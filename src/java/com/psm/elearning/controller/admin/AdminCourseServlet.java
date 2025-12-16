@@ -1,0 +1,187 @@
+package com.psm.elearning.controller.admin;
+
+import com.psm.elearning.dao.CourseDAO;
+import com.psm.elearning.dao.CourseDAOImpl;
+import com.psm.elearning.model.Course;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.io.IOException;
+import java.util.List;
+
+/**
+ * AdminCourseServlet handles course management for administrators.
+ * Actions: list, approve, reject
+ */
+public class AdminCourseServlet extends HttpServlet {
+    
+    private final CourseDAO courseDAO = new CourseDAOImpl();
+
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        
+        // Validate admin session
+        HttpSession session = request.getSession(false);
+        if (session == null || !"Admin".equals(session.getAttribute("userRole"))) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
+        String action = request.getParameter("action");
+        if (action == null) action = "list";
+
+        switch (action) {
+            case "list":
+                listCourses(request, response);
+                break;
+            case "approve":
+                approveCourse(request, response, session);
+                break;
+            case "reject":
+                rejectCourse(request, response);
+                break;
+            default:
+                listCourses(request, response);
+                break;
+        }
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        
+        // Validate admin session
+        HttpSession session = request.getSession(false);
+        if (session == null || !"Admin".equals(session.getAttribute("userRole"))) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
+        String action = request.getParameter("action");
+        
+        if ("approve".equals(action)) {
+            approveCourse(request, response, session);
+        } else if ("reject".equals(action)) {
+            rejectCourse(request, response);
+        } else {
+            listCourses(request, response);
+        }
+    }
+
+    /**
+     * List all courses with optional status filter
+     */
+    private void listCourses(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        
+        try {
+            String statusFilter = request.getParameter("status");
+            List<Course> courses;
+            
+            if (statusFilter != null && !statusFilter.trim().isEmpty()) {
+                courses = courseDAO.findByStatus(statusFilter);
+            } else {
+                courses = courseDAO.findAll();
+            }
+            
+            if (courses == null) {
+                courses = new java.util.ArrayList<>();
+            }
+            
+            request.setAttribute("courses", courses);
+            request.setAttribute("statusFilter", statusFilter);
+            request.getRequestDispatcher("/WEB-INF/views/admin/admin-courses.jsp").forward(request, response);
+            
+        } catch (Exception e) {
+            System.err.println("Error listing courses: " + e.getMessage());
+            e.printStackTrace();
+            
+            request.setAttribute("errorMessage", "Failed to load courses: " + e.getMessage());
+            request.setAttribute("courses", new java.util.ArrayList<>());
+            
+            try {
+                request.getRequestDispatcher("/WEB-INF/views/admin/admin-courses.jsp").forward(request, response);
+            } catch (Exception ex) {
+                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error loading courses: " + e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Approve a pending course
+     */
+    private void approveCourse(HttpServletRequest request, HttpServletResponse response, HttpSession session)
+            throws ServletException, IOException {
+        
+        try {
+            int courseId = Integer.parseInt(request.getParameter("id"));
+            Integer adminId = (Integer) session.getAttribute("userId");
+            
+            Course course = courseDAO.findById(courseId);
+            if (course == null) {
+                response.sendRedirect(request.getContextPath() + "/admin/courses?error=notfound");
+                return;
+            }
+            
+            // Check if course is in pending status
+            if (!Course.STATUS_PENDING.equals(course.getStatus())) {
+                response.sendRedirect(request.getContextPath() + "/admin/courses?error=notpending");
+                return;
+            }
+            
+            boolean approved = courseDAO.approve(courseId, adminId);
+            
+            if (approved) {
+                response.sendRedirect(request.getContextPath() + "/admin/courses?success=approved");
+            } else {
+                response.sendRedirect(request.getContextPath() + "/admin/courses?error=approvefailed");
+            }
+            
+        } catch (NumberFormatException e) {
+            response.sendRedirect(request.getContextPath() + "/admin/courses?error=invalid");
+        } catch (Exception e) {
+            System.err.println("Error approving course: " + e.getMessage());
+            response.sendRedirect(request.getContextPath() + "/admin/courses?error=exception");
+        }
+    }
+
+    /**
+     * Reject a pending course (set to Archived)
+     */
+    private void rejectCourse(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        
+        try {
+            int courseId = Integer.parseInt(request.getParameter("id"));
+            
+            Course course = courseDAO.findById(courseId);
+            if (course == null) {
+                response.sendRedirect(request.getContextPath() + "/admin/courses?error=notfound");
+                return;
+            }
+            
+            // Check if course is in pending status
+            if (!Course.STATUS_PENDING.equals(course.getStatus())) {
+                response.sendRedirect(request.getContextPath() + "/admin/courses?error=notpending");
+                return;
+            }
+            
+            boolean rejected = courseDAO.reject(courseId);
+            
+            if (rejected) {
+                response.sendRedirect(request.getContextPath() + "/admin/courses?success=rejected");
+            } else {
+                response.sendRedirect(request.getContextPath() + "/admin/courses?error=rejectfailed");
+            }
+            
+        } catch (NumberFormatException e) {
+            response.sendRedirect(request.getContextPath() + "/admin/courses?error=invalid");
+        } catch (Exception e) {
+            System.err.println("Error rejecting course: " + e.getMessage());
+            response.sendRedirect(request.getContextPath() + "/admin/courses?error=exception");
+        }
+    }
+}

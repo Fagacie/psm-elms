@@ -1,0 +1,30 @@
+# Build outputs
+/build/
+/dist/
+
+# IDE and local settings
+/.vscode/
+/.idea/
+*.iml
+.nb-gradle/
+nbproject/private/
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Logs and temp
+*.log
+*.tmp
+*.swp
+
+# Tool caches
+/.tools/
+
+# Sensitive configs (keep local only)
+/src/conf/*.properties
+/web/WEB-INF/classes/*.properties
+
+# Node/Vite (if used locally)
+node_modules/
+web/PSM E-Learning Platform UI/
