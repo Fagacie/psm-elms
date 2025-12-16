@@ -1,0 +1,18 @@
+# Cloudinary Configuration for file uploads (images, videos, documents)
+# COPY THIS FILE TO cloudinary.properties AND UPDATE WITH YOUR CREDENTIALS
+# Sign up at https://cloudinary.com for free account (25GB storage, 25GB bandwidth/month)
+
+cloudinary.cloud_name=your_cloud_name_here
+cloudinary.api_key=your_api_key_here
+cloudinary.api_secret=your_api_secret_here
+
+# Upload presets
+cloudinary.upload_preset=psm_elearning
+cloudinary.folder_passports=psm/passports
+cloudinary.folder_materials=psm/materials
+cloudinary.folder_certificates=psm/certificates
+
+# Transformations
+cloudinary.passport_width=400
+cloudinary.passport_height=400
+cloudinary.material_max_size=52428800

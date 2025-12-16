@@ -1,0 +1,19 @@
+# Paystack configuration
+# COPY THIS FILE TO paystack.properties AND UPDATE WITH YOUR CREDENTIALS
+# Get your TEST credentials from https://dashboard.paystack.com/#/settings/developer
+# Replace with LIVE credentials in production
+
+paystack.secret.key=sk_test_your_secret_key_here
+paystack.public.key=pk_test_your_public_key_here
+
+# App base URL; adjust port/context if different
+paystack.api.url=https://api.paystack.co
+paystack.currency=NGN
+
+# Callback route handled by PaymentCallbackServlet
+# Update this URL when deploying to production
+paystack.callback.url=http://localhost:8080/PSME/student/payment-callback
+
+# Timeout (ms)
+paystack.connect.timeout=30000
+paystack.read.timeout=30000

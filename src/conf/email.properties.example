@@ -1,0 +1,28 @@
+# Email Configuration for PSM E-Learning Platform
+# JavaMail SMTP Settings
+# COPY THIS FILE TO email.properties AND UPDATE WITH YOUR CREDENTIALS
+
+# SMTP Server Configuration (Gmail Example)
+smtp.host=smtp.gmail.com
+smtp.port=587
+
+# SMTP Authentication (Use App Password for Gmail)
+smtp.username=your_email@gmail.com
+smtp.password=your_gmail_app_password_here
+
+# Sender Information (Gmail requires from.email to equal smtp.username)
+from.email=your_email@gmail.com
+from.name=PSM E-Learning Platform
+
+# Additional Settings
+smtp.auth=true
+smtp.starttls.enable=true
+smtp.ssl.protocols=TLSv1.2
+
+# Enable JavaMail debug logging to Tomcat console
+mail.debug=false
+
+# Note: For Gmail, you need to:
+# 1. Enable 2-Factor Authentication
+# 2. Generate an App Password at https://myaccount.google.com/apppasswords
+# 3. Use the App Password in smtp.password field

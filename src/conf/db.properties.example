@@ -1,0 +1,19 @@
+# Database Configuration for PSM E-Learning Platform
+# MySQL JDBC Connection Properties
+# COPY THIS FILE TO db.properties AND UPDATE WITH YOUR CREDENTIALS
+
+# MySQL JDBC Driver
+db.driver=com.mysql.cj.jdbc.Driver
+
+# Database URL (modify host and port if needed)
+db.url=jdbc:mysql://localhost:3306/psm_elearning?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+
+# Database Credentials (CHANGE THESE)
+db.username=root
+db.password=your_database_password_here
+
+# Connection Pool Settings (Optional - for future implementation)
+db.pool.initialSize=5
+db.pool.maxActive=20
+db.pool.maxIdle=10
+db.pool.minIdle=5
