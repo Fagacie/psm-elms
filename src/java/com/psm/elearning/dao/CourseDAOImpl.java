@@ -2,9 +2,8 @@ package com.psm.elearning.dao;
 
 import com.psm.elearning.model.Course;
 import com.psm.elearning.util.DBConnection;
-
-import java.sql.*;
 import java.math.BigDecimal;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -168,15 +167,20 @@ public class CourseDAOImpl implements CourseDAO {
     @Override
     public List<Course> findByInstructor(int instructorId) {
         List<Course> list = new ArrayList<>();
-        String sql = "SELECT * FROM Course WHERE CreatedBy=? ORDER BY CreatedAt DESC";
+        String sql = "SELECT * FROM Course WHERE InstructorID=? ORDER BY CreatedAt DESC";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, instructorId);
+            System.out.println("[DEBUG] Querying courses for InstructorID: " + instructorId);
             try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) list.add(mapRow(rs));
+                while (rs.next()) {
+                    list.add(mapRow(rs));
+                }
             }
+            System.out.println("[DEBUG] Found " + list.size() + " courses for instructor " + instructorId);
         } catch (SQLException e) {
             System.err.println("Course findByInstructor failed: " + e.getMessage());
+            e.printStackTrace();
         }
         return list;
     }
@@ -239,6 +243,39 @@ public class CourseDAOImpl implements CourseDAO {
             }
         } catch (SQLException e) {
             System.err.println("Course filter failed: " + e.getMessage());
+        }
+        return list;
+    }
+
+    @Override
+    public int countByStatus(String status) {
+        String sql = "SELECT COUNT(*) FROM Course WHERE Status = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, status);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("countByStatus failed: " + e.getMessage());
+        }
+        return 0;
+    }
+
+    @Override
+    public List<Course> findFeaturedCourses(int limit) {
+        List<Course> list = new ArrayList<>();
+        String sql = "SELECT * FROM Course WHERE Status = 'Approved' ORDER BY CreatedAt DESC LIMIT ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, limit);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) list.add(mapRow(rs));
+            }
+        } catch (SQLException e) {
+            System.err.println("findFeaturedCourses failed: " + e.getMessage());
         }
         return list;
     }

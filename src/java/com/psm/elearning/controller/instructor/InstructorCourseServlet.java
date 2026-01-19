@@ -2,7 +2,10 @@ package com.psm.elearning.controller.instructor;
 
 import com.psm.elearning.dao.CourseDAO;
 import com.psm.elearning.dao.CourseDAOImpl;
+import com.psm.elearning.dao.EnrollmentDAO;
+import com.psm.elearning.dao.EnrollmentDAOImpl;
 import com.psm.elearning.model.Course;
+import com.psm.elearning.model.Enrollment;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -11,14 +14,10 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
-
-/**
- * InstructorCourseServlet handles course management for instructors.
- * Actions: list, create, edit, update, delete
- */
 public class InstructorCourseServlet extends HttpServlet {
     
     private final CourseDAO courseDAO = new CourseDAOImpl();
+    private final EnrollmentDAO enrollmentDAO = new EnrollmentDAOImpl();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -43,6 +42,9 @@ public class InstructorCourseServlet extends HttpServlet {
                 break;
             case "edit":
                 showEditForm(request, response);
+                break;
+            case "students":
+                viewCourseStudents(request, response, session);
                 break;
             case "delete":
                 deleteCourse(request, response, session);
@@ -255,7 +257,7 @@ public class InstructorCourseServlet extends HttpServlet {
                 existingCourse.setStatus(Course.STATUS_PENDING);
                 existingCourse.setApprovedBy(null);
             }
-            
+
             // Update course
             boolean updated = courseDAO.update(existingCourse);
             
@@ -312,6 +314,47 @@ public class InstructorCourseServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/instructor/courses?error=invalid");
         } catch (Exception e) {
             System.err.println("Error deleting course: " + e.getMessage());
+            response.sendRedirect(request.getContextPath() + "/instructor/courses?error=exception");
+        }
+    }
+
+    /**
+     * View students enrolled in a specific course
+     */
+    private void viewCourseStudents(HttpServletRequest request, HttpServletResponse response, HttpSession session)
+            throws ServletException, IOException {
+        
+        try {
+            Integer userId = (Integer) session.getAttribute("userId");
+            String courseIdStr = request.getParameter("courseId");
+            
+            if (courseIdStr == null || courseIdStr.trim().isEmpty()) {
+                response.sendRedirect(request.getContextPath() + "/instructor/courses");
+                return;
+            }
+            
+            int courseId = Integer.parseInt(courseIdStr);
+            Course course = courseDAO.findById(courseId);
+            
+            // Verify this course belongs to the instructor
+            if (course == null || !course.getCreatedBy().equals(userId)) {
+                response.sendRedirect(request.getContextPath() + "/instructor/courses?error=permission");
+                return;
+            }
+            
+            // Get all enrollments for this course
+            List<Enrollment> enrollments = enrollmentDAO.getEnrollmentsByCourse(courseId);
+            
+            request.setAttribute("course", course);
+            request.setAttribute("enrollments", enrollments);
+            request.setAttribute("studentCount", enrollments != null ? enrollments.size() : 0);
+            request.getRequestDispatcher("/WEB-INF/views/instructor/course-students.jsp").forward(request, response);
+            
+        } catch (NumberFormatException e) {
+            response.sendRedirect(request.getContextPath() + "/instructor/courses?error=invalid");
+        } catch (Exception e) {
+            System.err.println("Error viewing course students: " + e.getMessage());
+            e.printStackTrace();
             response.sendRedirect(request.getContextPath() + "/instructor/courses?error=exception");
         }
     }

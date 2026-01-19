@@ -225,32 +225,33 @@ public class EmailUtil {
         
         String htmlBody = "<!DOCTYPE html>" +
                 "<html><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'><style>" +
-                "body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; margin: 0; padding: 0; background-color: #f4f4f4; }" +
-                ".email-wrapper { max-width: 600px; margin: 20px auto; background: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }" +
-                ".header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 20px; text-align: center; }" +
+                "body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.6; margin: 0; padding: 0; background-color: #f5f5f5; }" +
+                ".email-wrapper { max-width: 600px; margin: 20px auto; background: #ffffff; border: 1px solid #e0e0e0; overflow: hidden; }" +
+                ".header { background: #1e3a8a; color: white; padding: 40px 20px; text-align: center; }" +
                 ".header h1 { margin: 0; font-size: 28px; font-weight: 600; }" +
-                ".header p { margin: 10px 0 0 0; opacity: 0.9; }" +
+                ".header p { margin: 10px 0 0 0; opacity: 0.95; font-size: 14px; }" +
                 ".content { padding: 40px 30px; }" +
-                ".greeting { font-size: 18px; color: #333; margin-bottom: 20px; }" +
-                ".message { color: #555; margin-bottom: 30px; font-size: 15px; }" +
-                ".info-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px; border-radius: 8px; margin: 30px 0; text-align: center; }" +
-                ".info-card h2 { margin: 0 0 15px 0; font-size: 16px; opacity: 0.9; font-weight: 400; }" +
-                ".reg-number { font-size: 32px; font-weight: bold; letter-spacing: 2px; margin: 10px 0; }" +
-                ".info-row { margin: 10px 0; }" +
-                ".login-instructions { background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #667eea; }" +
-                ".login-instructions h3 { margin: 0 0 15px 0; color: #333; font-size: 16px; }" +
-                ".login-instructions ol { margin: 0; padding-left: 20px; color: #555; }" +
-                ".login-instructions li { margin: 8px 0; }" +
-                ".btn { display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 40px; text-decoration: none; border-radius: 5px; margin: 20px 0; font-weight: 600; }" +
-                ".features { margin: 30px 0; }" +
-                ".feature-item { padding: 12px 0; border-bottom: 1px solid #eee; color: #555; }" +
+                ".greeting { font-size: 18px; color: #1a1a1a; margin-bottom: 20px; font-weight: 500; }" +
+                ".message { color: #4a4a4a; margin-bottom: 30px; font-size: 15px; line-height: 1.7; }" +
+                ".info-card { background: #1e3a8a; color: white; padding: 30px; border: 1px solid #1e40af; margin: 30px 0; text-align: center; }" +
+                ".info-card h2 { margin: 0 0 15px 0; font-size: 14px; opacity: 0.95; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }" +
+                ".reg-number { font-size: 36px; font-weight: 700; letter-spacing: 3px; margin: 15px 0; font-family: 'Courier New', monospace; }" +
+                ".info-row { margin: 15px 0; font-size: 15px; }" +
+                ".login-instructions { background: #ffffff; padding: 25px; border: 1px solid #e0e0e0; margin: 25px 0; }" +
+                ".login-instructions h3 { margin: 0 0 20px 0; color: #1a1a1a; font-size: 16px; font-weight: 600; }" +
+                ".login-instructions ol { margin: 0; padding-left: 20px; color: #4a4a4a; line-height: 1.8; }" +
+                ".login-instructions li { margin: 10px 0; }" +
+                ".login-instructions strong { color: #1e3a8a; }" +
+                ".btn { display: inline-block; background: #1e3a8a; color: white; padding: 14px 32px; text-decoration: none; border: 1px solid #1e40af; margin: 25px 0; font-weight: 600; transition: background 0.2s; }" +
+                ".btn:hover { background: #1e40af; }" +
+                ".features { margin: 30px 0; border: 1px solid #e0e0e0; }" +
+                ".feature-item { padding: 15px 20px; border-bottom: 1px solid #e0e0e0; color: #4a4a4a; background: #fafafa; }" +
                 ".feature-item:last-child { border-bottom: none; }" +
-                ".feature-icon { color: #667eea; margin-right: 8px; }" +
-                ".footer { background: #2c3e50; color: #ecf0f1; padding: 30px; text-align: center; font-size: 13px; }" +
+                ".feature-icon { color: #1e3a8a; margin-right: 10px; font-weight: 600; }" +
+                ".footer { background: #1a1a1a; color: #d0d0d0; padding: 30px; text-align: center; font-size: 13px; border-top: 1px solid #333; }" +
                 ".footer-links { margin: 15px 0; }" +
-                ".footer-links a { color: #3498db; text-decoration: none; margin: 0 10px; }" +
-                ".social-links { margin: 20px 0; }" +
-                ".social-links a { display: inline-block; margin: 0 8px; color: #ecf0f1; text-decoration: none; }" +
+                ".footer-links a { color: #60a5fa; text-decoration: none; margin: 0 10px; }" +  
+                ".footer p { margin: 10px 0; }" +
                 "</style></head><body>" +
                 "<div class='email-wrapper'>" +
                 "<div class='header'>" +

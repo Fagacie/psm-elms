@@ -59,4 +59,11 @@ public interface EnrollmentDAO {
      * @return List of all Enrollment objects
      */
     List<Enrollment> getAllEnrollments();
+    
+    /**
+     * Get all enrollments for a specific course with student details.
+     * @param courseId Course ID
+     * @return List of Enrollment objects with student information
+     */
+    List<Enrollment> getEnrollmentsByCourse(Integer courseId);
 }

@@ -2,9 +2,7 @@ package com.psm.elearning.dao;
 
 import com.psm.elearning.model.User;
 import com.psm.elearning.util.DBConnection;
-
 import java.sql.*;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -214,5 +212,22 @@ public class UserDAOImpl implements UserDAO {
                 }
             }
         }
+    }
+
+    @Override
+    public int countByRole(String role) {
+        String sql = "SELECT COUNT(*) FROM User WHERE Role = ? AND Status = 'Active'";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, role);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("countByRole failed: " + e.getMessage());
+        }
+        return 0;
     }
 }

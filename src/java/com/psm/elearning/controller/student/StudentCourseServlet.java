@@ -2,7 +2,12 @@ package com.psm.elearning.controller.student;
 
 import com.psm.elearning.dao.CourseDAO;
 import com.psm.elearning.dao.CourseDAOImpl;
+import com.psm.elearning.dao.UserDAO;
+import com.psm.elearning.dao.UserDAOImpl;
+import com.psm.elearning.dao.EnrollmentDAO;
+import com.psm.elearning.dao.EnrollmentDAOImpl;
 import com.psm.elearning.model.Course;
+import com.psm.elearning.model.User;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -10,6 +15,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 /**
  * StudentCourseServlet handles course browsing for students.
@@ -18,6 +25,8 @@ import java.util.List;
 public class StudentCourseServlet extends HttpServlet {
     
     private final CourseDAO courseDAO = new CourseDAOImpl();
+    private final UserDAO userDAO = new UserDAOImpl();
+    private final EnrollmentDAO enrollmentDAO = new EnrollmentDAOImpl();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -25,10 +34,11 @@ public class StudentCourseServlet extends HttpServlet {
         
         // Validate student session
         HttpSession session = request.getSession(false);
-        if (session == null || !"Student".equals(session.getAttribute("userRole"))) {
+        if (session == null || session.getAttribute("userId") == null || !"Student".equals(session.getAttribute("userRole"))) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
+        request.setAttribute("user", session.getAttribute("user"));
 
         String action = request.getParameter("action");
         if (action == null) action = "browse";
@@ -58,10 +68,11 @@ public class StudentCourseServlet extends HttpServlet {
         
         // Validate student session
         HttpSession session = request.getSession(false);
-        if (session == null || !"Student".equals(session.getAttribute("userRole"))) {
+        if (session == null || session.getAttribute("userId") == null || !"Student".equals(session.getAttribute("userRole"))) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
+        request.setAttribute("user", session.getAttribute("user"));
 
         String action = request.getParameter("action");
         
@@ -81,10 +92,14 @@ public class StudentCourseServlet extends HttpServlet {
             throws ServletException, IOException {
         
         try {
-            // Get all courses (Status column doesn't exist in current schema)
-            List<Course> courses = courseDAO.findAll();
-            
+            HttpSession session = request.getSession(false);
+            Integer userId = (Integer) session.getAttribute("userId");
+
+            List<Integer> enrolledCourseIds = loadEnrolledCourseIds(userId);
+            List<Course> courses = courseDAO.findByStatus("Approved");
+
             request.setAttribute("courses", courses);
+            request.setAttribute("enrolledCourseIds", enrolledCourseIds);
             request.getRequestDispatcher("/WEB-INF/views/student/available-courses.jsp").forward(request, response);
         } catch (Exception e) {
             System.err.println("Error browsing courses: " + e.getMessage());
@@ -101,6 +116,9 @@ public class StudentCourseServlet extends HttpServlet {
             throws ServletException, IOException {
         
         try {
+            HttpSession session = request.getSession(false);
+            Integer userId = (Integer) session.getAttribute("userId");
+
             int courseId = Integer.parseInt(request.getParameter("id"));
             Course course = courseDAO.findById(courseId);
             
@@ -110,8 +128,23 @@ public class StudentCourseServlet extends HttpServlet {
                 return;
             }
             
-            // Status check removed - showing all courses
-            
+            request.setAttribute("user", session.getAttribute("user"));
+
+            List<Integer> enrolledCourseIds = loadEnrolledCourseIds(userId);
+            request.setAttribute("enrolledCourseIds", enrolledCourseIds);
+
+            // Load instructor details if available
+            if (course.getCreatedBy() != null) {
+                try {
+                    User instructor = userDAO.findById(course.getCreatedBy());
+                    if (instructor != null) {
+                        request.setAttribute("instructor", instructor);
+                    }
+                } catch (Exception ex) {
+                    System.err.println("Failed to load instructor: " + ex.getMessage());
+                }
+            }
+
             request.setAttribute("course", course);
             request.getRequestDispatcher("/WEB-INF/views/student/course-details.jsp").forward(request, response);
         } catch (NumberFormatException e) {
@@ -131,6 +164,10 @@ public class StudentCourseServlet extends HttpServlet {
             throws ServletException, IOException {
         
         try {
+            HttpSession session = request.getSession(false);
+            Integer userId = (Integer) session.getAttribute("userId");
+            request.setAttribute("user", session.getAttribute("user"));
+            
             String keyword = request.getParameter("keyword");
             
             if (keyword == null || keyword.trim().isEmpty()) {
@@ -139,8 +176,10 @@ public class StudentCourseServlet extends HttpServlet {
             }
             
             List<Course> courses = courseDAO.searchCourses(keyword.trim());
+            List<Integer> enrolledCourseIds = loadEnrolledCourseIds(userId);
             
             request.setAttribute("courses", courses);
+            request.setAttribute("enrolledCourseIds", enrolledCourseIds);
             request.setAttribute("searchKeyword", keyword.trim());
             request.getRequestDispatcher("/WEB-INF/views/student/available-courses.jsp").forward(request, response);
         } catch (Exception e) {
@@ -157,6 +196,10 @@ public class StudentCourseServlet extends HttpServlet {
             throws ServletException, IOException {
         
         try {
+            HttpSession session = request.getSession(false);
+            Integer userId = (Integer) session.getAttribute("userId");
+            request.setAttribute("user", session.getAttribute("user"));
+            
             String category = request.getParameter("category");
             String level = request.getParameter("level");
             String minFeeStr = request.getParameter("minFee");
@@ -173,8 +216,10 @@ public class StudentCourseServlet extends HttpServlet {
             }
             
             List<Course> courses = courseDAO.filterCourses(category, level, minFee, maxFee);
+            List<Integer> enrolledCourseIds = loadEnrolledCourseIds(userId);
             
             request.setAttribute("courses", courses);
+            request.setAttribute("enrolledCourseIds", enrolledCourseIds);
             request.setAttribute("filterCategory", category);
             request.setAttribute("filterLevel", level);
             request.setAttribute("filterMinFee", minFee);
@@ -187,6 +232,17 @@ public class StudentCourseServlet extends HttpServlet {
             System.err.println("Error filtering courses: " + e.getMessage());
             request.setAttribute("errorMessage", "Filter failed");
             browseCourses(request, response);
+        }
+    }
+
+    private List<Integer> loadEnrolledCourseIds(Integer userId) {
+        try {
+            List<com.psm.elearning.model.Enrollment> enrollments = enrollmentDAO.getEnrollmentsByStudent(userId);
+            if (enrollments == null) return new ArrayList<>();
+            return enrollments.stream().map(com.psm.elearning.model.Enrollment::getCourseId).collect(Collectors.toList());
+        } catch (Exception e) {
+            System.err.println("Failed to load enrolled courses for user " + userId + ": " + e.getMessage());
+            return new ArrayList<>();
         }
     }
 }

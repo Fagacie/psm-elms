@@ -8,7 +8,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Enrollment Details - PSM E-Learning</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/landing.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/app.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/dashboard.css">
     <style>
         .info-card {
             border-left: 4px solid #0d6efd;
@@ -24,9 +30,76 @@
     </style>
 </head>
 <body>
-    <jsp:include page="../common/navbar.jsp"/>
-    
-    <div class="container mt-4 mb-5">
+    <!-- Top Navigation Bar (Dashboard style) -->
+    <nav class="top-navbar">
+        <div class="top-navbar-inner">
+            <div class="top-navbar-left">
+                <a href="${pageContext.request.contextPath}/dashboard" class="navbar-logo">
+                    <span class="logo-text">PSM</span>
+                    <span class="logo-subtext">E-Learning</span>
+                </a>
+                <h1 class="page-title-nav">Enrollment Details</h1>
+            </div>
+            <div class="top-navbar-right">
+                <button class="notification-btn" aria-label="Notifications">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge">3</span>
+                </button>
+                <div class="user-display">
+                    <div class="user-avatar-small">
+                        <c:choose>
+                            <c:when test="${not empty student.passportPath}">
+                                <c:choose>
+                                    <c:when test="${student.passportPath.startsWith('http')}">
+                                        <img src="${student.passportPath}" alt="Profile">
+                                    </c:when>
+                                    <c:otherwise>
+                                        <img src="${pageContext.request.contextPath}/${student.passportPath}" alt="Profile">
+                                    </c:otherwise>
+                                </c:choose>
+                            </c:when>
+                            <c:otherwise>
+                                <i class="fas fa-user"></i>
+                            </c:otherwise>
+                        </c:choose>
+                    </div>
+                    <span class="user-name-display">${sessionScope.userName}</span>
+                </div>
+                <a href="${pageContext.request.contextPath}/logout" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <aside class="app-sidebar">
+        <nav class="sidebar-nav">
+            <a href="${pageContext.request.contextPath}/dashboard" class="nav-item">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="${pageContext.request.contextPath}/student/courses" class="nav-item">
+                <i class="fas fa-book"></i>
+                <span>Browse Courses</span>
+            </a>
+            <a href="${pageContext.request.contextPath}/student/my-enrollments" class="nav-item active">
+                <i class="fas fa-graduation-cap"></i>
+                <span>My Enrollments</span>
+            </a>
+            <a href="${pageContext.request.contextPath}/student/materials" class="nav-item">
+                <i class="fas fa-folder-open"></i>
+                <span>Materials</span>
+            </a>
+            <a href="${pageContext.request.contextPath}/profile" class="nav-item">
+                <i class="fas fa-user"></i>
+                <span>Profile</span>
+            </a>
+        </nav>
+    </aside>
+
+    <main class="app-main">
+    <div class="content-wrapper">
+        <div class="container mt-4 mb-5">
         <!-- Breadcrumb -->
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
@@ -100,7 +173,7 @@
                             <div class="col-6 mb-2">
                                 <small class="text-muted">Amount</small>
                                 <div class="fw-bold text-success">
-                                    <fmt:formatNumber value="${enrollment.coursePrice}" type="currency"/>
+                                    ₦<fmt:formatNumber value="${enrollment.coursePrice}" type="number" minFractionDigits="2" maxFractionDigits="2"/>
                                 </div>
                             </div>
                             <c:if test="${enrollment.paymentRef != null}">
@@ -218,8 +291,10 @@
                 <i class="fas fa-arrow-left me-2"></i>Back to My Enrollments
             </a>
         </div>
+        </div>
     </div>
-    
+    </main>
+
     <jsp:include page="../common/footer.jsp"/>
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

@@ -23,13 +23,17 @@
     </style>
 </head>
 <body>
-    <jsp:include page="../common/navbar.jsp"/>
+    <jsp:include page="/WEB-INF/views/common/admin-header.jsp">
+        <jsp:param name="pageTitle" value="Enrollment Details"/>
+    </jsp:include>
+    <jsp:include page="/WEB-INF/views/common/admin-sidebar.jsp"/>
     
-    <div class="container mt-4 mb-5">
+    <main class="app-main">
+    <div class="content-wrapper">
         <!-- Breadcrumb -->
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="${pageContext.request.contextPath}/dashboard">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="${pageContext.request.contextPath}/admin/dashboard">Dashboard</a></li>
                 <li class="breadcrumb-item"><a href="${pageContext.request.contextPath}/admin/enrollments">Enrollments</a></li>
                 <li class="breadcrumb-item active">Enrollment #${enrollment.enrollmentId}</li>
             </ol>
@@ -191,7 +195,7 @@
                         <div class="detail-row">
                             <small class="text-muted">Amount</small>
                             <div class="fw-bold text-success fs-5">
-                                <fmt:formatNumber value="${enrollment.coursePrice}" type="currency"/>
+                                ₦<fmt:formatNumber value="${enrollment.coursePrice}" type="number" minFractionDigits="2" maxFractionDigits="2"/>
                             </div>
                         </div>
                         <c:if test="${enrollment.paymentRef != null}">
@@ -223,8 +227,7 @@
             </div>
         </div>
     </div>
-    
-    <jsp:include page="../common/footer.jsp"/>
+    </main>
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

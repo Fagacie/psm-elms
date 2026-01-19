@@ -379,6 +379,17 @@ public class UserManagementServlet extends HttpServlet {
         
         int userId = Integer.parseInt(userIdParam);
         
+        // Get current logged-in user
+        HttpSession session = request.getSession(false);
+        User currentUser = (User) session.getAttribute("user");
+        
+        // Prevent admin from deleting themselves
+        if (currentUser != null && currentUser.getUserId() == userId) {
+            request.getSession().setAttribute("error", "You cannot delete your own account");
+            response.sendRedirect(request.getContextPath() + "/admin/users");
+            return;
+        }
+        
         if (userDAO.delete(userId)) {
             request.getSession().setAttribute("success", "User deleted successfully");
         } else {

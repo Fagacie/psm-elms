@@ -6,206 +6,267 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${course.courseName} - PSM E-Learning</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        .sidebar {
-            min-height: 100vh;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-        .main-content {
-            min-height: 100vh;
-            background-color: #f8f9fa;
-        }
-        .course-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-radius: 10px;
-            padding: 40px;
-            box-shadow: 0 0 30px rgba(0,0,0,0.2);
-        }
-        .course-details-card {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 0 15px rgba(0,0,0,0.1);
-            padding: 30px;
-        }
-        .info-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-            font-size: 1.1rem;
-        }
-        .info-item i {
-            width: 30px;
-            margin-right: 15px;
-        }
-        .price-display {
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: #28a745;
-        }
-    </style>
+    <title><c:out value="${course.courseName}"/> - PSM E-Learning</title>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/landing.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/app.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/dashboard.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/course-details.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <div class="container-fluid">
-        <div class="row">
-            <!-- Sidebar -->
-            <nav class="col-md-2 d-md-block sidebar p-0">
-                <div class="position-sticky pt-3">
-                    <div class="text-center mb-4">
-                        <h4 class="text-white">PSM Student</h4>
-                        <p class="text-white-50">${sessionScope.userName}</p>
+    <!-- Top Navigation Bar (Dashboard style) -->
+    <nav class="top-navbar">
+        <div class="top-navbar-inner">
+            <div class="top-navbar-left">
+                <a href="${pageContext.request.contextPath}/dashboard" class="navbar-logo">
+                    <span class="logo-text">PSM</span>
+                    <span class="logo-subtext">E-Learning</span>
+                </a>
+                <h1 class="page-title-nav">Course Details</h1>
+            </div>
+            <div class="top-navbar-right">
+                <button class="notification-btn" aria-label="Notifications">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge">3</span>
+                </button>
+                <div class="user-display">
+                    <div class="user-avatar-small">
+                        <c:choose>
+                            <c:when test="${not empty student.passportPath}">
+                                <c:choose>
+                                    <c:when test="${student.passportPath.startsWith('http')}">
+                                        <img src="${student.passportPath}" alt="Profile">
+                                    </c:when>
+                                    <c:otherwise>
+                                        <img src="${pageContext.request.contextPath}/${student.passportPath}" alt="Profile">
+                                    </c:otherwise>
+                                </c:choose>
+                            </c:when>
+                            <c:otherwise>
+                                <i class="fas fa-user"></i>
+                            </c:otherwise>
+                        </c:choose>
                     </div>
-                    <ul class="nav flex-column">
-                        <li class="nav-item">
-                            <a class="nav-link text-white" href="${pageContext.request.contextPath}/dashboard">
-                                <i class="fas fa-home me-2"></i> Dashboard
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-white active bg-white bg-opacity-25" href="${pageContext.request.contextPath}/student/courses">
-                                <i class="fas fa-book me-2"></i> Browse Courses
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-white" href="${pageContext.request.contextPath}/student/my-enrollments">
-                                <i class="fas fa-graduation-cap me-2"></i> My Enrollments
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-white" href="${pageContext.request.contextPath}/profile">
-                                <i class="fas fa-user me-2"></i> Profile
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-white" href="${pageContext.request.contextPath}/logout">
-                                <i class="fas fa-sign-out-alt me-2"></i> Logout
-                            </a>
-                        </li>
-                    </ul>
+                    <span class="user-name-display">${sessionScope.userName}</span>
                 </div>
-            </nav>
-
-            <!-- Main content -->
-            <main class="col-md-10 ms-sm-auto px-md-4 main-content">
-                <div class="py-4">
-                    <a href="${pageContext.request.contextPath}/student/courses" class="btn btn-secondary mb-3">
-                        <i class="fas fa-arrow-left me-2"></i> Back to Courses
-                    </a>
-
-                    <!-- Course Header -->
-                    <div class="course-header mb-4">
-                        <div class="row align-items-center">
-                            <div class="col-md-8">
-                                <h1 class="display-5 mb-3">${course.courseName}</h1>
-                                <div class="d-flex gap-3 mb-3">
-                                    <span class="badge bg-light text-dark fs-6">${course.category}</span>
-                                    <span class="badge ${course.level == 'Beginner' ? 'bg-success' : (course.level == 'Intermediate' ? 'bg-warning' : 'bg-danger')} fs-6">
-                                        ${course.level}
-                                    </span>
-                                </div>
-                            </div>
-                            <div class="col-md-4 text-md-end">
-                                <div class="price-display mb-3">
-                                    <fmt:formatNumber value="${course.courseFee}" type="currency"/>
-                                </div>
-                                <a href="${pageContext.request.contextPath}/student/enrollment-summary?courseId=${course.courseId}" class="btn btn-success btn-lg w-100">
-                                    <i class="fas fa-check-circle me-2"></i>Enroll Now
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Course Details -->
-                    <div class="row">
-                        <div class="col-md-8 mb-4">
-                            <div class="course-details-card">
-                                <h3 class="mb-4">Course Description</h3>
-                                <p class="lead">${course.description}</p>
-
-                                <hr class="my-4">
-
-                                <h4 class="mb-3">What you'll learn</h4>
-                                <ul class="list-unstyled">
-                                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i> Comprehensive understanding of ${course.courseName}</li>
-                                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i> Practical skills for ${course.level} level learners</li>
-                                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i> Real-world applications in ${course.category}</li>
-                                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i> Certificate of completion</li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <div class="col-md-4">
-                            <div class="course-details-card">
-                                <h4 class="mb-4">Course Information</h4>
-                                
-                                <div class="info-item">
-                                    <i class="fas fa-clock text-primary"></i>
-                                    <div>
-                                        <strong>Duration</strong><br>
-                                        ${course.duration} hours
-                                    </div>
-                                </div>
-
-                                <div class="info-item">
-                                    <i class="fas fa-signal text-success"></i>
-                                    <div>
-                                        <strong>Difficulty Level</strong><br>
-                                        ${course.level}
-                                    </div>
-                                </div>
-
-                                <div class="info-item">
-                                    <i class="fas fa-layer-group text-info"></i>
-                                    <div>
-                                        <strong>Category</strong><br>
-                                        ${course.category}
-                                    </div>
-                                </div>
-
-                                <div class="info-item">
-                                    <i class="fas fa-calendar text-warning"></i>
-                                    <div>
-                                        <strong>Created</strong><br>
-                                        <c:choose>
-                                            <c:when test="${not empty course.createdAt}">
-                                                ${course.createdAt.toString().substring(0, 10)}
-                                            </c:when>
-                                            <c:otherwise>-</c:otherwise>
-                                        </c:choose>
-                                    </div>
-                                </div>
-
-                                <c:if test="${course.updatedAt != null}">
-                                    <div class="info-item">
-                                        <i class="fas fa-sync text-secondary"></i>
-                                        <div>
-                                            <strong>Last Updated</strong><br>
-                                            ${course.updatedAt.toString().substring(0, 10)}
-                                        </div>
-                                    </div>
-                                </c:if>
-
-                                <hr class="my-4">
-
-                                <div class="d-grid gap-2">
-                                    <button class="btn btn-primary btn-lg" disabled>
-                                        <i class="fas fa-play-circle me-2"></i> Start Learning (Coming Soon)
-                                    </button>
-                                    <button class="btn btn-outline-secondary" disabled>
-                                        <i class="fas fa-heart me-2"></i> Add to Wishlist (Coming Soon)
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </main>
+                <a href="${pageContext.request.contextPath}/logout" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
         </div>
-    </div>
+    </nav>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Left Sidebar -->
+    <aside class="app-sidebar">
+        <nav class="sidebar-nav">
+            <a href="${pageContext.request.contextPath}/dashboard" class="nav-item">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="${pageContext.request.contextPath}/student/courses" class="nav-item active">
+                <i class="fas fa-book"></i>
+                <span>Browse Courses</span>
+            </a>
+            <a href="${pageContext.request.contextPath}/student/my-enrollments" class="nav-item">
+                <i class="fas fa-graduation-cap"></i>
+                <span>My Enrollments</span>
+            </a>
+            <a href="${pageContext.request.contextPath}/student/materials" class="nav-item">
+                <i class="fas fa-folder-open"></i>
+                <span>Materials</span>
+            </a>
+            <a href="${pageContext.request.contextPath}/profile" class="nav-item">
+                <i class="fas fa-user"></i>
+                <span>Profile</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="app-main">
+        <div class="content-wrapper">
+            <!-- Page Header Block with Course Meta -->
+            <section class="section-card page-header">
+                <div class="page-header-top">
+                    <h2 class="course-title"><c:out value="${course.courseName}"/></h2>
+                    <div class="course-meta">
+                        <span class="meta-item">
+                            <span class="meta-label">Category:</span>
+                            <span class="meta-value"><c:out value="${course.category}"/></span>
+                        </span>
+                        <span class="meta-item">
+                            <span class="meta-label">Level:</span>
+                            <span class="meta-value"><c:out value="${course.level}"/></span>
+                        </span>
+                        <span class="meta-item">
+                            <span class="meta-label">Fee:</span>
+                            <span class="meta-value">₦<fmt:formatNumber value="${course.courseFee}" type="number" minFractionDigits="2" maxFractionDigits="2"/></span>
+                        </span>
+                    </div>
+                </div>
+                <div class="page-header-actions">
+                    <p class="course-subtext">Enroll to unlock access to materials, assessments, and grades.</p>
+                        <c:set var="isEnrolled" value="${not empty enrolledCourseIds && enrolledCourseIds.contains(course.courseId)}"/>
+                        <div class="course-actions">
+                            <c:choose>
+                                <c:when test="${isEnrolled}">
+                                    <span class="pill pill-success">You are enrolled</span>
+                                    <a href="${pageContext.request.contextPath}/student/my-enrollments" class="btn btn-secondary">
+                                        <i class="fas fa-list"></i> View My Enrollments
+                                    </a>
+                                </c:when>
+                                <c:otherwise>
+                                    <a href="${pageContext.request.contextPath}/student/enrollment-summary?courseId=${course.courseId}" class="btn btn-primary">
+                                        <i class="fas fa-credit-card"></i> Enroll Now
+                                    </a>
+                                </c:otherwise>
+                            </c:choose>
+                            <a href="${pageContext.request.contextPath}/student/courses" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Back to Courses
+                            </a>
+                        </div>
+                </div>
+            </section>
+
+            <div class="grid two-column">
+                <!-- Course Overview -->
+                <section class="section-card">
+                    <h3 class="section-title">Course Overview</h3>
+                    <div class="overview-grid">
+                        <div class="overview-block description">
+                            <h4 class="block-title">Description</h4>
+                            <p class="block-text"><c:out value="${course.description}"/></p>
+                        </div>
+                        <div class="overview-block facts">
+                            <div class="fact-row">
+                                <span class="fact-label">Duration</span>
+                                <span class="fact-value"><c:out value="${course.duration}"/> hours</span>
+                            </div>
+                            <div class="fact-row">
+                                <span class="fact-label">Level</span>
+                                <span class="fact-value"><c:out value="${course.level}"/></span>
+                            </div>
+                            <div class="fact-row">
+                                <span class="fact-label">Category</span>
+                                <span class="fact-value"><c:out value="${course.category}"/></span>
+                            </div>
+                            
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Key Course Information -->
+                <section class="section-card">
+                    <h3 class="section-title">Key Course Information</h3>
+                    <table class="data-table">
+                        <tbody>
+                            <tr>
+                                <th>Course Code</th>
+                                <td><c:out value="${course.courseId}"/></td>
+                            </tr>
+                            <tr>
+                                <th>Course Level</th>
+                                <td><c:out value="${course.level}"/></td>
+                            </tr>
+                            
+                        </tbody>
+                    </table>
+                </section>
+            </div>
+
+            <div class="grid two-column">
+                <!-- Instructor Information -->
+                <section class="section-card">
+                    <h3 class="section-title">Instructor</h3>
+                    <c:choose>
+                        <c:when test="${not empty instructor}">
+                            <table class="data-table">
+                                <tbody>
+                                    <tr>
+                                        <th>Name</th>
+                                        <td><c:out value="${instructor.fullName}"/></td>
+                                    </tr>
+                                    <c:if test="${not empty instructor.email}">
+                                        <tr>
+                                            <th>Email</th>
+                                            <td><c:out value="${instructor.email}"/></td>
+                                        </tr>
+                                    </c:if>
+                                    <c:if test="${not empty instructor.phone}">
+                                        <tr>
+                                            <th>Phone</th>
+                                            <td><c:out value="${instructor.phone}"/></td>
+                                        </tr>
+                                    </c:if>
+                                </tbody>
+                            </table>
+                        </c:when>
+                        <c:otherwise>
+                            <p class="block-text">Instructor information is not available.</p>
+                        </c:otherwise>
+                    </c:choose>
+                </section>
+
+                <!-- Assessment Overview & Navigation -->
+                <section class="section-card">
+                    <h3 class="section-title">Assessment Overview</h3>
+                    <div class="assessment-grid">
+                        <div class="assessment-item">
+                            <div class="assessment-label">Total Assignments</div>
+                            <div class="assessment-value">
+                                <c:choose>
+                                    <c:when test="${empty assessmentSummary}">0</c:when>
+                                    <c:otherwise><c:out value="${assessmentSummary.totalAssignments}"/></c:otherwise>
+                                </c:choose>
+                            </div>
+                        </div>
+                        <div class="assessment-item">
+                            <div class="assessment-label">Total Quizzes/Exams</div>
+                            <div class="assessment-value">
+                                <c:choose>
+                                    <c:when test="${empty assessmentSummary}">0</c:when>
+                                    <c:otherwise><c:out value="${assessmentSummary.totalQuizzes}"/></c:otherwise>
+                                </c:choose>
+                            </div>
+                        </div>
+                        <div class="assessment-item">
+                            <div class="assessment-label">Assessment Weighting</div>
+                            <div class="assessment-value">
+                                <c:choose>
+                                    <c:when test="${empty assessmentSummary}">—</c:when>
+                                    <c:otherwise><c:out value="${assessmentSummary.weighting}"/></c:otherwise>
+                                </c:choose>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="assessment-links">
+                        <a class="btn btn-primary" href="${pageContext.request.contextPath}/student/assignments<c:if test='${not empty course.courseId}'>?courseId=${course.courseId}</c:if>"><i class="fas fa-tasks"></i> View Assignments</a>
+                        <a class="btn" href="${pageContext.request.contextPath}/student/quizzes<c:if test='${not empty course.courseId}'>?courseId=${course.courseId}</c:if>"><i class="fas fa-clipboard-question"></i> View Quizzes</a>
+                        <a class="btn" href="${pageContext.request.contextPath}/student/grades<c:if test='${not empty course.courseId}'>?courseId=${course.courseId}</c:if>"><i class="fas fa-chart-line"></i> View Grades</a>
+                        <a class="btn" href="${pageContext.request.contextPath}/student/announcements<c:if test='${not empty course.courseId}'>?courseId=${course.courseId}</c:if>"><i class="fas fa-bullhorn"></i> View Announcements</a>
+                        <a class="btn" href="${pageContext.request.contextPath}/student/materials<c:if test='${not empty course.courseId}'>?courseId=${course.courseId}</c:if>"><i class="fas fa-folder-open"></i> View Materials</a>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Optional Notices -->
+            <c:if test="${not empty courseAnnouncements}">
+                <section class="section-card">
+                    <h3 class="section-title">Recent Notices</h3>
+                    <ul class="notice-list">
+                        <c:forEach var="note" items="${courseAnnouncements}" varStatus="loop">
+                            <c:if test="${loop.index < 3}">
+                                <li class="notice-item">
+                                    <div class="notice-title"><c:out value="${note.title}"/></div>
+                                    <div class="notice-meta"><span class="notice-date"><c:out value="${note.date}"/></span></div>
+                                    <p class="notice-text"><c:out value="${note.summary}"/></p>
+                                </li>
+                            </c:if>
+                        </c:forEach>
+                    </ul>
+                </section>
+            </c:if>
+        </div>
+    </main>
 </body>
 </html>

@@ -448,6 +448,72 @@ select {
 }
 
 /* ====================================
+   Featured Courses Section
+   ==================================== */
+
+.featured-courses {
+    padding: var(--spacing-xxl) 0;
+    background: var(--color-white);
+}
+
+.courses-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: var(--spacing-lg);
+}
+
+.course-card {
+    background: var(--color-background);
+    border: 1px solid var(--color-light-grey);
+    padding: var(--spacing-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    transition: var(--transition);
+}
+
+.course-card:hover {
+    border-color: var(--color-primary);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.course-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+}
+
+.course-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+.course-level {
+    font-size: 0.875rem;
+    color: var(--color-text-light);
+    text-transform: uppercase;
+}
+
+.course-body {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-sm);
+}
+
+.course-category,
+.course-duration,
+.course-fee {
+    font-size: 0.9375rem;
+    color: var(--color-text-light);
+}
+
+.course-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* ====================================
    User Roles Section
    ==================================== */
 
@@ -539,6 +605,46 @@ select {
 
 .role-primary .role-features li::before {
     background: var(--color-white);
+}
+
+/* ====================================
+   Access Section (Login Connection)
+   ==================================== */
+
+.access-platform {
+    padding: var(--spacing-xxl) 0;
+    background: var(--color-background);
+}
+
+.access-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: var(--spacing-lg);
+}
+
+.access-card {
+    background: var(--color-white);
+    border: 1px solid var(--color-light-grey);
+    padding: var(--spacing-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.access-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+.access-description {
+    font-size: 0.9375rem;
+    color: var(--color-text-light);
+}
+
+.access-actions {
+    display: flex;
+    gap: var(--spacing-sm);
 }
 
 /* ====================================
@@ -735,6 +841,9 @@ select {
     }
     
     .roles-grid {
+        grid-template-columns: 1fr;
+    }
+    .courses-grid {
         grid-template-columns: 1fr;
     }
     

@@ -52,30 +52,29 @@ public class LoginServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String role = request.getParameter("role");
         String identifier = request.getParameter("identifier");
         String password = request.getParameter("password");
 
-        // Validate input
-        if (role == null || role.trim().isEmpty() || identifier == null || identifier.trim().isEmpty() || password == null || password.trim().isEmpty()) {
-            request.setAttribute("error", "Role, identifier and password are required.");
+        // Validate input (role is no longer required on the form)
+        if (identifier == null || identifier.trim().isEmpty() || password == null || password.trim().isEmpty()) {
+            request.setAttribute("error", "Identifier and password are required.");
             request.getRequestDispatcher("/WEB-INF/views/login.jsp").forward(request, response);
             return;
         }
+
+        String trimmedIdentifier = identifier.trim();
         User user = null;
-        if ("Student".equalsIgnoreCase(role)) {
-            // Decide if identifier is reg number or email
-            if (identifier.toUpperCase().startsWith("PSM") && identifier.toUpperCase().matches("PSM\\d+")) {
-                Student student = studentDAO.findByRegNumber(identifier.trim().toUpperCase());
-                if (student != null) {
-                    user = userDAO.findById(student.getUserId());
-                }
-            } else {
-                user = userDAO.findByEmail(identifier.trim());
+
+        // If the identifier looks like a student registration number, resolve to the linked user; otherwise treat as email
+        if (trimmedIdentifier.toUpperCase().startsWith("PSM") && trimmedIdentifier.toUpperCase().matches("PSM\\d+")) {
+            Student student = studentDAO.findByRegNumber(trimmedIdentifier.toUpperCase());
+            if (student != null) {
+                user = userDAO.findById(student.getUserId());
             }
-        } else {
-            // Instructor/Admin always by email
-            user = userDAO.findByEmail(identifier.trim());
+        }
+
+        if (user == null) {
+            user = userDAO.findByEmail(trimmedIdentifier);
         }
         
         if (user == null) {

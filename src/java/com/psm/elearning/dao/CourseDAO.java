@@ -15,4 +15,6 @@ public interface CourseDAO {
     boolean reject(int courseId);
     List<Course> searchCourses(String keyword);
     List<Course> filterCourses(String category, String level, Double minFee, Double maxFee);
+    int countByStatus(String status);
+    List<Course> findFeaturedCourses(int limit);
 }

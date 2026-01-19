@@ -13,547 +13,251 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - PSM E-Learning Platform</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Student Dashboard - PSM E-Learning</title>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/landing.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/app.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/dashboard.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <style>
-        body {
-            background-color: #f8f9fa;
-        }
-        .sidebar {
-            min-height: 100vh;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-        .sidebar .nav-link {
-            color: rgba(255,255,255,0.8);
-            padding: 12px 20px;
-            margin: 5px 0;
-            border-radius: 8px;
-        }
-        .sidebar .nav-link:hover, .sidebar .nav-link.active {
-            background-color: rgba(255,255,255,0.2);
-            color: white;
-        }
-        .navbar {
-            background-color: white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .stat-card {
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 20px;
-            color: white;
-        }
-        .stat-card.primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-        .stat-card.success { background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%); }
-        .stat-card.warning { background: linear-gradient(135deg, #f12711 0%, #f5af19 100%); }
-        .stat-card.info { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
-        
-        .hover-card {
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-        .hover-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.15) !important;
-        }
-    </style>
 </head>
 <body>
-    <div class="container-fluid">
-        <div class="row">
-            <!-- Sidebar -->
-            <div class="col-md-2 col-lg-2 sidebar p-0">
-                <div class="p-4">
-                    <h4 class="text-center mb-4">
-                        <i class="fas fa-graduation-cap"></i> PSM E-Learning
-                    </h4>
-                    
-                    <div class="user-profile text-center mb-4">
+    <!-- Top Navigation Bar (Global) -->
+    <nav class="top-navbar">
+        <div class="top-navbar-inner">
+            <div class="top-navbar-left">
+                <a href="${pageContext.request.contextPath}/dashboard" class="navbar-logo">
+                    <span class="logo-text">PSM</span>
+                    <span class="logo-subtext">E-Learning</span>
+                </a>
+                <h1 class="page-title-nav">Student Dashboard</h1>
+            </div>
+            
+            <div class="top-navbar-right">
+                <button class="notification-btn" aria-label="Notifications">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge">3</span>
+                </button>
+                
+                <div class="user-display">
+                    <div class="user-avatar-small">
                         <c:choose>
                             <c:when test="${not empty student.passportPath}">
                                 <c:choose>
                                     <c:when test="${student.passportPath.startsWith('http')}">
-                                        <img src="${student.passportPath}" alt="Profile" class="rounded-circle" style="width: 80px; height: 80px; object-fit: cover; border: 3px solid white;">
+                                        <img src="${student.passportPath}" alt="Profile">
                                     </c:when>
                                     <c:otherwise>
-                                        <img src="${pageContext.request.contextPath}/${student.passportPath}" alt="Profile" class="rounded-circle" style="width: 80px; height: 80px; object-fit: cover; border: 3px solid white;">
+                                        <img src="${pageContext.request.contextPath}/${student.passportPath}" alt="Profile">
                                     </c:otherwise>
                                 </c:choose>
                             </c:when>
                             <c:otherwise>
-                                <div class="avatar bg-white text-primary rounded-circle d-inline-flex align-items-center justify-content-center" 
-                                     style="width: 80px; height: 80px; font-size: 32px;">
-                                    <i class="fas fa-user"></i>
-                                </div>
+                                <i class="fas fa-user"></i>
                             </c:otherwise>
                         </c:choose>
-                        <h6 class="mt-3 mb-1">${sessionScope.userName}</h6>
-                        <small class="text-white-50">
-                            <c:choose>
-                                <c:when test="${sessionScope.userRole == 'Student'}">
-                                    <i class="fas fa-user-graduate"></i> Student
-                                </c:when>
-                                <c:when test="${sessionScope.userRole == 'Instructor'}">
-                                    <i class="fas fa-chalkboard-teacher"></i> Instructor
-                                </c:when>
-                                <c:when test="${sessionScope.userRole == 'Admin'}">
-                                    <i class="fas fa-user-shield"></i> Administrator
-                                </c:when>
-                            </c:choose>
-                        </small>
                     </div>
-
-                    <nav class="nav flex-column">
-                        <a class="nav-link active" href="${pageContext.request.contextPath}/dashboard">
-                            <i class="fas fa-tachometer-alt"></i> Dashboard
-                        </a>
-                        
-                        <c:if test="${sessionScope.userRole == 'Student'}">
-                            <a class="nav-link" href="${pageContext.request.contextPath}/student/courses">
-                                <i class="fas fa-book"></i> My Courses
-                            </a>
-                            <a class="nav-link" href="${pageContext.request.contextPath}/student/my-enrollments">
-                                <i class="fas fa-clipboard-list"></i> Enrollments
-                            </a>
-                            <a class="nav-link" href="${pageContext.request.contextPath}/student/assessments">
-                                <i class="fas fa-tasks"></i> Assessments
-                            </a>
-                            <a class="nav-link" href="${pageContext.request.contextPath}/student/certificates">
-                                <i class="fas fa-certificate"></i> Certificates
-                            </a>
-                        </c:if>
-                        
-                        <c:if test="${sessionScope.userRole == 'Instructor'}">
-                            <a class="nav-link" href="${pageContext.request.contextPath}/instructor/courses">
-                                <i class="fas fa-book-open"></i> My Courses
-                            </a>
-                            <a class="nav-link" href="${pageContext.request.contextPath}/instructor/materials">
-                                <i class="fas fa-file-alt"></i> Materials
-                            </a>
-                            <a class="nav-link" href="${pageContext.request.contextPath}/instructor/assessments">
-                                <i class="fas fa-edit"></i> Assessments
-                            </a>
-                            <a class="nav-link" href="${pageContext.request.contextPath}/instructor/students">
-                                <i class="fas fa-users"></i> Students
-                            </a>
-                        </c:if>
-                        
-                        <c:if test="${sessionScope.userRole == 'Admin'}">
-                            <a class="nav-link" href="${pageContext.request.contextPath}/admin/users">
-                                <i class="fas fa-users-cog"></i> Users
-                            </a>
-                            <a class="nav-link" href="${pageContext.request.contextPath}/admin/courses">
-                                <i class="fas fa-book"></i> Courses
-                            </a>
-                            <a class="nav-link" href="${pageContext.request.contextPath}/admin/payments">
-                                <i class="fas fa-dollar-sign"></i> Payments
-                            </a>
-                            <a class="nav-link" href="${pageContext.request.contextPath}/admin/reports">
-                                <i class="fas fa-chart-bar"></i> Reports
-                            </a>
-                        </c:if>
-
-                        <hr class="bg-white">
-                        
-                        <a class="nav-link" href="${pageContext.request.contextPath}/profile">
-                            <i class="fas fa-user-circle"></i> Profile
-                        </a>
-                        <a class="nav-link" href="${pageContext.request.contextPath}/change-password">
-                            <i class="fas fa-key"></i> Change Password
-                        </a>
-                        <a class="nav-link" href="${pageContext.request.contextPath}/settings">
-                            <i class="fas fa-cog"></i> Settings
-                        </a>
-                        <a class="nav-link" href="${pageContext.request.contextPath}/logout">
-                            <i class="fas fa-sign-out-alt"></i> Logout
-                        </a>
-                    </nav>
+                    <span class="user-name-display">${sessionScope.userName}</span>
                 </div>
-            </div>
-
-            <!-- Main Content -->
-            <div class="col-md-10 col-lg-10 p-0">
-                <!-- Top Navbar -->
-                <nav class="navbar navbar-expand-lg navbar-light">
-                    <div class="container-fluid">
-                        <h5 class="mb-0">Dashboard</h5>
-                        <div class="d-flex align-items-center">
-                            <button class="btn btn-link position-relative me-3">
-                                <i class="fas fa-bell fa-lg text-muted"></i>
-                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                    3
-                                </span>
-                            </button>
-                            <div class="dropdown">
-                                <button class="btn btn-link dropdown-toggle text-decoration-none" type="button" 
-                                        data-bs-toggle="dropdown">
-                                    <i class="fas fa-user-circle fa-lg"></i>
-                                </button>
-                                <ul class="dropdown-menu dropdown-menu-end">
-                                    <li><a class="dropdown-item" href="${pageContext.request.contextPath}/profile">
-                                        <i class="fas fa-user"></i> Profile
-                                    </a></li>
-                                    <li><a class="dropdown-item" href="${pageContext.request.contextPath}/change-password">
-                                        <i class="fas fa-key"></i> Change Password
-                                    </a></li>
-                                    <li><a class="dropdown-item" href="${pageContext.request.contextPath}/settings">
-                                        <i class="fas fa-cog"></i> Settings
-                                    </a></li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item" href="${pageContext.request.contextPath}/logout">
-                                        <i class="fas fa-sign-out-alt"></i> Logout
-                                    </a></li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </nav>
-
-                <!-- Dashboard Content -->
-                <div class="container-fluid p-4">
-                    <div class="row mb-4">
-                        <div class="col-12">
-                            <h4>Welcome back, ${sessionScope.userName}!</h4>
-                            <p class="text-muted">Here's what's happening with your account today.</p>
-                        </div>
-                    </div>
-
-                    <!-- Statistics Cards -->
-                    <div class="row">
-                        <c:if test="${sessionScope.userRole == 'Student'}">
-                            <div class="col-md-3">
-                                <div class="stat-card primary">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <h6>Enrolled Courses</h6>
-                                            <h2 class="mb-0">5</h2>
-                                        </div>
-                                        <i class="fas fa-book fa-3x opacity-50"></i>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="stat-card success">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <h6>Completed</h6>
-                                            <h2 class="mb-0">3</h2>
-                                        </div>
-                                        <i class="fas fa-check-circle fa-3x opacity-50"></i>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="stat-card warning">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <h6>Pending Assessments</h6>
-                                            <h2 class="mb-0">2</h2>
-                                        </div>
-                                        <i class="fas fa-tasks fa-3x opacity-50"></i>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="stat-card info">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <h6>Certificates</h6>
-                                            <h2 class="mb-0">3</h2>
-                                        </div>
-                                        <i class="fas fa-certificate fa-3x opacity-50"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </c:if>
-
-                        <c:if test="${sessionScope.userRole == 'Instructor'}">
-                            <div class="col-md-3">
-                                <div class="stat-card primary">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <h6>My Courses</h6>
-                                            <h2 class="mb-0">8</h2>
-                                        </div>
-                                        <i class="fas fa-book-open fa-3x opacity-50"></i>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="stat-card success">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <h6>Total Students</h6>
-                                            <h2 class="mb-0">156</h2>
-                                        </div>
-                                        <i class="fas fa-users fa-3x opacity-50"></i>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="stat-card warning">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <h6>Pending Reviews</h6>
-                                            <h2 class="mb-0">12</h2>
-                                        </div>
-                                        <i class="fas fa-clipboard-check fa-3x opacity-50"></i>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="stat-card info">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <h6>Materials</h6>
-                                            <h2 class="mb-0">45</h2>
-                                        </div>
-                                        <i class="fas fa-file-alt fa-3x opacity-50"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </c:if>
-
-                        <c:if test="${sessionScope.userRole == 'Admin'}">
-                            <div class="col-md-3">
-                                <div class="stat-card primary">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <h6>Total Users</h6>
-                                            <h2 class="mb-0">342</h2>
-                                        </div>
-                                        <i class="fas fa-users fa-3x opacity-50"></i>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="stat-card success">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <h6>Active Courses</h6>
-                                            <h2 class="mb-0">28</h2>
-                                        </div>
-                                        <i class="fas fa-book fa-3x opacity-50"></i>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="stat-card warning">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <h6>Pending Approvals</h6>
-                                            <h2 class="mb-0">7</h2>
-                                        </div>
-                                        <i class="fas fa-hourglass-half fa-3x opacity-50"></i>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="stat-card info">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <h6>Revenue</h6>
-                                            <h2 class="mb-0">$15.2K</h2>
-                                        </div>
-                                        <i class="fas fa-dollar-sign fa-3x opacity-50"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </c:if>
-                    </div>
-
-                    <!-- Quick Access Cards -->
-                    <div class="row mt-4">
-                        <div class="col-12">
-                            <h5 class="mb-3"><i class="fas fa-th-large"></i> Quick Access</h5>
-                        </div>
-                        
-                        <c:if test="${sessionScope.userRole == 'Student'}">
-                            <div class="col-md-3 mb-3">
-                                <a href="${pageContext.request.contextPath}/student/courses" class="text-decoration-none">
-                                    <div class="card border-0 shadow-sm h-100 hover-card">
-                                        <div class="card-body text-center p-4">
-                                            <div class="mb-3">
-                                                <i class="fas fa-book fa-3x text-primary"></i>
-                                            </div>
-                                            <h5 class="card-title text-dark">Browse Courses</h5>
-                                            <p class="card-text text-muted small">Explore and enroll in available courses</p>
-                                        </div>
-                                    </div>
-                                </a>
-                            </div>
-                            <div class="col-md-3 mb-3">
-                                <a href="${pageContext.request.contextPath}/student/my-enrollments" class="text-decoration-none">
-                                    <div class="card border-0 shadow-sm h-100 hover-card">
-                                        <div class="card-body text-center p-4">
-                                            <div class="mb-3">
-                                                <i class="fas fa-clipboard-list fa-3x text-success"></i>
-                                            </div>
-                                            <h5 class="card-title text-dark">My Enrollments</h5>
-                                            <p class="card-text text-muted small">View your enrolled courses</p>
-                                        </div>
-                                    </div>
-                                </a>
-                            </div>
-                            <div class="col-md-3 mb-3">
-                                <a href="${pageContext.request.contextPath}/student/assessments" class="text-decoration-none">
-                                    <div class="card border-0 shadow-sm h-100 hover-card">
-                                        <div class="card-body text-center p-4">
-                                            <div class="mb-3">
-                                                <i class="fas fa-tasks fa-3x text-warning"></i>
-                                            </div>
-                                            <h5 class="card-title text-dark">Assessments</h5>
-                                            <p class="card-text text-muted small">Take and view assessments</p>
-                                        </div>
-                                    </div>
-                                </a>
-                            </div>
-                            <div class="col-md-3 mb-3">
-                                <a href="${pageContext.request.contextPath}/student/certificates" class="text-decoration-none">
-                                    <div class="card border-0 shadow-sm h-100 hover-card">
-                                        <div class="card-body text-center p-4">
-                                            <div class="mb-3">
-                                                <i class="fas fa-certificate fa-3x text-info"></i>
-                                            </div>
-                                            <h5 class="card-title text-dark">Certificates</h5>
-                                            <p class="card-text text-muted small">View your earned certificates</p>
-                                        </div>
-                                    </div>
-                                </a>
-                            </div>
-                        </c:if>
-
-                        <c:if test="${sessionScope.userRole == 'Instructor'}">
-                            <div class="col-md-3 mb-3">
-                                <a href="${pageContext.request.contextPath}/instructor/courses" class="text-decoration-none">
-                                    <div class="card border-0 shadow-sm h-100 hover-card">
-                                        <div class="card-body text-center p-4">
-                                            <div class="mb-3">
-                                                <i class="fas fa-book-open fa-3x text-primary"></i>
-                                            </div>
-                                            <h5 class="card-title text-dark">My Courses</h5>
-                                            <p class="card-text text-muted small">Manage your courses</p>
-                                        </div>
-                                    </div>
-                                </a>
-                            </div>
-                            <div class="col-md-3 mb-3">
-                                <a href="${pageContext.request.contextPath}/instructor/materials" class="text-decoration-none">
-                                    <div class="card border-0 shadow-sm h-100 hover-card">
-                                        <div class="card-body text-center p-4">
-                                            <div class="mb-3">
-                                                <i class="fas fa-file-alt fa-3x text-success"></i>
-                                            </div>
-                                            <h5 class="card-title text-dark">Course Materials</h5>
-                                            <p class="card-text text-muted small">Upload and manage materials</p>
-                                        </div>
-                                    </div>
-                                </a>
-                            </div>
-                            <div class="col-md-3 mb-3">
-                                <a href="${pageContext.request.contextPath}/instructor/assessments" class="text-decoration-none">
-                                    <div class="card border-0 shadow-sm h-100 hover-card">
-                                        <div class="card-body text-center p-4">
-                                            <div class="mb-3">
-                                                <i class="fas fa-edit fa-3x text-warning"></i>
-                                            </div>
-                                            <h5 class="card-title text-dark">Assessments</h5>
-                                            <p class="card-text text-muted small">Create and grade assessments</p>
-                                        </div>
-                                    </div>
-                                </a>
-                            </div>
-                            <div class="col-md-3 mb-3">
-                                <a href="${pageContext.request.contextPath}/instructor/students" class="text-decoration-none">
-                                    <div class="card border-0 shadow-sm h-100 hover-card">
-                                        <div class="card-body text-center p-4">
-                                            <div class="mb-3">
-                                                <i class="fas fa-users fa-3x text-info"></i>
-                                            </div>
-                                            <h5 class="card-title text-dark">Students</h5>
-                                            <p class="card-text text-muted small">View enrolled students</p>
-                                        </div>
-                                    </div>
-                                </a>
-                            </div>
-                        </c:if>
-
-                        <c:if test="${sessionScope.userRole == 'Admin'}">
-                            <div class="col-md-3 mb-3">
-                                <a href="${pageContext.request.contextPath}/admin/users" class="text-decoration-none">
-                                    <div class="card border-0 shadow-sm h-100 hover-card">
-                                        <div class="card-body text-center p-4">
-                                            <div class="mb-3">
-                                                <i class="fas fa-users-cog fa-3x text-primary"></i>
-                                            </div>
-                                            <h5 class="card-title text-dark">User Management</h5>
-                                            <p class="card-text text-muted small">Manage all system users</p>
-                                        </div>
-                                    </div>
-                                </a>
-                            </div>
-                            <div class="col-md-3 mb-3">
-                                <a href="${pageContext.request.contextPath}/admin/courses" class="text-decoration-none">
-                                    <div class="card border-0 shadow-sm h-100 hover-card">
-                                        <div class="card-body text-center p-4">
-                                            <div class="mb-3">
-                                                <i class="fas fa-book fa-3x text-success"></i>
-                                            </div>
-                                            <h5 class="card-title text-dark">Course Management</h5>
-                                            <p class="card-text text-muted small">Approve and manage courses</p>
-                                        </div>
-                                    </div>
-                                </a>
-                            </div>
-                            <div class="col-md-3 mb-3">
-                                <a href="${pageContext.request.contextPath}/admin/payments" class="text-decoration-none">
-                                    <div class="card border-0 shadow-sm h-100 hover-card">
-                                        <div class="card-body text-center p-4">
-                                            <div class="mb-3">
-                                                <i class="fas fa-dollar-sign fa-3x text-warning"></i>
-                                            </div>
-                                            <h5 class="card-title text-dark">Payments</h5>
-                                            <p class="card-text text-muted small">View payment transactions</p>
-                                        </div>
-                                    </div>
-                                </a>
-                            </div>
-                            <div class="col-md-3 mb-3">
-                                <a href="${pageContext.request.contextPath}/admin/reports" class="text-decoration-none">
-                                    <div class="card border-0 shadow-sm h-100 hover-card">
-                                        <div class="card-body text-center p-4">
-                                            <div class="mb-3">
-                                                <i class="fas fa-chart-bar fa-3x text-info"></i>
-                                            </div>
-                                            <h5 class="card-title text-dark">Reports</h5>
-                                            <p class="card-text text-muted small">View system reports</p>
-                                        </div>
-                                    </div>
-                                </a>
-                            </div>
-                        </c:if>
-                    </div>
-
-                    <!-- Recent Activity -->
-                    <div class="row mt-4">
-                        <div class="col-12">
-                            <div class="card border-0 shadow-sm">
-                                <div class="card-header bg-white">
-                                    <h5 class="mb-0"><i class="fas fa-clock"></i> Recent Activity</h5>
-                                </div>
-                                <div class="card-body">
-                                    <p class="text-muted">Recent activities will appear here...</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                
+                <a href="${pageContext.request.contextPath}/logout" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
             </div>
         </div>
-    </div>
+    </nav>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Sidebar Navigation (Primary) -->
+    <aside class="sidebar-nav">
+        <ul class="sidebar-menu">
+            <li>
+                <a href="${pageContext.request.contextPath}/dashboard" class="sidebar-link active">
+                    <i class="fas fa-th-large"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="${pageContext.request.contextPath}/student/courses" class="sidebar-link">
+                    <i class="fas fa-book"></i>
+                    <span>Browse Courses</span>
+                </a>
+            </li>
+            <li>
+                <a href="${pageContext.request.contextPath}/student/my-enrollments" class="sidebar-link">
+                    <i class="fas fa-graduation-cap"></i>
+                    <span>My Enrollments</span>
+                </a>
+            </li>
+            <li>
+                <a href="${pageContext.request.contextPath}/student/materials" class="sidebar-link">
+                    <i class="fas fa-folder-open"></i>
+                    <span>Materials</span>
+                </a>
+            </li>
+            <li>
+                <a href="${pageContext.request.contextPath}/profile" class="sidebar-link">
+                    <i class="fas fa-user-circle"></i>
+                    <span>Profile</span>
+                </a>
+            </li>
+        </ul>
+    </aside>
+    <!-- Main Content Area (Dynamic) -->
+    <main class="main-content">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1>Welcome, ${sessionScope.userName}</h1>
+            <p>Overview of your academic progress and activities</p>
+        </div>
+
+        <!-- A. Summary Metrics (Top Section) -->
+        <div class="metrics-grid">
+            <c:if test="${sessionScope.userRole == 'Student'}">
+                <div class="metric-block">
+                    <div class="metric-icon primary">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <div class="metric-value">${not empty enrolledCoursesCount ? enrolledCoursesCount : 0}</div>
+                    <p class="metric-label">Enrolled Courses</p>
+                </div>
+                
+                <div class="metric-block">
+                    <div class="metric-icon warning">
+                        <i class="fas fa-clipboard-list"></i>
+                    </div>
+                    <div class="metric-value">${not empty pendingAssignmentsCount ? pendingAssignmentsCount : 0}</div>
+                    <p class="metric-label">Pending Assignments</p>
+                </div>
+                
+                <div class="metric-block">
+                    <div class="metric-icon info">
+                        <i class="fas fa-question-circle"></i>
+                    </div>
+                    <div class="metric-value">${not empty upcomingQuizzesCount ? upcomingQuizzesCount : 0}</div>
+                    <p class="metric-label">Upcoming Quizzes</p>
+                </div>
+                
+                <div class="metric-block">
+                    <div class="metric-icon success">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="metric-value">${not empty overallProgress ? overallProgress : 0}%</div>
+                    <p class="metric-label">Overall Progress</p>
+                </div>
+            </c:if>
+        </div>
+
+        <!-- B. My Courses (Core Section) -->
+        <c:if test="${sessionScope.userRole == 'Student'}">
+            <div class="section-card">
+                <div class="section-header">
+                    <h2 class="section-title">My Courses</h2>
+                    <a href="${pageContext.request.contextPath}/student/courses" class="section-action">View All →</a>
+                </div>
+                <div class="section-body">
+                    <c:choose>
+                        <c:when test="${not empty enrolledCourses}">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Course Code</th>
+                                        <th>Course Title</th>
+                                        <th>Instructor</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <c:forEach var="course" items="${enrolledCourses}" varStatus="status">
+                                        <c:if test="${status.index < 5}">
+                                            <tr>
+                                                <td>${course.courseId}</td>
+                                                <td>${course.courseName}</td>
+                                                <td>${course.instructorName}</td>
+                                                <td>${course.completionStatus}</td>
+                                                <td>
+                                                    <a href="${pageContext.request.contextPath}/student/course/${course.courseId}" class="btn-action">View Course</a>
+                                                </td>
+                                            </tr>
+                                        </c:if>
+                                    </c:forEach>
+                                </tbody>
+                            </table>
+                        </c:when>
+                        <c:otherwise>
+                            <div class="empty-state">
+                                <i class="fas fa-book"></i>
+                                <p>No enrolled courses yet. Browse available courses to get started.</p>
+                            </div>
+                        </c:otherwise>
+                    </c:choose>
+                </div>
+            </div>
+
+            <!-- C. Upcoming Tasks (High Priority) -->
+            <div class="section-card">
+                <div class="section-header">
+                    <h2 class="section-title">Upcoming Tasks</h2>
+                </div>
+                <div class="section-body">
+                    <c:choose>
+                        <c:when test="${not empty upcomingTasks}">
+                            <ul class="task-list">
+                                <c:forEach var="task" items="${upcomingTasks}" varStatus="status">
+                                    <c:if test="${status.index < 4}">
+                                        <li class="task-item">
+                                            <div class="task-info">
+                                                <h3 class="task-title">${task.title}</h3>
+                                                <div class="task-meta">
+                                                    <strong>${task.courseName}</strong> • Due: ${task.dueDate}
+                                                </div>
+                                            </div>
+                                            <span class="task-urgency ${task.priority}">${task.priorityLabel}</span>
+                                        </li>
+                                    </c:if>
+                                </c:forEach>
+                            </ul>
+                        </c:when>
+                        <c:otherwise>
+                            <div class="empty-state">
+                                <i class="fas fa-clipboard-check"></i>
+                                <p>No pending tasks at the moment.</p>
+                            </div>
+                        </c:otherwise>
+                    </c:choose>
+                </div>
+            </div>
+
+            <!-- D. Announcements -->
+            <div class="section-card">
+                <div class="section-header">
+                    <h2 class="section-title">Announcements</h2>
+                </div>
+                <div class="section-body">
+                    <c:choose>
+                        <c:when test="${not empty announcements}">
+                            <ul class="announcement-list">
+                                <c:forEach var="announcement" items="${announcements}" varStatus="status">
+                                    <c:if test="${status.index < 3}">
+                                        <li class="announcement-item">
+                                            <h3 class="announcement-title">${announcement.title}</h3>
+                                            <p class="announcement-body">${announcement.content}</p>
+                                            <div class="announcement-meta">
+                                                Posted by <strong>${announcement.authorName}</strong> • ${announcement.postedDate}
+                                            </div>
+                                        </li>
+                                    </c:if>
+                                </c:forEach>
+                            </ul>
+                        </c:when>
+                        <c:otherwise>
+                            <div class="empty-state">
+                                <i class="fas fa-bullhorn"></i>
+                                <p>No announcements at this time.</p>
+                            </div>
+                        </c:otherwise>
+                    </c:choose>
+                </div>
+            </div>
+        </c:if>
+    </main>
 </body>
 </html>

@@ -15,4 +15,5 @@ public interface UserDAO {
     boolean updateStatus(int userId, String status);
     boolean updateLastLogin(int userId);
     boolean delete(int userId);
+    int countByRole(String role);
 }

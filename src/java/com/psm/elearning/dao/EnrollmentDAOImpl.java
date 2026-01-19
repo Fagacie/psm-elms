@@ -2,7 +2,6 @@ package com.psm.elearning.dao;
 
 import com.psm.elearning.model.Enrollment;
 import com.psm.elearning.util.DBConnection;
-
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -223,6 +222,35 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
             enrollment.setCompletionStatus(rs.getString("CompletionStatus"));
         }
         return enrollment;
+    }
+
+    @Override
+    public List<Enrollment> getEnrollmentsByCourse(Integer courseId) {
+        List<Enrollment> enrollments = new ArrayList<>();
+        String sql = "SELECT e.*, u.FullName AS StudentName, u.Email AS StudentEmail " +
+                "FROM Enrollment e " +
+                "JOIN User u ON e.UserID = u.UserID " +
+                "WHERE e.CourseID = ? " +
+                "ORDER BY e.EnrollmentDate DESC";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setInt(1, courseId);
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Enrollment enrollment = mapResultSet(rs);
+                    enrollment.setStudentName(rs.getString("StudentName"));
+                    enrollment.setStudentEmail(rs.getString("StudentEmail"));
+                    enrollments.add(enrollment);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("EnrollmentDAO: Error getting enrollments by course: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return enrollments;
     }
 
     private boolean hasColumn(ResultSet rs, String columnName) {

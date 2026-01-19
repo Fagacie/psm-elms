@@ -1,0 +1,202 @@
+/* My Enrollments Page Styles (Flat, Academic, No Radius, No Gradients) */
+
+:root {
+  --bg: #ffffff;
+  --ink: #121212;
+  --muted: #6b7280;
+  --line: #e5e7eb;
+  --primary: #1f4fbf; /* institutional blue */
+  --success: #166534; /* deep green */
+  --warning: #92400e; /* brownish amber */
+  --danger: #7f1d1d;  /* deep red */
+  --table-stripe: #f9fafb;
+}
+
+/* Layout hooks are largely defined in app.css (header, sidebar, etc.).
+   This file scopes enrollment-specific visuals. */
+
+/* Page header (main content) */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--line);
+}
+.page-header h2 {
+  margin: 0;
+  font-weight: 600;
+  color: var(--ink);
+}
+.page-header .text-muted {
+  margin: 4px 0 0 0;
+  color: var(--muted);
+}
+.page-header .btn.btn-primary {
+  border: 1px solid var(--primary);
+  background: transparent;
+  color: var(--primary);
+}
+.page-header .btn.btn-primary:hover {
+  background: var(--primary);
+  color: #fff;
+}
+
+/* Statistics Summary */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  margin: 16px 0 24px;
+}
+.stat-card {
+  background: #fff;
+  border: 1px solid var(--line);
+  padding: 16px;
+}
+.stat-icon {
+  width: 48px;
+  height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12px;
+  border: 1px solid var(--line);
+  color: var(--primary);
+}
+.stat-card .stat-content h3 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+}
+.stat-card .stat-content p {
+  margin: 2px 0 0 0;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+/* Enrollment table wrapper */
+.enrollments-table {
+  background: #fff;
+  border: 1px solid var(--line);
+}
+.table-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line);
+}
+.table-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+.enrollments-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.enrollments-table thead th {
+  text-align: left;
+  padding: 10px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  border-bottom: 1px solid var(--line);
+  text-transform: uppercase;
+}
+.enrollments-table tbody td {
+  padding: 14px 16px;
+  border-top: 1px solid var(--line);
+  vertical-align: middle;
+}
+.enrollments-table tbody tr:nth-child(odd) {
+  background: var(--table-stripe);
+}
+
+/* Course info */
+.course-info h4 {
+  margin: 0 0 4px 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+.course-info p {
+  margin: 0;
+  color: var(--muted);
+}
+
+/* Badges */
+.badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border: 1px solid var(--line);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.badge-success { color: var(--success); border-color: var(--success); }
+.badge-warning { color: var(--warning); border-color: var(--warning); }
+.badge-primary { color: var(--primary); border-color: var(--primary); }
+.badge-danger  { color: var(--danger);  border-color: var(--danger); }
+
+/* Actions */
+.actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.inline-form { display: inline-block; }
+
+/* Buttons: rely on app.css, add hover color-only rule */
+.btn:hover { filter: none; opacity: 0.92; }
+.btn.btn-secondary:hover { color: var(--primary); border-color: var(--primary); background: transparent; }
+
+/* Empty state */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+/* Enrollment Summary */
+.summary-block {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  padding: 16px;
+  margin-top: 16px;
+}
+
+.summary-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.summary-table th,
+.summary-table td {
+  padding: 12px;
+  border-bottom: 1px solid #e5e7eb;
+}
+.summary-table th {
+  text-align: left;
+  width: 220px;
+  color: #374151;
+  font-weight: 600;
+}
+.summary-table td {
+  color: #111827;
+}
+.empty-state i {
+  font-size: 48px;
+  color: var(--line);
+}
+.empty-state h3 {
+  margin: 8px 0;
+}
+.empty-state p {
+  margin: 0 0 16px 0;
+  color: var(--muted);
+}
+.empty-state .btn.btn-primary {
+  border: 1px solid var(--primary);
+  background: transparent;
+  color: var(--primary);
+}
+.empty-state .btn.btn-primary:hover {
+  background: var(--primary);
+  color: #fff;
+}

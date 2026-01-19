@@ -7,81 +7,124 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Payment - PSM E-Learning</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/landing.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/app.css">
     <style>
+        body {
+            background: var(--color-background);
+            padding: var(--spacing-lg);
+        }
+        .payment-wrapper {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: var(--spacing-xl);
+        }
         .payment-card {
-            border: 2px solid #dee2e6;
-            border-radius: 10px;
-            transition: all 0.3s;
+            background: var(--color-white);
+            border: 1px solid var(--color-light-grey);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
-        .payment-card:hover {
-            border-color: #0d6efd;
-            box-shadow: 0 0 15px rgba(13, 110, 253, 0.2);
+        .payment-header {
+            background: var(--color-primary);
+            color: var(--color-white);
+            padding: var(--spacing-lg);
         }
-        .payment-method {
-            cursor: pointer;
+        .payment-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 600;
         }
-        .payment-method input[type="radio"] {
-            display: none;
+        .payment-body {
+            padding: var(--spacing-lg);
         }
-        .payment-method input[type="radio"]:checked + label {
-            border-color: #0d6efd;
-            background-color: #e7f1ff;
+        .course-info {
+            background: var(--color-light-grey);
+            padding: var(--spacing-md);
+            margin-bottom: var(--spacing-lg);
+            border: 1px solid #e0e0e0;
         }
-        .amount-display {
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: #198754;
+        .course-info h4 {
+            margin: 0 0 var(--spacing-xs) 0;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--color-text);
+        }
+        .course-info p {
+            margin: 0;
+            color: var(--color-text-light);
+            font-size: 0.9rem;
+        }
+        .amount-box {
+            text-align: center;
+            padding: var(--spacing-lg);
+            margin: var(--spacing-lg) 0;
+            background: var(--color-background);
+            border: 1px solid var(--color-light-grey);
+        }
+        .amount-label {
+            color: var(--color-text-light);
+            font-size: 0.9rem;
+            margin-bottom: var(--spacing-sm);
+        }
+        .amount-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--color-primary);
+        }
+        .button-group {
+            display: flex;
+            gap: var(--spacing-md);
+            margin: var(--spacing-lg) 0;
+        }
+        .btn-full {
+            flex: 1;
+        }
+        .security-notice {
+            text-align: center;
+            color: var(--color-text-light);
+            font-size: 0.9rem;
+            margin-top: var(--spacing-lg);
+            padding-top: var(--spacing-lg);
+            border-top: 1px solid var(--color-light-grey);
         }
     </style>
 </head>
 <body>
-    <div class="container mt-5 mb-5">
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
-                <div class="card shadow-lg">
-                    <div class="card-header bg-primary text-white">
-                        <h4 class="mb-0"><i class="fas fa-credit-card me-2"></i>Complete Payment</h4>
+    <div class="payment-wrapper">
+        <div class="payment-card">
+            <div class="payment-header">
+                <h2>Complete Payment</h2>
+            </div>
+            <div class="payment-body">
+                <!-- Course Information -->
+                <div class="course-info">
+                    <h4>${enrollment.courseName}</h4>
+                    <p>${enrollment.courseDescription}</p>
+                </div>
+                
+                <!-- Amount Display -->
+                <div class="amount-box">
+                    <div class="amount-label">Total Amount</div>
+                    <div class="amount-value">
+                        ₦<fmt:formatNumber value="${enrollment.coursePrice}" type="number" minFractionDigits="2" maxFractionDigits="2"/>
                     </div>
-                    <div class="card-body p-4">
-                        <!-- Course Information -->
-                        <div class="alert alert-info mb-4">
-                            <h5 class="alert-heading"><i class="fas fa-book me-2"></i>${enrollment.courseName}</h5>
-                            <p class="mb-0">${enrollment.courseDescription}</p>
-                        </div>
-                        
-                        <!-- Amount Display -->
-                        <div class="text-center mb-4 p-4 bg-light rounded">
-                            <p class="text-muted mb-2">Total Amount</p>
-                            <div class="amount-display">
-                                <fmt:formatNumber value="${enrollment.coursePrice}" type="currency"/>
-                            </div>
-                        </div>
-                        
-                        <!-- Paystack Payment Trigger -->
-                        <form method="post" action="${pageContext.request.contextPath}/student/start-payment" id="paystackForm">
-                            <input type="hidden" name="enrollmentId" value="${enrollment.enrollmentId}">
-                            <div class="d-flex gap-3">
-                                <button type="submit" class="btn btn-success btn-lg flex-grow-1">
-                                    <i class="fas fa-credit-card me-2"></i>Pay with Paystack
-                                </button>
-                                <a href="${pageContext.request.contextPath}/student/my-enrollments" class="btn btn-outline-secondary btn-lg">Cancel</a>
-                            </div>
-                        </form>
-                        
-                        <!-- Security Notice -->
-                        <div class="text-center mt-4 text-muted">
-                            <i class="fas fa-shield-alt me-2"></i>
-                            <small>Your payment is secure and encrypted</small>
-                        </div>
+                </div>
+                
+                <!-- Paystack Payment Trigger -->
+                <form method="post" action="${pageContext.request.contextPath}/student/start-payment" id="paystackForm">
+                    <input type="hidden" name="enrollmentId" value="${enrollment.enrollmentId}">
+                    <div class="button-group">
+                        <button type="submit" class="btn btn-primary btn-full">Pay Now</button>
+                        <a href="${pageContext.request.contextPath}/student/my-enrollments" class="btn btn-outline btn-full" style="flex:1; text-align:center;">Cancel</a>
                     </div>
+                </form>
+                
+                <!-- Security Notice -->
+                <div class="security-notice">
+                    Your payment is secure and encrypted
                 </div>
             </div>
         </div>
     </div>
-    
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>// Simplified Paystack initiation handled server-side</script>
 </body>
 </html>

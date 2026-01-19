@@ -1,217 +1,224 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Course Management - PSM E-Learning</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        .sidebar {
-            min-height: 100vh;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-        .main-content {
-            min-height: 100vh;
-            background-color: #f8f9fa;
-        }
-        .course-table {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
-        }
-        .status-Pending { background-color: #ffc107; color: #000; }
-        .status-Approved { background-color: #28a745; color: white; }
-        .status-Archived { background-color: #6c757d; color: white; }
-    </style>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/landing.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/app.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin-dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
 </head>
 <body>
-    <div class="container-fluid">
-        <div class="row">
-            <!-- Sidebar -->
-            <nav class="col-md-2 d-md-block sidebar p-0">
-                <div class="position-sticky pt-3">
-                    <div class="text-center mb-4">
-                        <h4 class="text-white">PSM Admin</h4>
-                        <p class="text-white-50">${sessionScope.userName}</p>
-                    </div>
-                    <ul class="nav flex-column">
-                        <li class="nav-item">
-                            <a class="nav-link text-white" href="${pageContext.request.contextPath}/dashboard">
-                                <i class="fas fa-home me-2"></i> Dashboard
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-white" href="${pageContext.request.contextPath}/admin/users">
-                                <i class="fas fa-users me-2"></i> Users
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-white active bg-white bg-opacity-25" href="${pageContext.request.contextPath}/admin/courses">
-                                <i class="fas fa-book me-2"></i> Courses
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-white" href="${pageContext.request.contextPath}/profile">
-                                <i class="fas fa-user me-2"></i> Profile
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-white" href="${pageContext.request.contextPath}/logout">
-                                <i class="fas fa-sign-out-alt me-2"></i> Logout
-                            </a>
-                        </li>
-                    </ul>
+    <jsp:include page="/WEB-INF/views/common/admin-header.jsp">
+        <jsp:param name="pageTitle" value="Course Management"/>
+    </jsp:include>
+
+    <jsp:include page="/WEB-INF/views/common/admin-sidebar.jsp"/>
+
+    <main class="app-main">
+        <div class="content-wrapper">
+            <c:set var="courseCount" value="${empty courses ? 0 : fn:length(courses)}"/>
+            <c:set var="totalCourses" value="${courseCount}"/>
+            <c:set var="pendingCount" value="0"/>
+            <c:set var="approvedCount" value="0"/>
+            <c:set var="archivedCount" value="0"/>
+            <c:forEach items="${courses}" var="c">
+                <c:choose>
+                    <c:when test="${c.status eq 'Pending'}"><c:set var="pendingCount" value="${pendingCount + 1}"/></c:when>
+                    <c:when test="${c.status eq 'Approved'}"><c:set var="approvedCount" value="${approvedCount + 1}"/></c:when>
+                    <c:when test="${c.status eq 'Archived'}"><c:set var="archivedCount" value="${archivedCount + 1}"/></c:when>
+                </c:choose>
+            </c:forEach>
+
+            <!-- Alerts -->
+            <c:if test="${param.success == 'approved'}">
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle"></i> Course approved successfully.
                 </div>
-            </nav>
+            </c:if>
+            <c:if test="${param.success == 'rejected'}">
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle"></i> Course rejected successfully.
+                </div>
+            </c:if>
+            <c:if test="${param.error != null}">
+                <div class="alert alert-error">
+                    <i class="fas fa-exclamation-circle"></i> An error occurred. Please try again.
+                </div>
+            </c:if>
+            <c:if test="${not empty errorMessage}">
+                <div class="alert alert-error">
+                    <i class="fas fa-exclamation-circle"></i> <c:out value="${errorMessage}"/>
+                </div>
+            </c:if>
 
-            <!-- Main content -->
-            <main class="col-md-10 ms-sm-auto px-md-4 main-content">
-                <div class="py-4">
-                    <h2 class="mb-4">Course Management</h2>
-
-                    <!-- Success/Error Messages -->
-                    <c:if test="${param.success == 'approved'}">
-                        <div class="alert alert-success alert-dismissible fade show" role="alert">
-                            Course approved successfully!
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-                    </c:if>
-                    <c:if test="${param.success == 'rejected'}">
-                        <div class="alert alert-success alert-dismissible fade show" role="alert">
-                            Course rejected successfully!
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-                    </c:if>
-                    <c:if test="${param.error != null}">
-                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            An error occurred. Please try again.
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-                    </c:if>
-                    <c:if test="${not empty errorMessage}">
-                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            ${errorMessage}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-                    </c:if>
-
-                    <!-- Filter Buttons -->
-                    <div class="mb-4">
-                        <div class="btn-group" role="group">
-                            <a href="${pageContext.request.contextPath}/admin/courses" 
-                               class="btn ${empty statusFilter ? 'btn-primary' : 'btn-outline-primary'}">
-                                All Courses
-                            </a>
-                            <a href="${pageContext.request.contextPath}/admin/courses?status=Pending" 
-                               class="btn ${statusFilter == 'Pending' ? 'btn-warning' : 'btn-outline-warning'}">
-                                Pending
-                            </a>
-                            <a href="${pageContext.request.contextPath}/admin/courses?status=Approved" 
-                               class="btn ${statusFilter == 'Approved' ? 'btn-success' : 'btn-outline-success'}">
-                                Approved
-                            </a>
-                            <a href="${pageContext.request.contextPath}/admin/courses?status=Archived" 
-                               class="btn ${statusFilter == 'Archived' ? 'btn-secondary' : 'btn-outline-secondary'}">
-                                Archived
-                            </a>
-                        </div>
+            <!-- Course Statistics -->
+            <section class="section-card">
+                <div class="section-header">
+                    <h2>Course Statistics</h2>
+                </div>
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-label">Total Courses</div>
+                        <div class="metric-value">${totalCourses}</div>
                     </div>
-
-                    <!-- Courses Table -->
-                    <div class="course-table p-4">
-                        <c:choose>
-                            <c:when test="${empty courses}">
-                                <div class="alert alert-info text-center">
-                                    <i class="fas fa-info-circle me-2"></i>
-                                    No courses found.
-                                </div>
-                            </c:when>
-                            <c:otherwise>
-                                <div class="table-responsive">
-                                    <table class="table table-hover">
-                                        <thead>
-                                            <tr>
-                                                <th>Course Name</th>
-                                                <th>Category</th>
-                                                <th>Level</th>
-                                                <th>Duration</th>
-                                                <th>Fee</th>
-                                                <th>Status</th>
-                                                <th>Created</th>
-                                                <th>Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <c:forEach var="course" items="${courses}">
-                                                <tr>
-                                                    <td>
-                                                        <strong>${course.courseName}</strong>
-                                                        <c:if test="${not empty course.description}">
-                                                            <br><small class="text-muted">
-                                                                ${course.description.length() > 50 ? 
-                                                                  course.description.substring(0, 50).concat('...') : course.description}
-                                                            </small>
-                                                        </c:if>
-                                                    </td>
-                                                    <td>${course.category}</td>
-                                                    <td>
-                                                        <c:choose>
-                                                            <c:when test="${course.level == 'Beginner'}">
-                                                                <span class="badge bg-success">${course.level}</span>
-                                                            </c:when>
-                                                            <c:when test="${course.level == 'Intermediate'}">
-                                                                <span class="badge bg-warning text-dark">${course.level}</span>
-                                                            </c:when>
-                                                            <c:when test="${course.level == 'Advanced'}">
-                                                                <span class="badge bg-danger">${course.level}</span>
-                                                            </c:when>
-                                                        </c:choose>
-                                                    </td>
-                                                    <td>${course.duration} hrs</td>
-                                                    <td><fmt:formatNumber value="${course.courseFee}" type="currency"/></td>
-                                                    <td><span class="badge status-${course.status}">${course.status}</span></td>
-                                                    <td>
-                                                        <c:choose>
-                                                            <c:when test="${not empty course.createdAt}">
-                                                                ${course.createdAt.toString().substring(0, 10)}
-                                                            </c:when>
-                                                            <c:otherwise>-</c:otherwise>
-                                                        </c:choose>
-                                                    </td>
-                                                    <td>
-                                                        <c:if test="${course.status == 'Pending'}">
-                                                            <a href="${pageContext.request.contextPath}/admin/courses?action=approve&id=${course.courseId}" 
-                                                               class="btn btn-sm btn-success" 
-                                                               onclick="return confirm('Approve this course?');">
-                                                                <i class="fas fa-check"></i> Approve
-                                                            </a>
-                                                            <a href="${pageContext.request.contextPath}/admin/courses?action=reject&id=${course.courseId}" 
-                                                               class="btn btn-sm btn-danger" 
-                                                               onclick="return confirm('Reject this course?');">
-                                                                <i class="fas fa-times"></i> Reject
-                                                            </a>
-                                                        </c:if>
-                                                        <c:if test="${course.status != 'Pending'}">
-                                                            <span class="text-muted">No action</span>
-                                                        </c:if>
-                                                    </td>
-                                                </tr>
-                                            </c:forEach>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </c:otherwise>
-                        </c:choose>
+                    <div class="metric-card">
+                        <div class="metric-label">Pending Review</div>
+                        <div class="metric-value">${pendingCount}</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Approved</div>
+                        <div class="metric-value">${approvedCount}</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Archived</div>
+                        <div class="metric-value">${archivedCount}</div>
                     </div>
                 </div>
-            </main>
+            </section>
+
+            <!-- Filters and Search -->
+            <section class="section-card">
+                <div class="section-header">
+                    <h2>Filters & Status</h2>
+                </div>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px;">
+                    <a href="${pageContext.request.contextPath}/admin/courses" class="link" style="padding: 8px 16px; border: 1px solid ${empty param.status ? 'var(--color-primary)' : 'var(--color-light-grey)'}; background: ${empty param.status ? 'var(--color-primary)' : 'var(--color-white)'}; color: ${empty param.status ? 'white' : 'var(--color-text)'}; text-decoration: none; font-size: 14px; font-weight: 600; border-radius: 2px; cursor: pointer;">All Courses</a>
+                    <a href="${pageContext.request.contextPath}/admin/courses?status=Pending" class="link" style="padding: 8px 16px; border: 1px solid ${param.status == 'Pending' ? 'var(--color-primary)' : 'var(--color-light-grey)'}; background: ${param.status == 'Pending' ? 'var(--color-primary)' : 'var(--color-white)'}; color: ${param.status == 'Pending' ? 'white' : 'var(--color-text)'}; text-decoration: none; font-size: 14px; font-weight: 600; border-radius: 2px; cursor: pointer;">Pending Review</a>
+                    <a href="${pageContext.request.contextPath}/admin/courses?status=Approved" class="link" style="padding: 8px 16px; border: 1px solid ${param.status == 'Approved' ? 'var(--color-primary)' : 'var(--color-light-grey)'}; background: ${param.status == 'Approved' ? 'var(--color-primary)' : 'var(--color-white)'}; color: ${param.status == 'Approved' ? 'white' : 'var(--color-text)'}; text-decoration: none; font-size: 14px; font-weight: 600; border-radius: 2px; cursor: pointer;">Approved</a>
+                    <a href="${pageContext.request.contextPath}/admin/courses?status=Archived" class="link" style="padding: 8px 16px; border: 1px solid ${param.status == 'Archived' ? 'var(--color-primary)' : 'var(--color-light-grey)'}; background: ${param.status == 'Archived' ? 'var(--color-primary)' : 'var(--color-white)'}; color: ${param.status == 'Archived' ? 'white' : 'var(--color-text)'}; text-decoration: none; font-size: 14px; font-weight: 600; border-radius: 2px; cursor: pointer;">Archived</a>
+                </div>
+            </section>
+
+            <!-- Courses Table -->
+            <section class="section-card">
+                <div class="section-header">
+                    <h2>All Courses</h2>
+                </div>
+                <div class="table-wrapper">
+                    <table id="coursesTable" class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Course Name</th>
+                                <th>Category</th>
+                                <th>Level</th>
+                                <th>Duration (hrs)</th>
+                                <th>Fee (₦)</th>
+                                <th>Status</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <c:choose>
+                                <c:when test="${empty courses}">
+                                    <tr>
+                                        <td colspan="8" style="text-align: center; padding: 40px; color: var(--color-text-light);"><i class="fas fa-inbox fa-2x" style="display: block; margin-bottom: 10px;"></i>No courses found.</td>
+                                    </tr>
+                                </c:when>
+                                <c:otherwise>
+                                    <c:forEach var="course" items="${courses}">
+                                        <tr>
+                                            <td>
+                                                <strong>${course.courseName}</strong>
+                                                <c:if test="${not empty course.description}">
+                                                    <div style="font-size: 12px; color: var(--color-text-light); margin-top: 3px;">
+                                                        <c:set var="desc" value="${course.description}"/>
+                                                        <c:choose>
+                                                            <c:when test="${fn:length(desc) > 50}">
+                                                                ${fn:substring(desc, 0, 50)}...
+                                                            </c:when>
+                                                            <c:otherwise>
+                                                                ${desc}
+                                                            </c:otherwise>
+                                                        </c:choose>
+                                                    </div>
+                                                </c:if>
+                                            </td>
+                                            <td>${course.category}</td>
+                                            <td><span class="status-badge status-${course.level eq 'Beginner' ? 'success' : course.level eq 'Intermediate' ? 'warning' : 'secondary'}">${course.level}</span></td>
+                                            <td style="text-align: center;">${course.duration}</td>
+                                            <td style="text-align: right;"><fmt:formatNumber value="${course.courseFee}" type="number" minFractionDigits="2" maxFractionDigits="2"/></td>
+                                            <td><span class="status-badge status-${course.status eq 'Pending' ? 'warning' : course.status eq 'Approved' ? 'success' : 'secondary'}">${course.status}</span></td>
+                                            <td>
+                                                <c:choose>
+                                                    <c:when test="${not empty course.createdAt}">
+                                                        <c:set var="createdStr" value="${course.createdAt.toString()}"/>
+                                                        ${fn:length(createdStr) >= 10 ? fn:substring(createdStr, 0, 10) : createdStr}
+                                                    </c:when>
+                                                    <c:otherwise>-</c:otherwise>
+                                                </c:choose>
+                                            </td>
+                                            <td style="font-size: 13px;">
+                                                <c:choose>
+                                                    <c:when test="${course.status eq 'Pending'}">
+                                                        <a href="${pageContext.request.contextPath}/admin/courses?action=approve&id=${course.courseId}" class="link" style="color: var(--color-success);" onclick="return confirm('Approve this course?');"><i class="fas fa-check"></i> Approve</a> |
+                                                        <a href="${pageContext.request.contextPath}/admin/courses?action=reject&id=${course.courseId}" class="link" style="color: var(--color-danger);" onclick="return confirm('Reject this course?');"><i class="fas fa-times"></i> Reject</a>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <span style="color: var(--color-text-light);">-</span>
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </td>
+                                        </tr>
+                                    </c:forEach>
+                                </c:otherwise>
+                            </c:choose>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- DataTables styling and initialization -->
+            <style>
+                .dataTables_wrapper { padding: 15px 0; }
+                .dataTables_length, .dataTables_filter { margin-bottom: 15px; }
+                .dataTables_length label, .dataTables_filter label { display:flex; align-items:center; gap:10px; font-size:14px; color: var(--color-text); font-weight:500; }
+                .dataTables_length select, .dataTables_filter input { padding:8px 12px; border:1px solid var(--color-light-grey); background: var(--color-white); color: var(--color-text); font-size:14px; margin:0 5px; border-radius: 2px; }
+                .dataTables_length select:focus, .dataTables_filter input:focus { outline:none; border-color: var(--color-primary); }
+                .dataTables_info { padding:15px 0; color: var(--color-text-light); font-size:14px; }
+                .dataTables_paginate { padding:15px 0; }
+                .dataTables_paginate .paginate_button { padding:6px 12px; margin:0 2px; border:1px solid var(--color-light-grey); background: var(--color-white); color: var(--color-text); cursor:pointer; font-size:14px; border-radius: 2px; }
+                .dataTables_paginate .paginate_button:hover { background: var(--color-background); border-color: var(--color-primary); color: var(--color-primary); }
+                .dataTables_paginate .paginate_button.current { background: var(--color-primary); border-color: var(--color-primary); color:#fff; font-weight:600; }
+                .dataTables_paginate .paginate_button.disabled { opacity:0.5; cursor:not-allowed; }
+                .dataTables_length { float:left; } .dataTables_filter { float:right; }
+                .dataTables_info { float:left; clear:both; } .dataTables_paginate { float:right; clear:both; }
+                @media (max-width:768px){ .dataTables_length, .dataTables_filter, .dataTables_info, .dataTables_paginate { float:none; text-align:center; margin:10px 0; } .dataTables_length label, .dataTables_filter label { justify-content:center; } }
+            </style>
+            <script>
+                $(function(){
+                    if ($('#coursesTable').length && $('#coursesTable tbody tr').length > 1) {
+                        $('#coursesTable').DataTable({
+                            order: [[6,'desc']],
+                            pageLength: 25,
+                            lengthMenu: [[10,25,50,100,-1],[10,25,50,100,'All']],
+                            language: {
+                                search: 'Search courses:',
+                                lengthMenu: 'Show _MENU_ entries',
+                                info: 'Showing _START_ to _END_ of _TOTAL_ courses',
+                                infoEmpty: 'Showing 0 to 0 of 0 courses',
+                                infoFiltered: '(filtered from _MAX_ total courses)',
+                                zeroRecords: 'No matching courses found',
+                                emptyTable: 'No courses available',
+                                paginate: { first:'First', last:'Last', next:'Next', previous:'Previous' }
+                            },
+                            columnDefs: [
+                                { orderable: true, targets: [0,2,3,4,6] },
+                                { orderable: false, targets: [1,5,7] }
+                            ]
+                        });
+                    }
+                });
+            </script>
         </div>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    </main>
 </body>
 </html>

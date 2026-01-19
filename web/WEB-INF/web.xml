@@ -10,7 +10,6 @@
 
     <!-- Welcome File List -->
     <welcome-file-list>
-        <welcome-file>landing.html</welcome-file>
         <welcome-file>index.html</welcome-file>
     </welcome-file-list>
 
@@ -21,6 +20,16 @@
             <http-only>true</http-only>
         </cookie-config>
     </session-config>
+
+    <!-- Landing Page -->
+    <servlet>
+        <servlet-name>LandingServlet</servlet-name>
+        <servlet-class>com.psm.elearning.controller.LandingServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>LandingServlet</servlet-name>
+        <url-pattern>/landing</url-pattern>
+    </servlet-mapping>
 
     <!-- Authentication Servlets -->
     <servlet>

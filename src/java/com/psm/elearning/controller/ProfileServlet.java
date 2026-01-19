@@ -4,8 +4,11 @@ import com.psm.elearning.dao.StudentDAO;
 import com.psm.elearning.dao.StudentDAOImpl;
 import com.psm.elearning.dao.UserDAO;
 import com.psm.elearning.dao.UserDAOImpl;
+import com.psm.elearning.dao.InstructorDAO;
+import com.psm.elearning.dao.InstructorDAOImpl;
 import com.psm.elearning.model.Student;
 import com.psm.elearning.model.User;
+import com.psm.elearning.model.Instructor;
 import java.io.IOException;
 import java.time.LocalDate;
 import javax.servlet.ServletException;
@@ -18,6 +21,7 @@ public class ProfileServlet extends HttpServlet {
     
     private final UserDAO userDAO = new UserDAOImpl();
     private final StudentDAO studentDAO = new StudentDAOImpl();
+    private final InstructorDAO instructorDAO = new InstructorDAOImpl();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -34,12 +38,16 @@ public class ProfileServlet extends HttpServlet {
         // Get fresh data from database
         User user = userDAO.findById(userId);
         Student student = studentDAO.findByUserId(userId);
+        Instructor instructor = instructorDAO.findByUserId(userId);
         
         if (user != null) {
             request.setAttribute("user", user);
         }
         if (student != null) {
             request.setAttribute("student", student);
+        }
+        if (instructor != null) {
+            request.setAttribute("instructor", instructor);
         }
         
         request.getRequestDispatcher("/WEB-INF/views/profile.jsp").forward(request, response);

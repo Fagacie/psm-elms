@@ -8,14 +8,20 @@ import com.psm.elearning.model.User;
 import com.psm.elearning.model.Student;
 import com.psm.elearning.util.PasswordUtil;
 import com.psm.elearning.util.EmailUtil;
+import com.psm.elearning.util.CloudinaryUtil;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.Part;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 
+@MultipartConfig(maxFileSize = 5242880)
 public class RegisterServlet extends HttpServlet {
     
     private UserDAO userDAO;
@@ -135,6 +141,27 @@ public class RegisterServlet extends HttpServlet {
             return;
         }
 
+        // Handle passport photo upload (optional)
+        String passportUrl = null;
+        try {
+            Part passportPart = request.getPart("passport");
+            if (passportPart != null && passportPart.getSize() > 0) {
+                String fileName = Paths.get(passportPart.getSubmittedFileName()).getFileName().toString();
+                String fileExtension = fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
+                
+                if (fileExtension.matches("jpg|jpeg|png|gif") && passportPart.getSize() <= 5242880) {
+                    byte[] fileBytes;
+                    try (InputStream inputStream = passportPart.getInputStream()) {
+                        fileBytes = inputStream.readAllBytes();
+                    }
+                    String folder = CloudinaryUtil.getPassportFolder();
+                    passportUrl = CloudinaryUtil.uploadFile(fileBytes, fileName, folder, "image");
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Failed to upload passport photo during registration: " + e.getMessage());
+        }
+
         // Create Student record (matching Student table schema)
         Student student = new Student();
         student.setUserId(createdUser.getUserId());
@@ -147,27 +174,34 @@ public class RegisterServlet extends HttpServlet {
         student.setDob(dob); // may be null
         student.setGender(gender != null && !gender.trim().isEmpty() ? gender.trim() : null);
         student.setEmergencyContact(emergencyContact != null && !emergencyContact.trim().isEmpty() ? emergencyContact.trim() : null);
-        student.setPassportPath(null); // TODO: Handle file upload
+        student.setPassportPath(passportUrl);
         
         boolean studentCreated = studentDAO.create(student);
         if (!studentCreated) {
             // Rollback would require transaction management
             System.err.println("Student record creation failed for UserID: " + createdUser.getUserId());
+            request.setAttribute("error", "Registration failed. Could not create student record.");
+            repopulateForm(request);
+            request.getRequestDispatcher("/WEB-INF/views/register.jsp").forward(request, response);
+            return;
         }
 
-        // Send registration email
-        try {
-            EmailUtil.sendRegistrationEmail(
-                createdUser.getEmail(),
-                createdUser.getFullName(),
-                generatedReg
-            );
-        } catch (Exception e) {
-            System.err.println("Failed to send registration email: " + e.getMessage());
-        }
+        // Send registration email asynchronously (don't block registration)
+        final String emailCopy = createdUser.getEmail();
+        final String nameCopy = createdUser.getFullName();
+        final String regCopy = generatedReg;
+        new Thread(() -> {
+            try {
+                EmailUtil.sendRegistrationEmail(emailCopy, nameCopy, regCopy);
+                System.out.println("Registration email sent to: " + emailCopy);
+            } catch (Exception e) {
+                System.err.println("Failed to send registration email: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }).start();
 
         // Redirect to login with success message
-        request.getSession().setAttribute("successMessage", "Registration successful! Your Registration Number: " + generatedReg + " (use this to login as student)." );
+        request.getSession().setAttribute("successMessage", "Registration successful! Your Registration Number: " + generatedReg + ". Use email or reg number to login." );
         response.sendRedirect(request.getContextPath() + "/login");
     }
 
