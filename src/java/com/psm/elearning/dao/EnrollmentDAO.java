@@ -66,4 +66,33 @@ public interface EnrollmentDAO {
      * @return List of Enrollment objects with student information
      */
     List<Enrollment> getEnrollmentsByCourse(Integer courseId);
+    
+    /**
+     * Count total students enrolled in any course created by an instructor.
+     * @param instructorId Instructor user ID
+     * @return Total count of unique students enrolled in instructor's courses
+     */
+    Integer countStudentsByInstructor(Integer instructorId);
+    
+    /**
+     * Count total enrollments (not just unique students) for instructor's courses.
+     * @param instructorId Instructor user ID
+     * @return Total count of enrollments in instructor's courses
+     */
+    Integer countEnrollmentsByInstructor(Integer instructorId);
+    
+    /**
+     * Count pending enrollments for instructor's courses.
+     * @param instructorId Instructor user ID
+     * @return Count of enrollments with status=Pending
+     */
+    Integer countPendingEnrollmentsByInstructor(Integer instructorId);
+    
+    /**
+     * Count active (Enrolled status) enrollments for instructor's courses.
+     * @param instructorId Instructor user ID
+     * @return Count of enrollments with status=Enrolled
+     */
+    Integer countActiveEnrollmentsByInstructor(Integer instructorId);
 }
+

@@ -166,11 +166,26 @@ public class DashboardServlet extends HttpServlet {
                 // Populate courses created by this instructor
                 List courses = courseDAO.findByInstructor(userId);
                 System.out.println("[DEBUG] Retrieved " + (courses != null ? courses.size() : 0) + " courses for instructor");
-                
                 request.setAttribute("courses", courses);
+                
+                // Gather instructor statistics
+                Integer totalCourses = courses != null ? courses.size() : 0;
+                Integer totalStudents = enrollmentDAO.countStudentsByInstructor(userId);
+                Integer totalEnrollments = enrollmentDAO.countEnrollmentsByInstructor(userId);
+                Integer pendingEnrollments = enrollmentDAO.countPendingEnrollmentsByInstructor(userId);
+                Integer activeEnrollments = enrollmentDAO.countActiveEnrollmentsByInstructor(userId);
+                
+                System.out.println("[DEBUG] Instructor Stats - Courses: " + totalCourses + ", Students: " + totalStudents + 
+                                   ", Total Enrollments: " + totalEnrollments + ", Pending: " + pendingEnrollments);
+                
+                request.setAttribute("totalCourses", totalCourses);
+                request.setAttribute("totalStudents", totalStudents);
+                request.setAttribute("totalEnrollments", totalEnrollments);
+                request.setAttribute("pendingEnrollments", pendingEnrollments);
+                request.setAttribute("activeEnrollments", activeEnrollments);
             } catch (Exception e) {
                 // Log and continue; view will render empty state
-                System.err.println("[ERROR] Failed to load instructor courses: " + e.getMessage());
+                System.err.println("[ERROR] Failed to load instructor dashboard: " + e.getMessage());
                 e.printStackTrace();
             }
             request.getRequestDispatcher("/WEB-INF/views/instructor/instructor-dashboard.jsp").forward(request, response);

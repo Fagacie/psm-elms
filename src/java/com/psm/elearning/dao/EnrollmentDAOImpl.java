@@ -267,4 +267,105 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
         } catch (SQLException ignored) {}
         return false;
     }
+    
+    @Override
+    public Integer countStudentsByInstructor(Integer instructorId) {
+        String sql = "SELECT COUNT(DISTINCT e.StudentID) AS student_count " +
+                     "FROM Enrollment e " +
+                     "INNER JOIN Course c ON e.CourseID = c.CourseID " +
+                     "WHERE c.CreatedBy = ? AND e.Status != 'Cancelled'";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setInt(1, instructorId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    int count = rs.getInt("student_count");
+                    System.out.println("[DEBUG] countStudentsByInstructor for ID " + instructorId + ": " + count);
+                    return count;
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("EnrollmentDAO: Error counting students by instructor: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return 0;
+    }
+    
+    @Override
+    public Integer countEnrollmentsByInstructor(Integer instructorId) {
+        String sql = "SELECT COUNT(*) AS enrollment_count " +
+                     "FROM Enrollment e " +
+                     "INNER JOIN Course c ON e.CourseID = c.CourseID " +
+                     "WHERE c.CreatedBy = ? AND e.Status != 'Cancelled'";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setInt(1, instructorId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    int count = rs.getInt("enrollment_count");
+                    System.out.println("[DEBUG] countEnrollmentsByInstructor for ID " + instructorId + ": " + count);
+                    return count;
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("EnrollmentDAO: Error counting enrollments by instructor: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return 0;
+    }
+    
+    @Override
+    public Integer countPendingEnrollmentsByInstructor(Integer instructorId) {
+        String sql = "SELECT COUNT(*) AS pending_count " +
+                     "FROM Enrollment e " +
+                     "INNER JOIN Course c ON e.CourseID = c.CourseID " +
+                     "WHERE c.CreatedBy = ? AND e.Status = 'Pending'";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setInt(1, instructorId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    int count = rs.getInt("pending_count");
+                    System.out.println("[DEBUG] countPendingEnrollmentsByInstructor for ID " + instructorId + ": " + count);
+                    return count;
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("EnrollmentDAO: Error counting pending enrollments: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return 0;
+    }
+    
+    @Override
+    public Integer countActiveEnrollmentsByInstructor(Integer instructorId) {
+        String sql = "SELECT COUNT(*) AS active_count " +
+                     "FROM Enrollment e " +
+                     "INNER JOIN Course c ON e.CourseID = c.CourseID " +
+                     "WHERE c.CreatedBy = ? AND e.Status = 'Active'";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setInt(1, instructorId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    int count = rs.getInt("active_count");
+                    System.out.println("[DEBUG] countActiveEnrollmentsByInstructor for ID " + instructorId + ": " + count);
+                    return count;
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("EnrollmentDAO: Error counting active enrollments: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return 0;
+    }
 }
+

@@ -152,6 +152,20 @@ public class CourseDAOImpl implements CourseDAO {
     }
 
     @Override
+    public boolean updateStatus(int courseId, String status) {
+        String sql = "UPDATE Course SET Status=? WHERE CourseID=?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, status);
+            ps.setInt(2, courseId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Course status update failed: " + e.getMessage());
+            return false;
+        }
+    }
+
+    @Override
     public boolean delete(int courseId) {
         String sql = "DELETE FROM Course WHERE CourseID=?";
         try (Connection conn = DBConnection.getConnection();

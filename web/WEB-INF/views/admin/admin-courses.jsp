@@ -162,6 +162,12 @@
                                                         <a href="${pageContext.request.contextPath}/admin/courses?action=approve&id=${course.courseId}" class="link" style="color: var(--color-success);" onclick="return confirm('Approve this course?');"><i class="fas fa-check"></i> Approve</a> |
                                                         <a href="${pageContext.request.contextPath}/admin/courses?action=reject&id=${course.courseId}" class="link" style="color: var(--color-danger);" onclick="return confirm('Reject this course?');"><i class="fas fa-times"></i> Reject</a>
                                                     </c:when>
+                                                    <c:when test="${course.status eq 'Approved'}">
+                                                        <a href="${pageContext.request.contextPath}/admin/courses?action=archive&id=${course.courseId}" class="link" style="color: var(--color-warning);" onclick="return confirm('Archive this course? Students will no longer see it.');"><i class="fas fa-archive"></i> Archive</a>
+                                                    </c:when>
+                                                    <c:when test="${course.status eq 'Archived'}">
+                                                        <a href="${pageContext.request.contextPath}/admin/courses?action=restore&id=${course.courseId}" class="link" style="color: var(--color-info);" onclick="return confirm('Restore this course to Approved?');"><i class="fas fa-undo"></i> Restore</a>
+                                                    </c:when>
                                                     <c:otherwise>
                                                         <span style="color: var(--color-text-light);">-</span>
                                                     </c:otherwise>

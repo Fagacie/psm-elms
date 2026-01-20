@@ -52,19 +52,26 @@ public class PaystackService {
             }
 
             props.load(input);
-            this.secretKey = props.getProperty("paystack.secret.key");
-            this.publicKey = props.getProperty("paystack.public.key");
-            this.apiUrl = props.getProperty("paystack.api.url", "https://api.paystack.co");
-            this.currency = props.getProperty("paystack.currency", "NGN");
-            this.callbackUrl = props.getProperty("paystack.callback.url");
+            this.secretKey = props.getProperty("paystack.secret.key", "").trim();
+            this.publicKey = props.getProperty("paystack.public.key", "").trim();
+            this.apiUrl = props.getProperty("paystack.api.url", "https://api.paystack.co").trim();
+            this.currency = props.getProperty("paystack.currency", "NGN").trim();
+            this.callbackUrl = props.getProperty("paystack.callback.url", "").trim();
             
             System.out.println("Paystack configuration loaded successfully");
+            System.out.println("API URL: " + this.apiUrl);
             System.out.println("Currency: " + this.currency);
             System.out.println("Callback URL: " + this.callbackUrl);
             
         } catch (IOException ex) {
             System.err.println("Error loading Paystack configuration: " + ex.getMessage());
             ex.printStackTrace();
+            // Set defaults in case of error
+            this.secretKey = "sk_test_YOUR_SECRET_KEY_HERE";
+            this.publicKey = "pk_test_YOUR_PUBLIC_KEY_HERE";
+            this.apiUrl = "https://api.paystack.co";
+            this.currency = "NGN";
+            this.callbackUrl = "http://localhost:8080/PSME/student/payment-callback";
         }
     }
     
@@ -80,6 +87,11 @@ public class PaystackService {
         System.out.println("Email: " + email);
         System.out.println("Amount: " + amount);
         System.out.println("Enrollment ID: " + enrollmentId);
+        System.out.println("API URL: " + apiUrl);
+        
+        if (apiUrl == null || apiUrl.isEmpty()) {
+            throw new RuntimeException("Paystack API URL is not configured");
+        }
         
         try {
             // Convert amount to kobo (smallest currency unit) - Paystack expects amount in kobo
@@ -247,7 +259,11 @@ public class PaystackService {
             payload.put("callback_url", this.callbackUrl);
             payload.put("reference", reference);
             payload.put("metadata", new JSONObject().put("enrollment_id", enrollmentId));
-            URL url = new URL(apiUrl + "/transaction/initialize");
+            
+            System.out.println("API URL: " + apiUrl);
+            String fullUrl = apiUrl + "/transaction/initialize";
+            System.out.println("Full URL: " + fullUrl);
+            URL url = new URL(fullUrl);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Authorization", "Bearer " + secretKey);

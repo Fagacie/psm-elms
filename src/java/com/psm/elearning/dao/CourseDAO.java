@@ -17,4 +17,5 @@ public interface CourseDAO {
     List<Course> filterCourses(String category, String level, Double minFee, Double maxFee);
     int countByStatus(String status);
     List<Course> findFeaturedCourses(int limit);
+    boolean updateStatus(int courseId, String status);
 }

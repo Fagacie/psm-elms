@@ -43,6 +43,12 @@ public class AdminCourseServlet extends HttpServlet {
             case "reject":
                 rejectCourse(request, response);
                 break;
+            case "archive":
+                archiveCourse(request, response);
+                break;
+            case "restore":
+                restoreCourse(request, response);
+                break;
             default:
                 listCourses(request, response);
                 break;
@@ -66,6 +72,10 @@ public class AdminCourseServlet extends HttpServlet {
             approveCourse(request, response, session);
         } else if ("reject".equals(action)) {
             rejectCourse(request, response);
+        } else if ("archive".equals(action)) {
+            archiveCourse(request, response);
+        } else if ("restore".equals(action)) {
+            restoreCourse(request, response);
         } else {
             listCourses(request, response);
         }
@@ -181,6 +191,86 @@ public class AdminCourseServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/admin/courses?error=invalid");
         } catch (Exception e) {
             System.err.println("Error rejecting course: " + e.getMessage());
+            response.sendRedirect(request.getContextPath() + "/admin/courses?error=exception");
+        }
+    }
+    
+    /**
+     * Archive an approved course (disable it from being visible/enrollable)
+     */
+    private void archiveCourse(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        
+        try {
+            int courseId = Integer.parseInt(request.getParameter("id"));
+            
+            Course course = courseDAO.findById(courseId);
+            if (course == null) {
+                response.sendRedirect(request.getContextPath() + "/admin/courses?error=notfound");
+                return;
+            }
+            
+            // Check if course is approved (can only archive approved courses)
+            if (!Course.STATUS_APPROVED.equals(course.getStatus())) {
+                response.sendRedirect(request.getContextPath() + "/admin/courses?error=notapproved");
+                return;
+            }
+            
+            // Archive by setting status to Archived
+            course.setStatus(Course.STATUS_ARCHIVED);
+            boolean archived = courseDAO.update(course);
+            
+            if (archived) {
+                System.out.println("[ADMIN] Course " + courseId + " archived");
+                response.sendRedirect(request.getContextPath() + "/admin/courses?success=archived");
+            } else {
+                response.sendRedirect(request.getContextPath() + "/admin/courses?error=archivefailed");
+            }
+            
+        } catch (NumberFormatException e) {
+            response.sendRedirect(request.getContextPath() + "/admin/courses?error=invalid");
+        } catch (Exception e) {
+            System.err.println("Error archiving course: " + e.getMessage());
+            response.sendRedirect(request.getContextPath() + "/admin/courses?error=exception");
+        }
+    }
+    
+    /**
+     * Restore an archived course back to approved status
+     */
+    private void restoreCourse(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        
+        try {
+            int courseId = Integer.parseInt(request.getParameter("id"));
+            
+            Course course = courseDAO.findById(courseId);
+            if (course == null) {
+                response.sendRedirect(request.getContextPath() + "/admin/courses?error=notfound");
+                return;
+            }
+            
+            // Check if course is archived (can only restore archived courses)
+            if (!Course.STATUS_ARCHIVED.equals(course.getStatus())) {
+                response.sendRedirect(request.getContextPath() + "/admin/courses?error=notarchived");
+                return;
+            }
+            
+            // Restore by setting status back to Approved
+            course.setStatus(Course.STATUS_APPROVED);
+            boolean restored = courseDAO.update(course);
+            
+            if (restored) {
+                System.out.println("[ADMIN] Course " + courseId + " restored");
+                response.sendRedirect(request.getContextPath() + "/admin/courses?success=restored");
+            } else {
+                response.sendRedirect(request.getContextPath() + "/admin/courses?error=restorefailed");
+            }
+            
+        } catch (NumberFormatException e) {
+            response.sendRedirect(request.getContextPath() + "/admin/courses?error=invalid");
+        } catch (Exception e) {
+            System.err.println("Error restoring course: " + e.getMessage());
             response.sendRedirect(request.getContextPath() + "/admin/courses?error=exception");
         }
     }

@@ -1,6 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -84,67 +85,80 @@
     <!-- Main Content Area -->
     <main class="app-main">
         <div class="content-wrapper">
-            <!-- Instructor Summary Section (only if backend provides summary) -->
-            <c:if test="${not empty summary}">
-                <section class="section-card">
-                    <h3 class="section-title">Overview</h3>
-                    <div class="summary-grid">
-                        <c:if test="${not empty summary.totalCourses}">
-                            <div class="summary-item">
-                                <div class="summary-label">Total Courses</div>
-                                <div class="summary-value"><c:out value="${summary.totalCourses}"/></div>
-                            </div>
-                        </c:if>
-                        <c:if test="${not empty summary.totalStudents}">
-                            <div class="summary-item">
-                                <div class="summary-label">Total Students</div>
-                                <div class="summary-value"><c:out value="${summary.totalStudents}"/></div>
-                            </div>
-                        </c:if>
-                        <c:if test="${not empty summary.pendingSubmissions}">
-                            <div class="summary-item">
-                                <div class="summary-label">Pending Submissions</div>
-                                <div class="summary-value"><c:out value="${summary.pendingSubmissions}"/></div>
-                            </div>
-                        </c:if>
+            <!-- Dashboard Statistics Section -->
+            <section class="dashboard-stats">
+                <div class="stat-card">
+                    <div class="stat-icon courses-icon">
+                        <i class="fas fa-book"></i>
                     </div>
-                    <c:if test="${empty summary.totalCourses && empty summary.totalStudents && empty summary.pendingSubmissions}">
-                        <p class="muted">No data available.</p>
-                    </c:if>
-                </section>
-            </c:if>
+                    <div class="stat-content">
+                        <div class="stat-label">Total Courses</div>
+                        <div class="stat-value">${not empty totalCourses ? totalCourses : 0}</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon students-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-label">Total Students</div>
+                        <div class="stat-value">${not empty totalStudents ? totalStudents : 0}</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon enrollments-icon">
+                        <i class="fas fa-clipboard-list"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-label">Total Enrollments</div>
+                        <div class="stat-value">${not empty totalEnrollments ? totalEnrollments : 0}</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon pending-icon">
+                        <i class="fas fa-hourglass-half"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-label">Pending Enrollments</div>
+                        <div class="stat-value">${not empty pendingEnrollments ? pendingEnrollments : 0}</div>
+                    </div>
+                </div>
+            </section>
 
             <div class="grid two-column">
                 <!-- My Courses Section -->
-                <section class="section-card">
-                    <h3 class="section-title">My Courses</h3>
+                <section class="section-card courses-section">
+                    <div class="section-header">
+                        <h3 class="section-title">My Courses</h3>
+                        <span class="course-count">${not empty courses ? courses.size() : 0} Courses</span>
+                    </div>
                     <c:choose>
                         <c:when test="${not empty courses}">
-                            <table class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th>Course Code</th>
-                                        <th>Course Title</th>
-                                        <th>Status</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <c:forEach var="c" items="${courses}">
-                                        <tr>
-                                            <td><c:out value="${c.courseId}"/></td>
-                                            <td><c:out value="${c.courseName}"/></td>
-                                            <td><c:out value="${c.status}"/></td>
-                                            <td>
-                                                <a class="link-action" href="${pageContext.request.contextPath}/instructor/courses?action=edit&id=${c.courseId}">Manage</a>
-                                            </td>
-                                        </tr>
-                                    </c:forEach>
-                                </tbody>
-                            </table>
+                            <div class="courses-list">
+                                <c:forEach var="c" items="${courses}" varStatus="loop">
+                                    <div class="course-item">
+                                        <div class="course-item-header">
+                                            <div class="course-item-title"><c:out value="${c.courseName}"/></div>
+                                            <span class="course-status-badge status-${fn:toLowerCase(c.status)}"><c:out value="${c.status}"/></span>
+                                        </div>
+                                        <div class="course-item-footer">
+                                            <small class="course-category"><c:out value="${c.category}"/></small>
+                                            <a class="link-action" href="${pageContext.request.contextPath}/instructor/courses?action=edit&id=${c.courseId}">
+                                                <i class="fas fa-pencil-alt"></i> Manage
+                                            </a>
+                                        </div>
+                                    </div>
+                                </c:forEach>
+                            </div>
                         </c:when>
                         <c:otherwise>
-                            <div class="empty-state">No records found.</div>
+                            <div class="empty-state">
+                                <i class="fas fa-book"></i>
+                                <p>No courses created yet.</p>
+                            </div>
                         </c:otherwise>
                     </c:choose>
                 </section>
