@@ -202,7 +202,7 @@ public class CourseDAOImpl implements CourseDAO {
     @Override
     public List<Course> searchCourses(String keyword) {
         List<Course> list = new ArrayList<>();
-        String sql = "SELECT * FROM Course WHERE Status='Approved' AND (CourseName LIKE ? OR Description LIKE ? OR Category LIKE ?) ORDER BY CreatedAt DESC";
+        String sql = "SELECT * FROM Course WHERE Status='Approved' AND (Title LIKE ? OR Description LIKE ? OR Category LIKE ?) ORDER BY CreatedAt DESC";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             String searchPattern = "%" + keyword + "%";

@@ -27,6 +27,9 @@
         <a href="${pageContext.request.contextPath}/admin/assessments" class="nav-item ${fn:contains(currentPath, 'admin/assessments') ? 'active' : ''}">
             <i class="fas fa-clipboard-list"></i><span>Assessments</span>
         </a>
+        <a href="${pageContext.request.contextPath}/admin/certificates" class="nav-item ${fn:contains(currentPath, 'admin/certificates') ? 'active' : ''}">
+            <i class="fas fa-certificate"></i><span>Certificates</span>
+        </a>
         <a href="${pageContext.request.contextPath}/admin/announcements" class="nav-item ${fn:contains(currentPath, 'admin/announcements') ? 'active' : ''}">
             <i class="fas fa-bullhorn"></i><span>Announcements</span>
         </a>

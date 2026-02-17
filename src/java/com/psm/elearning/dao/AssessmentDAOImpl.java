@@ -20,6 +20,10 @@ public class AssessmentDAOImpl implements AssessmentDAO {
         int total = rs.getInt("TotalMarks");
         a.setTotalMarks(rs.wasNull() ? null : total);
         a.setInstructions(rs.getString("Instructions"));
+        int maxAttempts = rs.getInt("MaxAttempts");
+        a.setMaxAttempts(rs.wasNull() ? null : maxAttempts);
+        int questionsPerPage = rs.getInt("QuestionsPerPage");
+        a.setQuestionsPerPage(rs.wasNull() ? null : questionsPerPage);
         Timestamp cAt = rs.getTimestamp("CreatedAt");
         a.setCreatedAt(cAt != null ? cAt.toLocalDateTime() : null);
         a.setCreatedBy(rs.getInt("CreatedBy"));
@@ -28,7 +32,7 @@ public class AssessmentDAOImpl implements AssessmentDAO {
 
     @Override
     public Assessment create(Assessment assessment) {
-        String sql = "INSERT INTO Assessment (CourseID, Title, Type, Duration, TotalMarks, Instructions, CreatedBy) VALUES (?,?,?,?,?,?,?)";
+        String sql = "INSERT INTO Assessment (CourseID, Title, Type, Duration, TotalMarks, Instructions, MaxAttempts, QuestionsPerPage, CreatedBy) VALUES (?,?,?,?,?,?,?,?,?)";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setInt(1, assessment.getCourseId());
@@ -37,7 +41,9 @@ public class AssessmentDAOImpl implements AssessmentDAO {
             if (assessment.getDuration() != null) ps.setInt(4, assessment.getDuration()); else ps.setNull(4, Types.INTEGER);
             if (assessment.getTotalMarks() != null) ps.setInt(5, assessment.getTotalMarks()); else ps.setNull(5, Types.INTEGER);
             ps.setString(6, assessment.getInstructions());
-            ps.setInt(7, assessment.getCreatedBy());
+            ps.setInt(7, assessment.getMaxAttempts() != null ? assessment.getMaxAttempts() : 1);
+            ps.setInt(8, assessment.getQuestionsPerPage() != null ? assessment.getQuestionsPerPage() : 2);
+            ps.setInt(9, assessment.getCreatedBy());
             int affected = ps.executeUpdate();
             if (affected == 0) return null;
             try (ResultSet rs = ps.getGeneratedKeys()) {
@@ -83,7 +89,7 @@ public class AssessmentDAOImpl implements AssessmentDAO {
 
     @Override
     public boolean update(Assessment assessment) {
-        String sql = "UPDATE Assessment SET Title=?, Type=?, Duration=?, TotalMarks=?, Instructions=? WHERE AssessmentID=?";
+        String sql = "UPDATE Assessment SET Title=?, Type=?, Duration=?, TotalMarks=?, Instructions=?, MaxAttempts=?, QuestionsPerPage=? WHERE AssessmentID=?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, assessment.getTitle());
@@ -91,10 +97,25 @@ public class AssessmentDAOImpl implements AssessmentDAO {
             if (assessment.getDuration() != null) ps.setInt(3, assessment.getDuration()); else ps.setNull(3, Types.INTEGER);
             if (assessment.getTotalMarks() != null) ps.setInt(4, assessment.getTotalMarks()); else ps.setNull(4, Types.INTEGER);
             ps.setString(5, assessment.getInstructions());
-            ps.setInt(6, assessment.getAssessmentId());
+            ps.setInt(6, assessment.getMaxAttempts() != null ? assessment.getMaxAttempts() : 1);
+            ps.setInt(7, assessment.getQuestionsPerPage() != null ? assessment.getQuestionsPerPage() : 2);
+            ps.setInt(8, assessment.getAssessmentId());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             System.err.println("Assessment update failed: " + e.getMessage());
+            return false;
+        }
+    }
+
+    @Override
+    public boolean delete(int assessmentId) {
+        String sql = "DELETE FROM Assessment WHERE AssessmentID=?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, assessmentId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Assessment delete failed: " + e.getMessage());
             return false;
         }
     }

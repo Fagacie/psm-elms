@@ -7,5 +7,7 @@ public interface AssessmentSubmissionDAO {
     AssessmentSubmission submit(AssessmentSubmission submission);
     AssessmentSubmission findById(int submissionId);
     List<AssessmentSubmission> findByAssessment(int assessmentId);
+    List<AssessmentSubmission> findByAssessmentAndUser(int assessmentId, int userId);
     List<AssessmentSubmission> findByUser(int userId);
+    boolean gradeSubmission(int submissionId, Double score, String feedback);
 }

@@ -2,12 +2,11 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enrollment Details - PSM E-Learning</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Course Details - PSM E-Learning</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -15,288 +14,209 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/landing.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/app.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/dashboard.css">
-    <style>
-        .info-card {
-            border-left: 4px solid #0d6efd;
-        }
-        .access-card {
-            transition: all 0.3s;
-            cursor: pointer;
-        }
-        .access-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-    </style>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/enrollments.css">
 </head>
 <body>
-    <!-- Top Navigation Bar (Dashboard style) -->
-    <nav class="top-navbar">
-        <div class="top-navbar-inner">
-            <div class="top-navbar-left">
-                <a href="${pageContext.request.contextPath}/dashboard" class="navbar-logo">
-                    <span class="logo-text">PSM</span>
-                    <span class="logo-subtext">E-Learning</span>
-                </a>
-                <h1 class="page-title-nav">Enrollment Details</h1>
-            </div>
-            <div class="top-navbar-right">
-                <button class="notification-btn" aria-label="Notifications">
-                    <i class="fas fa-bell"></i>
-                    <span class="notification-badge">3</span>
-                </button>
-                <div class="user-display">
-                    <div class="user-avatar-small">
-                        <c:choose>
-                            <c:when test="${not empty student.passportPath}">
-                                <c:choose>
-                                    <c:when test="${student.passportPath.startsWith('http')}">
-                                        <img src="${student.passportPath}" alt="Profile">
-                                    </c:when>
-                                    <c:otherwise>
-                                        <img src="${pageContext.request.contextPath}/${student.passportPath}" alt="Profile">
-                                    </c:otherwise>
-                                </c:choose>
-                            </c:when>
-                            <c:otherwise>
-                                <i class="fas fa-user"></i>
-                            </c:otherwise>
-                        </c:choose>
-                    </div>
-                    <span class="user-name-display">${sessionScope.userName}</span>
-                </div>
-                <a href="${pageContext.request.contextPath}/logout" class="logout-btn">
-                    <i class="fas fa-sign-out-alt"></i> Logout
-                </a>
-            </div>
+<nav class="top-navbar">
+    <div class="top-navbar-inner">
+        <div class="top-navbar-left">
+            <a href="${pageContext.request.contextPath}/dashboard" class="navbar-logo">
+                <span class="logo-text">PSM</span>
+                <span class="logo-subtext">E-Learning</span>
+            </a>
+            <h1 class="page-title-nav">Course Details</h1>
         </div>
-    </nav>
-
-    <aside class="app-sidebar">
-        <nav class="sidebar-nav">
-            <a href="${pageContext.request.contextPath}/dashboard" class="nav-item">
-                <i class="fas fa-home"></i>
-                <span>Dashboard</span>
-            </a>
-            <a href="${pageContext.request.contextPath}/student/courses" class="nav-item">
-                <i class="fas fa-book"></i>
-                <span>Browse Courses</span>
-            </a>
-            <a href="${pageContext.request.contextPath}/student/my-enrollments" class="nav-item active">
-                <i class="fas fa-graduation-cap"></i>
-                <span>My Enrollments</span>
-            </a>
-            <a href="${pageContext.request.contextPath}/student/materials" class="nav-item">
-                <i class="fas fa-folder-open"></i>
-                <span>Materials</span>
-            </a>
-            <a href="${pageContext.request.contextPath}/profile" class="nav-item">
-                <i class="fas fa-user"></i>
-                <span>Profile</span>
-            </a>
-        </nav>
-    </aside>
-
-    <main class="app-main">
-    <div class="content-wrapper">
-        <div class="container mt-4 mb-5">
-        <!-- Breadcrumb -->
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="${pageContext.request.contextPath}/dashboard">Dashboard</a></li>
-                <li class="breadcrumb-item"><a href="${pageContext.request.contextPath}/student/my-enrollments">My Enrollments</a></li>
-                <li class="breadcrumb-item active">Enrollment Details</li>
-            </ol>
-        </nav>
-        
-        <!-- Course Header -->
-        <div class="card mb-4">
-            <div class="card-header bg-primary text-white">
-                <h4 class="mb-0">${enrollment.courseName}</h4>
+        <div class="top-navbar-right">
+            <button class="notification-btn" aria-label="Notifications">
+                <i class="fas fa-bell"></i>
+                <span class="notification-badge">3</span>
+            </button>
+            <div class="user-display">
+                <div class="user-avatar-small"><i class="fas fa-user"></i></div>
+                <span class="user-name-display">${sessionScope.userName}</span>
             </div>
-            <div class="card-body">
-                <p class="lead">${enrollment.courseDescription}</p>
-                <div class="row">
-                    <div class="col-md-3">
-                        <strong>Instructor:</strong><br>
-                        ${enrollment.instructorName}
-                    </div>
-                    <div class="col-md-3">
-                        <strong>Status:</strong><br>
-                        <c:choose>
-                            <c:when test="${enrollment.status == 'Enrolled'}">
-                                <span class="badge bg-success">Enrolled</span>
-                            </c:when>
-                            <c:otherwise>
-                                <span class="badge bg-warning">${enrollment.status}</span>
-                            </c:otherwise>
-                        </c:choose>
-                    </div>
-                    <div class="col-md-3">
-                        <strong>Progress:</strong><br>
-                        ${enrollment.completionStatus}
-                    </div>
-                    <div class="col-md-3">
-                        <strong>Enrolled Date:</strong><br>
-                        <c:choose>
-                            <c:when test="${enrollment.enrollmentDate != null}">
-                                ${enrollment.enrollmentDate.toString().substring(0, 10)}
-                            </c:when>
-                            <c:otherwise>N/A</c:otherwise>
-                        </c:choose>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Payment Information -->
-        <div class="row mb-4">
-            <div class="col-md-6">
-                <div class="card info-card">
-                    <div class="card-body">
-                        <h6 class="card-title"><i class="fas fa-credit-card me-2"></i>Payment Information</h6>
-                        <hr>
-                        <div class="row">
-                            <div class="col-6 mb-2">
-                                <small class="text-muted">Payment Status</small>
-                                <div>
-                                    <c:choose>
-                                        <c:when test="${enrollment.paymentStatus == 'Paid'}">
-                                            <span class="badge bg-success">Paid</span>
-                                        </c:when>
-                                        <c:otherwise>
-                                            <span class="badge bg-warning">${enrollment.paymentStatus}</span>
-                                        </c:otherwise>
-                                    </c:choose>
-                                </div>
-                            </div>
-                            <div class="col-6 mb-2">
-                                <small class="text-muted">Amount</small>
-                                <div class="fw-bold text-success">
-                                    ₦<fmt:formatNumber value="${enrollment.coursePrice}" type="number" minFractionDigits="2" maxFractionDigits="2"/>
-                                </div>
-                            </div>
-                            <c:if test="${enrollment.paymentRef != null}">
-                                <div class="col-12">
-                                    <small class="text-muted">Payment Reference</small>
-                                    <div class="font-monospace">${enrollment.paymentRef}</div>
-                                </div>
-                            </c:if>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card info-card">
-                    <div class="card-body">
-                        <h6 class="card-title"><i class="fas fa-chart-line me-2"></i>Course Progress</h6>
-                        <hr>
-                        <div class="mb-3">
-                            <div class="d-flex justify-content-between mb-1">
-                                <span>Completion Status</span>
-                                <span class="fw-bold">${enrollment.completionStatus}</span>
-                            </div>
-                            <div class="progress" style="height: 25px;">
-                                <c:choose>
-                                    <c:when test="${enrollment.completionStatus == 'Completed'}">
-                                        <div class="progress-bar bg-success" style="width: 100%">100%</div>
-                                    </c:when>
-                                    <c:when test="${enrollment.completionStatus == 'In Progress'}">
-                                        <div class="progress-bar bg-info" style="width: 50%">50%</div>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <div class="progress-bar bg-secondary" style="width: 0%">0%</div>
-                                    </c:otherwise>
-                                </c:choose>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Course Access (Only if Paid) -->
-        <c:if test="${enrollment.paymentStatus == 'Paid'}">
-            <h5 class="mb-3">Course Content</h5>
-            <div class="row g-4 mb-4">
-                <div class="col-md-4">
-                    <div class="card access-card">
-                        <div class="card-body text-center">
-                            <i class="fas fa-book fa-3x text-primary mb-3"></i>
-                            <h6>Course Materials</h6>
-                            <p class="text-muted small">Access lecture notes, PDFs, and resources</p>
-                            <a href="${pageContext.request.contextPath}/student/materials?courseId=${enrollment.courseId}" class="btn btn-primary btn-sm">
-                                View Materials
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card access-card">
-                        <div class="card-body text-center">
-                            <i class="fas fa-clipboard-check fa-3x text-success mb-3"></i>
-                            <h6>Assessments</h6>
-                            <p class="text-muted small">Take quizzes and track your scores</p>
-                            <a href="${pageContext.request.contextPath}/student/assessments?courseId=${enrollment.courseId}" class="btn btn-success btn-sm">
-                                View Assessments
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card access-card">
-                        <div class="card-body text-center">
-                            <i class="fas fa-certificate fa-3x text-warning mb-3"></i>
-                            <h6>Certificate</h6>
-                            <p class="text-muted small">
-                                <c:choose>
-                                    <c:when test="${enrollment.completionStatus == 'Completed'}">
-                                        Download your certificate
-                                    </c:when>
-                                    <c:otherwise>
-                                        Available upon completion
-                                    </c:otherwise>
-                                </c:choose>
-                            </p>
-                            <c:choose>
-                                <c:when test="${enrollment.completionStatus == 'Completed'}">
-                                    <a href="${pageContext.request.contextPath}/student/certificate?enrollmentId=${enrollment.enrollmentId}" class="btn btn-warning btn-sm">
-                                        Download
-                                    </a>
-                                </c:when>
-                                <c:otherwise>
-                                    <button class="btn btn-secondary btn-sm" disabled>Not Available</button>
-                                </c:otherwise>
-                            </c:choose>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </c:if>
-        
-        <!-- Pending Payment Notice -->
-        <c:if test="${enrollment.paymentStatus != 'Paid'}">
-            <div class="alert alert-warning">
-                <h5 class="alert-heading"><i class="fas fa-exclamation-triangle me-2"></i>Payment Required</h5>
-                <p>You need to complete your payment to access course materials and assessments.</p>
-                <a href="${pageContext.request.contextPath}/student/payment?enrollmentId=${enrollment.enrollmentId}" class="btn btn-warning">
-                    <i class="fas fa-credit-card me-2"></i>Complete Payment
-                </a>
-            </div>
-        </c:if>
-        
-        <!-- Action Buttons -->
-        <div class="d-flex gap-2">
-            <a href="${pageContext.request.contextPath}/student/my-enrollments" class="btn btn-outline-secondary">
-                <i class="fas fa-arrow-left me-2"></i>Back to My Enrollments
+            <a href="${pageContext.request.contextPath}/logout" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i> Logout
             </a>
-        </div>
         </div>
     </div>
-    </main>
+</nav>
 
-    <jsp:include page="../common/footer.jsp"/>
-    
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<aside class="app-sidebar">
+    <nav class="sidebar-nav">
+        <a href="${pageContext.request.contextPath}/dashboard" class="nav-item"><i class="fas fa-home"></i><span>Dashboard</span></a>
+        <a href="${pageContext.request.contextPath}/student/my-enrollments" class="nav-item active"><i class="fas fa-graduation-cap"></i><span>My Courses</span></a>
+        <a href="${pageContext.request.contextPath}/student/courses" class="nav-item"><i class="fas fa-book"></i><span>Browse Courses</span></a>
+        <a href="${pageContext.request.contextPath}/student/materials" class="nav-item"><i class="fas fa-folder-open"></i><span>Materials</span></a>
+        <a href="${pageContext.request.contextPath}/student/assessments" class="nav-item"><i class="fas fa-clipboard-list"></i><span>Assessments</span></a>
+        <a href="${pageContext.request.contextPath}/student/certificates" class="nav-item"><i class="fas fa-certificate"></i><span>Certificates</span></a>
+        <a href="${pageContext.request.contextPath}/profile" class="nav-item"><i class="fas fa-user"></i><span>Profile</span></a>
+    </nav>
+</aside>
+
+<main class="app-main">
+    <div class="content-wrapper">
+        <section class="section-card course-hero">
+            <div class="page-header page-header-plain">
+                <div>
+                    <h2>${enrollment.courseName}</h2>
+                    <p class="text-muted">${enrollment.instructorName} | ${enrollment.courseDescription}</p>
+                </div>
+            </div>
+            <div class="summary-block">
+                <div class="progress-wrap progress-wrap-wide">
+                    <div class="progress-title-row">
+                        <span>Course Progress</span><span>${progressPercent}%</span>
+                    </div>
+                    <div class="progress-track progress-track-lg">
+                        <div class="progress-fill" style="width:${progressPercent}%"></div>
+                    </div>
+                    <div class="meta-row">
+                        <span>Enrolled: <c:out value="${enrollment.enrollmentDate != null ? enrollment.enrollmentDate.toLocalDate() : '-'}"/></span>
+                        <span>Fee: NGN <fmt:formatNumber value="${enrollment.coursePrice}" type="number" minFractionDigits="2" maxFractionDigits="2"/></span>
+                        <span>Payment: ${enrollment.paymentStatus}</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section-card" style="margin-top:16px;">
+            <div class="tab-links">
+                <a class="tab-link ${activeTab == 'overview' ? 'active' : ''}" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=overview">Overview</a>
+                <a class="tab-link ${activeTab == 'assessments' ? 'active' : ''}" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=assessments">Assessments</a>
+                <a class="tab-link ${activeTab == 'materials' ? 'active' : ''}" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=materials">Materials</a>
+            </div>
+
+            <c:choose>
+                <c:when test="${activeTab == 'assessments'}">
+                    <h3 class="section-title-lg">Course Assessments</h3>
+                    <c:if test="${not paidAccess}">
+                        <div class="alert alert-warning" style="margin-top:12px;">Payment is required before taking assessments.</div>
+                    </c:if>
+                    <div class="stats-grid stats-tight">
+                        <div class="stat-card"><div class="stat-content"><h3>${assessmentCount}</h3><p>Assessments</p></div></div>
+                        <div class="stat-card"><div class="stat-content"><h3>${materialCount}</h3><p>Learning Materials</p></div></div>
+                    </div>
+                    <c:if test="${not empty assessments}">
+                        <table class="course-table">
+                            <thead>
+                            <tr><th>Assessment</th><th>Type</th><th>Duration</th><th>Attempts</th><th>Latest Result</th><th>Action</th></tr>
+                            </thead>
+                            <tbody>
+                            <c:forEach var="a" items="${assessments}">
+                                <c:set var="usedAttempts" value="${usedAttemptsByAssessment[a.assessmentId]}"/>
+                                <c:set var="allowedAttempts" value="${allowedAttemptsByAssessment[a.assessmentId]}"/>
+                                <c:set var="latest" value="${latestSubmissionByAssessment[a.assessmentId]}"/>
+                                <c:set var="hasActiveAttempt" value="${activeAttemptByAssessment[a.assessmentId]}"/>
+                                <tr>
+                                    <td>${a.title}</td>
+                                    <td>${a.type}</td>
+                                    <td>${a.duration} minutes</td>
+                                    <td>${usedAttempts} / ${allowedAttempts}</td>
+                                    <td>
+                                        <c:choose>
+                                            <c:when test="${not empty latest}">
+                                                <c:out value="${empty latest.status ? 'Submitted' : latest.status}"/>
+                                                <c:if test="${latest.score != null}"> | ${latest.score}</c:if>
+                                            </c:when>
+                                            <c:otherwise>-</c:otherwise>
+                                        </c:choose>
+                                    </td>
+                                    <td>
+                                        <div class="actions">
+                                            <c:if test="${paidAccess}">
+                                                <c:choose>
+                                                    <c:when test="${hasActiveAttempt}">
+                                                        <a class="btn btn-secondary btn-sm" href="${pageContext.request.contextPath}/student/assessments?courseId=${enrollment.courseId}&assessmentId=${a.assessmentId}&mode=attempt">Continue</a>
+                                                    </c:when>
+                                                    <c:when test="${usedAttempts < allowedAttempts}">
+                                                        <a class="btn btn-primary btn-sm" href="${pageContext.request.contextPath}/student/assessments?action=start&courseId=${enrollment.courseId}&assessmentId=${a.assessmentId}">Start</a>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <form action="${pageContext.request.contextPath}/student/assessments" method="post" class="inline-form">
+                                                            <input type="hidden" name="action" value="requestRetake">
+                                                            <input type="hidden" name="courseId" value="${enrollment.courseId}">
+                                                            <input type="hidden" name="assessmentId" value="${a.assessmentId}">
+                                                            <input type="hidden" name="reason" value="Requesting another attempt from course details page">
+                                                            <button type="submit" class="btn btn-secondary btn-sm">Request Retake</button>
+                                                        </form>
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </c:if>
+                                            <a class="btn btn-secondary btn-sm" href="${pageContext.request.contextPath}/student/assessments?courseId=${enrollment.courseId}&assessmentId=${a.assessmentId}">Details</a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </c:forEach>
+                            </tbody>
+                        </table>
+                    </c:if>
+                    <c:if test="${empty assessments}">
+                        <p class="text-muted state-note">No assessments published yet.</p>
+                    </c:if>
+                </c:when>
+
+                <c:when test="${activeTab == 'materials'}">
+                    <h3 class="section-title-lg">Course Materials</h3>
+                    <c:if test="${not paidAccess}">
+                        <div class="alert alert-warning" style="margin-top:12px;">Payment is required to view and download course materials.</div>
+                    </c:if>
+                    <c:if test="${paidAccess}">
+                        <c:choose>
+                            <c:when test="${empty materials}">
+                                <p class="text-muted state-note">No materials available yet.</p>
+                            </c:when>
+                            <c:otherwise>
+                                <div class="stack-list">
+                                    <c:forEach var="m" items="${materials}">
+                                        <div class="summary-block stack-row">
+                                            <div>
+                                                <div class="stack-title">${m.title}</div>
+                                                <div class="text-muted stack-meta">
+                                                    ${m.materialType}
+                                                    <c:if test="${not empty m.displayOrder}"> | Chapter ${m.displayOrder}</c:if>
+                                                    <c:if test="${empty m.displayOrder and not empty m.versionNumber}"> | ${m.versionNumber}</c:if>
+                                                    | <c:out value="${m.uploadDate != null ? m.uploadDate.toLocalDate() : '-'}"/>
+                                                </div>
+                                            </div>
+                                            <div class="actions">
+                                                <a class="btn btn-secondary btn-sm" target="_blank" rel="noopener noreferrer" href="${pageContext.request.contextPath}/student/materials?action=view&id=${m.materialId}"><i class="fas fa-eye"></i> View</a>
+                                                <c:if test="${m.materialType != 'Link'}">
+                                                    <a class="btn btn-primary btn-sm" href="${pageContext.request.contextPath}/student/materials?action=download&id=${m.materialId}"><i class="fas fa-download"></i> Download</a>
+                                                </c:if>
+                                            </div>
+                                        </div>
+                                    </c:forEach>
+                                </div>
+                            </c:otherwise>
+                        </c:choose>
+                    </c:if>
+                </c:when>
+
+                <c:otherwise>
+                    <h3 class="section-title-lg">About This Course</h3>
+                    <p class="text-muted state-note">${enrollment.courseDescription}</p>
+                    <div class="summary-block">
+                        <table class="summary-table">
+                            <tr><th>Instructor</th><td>${enrollment.instructorName}</td></tr>
+                            <tr><th>Status</th><td>${enrollment.status}</td></tr>
+                            <tr><th>Completion</th><td>${enrollment.completionStatus}</td></tr>
+                            <tr><th>Payment Status</th><td>${enrollment.paymentStatus}</td></tr>
+                            <tr><th>Payment Reference</th><td><c:out value="${empty enrollment.paymentRef ? '-' : enrollment.paymentRef}"/></td></tr>
+                        </table>
+                    </div>
+                    <div class="actions actions-top">
+                        <a class="btn btn-secondary btn-sm" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=materials">Go To Materials</a>
+                        <a class="btn btn-secondary btn-sm" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=assessments">Go To Assessments</a>
+                    </div>
+                </c:otherwise>
+            </c:choose>
+        </section>
+
+        <div class="back-row">
+            <a href="${pageContext.request.contextPath}/student/my-enrollments" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back to My Courses</a>
+        </div>
+    </div>
+</main>
 </body>
 </html>

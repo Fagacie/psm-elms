@@ -142,6 +142,24 @@
     </servlet-mapping>
 
     <servlet>
+        <servlet-name>InstructorMaterialServlet</servlet-name>
+        <servlet-class>com.psm.elearning.controller.instructor.InstructorMaterialServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>InstructorMaterialServlet</servlet-name>
+        <url-pattern>/instructor/materials</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>InstructorAssessmentServlet</servlet-name>
+        <servlet-class>com.psm.elearning.controller.instructor.InstructorAssessmentServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>InstructorAssessmentServlet</servlet-name>
+        <url-pattern>/instructor/assessments</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
         <servlet-name>AdminCourseServlet</servlet-name>
         <servlet-class>com.psm.elearning.controller.admin.AdminCourseServlet</servlet-class>
     </servlet>
@@ -157,6 +175,24 @@
     <servlet-mapping>
         <servlet-name>StudentCourseServlet</servlet-name>
         <url-pattern>/student/courses</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>StudentMaterialServlet</servlet-name>
+        <servlet-class>com.psm.elearning.controller.student.StudentMaterialServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>StudentMaterialServlet</servlet-name>
+        <url-pattern>/student/materials</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>StudentAssessmentServlet</servlet-name>
+        <servlet-class>com.psm.elearning.controller.student.StudentAssessmentServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>StudentAssessmentServlet</servlet-name>
+        <url-pattern>/student/assessments</url-pattern>
     </servlet-mapping>
 
     <!-- Enrollment & Payment Servlets -->
@@ -239,6 +275,60 @@
     <servlet-mapping>
         <servlet-name>EnrollmentDetailsServlet</servlet-name>
         <url-pattern>/student/enrollment-details</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>StudentCertificateServlet</servlet-name>
+        <servlet-class>com.psm.elearning.controller.student.StudentCertificateServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>StudentCertificateServlet</servlet-name>
+        <url-pattern>/student/certificate</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>StudentCertificatesServlet</servlet-name>
+        <servlet-class>com.psm.elearning.controller.student.StudentCertificatesServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>StudentCertificatesServlet</servlet-name>
+        <url-pattern>/student/certificates</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>InstructorCertificateServlet</servlet-name>
+        <servlet-class>com.psm.elearning.controller.instructor.InstructorCertificateServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>InstructorCertificateServlet</servlet-name>
+        <url-pattern>/instructor/certificates</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>AdminCertificateServlet</servlet-name>
+        <servlet-class>com.psm.elearning.controller.admin.AdminCertificateServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>AdminCertificateServlet</servlet-name>
+        <url-pattern>/admin/certificates</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>CertificateTemplateServlet</servlet-name>
+        <servlet-class>com.psm.elearning.controller.CertificateTemplateServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>CertificateTemplateServlet</servlet-name>
+        <url-pattern>/certificate/template</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>CertificateVerifyServlet</servlet-name>
+        <servlet-class>com.psm.elearning.controller.CertificateVerifyServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>CertificateVerifyServlet</servlet-name>
+        <url-pattern>/certificate/verify</url-pattern>
     </servlet-mapping>
 
     <servlet>

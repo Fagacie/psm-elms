@@ -98,7 +98,7 @@ public class PaymentCallbackServlet extends HttpServlet {
                     case "success": {
                         // Align with DB enum value
                         boolean paymentUpdated = paymentDAO.updatePaymentStatus(
-                            payment.getPaymentId(), "Success", paymentMethod, paystackStatus);
+                            payment.getPaymentId(), "Paid", paymentMethod, paystackStatus);
                         boolean enrollmentStatusUpdated = enrollmentDAO.updateStatus(
                             enrollment.getEnrollmentId(), "Enrolled");
                         // Also update enrollment payment status

@@ -83,13 +83,19 @@
             <li>
                 <a href="${pageContext.request.contextPath}/student/my-enrollments" class="sidebar-link">
                     <i class="fas fa-graduation-cap"></i>
-                    <span>My Enrollments</span>
+                    <span>My Courses</span>
                 </a>
             </li>
             <li>
                 <a href="${pageContext.request.contextPath}/student/materials" class="sidebar-link">
                     <i class="fas fa-folder-open"></i>
                     <span>Materials</span>
+                </a>
+            </li>
+            <li>
+                <a href="${pageContext.request.contextPath}/student/certificates" class="sidebar-link">
+                    <i class="fas fa-certificate"></i>
+                    <span>Certificates</span>
                 </a>
             </li>
             <li>

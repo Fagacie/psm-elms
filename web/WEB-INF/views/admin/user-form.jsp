@@ -58,6 +58,9 @@
             <a href="${pageContext.request.contextPath}/admin/assessments" class="nav-item">
                 <i class="fas fa-clipboard-list"></i><span>Assessment Management</span>
             </a>
+            <a href="${pageContext.request.contextPath}/admin/certificates" class="nav-item">
+                <i class="fas fa-certificate"></i><span>Certificates</span>
+            </a>
             <a href="${pageContext.request.contextPath}/admin/announcements" class="nav-item">
                 <i class="fas fa-bullhorn"></i><span>Announcements</span>
             </a>

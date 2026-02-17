@@ -35,6 +35,14 @@ public class Assessment {
     
     @Size(max = 5000, message = "Instructions must not exceed 5000 characters")
     private String instructions;
+
+    @Min(value = 1, message = "Max attempts must be at least 1")
+    @Max(value = 10, message = "Max attempts must not exceed 10")
+    private Integer maxAttempts;
+
+    @Min(value = 1, message = "Questions per page must be at least 1")
+    @Max(value = 20, message = "Questions per page must not exceed 20")
+    private Integer questionsPerPage;
     
     private LocalDateTime createdAt;
     
@@ -50,8 +58,8 @@ public class Assessment {
     public Assessment() {}
     
     public Assessment(Integer assessmentId, Integer courseId, String title, String type,
-                     Integer duration, Integer totalMarks, String instructions, LocalDateTime createdAt,
-                     Integer createdBy) {
+                     Integer duration, Integer totalMarks, String instructions, Integer maxAttempts,
+                     Integer questionsPerPage, LocalDateTime createdAt, Integer createdBy) {
         this.assessmentId = assessmentId;
         this.courseId = courseId;
         this.title = title;
@@ -59,6 +67,8 @@ public class Assessment {
         this.duration = duration;
         this.totalMarks = totalMarks;
         this.instructions = instructions;
+        this.maxAttempts = maxAttempts;
+        this.questionsPerPage = questionsPerPage;
         this.createdAt = createdAt;
         this.createdBy = createdBy;
     }
@@ -84,6 +94,12 @@ public class Assessment {
     
     public String getInstructions() { return instructions; }
     public void setInstructions(String instructions) { this.instructions = instructions; }
+
+    public Integer getMaxAttempts() { return maxAttempts; }
+    public void setMaxAttempts(Integer maxAttempts) { this.maxAttempts = maxAttempts; }
+
+    public Integer getQuestionsPerPage() { return questionsPerPage; }
+    public void setQuestionsPerPage(Integer questionsPerPage) { this.questionsPerPage = questionsPerPage; }
     
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

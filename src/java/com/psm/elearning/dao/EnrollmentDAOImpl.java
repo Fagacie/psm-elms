@@ -270,10 +270,10 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
     
     @Override
     public Integer countStudentsByInstructor(Integer instructorId) {
-        String sql = "SELECT COUNT(DISTINCT e.StudentID) AS student_count " +
+        String sql = "SELECT COUNT(DISTINCT e.UserID) AS student_count " +
                      "FROM Enrollment e " +
                      "INNER JOIN Course c ON e.CourseID = c.CourseID " +
-                     "WHERE c.CreatedBy = ? AND e.Status != 'Cancelled'";
+                     "WHERE c.InstructorID = ? AND e.Status != 'Cancelled'";
         
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -298,7 +298,7 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
         String sql = "SELECT COUNT(*) AS enrollment_count " +
                      "FROM Enrollment e " +
                      "INNER JOIN Course c ON e.CourseID = c.CourseID " +
-                     "WHERE c.CreatedBy = ? AND e.Status != 'Cancelled'";
+                     "WHERE c.InstructorID = ? AND e.Status != 'Cancelled'";
         
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -323,7 +323,7 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
         String sql = "SELECT COUNT(*) AS pending_count " +
                      "FROM Enrollment e " +
                      "INNER JOIN Course c ON e.CourseID = c.CourseID " +
-                     "WHERE c.CreatedBy = ? AND e.Status = 'Pending'";
+                     "WHERE c.InstructorID = ? AND e.Status = 'Pending'";
         
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -348,7 +348,7 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
         String sql = "SELECT COUNT(*) AS active_count " +
                      "FROM Enrollment e " +
                      "INNER JOIN Course c ON e.CourseID = c.CourseID " +
-                     "WHERE c.CreatedBy = ? AND e.Status = 'Active'";
+                     "WHERE c.InstructorID = ? AND e.Status = 'Active'";
         
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {

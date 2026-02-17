@@ -48,25 +48,17 @@
                 <i class="fas fa-book"></i>
                 <span>My Courses</span>
             </a>
-            <a href="${pageContext.request.contextPath}/instructor/assignments" class="nav-item">
-                <i class="fas fa-tasks"></i>
-                <span>Assignments</span>
+            <a href="${pageContext.request.contextPath}/instructor/materials" class="nav-item">
+                <i class="fas fa-folder-open"></i>
+                <span>Materials</span>
             </a>
-            <a href="${pageContext.request.contextPath}/instructor/quizzes" class="nav-item">
-                <i class="fas fa-clipboard-question"></i>
-                <span>Quizzes / Exams</span>
+            <a href="${pageContext.request.contextPath}/instructor/assessments" class="nav-item">
+                <i class="fas fa-clipboard-list"></i>
+                <span>Assessments</span>
             </a>
-            <a href="${pageContext.request.contextPath}/instructor/submissions" class="nav-item">
-                <i class="fas fa-inbox"></i>
-                <span>Student Submissions</span>
-            </a>
-            <a href="${pageContext.request.contextPath}/instructor/grades" class="nav-item">
-                <i class="fas fa-chart-line"></i>
-                <span>Grades / Evaluation</span>
-            </a>
-            <a href="${pageContext.request.contextPath}/instructor/announcements" class="nav-item">
-                <i class="fas fa-bullhorn"></i>
-                <span>Announcements</span>
+            <a href="${pageContext.request.contextPath}/instructor/certificates" class="nav-item">
+                <i class="fas fa-certificate"></i>
+                <span>Certificates</span>
             </a>
             <a href="${pageContext.request.contextPath}/profile" class="nav-item">
                 <i class="fas fa-user"></i>
@@ -162,6 +154,12 @@
                                     </c:if>
                                 </div>
                                 <div class="course-actions">
+                                    <a href="${pageContext.request.contextPath}/instructor/materials?courseId=${course.courseId}" class="btn btn-secondary btn-sm">
+                                        <i class="fas fa-folder-open"></i> Materials
+                                    </a>
+                                    <a href="${pageContext.request.contextPath}/instructor/assessments?courseId=${course.courseId}" class="btn btn-secondary btn-sm">
+                                        <i class="fas fa-clipboard-list"></i> Assessments
+                                    </a>
                                     <a href="${pageContext.request.contextPath}/instructor/courses?action=students&courseId=${course.courseId}" class="btn btn-primary btn-sm">
                                         <i class="fas fa-users"></i> Students
                                     </a>

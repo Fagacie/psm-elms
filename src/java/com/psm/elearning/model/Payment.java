@@ -26,7 +26,7 @@ public class Payment {
     private String method; // Paystack payment channel: card, bank, ussd, qr, mobile_money, bank_transfer
     
     @NotBlank(message = "Payment status is required")
-    @Pattern(regexp = "^(Pending|Success|Failed|Abandoned)$", message = "Status must be Pending, Success, Failed, or Abandoned")
+    @Pattern(regexp = "^(Pending|Paid|Failed|Abandoned)$", message = "Status must be Pending, Paid, Failed, or Abandoned")
     private String status;
     
     private LocalDateTime paymentDate;

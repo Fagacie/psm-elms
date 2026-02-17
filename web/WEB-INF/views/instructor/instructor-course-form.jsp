@@ -67,6 +67,10 @@
                 <i class="fas fa-bullhorn"></i>
                 <span>Announcements</span>
             </a>
+            <a href="${pageContext.request.contextPath}/instructor/certificates" class="nav-item">
+                <i class="fas fa-certificate"></i>
+                <span>Certificates</span>
+            </a>
             <a href="${pageContext.request.contextPath}/profile" class="nav-item">
                 <i class="fas fa-user"></i>
                 <span>Profile / Settings</span>

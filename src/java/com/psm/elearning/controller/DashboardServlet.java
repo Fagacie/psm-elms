@@ -124,7 +124,7 @@ public class DashboardServlet extends HttpServlet {
                     for (Enrollment e : allEnrollments) {
                         String paymentStatus = e.getPaymentStatus();
                         if (paymentStatus != null) {
-                            if (paymentStatus.equalsIgnoreCase("success") || paymentStatus.equalsIgnoreCase("paid")) {
+                        if (paymentStatus.equalsIgnoreCase("paid") || paymentStatus.equalsIgnoreCase("success")) {
                                 paidEnrollments++;
                                 if (e.getCoursePrice() != null) {
                                     totalRevenue += e.getCoursePrice();

@@ -1,165 +1,403 @@
-/* My Enrollments Page Styles (Flat, Academic, No Radius, No Gradients) */
-
 :root {
-  --bg: #ffffff;
-  --ink: #121212;
-  --muted: #6b7280;
-  --line: #e5e7eb;
-  --primary: #1f4fbf; /* institutional blue */
-  --success: #166534; /* deep green */
-  --warning: #92400e; /* brownish amber */
-  --danger: #7f1d1d;  /* deep red */
-  --table-stripe: #f9fafb;
+  --bg-a: #f4f7fc;
+  --bg-b: #eaf0f9;
+  --surface: #ffffff;
+  --surface-soft: #f8fbff;
+  --ink: #0f172a;
+  --muted: #5b6474;
+  --line: #d7dfeb;
+  --line-strong: #c6d2e3;
+  --primary: #174ea6;
+  --primary-strong: #113b80;
+  --teal: #0f766e;
+  --amber: #b45309;
+  --green: #166534;
 }
 
-/* Layout hooks are largely defined in app.css (header, sidebar, etc.).
-   This file scopes enrollment-specific visuals. */
+body {
+  background:
+    linear-gradient(180deg, var(--bg-a) 0%, var(--bg-b) 100%);
+}
 
-/* Page header (main content) */
+.app-main .content-wrapper {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92) 0%, rgba(248, 251, 255, 0.95) 100%);
+  border: 1px solid var(--line);
+  padding: 20px;
+}
+
+.section-card,
+.stat-card,
+.stat-icon,
+.enrollments-table,
+.summary-block,
+.course-filter,
+.btn,
+.badge,
+.tab-link,
+.progress-track,
+.table-header {
+  border-radius: 0 !important;
+}
+
+.section-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--line-strong);
+  box-shadow: 0 10px 22px rgba(17, 35, 68, 0.07);
+}
+.section-card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, var(--primary-strong), #2a69d1 55%, #4f88e2 100%);
+}
+.course-hero {
+  background:
+    linear-gradient(180deg, #ffffff 0%, #f3f8ff 100%);
+}
+
 .page-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 0;
+  gap: 16px;
+  padding: 12px 0 18px;
   border-bottom: 1px solid var(--line);
+}
+.page-header-plain {
+  border-bottom: none;
+  padding: 2px 0 6px;
 }
 .page-header h2 {
   margin: 0;
-  font-weight: 600;
   color: var(--ink);
+  font-size: 2.1rem;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
 }
 .page-header .text-muted {
-  margin: 4px 0 0 0;
+  margin: 8px 0 0;
   color: var(--muted);
-}
-.page-header .btn.btn-primary {
-  border: 1px solid var(--primary);
-  background: transparent;
-  color: var(--primary);
-}
-.page-header .btn.btn-primary:hover {
-  background: var(--primary);
-  color: #fff;
+  max-width: 900px;
 }
 
-/* Statistics Summary */
+.btn {
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  font-size: 0.78rem;
+  font-weight: 700;
+  border-width: 1px;
+}
+.btn.btn-primary {
+  background: var(--primary);
+  border-color: var(--primary-strong);
+  color: #fff;
+}
+.btn.btn-primary:hover {
+  background: var(--primary-strong);
+}
+.btn.btn-secondary {
+  background: #fff;
+  border-color: #a8b7cd;
+  color: #1f2f4a;
+}
+.btn.btn-secondary:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 16px;
-  margin: 16px 0 24px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin: 18px 0 20px;
+}
+.stats-tight {
+  margin: 12px 0 14px;
 }
 .stat-card {
-  background: #fff;
-  border: 1px solid var(--line);
+  display: grid;
+  grid-template-columns: 58px 1fr;
+  gap: 12px;
+  align-items: center;
   padding: 16px;
+  border: 1px solid var(--line);
+  border-left-width: 4px;
+  background:
+    linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
+}
+.stat-card:nth-child(1) {
+  border-left-color: var(--primary);
+}
+.stat-card:nth-child(2) {
+  border-left-color: var(--amber);
+}
+.stat-card:nth-child(3) {
+  border-left-color: var(--green);
 }
 .stat-icon {
   width: 48px;
   height: 48px;
+  border: 1px solid var(--line);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin-right: 12px;
-  border: 1px solid var(--line);
+  font-size: 18px;
+  background: #edf4ff;
   color: var(--primary);
 }
-.stat-card .stat-content h3 {
-  margin: 0;
-  font-size: 24px;
-  font-weight: 700;
+.stat-icon.primary {
+  color: var(--primary);
+  background: #e8f1ff;
+  border-color: #bdd2f7;
 }
-.stat-card .stat-content p {
-  margin: 2px 0 0 0;
+.stat-icon.warning {
+  color: var(--amber);
+  background: #fff7ed;
+  border-color: #f5d0a6;
+}
+.stat-icon.success {
+  color: var(--green);
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+}
+.stat-content h3 {
+  margin: 0;
+  font-size: 1.85rem;
+  color: #0b2248;
+  line-height: 1;
+}
+.stat-content p {
+  margin: 5px 0 0;
   color: var(--muted);
-  font-weight: 500;
+  font-weight: 600;
 }
 
-/* Enrollment table wrapper */
 .enrollments-table {
+  border: 1px solid var(--line-strong);
+  overflow: hidden;
   background: #fff;
-  border: 1px solid var(--line);
 }
 .table-header {
-  padding: 12px 16px;
+  padding: 12px 14px;
   border-bottom: 1px solid var(--line);
+  background:
+    linear-gradient(90deg, #f4f8ff 0%, #f9fbff 60%, #ffffff 100%);
 }
 .table-header h3 {
   margin: 0;
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 1.06rem;
+  color: #0f2a56;
 }
-.enrollments-table table {
+.table-header-flex {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.course-filter {
+  min-width: 190px;
+  border: 1px solid var(--line-strong);
+  background: #fff;
+  color: #1e293b;
+  padding: 8px 10px;
+}
+
+.enrollments-table table,
+.course-table {
   width: 100%;
   border-collapse: collapse;
 }
-.enrollments-table thead th {
+.enrollments-table thead th,
+.course-table thead th {
   text-align: left;
-  padding: 10px 16px;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--muted);
-  border-bottom: 1px solid var(--line);
+  background: #123968;
+  color: #e5eefb;
+  padding: 11px 12px;
+  border-right: 1px solid rgba(255, 255, 255, 0.14);
   text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.72rem;
 }
-.enrollments-table tbody td {
-  padding: 14px 16px;
-  border-top: 1px solid var(--line);
+.enrollments-table thead th:last-child,
+.course-table thead th:last-child {
+  border-right: none;
+}
+.enrollments-table tbody td,
+.course-table tbody td {
+  padding: 12px 12px;
+  border-bottom: 1px solid #ecf1f7;
   vertical-align: middle;
 }
-.enrollments-table tbody tr:nth-child(odd) {
-  background: var(--table-stripe);
+.enrollments-table tbody tr:nth-child(even),
+.course-table tbody tr:nth-child(even) {
+  background: #f9fbfe;
+}
+.enrollments-table tbody tr:hover,
+.course-table tbody tr:hover {
+  background: #eef4ff;
 }
 
-/* Course info */
 .course-info h4 {
-  margin: 0 0 4px 0;
-  font-size: 15px;
-  font-weight: 600;
+  margin: 0 0 4px;
+  font-size: 1rem;
+  color: #102a53;
 }
 .course-info p {
   margin: 0;
   color: var(--muted);
+  font-size: 0.84rem;
 }
 
-/* Badges */
 .badge {
-  display: inline-block;
-  padding: 4px 8px;
-  border: 1px solid var(--line);
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--ink);
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border: 1px solid;
+  font-size: 0.76rem;
+  font-weight: 700;
 }
-.badge-success { color: var(--success); border-color: var(--success); }
-.badge-warning { color: var(--warning); border-color: var(--warning); }
-.badge-primary { color: var(--primary); border-color: var(--primary); }
-.badge-danger  { color: var(--danger);  border-color: var(--danger); }
+.badge-success {
+  color: #166534;
+  background: #f0fdf4;
+  border-color: #86efac;
+}
+.badge-warning {
+  color: #92400e;
+  background: #fffbeb;
+  border-color: #fcd34d;
+}
+.badge-primary {
+  color: #1e3a8a;
+  background: #eff6ff;
+  border-color: #93c5fd;
+}
 
-/* Actions */
 .actions {
   display: flex;
-  gap: 8px;
+  gap: 7px;
+  flex-wrap: wrap;
   align-items: center;
 }
-.inline-form { display: inline-block; }
-
-/* Buttons: rely on app.css, add hover color-only rule */
-.btn:hover { filter: none; opacity: 0.92; }
-.btn.btn-secondary:hover { color: var(--primary); border-color: var(--primary); background: transparent; }
-
-/* Empty state */
-.empty-state {
-  text-align: center;
-  padding: 40px 20px;
+.actions-top {
+  margin-top: 12px;
+}
+.inline-form {
+  display: inline-block;
 }
 
-/* Enrollment Summary */
+.progress-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  max-width: 150px;
+}
+.progress-wrap-wide {
+  max-width: 100%;
+}
+.progress-title-row {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 700;
+  color: #102a53;
+  margin-bottom: 8px;
+}
+.progress-track {
+  width: 100%;
+  height: 8px;
+  border: 1px solid #c8d4e6;
+  background: #e8eef7;
+  overflow: hidden;
+}
+.progress-track-lg {
+  height: 11px;
+}
+.progress-fill {
+  height: 100%;
+  background:
+    repeating-linear-gradient(
+      135deg,
+      #174ea6,
+      #174ea6 12px,
+      #2a68cc 12px,
+      #2a68cc 24px
+    );
+}
+
 .summary-block {
+  border: 1px solid var(--line);
+  padding: 14px;
+  margin-top: 14px;
   background: #fff;
-  border: 1px solid #e5e7eb;
-  padding: 16px;
-  margin-top: 16px;
+}
+.meta-row {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 24px;
+  font-size: 0.84rem;
+  color: var(--muted);
+}
+
+.tab-links {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--line);
+  background: #f7faff;
+}
+.tab-link {
+  padding: 12px 16px;
+  text-decoration: none;
+  color: #334155;
+  font-weight: 600;
+  border-right: 1px solid var(--line);
+  border-bottom: 2px solid transparent;
+}
+.tab-link:hover {
+  color: var(--primary);
+  background: #edf3ff;
+}
+.tab-link.active {
+  color: var(--primary);
+  background: #fff;
+  border-bottom-color: var(--primary);
+}
+
+.section-title-lg {
+  margin: 18px 0 0;
+  font-size: 1.2rem;
+  color: #102a53;
+  letter-spacing: -0.01em;
+}
+.state-note {
+  margin-top: 10px;
+  padding: 8px 0 0 10px;
+  border-left: 3px solid #dbeafe;
+}
+
+.stack-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+}
+.stack-row {
+  margin-top: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  border-left: 3px solid #dbeafe;
+}
+.stack-title {
+  font-weight: 700;
+  color: #0f284f;
+}
+.stack-meta {
+  font-size: 0.82rem;
 }
 
 .summary-table {
@@ -168,35 +406,41 @@
 }
 .summary-table th,
 .summary-table td {
-  padding: 12px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid #edf2f7;
+  padding: 9px 8px;
 }
 .summary-table th {
-  text-align: left;
   width: 220px;
-  color: #374151;
-  font-weight: 600;
+  text-align: left;
+  color: #475569;
 }
-.summary-table td {
-  color: #111827;
+
+.back-row {
+  margin-top: 16px;
+}
+.empty-state {
+  text-align: center;
+  padding: 48px 20px;
 }
 .empty-state i {
-  font-size: 48px;
-  color: var(--line);
+  font-size: 46px;
+  color: #cbd5e1;
 }
-.empty-state h3 {
-  margin: 8px 0;
-}
-.empty-state p {
-  margin: 0 0 16px 0;
-  color: var(--muted);
-}
-.empty-state .btn.btn-primary {
-  border: 1px solid var(--primary);
-  background: transparent;
-  color: var(--primary);
-}
-.empty-state .btn.btn-primary:hover {
-  background: var(--primary);
-  color: #fff;
+
+@media (max-width: 980px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+  .table-header-flex {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .course-filter {
+    width: 100%;
+  }
+  .stack-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }

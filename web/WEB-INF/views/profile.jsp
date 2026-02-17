@@ -91,6 +91,10 @@
                         <i class="fas fa-bullhorn"></i>
                         <span>Announcements</span>
                     </a>
+                    <a href="${pageContext.request.contextPath}/instructor/certificates" class="nav-item">
+                        <i class="fas fa-certificate"></i>
+                        <span>Certificates</span>
+                    </a>
                 </c:when>
                 <c:otherwise>
                     <a href="${pageContext.request.contextPath}/student/courses" class="nav-item">
@@ -99,11 +103,15 @@
                     </a>
                     <a href="${pageContext.request.contextPath}/student/my-enrollments" class="nav-item">
                         <i class="fas fa-graduation-cap"></i>
-                        <span>My Enrollments</span>
+                        <span>My Courses</span>
                     </a>
                     <a href="${pageContext.request.contextPath}/student/materials" class="nav-item">
                         <i class="fas fa-folder-open"></i>
                         <span>Materials</span>
+                    </a>
+                    <a href="${pageContext.request.contextPath}/student/certificates" class="nav-item">
+                        <i class="fas fa-certificate"></i>
+                        <span>Certificates</span>
                     </a>
                 </c:otherwise>
             </c:choose>

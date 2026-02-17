@@ -69,11 +69,19 @@
             </a>
             <a href="${pageContext.request.contextPath}/student/my-enrollments" class="nav-item">
                 <i class="fas fa-graduation-cap"></i>
-                <span>My Enrollments</span>
+                <span>My Courses</span>
             </a>
             <a href="${pageContext.request.contextPath}/student/materials" class="nav-item">
                 <i class="fas fa-folder-open"></i>
                 <span>Materials</span>
+            </a>
+            <a href="${pageContext.request.contextPath}/student/assessments" class="nav-item">
+                <i class="fas fa-clipboard-list"></i>
+                <span>Assessments</span>
+            </a>
+            <a href="${pageContext.request.contextPath}/student/certificates" class="nav-item">
+                <i class="fas fa-certificate"></i>
+                <span>Certificates</span>
             </a>
             <a href="${pageContext.request.contextPath}/profile" class="nav-item">
                 <i class="fas fa-user"></i>
@@ -112,7 +120,7 @@
                                 <c:when test="${isEnrolled}">
                                     <span class="pill pill-success">You are enrolled</span>
                                     <a href="${pageContext.request.contextPath}/student/my-enrollments" class="btn btn-secondary">
-                                        <i class="fas fa-list"></i> View My Enrollments
+                                        <i class="fas fa-list"></i> View My Courses
                                     </a>
                                 </c:when>
                                 <c:otherwise>
@@ -240,10 +248,7 @@
                         </div>
                     </div>
                     <div class="assessment-links">
-                        <a class="btn btn-primary" href="${pageContext.request.contextPath}/student/assignments<c:if test='${not empty course.courseId}'>?courseId=${course.courseId}</c:if>"><i class="fas fa-tasks"></i> View Assignments</a>
-                        <a class="btn" href="${pageContext.request.contextPath}/student/quizzes<c:if test='${not empty course.courseId}'>?courseId=${course.courseId}</c:if>"><i class="fas fa-clipboard-question"></i> View Quizzes</a>
-                        <a class="btn" href="${pageContext.request.contextPath}/student/grades<c:if test='${not empty course.courseId}'>?courseId=${course.courseId}</c:if>"><i class="fas fa-chart-line"></i> View Grades</a>
-                        <a class="btn" href="${pageContext.request.contextPath}/student/announcements<c:if test='${not empty course.courseId}'>?courseId=${course.courseId}</c:if>"><i class="fas fa-bullhorn"></i> View Announcements</a>
+                        <a class="btn btn-primary" href="${pageContext.request.contextPath}/student/assessments<c:if test='${not empty course.courseId}'>?courseId=${course.courseId}</c:if>"><i class="fas fa-clipboard-list"></i> View Assessments</a>
                         <a class="btn" href="${pageContext.request.contextPath}/student/materials<c:if test='${not empty course.courseId}'>?courseId=${course.courseId}</c:if>"><i class="fas fa-folder-open"></i> View Materials</a>
                     </div>
                 </section>

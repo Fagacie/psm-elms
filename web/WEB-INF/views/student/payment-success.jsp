@@ -146,7 +146,7 @@
             <!-- Action Buttons -->
             <div class="button-group">
                 <a href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}" class="btn btn-primary">Start Learning</a>
-                <a href="${pageContext.request.contextPath}/student/my-enrollments" class="btn btn-outline">My Enrollments</a>
+                <a href="${pageContext.request.contextPath}/student/my-enrollments" class="btn btn-outline">My Courses</a>
             </div>
         </div>
     </div>
@@ -210,7 +210,7 @@
                                 <i class="fas fa-play-circle me-2"></i>Start Learning
                             </a>
                             <a href="${pageContext.request.contextPath}/student/my-enrollments" class="btn btn-outline-secondary btn-lg">
-                                <i class="fas fa-list me-2"></i>My Enrollments
+                                <i class="fas fa-list me-2"></i>My Courses
                             </a>
                         </div>
                     </div>

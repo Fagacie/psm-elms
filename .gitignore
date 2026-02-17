@@ -24,6 +24,7 @@ Thumbs.db
 # Sensitive configs (keep local only)
 /src/conf/*.properties
 /web/WEB-INF/classes/*.properties
+.env
 
 # Node/Vite (if used locally)
 node_modules/

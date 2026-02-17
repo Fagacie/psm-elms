@@ -1,0 +1,53 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: psme-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-psm_elearning}
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${MYSQL_ROOT_PASSWORD:-root}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  app:
+    image: tomcat:9.0-jdk17-temurin
+    container_name: psme-tomcat
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_DRIVER: com.mysql.cj.jdbc.Driver
+      DB_URL: jdbc:mysql://db:3306/${MYSQL_DATABASE:-psm_elearning}?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      DB_USERNAME: root
+      DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+    ports:
+      - "${APP_PORT:-8080}:8080"
+    volumes:
+      - ./dist/PSME.war:/usr/local/tomcat/webapps/PSME.war:ro
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: psme-phpmyadmin
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+    ports:
+      - "${PHPMYADMIN_PORT:-8081}:80"
+
+volumes:
+  mysql_data:

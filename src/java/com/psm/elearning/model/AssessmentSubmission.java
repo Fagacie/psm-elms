@@ -26,25 +26,41 @@ public class AssessmentSubmission {
     @DecimalMin(value = "0.0", message = "Score must be >= 0")
     @DecimalMax(value = "1000.0", message = "Score must not exceed 1000")
     private Double score;
+
+    private String feedback;
     
     @Min(value = 1, message = "Attempt number must be at least 1")
     @Max(value = 10, message = "Attempt number must not exceed 10")
     private Integer attemptNumber;
+
+    @Pattern(regexp = "^(Submitted|TimedOut|AutoSubmitted)$", message = "Invalid submission status")
+    private String status;
+
+    private LocalDateTime startedAt;
+    private LocalDateTime endedAt;
     
     private LocalDateTime submitDate;
+
+    private String studentName;
+    private String studentEmail;
     
     // Constructors
     public AssessmentSubmission() {}
     
     public AssessmentSubmission(Integer submissionId, Integer assessmentId, Integer userId,
                                String answersFilePath, Double score, Integer attemptNumber,
+                               String status, LocalDateTime startedAt, LocalDateTime endedAt,
                                LocalDateTime submitDate) {
         this.submissionId = submissionId;
         this.assessmentId = assessmentId;
         this.userId = userId;
         this.answersFilePath = answersFilePath;
         this.score = score;
+        this.feedback = null;
         this.attemptNumber = attemptNumber;
+        this.status = status;
+        this.startedAt = startedAt;
+        this.endedAt = endedAt;
         this.submitDate = submitDate;
     }
     
@@ -63,12 +79,30 @@ public class AssessmentSubmission {
     
     public Double getScore() { return score; }
     public void setScore(Double score) { this.score = score; }
+
+    public String getFeedback() { return feedback; }
+    public void setFeedback(String feedback) { this.feedback = feedback; }
     
     public Integer getAttemptNumber() { return attemptNumber; }
     public void setAttemptNumber(Integer attemptNumber) { this.attemptNumber = attemptNumber; }
+
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
+
+    public LocalDateTime getStartedAt() { return startedAt; }
+    public void setStartedAt(LocalDateTime startedAt) { this.startedAt = startedAt; }
+
+    public LocalDateTime getEndedAt() { return endedAt; }
+    public void setEndedAt(LocalDateTime endedAt) { this.endedAt = endedAt; }
     
     public LocalDateTime getSubmitDate() { return submitDate; }
     public void setSubmitDate(LocalDateTime submitDate) { this.submitDate = submitDate; }
+
+    public String getStudentName() { return studentName; }
+    public void setStudentName(String studentName) { this.studentName = studentName; }
+
+    public String getStudentEmail() { return studentEmail; }
+    public void setStudentEmail(String studentEmail) { this.studentEmail = studentEmail; }
 }
 
 

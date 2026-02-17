@@ -49,6 +49,25 @@ public class DBConnection {
                 DB_USER = props.getProperty("db.username");
                 DB_PASSWORD = props.getProperty("db.password");
             }
+
+            // Allow environment variable overrides (useful for Docker/dev containers)
+            String envDriver = System.getenv("DB_DRIVER");
+            String envUrl = System.getenv("DB_URL");
+            String envUser = System.getenv("DB_USERNAME");
+            String envPassword = System.getenv("DB_PASSWORD");
+
+            if (envDriver != null && !envDriver.trim().isEmpty()) {
+                DB_DRIVER = envDriver.trim();
+            }
+            if (envUrl != null && !envUrl.trim().isEmpty()) {
+                DB_URL = envUrl.trim();
+            }
+            if (envUser != null && !envUser.trim().isEmpty()) {
+                DB_USER = envUser.trim();
+            }
+            if (envPassword != null) {
+                DB_PASSWORD = envPassword;
+            }
             
             // Load MySQL JDBC Driver
             Class.forName(DB_DRIVER);

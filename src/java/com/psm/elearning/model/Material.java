@@ -40,6 +40,13 @@ public class Material {
     @Size(max = 20, message = "Version number must not exceed 20 characters")
     private String versionNumber;
 
+    @Min(value = 1, message = "Display order must be at least 1")
+    private Integer displayOrder;
+
+    private boolean isDeleted;
+    private LocalDateTime deletedAt;
+    private Integer deletedBy;
+
     // Type constants
     public static final String TYPE_PDF = "PDF";
     public static final String TYPE_VIDEO = "Video";
@@ -61,6 +68,7 @@ public class Material {
         this.uploadedBy = uploadedBy;
         this.uploadDate = uploadDate;
         this.versionNumber = versionNumber;
+        this.isDeleted = false;
     }
     
     // Getters and Setters
@@ -90,6 +98,18 @@ public class Material {
     
     public String getVersionNumber() { return versionNumber; }
     public void setVersionNumber(String versionNumber) { this.versionNumber = versionNumber; }
+
+    public Integer getDisplayOrder() { return displayOrder; }
+    public void setDisplayOrder(Integer displayOrder) { this.displayOrder = displayOrder; }
+
+    public boolean isDeleted() { return isDeleted; }
+    public void setDeleted(boolean deleted) { isDeleted = deleted; }
+
+    public LocalDateTime getDeletedAt() { return deletedAt; }
+    public void setDeletedAt(LocalDateTime deletedAt) { this.deletedAt = deletedAt; }
+
+    public Integer getDeletedBy() { return deletedBy; }
+    public void setDeletedBy(Integer deletedBy) { this.deletedBy = deletedBy; }
 }
 
 
