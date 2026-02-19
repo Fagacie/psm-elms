@@ -77,7 +77,7 @@ public class StudentMaterialServlet extends HttpServlet {
         }
 
         Integer selectedCourseId = null;
-        if (!courseIdStr.isEmpty()) {
+        if (courseIdStr != null && !courseIdStr.trim().isEmpty()) {
             try {
                 selectedCourseId = Integer.parseInt(courseIdStr);
             } catch (NumberFormatException e) {

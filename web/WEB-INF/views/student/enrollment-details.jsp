@@ -14,7 +14,8 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/landing.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/app.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/dashboard.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/enrollments.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/course-details.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/materials.css">
 </head>
 <body>
 <nav class="top-navbar">
@@ -56,11 +57,19 @@
 
 <main class="app-main">
     <div class="content-wrapper">
+        <div class="breadcrumbs">
+            <a href="${pageContext.request.contextPath}/dashboard"><i class="fas fa-home"></i> Home</a>
+            <span class="separator">/</span>
+            <a href="${pageContext.request.contextPath}/student/my-enrollments">My Courses</a>
+            <span class="separator">/</span>
+            <span>${enrollment.courseName}</span>
+        </div>
         <section class="section-card course-hero">
-            <div class="page-header page-header-plain">
+            <div class="page-header">
                 <div>
-                    <h2>${enrollment.courseName}</h2>
-                    <p class="text-muted">${enrollment.instructorName} | ${enrollment.courseDescription}</p>
+                    <h2><i class="fas fa-graduation-cap"></i> ${enrollment.courseName}</h2>
+                    <p class="text-muted"><i class="fas fa-chalkboard-teacher"></i> ${enrollment.instructorName}</p>
+                    <p class="text-muted" style="margin-top: 8px;">${enrollment.courseDescription}</p>
                 </div>
             </div>
             <div class="summary-block">
@@ -72,24 +81,41 @@
                         <div class="progress-fill" style="width:${progressPercent}%"></div>
                     </div>
                     <div class="meta-row">
-                        <span>Enrolled: <c:out value="${enrollment.enrollmentDate != null ? enrollment.enrollmentDate.toLocalDate() : '-'}"/></span>
-                        <span>Fee: NGN <fmt:formatNumber value="${enrollment.coursePrice}" type="number" minFractionDigits="2" maxFractionDigits="2"/></span>
-                        <span>Payment: ${enrollment.paymentStatus}</span>
+                        <span><i class="fas fa-calendar-check"></i> Enrolled: <c:out value="${enrollment.enrollmentDate != null ? enrollment.enrollmentDate.toLocalDate() : '-'}"/></span>
+                        <span><i class="fas fa-money-bill-wave"></i> Fee: NGN <fmt:formatNumber value="${enrollment.coursePrice}" type="number" minFractionDigits="2" maxFractionDigits="2"/></span>
+                        <span>
+                            <i class="fas fa-${enrollment.paymentStatus == 'COMPLETED' ? 'check-circle' : 'clock'}"></i> 
+                            Payment: 
+                            <c:choose>
+                                <c:when test="${enrollment.paymentStatus == 'COMPLETED'}">
+                                    <span class="badge badge-success">${enrollment.paymentStatus}</span>
+                                </c:when>
+                                <c:otherwise>
+                                    <span class="badge badge-warning">${enrollment.paymentStatus}</span>
+                                </c:otherwise>
+                            </c:choose>
+                        </span>
                     </div>
                 </div>
             </div>
         </section>
 
-        <section class="section-card" style="margin-top:16px;">
+        <section class="section-card">
             <div class="tab-links">
-                <a class="tab-link ${activeTab == 'overview' ? 'active' : ''}" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=overview">Overview</a>
-                <a class="tab-link ${activeTab == 'assessments' ? 'active' : ''}" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=assessments">Assessments</a>
-                <a class="tab-link ${activeTab == 'materials' ? 'active' : ''}" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=materials">Materials</a>
+                <a class="tab-link ${activeTab == 'overview' ? 'active' : ''}" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=overview">
+                    <i class="fas fa-info-circle"></i> Overview
+                </a>
+                <a class="tab-link ${activeTab == 'materials' ? 'active' : ''}" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=materials">
+                    <i class="fas fa-folder-open"></i> Materials
+                </a>
+                <a class="tab-link ${activeTab == 'assessments' ? 'active' : ''}" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=assessments">
+                    <i class="fas fa-clipboard-list"></i> Assessments
+                </a>
             </div>
 
             <c:choose>
                 <c:when test="${activeTab == 'assessments'}">
-                    <h3 class="section-title-lg">Course Assessments</h3>
+                    <h3 class="section-title-lg"><i class="fas fa-clipboard-list"></i> Course Assessments</h3>
                     <c:if test="${not paidAccess}">
                         <div class="alert alert-warning" style="margin-top:12px;">Payment is required before taking assessments.</div>
                     </c:if>
@@ -157,35 +183,73 @@
                 </c:when>
 
                 <c:when test="${activeTab == 'materials'}">
-                    <h3 class="section-title-lg">Course Materials</h3>
+                    <h3 class="section-title-lg"><i class="fas fa-folder-open"></i> Course Materials</h3>
                     <c:if test="${not paidAccess}">
                         <div class="alert alert-warning" style="margin-top:12px;">Payment is required to view and download course materials.</div>
                     </c:if>
                     <c:if test="${paidAccess}">
                         <c:choose>
                             <c:when test="${empty materials}">
-                                <p class="text-muted state-note">No materials available yet.</p>
+                                <div class="empty-inline">
+                                    <i class="fas fa-folder-open"></i>
+                                    <p>No materials available yet for this course.</p>
+                                </div>
                             </c:when>
                             <c:otherwise>
-                                <div class="stack-list">
+                                <div class="material-card-grid">
                                     <c:forEach var="m" items="${materials}">
-                                        <div class="summary-block stack-row">
-                                            <div>
-                                                <div class="stack-title">${m.title}</div>
-                                                <div class="text-muted stack-meta">
+                                        <article class="material-card">
+                                            <div class="material-card-top">
+                                                <span class="material-type-badge material-type-${m.materialType}">
+                                                    <c:choose>
+                                                        <c:when test="${m.materialType == 'PDF'}">
+                                                            <i class="fas fa-file-pdf"></i>
+                                                        </c:when>
+                                                        <c:when test="${m.materialType == 'Video'}">
+                                                            <i class="fas fa-play-circle"></i>
+                                                        </c:when>
+                                                        <c:when test="${m.materialType == 'Slides'}">
+                                                            <i class="fas fa-file-powerpoint"></i>
+                                                        </c:when>
+                                                        <c:when test="${m.materialType == 'Link'}">
+                                                            <i class="fas fa-link"></i>
+                                                        </c:when>
+                                                    </c:choose>
                                                     ${m.materialType}
-                                                    <c:if test="${not empty m.displayOrder}"> | Chapter ${m.displayOrder}</c:if>
-                                                    <c:if test="${empty m.displayOrder and not empty m.versionNumber}"> | ${m.versionNumber}</c:if>
-                                                    | <c:out value="${m.uploadDate != null ? m.uploadDate.toLocalDate() : '-'}"/>
-                                                </div>
+                                                </span>
+                                                <span class="material-version">
+                                                    <c:choose>
+                                                        <c:when test="${not empty m.displayOrder}">Ch ${m.displayOrder}</c:when>
+                                                        <c:otherwise>${m.versionNumber}</c:otherwise>
+                                                    </c:choose>
+                                                </span>
                                             </div>
-                                            <div class="actions">
-                                                <a class="btn btn-secondary btn-sm" target="_blank" rel="noopener noreferrer" href="${pageContext.request.contextPath}/student/materials?action=view&id=${m.materialId}"><i class="fas fa-eye"></i> View</a>
+                                            <h5>${m.title}</h5>
+                                            <c:if test="${not empty m.description}">
+                                                <p>${m.description}</p>
+                                            </c:if>
+                                            <div class="material-meta">
+                                                <span>
+                                                    <i class="fas fa-calendar-alt"></i>
+                                                    <c:choose>
+                                                        <c:when test="${not empty m.uploadDate}">
+                                                            ${m.uploadDate.toLocalDate()}
+                                                        </c:when>
+                                                        <c:otherwise>-</c:otherwise>
+                                                    </c:choose>
+                                                </span>
+                                            </div>
+                                            <div class="material-actions">
+                                                <a class="btn btn-primary btn-sm" href="${pageContext.request.contextPath}/student/materials?action=view&id=${m.materialId}" target="_blank" rel="noopener noreferrer">
+                                                    <i class="fas fa-eye"></i> View
+                                                </a>
                                                 <c:if test="${m.materialType != 'Link'}">
-                                                    <a class="btn btn-primary btn-sm" href="${pageContext.request.contextPath}/student/materials?action=download&id=${m.materialId}"><i class="fas fa-download"></i> Download</a>
+                                                    <a class="btn btn-secondary btn-sm" href="${pageContext.request.contextPath}/student/materials?action=download&id=${m.materialId}">
+                                                        <i class="fas fa-download"></i> Download
+                                                    </a>
                                                 </c:if>
                                             </div>
-                                        </div>
+                                        </article>
                                     </c:forEach>
                                 </div>
                             </c:otherwise>
@@ -194,8 +258,10 @@
                 </c:when>
 
                 <c:otherwise>
-                    <h3 class="section-title-lg">About This Course</h3>
-                    <p class="text-muted state-note">${enrollment.courseDescription}</p>
+                    <h3 class="section-title-lg"><i class="fas fa-info-circle"></i> About This Course</h3>
+                    <div style="padding: var(--spacing-lg); background: var(--color-bg); border-radius: var(--radius-md); margin-bottom: var(--spacing-xl);">
+                        <p style="margin: 0; line-height: 1.6; color: var(--color-text-primary);">${enrollment.courseDescription}</p>
+                    </div>
                     <div class="summary-block">
                         <table class="summary-table">
                             <tr><th>Instructor</th><td>${enrollment.instructorName}</td></tr>
