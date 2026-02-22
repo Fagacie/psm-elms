@@ -11,32 +11,28 @@ import java.util.List;
  * Implementation of EnrollmentDAO using JDBC.
  */
 public class EnrollmentDAOImpl implements EnrollmentDAO {
-    
+
     @Override
     public Enrollment createEnrollment(Enrollment enrollment) {
-        // Align with current DB schema: Enrollment(UserID, CourseID, EnrollmentDate, Progress, CompletionDate, Status)
-        // We insert minimal required fields: UserID, CourseID, Status (use 'Enrolled' as initial state since 'Pending' is not allowed)
         String sql = "INSERT INTO Enrollment (UserID, CourseID, Status, EnrollmentDate) VALUES (?, ?, ?, NOW())";
-        
+
         System.out.println("EnrollmentDAO: Creating enrollment for user " + enrollment.getUserId() + " in course " + enrollment.getCourseId());
-        
+
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            
+
             ps.setInt(1, enrollment.getUserId());
             ps.setInt(2, enrollment.getCourseId());
-            // Use provided status (default to Pending) instead of forcing Enrolled
             String initialStatus = enrollment.getStatus() != null ? enrollment.getStatus() : "Pending";
             ps.setString(3, initialStatus);
-            
+
             int affected = ps.executeUpdate();
-            
+
             if (affected > 0) {
                 try (ResultSet rs = ps.getGeneratedKeys()) {
                     if (rs.next()) {
                         enrollment.setEnrollmentId(rs.getInt(1));
                         enrollment.setStatus(initialStatus);
-                        // paymentStatus/completionStatus not tracked in current schema
                         enrollment.setEnrollmentDate(LocalDateTime.now());
                         System.out.println("EnrollmentDAO: Enrollment created successfully with ID " + enrollment.getEnrollmentId());
                         return enrollment;
@@ -49,17 +45,17 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
         }
         return null;
     }
-    
+
     @Override
     public boolean checkExistingEnrollment(Integer userId, Integer courseId) {
         String sql = "SELECT COUNT(*) FROM Enrollment WHERE UserID = ? AND CourseID = ?";
-        
+
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-            
+
             ps.setInt(1, userId);
             ps.setInt(2, courseId);
-            
+
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     return rs.getInt(1) > 0;
@@ -70,27 +66,42 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
         }
         return false;
     }
-    
+
     @Override
     public boolean updatePaymentStatus(Integer enrollmentId, String paymentStatus, String paymentRef) {
-        // Current DB schema does not have PaymentStatus/PaymentRef columns on Enrollment.
-        // This becomes a no-op to maintain flow compatibility.
-        System.out.println("EnrollmentDAO: Skipping payment status update on Enrollment (not supported in current schema)");
-        return true;
+        String sql = "UPDATE Enrollment SET PaymentStatus = ?, PaymentRef = ? WHERE EnrollmentID = ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, paymentStatus);
+            if (paymentRef == null || paymentRef.trim().isEmpty()) {
+                ps.setNull(2, Types.VARCHAR);
+            } else {
+                ps.setString(2, paymentRef.trim());
+            }
+            ps.setInt(3, enrollmentId);
+
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("EnrollmentDAO: Error updating payment status: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return false;
     }
-    
+
     @Override
     public boolean updateStatus(Integer enrollmentId, String status) {
         String sql = "UPDATE Enrollment SET Status = ? WHERE EnrollmentID = ?";
-        
+
         System.out.println("EnrollmentDAO: Updating status to " + status + " for enrollment " + enrollmentId);
-        
+
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-            
+
             ps.setString(1, status);
             ps.setInt(2, enrollmentId);
-            
+
             int affected = ps.executeUpdate();
             return affected > 0;
         } catch (SQLException e) {
@@ -98,7 +109,31 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
         }
         return false;
     }
-    
+
+    @Override
+    public boolean updateLearningProgress(Integer enrollmentId, Integer progress, String completionStatus, String status) {
+        String sql = "UPDATE Enrollment SET Progress = ?, CompletionStatus = ?, Status = ? WHERE EnrollmentID = ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            int safeProgress = progress == null ? 0 : Math.max(0, Math.min(100, progress));
+            String safeCompletion = completionStatus == null || completionStatus.trim().isEmpty() ? "Not Started" : completionStatus.trim();
+            String safeStatus = status == null || status.trim().isEmpty() ? "Enrolled" : status.trim();
+
+            ps.setInt(1, safeProgress);
+            ps.setString(2, safeCompletion);
+            ps.setString(3, safeStatus);
+            ps.setInt(4, enrollmentId);
+
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("EnrollmentDAO: Error updating learning progress: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     @Override
     public List<Enrollment> getEnrollmentsByStudent(Integer userId) {
         List<Enrollment> enrollments = new ArrayList<>();
@@ -108,12 +143,12 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
                 "LEFT JOIN User u ON c.InstructorID = u.UserID " +
                 "WHERE e.UserID = ? " +
                 "ORDER BY e.EnrollmentDate DESC";
-        
+
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-            
+
             ps.setInt(1, userId);
-            
+
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     Enrollment enrollment = mapResultSet(rs);
@@ -130,7 +165,7 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
         }
         return enrollments;
     }
-    
+
     @Override
     public Enrollment getEnrollment(Integer enrollmentId) {
         String sql = "SELECT e.*, c.Title AS CourseTitle, c.Description, c.CourseFee, u.FullName AS InstructorName " +
@@ -138,12 +173,12 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
                 "JOIN Course c ON e.CourseID = c.CourseID " +
                 "LEFT JOIN User u ON c.InstructorID = u.UserID " +
                 "WHERE e.EnrollmentID = ?";
-        
+
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-            
+
             ps.setInt(1, enrollmentId);
-            
+
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     Enrollment enrollment = mapResultSet(rs);
@@ -159,7 +194,7 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
         }
         return null;
     }
-    
+
     @Override
     public List<Enrollment> getAllEnrollments() {
         List<Enrollment> enrollments = new ArrayList<>();
@@ -168,11 +203,11 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
                 "JOIN Course c ON e.CourseID = c.CourseID " +
                 "JOIN User u ON e.UserID = u.UserID " +
                 "ORDER BY e.EnrollmentDate DESC";
-        
+
         try (Connection conn = DBConnection.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
-            
+
             while (rs.next()) {
                 Enrollment enrollment = mapResultSet(rs);
                 enrollment.setCourseName(rs.getString("CourseTitle"));
@@ -186,7 +221,7 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
         }
         return enrollments;
     }
-    
+
     /**
      * Map ResultSet to Enrollment object.
      */
@@ -221,6 +256,12 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
         if (hasColumn(rs, "CompletionStatus")) {
             enrollment.setCompletionStatus(rs.getString("CompletionStatus"));
         }
+        if (hasColumn(rs, "Progress")) {
+            int progress = rs.getInt("Progress");
+            if (!rs.wasNull()) {
+                enrollment.setProgress(progress);
+            }
+        }
         return enrollment;
     }
 
@@ -232,12 +273,12 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
                 "JOIN User u ON e.UserID = u.UserID " +
                 "WHERE e.CourseID = ? " +
                 "ORDER BY e.EnrollmentDate DESC";
-        
+
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-            
+
             ps.setInt(1, courseId);
-            
+
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     Enrollment enrollment = mapResultSet(rs);
@@ -267,17 +308,17 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
         } catch (SQLException ignored) {}
         return false;
     }
-    
+
     @Override
     public Integer countStudentsByInstructor(Integer instructorId) {
         String sql = "SELECT COUNT(DISTINCT e.UserID) AS student_count " +
                      "FROM Enrollment e " +
                      "INNER JOIN Course c ON e.CourseID = c.CourseID " +
                      "WHERE c.InstructorID = ? AND e.Status != 'Cancelled'";
-        
+
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-            
+
             ps.setInt(1, instructorId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -292,17 +333,17 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
         }
         return 0;
     }
-    
+
     @Override
     public Integer countEnrollmentsByInstructor(Integer instructorId) {
         String sql = "SELECT COUNT(*) AS enrollment_count " +
                      "FROM Enrollment e " +
                      "INNER JOIN Course c ON e.CourseID = c.CourseID " +
                      "WHERE c.InstructorID = ? AND e.Status != 'Cancelled'";
-        
+
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-            
+
             ps.setInt(1, instructorId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -317,17 +358,17 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
         }
         return 0;
     }
-    
+
     @Override
     public Integer countPendingEnrollmentsByInstructor(Integer instructorId) {
         String sql = "SELECT COUNT(*) AS pending_count " +
                      "FROM Enrollment e " +
                      "INNER JOIN Course c ON e.CourseID = c.CourseID " +
                      "WHERE c.InstructorID = ? AND e.Status = 'Pending'";
-        
+
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-            
+
             ps.setInt(1, instructorId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -342,17 +383,17 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
         }
         return 0;
     }
-    
+
     @Override
     public Integer countActiveEnrollmentsByInstructor(Integer instructorId) {
         String sql = "SELECT COUNT(*) AS active_count " +
                      "FROM Enrollment e " +
                      "INNER JOIN Course c ON e.CourseID = c.CourseID " +
                      "WHERE c.InstructorID = ? AND e.Status = 'Active'";
-        
+
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-            
+
             ps.setInt(1, instructorId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -368,4 +409,3 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
         return 0;
     }
 }
-

@@ -76,6 +76,8 @@ public class StudentAssessmentServlet extends HttpServlet {
         Integer selectedCourseId = parseInt(request.getParameter("courseId"));
         Integer selectedAssessmentId = parseInt(request.getParameter("assessmentId"));
         String action = normalize(request.getParameter("action"));
+        boolean fromHub = "1".equals(normalize(request.getParameter("fromHub")));
+        Integer fromHubEnrollmentId = parseInt(request.getParameter("enrollmentId"));
         int page = parseIntOrDefault(request.getParameter("page"), 1);
 
         List<Enrollment> paidEnrollments = getPaidEnrollments(userId);
@@ -210,6 +212,8 @@ public class StudentAssessmentServlet extends HttpServlet {
         request.setAttribute("totalPages", totalPages);
         request.setAttribute("pagedQuestions", pagedQuestions);
         request.setAttribute("remainingSeconds", remainingSeconds);
+        request.setAttribute("fromHub", fromHub);
+        request.setAttribute("fromHubEnrollmentId", fromHubEnrollmentId);
         if (activeState != null) {
             request.setAttribute("currentAnswers", activeState.answers);
         }
@@ -280,6 +284,7 @@ public class StudentAssessmentServlet extends HttpServlet {
 
         if ("submit".equalsIgnoreCase(action)) {
             String uploadedAnswerUrl = null;
+            boolean isAssignment = Assessment.TYPE_ASSIGNMENT.equalsIgnoreCase(assessment.getType());
             if (!Assessment.TYPE_QUIZ.equalsIgnoreCase(assessment.getType())) {
                 try {
                     Part answerFile = request.getPart("answerFile");
@@ -296,7 +301,15 @@ public class StudentAssessmentServlet extends HttpServlet {
                             }
                         }
                     }
+                    if (isAssignment && (answerFile == null || answerFile.getSize() == 0)) {
+                        response.sendRedirect(request.getContextPath() + "/student/assessments?courseId=" + courseId + "&assessmentId=" + assessmentId + "&error=assignmentfile");
+                        return;
+                    }
                 } catch (Exception ignored) {
+                    if (isAssignment) {
+                        response.sendRedirect(request.getContextPath() + "/student/assessments?courseId=" + courseId + "&assessmentId=" + assessmentId + "&error=assignmentfile");
+                        return;
+                    }
                 }
             }
 

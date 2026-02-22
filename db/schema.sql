@@ -104,6 +104,19 @@ CREATE TABLE IF NOT EXISTS `Material` (
   CONSTRAINT `fk_material_deleted_by` FOREIGN KEY (`DeletedBy`) REFERENCES `User`(`UserID`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- Material Progress
+CREATE TABLE IF NOT EXISTS `MaterialProgress` (
+  `ProgressID` INT AUTO_INCREMENT PRIMARY KEY,
+  `UserID` INT NOT NULL,
+  `MaterialID` INT NOT NULL,
+  `ViewedAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY `uk_material_progress` (`UserID`, `MaterialID`),
+  KEY `idx_material_progress_user` (`UserID`),
+  KEY `idx_material_progress_material` (`MaterialID`),
+  CONSTRAINT `fk_material_progress_user` FOREIGN KEY (`UserID`) REFERENCES `User`(`UserID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_material_progress_material` FOREIGN KEY (`MaterialID`) REFERENCES `Material`(`MaterialID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 -- Enrollments
 CREATE TABLE IF NOT EXISTS `Enrollment` (
   `EnrollmentID` INT AUTO_INCREMENT PRIMARY KEY,
@@ -227,8 +240,12 @@ CREATE TABLE IF NOT EXISTS `Certificate` (
   `QRCodePath` VARCHAR(255) NULL,
   `GeneratedBy` VARCHAR(100) NULL,
   `VerificationURL` VARCHAR(255) NULL,
+  `Status` ENUM('Active','Revoked') NOT NULL DEFAULT 'Active',
+  `RevokedAt` TIMESTAMP NULL DEFAULT NULL,
+  `RevokedBy` INT NULL,
   UNIQUE KEY `uk_certificate_no` (`CertificateNo`),
   UNIQUE KEY `uk_certificate_enrollment` (`EnrollmentID`),
+  KEY `idx_certificate_status` (`Status`),
   CONSTRAINT `fk_certificate_enrollment` FOREIGN KEY (`EnrollmentID`) REFERENCES `Enrollment`(`EnrollmentID`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

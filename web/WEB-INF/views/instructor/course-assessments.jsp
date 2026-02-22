@@ -87,14 +87,14 @@
         <!-- Tab Navigation -->
         <c:if test="${not empty selectedCourse}">
             <div class="tabs">
-                <button type="button" class="tab-btn ${defaultTab == 'create' ? 'active' : ''}" onclick="showTab(event, 'create-tab')">
+                <button type="button" class="tab-btn ${defaultTab == 'create' ? 'active' : ''}" data-tab-target="create-tab">
                     <i class="fas fa-plus-circle"></i> Create Assessment
                 </button>
-                <button type="button" class="tab-btn ${defaultTab == 'list' ? 'active' : ''}" onclick="showTab(event, 'list-tab')">
+                <button type="button" class="tab-btn ${defaultTab == 'list' ? 'active' : ''}" data-tab-target="list-tab">
                     <i class="fas fa-list"></i> Manage Assessments (${assessments.size()})
                 </button>
                 <c:if test="${not empty selectedAssessment}">
-                    <button type="button" class="tab-btn ${defaultTab == 'details' ? 'active' : ''}" onclick="showTab(event, 'details-tab')">
+                    <button type="button" class="tab-btn ${defaultTab == 'details' ? 'active' : ''}" data-tab-target="details-tab">
                         <i class="fas fa-clipboard-check"></i> Assessment Details
                     </button>
                 </c:if>
@@ -298,13 +298,13 @@
 
                     <!-- Sub-tabs for Questions vs Submissions -->
                     <div class="sub-tabs">
-                        <button type="button" class="sub-tab-btn active" onclick="showSubTab(event, 'questions-section')">
+                        <button type="button" class="sub-tab-btn active" data-subtab-target="questions-section">
                             <i class="fas fa-question-circle"></i> Questions (${questions.size()})
                         </button>
-                        <button type="button" class="sub-tab-btn" onclick="showSubTab(event, 'submissions-section')">
+                        <button type="button" class="sub-tab-btn" data-subtab-target="submissions-section">
                             <i class="fas fa-users"></i> Student Submissions (${submissions.size()})
                         </button>
-                        <button type="button" class="sub-tab-btn" onclick="showSubTab(event, 'retake-section')">
+                        <button type="button" class="sub-tab-btn" data-subtab-target="retake-section">
                             <i class="fas fa-redo"></i> Retake Requests (${retakeRequests.size()})
                         </button>
                     </div>
@@ -313,8 +313,16 @@
                     <div id="questions-section" class="sub-tab-content active">
                         <div class="questions-section">
                             <h3><i class="fas fa-plus-circle"></i> Add Question</h3>
-                            <p class="form-subtitle">
-                                <strong>Note:</strong> Quiz questions require options A & B and a correct option. Exam and Assignment questions can be structured (no options).
+                            <p class="form-subtitle" id="question-note">
+                                <strong>Note:</strong>
+                                <c:choose>
+                                    <c:when test="${selectedAssessment.type == 'Assignment'}">
+                                        Assignment questions are descriptive. No options required. Students will upload a file.
+                                    </c:when>
+                                    <c:otherwise>
+                                        Quiz/Exam questions require options A & B and a correct option.
+                                    </c:otherwise>
+                                </c:choose>
                             </p>
                             <div class="add-question-form">
                                 <form method="post" action="${pageContext.request.contextPath}/instructor/assessments">
@@ -326,14 +334,16 @@
                                             <label>Question Text *</label>
                                             <textarea name="questionText" rows="3" required placeholder="Enter your question here..."></textarea>
                                         </div>
-                                        <div class="field"><label>Option A</label><input type="text" name="optionA" placeholder="Option A"></div>
-                                        <div class="field"><label>Option B</label><input type="text" name="optionB" placeholder="Option B"></div>
-                                        <div class="field"><label>Option C</label><input type="text" name="optionC" placeholder="Option C"></div>
-                                        <div class="field"><label>Option D</label><input type="text" name="optionD" placeholder="Option D"></div>
-                                        <div class="field">
+                                        <div class="option-fields">
+                                            <div class="field"><label>Option A</label><input type="text" name="optionA" placeholder="Option A"></div>
+                                            <div class="field"><label>Option B</label><input type="text" name="optionB" placeholder="Option B"></div>
+                                            <div class="field"><label>Option C</label><input type="text" name="optionC" placeholder="Option C"></div>
+                                            <div class="field"><label>Option D</label><input type="text" name="optionD" placeholder="Option D"></div>
+                                        </div>
+                                        <div class="field correct-field">
                                             <label>Correct Option</label>
                                             <select name="correctOption">
-                                                <option value="">None (for Assignments)</option>
+                                                <option value="">None</option>
                                                 <option value="A">A</option>
                                                 <option value="B">B</option>
                                                 <option value="C">C</option>
@@ -616,54 +626,40 @@
 </main>
 <script>
     // Tab navigation
-    function showTab(event, tabId) {
-        if (event) {
-            event.preventDefault();
-        }
-        // Hide all tabs
+    function showTab(tabId, trigger) {
         document.querySelectorAll('.tab-content').forEach(tab => {
             tab.style.display = 'none';
             tab.classList.remove('active');
         });
-        // Remove active class from all tab buttons
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.classList.remove('active');
         });
-        // Show selected tab
         const selectedTab = document.getElementById(tabId);
         if (selectedTab) {
             selectedTab.style.display = 'block';
             selectedTab.classList.add('active');
         }
-        // Add active class to clicked button
-        if (event && event.currentTarget) {
-            event.currentTarget.classList.add('active');
+        if (trigger) {
+            trigger.classList.add('active');
         }
     }
-    
+
     // Sub-tab navigation
-    function showSubTab(event, subTabId) {
-        if (event) {
-            event.preventDefault();
-        }
-        // Hide all sub-tabs
+    function showSubTab(subTabId, trigger) {
         document.querySelectorAll('.sub-tab-content').forEach(tab => {
             tab.style.display = 'none';
             tab.classList.remove('active');
         });
-        // Remove active class from all sub-tab buttons
         document.querySelectorAll('.sub-tab-btn').forEach(btn => {
             btn.classList.remove('active');
         });
-        // Show selected sub-tab
         const selectedSubTab = document.getElementById(subTabId);
         if (selectedSubTab) {
             selectedSubTab.style.display = 'block';
             selectedSubTab.classList.add('active');
         }
-        // Add active class to clicked button
-        if (event && event.currentTarget) {
-            event.currentTarget.classList.add('active');
+        if (trigger) {
+            trigger.classList.add('active');
         }
     }
     
@@ -681,6 +677,44 @@
     
     // Calculate submission statistics
     document.addEventListener('DOMContentLoaded', function() {
+        function syncQuestionForm() {
+            var type = '${selectedAssessment.type}';
+            var optionFields = document.querySelector('.option-fields');
+            var correctField = document.querySelector('.correct-field');
+            var note = document.getElementById('question-note');
+            var isAssignment = type === 'Assignment';
+            if (optionFields) optionFields.style.display = isAssignment ? 'none' : 'contents';
+            if (correctField) correctField.style.display = isAssignment ? 'none' : 'block';
+            if (note) {
+                note.innerHTML = '<strong>Note:</strong> ' + (isAssignment
+                    ? 'Assignment questions are descriptive. No options required. Students will upload a file.'
+                    : 'Quiz/Exam questions require options A & B and a correct option.');
+            }
+        }
+        syncQuestionForm();
+
+        // Wire tab buttons reliably (fixes non-responsive buttons in some layouts)
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const target = btn.getAttribute('data-tab-target');
+                if (target) showTab(target, btn);
+            });
+        });
+        document.querySelectorAll('.sub-tab-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const target = btn.getAttribute('data-subtab-target');
+                if (target) showSubTab(target, btn);
+            });
+        });
+
+        // Ensure default active tabs are visible on load
+        const activeTabBtn = document.querySelector('.tab-btn.active');
+        const activeTabId = activeTabBtn ? activeTabBtn.getAttribute('data-tab-target') : null;
+        if (activeTabId) showTab(activeTabId, activeTabBtn);
+        const activeSubTabBtn = document.querySelector('.sub-tab-btn.active');
+        const activeSubTabId = activeSubTabBtn ? activeSubTabBtn.getAttribute('data-subtab-target') : null;
+        if (activeSubTabId) showSubTab(activeSubTabId, activeSubTabBtn);
+
         const submissionsTable = document.querySelector('#submissions-section .data-table tbody');
         if (submissionsTable) {
             const rows = submissionsTable.querySelectorAll('tr');

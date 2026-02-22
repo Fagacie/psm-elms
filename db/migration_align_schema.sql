@@ -55,6 +55,18 @@ ALTER TABLE `Material`
 ALTER TABLE `Material`
   ADD INDEX IF NOT EXISTS `idx_material_course_order` (`CourseID`, `DisplayOrder`);
 
+CREATE TABLE IF NOT EXISTS `MaterialProgress` (
+  `ProgressID` INT AUTO_INCREMENT PRIMARY KEY,
+  `UserID` INT NOT NULL,
+  `MaterialID` INT NOT NULL,
+  `ViewedAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY `uk_material_progress` (`UserID`, `MaterialID`),
+  KEY `idx_material_progress_user` (`UserID`),
+  KEY `idx_material_progress_material` (`MaterialID`),
+  CONSTRAINT `fk_material_progress_user` FOREIGN KEY (`UserID`) REFERENCES `User`(`UserID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_material_progress_material` FOREIGN KEY (`MaterialID`) REFERENCES `Material`(`MaterialID`) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
 UPDATE `Material` m
 JOIN (
   SELECT `MaterialID`,
@@ -239,7 +251,13 @@ ALTER TABLE `Certificate`
   ADD COLUMN IF NOT EXISTS `IssueDate` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   ADD COLUMN IF NOT EXISTS `QRCodePath` VARCHAR(255) NULL,
   ADD COLUMN IF NOT EXISTS `GeneratedBy` VARCHAR(100) NULL,
-  ADD COLUMN IF NOT EXISTS `VerificationURL` VARCHAR(255) NULL;
+  ADD COLUMN IF NOT EXISTS `VerificationURL` VARCHAR(255) NULL,
+  ADD COLUMN IF NOT EXISTS `Status` ENUM('Active','Revoked') NOT NULL DEFAULT 'Active',
+  ADD COLUMN IF NOT EXISTS `RevokedAt` TIMESTAMP NULL DEFAULT NULL,
+  ADD COLUMN IF NOT EXISTS `RevokedBy` INT NULL;
+
+ALTER TABLE `Certificate`
+  ADD INDEX IF NOT EXISTS `idx_certificate_status` (`Status`);
 
 -- Map legacy fields if present
 UPDATE `Certificate`

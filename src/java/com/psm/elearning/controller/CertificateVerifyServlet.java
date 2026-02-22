@@ -49,6 +49,12 @@ public class CertificateVerifyServlet extends HttpServlet {
             request.getRequestDispatcher("/WEB-INF/views/certificate-verify.jsp").forward(request, response);
             return;
         }
+        if ("Revoked".equalsIgnoreCase(certificate.getStatus())) {
+            request.setAttribute("valid", false);
+            request.setAttribute("message", "Certificate has been revoked.");
+            request.getRequestDispatcher("/WEB-INF/views/certificate-verify.jsp").forward(request, response);
+            return;
+        }
 
         Enrollment enrollment = enrollmentDAO.getEnrollment(certificate.getEnrollmentId());
         Course course = enrollment != null ? courseDAO.findById(enrollment.getCourseId()) : null;

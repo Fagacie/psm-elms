@@ -10,6 +10,10 @@ public class CertificateView {
     private LocalDateTime issueDate;
     private String generatedBy;
     private String verificationURL;
+    private String qrCodePath;
+    private String status;
+    private LocalDateTime revokedAt;
+    private Integer revokedBy;
     private String studentName;
     private String studentEmail;
     private String regNumber;
@@ -71,6 +75,38 @@ public class CertificateView {
 
     public void setVerificationURL(String verificationURL) {
         this.verificationURL = verificationURL;
+    }
+
+    public String getQrCodePath() {
+        return qrCodePath;
+    }
+
+    public void setQrCodePath(String qrCodePath) {
+        this.qrCodePath = qrCodePath;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public LocalDateTime getRevokedAt() {
+        return revokedAt;
+    }
+
+    public void setRevokedAt(LocalDateTime revokedAt) {
+        this.revokedAt = revokedAt;
+    }
+
+    public Integer getRevokedBy() {
+        return revokedBy;
+    }
+
+    public void setRevokedBy(Integer revokedBy) {
+        this.revokedBy = revokedBy;
     }
 
     public String getStudentName() {

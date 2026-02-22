@@ -38,6 +38,8 @@ public class Enrollment {
     @Pattern(regexp = "^(Not Started|In Progress|Completed)$", 
              message = "Completion status must be Not Started, In Progress, or Completed")
     private String completionStatus;
+
+    private Integer progress;
     
     // Additional fields for joined queries
     @Size(max = 200, message = "Course name must not exceed 200 characters")
@@ -131,6 +133,9 @@ public class Enrollment {
     
     public String getCompletionStatus() { return completionStatus; }
     public void setCompletionStatus(String completionStatus) { this.completionStatus = completionStatus; }
+
+    public Integer getProgress() { return progress; }
+    public void setProgress(Integer progress) { this.progress = progress; }
     
     public String getCourseName() { return courseName; }
     public void setCourseName(String courseName) { this.courseName = courseName; }
@@ -153,9 +158,3 @@ public class Enrollment {
     public String getInstructorEmail() { return instructorEmail; }
     public void setInstructorEmail(String instructorEmail) { this.instructorEmail = instructorEmail; }
 }
-
-
-
-
-
-

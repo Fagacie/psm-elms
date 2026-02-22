@@ -6,6 +6,8 @@ import com.psm.elearning.dao.EnrollmentDAO;
 import com.psm.elearning.dao.EnrollmentDAOImpl;
 import com.psm.elearning.dao.MaterialDAO;
 import com.psm.elearning.dao.MaterialDAOImpl;
+import com.psm.elearning.dao.MaterialProgressDAO;
+import com.psm.elearning.dao.MaterialProgressDAOImpl;
 import com.psm.elearning.dao.PaymentDAO;
 import com.psm.elearning.dao.PaymentDAOImpl;
 import com.psm.elearning.model.Course;
@@ -35,6 +37,7 @@ public class StudentMaterialServlet extends HttpServlet {
 
     private final EnrollmentDAO enrollmentDAO = new EnrollmentDAOImpl();
     private final MaterialDAO materialDAO = new MaterialDAOImpl();
+    private final MaterialProgressDAO progressDAO = new MaterialProgressDAOImpl();
     private final CourseDAO courseDAO = new CourseDAOImpl();
     private final PaymentDAO paymentDAO = new PaymentDAOImpl();
 
@@ -51,6 +54,12 @@ public class StudentMaterialServlet extends HttpServlet {
         Integer userId = (Integer) session.getAttribute("userId");
         String action = request.getParameter("action");
         if ("view".equalsIgnoreCase(action) || "download".equalsIgnoreCase(action)) {
+            if ("view".equalsIgnoreCase(action)) {
+                Integer materialId = parseInt(request.getParameter("id"));
+                if (materialId != null) {
+                    progressDAO.markViewed(userId, materialId);
+                }
+            }
             serveMaterialFile(request, response, userId, "download".equalsIgnoreCase(action));
             return;
         }
@@ -282,6 +291,15 @@ public class StudentMaterialServlet extends HttpServlet {
         if (lower.endsWith(".zip")) return "application/zip";
         if (lower.endsWith(".txt")) return "text/plain";
         return "application/octet-stream";
+    }
+
+    private Integer parseInt(String value) {
+        try {
+            if (value == null || value.trim().isEmpty()) return null;
+            return Integer.parseInt(value.trim());
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 
     private List<Enrollment> filterPaidEnrollments(List<Enrollment> enrollments) {

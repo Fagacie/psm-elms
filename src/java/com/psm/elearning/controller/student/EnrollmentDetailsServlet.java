@@ -12,12 +12,15 @@ import com.psm.elearning.dao.AssessmentSubmissionDAO;
 import com.psm.elearning.dao.AssessmentSubmissionDAOImpl;
 import com.psm.elearning.dao.AssessmentRetakeRequestDAO;
 import com.psm.elearning.dao.AssessmentRetakeRequestDAOImpl;
+import com.psm.elearning.dao.MaterialProgressDAO;
+import com.psm.elearning.dao.MaterialProgressDAOImpl;
 import com.psm.elearning.model.Enrollment;
 import com.psm.elearning.model.Material;
 import com.psm.elearning.model.Payment;
 import com.psm.elearning.model.Assessment;
 import com.psm.elearning.model.AssessmentSubmission;
 import com.psm.elearning.util.AssessmentPlacementUtil;
+import com.psm.elearning.service.EnrollmentStateSyncService;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -43,6 +46,8 @@ public class EnrollmentDetailsServlet extends HttpServlet {
     private AssessmentDAO assessmentDAO;
     private AssessmentSubmissionDAO submissionDAO;
     private AssessmentRetakeRequestDAO retakeRequestDAO;
+    private MaterialProgressDAO materialProgressDAO;
+    private EnrollmentStateSyncService enrollmentStateSyncService;
 
     public static class LearningItem {
         private final int order;
@@ -138,6 +143,8 @@ public class EnrollmentDetailsServlet extends HttpServlet {
         assessmentDAO = new AssessmentDAOImpl();
         submissionDAO = new AssessmentSubmissionDAOImpl();
         retakeRequestDAO = new AssessmentRetakeRequestDAOImpl();
+        materialProgressDAO = new MaterialProgressDAOImpl();
+        enrollmentStateSyncService = new EnrollmentStateSyncService();
     }
     
     @Override
@@ -335,15 +342,15 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                     String primaryIconAssessment = null;
                     if (paidAccess && hasActiveAttempt) {
                         primaryLabelAssessment = "Continue";
-                        primaryUrlAssessment = request.getContextPath() + "/student/assessments?courseId=" + enrollment.getCourseId() + "&assessmentId=" + assessment.getAssessmentId() + "&mode=attempt";
+                        primaryUrlAssessment = request.getContextPath() + "/student/assessments?courseId=" + enrollment.getCourseId() + "&assessmentId=" + assessment.getAssessmentId() + "&mode=attempt&fromHub=1&enrollmentId=" + enrollment.getEnrollmentId();
                         primaryIconAssessment = "fa-play";
                     } else if (paidAccess && used < Math.max(allowed, 1)) {
                         primaryLabelAssessment = "Start";
-                        primaryUrlAssessment = request.getContextPath() + "/student/assessments?action=start&courseId=" + enrollment.getCourseId() + "&assessmentId=" + assessment.getAssessmentId();
+                        primaryUrlAssessment = request.getContextPath() + "/student/assessments?action=start&courseId=" + enrollment.getCourseId() + "&assessmentId=" + assessment.getAssessmentId() + "&fromHub=1&enrollmentId=" + enrollment.getEnrollmentId();
                         primaryIconAssessment = "fa-play";
                     }
                     String secondaryLabelAssessment = "Details";
-                    String secondaryUrlAssessment = request.getContextPath() + "/student/assessments?courseId=" + enrollment.getCourseId() + "&assessmentId=" + assessment.getAssessmentId();
+                    String secondaryUrlAssessment = request.getContextPath() + "/student/assessments?courseId=" + enrollment.getCourseId() + "&assessmentId=" + assessment.getAssessmentId() + "&fromHub=1&enrollmentId=" + enrollment.getEnrollmentId();
                     String secondaryIconAssessment = "fa-info-circle";
                     learningItems.add(new LearningItem(
                             orderIndex++,
@@ -400,15 +407,15 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                 String primaryIcon = null;
                 if (paidAccess && hasActiveAttempt) {
                     primaryLabel = "Continue";
-                    primaryUrl = request.getContextPath() + "/student/assessments?courseId=" + enrollment.getCourseId() + "&assessmentId=" + assessment.getAssessmentId() + "&mode=attempt";
+                    primaryUrl = request.getContextPath() + "/student/assessments?courseId=" + enrollment.getCourseId() + "&assessmentId=" + assessment.getAssessmentId() + "&mode=attempt&fromHub=1&enrollmentId=" + enrollment.getEnrollmentId();
                     primaryIcon = "fa-play";
                 } else if (paidAccess && used < Math.max(allowed, 1)) {
                     primaryLabel = "Start";
-                    primaryUrl = request.getContextPath() + "/student/assessments?action=start&courseId=" + enrollment.getCourseId() + "&assessmentId=" + assessment.getAssessmentId();
+                    primaryUrl = request.getContextPath() + "/student/assessments?action=start&courseId=" + enrollment.getCourseId() + "&assessmentId=" + assessment.getAssessmentId() + "&fromHub=1&enrollmentId=" + enrollment.getEnrollmentId();
                     primaryIcon = "fa-play";
                 }
                 String secondaryLabel = "Details";
-                String secondaryUrl = request.getContextPath() + "/student/assessments?courseId=" + enrollment.getCourseId() + "&assessmentId=" + assessment.getAssessmentId();
+                String secondaryUrl = request.getContextPath() + "/student/assessments?courseId=" + enrollment.getCourseId() + "&assessmentId=" + assessment.getAssessmentId() + "&fromHub=1&enrollmentId=" + enrollment.getEnrollmentId();
                 String secondaryIcon = "fa-info-circle";
                 learningItems.add(new LearningItem(
                         orderIndex++,
@@ -436,7 +443,8 @@ public class EnrollmentDetailsServlet extends HttpServlet {
 
             String tab = request.getParameter("tab");
             if (tab == null || tab.trim().isEmpty()) tab = "learning";
-            int progressPercent = resolveProgressPercent(enrollment.getCompletionStatus(), enrollment.getStatus());
+            EnrollmentStateSyncService.SyncResult syncResult = enrollmentStateSyncService.syncEnrollmentState(enrollment);
+            int progressPercent = syncResult.getProgressPercent();
             
             request.setAttribute("enrollment", enrollment);
             request.setAttribute("materials", materials);
@@ -450,6 +458,7 @@ public class EnrollmentDetailsServlet extends HttpServlet {
             request.setAttribute("allowedAttemptsByAssessment", allowedAttemptsByAssessment);
             request.setAttribute("latestSubmissionByAssessment", latestSubmissionByAssessment);
             request.setAttribute("activeAttemptByAssessment", activeAttemptByAssessment);
+            request.setAttribute("materialsViewedCount", syncResult.getViewedMaterials());
             request.setAttribute("learningItems", learningItems);
             request.getRequestDispatcher("/WEB-INF/views/student/enrollment-details.jsp").forward(request, response);
             
@@ -462,11 +471,45 @@ public class EnrollmentDetailsServlet extends HttpServlet {
         }
     }
 
-    private int resolveProgressPercent(String completionStatus, String status) {
-        if ("Completed".equalsIgnoreCase(completionStatus) || "Completed".equalsIgnoreCase(status)) return 100;
-        if ("In Progress".equalsIgnoreCase(completionStatus)) return 65;
-        if ("Enrolled".equalsIgnoreCase(status) || "Active".equalsIgnoreCase(status)) return 25;
-        return 0;
+    private int resolveProgressPercent(Enrollment enrollment, List<Material> materials, List<Assessment> assessments, Integer userId) {
+        if (enrollment == null || userId == null) return 0;
+        if ("Completed".equalsIgnoreCase(enrollment.getCompletionStatus()) || "Completed".equalsIgnoreCase(enrollment.getStatus())) {
+            return 100;
+        }
+
+        int totalMaterials = materials != null ? materials.size() : 0;
+        int viewedMaterials = materialProgressDAO.countViewedByCourse(userId, enrollment.getCourseId());
+        double materialRatio = totalMaterials == 0 ? 1.0 : Math.min(1.0, (double) viewedMaterials / totalMaterials);
+
+        int totalAssessments = assessments != null ? assessments.size() : 0;
+        int passedAssessments = 0;
+        if (assessments != null) {
+            for (Assessment a : assessments) {
+                List<AssessmentSubmission> subs = submissionDAO.findByAssessmentAndUser(a.getAssessmentId(), userId);
+                boolean passed = false;
+                if (subs != null) {
+                    for (AssessmentSubmission s : subs) {
+                        if (s.getScore() == null) continue;
+                        if ("TimedOut".equalsIgnoreCase(s.getStatus())) continue;
+                        double threshold = resolvePassThreshold(a.getTotalMarks());
+                        if (s.getScore() >= threshold) {
+                            passed = true;
+                            break;
+                        }
+                    }
+                }
+                if (passed) passedAssessments++;
+            }
+        }
+        double assessmentRatio = totalAssessments == 0 ? 1.0 : Math.min(1.0, (double) passedAssessments / totalAssessments);
+
+        int percent = (int) Math.round((materialRatio * 60.0) + (assessmentRatio * 40.0));
+        return Math.max(0, Math.min(100, percent));
+    }
+
+    private double resolvePassThreshold(Integer totalMarks) {
+        if (totalMarks == null || totalMarks <= 0) return 50.0;
+        return totalMarks * 0.5;
     }
 
     private String resolveMaterialIcon(String materialType) {
@@ -497,3 +540,9 @@ public class EnrollmentDetailsServlet extends HttpServlet {
         }
     }
 }
+
+
+
+
+
+

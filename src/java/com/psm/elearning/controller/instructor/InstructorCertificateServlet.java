@@ -32,6 +32,42 @@ public class InstructorCertificateServlet extends HttpServlet {
         request.getRequestDispatcher("/WEB-INF/views/instructor/course-certificates.jsp").forward(request, response);
     }
 
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        HttpSession session = request.getSession(false);
+        if (!isInstructor(session)) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
+        String action = request.getParameter("action");
+        if (!"revoke".equalsIgnoreCase(action)) {
+            response.sendRedirect(request.getContextPath() + "/instructor/certificates?error=invalid");
+            return;
+        }
+
+        Integer userId = (Integer) session.getAttribute("userId");
+        Integer certificateId = parseInt(request.getParameter("certificateId"));
+        if (certificateId == null) {
+            response.sendRedirect(request.getContextPath() + "/instructor/certificates?error=invalid");
+            return;
+        }
+
+        boolean revoked = certificateDAO.revoke(certificateId, userId);
+        response.sendRedirect(request.getContextPath() + "/instructor/certificates" + (revoked ? "?success=revoked" : "?error=revoke"));
+    }
+
+    private Integer parseInt(String value) {
+        try {
+            if (value == null || value.trim().isEmpty()) return null;
+            return Integer.parseInt(value.trim());
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
     private boolean isInstructor(HttpSession session) {
         if (session == null || session.getAttribute("userId") == null) return false;
         Object role = session.getAttribute("userRole");

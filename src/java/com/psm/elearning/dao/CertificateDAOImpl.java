@@ -10,6 +10,15 @@ import java.util.List;
 
 public class CertificateDAOImpl implements CertificateDAO {
 
+    private static boolean hasColumn(ResultSet rs, String columnName) throws SQLException {
+        ResultSetMetaData metaData = rs.getMetaData();
+        int columns = metaData.getColumnCount();
+        for (int i = 1; i <= columns; i++) {
+            if (columnName.equalsIgnoreCase(metaData.getColumnLabel(i))) return true;
+        }
+        return false;
+    }
+
     private Certificate mapRow(ResultSet rs) throws SQLException {
         Certificate c = new Certificate();
         c.setCertificateId(rs.getInt("CertificateID"));
@@ -20,6 +29,19 @@ public class CertificateDAOImpl implements CertificateDAO {
         c.setQrCodePath(rs.getString("QRCodePath"));
         c.setGeneratedBy(rs.getString("GeneratedBy"));
         c.setVerificationURL(rs.getString("VerificationURL"));
+        if (hasColumn(rs, "Status")) {
+            c.setStatus(rs.getString("Status"));
+        } else {
+            c.setStatus("Active");
+        }
+        if (hasColumn(rs, "RevokedAt")) {
+            Timestamp revokedAt = rs.getTimestamp("RevokedAt");
+            c.setRevokedAt(revokedAt != null ? revokedAt.toLocalDateTime() : null);
+        }
+        if (hasColumn(rs, "RevokedBy")) {
+            int revokedBy = rs.getInt("RevokedBy");
+            c.setRevokedBy(rs.wasNull() ? null : revokedBy);
+        }
         return c;
     }
 
@@ -33,6 +55,22 @@ public class CertificateDAOImpl implements CertificateDAO {
         c.setIssueDate(id != null ? id.toLocalDateTime() : null);
         c.setGeneratedBy(rs.getString("GeneratedBy"));
         c.setVerificationURL(rs.getString("VerificationURL"));
+        if (hasColumn(rs, "QRCodePath")) {
+            c.setQrCodePath(rs.getString("QRCodePath"));
+        }
+        if (hasColumn(rs, "Status")) {
+            c.setStatus(rs.getString("Status"));
+        } else {
+            c.setStatus("Active");
+        }
+        if (hasColumn(rs, "RevokedAt")) {
+            Timestamp revokedAt = rs.getTimestamp("RevokedAt");
+            c.setRevokedAt(revokedAt != null ? revokedAt.toLocalDateTime() : null);
+        }
+        if (hasColumn(rs, "RevokedBy")) {
+            int revokedBy = rs.getInt("RevokedBy");
+            c.setRevokedBy(rs.wasNull() ? null : revokedBy);
+        }
         c.setStudentName(rs.getString("StudentName"));
         c.setStudentEmail(rs.getString("StudentEmail"));
         c.setRegNumber(rs.getString("RegNumber"));
@@ -43,7 +81,7 @@ public class CertificateDAOImpl implements CertificateDAO {
     }
 
     private static final String CERTIFICATE_DETAIL_SELECT =
-            "SELECT c.CertificateID, c.EnrollmentID, c.CertificateNo, c.IssueDate, c.GeneratedBy, c.VerificationURL, "
+            "SELECT c.CertificateID, c.EnrollmentID, c.CertificateNo, c.IssueDate, c.GeneratedBy, c.VerificationURL, c.QRCodePath, c.Status, c.RevokedAt, c.RevokedBy, "
                     + "e.CourseID, e.UserID AS StudentUserID, co.CreatedBy AS CourseCreatedBy, "
                     + "u.FullName AS StudentName, u.Email AS StudentEmail, s.RegNumber, co.CourseName "
                     + "FROM Certificate c "
@@ -194,5 +232,24 @@ public class CertificateDAOImpl implements CertificateDAO {
             System.err.println("Certificate findDetailedById failed: " + e.getMessage());
         }
         return null;
+    }
+
+    @Override
+    public boolean revoke(int certificateId, Integer revokedBy) {
+        String sql = "UPDATE Certificate SET Status='Revoked', RevokedAt=CURRENT_TIMESTAMP, RevokedBy=? " +
+                "WHERE CertificateID=? AND (Status IS NULL OR Status <> 'Revoked')";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            if (revokedBy != null) {
+                ps.setInt(1, revokedBy);
+            } else {
+                ps.setNull(1, Types.INTEGER);
+            }
+            ps.setInt(2, certificateId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Certificate revoke failed: " + e.getMessage());
+            return false;
+        }
     }
 }

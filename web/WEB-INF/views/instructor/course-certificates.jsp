@@ -55,6 +55,12 @@
     <div class="content-wrapper">
         <div class="section-card">
             <h3>Issued Certificates in Your Courses</h3>
+            <c:if test="${param.success == 'revoked'}">
+                <div class="alert alert-success" style="margin-bottom:12px;">Certificate revoked successfully.</div>
+            </c:if>
+            <c:if test="${param.error == 'revoke'}">
+                <div class="alert alert-error" style="margin-bottom:12px;">Unable to revoke certificate.</div>
+            </c:if>
             <c:choose>
                 <c:when test="${empty certificates}">
                     <p>No certificates issued yet.</p>
@@ -68,6 +74,7 @@
                             <th>Registration No</th>
                             <th>Course</th>
                             <th>Issue Date</th>
+                            <th>Status</th>
                             <th>Actions</th>
                         </tr>
                         </thead>
@@ -81,15 +88,27 @@
                                 <td>
                                     <c:choose>
                                         <c:when test="${not empty cert.issueDate}">
-                                            <c:set var="dateText" value="${cert.issueDate.toString()}"/>
-                                            ${fn:length(dateText) >= 10 ? fn:substring(dateText, 0, 10) : dateText}
+                                            ${cert.issueDate.toLocalDate()}
                                         </c:when>
                                         <c:otherwise>-</c:otherwise>
                                     </c:choose>
                                 </td>
                                 <td>
+                                    <c:choose>
+                                        <c:when test="${cert.status == 'Revoked'}"><span class="badge badge-danger">Revoked</span></c:when>
+                                        <c:otherwise><span class="badge badge-success">Active</span></c:otherwise>
+                                    </c:choose>
+                                </td>
+                                <td>
                                     <a class="btn btn-secondary btn-sm" href="${pageContext.request.contextPath}/certificate/template?certificateId=${cert.certificateId}&back=${pageContext.request.contextPath}/instructor/certificates">Template</a>
                                     <a class="btn btn-primary btn-sm" target="_blank" href="${cert.verificationURL}">Verify</a>
+                                    <c:if test="${cert.status != 'Revoked'}">
+                                        <form method="post" action="${pageContext.request.contextPath}/instructor/certificates" style="display:inline;">
+                                            <input type="hidden" name="action" value="revoke">
+                                            <input type="hidden" name="certificateId" value="${cert.certificateId}">
+                                            <button class="btn btn-danger btn-sm" type="submit" onclick="return confirm('Revoke this certificate?');">Revoke</button>
+                                        </form>
+                                    </c:if>
                                 </td>
                             </tr>
                         </c:forEach>

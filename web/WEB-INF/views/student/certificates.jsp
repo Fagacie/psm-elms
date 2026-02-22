@@ -61,7 +61,10 @@
                                 <td>${enrollment.courseName}</td>
                                 <td>${enrollment.completionStatus}</td>
                                 <td>
-                                    <a class="btn btn-primary btn-sm" href="${pageContext.request.contextPath}/student/certificate?enrollmentId=${enrollment.enrollmentId}">Generate Certificate</a>
+                                    <form method="post" action="${pageContext.request.contextPath}/student/certificate" style="display:inline;">
+                                        <input type="hidden" name="enrollmentId" value="${enrollment.enrollmentId}">
+                                        <button class="btn btn-primary btn-sm" type="submit">Generate Certificate</button>
+                                    </form>
                                 </td>
                             </tr>
                         </c:forEach>
@@ -84,6 +87,7 @@
                             <th>Certificate No</th>
                             <th>Course</th>
                             <th>Issue Date</th>
+                            <th>Status</th>
                             <th>Actions</th>
                         </tr>
                         </thead>
@@ -95,10 +99,15 @@
                                 <td>
                                     <c:choose>
                                         <c:when test="${not empty cert.issueDate}">
-                                            <c:set var="dateText" value="${cert.issueDate.toString()}"/>
-                                            ${fn:length(dateText) >= 10 ? fn:substring(dateText, 0, 10) : dateText}
+                                            ${cert.issueDate.toLocalDate()}
                                         </c:when>
                                         <c:otherwise>-</c:otherwise>
+                                    </c:choose>
+                                </td>
+                                <td>
+                                    <c:choose>
+                                        <c:when test="${cert.status == 'Revoked'}"><span class="badge badge-danger">Revoked</span></c:when>
+                                        <c:otherwise><span class="badge badge-success">Active</span></c:otherwise>
                                     </c:choose>
                                 </td>
                                 <td>

@@ -4,12 +4,10 @@ import com.psm.elearning.dao.CertificateDAO;
 import com.psm.elearning.dao.CertificateDAOImpl;
 import com.psm.elearning.dao.EnrollmentDAO;
 import com.psm.elearning.dao.EnrollmentDAOImpl;
-import com.psm.elearning.dao.PaymentDAO;
-import com.psm.elearning.dao.PaymentDAOImpl;
 import com.psm.elearning.model.Certificate;
 import com.psm.elearning.model.CertificateView;
 import com.psm.elearning.model.Enrollment;
-import com.psm.elearning.model.Payment;
+import com.psm.elearning.service.EnrollmentStateSyncService;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -24,7 +22,7 @@ public class StudentCertificatesServlet extends HttpServlet {
 
     private final CertificateDAO certificateDAO = new CertificateDAOImpl();
     private final EnrollmentDAO enrollmentDAO = new EnrollmentDAOImpl();
-    private final PaymentDAO paymentDAO = new PaymentDAOImpl();
+    private final EnrollmentStateSyncService enrollmentStateSyncService = new EnrollmentStateSyncService();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -43,7 +41,9 @@ public class StudentCertificatesServlet extends HttpServlet {
         List<Enrollment> readyToGenerate = new ArrayList<>();
 
         for (Enrollment enrollment : enrollments) {
-            if (!isEligible(enrollment)) continue;
+            EnrollmentStateSyncService.SyncResult syncResult = enrollmentStateSyncService.syncEnrollmentState(enrollment);
+            if (!syncResult.isEligibleForCertificate()) continue;
+
             Certificate existing = certificateDAO.findByEnrollment(enrollment.getEnrollmentId());
             if (existing == null) {
                 readyToGenerate.add(enrollment);
@@ -53,22 +53,6 @@ public class StudentCertificatesServlet extends HttpServlet {
         request.setAttribute("issuedCertificates", issuedCertificates);
         request.setAttribute("readyToGenerate", readyToGenerate);
         request.getRequestDispatcher("/WEB-INF/views/student/certificates.jsp").forward(request, response);
-    }
-
-    private boolean isEligible(Enrollment enrollment) {
-        boolean paid = false;
-        if (enrollment.getPaymentStatus() != null) {
-            paid = "Paid".equalsIgnoreCase(enrollment.getPaymentStatus());
-        }
-        if (!paid && enrollment.getEnrollmentId() != null) {
-            Payment payment = paymentDAO.getPaymentByEnrollmentId(enrollment.getEnrollmentId());
-            paid = payment != null && "Paid".equalsIgnoreCase(payment.getStatus());
-        }
-
-        boolean completed = "Completed".equalsIgnoreCase(enrollment.getCompletionStatus())
-                || "Completed".equalsIgnoreCase(enrollment.getStatus());
-
-        return paid && completed;
     }
 
     private boolean isStudent(HttpSession session) {

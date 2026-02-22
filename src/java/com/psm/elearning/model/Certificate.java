@@ -31,13 +31,19 @@ public class Certificate {
     
     @Size(max = 255, message = "Verification URL must not exceed 255 characters")
     private String verificationURL;
+
+    @Size(max = 20, message = "Status must not exceed 20 characters")
+    private String status;
+
+    private LocalDateTime revokedAt;
+    private Integer revokedBy;
     
     // Constructors
     public Certificate() {}
     
     public Certificate(Integer certificateId, Integer enrollmentId, String certificateNo,
                       LocalDateTime issueDate, String qrCodePath, String generatedBy,
-                      String verificationURL) {
+                      String verificationURL, String status, LocalDateTime revokedAt, Integer revokedBy) {
         this.certificateId = certificateId;
         this.enrollmentId = enrollmentId;
         this.certificateNo = certificateNo;
@@ -45,6 +51,9 @@ public class Certificate {
         this.qrCodePath = qrCodePath;
         this.generatedBy = generatedBy;
         this.verificationURL = verificationURL;
+        this.status = status;
+        this.revokedAt = revokedAt;
+        this.revokedBy = revokedBy;
     }
     
     // Getters and Setters
@@ -68,6 +77,15 @@ public class Certificate {
     
     public String getVerificationURL() { return verificationURL; }
     public void setVerificationURL(String verificationURL) { this.verificationURL = verificationURL; }
+
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
+
+    public LocalDateTime getRevokedAt() { return revokedAt; }
+    public void setRevokedAt(LocalDateTime revokedAt) { this.revokedAt = revokedAt; }
+
+    public Integer getRevokedBy() { return revokedBy; }
+    public void setRevokedBy(Integer revokedBy) { this.revokedBy = revokedBy; }
 }
 
 

@@ -8,6 +8,7 @@ import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileSystems;
@@ -71,6 +72,38 @@ public class QRUtil {
             System.err.println("Failed to generate QR code: " + e.getMessage());
             e.printStackTrace();
             return false;
+        }
+    }
+
+    /**
+     * Generates a QR code image as byte array (PNG).
+     *
+     * @param data Data to encode in the QR code
+     * @return PNG bytes or null on failure
+     */
+    public static byte[] generateQRCodeBytes(String data) {
+        try {
+            Map<EncodeHintType, Object> hints = new HashMap<>();
+            hints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.H);
+            hints.put(EncodeHintType.CHARACTER_SET, "UTF-8");
+            hints.put(EncodeHintType.MARGIN, 1);
+
+            QRCodeWriter qrCodeWriter = new QRCodeWriter();
+            BitMatrix bitMatrix = qrCodeWriter.encode(
+                data,
+                BarcodeFormat.QR_CODE,
+                QR_CODE_WIDTH,
+                QR_CODE_HEIGHT,
+                hints
+            );
+
+            try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+                MatrixToImageWriter.writeToStream(bitMatrix, QR_CODE_FORMAT, out);
+                return out.toByteArray();
+            }
+        } catch (WriterException | IOException e) {
+            System.err.println("Failed to generate QR code bytes: " + e.getMessage());
+            return null;
         }
     }
     

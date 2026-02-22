@@ -39,6 +39,16 @@ public interface EnrollmentDAO {
      * @return true if updated successfully, false otherwise
      */
     boolean updateStatus(Integer enrollmentId, String status);
+
+    /**
+     * Update computed learning progress and completion state.
+     * @param enrollmentId Enrollment ID
+     * @param progress Progress percentage 0-100
+     * @param completionStatus Completion status (Not Started, In Progress, Completed)
+     * @param status Enrollment status (Pending, Enrolled, Active, Completed, Cancelled)
+     * @return true if updated successfully, false otherwise
+     */
+    boolean updateLearningProgress(Integer enrollmentId, Integer progress, String completionStatus, String status);
     
     /**
      * Get all enrollments for a specific student with course details.
@@ -95,4 +105,5 @@ public interface EnrollmentDAO {
      */
     Integer countActiveEnrollmentsByInstructor(Integer instructorId);
 }
+
 

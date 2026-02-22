@@ -122,6 +122,10 @@
                     <i class="fas fa-chart-line"></i>
                     <span>Progress: ${progressPercent}%</span>
                 </div>
+                <div class="meta-item">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Materials Viewed: ${materialsViewedCount} / ${materialCount}</span>
+                </div>
             </div>
         </div>
 
