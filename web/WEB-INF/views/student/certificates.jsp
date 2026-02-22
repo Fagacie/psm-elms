@@ -32,7 +32,6 @@
         <a href="${pageContext.request.contextPath}/dashboard" class="nav-item"><i class="fas fa-home"></i><span>Dashboard</span></a>
         <a href="${pageContext.request.contextPath}/student/courses" class="nav-item"><i class="fas fa-book"></i><span>Browse Courses</span></a>
         <a href="${pageContext.request.contextPath}/student/my-enrollments" class="nav-item"><i class="fas fa-graduation-cap"></i><span>My Courses</span></a>
-        <a href="${pageContext.request.contextPath}/student/materials" class="nav-item"><i class="fas fa-folder-open"></i><span>Materials</span></a>
         <a href="${pageContext.request.contextPath}/student/assessments" class="nav-item"><i class="fas fa-clipboard-list"></i><span>Assessments</span></a>
         <a href="${pageContext.request.contextPath}/student/certificates" class="nav-item active"><i class="fas fa-certificate"></i><span>Certificates</span></a>
         <a href="${pageContext.request.contextPath}/profile" class="nav-item"><i class="fas fa-user"></i><span>Profile</span></a>

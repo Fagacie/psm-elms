@@ -1,0 +1,653 @@
+/* Instructor Assessments - Consistent Instructor UI */
+
+:root {
+    --border-color: var(--color-light-grey);
+    --text-primary: var(--color-text);
+    --text-secondary: var(--color-text-light);
+    --text-muted: var(--color-text-light);
+}
+
+.course-filter-card {
+    margin-bottom: 16px;
+}
+
+.course-filter-form {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.course-filter-form label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.course-filter-form select {
+    min-width: 260px;
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    font-size: 14px;
+    color: var(--text-primary);
+    background: #fff;
+}
+
+.tabs,
+.sub-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--border-color);
+    flex-wrap: wrap;
+}
+
+.tab-btn,
+.sub-tab-btn {
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-bottom: none;
+    padding: 10px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+.tab-btn:hover,
+.sub-tab-btn:hover {
+    color: var(--color-primary);
+    background: #f8f9fa;
+}
+
+.tab-btn.active,
+.sub-tab-btn.active {
+    color: var(--color-primary);
+    border-top: 2px solid var(--color-primary);
+    background: #fff;
+}
+
+.tab-content,
+.sub-tab-content {
+    display: none;
+}
+
+.tab-content.active,
+.sub-tab-content.active {
+    display: block;
+}
+
+.assessment-form-section,
+.assessments-list-section,
+.questions-section,
+.submissions-section,
+.retake-requests-section {
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-left: 4px solid var(--color-primary);
+    padding: 22px;
+    margin-bottom: 20px;
+}
+
+.assessment-form-section h3,
+.assessments-list-section h3,
+.questions-section h3,
+.submissions-section h3,
+.retake-requests-section h3 {
+    margin: 0 0 14px 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.form-subtitle {
+    margin: 0 0 14px 0;
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.upload-form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 14px;
+    margin-bottom: 16px;
+}
+
+.upload-form-grid .field {
+    display: flex;
+    flex-direction: column;
+}
+
+.upload-form-grid .field.full {
+    grid-column: 1 / -1;
+}
+
+.upload-form-grid label {
+    margin-bottom: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.upload-form-grid input,
+.upload-form-grid select,
+.upload-form-grid textarea {
+    width: 100%;
+    border: 1px solid var(--border-color);
+    background: #fff;
+    padding: 10px 12px;
+    font-size: 14px;
+    color: var(--text-primary);
+}
+
+.upload-form-grid input:focus,
+.upload-form-grid select:focus,
+.upload-form-grid textarea:focus,
+.course-filter-form select:focus {
+    outline: none;
+    border-color: var(--color-primary);
+}
+
+.helper-text {
+    margin-top: 4px;
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.add-question-form {
+    background: #f8f9fa;
+    border: 1px solid var(--border-color);
+    padding: 14px;
+    margin-bottom: 16px;
+}
+
+.assessments-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 16px;
+}
+
+.assessment-card {
+    border: 1px solid var(--border-color);
+    background: #fff;
+    padding: 16px;
+}
+
+.assessment-card:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.assessment-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.assessment-title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.assessment-type-badge {
+    padding: 4px 10px;
+    border: 1px solid;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    background: #fff;
+}
+
+.assessment-type-badge.type-Assignment {
+    color: #1565c0;
+    border-color: #1565c0;
+}
+
+.assessment-type-badge.type-Quiz {
+    color: #2e7d32;
+    border-color: #2e7d32;
+}
+
+.assessment-type-badge.type-Exam {
+    color: #c62828;
+    border-color: #c62828;
+}
+
+.assessment-meta-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 12px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border-color);
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.assessment-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    border-top: 1px solid var(--border-color);
+    padding-top: 10px;
+}
+
+.edit-dropdown-content {
+    margin-top: 12px;
+    border-top: 1px solid var(--border-color);
+    padding-top: 12px;
+}
+
+.assessment-details-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    border: 1px solid var(--border-color);
+    border-left: 4px solid var(--color-primary);
+    background: #fff;
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.assessment-details-title {
+    margin: 0 0 8px 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.assessment-details-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.questions-list-title {
+    margin-top: 18px;
+}
+
+.questions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.question-item {
+    display: flex;
+    gap: 12px;
+    border: 1px solid var(--border-color);
+    border-left: 3px solid #ef6c00;
+    background: #fff;
+    padding: 14px;
+}
+
+.question-number {
+    min-width: 36px;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border-color);
+    background: #f8f9fa;
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.question-content {
+    flex: 1;
+}
+
+.question-item-text {
+    margin-bottom: 8px;
+    color: var(--text-primary);
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.question-item-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+.question-options {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+}
+
+.question-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px;
+    border: 1px solid var(--border-color);
+    background: #f8f9fa;
+    font-size: 13px;
+}
+
+.question-option.correct {
+    border-color: #2e7d32;
+    background: #e8f5e9;
+    font-weight: 600;
+}
+
+.option-label {
+    min-width: 22px;
+    height: 22px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border-color);
+    background: #fff;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.submissions-section .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.submissions-toolbar,
+.submissions-filter-form {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.submissions-filter-form label {
+    font-size: 13px;
+    color: var(--text-primary);
+}
+
+.submissions-filter-form select {
+    padding: 9px 10px;
+    border: 1px solid var(--border-color);
+    font-size: 13px;
+    color: var(--text-primary);
+    background: #fff;
+}
+
+.submissions-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.stat-card {
+    border: 1px solid var(--border-color);
+    border-left: 4px solid var(--color-primary);
+    background: #fff;
+    padding: 14px;
+}
+
+.stat-card:nth-child(2) { border-left-color: #2e7d32; }
+.stat-card:nth-child(3) { border-left-color: #ef6c00; }
+.stat-card:nth-child(4) { border-left-color: #1565c0; }
+
+.stat-number {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.1;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+    font-weight: 600;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid var(--border-color);
+    background: #fff;
+}
+
+.data-table th,
+.data-table td {
+    padding: 10px;
+    border-bottom: 1px solid var(--border-color);
+    text-align: left;
+    vertical-align: top;
+    font-size: 13px;
+    color: var(--text-primary);
+}
+
+.data-table th {
+    background: #f8f9fa;
+    color: var(--text-secondary);
+    font-weight: 700;
+}
+
+.data-table tbody tr:hover {
+    background: #f8f9fa;
+}
+
+.student-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.student-name { color: var(--text-primary); }
+
+.student-email {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.submission-row.ungraded { background: #fffaf0; }
+.submission-row.graded { background: #f3fbf4; }
+
+.score-pending {
+    color: #ef6c00;
+    font-weight: 600;
+}
+
+.score-value {
+    color: #2e7d32;
+    font-weight: 600;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border: 1px solid var(--border-color);
+    background: #fff;
+    color: var(--text-secondary);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-badge.status-Submitted,
+.status-badge.status-AutoSubmitted,
+.status-badge.status-Approved {
+    border-color: #2e7d32;
+    color: #2e7d32;
+    background: #e8f5e9;
+}
+
+.status-badge.status-TimedOut,
+.status-badge.status-Pending {
+    border-color: #ef6c00;
+    color: #ef6c00;
+    background: #fff3e0;
+}
+
+.status-badge.status-Rejected {
+    border-color: #c62828;
+    color: #c62828;
+    background: #ffebee;
+}
+
+.grade-dropdown summary {
+    list-style: none;
+    cursor: pointer;
+}
+
+.grade-form-container {
+    margin-top: 10px;
+    border: 1px solid var(--border-color);
+    background: #f8f9fa;
+    padding: 12px;
+    min-width: 280px;
+}
+
+.grade-form-container .form-group {
+    margin-bottom: 10px;
+}
+
+.grade-form-container label {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.grade-form-container input,
+.grade-form-container textarea {
+    width: 100%;
+    border: 1px solid var(--border-color);
+    padding: 8px 10px;
+    font-size: 13px;
+    color: var(--text-primary);
+}
+
+.file-link {
+    font-size: 13px;
+    color: var(--color-primary);
+    text-decoration: none;
+}
+
+.file-link:hover {
+    text-decoration: underline;
+}
+
+.retake-requests-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.retake-request-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+    border: 1px solid var(--border-color);
+    border-left: 4px solid #ef6c00;
+    background: #fff;
+    padding: 12px;
+}
+
+.retake-request-item.status-Approved { border-left-color: #2e7d32; }
+.retake-request-item.status-Rejected { border-left-color: #c62828; }
+
+.retake-request-content { flex: 1; }
+
+.retake-request-student {
+    margin-bottom: 6px;
+    color: var(--text-primary);
+}
+
+.retake-request-reason,
+.retake-request-status {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 3px;
+}
+
+.retake-request-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.inline-form { display: inline; }
+.inline-form-gap { margin-left: 8px; }
+
+.empty-state-box {
+    text-align: center;
+    padding: 36px 20px;
+    border: 1px dashed var(--border-color);
+    background: #f8f9fa;
+    color: var(--text-secondary);
+}
+
+.empty-state-box i {
+    font-size: 36px;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+}
+
+.empty-state-box p {
+    margin: 0 0 12px 0;
+}
+
+@media (max-width: 992px) {
+    .assessment-details-header,
+    .submissions-section .section-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .tab-btn,
+    .sub-tab-btn {
+        flex: 1;
+        text-align: center;
+    }
+}
+
+@media (max-width: 768px) {
+    .upload-form-grid,
+    .assessments-grid,
+    .assessment-meta-grid,
+    .submissions-stats,
+    .question-options {
+        grid-template-columns: 1fr;
+    }
+
+    .assessment-actions .btn,
+    .retake-request-actions .btn {
+        width: 100%;
+    }
+
+    .retake-request-item,
+    .question-item {
+        flex-direction: column;
+    }
+
+    .inline-form,
+    .inline-form-gap {
+        display: block;
+        margin-left: 0;
+        width: 100%;
+    }
+}

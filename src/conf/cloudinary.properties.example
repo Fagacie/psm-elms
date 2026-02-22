@@ -11,6 +11,7 @@ cloudinary.upload_preset=psm_elearning
 cloudinary.folder_passports=psm/passports
 cloudinary.folder_materials=psm/materials
 cloudinary.folder_certificates=psm/certificates
+cloudinary.folder_assessment_answers=psm/assessment-answers
 
 # Transformations
 cloudinary.passport_width=400

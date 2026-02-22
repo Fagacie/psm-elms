@@ -160,7 +160,10 @@
                                     <a href="${pageContext.request.contextPath}/instructor/assessments?courseId=${course.courseId}" class="btn btn-secondary btn-sm">
                                         <i class="fas fa-clipboard-list"></i> Assessments
                                     </a>
-                                    <a href="${pageContext.request.contextPath}/instructor/courses?action=students&courseId=${course.courseId}" class="btn btn-primary btn-sm">
+                                    <a href="${pageContext.request.contextPath}/instructor/content-organizer?courseId=${course.courseId}" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-layer-group"></i> Organize
+                                    </a>
+                                    <a href="${pageContext.request.contextPath}/instructor/courses?action=students&courseId=${course.courseId}" class="btn btn-secondary btn-sm">
                                         <i class="fas fa-users"></i> Students
                                     </a>
                                     <a href="${pageContext.request.contextPath}/instructor/courses?action=edit&id=${course.courseId}" class="btn btn-secondary btn-sm">

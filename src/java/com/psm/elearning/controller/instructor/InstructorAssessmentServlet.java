@@ -10,11 +10,15 @@ import com.psm.elearning.dao.AssessmentSubmissionDAO;
 import com.psm.elearning.dao.AssessmentSubmissionDAOImpl;
 import com.psm.elearning.dao.CourseDAO;
 import com.psm.elearning.dao.CourseDAOImpl;
+import com.psm.elearning.dao.MaterialDAO;
+import com.psm.elearning.dao.MaterialDAOImpl;
 import com.psm.elearning.model.Assessment;
 import com.psm.elearning.model.AssessmentQuestion;
 import com.psm.elearning.model.AssessmentRetakeRequest;
 import com.psm.elearning.model.AssessmentSubmission;
 import com.psm.elearning.model.Course;
+import com.psm.elearning.model.Material;
+import com.psm.elearning.util.AssessmentPlacementUtil;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -24,7 +28,9 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class InstructorAssessmentServlet extends HttpServlet {
 
@@ -33,6 +39,7 @@ public class InstructorAssessmentServlet extends HttpServlet {
     private final AssessmentQuestionDAO questionDAO = new AssessmentQuestionDAOImpl();
     private final AssessmentRetakeRequestDAO retakeRequestDAO = new AssessmentRetakeRequestDAOImpl();
     private final AssessmentSubmissionDAO submissionDAO = new AssessmentSubmissionDAOImpl();
+    private final MaterialDAO materialDAO = new MaterialDAOImpl();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -124,9 +131,21 @@ public class InstructorAssessmentServlet extends HttpServlet {
         }
 
         List<Assessment> assessments = new ArrayList<>();
+        List<Material> materials = new ArrayList<>();
         if (selectedCourseId != null) {
             assessments = assessmentDAO.findByCourse(selectedCourseId);
             if (assessments == null) assessments = new ArrayList<>();
+            materials = materialDAO.findByCourse(selectedCourseId);
+            if (materials == null) materials = new ArrayList<>();
+        }
+
+        Map<Integer, String> placementTypeByAssessmentId = new LinkedHashMap<>();
+        Map<Integer, Integer> placementMaterialByAssessmentId = new LinkedHashMap<>();
+        for (Assessment assessment : assessments) {
+            AssessmentPlacementUtil.Placement placement = AssessmentPlacementUtil.parsePlacement(assessment.getInstructions());
+            assessment.setInstructions(AssessmentPlacementUtil.stripPlacement(assessment.getInstructions()));
+            placementTypeByAssessmentId.put(assessment.getAssessmentId(), placement.type);
+            placementMaterialByAssessmentId.put(assessment.getAssessmentId(), placement.materialId);
         }
 
         Assessment selectedAssessment = null;
@@ -139,6 +158,10 @@ public class InstructorAssessmentServlet extends HttpServlet {
                 request.setAttribute("errorMessage", "Invalid assessment selected.");
                 selectedAssessment = null;
             } else {
+                AssessmentPlacementUtil.Placement placement = AssessmentPlacementUtil.parsePlacement(selectedAssessment.getInstructions());
+                selectedAssessment.setInstructions(AssessmentPlacementUtil.stripPlacement(selectedAssessment.getInstructions()));
+                placementTypeByAssessmentId.putIfAbsent(selectedAssessment.getAssessmentId(), placement.type);
+                placementMaterialByAssessmentId.putIfAbsent(selectedAssessment.getAssessmentId(), placement.materialId);
                 questions = questionDAO.findByAssessment(selectedAssessmentId);
                 if (questions == null) questions = new ArrayList<>();
                 retakeRequests = retakeRequestDAO.findByAssessment(selectedAssessmentId);
@@ -151,11 +174,14 @@ public class InstructorAssessmentServlet extends HttpServlet {
 
         request.setAttribute("selectedCourse", selectedCourse);
         request.setAttribute("assessments", assessments);
+        request.setAttribute("materials", materials);
         request.setAttribute("selectedAssessment", selectedAssessment);
         request.setAttribute("questions", questions);
         request.setAttribute("retakeRequests", retakeRequests);
         request.setAttribute("submissions", submissions);
         request.setAttribute("gradeFilter", gradeFilter);
+        request.setAttribute("assessmentPlacementTypeMap", placementTypeByAssessmentId);
+        request.setAttribute("assessmentPlacementMaterialIdMap", placementMaterialByAssessmentId);
         request.getRequestDispatcher("/WEB-INF/views/instructor/course-assessments.jsp").forward(request, response);
     }
 
@@ -181,6 +207,7 @@ public class InstructorAssessmentServlet extends HttpServlet {
         Integer maxAttempts = parseInt(request.getParameter("maxAttempts"));
         Integer questionsPerPage = parseInt(request.getParameter("questionsPerPage"));
         String instructions = normalize(request.getParameter("instructions"));
+        String placement = normalize(request.getParameter("placement"));
 
         if (title.isEmpty() || type.isEmpty()) {
             response.sendRedirect(request.getContextPath() + "/instructor/assessments?courseId=" + courseId + "&error=missing");
@@ -193,7 +220,7 @@ public class InstructorAssessmentServlet extends HttpServlet {
         assessment.setType(type);
         assessment.setDuration(duration);
         assessment.setTotalMarks(totalMarks);
-        assessment.setInstructions(instructions);
+        assessment.setInstructions(AssessmentPlacementUtil.applyPlacement(instructions, placement));
         assessment.setMaxAttempts(maxAttempts != null && maxAttempts > 0 ? maxAttempts : 1);
         assessment.setQuestionsPerPage(questionsPerPage != null && questionsPerPage > 0 ? questionsPerPage : 2);
         assessment.setCreatedBy(userId);
@@ -231,6 +258,7 @@ public class InstructorAssessmentServlet extends HttpServlet {
         Integer maxAttempts = parseInt(request.getParameter("maxAttempts"));
         Integer questionsPerPage = parseInt(request.getParameter("questionsPerPage"));
         String instructions = normalize(request.getParameter("instructions"));
+        String placement = normalize(request.getParameter("placement"));
 
         if (title.isEmpty() || type.isEmpty()) {
             response.sendRedirect(request.getContextPath() + "/instructor/assessments?courseId=" + courseId + "&assessmentId=" + assessmentId + "&error=missing");
@@ -241,7 +269,7 @@ public class InstructorAssessmentServlet extends HttpServlet {
         assessment.setType(type);
         assessment.setDuration(duration);
         assessment.setTotalMarks(totalMarks);
-        assessment.setInstructions(instructions);
+        assessment.setInstructions(AssessmentPlacementUtil.applyPlacement(instructions, placement));
         assessment.setMaxAttempts(maxAttempts != null && maxAttempts > 0 ? maxAttempts : 1);
         assessment.setQuestionsPerPage(questionsPerPage != null && questionsPerPage > 0 ? questionsPerPage : 2);
 
@@ -304,7 +332,7 @@ public class InstructorAssessmentServlet extends HttpServlet {
         q.setCorrectOption(correctOption.isEmpty() ? null : correctOption);
         q.setMarks(parseDouble(request.getParameter("marks")));
 
-        if ((Assessment.TYPE_QUIZ.equalsIgnoreCase(assessment.getType()) || Assessment.TYPE_EXAM.equalsIgnoreCase(assessment.getType()))
+        if (Assessment.TYPE_QUIZ.equalsIgnoreCase(assessment.getType())
                 && (q.getOptionA().isEmpty() || q.getOptionB().isEmpty() || q.getCorrectOption() == null)) {
             response.sendRedirect(request.getContextPath() + "/instructor/assessments?courseId=" + courseId + "&assessmentId=" + assessmentId + "&error=qoptions");
             return;

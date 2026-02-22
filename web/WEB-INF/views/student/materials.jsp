@@ -11,34 +11,31 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/landing.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/app.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/dashboard.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/course-details.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/materials.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-<nav class="top-navbar">
-    <div class="top-navbar-inner">
-        <div class="top-navbar-left">
-            <a href="${pageContext.request.contextPath}/dashboard" class="navbar-logo">
-                <span class="logo-text">PSM</span><span class="logo-subtext">E-Learning</span>
-            </a>
-            <h1 class="page-title-nav"><i class="fas fa-folder-open"></i> Learning Materials</h1>
+<header class="app-header">
+    <div class="header-left">
+        <div class="logo-section">
+            <i class="fas fa-graduation-cap"></i>
+            <span>PSM E-Learning</span>
         </div>
-        <div class="top-navbar-right">
-            <a href="${pageContext.request.contextPath}/logout" class="logout-btn">
-                <i class="fas fa-sign-out-alt"></i> Logout
-            </a>
-        </div>
+        <h1 class="page-title">Learning Materials</h1>
     </div>
-</nav>
+    <div class="header-right">
+        <a href="${pageContext.request.contextPath}/logout" class="btn btn-secondary btn-sm">
+            <i class="fas fa-sign-out-alt"></i>
+            Logout
+        </a>
+    </div>
+</header>
 
 <aside class="app-sidebar">
     <nav class="sidebar-nav">
         <a href="${pageContext.request.contextPath}/dashboard" class="nav-item"><i class="fas fa-home"></i><span>Dashboard</span></a>
         <a href="${pageContext.request.contextPath}/student/courses" class="nav-item"><i class="fas fa-book"></i><span>Browse Courses</span></a>
         <a href="${pageContext.request.contextPath}/student/my-enrollments" class="nav-item"><i class="fas fa-graduation-cap"></i><span>My Courses</span></a>
-        <a href="${pageContext.request.contextPath}/student/materials" class="nav-item active"><i class="fas fa-folder-open"></i><span>Materials</span></a>
         <a href="${pageContext.request.contextPath}/student/assessments" class="nav-item"><i class="fas fa-clipboard-list"></i><span>Assessments</span></a>
         <a href="${pageContext.request.contextPath}/student/certificates" class="nav-item"><i class="fas fa-certificate"></i><span>Certificates</span></a>
         <a href="${pageContext.request.contextPath}/profile" class="nav-item"><i class="fas fa-user"></i><span>Profile</span></a>
@@ -51,6 +48,11 @@
             <a href="${pageContext.request.contextPath}/dashboard"><i class="fas fa-home"></i> Home</a>
             <span class="separator">/</span>
             <span>Learning Materials</span>
+        </div>
+        
+        <div class="alert alert-info" style="border-left: 4px solid #1a73e8; background: #e8f0fe; border: 1px solid #d2e3fc; padding: 16px; margin-bottom: 24px;">
+            <i class="fas fa-info-circle" style="color: #1a73e8;"></i>
+            <strong>Tip:</strong> Access course materials directly from <a href="${pageContext.request.contextPath}/student/my-enrollments" style="color: #1a73e8; text-decoration: underline;">My Courses</a> for better organization. Each course page contains all materials and assessments in one place.
         </div>
         
         <c:if test="${not empty errorMessage}">

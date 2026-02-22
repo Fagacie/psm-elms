@@ -2,12 +2,20 @@ package com.psm.elearning.dao;
 
 import com.psm.elearning.model.Assessment;
 import com.psm.elearning.util.DBConnection;
-
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class AssessmentDAOImpl implements AssessmentDAO {
+
+    private static boolean hasColumn(ResultSet rs, String columnName) throws SQLException {
+        ResultSetMetaData metaData = rs.getMetaData();
+        int count = metaData.getColumnCount();
+        for (int i = 1; i <= count; i++) {
+            if (columnName.equalsIgnoreCase(metaData.getColumnLabel(i))) return true;
+        }
+        return false;
+    }
 
     private Assessment mapRow(ResultSet rs) throws SQLException {
         Assessment a = new Assessment();
@@ -32,9 +40,10 @@ public class AssessmentDAOImpl implements AssessmentDAO {
 
     @Override
     public Assessment create(Assessment assessment) {
-        String sql = "INSERT INTO Assessment (CourseID, Title, Type, Duration, TotalMarks, Instructions, MaxAttempts, QuestionsPerPage, CreatedBy) VALUES (?,?,?,?,?,?,?,?,?)";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+             PreparedStatement ps = conn.prepareStatement(
+                     "INSERT INTO Assessment (CourseID, Title, Type, Duration, TotalMarks, Instructions, MaxAttempts, QuestionsPerPage, CreatedBy) VALUES (?,?,?,?,?,?,?,?,?)",
+                     Statement.RETURN_GENERATED_KEYS)) {
             ps.setInt(1, assessment.getCourseId());
             ps.setString(2, assessment.getTitle());
             ps.setString(3, assessment.getType());
@@ -89,9 +98,9 @@ public class AssessmentDAOImpl implements AssessmentDAO {
 
     @Override
     public boolean update(Assessment assessment) {
-        String sql = "UPDATE Assessment SET Title=?, Type=?, Duration=?, TotalMarks=?, Instructions=?, MaxAttempts=?, QuestionsPerPage=? WHERE AssessmentID=?";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+             PreparedStatement ps = conn.prepareStatement(
+                     "UPDATE Assessment SET Title=?, Type=?, Duration=?, TotalMarks=?, Instructions=?, MaxAttempts=?, QuestionsPerPage=? WHERE AssessmentID=?")) {
             ps.setString(1, assessment.getTitle());
             ps.setString(2, assessment.getType());
             if (assessment.getDuration() != null) ps.setInt(3, assessment.getDuration()); else ps.setNull(3, Types.INTEGER);

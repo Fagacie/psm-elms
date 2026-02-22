@@ -105,10 +105,6 @@
                         <i class="fas fa-graduation-cap"></i>
                         <span>My Courses</span>
                     </a>
-                    <a href="${pageContext.request.contextPath}/student/materials" class="nav-item">
-                        <i class="fas fa-folder-open"></i>
-                        <span>Materials</span>
-                    </a>
                     <a href="${pageContext.request.contextPath}/student/certificates" class="nav-item">
                         <i class="fas fa-certificate"></i>
                         <span>Certificates</span>

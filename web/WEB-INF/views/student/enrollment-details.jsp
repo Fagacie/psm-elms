@@ -6,283 +6,550 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Course Details - PSM E-Learning</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>${enrollment.courseName} - PSM E-Learning</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/landing.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/app.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/dashboard.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/course-details.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/materials.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-courses.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
-<nav class="top-navbar">
-    <div class="top-navbar-inner">
-        <div class="top-navbar-left">
-            <a href="${pageContext.request.contextPath}/dashboard" class="navbar-logo">
-                <span class="logo-text">PSM</span>
-                <span class="logo-subtext">E-Learning</span>
-            </a>
-            <h1 class="page-title-nav">Course Details</h1>
+<body class="student-page enrollment-details-page">
+<!-- Top Navigation Bar -->
+<header class="app-header">
+    <div class="header-left">
+        <div class="logo-section">
+            <i class="fas fa-graduation-cap"></i>
+            <span>PSM E-Learning</span>
         </div>
-        <div class="top-navbar-right">
-            <button class="notification-btn" aria-label="Notifications">
-                <i class="fas fa-bell"></i>
-                <span class="notification-badge">3</span>
-            </button>
-            <div class="user-display">
-                <div class="user-avatar-small"><i class="fas fa-user"></i></div>
-                <span class="user-name-display">${sessionScope.userName}</span>
-            </div>
-            <a href="${pageContext.request.contextPath}/logout" class="logout-btn">
-                <i class="fas fa-sign-out-alt"></i> Logout
-            </a>
-        </div>
+        <h1 class="page-title">${enrollment.courseName}</h1>
     </div>
-</nav>
+    <div class="header-right">
+        <a href="${pageContext.request.contextPath}/logout" class="btn btn-secondary btn-sm">
+            <i class="fas fa-sign-out-alt"></i>
+            Logout
+        </a>
+    </div>
+</header>
 
+<!-- Left Sidebar Navigation -->
 <aside class="app-sidebar">
     <nav class="sidebar-nav">
-        <a href="${pageContext.request.contextPath}/dashboard" class="nav-item"><i class="fas fa-home"></i><span>Dashboard</span></a>
-        <a href="${pageContext.request.contextPath}/student/my-enrollments" class="nav-item active"><i class="fas fa-graduation-cap"></i><span>My Courses</span></a>
-        <a href="${pageContext.request.contextPath}/student/courses" class="nav-item"><i class="fas fa-book"></i><span>Browse Courses</span></a>
-        <a href="${pageContext.request.contextPath}/student/materials" class="nav-item"><i class="fas fa-folder-open"></i><span>Materials</span></a>
-        <a href="${pageContext.request.contextPath}/student/assessments" class="nav-item"><i class="fas fa-clipboard-list"></i><span>Assessments</span></a>
-        <a href="${pageContext.request.contextPath}/student/certificates" class="nav-item"><i class="fas fa-certificate"></i><span>Certificates</span></a>
-        <a href="${pageContext.request.contextPath}/profile" class="nav-item"><i class="fas fa-user"></i><span>Profile</span></a>
+        <a href="${pageContext.request.contextPath}/dashboard" class="nav-item">
+            <i class="fas fa-home"></i>
+            <span>Dashboard</span>
+        </a>
+        <a href="${pageContext.request.contextPath}/student/my-enrollments" class="nav-item active">
+            <i class="fas fa-graduation-cap"></i>
+            <span>My Courses</span>
+        </a>
+        <a href="${pageContext.request.contextPath}/student/courses" class="nav-item">
+            <i class="fas fa-book"></i>
+            <span>Browse Courses</span>
+        </a>
+        <a href="${pageContext.request.contextPath}/student/assessments" class="nav-item">
+            <i class="fas fa-clipboard-list"></i>
+            <span>Assessments</span>
+        </a>
+        <a href="${pageContext.request.contextPath}/student/certificates" class="nav-item">
+            <i class="fas fa-certificate"></i>
+            <span>Certificates</span>
+        </a>
+        <a href="${pageContext.request.contextPath}/profile" class="nav-item">
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
+        </a>
     </nav>
 </aside>
 
 <main class="app-main">
     <div class="content-wrapper">
-        <div class="breadcrumbs">
-            <a href="${pageContext.request.contextPath}/dashboard"><i class="fas fa-home"></i> Home</a>
-            <span class="separator">/</span>
-            <a href="${pageContext.request.contextPath}/student/my-enrollments">My Courses</a>
-            <span class="separator">/</span>
+        <!-- Breadcrumb Navigation -->
+        <div class="page-breadcrumb details-breadcrumb" style="margin-bottom: 24px; font-size: 14px; color: #5f6368;">
+            <a href="${pageContext.request.contextPath}/dashboard" style="color: #1a73e8; text-decoration: none;">
+                <i class="fas fa-home"></i> Dashboard
+            </a>
+            <span style="margin: 0 8px;">/</span>
+            <a href="${pageContext.request.contextPath}/student/my-enrollments" style="color: #1a73e8; text-decoration: none;">
+                My Courses
+            </a>
+            <span style="margin: 0 8px;">/</span>
             <span>${enrollment.courseName}</span>
         </div>
-        <section class="section-card course-hero">
-            <div class="page-header">
-                <div>
-                    <h2><i class="fas fa-graduation-cap"></i> ${enrollment.courseName}</h2>
-                    <p class="text-muted"><i class="fas fa-chalkboard-teacher"></i> ${enrollment.instructorName}</p>
-                    <p class="text-muted" style="margin-top: 8px;">${enrollment.courseDescription}</p>
+
+        <!-- Page Actions with Payment Badge -->
+        <c:set var="isPaymentComplete" value="${enrollment.paymentStatus == 'Paid' || enrollment.paymentStatus == 'COMPLETED' || enrollment.paymentStatus == 'Completed' || enrollment.paymentStatus == 'SUCCESS' || enrollment.paymentStatus == 'success'}"/>
+        <div class="page-actions details-page-actions" style="justify-content: space-between; align-items: center;">
+            <div>
+                <a href="${pageContext.request.contextPath}/student/my-enrollments" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to My Courses
+                </a>
+            </div>
+            <span class="status-badge details-payment-badge ${isPaymentComplete ? 'status-Approved' : 'status-Pending'}" style="font-size: 14px;">
+                <i class="fas fa-${isPaymentComplete ? 'check-circle' : 'clock'}"></i>
+                ${isPaymentComplete ? 'Paid' : 'Payment Pending'}
+            </span>
+        </div>
+
+        <!-- Course Info Card -->
+        <div class="course-card details-hero-card">
+            <div class="course-header">
+                <h2 class="course-title">${enrollment.courseName}</h2>
+                <c:choose>
+                    <c:when test="${isPaymentComplete}">
+                        <span class="status-badge status-Approved">Paid</span>
+                    </c:when>
+                    <c:otherwise>
+                        <span class="status-badge status-Pending">Pending Payment</span>
+                    </c:otherwise>
+                </c:choose>
+            </div>
+            
+            <p class="course-description">${enrollment.courseDescription}</p>
+            
+            <div class="course-meta">
+                <div class="meta-item">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                    <span>${enrollment.instructorName}</span>
+                </div>
+                <div class="meta-item">
+                    <i class="fas fa-calendar-check"></i>
+                    <span>Enrolled: <c:out value="${enrollment.enrollmentDate != null ? enrollment.enrollmentDate.toLocalDate() : '-'}"/></span>
+                </div>
+                <div class="meta-item">
+                    <i class="fas fa-money-bill-wave"></i>
+                    <span>Fee: ₦<fmt:formatNumber value="${enrollment.coursePrice}" type="number" minFractionDigits="2" maxFractionDigits="2"/></span>
+                </div>
+                <div class="meta-item">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Progress: ${progressPercent}%</span>
                 </div>
             </div>
-            <div class="summary-block">
-                <div class="progress-wrap progress-wrap-wide">
-                    <div class="progress-title-row">
-                        <span>Course Progress</span><span>${progressPercent}%</span>
+        </div>
+
+        <!-- Tabs Navigation -->
+        <div class="tab-links">
+            <a class="tab-link ${activeTab == 'learning' ? 'active' : ''}" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=learning">
+                <i class="fas fa-layer-group"></i> Learning Hub
+            </a>
+            <a class="tab-link ${activeTab == 'overview' ? 'active' : ''}" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=overview">
+                <i class="fas fa-info-circle"></i> Overview
+            </a>
+            <a class="tab-link ${activeTab == 'materials' ? 'active' : ''}" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=materials">
+                <i class="fas fa-folder-open"></i> Materials
+            </a>
+            <a class="tab-link ${activeTab == 'assessments' ? 'active' : ''}" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=assessments">
+                <i class="fas fa-clipboard-list"></i> Assessments
+            </a>
+        </div>
+
+        <!-- Tab Content -->
+        <c:choose>
+            <c:when test="${activeTab == 'learning'}">
+                <div class="course-card">
+                    <div class="learning-header">
+                        <div>
+                            <h3 style="margin: 0; font-size: 18px; font-weight: 600; color: #202124;">Learning Hub</h3>
+                            <p style="margin: 6px 0 0; color: #5f6368; font-size: 14px;">Follow the sequence to complete materials and assessments in one place.</p>
+                        </div>
                     </div>
-                    <div class="progress-track progress-track-lg">
-                        <div class="progress-fill" style="width:${progressPercent}%"></div>
+
+                    <c:if test="${not paidAccess}">
+                        <div class="alert alert-error" style="margin: 16px 0 20px;">
+                            <i class="fas fa-exclamation-circle"></i>
+                            Payment is required to open materials and take assessments.
+                        </div>
+                    </c:if>
+
+                    <c:choose>
+                        <c:when test="${not empty learningItems}">
+                            <div class="learning-list">
+                                <c:forEach var="item" items="${learningItems}">
+                                    <div class="course-card learning-item ${item.type == 'Material' ? 'learning-item-material' : 'learning-item-assessment'} ${item.locked ? 'learning-item-locked' : ''}">
+                                        <div class="learning-item-main">
+                                            <div class="learning-item-icon">
+                                                <i class="fas ${item.iconClass}"></i>
+                                            </div>
+                                            <div class="learning-item-content">
+                                                <div class="learning-item-title-row">
+                                                    <span class="learning-item-type">${item.type}</span>
+                                                    <span class="status-badge ${item.badgeClass}">${item.badgeText}</span>
+                                                </div>
+                                                <h4 class="learning-item-title">${item.title}</h4>
+                                                <c:if test="${not empty item.description}">
+                                                    <p class="learning-item-desc">${item.description}</p>
+                                                </c:if>
+                                                <div class="learning-item-meta">
+                                                    <c:if test="${not empty item.metaPrimary}">
+                                                        <span><i class="fas fa-clock"></i> ${item.metaPrimary}</span>
+                                                    </c:if>
+                                                    <c:if test="${not empty item.metaSecondary}">
+                                                        <span><i class="fas fa-chart-bar"></i> ${item.metaSecondary}</span>
+                                                    </c:if>
+                                                    <c:if test="${not empty item.metaTertiary}">
+                                                        <span><i class="fas fa-award"></i> ${item.metaTertiary}</span>
+                                                    </c:if>
+                                                </div>
+                                                <c:if test="${item.locked}">
+                                                    <div class="learning-item-lock">
+                                                        <i class="fas fa-lock"></i> ${item.lockReason}
+                                                    </div>
+                                                </c:if>
+                                            </div>
+                                            <div class="learning-item-status">
+                                                <c:if test="${not empty item.statusLabel}">
+                                                    <span class="status-badge ${item.statusClass}">${item.statusLabel}</span>
+                                                </c:if>
+                                            </div>
+                                        </div>
+                                        <div class="learning-item-actions">
+                                            <c:if test="${not item.locked}">
+                                                <c:if test="${not empty item.primaryActionUrl}">
+                                                    <a class="btn btn-primary btn-sm" href="${item.primaryActionUrl}">
+                                                        <i class="fas ${item.primaryActionIcon}"></i> ${item.primaryActionLabel}
+                                                    </a>
+                                                </c:if>
+                                                <c:if test="${not empty item.secondaryActionUrl}">
+                                                    <a class="btn btn-secondary btn-sm" href="${item.secondaryActionUrl}">
+                                                        <i class="fas ${item.secondaryActionIcon}"></i> ${item.secondaryActionLabel}
+                                                    </a>
+                                                </c:if>
+                                            </c:if>
+                                        </div>
+                                    </div>
+                                </c:forEach>
+                            </div>
+                        </c:when>
+                        <c:otherwise>
+                            <div class="empty-state-box">
+                                <i class="fas fa-layer-group"></i>
+                                <p>No learning items available yet.</p>
+                            </div>
+                        </c:otherwise>
+                    </c:choose>
+                </div>
+            </c:when>
+            <c:when test="${activeTab == 'overview'}">
+                <!-- Overview Section -->
+                <div class="course-card details-overview-card">
+                    <h3 style="margin: 0 0 20px 0; font-size: 18px; font-weight: 600; color: #202124;">Course Information</h3>
+                    
+                    <div class="details-table-wrap" style="overflow-x: auto;">
+                    <table class="details-table" style="width: 100%; border-collapse: collapse;">
+                        <tr style="border-bottom: 1px solid #e5e7eb;">
+                            <td style="padding: 12px 0; font-weight: 500; color: #5f6368; width: 180px;">
+                                <i class="fas fa-chalkboard-teacher" style="margin-right: 8px;"></i>Instructor
+                            </td>
+                            <td style="padding: 12px 0; color: #202124;">${enrollment.instructorName}</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e5e7eb;">
+                            <td style="padding: 12px 0; font-weight: 500; color: #5f6368;">
+                                <i class="fas fa-envelope" style="margin-right: 8px;"></i>Instructor Email
+                            </td>
+                            <td style="padding: 12px 0; color: #202124;">
+                                <c:if test="${not empty enrollment.instructorEmail}">
+                                    <a href="mailto:${enrollment.instructorEmail}" style="color: #1a73e8; text-decoration: none;">
+                                        ${enrollment.instructorEmail}
+                                    </a>
+                                </c:if>
+                                <c:if test="${empty enrollment.instructorEmail}">
+                                    <span style="color: #9ca3af;">Not available</span>
+                                </c:if>
+                            </td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e5e7eb;">
+                            <td style="padding: 12px 0; font-weight: 500; color: #5f6368;">
+                                <i class="fas fa-folder-open" style="margin-right: 8px;"></i>Materials
+                            </td>
+                            <td style="padding: 12px 0; color: #202124;">${materialCount} Learning Materials</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e5e7eb;">
+                            <td style="padding: 12px 0; font-weight: 500; color: #5f6368;">
+                                <i class="fas fa-clipboard-list" style="margin-right: 8px;"></i>Assessments
+                            </td>
+                            <td style="padding: 12px 0; color: #202124;">${assessmentCount} Assessments</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e5e7eb;">
+                            <td style="padding: 12px 0; font-weight: 500; color: #5f6368;">
+                                <i class="fas fa-chart-line" style="margin-right: 8px;"></i>Progress
+                            </td>
+                            <td style="padding: 12px 0; color: #202124;">${progressPercent}%</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e5e7eb;">
+                            <td style="padding: 12px 0; font-weight: 500; color: #5f6368;">
+                                <i class="fas fa-user-check" style="margin-right: 8px;"></i>Enrollment Status
+                            </td>
+                            <td style="padding: 12px 0; color: #202124;">${enrollment.status}</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e5e7eb;">
+                            <td style="padding: 12px 0; font-weight: 500; color: #5f6368;">
+                                <i class="fas fa-check-circle" style="margin-right: 8px;"></i>Completion
+                            </td>
+                            <td style="padding: 12px 0; color: #202124;">${enrollment.completionStatus}</td>
+                        </tr>
+                        <c:if test="${not empty enrollment.paymentRef}">
+                            <tr style="border-bottom: 1px solid #e5e7eb;">
+                                <td style="padding: 12px 0; font-weight: 500; color: #5f6368;">
+                                    <i class="fas fa-receipt" style="margin-right: 8px;"></i>Payment Reference
+                                </td>
+                                <td style="padding: 12px 0; color: #202124; font-family: monospace;">${enrollment.paymentRef}</td>
+                            </tr>
+                        </c:if>
+                    </table>
                     </div>
-                    <div class="meta-row">
-                        <span><i class="fas fa-calendar-check"></i> Enrolled: <c:out value="${enrollment.enrollmentDate != null ? enrollment.enrollmentDate.toLocalDate() : '-'}"/></span>
-                        <span><i class="fas fa-money-bill-wave"></i> Fee: NGN <fmt:formatNumber value="${enrollment.coursePrice}" type="number" minFractionDigits="2" maxFractionDigits="2"/></span>
-                        <span>
-                            <i class="fas fa-${enrollment.paymentStatus == 'COMPLETED' ? 'check-circle' : 'clock'}"></i> 
-                            Payment: 
+
+                    <!-- Announcements Section -->
+                    <div class="details-announcements" style="margin-top: 32px;">
+                        <h3 style="font-size: 16px; font-weight: 600; color: #202124; margin-bottom: 16px;">
+                            <i class="fas fa-megaphone" style="margin-right: 8px;"></i>Course Announcements
+                        </h3>
+                        <div id="announcementsContainer">
                             <c:choose>
-                                <c:when test="${enrollment.paymentStatus == 'COMPLETED'}">
-                                    <span class="badge badge-success">${enrollment.paymentStatus}</span>
+                                <c:when test="${not empty announcements}">
+                                    <c:forEach var="ann" items="${announcements}" varStatus="annStatus">
+                                        <div class="course-card details-announcement-card ${annStatus.index > 2 ? 'extra-announcement' : ''}" style="margin-bottom: 12px; ${annStatus.index > 2 ? 'display: none;' : ''}">
+                                            <div style="padding: 16px;">
+                                                <div class="announcement-row" style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                                    <div style="flex: 1;">
+                                                        <h4 style="font-size: 14px; font-weight: 600; color: #202124; margin-bottom: 4px;">
+                                                            ${ann.title}
+                                                        </h4>
+                                                        <div style="font-size: 13px; color: #5f6368; margin-bottom: 8px;">
+                                                            <i class="fas fa-calendar-alt" style="margin-right: 4px;"></i>
+                                                            <c:choose>
+                                                                <c:when test="${not empty ann.createdDate}">
+                                                                    ${ann.createdDate.toLocalDate()}
+                                                                </c:when>
+                                                                <c:otherwise>Recently</c:otherwise>
+                                                            </c:choose>
+                                                        </div>
+                                                        <div style="font-size: 13px; color: #3c4043; line-height: 1.5;">
+                                                            ${ann.content}
+                                                        </div>
+                                                    </div>
+                                                    <span class="status-badge status-Approved announcement-badge" style="margin-left: 12px; font-size: 11px;">
+                                                        <i class="fas fa-thumbtack"></i> Pinned
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </c:forEach>
+                                    <c:if test="${announcements.size() > 3}">
+                                        <div style="text-align: center; margin-top: 12px;">
+                                            <button id="showMoreAnnouncementsBtn" class="btn btn-secondary btn-sm" onclick="showMoreAnnouncements()">
+                                                <i class="fas fa-chevron-down"></i> Show More (${announcements.size() - 3})
+                                            </button>
+                                        </div>
+                                    </c:if>
                                 </c:when>
                                 <c:otherwise>
-                                    <span class="badge badge-warning">${enrollment.paymentStatus}</span>
+                                    <div style="text-align: center; padding: 24px; color: #5f6368;">
+                                        <i class="fas fa-bell-slash" style="font-size: 24px; color: #dadce0; margin-bottom: 8px;"></i>
+                                        <p>No announcements yet. Check back soon for course updates!</p>
+                                    </div>
                                 </c:otherwise>
                             </c:choose>
-                        </span>
+                        </div>
+                    </div>
+
+                    <div class="course-actions" style="margin-top: 24px;">
+                        <a class="btn btn-primary btn-sm" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=materials">
+                            <i class="fas fa-folder-open"></i> View Materials
+                        </a>
+                        <a class="btn btn-primary btn-sm" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=assessments">
+                            <i class="fas fa-clipboard-list"></i> View Assessments
+                        </a>
                     </div>
                 </div>
-            </div>
-        </section>
+            </c:when>
 
-        <section class="section-card">
-            <div class="tab-links">
-                <a class="tab-link ${activeTab == 'overview' ? 'active' : ''}" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=overview">
-                    <i class="fas fa-info-circle"></i> Overview
-                </a>
-                <a class="tab-link ${activeTab == 'materials' ? 'active' : ''}" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=materials">
-                    <i class="fas fa-folder-open"></i> Materials
-                </a>
-                <a class="tab-link ${activeTab == 'assessments' ? 'active' : ''}" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=assessments">
-                    <i class="fas fa-clipboard-list"></i> Assessments
-                </a>
-            </div>
-
-            <c:choose>
-                <c:when test="${activeTab == 'assessments'}">
-                    <h3 class="section-title-lg"><i class="fas fa-clipboard-list"></i> Course Assessments</h3>
-                    <c:if test="${not paidAccess}">
-                        <div class="alert alert-warning" style="margin-top:12px;">Payment is required before taking assessments.</div>
-                    </c:if>
-                    <div class="stats-grid stats-tight">
-                        <div class="stat-card"><div class="stat-content"><h3>${assessmentCount}</h3><p>Assessments</p></div></div>
-                        <div class="stat-card"><div class="stat-content"><h3>${materialCount}</h3><p>Learning Materials</p></div></div>
+            <c:when test="${activeTab == 'materials'}">
+                <!-- Materials Section -->
+                <c:if test="${not paidAccess}">
+                    <div class="alert alert-error" style="margin-bottom: 20px;">
+                        <i class="fas fa-exclamation-circle"></i>
+                        Payment is required to view and download course materials.
                     </div>
-                    <c:if test="${not empty assessments}">
-                        <table class="course-table">
-                            <thead>
-                            <tr><th>Assessment</th><th>Type</th><th>Duration</th><th>Attempts</th><th>Latest Result</th><th>Action</th></tr>
-                            </thead>
-                            <tbody>
-                            <c:forEach var="a" items="${assessments}">
-                                <c:set var="usedAttempts" value="${usedAttemptsByAssessment[a.assessmentId]}"/>
-                                <c:set var="allowedAttempts" value="${allowedAttemptsByAssessment[a.assessmentId]}"/>
-                                <c:set var="latest" value="${latestSubmissionByAssessment[a.assessmentId]}"/>
-                                <c:set var="hasActiveAttempt" value="${activeAttemptByAssessment[a.assessmentId]}"/>
-                                <tr>
-                                    <td>${a.title}</td>
-                                    <td>${a.type}</td>
-                                    <td>${a.duration} minutes</td>
-                                    <td>${usedAttempts} / ${allowedAttempts}</td>
-                                    <td>
-                                        <c:choose>
-                                            <c:when test="${not empty latest}">
-                                                <c:out value="${empty latest.status ? 'Submitted' : latest.status}"/>
-                                                <c:if test="${latest.score != null}"> | ${latest.score}</c:if>
-                                            </c:when>
-                                            <c:otherwise>-</c:otherwise>
-                                        </c:choose>
-                                    </td>
-                                    <td>
-                                        <div class="actions">
-                                            <c:if test="${paidAccess}">
-                                                <c:choose>
-                                                    <c:when test="${hasActiveAttempt}">
-                                                        <a class="btn btn-secondary btn-sm" href="${pageContext.request.contextPath}/student/assessments?courseId=${enrollment.courseId}&assessmentId=${a.assessmentId}&mode=attempt">Continue</a>
-                                                    </c:when>
-                                                    <c:when test="${usedAttempts < allowedAttempts}">
-                                                        <a class="btn btn-primary btn-sm" href="${pageContext.request.contextPath}/student/assessments?action=start&courseId=${enrollment.courseId}&assessmentId=${a.assessmentId}">Start</a>
-                                                    </c:when>
-                                                    <c:otherwise>
-                                                        <form action="${pageContext.request.contextPath}/student/assessments" method="post" class="inline-form">
-                                                            <input type="hidden" name="action" value="requestRetake">
-                                                            <input type="hidden" name="courseId" value="${enrollment.courseId}">
-                                                            <input type="hidden" name="assessmentId" value="${a.assessmentId}">
-                                                            <input type="hidden" name="reason" value="Requesting another attempt from course details page">
-                                                            <button type="submit" class="btn btn-secondary btn-sm">Request Retake</button>
-                                                        </form>
-                                                    </c:otherwise>
-                                                </c:choose>
-                                            </c:if>
-                                            <a class="btn btn-secondary btn-sm" href="${pageContext.request.contextPath}/student/assessments?courseId=${enrollment.courseId}&assessmentId=${a.assessmentId}">Details</a>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </c:forEach>
-                            </tbody>
-                        </table>
-                    </c:if>
-                    <c:if test="${empty assessments}">
-                        <p class="text-muted state-note">No assessments published yet.</p>
-                    </c:if>
-                </c:when>
-
-                <c:when test="${activeTab == 'materials'}">
-                    <h3 class="section-title-lg"><i class="fas fa-folder-open"></i> Course Materials</h3>
-                    <c:if test="${not paidAccess}">
-                        <div class="alert alert-warning" style="margin-top:12px;">Payment is required to view and download course materials.</div>
-                    </c:if>
-                    <c:if test="${paidAccess}">
-                        <c:choose>
-                            <c:when test="${empty materials}">
-                                <div class="empty-inline">
-                                    <i class="fas fa-folder-open"></i>
-                                    <p>No materials available yet for this course.</p>
-                                </div>
-                            </c:when>
-                            <c:otherwise>
-                                <div class="material-card-grid">
-                                    <c:forEach var="m" items="${materials}">
-                                        <article class="material-card">
-                                            <div class="material-card-top">
-                                                <span class="material-type-badge material-type-${m.materialType}">
-                                                    <c:choose>
-                                                        <c:when test="${m.materialType == 'PDF'}">
-                                                            <i class="fas fa-file-pdf"></i>
-                                                        </c:when>
-                                                        <c:when test="${m.materialType == 'Video'}">
-                                                            <i class="fas fa-play-circle"></i>
-                                                        </c:when>
-                                                        <c:when test="${m.materialType == 'Slides'}">
-                                                            <i class="fas fa-file-powerpoint"></i>
-                                                        </c:when>
-                                                        <c:when test="${m.materialType == 'Link'}">
-                                                            <i class="fas fa-link"></i>
-                                                        </c:when>
-                                                    </c:choose>
-                                                    ${m.materialType}
-                                                </span>
-                                                <span class="material-version">
-                                                    <c:choose>
-                                                        <c:when test="${not empty m.displayOrder}">Ch ${m.displayOrder}</c:when>
-                                                        <c:otherwise>${m.versionNumber}</c:otherwise>
-                                                    </c:choose>
-                                                </span>
-                                            </div>
-                                            <h5>${m.title}</h5>
-                                            <c:if test="${not empty m.description}">
-                                                <p>${m.description}</p>
-                                            </c:if>
-                                            <div class="material-meta">
-                                                <span>
-                                                    <i class="fas fa-calendar-alt"></i>
+                </c:if>
+                
+                <c:if test="${paidAccess}">
+                    <c:choose>
+                        <c:when test="${not empty materials}">
+                            <div class="course-card">
+                                <div class="details-table-wrap" style="overflow-x: auto;">
+                                <table class="details-table" style="width: 100%; border-collapse: collapse;">
+                                    <thead>
+                                        <tr style="border-bottom: 2px solid #e5e7eb;">
+                                            <th style="padding: 12px; text-align: left; font-weight: 600; color: #202124;">Material</th>
+                                            <th style="padding: 12px; text-align: left; font-weight: 600; color: #202124; width: 120px;">Type</th>
+                                            <th style="padding: 12px; text-align: left; font-weight: 600; color: #202124; width: 150px;">Uploaded</th>
+                                            <th style="padding: 12px; text-align: center; font-weight: 600; color: #202124; width: 200px;">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <c:forEach var="m" items="${materials}">
+                                            <tr style="border-bottom: 1px solid #e5e7eb;">
+                                                <td style="padding: 12px;">
+                                                    <div style="font-weight: 500; color: #202124; margin-bottom: 4px;">${m.title}</div>
+                                                    <c:if test="${not empty m.description}">
+                                                        <div style="font-size: 13px; color: #5f6368;">${m.description}</div>
+                                                    </c:if>
+                                                </td>
+                                                <td style="padding: 12px;">
+                                                    <span class="status-badge status-Approved" style="font-size: 12px;">
+                                                        <c:choose>
+                                                            <c:when test="${m.materialType == 'PDF'}">
+                                                                <i class="fas fa-file-pdf"></i>
+                                                            </c:when>
+                                                            <c:when test="${m.materialType == 'Video'}">
+                                                                <i class="fas fa-play-circle"></i>
+                                                            </c:when>
+                                                            <c:when test="${m.materialType == 'Slides'}">
+                                                                <i class="fas fa-file-powerpoint"></i>
+                                                            </c:when>
+                                                            <c:when test="${m.materialType == 'Link'}">
+                                                                <i class="fas fa-link"></i>
+                                                            </c:when>
+                                                        </c:choose>
+                                                        ${m.materialType}
+                                                    </span>
+                                                </td>
+                                                <td style="padding: 12px; color: #5f6368; font-size: 14px;">
                                                     <c:choose>
                                                         <c:when test="${not empty m.uploadDate}">
                                                             ${m.uploadDate.toLocalDate()}
                                                         </c:when>
                                                         <c:otherwise>-</c:otherwise>
                                                     </c:choose>
-                                                </span>
-                                            </div>
-                                            <div class="material-actions">
-                                                <a class="btn btn-primary btn-sm" href="${pageContext.request.contextPath}/student/materials?action=view&id=${m.materialId}" target="_blank" rel="noopener noreferrer">
-                                                    <i class="fas fa-eye"></i> View
-                                                </a>
-                                                <c:if test="${m.materialType != 'Link'}">
-                                                    <a class="btn btn-secondary btn-sm" href="${pageContext.request.contextPath}/student/materials?action=download&id=${m.materialId}">
-                                                        <i class="fas fa-download"></i> Download
+                                                </td>
+                                                <td style="padding: 12px; text-align: center;">
+                                                    <a class="btn btn-primary btn-sm" href="${pageContext.request.contextPath}/student/materials?action=view&id=${m.materialId}" target="_blank">
+                                                        <i class="fas fa-eye"></i> View
                                                     </a>
-                                                </c:if>
-                                            </div>
-                                        </article>
-                                    </c:forEach>
+                                                    <c:if test="${m.materialType != 'Link'}">
+                                                        <a class="btn btn-secondary btn-sm" href="${pageContext.request.contextPath}/student/materials?action=download&id=${m.materialId}">
+                                                            <i class="fas fa-download"></i>
+                                                        </a>
+                                                    </c:if>
+                                                </td>
+                                            </tr>
+                                        </c:forEach>
+                                    </tbody>
+                                </table>
                                 </div>
-                            </c:otherwise>
-                        </c:choose>
-                    </c:if>
-                </c:when>
+                            </div>
+                        </c:when>
+                        <c:otherwise>
+                            <div class="empty-state-box">
+                                <i class="fas fa-folder-open"></i>
+                                <p>No materials available yet for this course.</p>
+                            </div>
+                        </c:otherwise>
+                    </c:choose>
+                </c:if>
+            </c:when>
 
-                <c:otherwise>
-                    <h3 class="section-title-lg"><i class="fas fa-info-circle"></i> About This Course</h3>
-                    <div style="padding: var(--spacing-lg); background: var(--color-bg); border-radius: var(--radius-md); margin-bottom: var(--spacing-xl);">
-                        <p style="margin: 0; line-height: 1.6; color: var(--color-text-primary);">${enrollment.courseDescription}</p>
+            <c:when test="${activeTab == 'assessments'}">
+                <!-- Assessments Section -->
+                <c:if test="${not paidAccess}">
+                    <div class="alert alert-error" style="margin-bottom: 20px;">
+                        <i class="fas fa-exclamation-circle"></i>
+                        Payment is required before taking assessments.
                     </div>
-                    <div class="summary-block">
-                        <table class="summary-table">
-                            <tr><th>Instructor</th><td>${enrollment.instructorName}</td></tr>
-                            <tr><th>Status</th><td>${enrollment.status}</td></tr>
-                            <tr><th>Completion</th><td>${enrollment.completionStatus}</td></tr>
-                            <tr><th>Payment Status</th><td>${enrollment.paymentStatus}</td></tr>
-                            <tr><th>Payment Reference</th><td><c:out value="${empty enrollment.paymentRef ? '-' : enrollment.paymentRef}"/></td></tr>
-                        </table>
-                    </div>
-                    <div class="actions actions-top">
-                        <a class="btn btn-secondary btn-sm" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=materials">Go To Materials</a>
-                        <a class="btn btn-secondary btn-sm" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=assessments">Go To Assessments</a>
-                    </div>
-                </c:otherwise>
-            </c:choose>
-        </section>
-
-        <div class="back-row">
-            <a href="${pageContext.request.contextPath}/student/my-enrollments" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back to My Courses</a>
+                </c:if>
+                
+                <c:choose>
+                    <c:when test="${not empty assessments}">
+                        <div class="course-card">
+                            <div class="details-table-wrap" style="overflow-x: auto;">
+                            <table class="details-table" style="width: 100%; border-collapse: collapse;">
+                                <thead>
+                                    <tr style="border-bottom: 2px solid #e5e7eb;">
+                                        <th style="padding: 12px; text-align: left; font-weight: 600; color: #202124;">Assessment</th>
+                                        <th style="padding: 12px; text-align: left; font-weight: 600; color: #202124; width: 100px;">Type</th>
+                                        <th style="padding: 12px; text-align: center; font-weight: 600; color: #202124; width: 100px;">Duration</th>
+                                        <th style="padding: 12px; text-align: center; font-weight: 600; color: #202124; width: 120px;">Attempts</th>
+                                        <th style="padding: 12px; text-align: center; font-weight: 600; color: #202124; width: 150px;">Latest Result</th>
+                                        <th style="padding: 12px; text-align: center; font-weight: 600; color: #202124; width: 200px;">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <c:forEach var="a" items="${assessments}">
+                                        <c:set var="usedAttempts" value="${usedAttemptsByAssessment[a.assessmentId]}"/>
+                                        <c:set var="allowedAttempts" value="${allowedAttemptsByAssessment[a.assessmentId]}"/>
+                                        <c:set var="latest" value="${latestSubmissionByAssessment[a.assessmentId]}"/>
+                                        <c:set var="hasActiveAttempt" value="${activeAttemptByAssessment[a.assessmentId]}"/>
+                                        
+                                        <tr style="border-bottom: 1px solid #e5e7eb;">
+                                            <td style="padding: 12px; font-weight: 500; color: #202124;">${a.title}</td>
+                                            <td style="padding: 12px;">
+                                                <span class="status-badge status-${a.type == 'Quiz' ? 'Pending' : 'Approved'}" style="font-size: 12px;">
+                                                    ${a.type}
+                                                </span>
+                                            </td>
+                                            <td style="padding: 12px; text-align: center; color: #5f6368;">${a.duration} min</td>
+                                            <td style="padding: 12px; text-align: center; color: #5f6368;">${usedAttempts} / ${allowedAttempts}</td>
+                                            <td style="padding: 12px; text-align: center; color: #5f6368;">
+                                                <c:choose>
+                                                    <c:when test="${not empty latest}">
+                                                        <div style="font-weight: 500; color: #202124;">
+                                                            <c:out value="${empty latest.status ? 'Submitted' : latest.status}"/>
+                                                        </div>
+                                                        <c:if test="${latest.score != null}">
+                                                            <div style="font-size: 13px; color: #1a73e8;">${latest.score}</div>
+                                                        </c:if>
+                                                    </c:when>
+                                                    <c:otherwise>-</c:otherwise>
+                                                </c:choose>
+                                            </td>
+                                            <td style="padding: 12px; text-align: center;">
+                                                <c:if test="${paidAccess}">
+                                                    <c:choose>
+                                                        <c:when test="${hasActiveAttempt}">
+                                                            <a class="btn btn-primary btn-sm" href="${pageContext.request.contextPath}/student/assessments?courseId=${enrollment.courseId}&assessmentId=${a.assessmentId}&mode=attempt">
+                                                                <i class="fas fa-play"></i> Continue
+                                                            </a>
+                                                        </c:when>
+                                                        <c:when test="${usedAttempts < allowedAttempts}">
+                                                            <a class="btn btn-primary btn-sm" href="${pageContext.request.contextPath}/student/assessments?action=start&courseId=${enrollment.courseId}&assessmentId=${a.assessmentId}">
+                                                                <i class="fas fa-play"></i> Start
+                                                            </a>
+                                                        </c:when>
+                                                    </c:choose>
+                                                </c:if>
+                                                <a class="btn btn-secondary btn-sm" href="${pageContext.request.contextPath}/student/assessments?courseId=${enrollment.courseId}&assessmentId=${a.assessmentId}">
+                                                    <i class="fas fa-info-circle"></i> Details
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </c:forEach>
+                                </tbody>
+                            </table>
+                            </div>
+                        </div>
+                    </c:when>
+                    <c:otherwise>
+                        <div class="empty-state-box">
+                            <i class="fas fa-clipboard-list"></i>
+                            <p>No assessments published yet.</p>
+                        </div>
+                    </c:otherwise>
+                </c:choose>
+            </c:when>
+        </c:choose>
         </div>
     </div>
 </main>
+<script>
+function showMoreAnnouncements() {
+    const hiddenAnnouncements = document.querySelectorAll('.extra-announcement');
+    hiddenAnnouncements.forEach(function(card) {
+        card.style.display = 'block';
+    });
+
+    const button = document.getElementById('showMoreAnnouncementsBtn');
+    if (button) {
+        button.style.display = 'none';
+    }
+}
+</script>
 </body>
 </html>

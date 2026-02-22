@@ -213,4 +213,8 @@ public class CloudinaryUtil {
     public static String getCertificatesFolder() {
         return props.getProperty("cloudinary.folder_certificates", "psm/certificates");
     }
+
+    public static String getAssessmentAnswersFolder() {
+        return props.getProperty("cloudinary.folder_assessment_answers", "psm/assessment-answers");
+    }
 }

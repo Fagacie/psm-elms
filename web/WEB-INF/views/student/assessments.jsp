@@ -34,7 +34,6 @@
         <a href="${pageContext.request.contextPath}/dashboard" class="nav-item"><i class="fas fa-home"></i><span>Dashboard</span></a>
         <a href="${pageContext.request.contextPath}/student/courses" class="nav-item"><i class="fas fa-book"></i><span>Browse Courses</span></a>
         <a href="${pageContext.request.contextPath}/student/my-enrollments" class="nav-item"><i class="fas fa-graduation-cap"></i><span>My Courses</span></a>
-        <a href="${pageContext.request.contextPath}/student/materials" class="nav-item"><i class="fas fa-folder-open"></i><span>Materials</span></a>
         <a href="${pageContext.request.contextPath}/student/assessments" class="nav-item active"><i class="fas fa-clipboard-list"></i><span>Assessments</span></a>
         <a href="${pageContext.request.contextPath}/student/certificates" class="nav-item"><i class="fas fa-certificate"></i><span>Certificates</span></a>
         <a href="${pageContext.request.contextPath}/profile" class="nav-item"><i class="fas fa-user"></i><span>Profile</span></a>
@@ -43,6 +42,10 @@
 
 <main class="app-main">
     <div class="content-wrapper">
+        <div class="alert alert-info" style="border-left: 4px solid #1a73e8; background: #e8f0fe; border: 1px solid #d2e3fc; padding: 16px; margin-bottom: 24px;">
+            <i class="fas fa-info-circle" style="color: #1a73e8;"></i>
+            <strong>Tip:</strong> You can now take assessments inside your course <a href="${pageContext.request.contextPath}/student/my-enrollments" style="color: #1a73e8; text-decoration: underline;">Learning Hub</a> alongside materials.
+        </div>
         <c:if test="${not empty errorMessage}"><div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> ${errorMessage}</div></c:if>
         <c:if test="${param.success == 'submitted'}"><div class="alert alert-success"><i class="fas fa-check-circle"></i> Assessment submitted.</div></c:if>
         <c:if test="${param.success == 'retakerequested'}"><div class="alert alert-success"><i class="fas fa-check-circle"></i> Retake request sent to instructor.</div></c:if>
@@ -136,7 +139,7 @@
                             <div class="alert alert-warning">
                                 <strong>Time left:</strong> <span id="timer">--:--</span> | Page ${currentPage} of ${totalPages}
                             </div>
-                            <form method="post" action="${pageContext.request.contextPath}/student/assessments" id="attemptForm">
+                            <form method="post" action="${pageContext.request.contextPath}/student/assessments" id="attemptForm" enctype="multipart/form-data">
                                 <input type="hidden" name="courseId" value="${selectedCourseId}">
                                 <input type="hidden" name="assessmentId" value="${selectedAssessment.assessmentId}">
                                 <input type="hidden" name="page" value="${currentPage}">
@@ -157,6 +160,14 @@
                                         </c:choose>
                                     </div>
                                 </c:forEach>
+
+                                <c:if test="${selectedAssessment.type != 'Quiz'}">
+                                    <div class="course-material-block" style="padding:12px; margin-bottom:10px;">
+                                        <p><strong>Optional file upload (structured answer)</strong></p>
+                                        <input type="file" name="answerFile" accept=".pdf,.doc,.docx,.txt,.rtf,.odt,.zip,.png,.jpg,.jpeg">
+                                        <p class="text-muted" style="margin-top:6px;">You can upload your structured response file. It will be stored in Cloudinary.</p>
+                                    </div>
+                                </c:if>
 
                                 <div class="material-actions" style="margin-top:12px;">
                                     <c:if test="${currentPage > 1}">

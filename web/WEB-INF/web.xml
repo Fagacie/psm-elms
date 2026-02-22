@@ -160,6 +160,15 @@
     </servlet-mapping>
 
     <servlet>
+        <servlet-name>InstructorContentOrganizerServlet</servlet-name>
+        <servlet-class>com.psm.elearning.controller.instructor.InstructorContentOrganizerServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>InstructorContentOrganizerServlet</servlet-name>
+        <url-pattern>/instructor/content-organizer</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
         <servlet-name>AdminCourseServlet</servlet-name>
         <servlet-class>com.psm.elearning.controller.admin.AdminCourseServlet</servlet-class>
     </servlet>

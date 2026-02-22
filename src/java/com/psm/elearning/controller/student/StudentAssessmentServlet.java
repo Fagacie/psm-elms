@@ -21,13 +21,18 @@ import com.psm.elearning.model.AssessmentSubmission;
 import com.psm.elearning.model.Course;
 import com.psm.elearning.model.Enrollment;
 import com.psm.elearning.model.Payment;
+import com.psm.elearning.util.AssessmentPlacementUtil;
+import com.psm.elearning.util.CloudinaryUtil;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.servlet.http.Part;
 import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,6 +41,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@MultipartConfig(maxFileSize = 50 * 1024 * 1024, maxRequestSize = 60 * 1024 * 1024)
 public class StudentAssessmentServlet extends HttpServlet {
 
     private final EnrollmentDAO enrollmentDAO = new EnrollmentDAOImpl();
@@ -96,6 +102,9 @@ public class StudentAssessmentServlet extends HttpServlet {
         Course selectedCourse = courseDAO.findById(selectedCourseId);
         List<Assessment> assessments = assessmentDAO.findByCourse(selectedCourseId);
         if (assessments == null) assessments = new ArrayList<>();
+        for (Assessment assessment : assessments) {
+            assessment.setInstructions(AssessmentPlacementUtil.stripPlacement(assessment.getInstructions()));
+        }
 
         Map<Integer, AssessmentSubmission> latestSubmissionByAssessment = new LinkedHashMap<>();
         for (Assessment assessment : assessments) {
@@ -152,6 +161,7 @@ public class StudentAssessmentServlet extends HttpServlet {
                 request.setAttribute("errorMessage", "Invalid assessment selected.");
                 selectedAssessment = null;
             } else {
+                selectedAssessment.setInstructions(AssessmentPlacementUtil.stripPlacement(selectedAssessment.getInstructions()));
                 questions = questionDAO.findByAssessment(selectedAssessmentId);
                 if (questions == null) questions = new ArrayList<>();
                 submissionHistory = submissionDAO.findByAssessmentAndUser(selectedAssessmentId, userId);
@@ -269,7 +279,28 @@ public class StudentAssessmentServlet extends HttpServlet {
         }
 
         if ("submit".equalsIgnoreCase(action)) {
-            submitAttempt(state, assessment, questions, userId, session, "Submitted");
+            String uploadedAnswerUrl = null;
+            if (!Assessment.TYPE_QUIZ.equalsIgnoreCase(assessment.getType())) {
+                try {
+                    Part answerFile = request.getPart("answerFile");
+                    if (answerFile != null && answerFile.getSize() > 0) {
+                        String fileName = extractFileName(answerFile);
+                        if (fileName != null && !fileName.trim().isEmpty()) {
+                            try (InputStream in = answerFile.getInputStream()) {
+                                uploadedAnswerUrl = CloudinaryUtil.uploadFile(
+                                        in.readAllBytes(),
+                                        fileName,
+                                        CloudinaryUtil.getAssessmentAnswersFolder(),
+                                        "raw"
+                                );
+                            }
+                        }
+                    }
+                } catch (Exception ignored) {
+                }
+            }
+
+            submitAttempt(state, assessment, questions, userId, session, "Submitted", uploadedAnswerUrl);
             response.sendRedirect(request.getContextPath() + "/student/assessments?courseId=" + courseId + "&assessmentId=" + assessmentId + "&success=submitted");
             return;
         }
@@ -336,11 +367,11 @@ public class StudentAssessmentServlet extends HttpServlet {
     }
 
     private void autoSubmitTimedOut(AttemptState state, List<AssessmentQuestion> questions, Integer userId, HttpSession session) {
-        submitAttempt(state, assessmentDAO.findById(state.assessmentId), questions, userId, session, "TimedOut");
+        submitAttempt(state, assessmentDAO.findById(state.assessmentId), questions, userId, session, "TimedOut", null);
     }
 
     private void submitAttempt(AttemptState state, Assessment assessment, List<AssessmentQuestion> questions,
-                               Integer userId, HttpSession session, String status) {
+                               Integer userId, HttpSession session, String status, String uploadedAnswerUrl) {
         if (assessment == null) return;
 
         double earned = 0.0;
@@ -384,7 +415,11 @@ public class StudentAssessmentServlet extends HttpServlet {
         submission.setStatus(status);
         submission.setStartedAt(LocalDateTime.now().minusSeconds(Math.max(0, (System.currentTimeMillis() - state.startedAtMillis) / 1000L)));
         submission.setEndedAt(LocalDateTime.now());
-        submission.setAnswersFilePath(answersSummary.isEmpty() ? null : answersSummary);
+        if (uploadedAnswerUrl != null && !uploadedAnswerUrl.trim().isEmpty()) {
+            submission.setAnswersFilePath(uploadedAnswerUrl);
+        } else {
+            submission.setAnswersFilePath(answersSummary.isEmpty() ? null : answersSummary);
+        }
         submissionDAO.submit(submission);
 
         session.removeAttribute(attemptSessionKey(state.assessmentId));
@@ -439,6 +474,18 @@ public class StudentAssessmentServlet extends HttpServlet {
 
     private String normalize(String value) {
         return value == null ? "" : value.trim();
+    }
+
+    private String extractFileName(Part part) {
+        if (part == null || part.getSubmittedFileName() == null) {
+            return null;
+        }
+        String submitted = part.getSubmittedFileName().trim();
+        if (submitted.isEmpty()) {
+            return null;
+        }
+        int slash = Math.max(submitted.lastIndexOf('/'), submitted.lastIndexOf('\\'));
+        return slash >= 0 ? submitted.substring(slash + 1) : submitted;
     }
 
     private boolean isStudent(HttpSession session) {

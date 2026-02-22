@@ -180,7 +180,7 @@ public class PaymentDAOImpl implements PaymentDAO {
         payment.setAmount(rs.getDouble("Amount"));
         // Map DB columns to model fields
         payment.setMethod(rs.getString("PaymentMethod"));
-        payment.setStatus(rs.getString("PaymentStatus"));
+        payment.setStatus(normalizePaymentStatus(rs.getString("PaymentStatus")));
         // Reference column stores the Paystack reference
         String ref = rs.getString("Reference");
         payment.setPaymentRef(ref);
@@ -192,5 +192,25 @@ public class PaymentDAOImpl implements PaymentDAO {
         }
         
         return payment;
+    }
+
+    private String normalizePaymentStatus(String status) {
+        if (status == null) {
+            return "Pending";
+        }
+        String value = status.trim();
+        if (value.equalsIgnoreCase("paid") || value.equalsIgnoreCase("completed") || value.equalsIgnoreCase("success")) {
+            return "Paid";
+        }
+        if (value.equalsIgnoreCase("failed")) {
+            return "Failed";
+        }
+        if (value.equalsIgnoreCase("abandoned")) {
+            return "Abandoned";
+        }
+        if (value.equalsIgnoreCase("pending") || value.equalsIgnoreCase("processing")) {
+            return "Pending";
+        }
+        return value;
     }
 }
