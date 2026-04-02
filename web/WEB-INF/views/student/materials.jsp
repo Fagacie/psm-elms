@@ -8,211 +8,170 @@
     <title>Learning Materials - Student</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/landing.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/app.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/materials.css">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/student-v2.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/materials-v2.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
-<header class="app-header">
-    <div class="header-left">
-        <div class="logo-section">
-            <i class="fas fa-graduation-cap"></i>
-            <span>PSM E-Learning</span>
-        </div>
-        <h1 class="page-title">Learning Materials</h1>
+<body class="sv-page">
+<header class="sv-topbar">
+    <div class="sv-top-left">
+        <button class="sv-menu-btn" id="svMenuBtn" type="button" aria-label="Toggle navigation"><i class="fas fa-bars"></i></button>
+        <a href="${pageContext.request.contextPath}/dashboard" class="sv-brand"><span class="sv-brand-main">PSM</span><span class="sv-brand-sub">E-Learning</span></a>
+        <div class="sv-page-title"><h1>Learning Materials</h1><p>Organized by your paid courses</p></div>
     </div>
-    <div class="header-right">
-        <a href="${pageContext.request.contextPath}/logout" class="btn btn-secondary btn-sm">
-            <i class="fas fa-sign-out-alt"></i>
-            Logout
-        </a>
-    </div>
+    <div class="sv-top-right"><a href="${pageContext.request.contextPath}/logout" class="sv-logout"><i class="fas fa-right-from-bracket"></i> Logout</a></div>
 </header>
 
-<aside class="app-sidebar">
-    <nav class="sidebar-nav">
-        <a href="${pageContext.request.contextPath}/dashboard" class="nav-item"><i class="fas fa-home"></i><span>Dashboard</span></a>
-        <a href="${pageContext.request.contextPath}/student/courses" class="nav-item"><i class="fas fa-book"></i><span>Browse Courses</span></a>
-        <a href="${pageContext.request.contextPath}/student/my-enrollments" class="nav-item"><i class="fas fa-graduation-cap"></i><span>My Courses</span></a>
-        <a href="${pageContext.request.contextPath}/student/assessments" class="nav-item"><i class="fas fa-clipboard-list"></i><span>Assessments</span></a>
-        <a href="${pageContext.request.contextPath}/student/certificates" class="nav-item"><i class="fas fa-certificate"></i><span>Certificates</span></a>
-        <a href="${pageContext.request.contextPath}/profile" class="nav-item"><i class="fas fa-user"></i><span>Profile</span></a>
-    </nav>
-</aside>
+<div class="sv-layout">
+    <aside class="sv-sidebar" id="svSidebar">
+        <nav class="sv-nav">
+            <a href="${pageContext.request.contextPath}/dashboard" class="sv-nav-link"><i class="fas fa-house"></i><span>Dashboard</span></a>
+            <a href="${pageContext.request.contextPath}/student/my-enrollments" class="sv-nav-link active"><i class="fas fa-book-open"></i><span>My Courses</span></a>
+            <a href="${pageContext.request.contextPath}/student/courses" class="sv-nav-link"><i class="fas fa-compass"></i><span>Browse Courses</span></a>
+            <a href="${pageContext.request.contextPath}/student/certificates" class="sv-nav-link"><i class="fas fa-certificate"></i><span>Certificates</span></a>
+            <a href="${pageContext.request.contextPath}/profile" class="sv-nav-link"><i class="fas fa-user-gear"></i><span>Profile</span></a>
+        </nav>
+    </aside>
 
-<main class="app-main">
-    <div class="content-wrapper">
-        <div class="breadcrumbs">
-            <a href="${pageContext.request.contextPath}/dashboard"><i class="fas fa-home"></i> Home</a>
-            <span class="separator">/</span>
+    <main class="sv-main">
+        <div class="sv-breadcrumb">
+            <a href="${pageContext.request.contextPath}/dashboard"><i class="fas fa-house"></i> Dashboard</a>
+            <span>/</span>
             <span>Learning Materials</span>
         </div>
-        
-        <div class="alert alert-info" style="border-left: 4px solid #1a73e8; background: #e8f0fe; border: 1px solid #d2e3fc; padding: 16px; margin-bottom: 24px;">
-            <i class="fas fa-info-circle" style="color: #1a73e8;"></i>
-            <strong>Tip:</strong> Access course materials directly from <a href="${pageContext.request.contextPath}/student/my-enrollments" style="color: #1a73e8; text-decoration: underline;">My Courses</a> for better organization. Each course page contains all materials and assessments in one place.
+
+        <div class="alert alert-info">
+            <strong>Flow:</strong> materials and assessments are also available in each course Learning Hub.
+            <a href="${pageContext.request.contextPath}/student/my-enrollments" class="sv-link-inline">Open My Courses</a>.
         </div>
-        
-        <c:if test="${not empty errorMessage}">
-            <div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> ${errorMessage}</div>
-        </c:if>
+
+        <c:if test="${not empty errorMessage}"><div class="alert alert-error">${errorMessage}</div></c:if>
 
         <c:choose>
             <c:when test="${empty paidEnrollments}">
-                <div class="section-card">
-                    <div class="empty-inline">
-                        <i class="fas fa-graduation-cap"></i>
-                        <p style="margin-top: 16px; font-size: 16px; font-weight: 500;">No Paid Enrollments</p>
-                        <p>You don't have any paid enrollments yet. Complete payment to access course materials.</p>
-                        <a href="${pageContext.request.contextPath}/student/courses" class="btn btn-primary" style="margin-top: 16px;">
-                            <i class="fas fa-book"></i> Browse Courses
-                        </a>
+                <section class="sv-card">
+                    <div class="sv-card-body">
+                        <div class="empty-state-box">
+                            <i class="fas fa-graduation-cap"></i>
+                            <p>You do not have paid enrollments yet. Complete payment to unlock materials.</p>
+                            <a href="${pageContext.request.contextPath}/student/courses" class="sv-btn primary">Browse Courses</a>
+                        </div>
                     </div>
-                </div>
+                </section>
             </c:when>
             <c:otherwise>
-                <div class="section-card">
-                    <div class="materials-toolbar">
-                        <form method="get" action="${pageContext.request.contextPath}/student/materials" class="materials-filter-form">
-                            <label for="courseId"><strong>View By Course</strong></label>
-                            <select id="courseId" name="courseId">
-                                <option value="">All paid courses</option>
-                                <c:forEach var="e" items="${paidEnrollments}">
-                                    <option value="${e.courseId}" <c:if test="${selectedCourseId == e.courseId}">selected</c:if>>
-                                        ${e.courseName}
-                                    </option>
-                                </c:forEach>
-                            </select>
-                            <input type="text" name="keyword" value="${searchKeyword}" placeholder="Search by title, description...">
-                            <select name="materialType">
-                                <option value="">All Types</option>
-                                <option value="PDF" ${selectedMaterialType == 'PDF' ? 'selected' : ''}>PDF</option>
-                                <option value="Video" ${selectedMaterialType == 'Video' ? 'selected' : ''}>Video</option>
-                                <option value="Slides" ${selectedMaterialType == 'Slides' ? 'selected' : ''}>Slides</option>
-                                <option value="Link" ${selectedMaterialType == 'Link' ? 'selected' : ''}>Link</option>
-                            </select>
-                            <select name="sort">
-                                <option value="sequence" ${selectedSort == 'sequence' ? 'selected' : ''}>Chapter Order</option>
-                                <option value="latest" ${selectedSort == 'latest' ? 'selected' : ''}>Latest first</option>
-                                <option value="oldest" ${selectedSort == 'oldest' ? 'selected' : ''}>Oldest first</option>
-                                <option value="title" ${selectedSort == 'title' ? 'selected' : ''}>Title A-Z</option>
-                                <option value="type" ${selectedSort == 'type' ? 'selected' : ''}>Type</option>
-                            </select>
-                            <button class="btn btn-primary btn-sm" type="submit"><i class="fas fa-filter"></i> Apply</button>
-                            <a href="${pageContext.request.contextPath}/student/materials" class="btn btn-secondary btn-sm">Reset</a>
+                <section class="sv-card">
+                    <div class="sv-card-head"><h3>Filter Materials</h3></div>
+                    <div class="sv-card-body mat-toolbar">
+                        <form method="get" action="${pageContext.request.contextPath}/student/materials" class="mat-filter">
+                            <div>
+                                <label for="courseId">Course</label>
+                                <select id="courseId" name="courseId">
+                                    <option value="">All paid courses</option>
+                                    <c:forEach var="e" items="${paidEnrollments}">
+                                        <option value="${e.courseId}" <c:if test="${selectedCourseId == e.courseId}">selected</c:if>>${e.courseName}</option>
+                                    </c:forEach>
+                                </select>
+                            </div>
+                            <div>
+                                <label>Keyword</label>
+                                <input type="text" name="keyword" value="${searchKeyword}" placeholder="title or description">
+                            </div>
+                            <div>
+                                <label>Type</label>
+                                <select name="materialType">
+                                    <option value="">All Types</option>
+                                    <option value="PDF" ${selectedMaterialType == 'PDF' ? 'selected' : ''}>PDF</option>
+                                    <option value="Video" ${selectedMaterialType == 'Video' ? 'selected' : ''}>Video</option>
+                                    <option value="Slides" ${selectedMaterialType == 'Slides' ? 'selected' : ''}>Slides</option>
+                                    <option value="Link" ${selectedMaterialType == 'Link' ? 'selected' : ''}>Link</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>Sort</label>
+                                <select name="sort">
+                                    <option value="sequence" ${selectedSort == 'sequence' ? 'selected' : ''}>Chapter Order</option>
+                                    <option value="latest" ${selectedSort == 'latest' ? 'selected' : ''}>Latest first</option>
+                                    <option value="oldest" ${selectedSort == 'oldest' ? 'selected' : ''}>Oldest first</option>
+                                    <option value="title" ${selectedSort == 'title' ? 'selected' : ''}>Title A-Z</option>
+                                    <option value="type" ${selectedSort == 'type' ? 'selected' : ''}>Type</option>
+                                </select>
+                            </div>
+                            <div class="mat-filter-actions">
+                                <button class="sv-btn primary" type="submit">Apply</button>
+                                <a href="${pageContext.request.contextPath}/student/materials" class="sv-btn">Reset</a>
+                            </div>
                         </form>
-                        <div class="materials-summary">
-                            <div class="summary-item">
-                                <div class="summary-value">${visibleCourseCount}</div>
-                                <div class="summary-label">Course(s)</div>
-                            </div>
-                            <div class="summary-item">
-                                <div class="summary-value">${totalMaterials}</div>
-                                <div class="summary-label">Material(s)</div>
-                            </div>
+
+                        <div class="mat-summary">
+                            <div class="mat-summary-item"><strong>${visibleCourseCount}</strong><span>Course(s)</span></div>
+                            <div class="mat-summary-item"><strong>${totalMaterials}</strong><span>Material(s)</span></div>
+                            <div class="mat-summary-item"><strong>${totalViewedMaterials}</strong><span>Viewed</span></div>
                         </div>
                     </div>
-                </div>
+                </section>
 
-                <div class="section-card">
-                    <h3 class="section-title-lg"><i class="fas fa-book-open"></i> Your Learning Library</h3>
-                    <c:forEach var="e" items="${displayEnrollments}">
-                        <div class="course-material-block">
-                            <div class="course-material-header">
-                                <div>
-                                    <h4><i class="fas fa-book"></i> ${e.courseName}</h4>
-                                    <div class="course-material-meta"><i class="fas fa-check-circle" style="color: var(--color-success);"></i> Paid Access</div>
+                <section class="sv-card">
+                    <div class="sv-card-head"><h3>Your Material Library</h3></div>
+                    <div class="sv-card-body">
+                        <c:forEach var="e" items="${displayEnrollments}">
+                            <div class="mat-course">
+                                <div class="mat-course-head">
+                                    <div>
+                                        <h4><i class="fas fa-book"></i> ${e.courseName}</h4>
+                                        <p class="sv-course-line">Paid access active</p>
+                                    </div>
+                                    <a class="sv-btn" href="${pageContext.request.contextPath}/student/enrollment-details?id=${e.enrollmentId}&tab=learning">Open Learning Hub</a>
                                 </div>
-                                <a class="btn btn-secondary btn-sm" href="${pageContext.request.contextPath}/student/course-details?id=${e.courseId}">
-                                    <i class="fas fa-book-open"></i> Course
-                                </a>
+
+                                <c:set var="courseMaterials" value="${materialsByCourse[e.courseId]}"/>
+                                <c:choose>
+                                    <c:when test="${empty courseMaterials}">
+                                        <div class="empty-state-box sv-empty-inline"><p>No materials available yet for this course.</p></div>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <div class="mat-grid">
+                                            <c:forEach var="m" items="${courseMaterials}">
+                                                <c:set var="viewedInCourse" value="${viewedMaterialIdsByCourse[e.courseId].contains(m.materialId)}"/>
+                                                <article class="mat-card">
+                                                    <div class="mat-card-top">
+                                                        <span class="assessment-type-badge assessment-type-Assignment">${m.materialType}</span>
+                                                        <span class="sv-course-line"><c:choose><c:when test="${not empty m.displayOrder}">Ch ${m.displayOrder}</c:when><c:otherwise>${m.versionNumber}</c:otherwise></c:choose></span>
+                                                    </div>
+                                                    <h5>${m.title}</h5>
+                                                    <c:if test="${not empty m.description}"><p>${m.description}</p></c:if>
+                                                    <div class="mat-meta">
+                                                        <span><i class="fas fa-calendar-alt"></i> <c:choose><c:when test="${not empty m.uploadDate}">${m.uploadDate.toLocalDate()}</c:when><c:otherwise>-</c:otherwise></c:choose></span>
+                                                        <span><i class="fas fa-circle-check"></i> ${viewedInCourse ? 'Viewed' : 'Pending'}</span>
+                                                    </div>
+                                                    <div class="mat-actions">
+                                                        <a class="sv-btn" target="_blank" rel="noopener noreferrer" href="${pageContext.request.contextPath}/student/materials?action=view&id=${m.materialId}">${viewedInCourse ? 'Review' : 'Open'}</a>
+                                                        <c:if test="${m.materialType != 'Link'}"><a class="sv-btn" href="${pageContext.request.contextPath}/student/materials?action=download&id=${m.materialId}">Download</a></c:if>
+                                                    </div>
+                                                </article>
+                                            </c:forEach>
+                                        </div>
+                                    </c:otherwise>
+                                </c:choose>
                             </div>
+                        </c:forEach>
 
-                            <c:set var="courseMaterials" value="${materialsByCourse[e.courseId]}"/>
-                            <c:choose>
-                                <c:when test="${empty courseMaterials}">
-                                    <div class="empty-inline">
-                                        <i class="fas fa-inbox"></i>
-                                        <p>No materials available yet for this course.</p>
-                                    </div>
-                                </c:when>
-                                <c:otherwise>
-                                    <div class="material-card-grid">
-                                        <c:forEach var="m" items="${courseMaterials}">
-                                            <article class="material-card">
-                                                <div class="material-card-top">
-                                                    <span class="material-type-badge material-type-${m.materialType}">
-                                                        <c:choose>
-                                                            <c:when test="${m.materialType == 'PDF'}">
-                                                                <i class="fas fa-file-pdf"></i>
-                                                            </c:when>
-                                                            <c:when test="${m.materialType == 'Video'}">
-                                                                <i class="fas fa-play-circle"></i>
-                                                            </c:when>
-                                                            <c:when test="${m.materialType == 'Slides'}">
-                                                                <i class="fas fa-file-powerpoint"></i>
-                                                            </c:when>
-                                                            <c:when test="${m.materialType == 'Link'}">
-                                                                <i class="fas fa-link"></i>
-                                                            </c:when>
-                                                        </c:choose>
-                                                        ${m.materialType}
-                                                    </span>
-                                                    <span class="material-version">
-                                                        <c:choose>
-                                                            <c:when test="${not empty m.displayOrder}">Ch ${m.displayOrder}</c:when>
-                                                            <c:otherwise>${m.versionNumber}</c:otherwise>
-                                                        </c:choose>
-                                                    </span>
-                                                </div>
-                                                <h5>${m.title}</h5>
-                                                <c:if test="${not empty m.description}">
-                                                    <p>${m.description}</p>
-                                                </c:if>
-                                                <div class="material-meta">
-                                                    <span>
-                                                        <i class="fas fa-calendar-alt"></i>
-                                                        <c:choose>
-                                                            <c:when test="${not empty m.uploadDate}">
-                                                                ${m.uploadDate.toLocalDate()}
-                                                            </c:when>
-                                                            <c:otherwise>-</c:otherwise>
-                                                        </c:choose>
-                                                    </span>
-                                                </div>
-                                                <div class="material-actions">
-                                                    <a class="btn btn-primary btn-sm" href="${pageContext.request.contextPath}/student/materials?action=view&id=${m.materialId}" target="_blank" rel="noopener noreferrer">
-                                                        <i class="fas fa-eye"></i> Open
-                                                    </a>
-                                                    <c:if test="${m.materialType != 'Link'}">
-                                                        <a class="btn btn-secondary btn-sm" href="${pageContext.request.contextPath}/student/materials?action=download&id=${m.materialId}">
-                                                            <i class="fas fa-download"></i> Download
-                                                        </a>
-                                                    </c:if>
-                                                </div>
-                                            </article>
-                                        </c:forEach>
-                                    </div>
-                                </c:otherwise>
-                            </c:choose>
-                        </div>
-                    </c:forEach>
-
-                    <c:if test="${empty displayEnrollments}">
-                        <div class="empty-inline">
-                            <i class="fas fa-search"></i>
-                            <p>No courses matched the selected filter.</p>
-                            <a href="${pageContext.request.contextPath}/student/materials" class="btn btn-secondary" style="margin-top: 16px;">
-                                <i class="fas fa-redo"></i> Reset Filters
-                            </a>
-                        </div>
-                    </c:if>
-                </div>
+                        <c:if test="${empty displayEnrollments}">
+                            <div class="empty-state-box">
+                                <i class="fas fa-search"></i>
+                                <p>No courses matched your selected filter.</p>
+                                <a href="${pageContext.request.contextPath}/student/materials" class="sv-btn">Reset Filters</a>
+                            </div>
+                        </c:if>
+                    </div>
+                </section>
             </c:otherwise>
         </c:choose>
-    </div>
-</main>
+    </main>
+</div>
+
+<div class="sv-overlay" id="svOverlay"></div>
+<script src="${pageContext.request.contextPath}/js/student-v2.js"></script>
 </body>
 </html>

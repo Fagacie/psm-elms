@@ -1,0 +1,340 @@
+.me-user {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px;
+  border: 1px solid #27405f;
+  background: linear-gradient(180deg, rgba(18, 36, 60, 0.82), rgba(10, 22, 38, 0.82));
+}
+
+.me-user-icon {
+  width: 34px;
+  height: 34px;
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid #355981;
+  color: #d7ebff;
+  background: linear-gradient(135deg, rgba(25, 163, 215, 0.26), rgba(36, 133, 255, 0.18));
+}
+
+.me-user-copy {
+  display: grid;
+  gap: 2px;
+  line-height: 1.1;
+}
+
+.me-user-copy strong {
+  font-size: 0.84rem;
+  color: #eef6ff;
+}
+
+.me-user-copy span {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  color: var(--sv-muted);
+}
+
+.me-hero {
+  border: 1px solid var(--sv-border);
+  background:
+    radial-gradient(circle at 16% 18%, rgba(65, 198, 255, 0.18), transparent 36%),
+    radial-gradient(circle at 84% 76%, rgba(244, 184, 93, 0.16), transparent 40%),
+    linear-gradient(180deg, rgba(16, 33, 56, 0.92), rgba(8, 18, 31, 0.92));
+  margin-bottom: 14px;
+  padding: 14px;
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 12px;
+  align-items: center;
+  overflow: hidden;
+}
+
+.me-kicker {
+  margin: 0;
+  color: #8ac6ff;
+  text-transform: uppercase;
+  letter-spacing: 0.9px;
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.me-hero-copy h2 {
+  margin: 8px 0 0;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: clamp(1.15rem, 1.8vw, 1.65rem);
+}
+
+.me-hero-copy p {
+  margin: 8px 0 0;
+  color: var(--sv-muted);
+  max-width: 56ch;
+}
+
+.me-hero-actions {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.me-hero-scene {
+  position: relative;
+  height: 180px;
+  border: 1px solid #2a486d;
+  background: linear-gradient(180deg, rgba(14, 30, 50, 0.86), rgba(8, 18, 31, 0.9));
+  overflow: hidden;
+}
+
+.me-scene-panel {
+  position: absolute;
+  display: grid;
+  gap: 3px;
+  min-width: 112px;
+  padding: 10px 12px;
+  border: 1px solid #355981;
+  background: linear-gradient(180deg, rgba(16, 33, 56, 0.95), rgba(8, 18, 31, 0.92));
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.18);
+}
+
+.me-scene-panel span {
+  color: var(--sv-muted);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+}
+
+.me-scene-panel strong {
+  color: #f1f7ff;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 0.92rem;
+}
+
+.me-scene-panel-a {
+  top: 22px;
+  right: 18px;
+}
+
+.me-scene-panel-b {
+  left: 18px;
+  bottom: 18px;
+}
+
+.me-orb,
+.me-shape {
+  position: absolute;
+  will-change: transform;
+  transition: transform 120ms ease-out;
+}
+
+.me-orb {
+  border-radius: 50%;
+  border: 1px solid #355981;
+}
+
+.me-orb-a {
+  width: 74px;
+  height: 74px;
+  top: 18px;
+  left: 16px;
+}
+
+.me-orb-b {
+  width: 48px;
+  height: 48px;
+  right: 20px;
+  top: 24px;
+}
+
+.me-orb-c {
+  width: 30px;
+  height: 30px;
+  right: 70px;
+  bottom: 16px;
+}
+
+.me-shape {
+  border: 1px solid #3b5f87;
+  background: #10233d;
+}
+
+.me-shape-a {
+  width: 70px;
+  height: 46px;
+  left: 44%;
+  top: 28%;
+  background: linear-gradient(160deg, #1b3659, #10233c);
+}
+
+.me-shape-b {
+  width: 82px;
+  height: 10px;
+  left: 56%;
+  top: 62%;
+  background: linear-gradient(90deg, #19a3d7, #2485ff);
+  border-color: #1e78e0;
+}
+
+.me-shape-c {
+  width: 54px;
+  height: 68px;
+  left: 24%;
+  top: 54%;
+  background: repeating-linear-gradient(0deg, #dfeafe, #dfeafe 8px, #b9cde7 8px, #b9cde7 9px);
+  border-color: #7b9ec5;
+}
+
+.me-controlbar {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--sv-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.me-section-intro {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding: 12px 14px;
+  border: 1px solid #213754;
+  background: rgba(11, 25, 43, 0.66);
+}
+
+.me-section-intro strong {
+  display: block;
+  color: #edf6ff;
+  margin-bottom: 4px;
+}
+
+.me-section-intro p {
+  margin: 0;
+  color: var(--sv-muted);
+  font-size: 0.85rem;
+}
+
+.me-section-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 10px;
+  border: 1px solid #32577f;
+  color: #d7ebff;
+  background: rgba(16, 33, 56, 0.84);
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  font-weight: 700;
+}
+
+.me-filter-group {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.me-filter {
+  min-height: 32px;
+  padding: 0 10px;
+  border: 1px solid #2c4b70;
+  background: rgba(17, 39, 64, 0.6);
+  color: #d8ebff;
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 700;
+}
+
+.me-filter:hover,
+.me-filter.active {
+  border-color: var(--sv-accent);
+  color: #fff;
+}
+
+.me-search-wrap {
+  min-width: 250px;
+}
+
+.me-search-wrap input {
+  width: 100%;
+  min-height: 34px;
+  padding: 0 10px;
+  border: 1px solid #2b4b71;
+  background: linear-gradient(180deg, rgba(16, 33, 56, 0.9), rgba(8, 18, 31, 0.9));
+  color: #eaf2ff;
+}
+
+.me-search-wrap input:focus {
+  outline: 2px solid #7fd3ff;
+  outline-offset: 0;
+  border-color: #7fd3ff;
+}
+
+.me-card {
+  transition: transform 220ms ease, border-color 220ms ease, box-shadow 220ms ease;
+}
+
+.me-card:hover {
+  border-color: #2f567f;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+}
+
+.me-tilt {
+  transform-style: preserve-3d;
+  transition: transform 120ms ease-out;
+}
+
+.me-empty-hidden {
+  display: none;
+}
+
+.me-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+@media (max-width: 1080px) {
+  .me-hero {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .me-user {
+    display: none;
+  }
+
+  .me-hero-scene {
+    height: 145px;
+  }
+
+  .me-section-intro {
+    flex-direction: column;
+  }
+
+  .me-search-wrap {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .me-filter-group {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .me-card,
+  .me-tilt {
+    transition: none !important;
+  }
+}

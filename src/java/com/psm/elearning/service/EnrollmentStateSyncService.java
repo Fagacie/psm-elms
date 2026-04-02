@@ -20,6 +20,7 @@ import com.psm.elearning.model.Payment;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringJoiner;
 
 /**
  * Centralized enrollment state synchronization.
@@ -74,34 +75,27 @@ public class EnrollmentStateSyncService {
         if (assessments == null) assessments = new ArrayList<>();
         int totalAssessments = assessments.size();
         int passedAssessments = 0;
+        double assessmentEngagementPoints = 0.0;
         boolean passedAllAssessments = true;
 
         for (Assessment assessment : assessments) {
             List<AssessmentSubmission> submissions = submissionDAO.findByAssessmentAndUser(assessment.getAssessmentId(), enrollment.getUserId());
-            boolean passed = false;
-            if (submissions != null) {
-                for (AssessmentSubmission s : submissions) {
-                    if (s.getScore() == null) continue;
-                    if ("TimedOut".equalsIgnoreCase(s.getStatus())) continue;
-                    double threshold = resolvePassThreshold(assessment.getTotalMarks());
-                    if (s.getScore() >= threshold) {
-                        passed = true;
-                        break;
-                    }
-                }
-            }
-            if (passed) {
+            AssessmentProgressState progressState = resolveAssessmentProgress(assessment, submissions);
+            assessmentEngagementPoints += progressState.getEngagementWeight();
+            if (progressState.isPassed()) {
                 passedAssessments++;
             } else {
                 passedAllAssessments = false;
             }
         }
 
-        double assessmentRatio = totalAssessments == 0 ? 1.0 : Math.min(1.0, (double) passedAssessments / totalAssessments);
+        double assessmentRatio = totalAssessments == 0 ? 1.0 : Math.min(1.0, assessmentEngagementPoints / totalAssessments);
         int progressPercent = (int) Math.round((materialRatio * 60.0) + (assessmentRatio * 40.0));
         progressPercent = Math.max(0, Math.min(100, progressPercent));
 
-        boolean completed = progressPercent >= 100 && passedAllAssessments;
+        boolean viewedAllMaterials = viewedMaterials >= totalMaterials;
+        boolean passedRequiredAssessments = passedAssessments >= totalAssessments;
+        boolean completed = viewedAllMaterials && passedRequiredAssessments;
         String completionStatus = completed ? "Completed" : (progressPercent > 0 ? "In Progress" : "Not Started");
         String enrollmentStatus = completed ? "Completed" : "Enrolled";
 
@@ -110,7 +104,7 @@ public class EnrollmentStateSyncService {
         enrollment.setCompletionStatus(completionStatus);
         enrollment.setStatus(enrollmentStatus);
 
-        boolean eligibleForCertificate = paid && completed && passedAllAssessments;
+        boolean eligibleForCertificate = paid && viewedAllMaterials && passedRequiredAssessments;
 
         return new SyncResult(
                 paid,
@@ -130,6 +124,50 @@ public class EnrollmentStateSyncService {
     }
 
     private double resolvePassThreshold(Integer totalMarks) {
+        if (totalMarks == null || totalMarks <= 0) {
+            return 50.0;
+        }
+        return totalMarks * 0.5;
+    }
+
+    public static AssessmentProgressState resolveAssessmentProgress(Assessment assessment, List<AssessmentSubmission> submissions) {
+        if (assessment == null || submissions == null || submissions.isEmpty()) {
+            return new AssessmentProgressState(false, false, 0.0);
+        }
+
+        boolean submitted = false;
+        boolean graded = false;
+        boolean passed = false;
+
+        for (AssessmentSubmission submission : submissions) {
+            if (submission == null) continue;
+            if ("TimedOut".equalsIgnoreCase(submission.getStatus())) {
+                continue;
+            }
+            submitted = true;
+            if (submission.getScore() != null) {
+                graded = true;
+                double threshold = resolvePassThresholdStatic(assessment.getTotalMarks());
+                if (submission.getScore() >= threshold) {
+                    passed = true;
+                    break;
+                }
+            }
+        }
+
+        if (passed) {
+            return new AssessmentProgressState(true, true, 1.0);
+        }
+        if (graded) {
+            return new AssessmentProgressState(true, false, 0.65);
+        }
+        if (submitted) {
+            return new AssessmentProgressState(true, false, 0.4);
+        }
+        return new AssessmentProgressState(false, false, 0.0);
+    }
+
+    private static double resolvePassThresholdStatic(Integer totalMarks) {
         if (totalMarks == null || totalMarks <= 0) {
             return 50.0;
         }
@@ -192,5 +230,61 @@ public class EnrollmentStateSyncService {
         public String getPaymentRef() { return paymentRef; }
         public String getCompletionStatus() { return completionStatus; }
         public String getEnrollmentStatus() { return enrollmentStatus; }
+
+        public boolean hasViewedAllMaterials() {
+            return viewedMaterials >= totalMaterials;
+        }
+
+        public boolean hasPassedRequiredAssessments() {
+            return passedAssessments >= totalAssessments;
+        }
+
+        public List<String> getMissingRequirements() {
+            List<String> missing = new ArrayList<>();
+            if (!paid) {
+                missing.add("payment");
+            }
+            if (!hasViewedAllMaterials()) {
+                missing.add("materials");
+            }
+            if (!hasPassedRequiredAssessments()) {
+                missing.add("assessments");
+            }
+            return missing;
+        }
+
+        public String getBlockingReasonSummary() {
+            List<String> missing = getMissingRequirements();
+            if (missing.isEmpty()) {
+                return "All certificate requirements are complete.";
+            }
+            StringJoiner joiner = new StringJoiner(", ");
+            if (missing.contains("payment")) {
+                joiner.add("payment not confirmed");
+            }
+            if (missing.contains("materials")) {
+                joiner.add("not all materials viewed");
+            }
+            if (missing.contains("assessments")) {
+                joiner.add("not all required assessments passed");
+            }
+            return "Certificate requirements pending: " + joiner;
+        }
+    }
+
+    public static class AssessmentProgressState {
+        private final boolean attempted;
+        private final boolean passed;
+        private final double engagementWeight;
+
+        public AssessmentProgressState(boolean attempted, boolean passed, double engagementWeight) {
+            this.attempted = attempted;
+            this.passed = passed;
+            this.engagementWeight = engagementWeight;
+        }
+
+        public boolean isAttempted() { return attempted; }
+        public boolean isPassed() { return passed; }
+        public double getEngagementWeight() { return engagementWeight; }
     }
 }

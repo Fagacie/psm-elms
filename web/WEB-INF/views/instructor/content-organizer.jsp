@@ -6,102 +6,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Organize Course Content - PSM E-Learning</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/landing.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/app.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-courses.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-shell.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-organizer.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        .organizer-item {
-            padding: 12px 16px;
-            margin-bottom: 8px;
-            border-radius: 4px;
-            cursor: move;
-            transition: box-shadow 0.2s;
-        }
-        .organizer-item:hover {
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        .organizer-item-material {
-            border: 1px solid #bfdbfe;
-            background: #f9fafb;
-        }
-        .organizer-item-assessment {
-            border: 1px solid #fed7aa;
-            background: #fefce8;
-            margin-left: 24px;
-        }
-        .organizer-item-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 4px;
-        }
-        .organizer-drag-handle {
-            color: #9ca3af;
-            cursor: grab;
-        }
-        .organizer-drag-handle:active {
-            cursor: grabbing;
-        }
-        .organizer-item-icon {
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: white;
-            border: 1px solid #e5e7eb;
-            border-radius: 4px;
-            color: #6b7280;
-        }
-        .organizer-item-content {
-            flex: 1;
-        }
-        .organizer-item-title {
-            font-weight: 600;
-            color: #111827;
-            margin: 0 0 4px 0;
-            font-size: 14px;
-        }
-        .organizer-item-meta {
-            font-size: 12px;
-            color: #6b7280;
-        }
-        .organizer-item-actions {
-            display: flex;
-            gap: 8px;
-        }
-        .organizer-final-section {
-            margin-top: 24px;
-            padding-top: 24px;
-            border-top: 2px dashed #e5e7eb;
-        }
-        .organizer-section-label {
-            font-size: 12px;
-            font-weight: 600;
-            color: #6b7280;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-bottom: 12px;
-        }
-        .dragging {
-            opacity: 0.5;
-        }
-        .drag-over {
-            border-top: 3px solid #1a73e8;
-        }
-    </style>
 </head>
-<body>
+<body class="instructor-ui">
 <header class="app-header">
     <div class="header-left">
         <div class="logo-section">
             <i class="fas fa-graduation-cap"></i>
             <span>PSM E-Learning</span>
         </div>
-        <h1 class="page-title">Organize Course Content</h1>
+        <h1 class="page-title">Content Organizer</h1>
     </div>
     <div class="header-right">
+        <div class="user-menu">
+            <div class="user-info">
+                <span class="user-name"><c:out value="${empty user ? sessionScope.user.fullName : user.fullName}"/></span>
+                <span class="user-role">Instructor</span>
+            </div>
+            <div class="user-avatar"><i class="fas fa-user"></i></div>
+        </div>
         <a href="${pageContext.request.contextPath}/logout" class="btn btn-secondary btn-sm">
             <i class="fas fa-sign-out-alt"></i> Logout
         </a>
@@ -113,14 +41,17 @@
         <a href="${pageContext.request.contextPath}/dashboard" class="nav-item">
             <i class="fas fa-home"></i><span>Dashboard</span>
         </a>
-        <a href="${pageContext.request.contextPath}/instructor/courses" class="nav-item">
-            <i class="fas fa-book"></i><span>My Courses</span>
+        <a href="${pageContext.request.contextPath}/instructor/courses" class="nav-item active">
+            <i class="fas fa-book"></i><span>Courses</span>
         </a>
         <a href="${pageContext.request.contextPath}/instructor/materials" class="nav-item">
             <i class="fas fa-folder-open"></i><span>Materials</span>
         </a>
         <a href="${pageContext.request.contextPath}/instructor/assessments" class="nav-item">
             <i class="fas fa-clipboard-list"></i><span>Assessments</span>
+        </a>
+        <a href="${pageContext.request.contextPath}/instructor/certificates" class="nav-item">
+            <i class="fas fa-certificate"></i><span>Certificates</span>
         </a>
         <a href="${pageContext.request.contextPath}/profile" class="nav-item">
             <i class="fas fa-user"></i><span>Profile</span>
@@ -130,129 +61,159 @@
 
 <main class="app-main">
     <div class="content-wrapper">
-        <div class="page-actions" style="margin-bottom: 16px;">
-            <a href="${pageContext.request.contextPath}/instructor/courses" class="btn btn-secondary">
-                <i class="fas fa-arrow-left"></i> Back to Courses
-            </a>
-            <button class="btn btn-primary" onclick="saveContentOrder()">
-                <i class="fas fa-save"></i> Save Order
-            </button>
-        </div>
+        <section class="ins-page-head">
+            <div>
+                <p class="ins-page-kicker">Course Flow Studio</p>
+                <h2>Arrange materials and assessments in the order students should experience them</h2>
+                <p>This workspace connects the learning sequence into one visual flow. Reorder materials, attach assessments after the right chapter, and keep final evaluations clearly separated at the end of the course.</p>
+            </div>
+            <div class="ins-hero-actions">
+                <a href="${pageContext.request.contextPath}/instructor/courses" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Courses
+                </a>
+                <button class="btn btn-primary" type="button" onclick="saveContentOrder()">
+                    <i class="fas fa-save"></i> Save Order
+                </button>
+            </div>
+        </section>
+
+        <section class="ins-hero-card organizer-hero">
+            <div class="ins-hero-grid">
+                <div>
+                    <h3>${course.courseName}</h3>
+                    <p>Drag materials to change chapter sequence. Drag assessments beneath a material to make them appear after that chapter, or place them in the final section to position them after all learning materials.</p>
+                </div>
+                <div class="ins-hero-metrics">
+                    <div class="ins-metric">
+                        <strong>${materials.size()}</strong>
+                        <span>Materials in sequence</span>
+                    </div>
+                    <div class="ins-metric">
+                        <strong>${finalAssessments.size()}</strong>
+                        <span>Final assessments</span>
+                    </div>
+                    <div class="ins-metric">
+                        <strong>${param.success == 'reordered' ? 'Saved' : 'Ready'}</strong>
+                        <span>Flow state</span>
+                    </div>
+                    <div class="ins-metric">
+                        <strong>${empty materials ? 'Empty' : 'Structured'}</strong>
+                        <span>Learning path</span>
+                    </div>
+                </div>
+            </div>
+        </section>
 
         <c:if test="${param.success == 'reordered'}">
             <div class="alert alert-success">
-                <i class="fas fa-check-circle"></i> Material order saved successfully!
+                <i class="fas fa-check-circle"></i> Course content order saved successfully.
+            </div>
+        </c:if>
+        <c:if test="${param.error == 'invalid'}">
+            <div class="alert alert-error">
+                <i class="fas fa-exclamation-circle"></i> Unable to save the current arrangement. Please try again.
             </div>
         </c:if>
 
-        <div class="course-card">
-            <h2 style="margin: 0 0 8px 0; font-size: 20px; font-weight: 600;">${course.courseName}</h2>
-            <p style="margin: 0 0 20px 0; color: #6b7280; font-size: 14px;">
-                Drag and drop materials to reorder them. Drag assessments to place them after any material or in the final section.
-            </p>
-
-            <div class="organizer-section-label">
-                <i class="fas fa-layer-group"></i> Course Content Flow
-            </div>
-
-            <div id="materialsContainer">
-                <c:forEach var="material" items="${materials}">
-                    <div class="organizer-item organizer-item-material" draggable="true" data-id="${material.materialId}">
-                        <div class="organizer-item-header">
-                            <i class="fas fa-grip-vertical organizer-drag-handle"></i>
-                            <div class="organizer-item-icon">
-                                <i class="fas fa-file"></i>
-                            </div>
-                            <div class="organizer-item-content">
-                                <div class="organizer-item-title">
-                                    <i class="fas fa-folder"></i> ${material.title}
-                                </div>
-                                <div class="organizer-item-meta">
-                                    Material • Order: ${material.displayOrder != null ? material.displayOrder : 'N/A'}
-                                </div>
-                            </div>
-                            <div class="organizer-item-actions">
-                                <a href="${pageContext.request.contextPath}/instructor/materials?courseId=${course.courseId}" 
-                                   class="btn btn-secondary btn-sm" title="Edit Material">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <c:forEach var="assessment" items="${assessmentsAfterMaterial[material.materialId]}">
-                        <div class="organizer-item organizer-item-assessment" draggable="true" data-id="${assessment.assessmentId}" data-type="assessment" data-material-id="${material.materialId}">
-                            <div class="organizer-item-header">
-                                <i class="fas fa-grip-vertical organizer-drag-handle"></i>
-                                <div class="organizer-item-icon">
-                                    <i class="fas fa-clipboard-list"></i>
-                                </div>
-                                <div class="organizer-item-content">
-                                    <div class="organizer-item-title">
-                                        <i class="fas fa-arrow-right" style="font-size: 10px; margin-right: 4px;"></i>
-                                        ${assessment.title}
-                                    </div>
-                                    <div class="organizer-item-meta">
-                                        Assessment (${assessment.type}) • Placed after this material
-                                    </div>
-                                </div>
-                                <div class="organizer-item-actions">
-                                    <a href="${pageContext.request.contextPath}/instructor/assessments?courseId=${course.courseId}&assessmentId=${assessment.assessmentId}" 
-                                       class="btn btn-secondary btn-sm" title="Change Placement">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </c:forEach>
-                </c:forEach>
-            </div>
-
-            <div class="organizer-final-section" id="finalSection">
-                <div class="organizer-section-label">
-                    <i class="fas fa-flag-checkered"></i> Final Assessments <small style="font-weight: normal; opacity: 0.7;">(Drop assessments here)</small>
-                </div>
-                <div id="finalAssessmentsContainer">
-                    <c:forEach var="assessment" items="${finalAssessments}">
-                        <div class="organizer-item organizer-item-assessment" draggable="true" data-id="${assessment.assessmentId}" data-type="assessment" data-material-id="final" style="margin-left: 0;">
-                            <div class="organizer-item-header">
-                                <i class="fas fa-grip-vertical organizer-drag-handle"></i>
-                                <div class="organizer-item-icon">
-                                    <i class="fas fa-clipboard-list"></i>
-                                </div>
-                                <div class="organizer-item-content">
-                                    <div class="organizer-item-title">
-                                        ${assessment.title}
-                                    </div>
-                                    <div class="organizer-item-meta">
-                                        Assessment (${assessment.type}) • Appears after all materials
-                                    </div>
-                                </div>
-                                <div class="organizer-item-actions">
-                                    <a href="${pageContext.request.contextPath}/instructor/assessments?courseId=${course.courseId}&assessmentId=${assessment.assessmentId}" 
-                                       class="btn btn-secondary btn-sm" title="Change Placement">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </c:forEach>
-                    <c:if test="${empty finalAssessments}">
-                        <div class="drop-zone-placeholder" style="padding: 24px; text-align: center; color: #9ca3af; border: 2px dashed #e5e7eb; border-radius: 4px; background: #f9fafb;">
-                            <i class="fas fa-hand-point-up"></i> Drop assessments here to place them at the end of the course
-                        </div>
-                    </c:if>
+        <section class="section-card organizer-section">
+            <div class="section-header">
+                <div>
+                    <h3 class="section-title">Course Content Flow</h3>
+                    <p class="section-caption">Materials create the main learning path. Assessments can be attached after a material or moved to the final assessment area.</p>
                 </div>
             </div>
 
             <c:if test="${empty materials}">
                 <div class="empty-state-box">
                     <i class="fas fa-folder-open"></i>
-                    <p>No materials or assessments yet. Add materials and assessments to organize them here.</p>
+                    <p>No materials or assessments yet. Add materials and assessments first, then organize them here.</p>
                     <a href="${pageContext.request.contextPath}/instructor/materials" class="btn btn-primary">Add Materials</a>
                 </div>
             </c:if>
-        </div>
+
+            <c:if test="${not empty materials}">
+                <div class="organizer-shell">
+                    <div class="organizer-section-label">
+                        <i class="fas fa-layer-group"></i> Learning Sequence
+                    </div>
+
+                    <div id="materialsContainer" class="organizer-list">
+                        <c:forEach var="material" items="${materials}">
+                            <div class="organizer-item organizer-item-material" draggable="true" data-id="${material.materialId}">
+                                <div class="organizer-item-header">
+                                    <i class="fas fa-grip-vertical organizer-drag-handle"></i>
+                                    <div class="organizer-item-icon">
+                                        <i class="fas fa-file-alt"></i>
+                                    </div>
+                                    <div class="organizer-item-content">
+                                        <div class="organizer-item-title">${material.title}</div>
+                                        <div class="organizer-item-meta">Material • Order: <c:out value="${material.displayOrder}" default="N/A"/></div>
+                                    </div>
+                                    <div class="organizer-item-actions">
+                                        <a href="${pageContext.request.contextPath}/instructor/materials?courseId=${course.courseId}" class="btn btn-secondary btn-sm" title="Edit Material">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <c:forEach var="assessment" items="${assessmentsAfterMaterial[material.materialId]}">
+                                <div class="organizer-item organizer-item-assessment" draggable="true" data-id="${assessment.assessmentId}" data-type="assessment" data-material-id="${material.materialId}">
+                                    <div class="organizer-item-header">
+                                        <i class="fas fa-grip-vertical organizer-drag-handle"></i>
+                                        <div class="organizer-item-icon">
+                                            <i class="fas fa-clipboard-check"></i>
+                                        </div>
+                                        <div class="organizer-item-content">
+                                            <div class="organizer-item-title">${assessment.title}</div>
+                                            <div class="organizer-item-meta">Assessment (${assessment.type}) • Placed after this material</div>
+                                        </div>
+                                        <div class="organizer-item-actions">
+                                            <a href="${pageContext.request.contextPath}/instructor/assessments?courseId=${course.courseId}&assessmentId=${assessment.assessmentId}" class="btn btn-secondary btn-sm" title="Edit Assessment">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </c:forEach>
+                        </c:forEach>
+                    </div>
+
+                    <div class="organizer-final-section">
+                        <div class="organizer-section-label">
+                            <i class="fas fa-flag-checkered"></i> Final Assessments
+                        </div>
+                        <div id="finalAssessmentsContainer" class="final-assessments-container">
+                            <c:forEach var="assessment" items="${finalAssessments}">
+                                <div class="organizer-item organizer-item-assessment organizer-item-final" draggable="true" data-id="${assessment.assessmentId}" data-type="assessment" data-material-id="final">
+                                    <div class="organizer-item-header">
+                                        <i class="fas fa-grip-vertical organizer-drag-handle"></i>
+                                        <div class="organizer-item-icon">
+                                            <i class="fas fa-clipboard-list"></i>
+                                        </div>
+                                        <div class="organizer-item-content">
+                                            <div class="organizer-item-title">${assessment.title}</div>
+                                            <div class="organizer-item-meta">Assessment (${assessment.type}) • Appears after all materials</div>
+                                        </div>
+                                        <div class="organizer-item-actions">
+                                            <a href="${pageContext.request.contextPath}/instructor/assessments?courseId=${course.courseId}&assessmentId=${assessment.assessmentId}" class="btn btn-secondary btn-sm" title="Edit Assessment">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </c:forEach>
+                            <c:if test="${empty finalAssessments}">
+                                <div class="drop-zone-placeholder">
+                                    <i class="fas fa-hand-point-up"></i>
+                                    <span>Drop assessments here to place them at the end of the course.</span>
+                                </div>
+                            </c:if>
+                        </div>
+                    </div>
+                </div>
+            </c:if>
+        </section>
     </div>
 </main>
 
@@ -267,8 +228,11 @@ document.addEventListener('DOMContentLoaded', function() {
 function initializeDragAndDrop() {
     const container = document.getElementById('materialsContainer');
     const finalSection = document.getElementById('finalAssessmentsContainer');
-    
-    // Materials are drop targets
+
+    if (!container) {
+        return;
+    }
+
     const materials = container.querySelectorAll('.organizer-item-material');
     materials.forEach(item => {
         item.addEventListener('dragstart', handleDragStart);
@@ -278,15 +242,13 @@ function initializeDragAndDrop() {
         item.addEventListener('dragenter', handleDragEnter);
         item.addEventListener('dragleave', handleDragLeave);
     });
-    
-    // Assessments are draggable
+
     const assessments = document.querySelectorAll('.organizer-item-assessment');
     assessments.forEach(item => {
         item.addEventListener('dragstart', handleDragStart);
         item.addEventListener('dragend', handleDragEnd);
     });
-    
-    // Final section is a drop target
+
     if (finalSection) {
         finalSection.addEventListener('dragover', handleDragOver);
         finalSection.addEventListener('drop', handleDropInFinal);
@@ -303,7 +265,7 @@ function handleDragStart(e) {
     e.dataTransfer.setData('text/html', this.innerHTML);
 }
 
-function handleDragEnd(e) {
+function handleDragEnd() {
     this.classList.remove('dragging');
     document.querySelectorAll('.organizer-item-material, #finalAssessmentsContainer').forEach(item => {
         item.classList.remove('drag-over');
@@ -320,13 +282,13 @@ function handleDragOver(e) {
     return false;
 }
 
-function handleDragEnter(e) {
+function handleDragEnter() {
     if (draggedElement !== this) {
         this.classList.add('drag-over');
     }
 }
 
-function handleDragLeave(e) {
+function handleDragLeave() {
     this.classList.remove('drag-over');
 }
 
@@ -337,36 +299,30 @@ function handleDrop(e) {
     if (e.preventDefault) {
         e.preventDefault();
     }
-    
+
     this.classList.remove('drag-over');
-    
+
     if (!draggedElement || draggedElement === this) {
         return false;
     }
-    
+
     if (draggedType === 'material') {
-        // Material dropped on another material - reorder
         const container = document.getElementById('materialsContainer');
         const allMaterials = Array.from(container.querySelectorAll('.organizer-item-material'));
         const draggedIndex = allMaterials.indexOf(draggedElement);
         const targetIndex = allMaterials.indexOf(this);
-        
+
         if (draggedIndex < targetIndex) {
             this.parentNode.insertBefore(draggedElement, this.nextSibling);
         } else {
             this.parentNode.insertBefore(draggedElement, this);
         }
-        
-        // Move associated assessments with the material
+
         moveAssociatedAssessments(draggedElement);
     } else if (draggedType === 'assessment') {
-        // Assessment dropped on a material - place after it
         const targetMaterialId = this.dataset.id;
-        
-        // Remove assessment from current location
         draggedElement.remove();
-        
-        // Insert after the target material (after any existing assessments)
+
         let insertAfter = this;
         let nextSibling = this.nextElementSibling;
         while (nextSibling && nextSibling.classList.contains('organizer-item-assessment')) {
@@ -374,18 +330,15 @@ function handleDrop(e) {
             nextSibling = nextSibling.nextElementSibling;
         }
         insertAfter.parentNode.insertBefore(draggedElement, insertAfter.nextSibling);
-        
-        // Update data attribute
         draggedElement.dataset.materialId = targetMaterialId;
-        
-        // Update visual feedback
+
         const metaElement = draggedElement.querySelector('.organizer-item-meta');
         if (metaElement) {
             const typeText = metaElement.textContent.split('•')[0].trim();
             metaElement.textContent = typeText + ' • Placed after this material';
         }
     }
-    
+
     return false;
 }
 
@@ -396,50 +349,40 @@ function handleDropInFinal(e) {
     if (e.preventDefault) {
         e.preventDefault();
     }
-    
+
     this.classList.remove('drag-over');
-    
+
     if (!draggedElement || draggedType !== 'assessment') {
         return false;
     }
-    
-    // Remove placeholder if exists
+
     const placeholder = this.querySelector('.drop-zone-placeholder');
     if (placeholder) {
         placeholder.remove();
     }
-    
-    // Remove assessment from current location
+
     draggedElement.remove();
-    
-    // Add to final section
     this.appendChild(draggedElement);
-    
-    // Update data attribute
     draggedElement.dataset.materialId = 'final';
-    
-    // Update visual feedback
+
     const metaElement = draggedElement.querySelector('.organizer-item-meta');
     if (metaElement) {
         const typeText = metaElement.textContent.split('•')[0].trim();
         metaElement.textContent = typeText + ' • Appears after all materials';
     }
-    
+
     return false;
 }
 
 function moveAssociatedAssessments(materialElement) {
-    const materialId = materialElement.dataset.id;
     let nextElement = materialElement.nextElementSibling;
     const associatedAssessments = [];
-    
-    // Collect all consecutive assessment items
+
     while (nextElement && nextElement.classList.contains('organizer-item-assessment')) {
         associatedAssessments.push(nextElement);
         nextElement = nextElement.nextElementSibling;
     }
-    
-    // Re-insert them after the material
+
     associatedAssessments.forEach(assessment => {
         materialElement.parentNode.insertBefore(assessment, materialElement.nextSibling);
     });
@@ -447,10 +390,13 @@ function moveAssociatedAssessments(materialElement) {
 
 function saveContentOrder() {
     const container = document.getElementById('materialsContainer');
+    if (!container) {
+        return;
+    }
+
     const materialItems = container.querySelectorAll('.organizer-item-material');
     const materialIds = Array.from(materialItems).map(item => item.dataset.id);
-    
-    // Collect assessment placements
+
     const assessmentPlacements = [];
     const allAssessments = document.querySelectorAll('.organizer-item-assessment');
     allAssessments.forEach(assessment => {
@@ -459,23 +405,23 @@ function saveContentOrder() {
             materialId: assessment.dataset.materialId
         });
     });
-    
+
     const form = document.createElement('form');
     form.method = 'POST';
     form.action = '${pageContext.request.contextPath}/instructor/content-organizer';
-    
+
     const actionInput = document.createElement('input');
     actionInput.type = 'hidden';
     actionInput.name = 'action';
     actionInput.value = 'saveContentOrder';
     form.appendChild(actionInput);
-    
+
     const courseIdInput = document.createElement('input');
     courseIdInput.type = 'hidden';
     courseIdInput.name = 'courseId';
     courseIdInput.value = '${course.courseId}';
     form.appendChild(courseIdInput);
-    
+
     materialIds.forEach(id => {
         const input = document.createElement('input');
         input.type = 'hidden';
@@ -483,24 +429,25 @@ function saveContentOrder() {
         input.value = id;
         form.appendChild(input);
     });
-    
+
     assessmentPlacements.forEach(placement => {
         const idInput = document.createElement('input');
         idInput.type = 'hidden';
         idInput.name = 'assessmentIds[]';
         idInput.value = placement.id;
         form.appendChild(idInput);
-        
+
         const materialInput = document.createElement('input');
         materialInput.type = 'hidden';
         materialInput.name = 'assessmentMaterials[]';
         materialInput.value = placement.materialId;
         form.appendChild(materialInput);
     });
-    
+
     document.body.appendChild(form);
     form.submit();
 }
 </script>
 </body>
 </html>
+

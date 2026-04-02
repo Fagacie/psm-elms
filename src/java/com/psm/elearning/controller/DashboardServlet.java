@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.*;
 
 public class DashboardServlet extends HttpServlet {
@@ -17,6 +18,7 @@ public class DashboardServlet extends HttpServlet {
     private CourseDAO courseDAO;
     private UserDAO userDAO;
     private PaymentDAO paymentDAO;
+    private CertificateDAO certificateDAO;
 
     @Override
     public void init() throws ServletException {
@@ -25,6 +27,7 @@ public class DashboardServlet extends HttpServlet {
         courseDAO = new CourseDAOImpl();
         userDAO = new UserDAOImpl();
         paymentDAO = new PaymentDAOImpl();
+        certificateDAO = new CertificateDAOImpl();
     }
 
     @Override
@@ -53,16 +56,56 @@ public class DashboardServlet extends HttpServlet {
         // Fetch dashboard data for students
         if ("Student".equals(role)) {
             try {
-                // Get enrolled courses
                 List<Enrollment> enrolledCourses = enrollmentDAO.getEnrollmentsByStudent(user.getUserId());
                 request.setAttribute("enrolledCourses", enrolledCourses);
-                request.setAttribute("enrolledCoursesCount", enrolledCourses != null ? enrolledCourses.size() : 0);
-                
-                // TODO: Add logic for pending assignments, upcoming quizzes, and announcements
-                // For now, set placeholders
-                request.setAttribute("pendingAssignmentsCount", 0);
-                request.setAttribute("upcomingQuizzesCount", 0);
-                request.setAttribute("overallProgress", 0);
+
+                int enrolledCoursesCount = enrolledCourses != null ? enrolledCourses.size() : 0;
+                int activeCoursesCount = 0;
+                int completedCoursesCount = 0;
+                int paidEnrollmentsCount = 0;
+                int progressSum = 0;
+                int progressEntries = 0;
+
+                if (enrolledCourses != null) {
+                    for (Enrollment enrollment : enrolledCourses) {
+                        String completion = enrollment.getCompletionStatus();
+                        String status = enrollment.getStatus();
+                        String payment = enrollment.getPaymentStatus();
+
+                        if ("Completed".equalsIgnoreCase(completion) || "Completed".equalsIgnoreCase(status)) {
+                            completedCoursesCount++;
+                        } else {
+                            activeCoursesCount++;
+                        }
+
+                        if ("Paid".equalsIgnoreCase(payment)) {
+                            paidEnrollmentsCount++;
+                        }
+
+                        if (enrollment.getProgress() != null) {
+                            int clamped = Math.max(0, Math.min(100, enrollment.getProgress()));
+                            progressSum += clamped;
+                            progressEntries++;
+                        }
+                    }
+                }
+
+                int overallProgress = progressEntries > 0 ? Math.round((float) progressSum / progressEntries) : 0;
+                int certificatesCount = 0;
+                try {
+                    List<Certificate> issued = certificateDAO.findByUser(user.getUserId());
+                    certificatesCount = issued != null ? issued.size() : 0;
+                } catch (Exception ignored) {
+                    // Keep dashboard available even if certificate read fails.
+                }
+
+                request.setAttribute("enrolledCoursesCount", enrolledCoursesCount);
+                request.setAttribute("activeCoursesCount", activeCoursesCount);
+                request.setAttribute("completedCoursesCount", completedCoursesCount);
+                request.setAttribute("paidEnrollmentsCount", paidEnrollmentsCount);
+                request.setAttribute("certificatesCount", certificatesCount);
+                request.setAttribute("overallProgress", overallProgress);
+                request.setAttribute("dashboardDate", LocalDate.now());
                 
             } catch (Exception e) {
                 e.printStackTrace();

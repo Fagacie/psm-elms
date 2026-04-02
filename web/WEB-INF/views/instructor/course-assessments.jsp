@@ -7,12 +7,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Course Assessments - Instructor</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/landing.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/app.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-shell.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-assessments.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
+<body class="instructor-ui">
 <header class="app-header">
     <div class="header-left">
         <div class="logo-section">
@@ -22,6 +24,13 @@
         <h1 class="page-title">Course Assessments</h1>
     </div>
     <div class="header-right">
+        <div class="user-menu">
+            <div class="user-info">
+                <span class="user-name"><c:out value="${empty user ? sessionScope.user.fullName : user.fullName}"/></span>
+                <span class="user-role">Instructor</span>
+            </div>
+            <div class="user-avatar"><i class="fas fa-user"></i></div>
+        </div>
         <a href="${pageContext.request.contextPath}/logout" class="btn btn-secondary btn-sm">
             <i class="fas fa-sign-out-alt"></i> Logout
         </a>
@@ -34,7 +43,7 @@
             <i class="fas fa-home"></i><span>Dashboard</span>
         </a>
         <a href="${pageContext.request.contextPath}/instructor/courses" class="nav-item">
-            <i class="fas fa-book"></i><span>My Courses</span>
+            <i class="fas fa-book"></i><span>Courses</span>
         </a>
         <a href="${pageContext.request.contextPath}/instructor/materials" class="nav-item">
             <i class="fas fa-folder-open"></i><span>Materials</span>
@@ -53,8 +62,25 @@
 
 <main class="app-main">
     <div class="content-wrapper">
+        <section class="ins-page-head">
+            <div>
+                <p class="ins-page-kicker">Assessment Workspace</p>
+                <h2>Design, review, and grade assessments with clearer structure</h2>
+                <p>This page now aligns with the instructor workspace so assessment creation, question handling, grading, and retake decisions feel connected instead of scattered.</p>
+            </div>
+            <div class="ins-hero-actions">
+                <c:if test="${not empty selectedCourse}">
+                    <a href="${pageContext.request.contextPath}/instructor/assessments?courseId=${selectedCourse.courseId}&view=create" class="btn btn-primary">
+                        <i class="fas fa-plus-circle"></i> New Assessment
+                    </a>
+                </c:if>
+                <a href="${pageContext.request.contextPath}/instructor/materials" class="btn btn-secondary">
+                    <i class="fas fa-folder-open"></i> Open Materials
+                </a>
+            </div>
+        </section>
+
         <c:set var="defaultTab" value="${not empty selectedAssessment ? 'details' : (param.view == 'create' ? 'create' : 'list')}" />
-        <!-- Course Selection -->
         <div class="section-card course-filter-card">
             <form method="get" action="${pageContext.request.contextPath}/instructor/assessments" class="course-filter-form">
                 <label for="courseId"><strong>Select Course:</strong></label>
@@ -84,8 +110,34 @@
         <c:if test="${param.error == 'qoptions'}"><div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> Quiz requires options A/B and a correct option.</div></c:if>
         <c:if test="${param.error != null and param.error != 'qoptions'}"><div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> Action failed. Please retry.</div></c:if>
 
-        <!-- Tab Navigation -->
         <c:if test="${not empty selectedCourse}">
+            <section class="ins-hero-card assessments-hero">
+                <div class="ins-hero-grid">
+                    <div>
+                        <h3>${selectedCourse.courseName}</h3>
+                        <p>Use this workspace to place the right assessment at the right point in the course, distinguish quizzes from assignments and exams, and keep grading decisions visible.</p>
+                    </div>
+                    <div class="ins-hero-metrics">
+                        <div class="ins-metric">
+                            <strong>${assessments.size()}</strong>
+                            <span>Assessments in course</span>
+                        </div>
+                        <div class="ins-metric">
+                            <strong>${not empty selectedAssessment ? questions.size() : 0}</strong>
+                            <span>Questions in focus</span>
+                        </div>
+                        <div class="ins-metric">
+                            <strong>${not empty selectedAssessment ? submissions.size() : 0}</strong>
+                            <span>Submission records</span>
+                        </div>
+                        <div class="ins-metric">
+                            <strong>${not empty selectedAssessment ? retakeRequests.size() : 0}</strong>
+                            <span>Retake requests</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <div class="tabs">
                 <button type="button" class="tab-btn ${defaultTab == 'create' ? 'active' : ''}" data-tab-target="create-tab">
                     <i class="fas fa-plus-circle"></i> Create Assessment
@@ -754,3 +806,4 @@
 </script>
 </body>
 </html>
+

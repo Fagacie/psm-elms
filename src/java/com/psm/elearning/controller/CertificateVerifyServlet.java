@@ -35,6 +35,7 @@ public class CertificateVerifyServlet extends HttpServlet {
             throws ServletException, IOException {
 
         String code = request.getParameter("code");
+        request.setAttribute("checkedCode", code != null ? code.trim() : "");
         if (code == null || code.trim().isEmpty()) {
             request.setAttribute("valid", false);
             request.setAttribute("message", "Certificate code is required.");

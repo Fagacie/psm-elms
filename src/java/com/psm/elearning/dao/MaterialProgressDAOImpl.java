@@ -6,6 +6,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 public class MaterialProgressDAOImpl implements MaterialProgressDAO {
 
@@ -40,5 +42,26 @@ public class MaterialProgressDAOImpl implements MaterialProgressDAO {
             System.err.println("MaterialProgress countViewedByCourse failed: " + e.getMessage());
         }
         return 0;
+    }
+
+    @Override
+    public Set<Integer> findViewedMaterialIdsByCourse(int userId, int courseId) {
+        Set<Integer> viewedIds = new LinkedHashSet<>();
+        String sql = "SELECT mp.MaterialID FROM MaterialProgress mp " +
+                "JOIN Material m ON mp.MaterialID = m.MaterialID " +
+                "WHERE mp.UserID=? AND m.CourseID=? AND (m.IsDeleted=0 OR m.IsDeleted IS NULL)";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            ps.setInt(2, courseId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    viewedIds.add(rs.getInt(1));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("MaterialProgress findViewedMaterialIdsByCourse failed: " + e.getMessage());
+        }
+        return viewedIds;
     }
 }

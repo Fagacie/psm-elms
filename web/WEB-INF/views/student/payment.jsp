@@ -2,129 +2,90 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Payment - PSM E-Learning</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/landing.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/app.css">
-    <style>
-        body {
-            background: var(--color-background);
-            padding: var(--spacing-lg);
-        }
-        .payment-wrapper {
-            max-width: 600px;
-            margin: 0 auto;
-            padding: var(--spacing-xl);
-        }
-        .payment-card {
-            background: var(--color-white);
-            border: 1px solid var(--color-light-grey);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-        .payment-header {
-            background: var(--color-primary);
-            color: var(--color-white);
-            padding: var(--spacing-lg);
-        }
-        .payment-header h2 {
-            margin: 0;
-            font-size: 1.5rem;
-            font-weight: 600;
-        }
-        .payment-body {
-            padding: var(--spacing-lg);
-        }
-        .course-info {
-            background: var(--color-light-grey);
-            padding: var(--spacing-md);
-            margin-bottom: var(--spacing-lg);
-            border: 1px solid #e0e0e0;
-        }
-        .course-info h4 {
-            margin: 0 0 var(--spacing-xs) 0;
-            font-size: 1rem;
-            font-weight: 600;
-            color: var(--color-text);
-        }
-        .course-info p {
-            margin: 0;
-            color: var(--color-text-light);
-            font-size: 0.9rem;
-        }
-        .amount-box {
-            text-align: center;
-            padding: var(--spacing-lg);
-            margin: var(--spacing-lg) 0;
-            background: var(--color-background);
-            border: 1px solid var(--color-light-grey);
-        }
-        .amount-label {
-            color: var(--color-text-light);
-            font-size: 0.9rem;
-            margin-bottom: var(--spacing-sm);
-        }
-        .amount-value {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--color-primary);
-        }
-        .button-group {
-            display: flex;
-            gap: var(--spacing-md);
-            margin: var(--spacing-lg) 0;
-        }
-        .btn-full {
-            flex: 1;
-        }
-        .security-notice {
-            text-align: center;
-            color: var(--color-text-light);
-            font-size: 0.9rem;
-            margin-top: var(--spacing-lg);
-            padding-top: var(--spacing-lg);
-            border-top: 1px solid var(--color-light-grey);
-        }
-    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/student-v2.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/enrollment-flow-v2.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
-    <div class="payment-wrapper">
-        <div class="payment-card">
-            <div class="payment-header">
-                <h2>Complete Payment</h2>
-            </div>
-            <div class="payment-body">
-                <!-- Course Information -->
-                <div class="course-info">
-                    <h4>${enrollment.courseName}</h4>
-                    <p>${enrollment.courseDescription}</p>
-                </div>
-                
-                <!-- Amount Display -->
-                <div class="amount-box">
-                    <div class="amount-label">Total Amount</div>
-                    <div class="amount-value">
-                        ₦<fmt:formatNumber value="${enrollment.coursePrice}" type="number" minFractionDigits="2" maxFractionDigits="2"/>
-                    </div>
-                </div>
-                
-                <!-- Paystack Payment Trigger -->
-                <form method="post" action="${pageContext.request.contextPath}/student/start-payment" id="paystackForm">
-                    <input type="hidden" name="enrollmentId" value="${enrollment.enrollmentId}">
-                    <div class="button-group">
-                        <button type="submit" class="btn btn-primary btn-full">Pay Now</button>
-                        <a href="${pageContext.request.contextPath}/student/my-enrollments" class="btn btn-outline btn-full" style="flex:1; text-align:center;">Cancel</a>
-                    </div>
-                </form>
-                
-                <!-- Security Notice -->
-                <div class="security-notice">
-                    Your payment is secure and encrypted
-                </div>
-            </div>
-        </div>
+<body class="sv-page">
+<header class="sv-topbar">
+    <div class="sv-top-left">
+        <button class="sv-menu-btn" id="svMenuBtn" type="button" aria-label="Toggle navigation"><i class="fas fa-bars"></i></button>
+        <a href="${pageContext.request.contextPath}/dashboard" class="sv-brand"><span class="sv-brand-main">PSM</span><span class="sv-brand-sub">E-Learning</span></a>
+        <div class="sv-page-title"><h1>Payment</h1><p>Secure checkout</p></div>
     </div>
+    <div class="sv-top-right"><a href="${pageContext.request.contextPath}/logout" class="sv-logout"><i class="fas fa-right-from-bracket"></i> Logout</a></div>
+</header>
+
+<div class="sv-layout">
+    <aside class="sv-sidebar" id="svSidebar">
+        <nav class="sv-nav">
+            <a href="${pageContext.request.contextPath}/dashboard" class="sv-nav-link"><i class="fas fa-house"></i><span>Dashboard</span></a>
+            <a href="${pageContext.request.contextPath}/student/my-enrollments" class="sv-nav-link"><i class="fas fa-book-open"></i><span>My Courses</span></a>
+            <a href="${pageContext.request.contextPath}/student/courses" class="sv-nav-link active"><i class="fas fa-compass"></i><span>Browse Courses</span></a>
+            <a href="${pageContext.request.contextPath}/student/certificates" class="sv-nav-link"><i class="fas fa-certificate"></i><span>Certificates</span></a>
+            <a href="${pageContext.request.contextPath}/profile" class="sv-nav-link"><i class="fas fa-user-gear"></i><span>Profile</span></a>
+        </nav>
+    </aside>
+
+    <main class="sv-main ef-main">
+        <div class="sv-breadcrumb">
+            <a href="${pageContext.request.contextPath}/dashboard"><i class="fas fa-house"></i> Dashboard</a>
+            <span>/</span>
+            <a href="${pageContext.request.contextPath}/student/courses">Browse Courses</a>
+            <span>/</span>
+            <span>Payment</span>
+        </div>
+
+        <div class="ef-stepper">
+            <div class="ef-step">1. Enrollment Summary</div>
+            <div class="ef-step active">2. Payment</div>
+            <div class="ef-step">3. Access Learning Hub</div>
+        </div>
+
+        <section class="ef-course">
+            <c:if test="${paymentError == 'paystack'}">
+                <div class="alert alert-error">Unable to initialize secure payment gateway. Please try again.</div>
+            </c:if>
+            <c:if test="${paymentError == 'initstore'}">
+                <div class="alert alert-error">Payment session started but could not be saved. Please retry to avoid inconsistent status.</div>
+            </c:if>
+            <c:if test="${paymentError == 'noemail'}">
+                <div class="alert alert-error">Your account email is missing. Update profile email before retrying payment.</div>
+            </c:if>
+
+            <h3>${enrollment.courseName}</h3>
+            <p>${enrollment.courseDescription}</p>
+
+            <div class="ef-grid">
+                <div class="ef-meta"><span>Enrollment ID</span><strong>#${enrollment.enrollmentId}</strong></div>
+                <div class="ef-meta"><span>Payment Status</span><strong><c:out value="${enrollment.paymentStatus}" default="Pending"/></strong></div>
+                <div class="ef-meta"><span>Reference</span><strong><c:out value="${enrollment.paymentRef}" default="-"/></strong></div>
+            </div>
+
+            <div class="ef-amount"><span>Total Amount</span><strong><fmt:formatNumber value="${enrollment.coursePrice}" type="number" minFractionDigits="2" maxFractionDigits="2"/></strong></div>
+
+            <form method="post" action="${pageContext.request.contextPath}/student/start-payment" id="paystackForm">
+                <input type="hidden" name="enrollmentId" value="${enrollment.enrollmentId}">
+                <div class="ef-actions">
+                    <button type="submit" class="sv-btn primary">Pay Now</button>
+                    <a href="${pageContext.request.contextPath}/student/my-enrollments" class="sv-btn">Cancel</a>
+                </div>
+            </form>
+
+            <div class="ef-note"><h4>Security Notice</h4><ul><li>Your payment is encrypted and processed securely.</li><li>After successful payment, access is activated immediately.</li></ul></div>
+        </section>
+    </main>
+</div>
+
+<div class="sv-overlay" id="svOverlay"></div>
+<script src="${pageContext.request.contextPath}/js/student-v2.js"></script>
 </body>
 </html>

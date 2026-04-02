@@ -8,192 +8,218 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Course Management - PSM E-Learning</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/landing.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/app.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin-dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
 </head>
 <body>
-    <jsp:include page="/WEB-INF/views/common/admin-header.jsp">
-        <jsp:param name="pageTitle" value="Course Management"/>
-    </jsp:include>
+<jsp:include page="/WEB-INF/views/common/admin-header.jsp">
+    <jsp:param name="pageTitle" value="Courses"/>
+</jsp:include>
 
-    <jsp:include page="/WEB-INF/views/common/admin-sidebar.jsp"/>
+<jsp:include page="/WEB-INF/views/common/admin-sidebar.jsp"/>
 
-    <main class="app-main">
-        <div class="content-wrapper">
-            <c:set var="courseCount" value="${empty courses ? 0 : fn:length(courses)}"/>
-            <c:set var="totalCourses" value="${courseCount}"/>
-            <c:set var="pendingCount" value="0"/>
-            <c:set var="approvedCount" value="0"/>
-            <c:set var="archivedCount" value="0"/>
-            <c:forEach items="${courses}" var="c">
-                <c:choose>
-                    <c:when test="${c.status eq 'Pending'}"><c:set var="pendingCount" value="${pendingCount + 1}"/></c:when>
-                    <c:when test="${c.status eq 'Approved'}"><c:set var="approvedCount" value="${approvedCount + 1}"/></c:when>
-                    <c:when test="${c.status eq 'Archived'}"><c:set var="archivedCount" value="${archivedCount + 1}"/></c:when>
-                </c:choose>
-            </c:forEach>
+<main class="app-main">
+    <div class="content-wrapper">
+        <c:set var="courseCount" value="${empty courses ? 0 : fn:length(courses)}"/>
+        <c:set var="totalCourses" value="${courseCount}"/>
+        <c:set var="pendingCount" value="0"/>
+        <c:set var="approvedCount" value="0"/>
+        <c:set var="archivedCount" value="0"/>
+        <c:forEach items="${courses}" var="c">
+            <c:choose>
+                <c:when test="${c.status eq 'Pending'}"><c:set var="pendingCount" value="${pendingCount + 1}"/></c:when>
+                <c:when test="${c.status eq 'Approved'}"><c:set var="approvedCount" value="${approvedCount + 1}"/></c:when>
+                <c:when test="${c.status eq 'Archived'}"><c:set var="archivedCount" value="${archivedCount + 1}"/></c:when>
+            </c:choose>
+        </c:forEach>
 
-            <!-- Alerts -->
-            <c:if test="${param.success == 'approved'}">
-                <div class="alert alert-success">
-                    <i class="fas fa-check-circle"></i> Course approved successfully.
-                </div>
-            </c:if>
-            <c:if test="${param.success == 'rejected'}">
-                <div class="alert alert-success">
-                    <i class="fas fa-check-circle"></i> Course rejected successfully.
-                </div>
-            </c:if>
-            <c:if test="${param.error != null}">
-                <div class="alert alert-error">
-                    <i class="fas fa-exclamation-circle"></i> An error occurred. Please try again.
-                </div>
-            </c:if>
-            <c:if test="${not empty errorMessage}">
-                <div class="alert alert-error">
-                    <i class="fas fa-exclamation-circle"></i> <c:out value="${errorMessage}"/>
-                </div>
-            </c:if>
+        <section class="admin-page-head">
+            <div class="admin-breadcrumb">
+                <a href="${pageContext.request.contextPath}/dashboard">Dashboard</a>
+                <i class="fas fa-angle-right"></i>
+                <span>Courses</span>
+            </div>
 
-            <!-- Course Statistics -->
-            <section class="section-card">
-                <div class="section-header">
-                    <h2>Course Statistics</h2>
+            <div class="admin-hero">
+                <div class="admin-hero-copy">
+                    <p class="admin-kicker">Course Governance</p>
+                    <h2>Review approvals, archive inactive content, and keep the course catalog clean</h2>
+                    <p>Track course status across the platform and take fast moderation actions on pending, approved, and archived learning products.</p>
                 </div>
-                <div class="metrics-grid">
-                    <div class="metric-card">
-                        <div class="metric-label">Total Courses</div>
-                        <div class="metric-value">${totalCourses}</div>
+                <div class="admin-hero-scene" aria-hidden="true">
+                    <span class="admin-orb admin-orb-a"></span>
+                    <span class="admin-orb admin-orb-b"></span>
+                    <span class="admin-shape admin-shape-a"></span>
+                    <span class="admin-shape admin-shape-b"></span>
+                    <div class="admin-scene-panel admin-scene-panel-a">
+                        <span>Total Courses</span>
+                        <strong>${totalCourses}</strong>
                     </div>
-                    <div class="metric-card">
-                        <div class="metric-label">Pending Review</div>
-                        <div class="metric-value">${pendingCount}</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-label">Approved</div>
-                        <div class="metric-value">${approvedCount}</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-label">Archived</div>
-                        <div class="metric-value">${archivedCount}</div>
+                    <div class="admin-scene-panel admin-scene-panel-b">
+                        <span>Pending</span>
+                        <strong>${pendingCount}</strong>
                     </div>
                 </div>
-            </section>
+            </div>
+        </section>
 
-            <!-- Filters and Search -->
-            <section class="section-card">
-                <div class="section-header">
-                    <h2>Filters & Status</h2>
-                </div>
-                <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px;">
-                    <a href="${pageContext.request.contextPath}/admin/courses" class="link" style="padding: 8px 16px; border: 1px solid ${empty param.status ? 'var(--color-primary)' : 'var(--color-light-grey)'}; background: ${empty param.status ? 'var(--color-primary)' : 'var(--color-white)'}; color: ${empty param.status ? 'white' : 'var(--color-text)'}; text-decoration: none; font-size: 14px; font-weight: 600; border-radius: 2px; cursor: pointer;">All Courses</a>
-                    <a href="${pageContext.request.contextPath}/admin/courses?status=Pending" class="link" style="padding: 8px 16px; border: 1px solid ${param.status == 'Pending' ? 'var(--color-primary)' : 'var(--color-light-grey)'}; background: ${param.status == 'Pending' ? 'var(--color-primary)' : 'var(--color-white)'}; color: ${param.status == 'Pending' ? 'white' : 'var(--color-text)'}; text-decoration: none; font-size: 14px; font-weight: 600; border-radius: 2px; cursor: pointer;">Pending Review</a>
-                    <a href="${pageContext.request.contextPath}/admin/courses?status=Approved" class="link" style="padding: 8px 16px; border: 1px solid ${param.status == 'Approved' ? 'var(--color-primary)' : 'var(--color-light-grey)'}; background: ${param.status == 'Approved' ? 'var(--color-primary)' : 'var(--color-white)'}; color: ${param.status == 'Approved' ? 'white' : 'var(--color-text)'}; text-decoration: none; font-size: 14px; font-weight: 600; border-radius: 2px; cursor: pointer;">Approved</a>
-                    <a href="${pageContext.request.contextPath}/admin/courses?status=Archived" class="link" style="padding: 8px 16px; border: 1px solid ${param.status == 'Archived' ? 'var(--color-primary)' : 'var(--color-light-grey)'}; background: ${param.status == 'Archived' ? 'var(--color-primary)' : 'var(--color-white)'}; color: ${param.status == 'Archived' ? 'white' : 'var(--color-text)'}; text-decoration: none; font-size: 14px; font-weight: 600; border-radius: 2px; cursor: pointer;">Archived</a>
-                </div>
-            </section>
+        <c:if test="${param.success == 'approved'}">
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle"></i> Course approved successfully.
+            </div>
+        </c:if>
+        <c:if test="${param.success == 'rejected'}">
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle"></i> Course rejected successfully.
+            </div>
+        </c:if>
+        <c:if test="${param.error != null}">
+            <div class="alert alert-error">
+                <i class="fas fa-exclamation-circle"></i> An error occurred. Please try again.
+            </div>
+        </c:if>
+        <c:if test="${not empty errorMessage}">
+            <div class="alert alert-error">
+                <i class="fas fa-exclamation-circle"></i> <c:out value="${errorMessage}"/>
+            </div>
+        </c:if>
 
-            <!-- Courses Table -->
-            <section class="section-card">
-                <div class="section-header">
-                    <h2>All Courses</h2>
+        <section class="section-card">
+            <div class="section-header">
+                <h2>Course Overview</h2>
+            </div>
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-label">Total Courses</div>
+                    <div class="metric-value">${totalCourses}</div>
                 </div>
-                <div class="table-wrapper">
-                    <table id="coursesTable" class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Course Name</th>
-                                <th>Category</th>
-                                <th>Level</th>
-                                <th>Duration (hrs)</th>
-                                <th>Fee (₦)</th>
-                                <th>Status</th>
-                                <th>Created</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <c:choose>
-                                <c:when test="${empty courses}">
+                <div class="metric-card">
+                    <div class="metric-label">Pending Review</div>
+                    <div class="metric-value">${pendingCount}</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Approved</div>
+                    <div class="metric-value">${approvedCount}</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Archived</div>
+                    <div class="metric-value">${archivedCount}</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section-card">
+            <div class="section-header">
+                <h2>Status Filters</h2>
+            </div>
+            <div style="padding: 14px 16px 16px; display:flex; gap:10px; flex-wrap:wrap;">
+                <a href="${pageContext.request.contextPath}/admin/courses" class="admin-btn ${empty param.status ? 'primary' : 'secondary'}">All Courses</a>
+                <a href="${pageContext.request.contextPath}/admin/courses?status=Pending" class="admin-btn ${param.status == 'Pending' ? 'primary' : 'secondary'}">Pending Review</a>
+                <a href="${pageContext.request.contextPath}/admin/courses?status=Approved" class="admin-btn ${param.status == 'Approved' ? 'primary' : 'secondary'}">Approved</a>
+                <a href="${pageContext.request.contextPath}/admin/courses?status=Archived" class="admin-btn ${param.status == 'Archived' ? 'primary' : 'secondary'}">Archived</a>
+            </div>
+        </section>
+
+        <section class="section-card">
+            <div class="section-header">
+                <h2>All Courses</h2>
+            </div>
+            <div class="table-wrapper">
+                <table id="coursesTable" class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Course Name</th>
+                            <th>Category</th>
+                            <th>Level</th>
+                            <th>Duration (hrs)</th>
+                            <th>Fee (NGN)</th>
+                            <th>Status</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <c:choose>
+                            <c:when test="${empty courses}">
+                                <tr>
+                                    <td colspan="8">
+                                        <div class="empty-state" style="margin:12px;">
+                                            <i class="fas fa-inbox"></i>
+                                            <p>No courses found.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </c:when>
+                            <c:otherwise>
+                                <c:forEach var="course" items="${courses}">
                                     <tr>
-                                        <td colspan="8" style="text-align: center; padding: 40px; color: var(--color-text-light);"><i class="fas fa-inbox fa-2x" style="display: block; margin-bottom: 10px;"></i>No courses found.</td>
-                                    </tr>
-                                </c:when>
-                                <c:otherwise>
-                                    <c:forEach var="course" items="${courses}">
-                                        <tr>
-                                            <td>
-                                                <strong>${course.courseName}</strong>
-                                                <c:if test="${not empty course.description}">
-                                                    <div style="font-size: 12px; color: var(--color-text-light); margin-top: 3px;">
-                                                        <c:set var="desc" value="${course.description}"/>
-                                                        <c:choose>
-                                                            <c:when test="${fn:length(desc) > 50}">
-                                                                ${fn:substring(desc, 0, 50)}...
-                                                            </c:when>
-                                                            <c:otherwise>
-                                                                ${desc}
-                                                            </c:otherwise>
-                                                        </c:choose>
-                                                    </div>
-                                                </c:if>
-                                            </td>
-                                            <td>${course.category}</td>
-                                            <td><span class="status-badge status-${course.level eq 'Beginner' ? 'success' : course.level eq 'Intermediate' ? 'warning' : 'secondary'}">${course.level}</span></td>
-                                            <td style="text-align: center;">${course.duration}</td>
-                                            <td style="text-align: right;"><fmt:formatNumber value="${course.courseFee}" type="number" minFractionDigits="2" maxFractionDigits="2"/></td>
-                                            <td><span class="status-badge status-${course.status eq 'Pending' ? 'warning' : course.status eq 'Approved' ? 'success' : 'secondary'}">${course.status}</span></td>
-                                            <td>
-                                                <c:choose>
-                                                    <c:when test="${not empty course.createdAt}">
-                                                        <c:set var="createdStr" value="${course.createdAt.toString()}"/>
-                                                        ${fn:length(createdStr) >= 10 ? fn:substring(createdStr, 0, 10) : createdStr}
-                                                    </c:when>
-                                                    <c:otherwise>-</c:otherwise>
-                                                </c:choose>
-                                            </td>
-                                            <td style="font-size: 13px;">
+                                        <td>
+                                            <strong>${course.courseName}</strong>
+                                            <c:if test="${not empty course.description}">
+                                                <div style="font-size:12px; color:var(--admin-muted); margin-top:4px;">
+                                                    <c:set var="desc" value="${course.description}"/>
+                                                    <c:choose>
+                                                        <c:when test="${fn:length(desc) > 70}">${fn:substring(desc, 0, 70)}...</c:when>
+                                                        <c:otherwise>${desc}</c:otherwise>
+                                                    </c:choose>
+                                                </div>
+                                            </c:if>
+                                        </td>
+                                        <td>${course.category}</td>
+                                        <td><span class="status-badge status-${course.level eq 'Beginner' ? 'success' : course.level eq 'Intermediate' ? 'warning' : 'secondary'}">${course.level}</span></td>
+                                        <td>${course.duration}</td>
+                                        <td><fmt:formatNumber value="${course.courseFee}" type="number" minFractionDigits="2" maxFractionDigits="2"/></td>
+                                        <td><span class="status-badge status-${course.status eq 'Pending' ? 'warning' : course.status eq 'Approved' ? 'success' : 'secondary'}">${course.status}</span></td>
+                                        <td>
+                                            <c:choose>
+                                                <c:when test="${not empty course.createdAt}">
+                                                    <c:set var="createdStr" value="${course.createdAt.toString()}"/>
+                                                    ${fn:length(createdStr) >= 10 ? fn:substring(createdStr, 0, 10) : createdStr}
+                                                </c:when>
+                                                <c:otherwise>-</c:otherwise>
+                                            </c:choose>
+                                        </td>
+                                        <td>
+                                            <div style="display:flex; gap:8px; flex-wrap:wrap;">
                                                 <c:choose>
                                                     <c:when test="${course.status eq 'Pending'}">
-                                                        <a href="${pageContext.request.contextPath}/admin/courses?action=approve&id=${course.courseId}" class="link" style="color: var(--color-success);" onclick="return confirm('Approve this course?');"><i class="fas fa-check"></i> Approve</a> |
-                                                        <a href="${pageContext.request.contextPath}/admin/courses?action=reject&id=${course.courseId}" class="link" style="color: var(--color-danger);" onclick="return confirm('Reject this course?');"><i class="fas fa-times"></i> Reject</a>
+                                                        <a href="${pageContext.request.contextPath}/admin/courses?action=approve&id=${course.courseId}" class="admin-btn primary" onclick="return confirm('Approve this course?');">Approve</a>
+                                                        <a href="${pageContext.request.contextPath}/admin/courses?action=reject&id=${course.courseId}" class="admin-btn secondary" style="border-color:#a55058; color:#ffc2c6;" onclick="return confirm('Reject this course?');">Reject</a>
                                                     </c:when>
                                                     <c:when test="${course.status eq 'Approved'}">
-                                                        <a href="${pageContext.request.contextPath}/admin/courses?action=archive&id=${course.courseId}" class="link" style="color: var(--color-warning);" onclick="return confirm('Archive this course? Students will no longer see it.');"><i class="fas fa-archive"></i> Archive</a>
+                                                        <a href="${pageContext.request.contextPath}/admin/courses?action=archive&id=${course.courseId}" class="admin-btn secondary" onclick="return confirm('Archive this course? Students will no longer see it.');">Archive</a>
                                                     </c:when>
                                                     <c:when test="${course.status eq 'Archived'}">
-                                                        <a href="${pageContext.request.contextPath}/admin/courses?action=restore&id=${course.courseId}" class="link" style="color: var(--color-info);" onclick="return confirm('Restore this course to Approved?');"><i class="fas fa-undo"></i> Restore</a>
+                                                        <a href="${pageContext.request.contextPath}/admin/courses?action=restore&id=${course.courseId}" class="admin-btn secondary" onclick="return confirm('Restore this course to Approved?');">Restore</a>
                                                     </c:when>
                                                     <c:otherwise>
-                                                        <span style="color: var(--color-text-light);">-</span>
+                                                        <span style="color: var(--admin-muted);">-</span>
                                                     </c:otherwise>
                                                 </c:choose>
-                                            </td>
-                                        </tr>
-                                    </c:forEach>
-                                </c:otherwise>
-                            </c:choose>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-
-            <!-- DataTables styling and initialization -->
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </c:forEach>
+                            </c:otherwise>
+                        </c:choose>
+                    </tbody>
+                </table>
+            </div>
             <style>
-                .dataTables_wrapper { padding: 15px 0; }
+                .dataTables_wrapper { padding: 14px 16px 16px; color: var(--admin-muted); }
                 .dataTables_length, .dataTables_filter { margin-bottom: 15px; }
-                .dataTables_length label, .dataTables_filter label { display:flex; align-items:center; gap:10px; font-size:14px; color: var(--color-text); font-weight:500; }
-                .dataTables_length select, .dataTables_filter input { padding:8px 12px; border:1px solid var(--color-light-grey); background: var(--color-white); color: var(--color-text); font-size:14px; margin:0 5px; border-radius: 2px; }
-                .dataTables_length select:focus, .dataTables_filter input:focus { outline:none; border-color: var(--color-primary); }
-                .dataTables_info { padding:15px 0; color: var(--color-text-light); font-size:14px; }
+                .dataTables_length label, .dataTables_filter label { display:flex; align-items:center; gap:10px; color: var(--admin-muted); font-weight:500; }
+                .dataTables_length select, .dataTables_filter input { margin:0 5px; }
+                .dataTables_info { padding:15px 0; color: var(--admin-muted); }
                 .dataTables_paginate { padding:15px 0; }
-                .dataTables_paginate .paginate_button { padding:6px 12px; margin:0 2px; border:1px solid var(--color-light-grey); background: var(--color-white); color: var(--color-text); cursor:pointer; font-size:14px; border-radius: 2px; }
-                .dataTables_paginate .paginate_button:hover { background: var(--color-background); border-color: var(--color-primary); color: var(--color-primary); }
-                .dataTables_paginate .paginate_button.current { background: var(--color-primary); border-color: var(--color-primary); color:#fff; font-weight:600; }
+                .dataTables_paginate .paginate_button { padding:6px 12px; margin:0 2px; border:1px solid var(--admin-border); background: rgba(17, 39, 64, 0.6); color: #d8ebff !important; cursor:pointer; font-size:14px; }
+                .dataTables_paginate .paginate_button:hover { border-color: var(--admin-accent); color: #fff !important; }
+                .dataTables_paginate .paginate_button.current { background: linear-gradient(120deg, #19a3d7, #2485ff); border-color:#1e78e0; color:#fff !important; font-weight:600; }
                 .dataTables_paginate .paginate_button.disabled { opacity:0.5; cursor:not-allowed; }
                 .dataTables_length { float:left; } .dataTables_filter { float:right; }
                 .dataTables_info { float:left; clear:both; } .dataTables_paginate { float:right; clear:both; }
@@ -224,7 +250,8 @@
                     }
                 });
             </script>
-        </div>
-    </main>
+        </section>
+    </div>
+</main>
 </body>
 </html>

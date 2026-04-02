@@ -48,6 +48,9 @@ public class ProcessEnrollmentServlet extends HttpServlet {
         }
         
         String role = (String) session.getAttribute("role");
+        if (role == null) {
+            role = (String) session.getAttribute("userRole");
+        }
         if (!"Student".equals(role)) {
             response.sendRedirect(request.getContextPath() + "/dashboard");
             return;

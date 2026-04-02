@@ -77,6 +77,10 @@ public class StudentCertificateServlet extends HttpServlet {
         request.setAttribute("diagTotalMaterials", syncResult.getTotalMaterials());
         request.setAttribute("diagPassedAssessments", syncResult.getPassedAssessments());
         request.setAttribute("diagTotalAssessments", syncResult.getTotalAssessments());
+        request.setAttribute("diagViewedAllMaterials", syncResult.hasViewedAllMaterials());
+        request.setAttribute("diagPassedRequiredAssessments", syncResult.hasPassedRequiredAssessments());
+        request.setAttribute("eligibilitySummary", syncResult.getBlockingReasonSummary());
+        request.setAttribute("missingRequirements", syncResult.getMissingRequirements());
         request.setAttribute("enrollment", enrollment);
         request.setAttribute("course", course);
         request.setAttribute("studentUser", studentUser);
@@ -97,6 +101,8 @@ public class StudentCertificateServlet extends HttpServlet {
         }
 
         Integer userId = (Integer) session.getAttribute("userId");
+        String redirectTo = request.getParameter("redirectTo");
+        boolean backToCertificates = "certificates".equalsIgnoreCase(redirectTo);
         Integer enrollmentId = parseInt(request.getParameter("enrollmentId"));
         if (enrollmentId == null) {
             response.sendRedirect(request.getContextPath() + "/student/my-enrollments?error=invalid");
@@ -111,16 +117,33 @@ public class StudentCertificateServlet extends HttpServlet {
 
         EnrollmentStateSyncService.SyncResult syncResult = enrollmentStateSyncService.syncEnrollmentState(enrollment);
         if (!syncResult.isEligibleForCertificate()) {
-            response.sendRedirect(request.getContextPath() + "/student/certificate?enrollmentId=" + enrollmentId + "&error=noteligible");
+            String reasonQuery = buildEligibilityReasonQuery(syncResult);
+            if (backToCertificates) {
+                response.sendRedirect(request.getContextPath() + "/student/certificates?error=noteligible&enrollmentId=" + enrollmentId + reasonQuery);
+            } else {
+                response.sendRedirect(request.getContextPath() + "/student/certificate?enrollmentId=" + enrollmentId + "&error=noteligible" + reasonQuery);
+            }
             return;
         }
 
         Certificate certificate = certificateDAO.findByEnrollment(enrollmentId);
         if (certificate == null) {
             certificate = issueCertificate(request, enrollmentId);
+            if (certificate == null) {
+                if (backToCertificates) {
+                    response.sendRedirect(request.getContextPath() + "/student/certificates?error=generatefail&enrollmentId=" + enrollmentId);
+                } else {
+                    response.sendRedirect(request.getContextPath() + "/student/certificate?enrollmentId=" + enrollmentId + "&error=generatefail");
+                }
+                return;
+            }
         }
 
-        response.sendRedirect(request.getContextPath() + "/student/certificate?enrollmentId=" + enrollmentId);
+        if (backToCertificates) {
+            response.sendRedirect(request.getContextPath() + "/student/certificates?success=generated");
+        } else {
+            response.sendRedirect(request.getContextPath() + "/student/certificate?enrollmentId=" + enrollmentId);
+        }
     }
 
     private Certificate issueCertificate(HttpServletRequest request, int enrollmentId) {
@@ -172,10 +195,28 @@ public class StudentCertificateServlet extends HttpServlet {
         return scheme + "://" + server + ":" + port;
     }
 
+    private String buildEligibilityReasonQuery(EnrollmentStateSyncService.SyncResult syncResult) {
+        StringBuilder reasons = new StringBuilder();
+        if (!syncResult.isPaid()) {
+            reasons.append("payment");
+        }
+        if (!syncResult.hasViewedAllMaterials()) {
+            if (reasons.length() > 0) reasons.append(',');
+            reasons.append("materials");
+        }
+        if (!syncResult.hasPassedRequiredAssessments()) {
+            if (reasons.length() > 0) reasons.append(',');
+            reasons.append("assessments");
+        }
+        return reasons.length() > 0 ? "&reason=" + reasons : "";
+    }
+
     private Integer parseInt(String value) {
         try {
-            if (value == null || value.trim().isEmpty()) return null;
-            return Integer.parseInt(value.trim());
+            if (value == null) return null;
+            String cleaned = value.trim();
+            if (cleaned.isEmpty()) return null;
+            return Integer.parseInt(cleaned);
         } catch (NumberFormatException e) {
             return null;
         }

@@ -7,12 +7,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Course Certificates - Instructor</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/landing.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/app.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-courses.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-shell.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-certificates.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
+<body class="instructor-ui">
 <header class="app-header">
     <div class="header-left">
         <div class="logo-section">
@@ -22,6 +24,13 @@
         <h1 class="page-title">Course Certificates</h1>
     </div>
     <div class="header-right">
+        <div class="user-menu">
+            <div class="user-info">
+                <span class="user-name"><c:out value="${empty user ? sessionScope.user.fullName : user.fullName}"/></span>
+                <span class="user-role">Instructor</span>
+            </div>
+            <div class="user-avatar"><i class="fas fa-user"></i></div>
+        </div>
         <a href="${pageContext.request.contextPath}/logout" class="btn btn-secondary btn-sm">
             <i class="fas fa-sign-out-alt"></i> Logout
         </a>
@@ -34,7 +43,7 @@
             <i class="fas fa-home"></i><span>Dashboard</span>
         </a>
         <a href="${pageContext.request.contextPath}/instructor/courses" class="nav-item">
-            <i class="fas fa-book"></i><span>My Courses</span>
+            <i class="fas fa-book"></i><span>Courses</span>
         </a>
         <a href="${pageContext.request.contextPath}/instructor/materials" class="nav-item">
             <i class="fas fa-folder-open"></i><span>Materials</span>
@@ -53,76 +62,142 @@
 
 <main class="app-main">
     <div class="content-wrapper">
-        <div class="section-card">
-            <h3>Issued Certificates in Your Courses</h3>
-            <c:if test="${param.success == 'revoked'}">
-                <div class="alert alert-success" style="margin-bottom:12px;">Certificate revoked successfully.</div>
-            </c:if>
-            <c:if test="${param.error == 'revoke'}">
-                <div class="alert alert-error" style="margin-bottom:12px;">Unable to revoke certificate.</div>
-            </c:if>
+        <section class="ins-page-head">
+            <div>
+                <p class="ins-page-kicker">Certificate Oversight</p>
+                <h2>Track issued credentials and protect certificate integrity</h2>
+                <p>This page now presents certificate records as a professional review workspace so instructors can inspect issued documents, verify status quickly, and revoke only when necessary.</p>
+            </div>
+            <div class="ins-hero-actions">
+                <a class="btn btn-primary" href="${pageContext.request.contextPath}/certificate/template?back=${pageContext.request.contextPath}/instructor/certificates">
+                    <i class="fas fa-eye"></i> Open Template Preview
+                </a>
+            </div>
+        </section>
+
+        <section class="ins-hero-card certificates-hero">
+            <div class="ins-hero-grid">
+                <div>
+                    <h3>Issued certificates across your courses</h3>
+                    <p>Use this registry to review who has already been certified, verify each certificate link, and manage revocations in a controlled and visible way.</p>
+                </div>
+                <div class="ins-hero-metrics">
+                    <div class="ins-metric">
+                        <strong>${fn:length(certificates)}</strong>
+                        <span>Total issued</span>
+                    </div>
+                    <div class="ins-metric">
+                        <strong>${fn:length(certificates)}</strong>
+                        <span>Records in view</span>
+                    </div>
+                    <div class="ins-metric">
+                        <strong>${param.success == 'revoked' ? 'Updated' : 'Stable'}</strong>
+                        <span>Registry status</span>
+                    </div>
+                    <div class="ins-metric">
+                        <strong>${param.error == 'revoke' ? 'Check' : 'Ready'}</strong>
+                        <span>Action signal</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <c:if test="${param.success == 'revoked'}">
+            <div class="alert alert-success"><i class="fas fa-check-circle"></i> Certificate revoked successfully.</div>
+        </c:if>
+        <c:if test="${param.error == 'revoke'}">
+            <div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> Unable to revoke certificate.</div>
+        </c:if>
+
+        <section class="section-card certificates-section">
+            <div class="section-header">
+                <div>
+                    <h3 class="section-title">Issued Certificates</h3>
+                    <p class="section-caption">Review active and revoked certificates linked to the courses you manage.</p>
+                </div>
+                <div class="student-count-badge">${fn:length(certificates)} Records</div>
+            </div>
+
             <c:choose>
                 <c:when test="${empty certificates}">
-                    <p>No certificates issued yet.</p>
+                    <div class="empty-state-box">
+                        <i class="fas fa-certificate"></i>
+                        <p>No certificates have been issued yet.</p>
+                    </div>
                 </c:when>
                 <c:otherwise>
-                    <table class="data-table" style="width:100%;">
-                        <thead>
-                        <tr>
-                            <th>Certificate No</th>
-                            <th>Student</th>
-                            <th>Registration No</th>
-                            <th>Course</th>
-                            <th>Issue Date</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <c:forEach var="cert" items="${certificates}">
-                            <tr>
-                                <td>${cert.certificateNo}</td>
-                                <td>${cert.studentName}<br><small>${cert.studentEmail}</small></td>
-                                <td><c:out value="${cert.regNumber}" default="-"/></td>
-                                <td>${cert.courseName}</td>
-                                <td>
-                                    <c:choose>
-                                        <c:when test="${not empty cert.issueDate}">
-                                            ${cert.issueDate.toLocalDate()}
-                                        </c:when>
-                                        <c:otherwise>-</c:otherwise>
-                                    </c:choose>
-                                </td>
-                                <td>
-                                    <c:choose>
-                                        <c:when test="${cert.status == 'Revoked'}"><span class="badge badge-danger">Revoked</span></c:when>
-                                        <c:otherwise><span class="badge badge-success">Active</span></c:otherwise>
-                                    </c:choose>
-                                </td>
-                                <td>
-                                    <a class="btn btn-secondary btn-sm" href="${pageContext.request.contextPath}/certificate/template?certificateId=${cert.certificateId}&back=${pageContext.request.contextPath}/instructor/certificates">Template</a>
-                                    <a class="btn btn-primary btn-sm" target="_blank" href="${cert.verificationURL}">Verify</a>
-                                    <c:if test="${cert.status != 'Revoked'}">
-                                        <form method="post" action="${pageContext.request.contextPath}/instructor/certificates" style="display:inline;">
-                                            <input type="hidden" name="action" value="revoke">
-                                            <input type="hidden" name="certificateId" value="${cert.certificateId}">
-                                            <button class="btn btn-danger btn-sm" type="submit" onclick="return confirm('Revoke this certificate?');">Revoke</button>
-                                        </form>
-                                    </c:if>
-                                </td>
-                            </tr>
-                        </c:forEach>
-                        </tbody>
-                    </table>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Certificate No</th>
+                                    <th>Student</th>
+                                    <th>Registration No</th>
+                                    <th>Course</th>
+                                    <th>Issue Date</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <c:forEach var="cert" items="${certificates}">
+                                    <tr>
+                                        <td class="cert-no">${cert.certificateNo}</td>
+                                        <td>
+                                            <div class="student-name">${cert.studentName}</div>
+                                            <div class="student-email">${cert.studentEmail}</div>
+                                        </td>
+                                        <td><c:out value="${cert.regNumber}" default="-"/></td>
+                                        <td>${cert.courseName}</td>
+                                        <td>
+                                            <c:choose>
+                                                <c:when test="${not empty cert.issueDate}">
+                                                    ${cert.issueDate.toLocalDate()}
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <span class="table-muted">-</span>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </td>
+                                        <td>
+                                            <c:choose>
+                                                <c:when test="${cert.status == 'Revoked'}">
+                                                    <span class="status-badge status-revoked">Revoked</span>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <span class="status-badge status-active">Active</span>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </td>
+                                        <td>
+                                            <div class="certificate-actions">
+                                                <a class="btn btn-secondary btn-sm" href="${pageContext.request.contextPath}/certificate/template?certificateId=${cert.certificateId}&back=${pageContext.request.contextPath}/instructor/certificates">
+                                                    <i class="fas fa-eye"></i> Template
+                                                </a>
+                                                <a class="btn btn-primary btn-sm" target="_blank" rel="noopener noreferrer" href="${cert.verificationURL}">
+                                                    <i class="fas fa-shield-check"></i> Verify
+                                                </a>
+                                                <c:if test="${cert.status != 'Revoked'}">
+                                                    <form method="post" action="${pageContext.request.contextPath}/instructor/certificates">
+                                                        <input type="hidden" name="action" value="revoke">
+                                                        <input type="hidden" name="certificateId" value="${cert.certificateId}">
+                                                        <button class="btn btn-danger btn-sm" type="submit" onclick="return confirm('Revoke this certificate?');">
+                                                            <i class="fas fa-ban"></i> Revoke
+                                                        </button>
+                                                    </form>
+                                                </c:if>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </c:forEach>
+                            </tbody>
+                        </table>
+                    </div>
                 </c:otherwise>
             </c:choose>
-        </div>
-
-        <div class="section-card" style="margin-top:16px;">
-            <h3>Template Preview</h3>
-            <a class="btn btn-primary btn-sm" href="${pageContext.request.contextPath}/certificate/template?back=${pageContext.request.contextPath}/instructor/certificates">Open Preview Template</a>
-        </div>
+        </section>
     </div>
 </main>
 </body>
 </html>
+

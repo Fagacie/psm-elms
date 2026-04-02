@@ -217,4 +217,8 @@ public class CloudinaryUtil {
     public static String getAssessmentAnswersFolder() {
         return props.getProperty("cloudinary.folder_assessment_answers", "psm/assessment-answers");
     }
+
+    public static String getCourseBannersFolder() {
+        return props.getProperty("cloudinary.folder_course_banners", "psm/course-banners");
+    }
 }

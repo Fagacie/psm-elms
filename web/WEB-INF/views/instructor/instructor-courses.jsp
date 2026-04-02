@@ -1,18 +1,21 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Courses - PSM E-Learning</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/landing.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/app.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-shell.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-courses.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
+<body class="instructor-ui">
     <!-- Top Navigation Bar -->
     <header class="app-header">
         <div class="header-left">
@@ -46,7 +49,7 @@
             </a>
             <a href="${pageContext.request.contextPath}/instructor/courses" class="nav-item active">
                 <i class="fas fa-book"></i>
-                <span>My Courses</span>
+                <span>Courses</span>
             </a>
             <a href="${pageContext.request.contextPath}/instructor/materials" class="nav-item">
                 <i class="fas fa-folder-open"></i>
@@ -70,6 +73,46 @@
     <!-- Main Content Area -->
     <main class="app-main">
         <div class="content-wrapper">
+            <section class="ins-page-head">
+                <div>
+                    <p class="ins-page-kicker">Course Management</p>
+                    <h2>Build, review, and operate your learning catalog</h2>
+                    <p>This workspace should feel like a professional course studio. Each course card now acts like an operational hub with banner, status, context, and the main actions you actually use.</p>
+                </div>
+                <div class="ins-hero-actions">
+                    <a href="${pageContext.request.contextPath}/instructor/courses?action=create" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Create New Course
+                    </a>
+                </div>
+            </section>
+
+            <section class="ins-hero-card">
+                <div class="ins-hero-grid">
+                    <div>
+                        <h3>Your course portfolio at a glance</h3>
+                        <p>Use this page to monitor approval state, keep banners and metadata clean, and jump into materials, assessments, and roster management from one place.</p>
+                    </div>
+                    <div class="ins-hero-metrics">
+                        <div class="ins-metric">
+                            <strong>${not empty courses ? courses.size() : 0}</strong>
+                            <span>Total courses</span>
+                        </div>
+                        <div class="ins-metric">
+                            <strong>${fn:length(courses)}</strong>
+                            <span>Managed in this workspace</span>
+                        </div>
+                        <div class="ins-metric">
+                            <strong>${param.success == 'created' ? 'New' : 'Live'}</strong>
+                            <span>Latest workspace state</span>
+                        </div>
+                        <div class="ins-metric">
+                            <strong>${param.error != null ? 'Check' : 'Ready'}</strong>
+                            <span>Status signal</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <!-- Page Actions -->
             <div class="page-actions">
                 <a href="${pageContext.request.contextPath}/instructor/courses?action=create" class="btn btn-primary">
@@ -117,6 +160,19 @@
                     <div class="courses-grid">
                         <c:forEach var="course" items="${courses}">
                             <div class="course-card">
+                                <div class="course-banner-wrap">
+                                    <c:choose>
+                                        <c:when test="${not empty course.courseBanner}">
+                                            <img class="course-banner" src="${course.courseBanner}" alt="${course.courseName} banner">
+                                        </c:when>
+                                        <c:otherwise>
+                                            <div class="course-banner course-banner-placeholder">
+                                                <i class="fas fa-image"></i>
+                                                <span>No banner uploaded</span>
+                                            </div>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </div>
                                 <div class="course-header">
                                     <h3 class="course-title"><c:out value="${course.courseName}"/></h3>
                                     <span class="status-badge status-${course.status}"><c:out value="${course.status}"/></span>
@@ -184,3 +240,4 @@
     </main>
 </body>
 </html>
+

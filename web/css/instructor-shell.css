@@ -1,0 +1,647 @@
+:root {
+    --ins-bg: #f4f7fb;
+    --ins-surface: #ffffff;
+    --ins-surface-2: #eef4fb;
+    --ins-text: #142033;
+    --ins-muted: #64748b;
+    --ins-border: #d9e4f0;
+    --ins-border-strong: #bfd1e3;
+    --ins-primary: #1f4e79;
+    --ins-primary-strong: #173a5b;
+    --ins-accent: #2aa7c8;
+    --ins-success: #1f9d67;
+    --ins-warning: #c98516;
+    --ins-danger: #cb4c4c;
+    --ins-shadow-sm: 0 8px 18px rgba(20, 32, 51, 0.06);
+    --ins-shadow-md: 0 16px 36px rgba(20, 32, 51, 0.1);
+    --ins-radius-sm: 10px;
+    --ins-radius-md: 16px;
+    --ins-radius-lg: 22px;
+}
+
+body.instructor-ui {
+    margin: 0;
+    background:
+        radial-gradient(circle at top left, rgba(42, 167, 200, 0.14), transparent 26%),
+        radial-gradient(circle at 85% 0%, rgba(31, 78, 121, 0.08), transparent 22%),
+        linear-gradient(180deg, #f8fbff 0%, var(--ins-bg) 100%);
+    color: var(--ins-text);
+    font-family: "Inter", "Segoe UI", sans-serif;
+    line-height: 1.5;
+}
+
+.instructor-ui * {
+    box-sizing: border-box;
+}
+
+.instructor-ui a {
+    color: inherit;
+}
+
+.instructor-ui .app-header,
+.instructor-ui .header-left,
+.instructor-ui .header-right,
+.instructor-ui .logo-section,
+.instructor-ui .user-menu,
+.instructor-ui .user-info,
+.instructor-ui .nav-item,
+.instructor-ui .btn {
+    display: flex;
+    align-items: center;
+}
+
+.instructor-ui .app-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1001;
+    justify-content: space-between;
+    height: 76px;
+    padding: 0 22px 0 26px;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid rgba(191, 209, 227, 0.7);
+    box-shadow: 0 8px 24px rgba(20, 32, 51, 0.05);
+}
+
+.instructor-ui .header-left {
+    gap: 14px;
+    flex: 1;
+}
+
+.instructor-ui .logo-section {
+    min-width: 208px;
+    gap: 10px;
+    color: var(--ins-primary);
+    font-family: "Sora", "Inter", sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.instructor-ui .logo-section i {
+    width: 42px;
+    height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(31, 78, 121, 0.14), rgba(42, 167, 200, 0.14));
+    border: 1px solid rgba(191, 209, 227, 0.9);
+    font-size: 1.15rem;
+}
+
+.instructor-ui .page-title {
+    border-left: 1px solid var(--ins-border);
+    padding-left: 16px;
+    font-family: "Sora", "Inter", sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--ins-text);
+}
+
+.instructor-ui .header-right {
+    gap: 14px;
+    justify-content: flex-end;
+}
+
+.instructor-ui .user-menu {
+    gap: 12px;
+    padding: 8px 10px 8px 14px;
+    border: 1px solid rgba(191, 209, 227, 0.75);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.78);
+}
+
+.instructor-ui .user-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.instructor-ui .user-name {
+    font-size: 0.84rem;
+}
+
+.instructor-ui .user-role {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.instructor-ui .user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--ins-primary), var(--ins-accent));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+.instructor-ui .app-sidebar {
+    position: fixed;
+    left: 0;
+    overflow-y: auto;
+    z-index: 1000;
+    top: 76px;
+    width: 278px;
+    height: calc(100vh - 76px);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(246, 250, 255, 0.96));
+    border-right: 1px solid rgba(191, 209, 227, 0.85);
+    padding: 18px 16px 22px;
+    box-sizing: border-box;
+}
+
+.instructor-ui .sidebar-nav {
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.instructor-ui .nav-item {
+    text-decoration: none;
+    border-left: none;
+    border-radius: 14px;
+    padding: 13px 14px;
+    color: #31465f;
+    font-weight: 600;
+    gap: 12px;
+    transition: transform 0.2s ease, color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.instructor-ui .nav-item i {
+    width: 18px;
+    font-size: 0.95rem;
+}
+
+.instructor-ui .nav-item:hover {
+    background: linear-gradient(135deg, rgba(31, 78, 121, 0.09), rgba(42, 167, 200, 0.08));
+    color: var(--ins-primary);
+    transform: translateX(2px);
+}
+
+.instructor-ui .nav-item.active {
+    background: linear-gradient(135deg, rgba(31, 78, 121, 0.14), rgba(42, 167, 200, 0.14));
+    color: var(--ins-primary-strong);
+    box-shadow: inset 0 0 0 1px rgba(191, 209, 227, 0.8);
+}
+
+.instructor-ui .app-main {
+    margin-left: 278px;
+    margin-top: 76px;
+    min-height: calc(100vh - 76px);
+    background: transparent;
+}
+
+.instructor-ui .content-wrapper {
+    padding: 28px;
+    max-width: 1540px;
+    margin: 0 auto;
+}
+
+.ins-page-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 22px;
+}
+
+.ins-page-kicker {
+    margin: 0 0 6px;
+    color: var(--ins-accent);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.ins-page-head h2 {
+    margin: 0;
+    font-family: "Sora", "Inter", sans-serif;
+    font-size: clamp(1.6rem, 2.2vw, 2.15rem);
+    line-height: 1.1;
+}
+
+.ins-page-head p {
+    margin: 8px 0 0;
+    max-width: 62ch;
+    color: var(--ins-muted);
+    font-size: 0.98rem;
+}
+
+.ins-hero-card,
+.instructor-ui .section-card,
+.instructor-ui .card,
+.instructor-ui .form-card,
+.instructor-ui .empty-state-box,
+.instructor-ui .alert,
+.instructor-ui .action-bar,
+.instructor-ui .course-card,
+.instructor-ui .stat-card {
+    border-radius: var(--ins-radius-md);
+    border: 1px solid rgba(191, 209, 227, 0.85);
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: var(--ins-shadow-sm);
+}
+
+.instructor-ui .section-card,
+.instructor-ui .card,
+.instructor-ui .form-card {
+    padding: 20px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.ins-hero-card {
+    padding: 22px;
+    margin-bottom: 24px;
+    background:
+        radial-gradient(circle at top right, rgba(42, 167, 200, 0.18), transparent 30%),
+        linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(245, 250, 255, 0.94));
+}
+
+.ins-hero-grid {
+    display: grid;
+    grid-template-columns: 1.35fr 0.95fr;
+    gap: 16px;
+}
+
+.ins-hero-grid h3 {
+    margin: 0;
+    font-family: "Sora", "Inter", sans-serif;
+    font-size: 1.4rem;
+}
+
+.ins-hero-grid p {
+    margin: 10px 0 0;
+    color: var(--ins-muted);
+}
+
+.ins-hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 16px;
+}
+
+.ins-hero-metrics {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.ins-metric {
+    padding: 14px;
+    border: 1px solid rgba(191, 209, 227, 0.85);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.85);
+}
+
+.ins-metric strong {
+    display: block;
+    font-family: "Sora", "Inter", sans-serif;
+    font-size: 1.45rem;
+    color: var(--ins-primary);
+}
+
+.ins-metric span {
+    display: block;
+    margin-top: 4px;
+    color: var(--ins-muted);
+    font-size: 0.82rem;
+}
+
+.instructor-ui .btn {
+    border-radius: 12px;
+    padding: 10px 16px;
+    font-weight: 700;
+    box-shadow: none;
+    justify-content: center;
+    gap: 8px;
+    border: 1px solid transparent;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform 0.18s ease, background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.instructor-ui .btn-primary {
+    background: linear-gradient(135deg, var(--ins-primary), var(--ins-accent));
+    color: #fff;
+}
+
+.instructor-ui .btn-primary:hover {
+    background: linear-gradient(135deg, var(--ins-primary-strong), #208eab);
+    transform: translateY(-1px);
+}
+
+.instructor-ui .btn-secondary {
+    background: #eef4fb;
+    color: var(--ins-primary);
+    border: 1px solid var(--ins-border);
+}
+
+.instructor-ui .btn-secondary:hover {
+    background: #e6f0fa;
+    color: var(--ins-primary-strong);
+    transform: translateY(-1px);
+}
+
+.instructor-ui .btn-danger {
+    background: rgba(203, 76, 76, 0.12);
+    color: #a32d2d;
+    border: 1px solid rgba(203, 76, 76, 0.3);
+}
+
+.instructor-ui .btn-danger:hover {
+    background: rgba(203, 76, 76, 0.18);
+    transform: translateY(-1px);
+}
+
+.instructor-ui .btn-sm {
+    padding: 8px 12px;
+    font-size: 0.8rem;
+}
+
+.instructor-ui .alert {
+    border-left: none;
+    padding: 14px 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.instructor-ui .alert-success {
+    background: rgba(31, 157, 103, 0.1);
+    color: #176944;
+}
+
+.instructor-ui .alert-error,
+.instructor-ui .alert-danger {
+    background: rgba(203, 76, 76, 0.1);
+    color: #8d3131;
+}
+
+.instructor-ui .alert-warning {
+    background: rgba(201, 133, 22, 0.12);
+    color: #8c5b12;
+}
+
+.instructor-ui .empty-state-box,
+.instructor-ui .empty-state {
+    text-align: center;
+    padding: 36px 24px;
+    color: var(--ins-muted);
+}
+
+.instructor-ui .empty-state-box i,
+.instructor-ui .empty-state i {
+    font-size: 2.1rem;
+    margin-bottom: 10px;
+    color: #92abc4;
+}
+
+.instructor-ui .form-header,
+.instructor-ui .breadcrumb,
+.instructor-ui .content-header {
+    border-bottom-color: rgba(191, 209, 227, 0.85);
+}
+
+.instructor-ui .form-input,
+.instructor-ui .form-textarea,
+.instructor-ui .form-select,
+.instructor-ui .form-control,
+.instructor-ui input,
+.instructor-ui select,
+.instructor-ui textarea {
+    border-radius: 12px !important;
+    border: 1px solid var(--ins-border);
+    background: #fbfdff;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.instructor-ui .form-input:focus,
+.instructor-ui .form-textarea:focus,
+.instructor-ui .form-select:focus,
+.instructor-ui .form-control:focus,
+.instructor-ui input:focus,
+.instructor-ui select:focus,
+.instructor-ui textarea:focus {
+    border-color: #7eb8d0;
+    box-shadow: 0 0 0 4px rgba(42, 167, 200, 0.12);
+}
+
+.instructor-ui .section-title,
+.instructor-ui .card-title,
+.instructor-ui .form-header h2 {
+    font-family: "Sora", "Inter", sans-serif;
+    color: var(--ins-text);
+}
+
+.instructor-ui .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 16px;
+}
+
+.instructor-ui .section-caption {
+    margin: 8px 0 0;
+    color: var(--ins-muted);
+    font-size: 0.88rem;
+}
+
+.instructor-ui .breadcrumb {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 18px;
+    color: var(--ins-muted);
+    font-size: 0.84rem;
+}
+
+.instructor-ui .breadcrumb a {
+    color: var(--ins-primary);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.instructor-ui .breadcrumb a:hover {
+    color: var(--ins-primary-strong);
+}
+
+.instructor-ui .table,
+.instructor-ui .data-table,
+.instructor-ui .course-table {
+    width: 100%;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid rgba(191, 209, 227, 0.85);
+    background: rgba(255, 255, 255, 0.96);
+}
+
+.instructor-ui .table thead,
+.instructor-ui .data-table thead,
+.instructor-ui .course-table thead {
+    background: #eef4fb;
+}
+
+.instructor-ui .table th,
+.instructor-ui .data-table th,
+.instructor-ui .course-table th {
+    color: #49627d;
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.instructor-ui .table th,
+.instructor-ui .table td,
+.instructor-ui .data-table th,
+.instructor-ui .data-table td,
+.instructor-ui .course-table th,
+.instructor-ui .course-table td {
+    padding: 14px 16px;
+    border-bottom-color: rgba(217, 228, 240, 0.9);
+    vertical-align: middle;
+}
+
+.instructor-ui .table tbody tr:hover,
+.instructor-ui .data-table tbody tr:hover,
+.instructor-ui .course-table tbody tr:hover {
+    background: #f8fbff;
+}
+
+.instructor-ui .table-container {
+    overflow-x: auto;
+}
+
+.instructor-ui .status-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border: 1px solid transparent;
+}
+
+.instructor-ui .page-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.ins-two-col {
+    display: grid;
+    grid-template-columns: 1.45fr 0.95fr;
+    gap: 18px;
+}
+
+.ins-stack {
+    display: grid;
+    gap: 18px;
+}
+
+@media (max-width: 1120px) {
+    .instructor-ui .app-sidebar {
+        width: 250px;
+    }
+
+    .instructor-ui .app-main {
+        margin-left: 250px;
+    }
+
+    .ins-hero-grid,
+    .ins-two-col {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 860px) {
+    .instructor-ui .app-header {
+        position: static;
+        height: auto;
+        padding: 16px;
+        flex-wrap: wrap;
+    }
+
+    .instructor-ui .app-sidebar {
+        position: static;
+        width: auto;
+        height: auto;
+        padding: 14px;
+        border-right: none;
+        border-bottom: 1px solid rgba(191, 209, 227, 0.85);
+    }
+
+    .instructor-ui .sidebar-nav {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+
+    .instructor-ui .nav-item {
+        flex: 1 1 200px;
+    }
+
+    .instructor-ui .app-main {
+        margin: 0;
+    }
+
+    .instructor-ui .content-wrapper {
+        padding: 18px;
+    }
+
+    .ins-page-head {
+        flex-direction: column;
+    }
+
+    .instructor-ui .section-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
+
+@media (max-width: 640px) {
+    .instructor-ui .header-left,
+    .instructor-ui .header-right {
+        width: 100%;
+        flex-wrap: wrap;
+    }
+
+    .instructor-ui .logo-section {
+        min-width: 0;
+    }
+
+    .instructor-ui .page-title {
+        border-left: none;
+        padding-left: 0;
+    }
+
+    .instructor-ui .user-menu {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .instructor-ui .btn,
+    .ins-hero-actions .btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .ins-hero-metrics {
+        grid-template-columns: 1fr;
+    }
+}

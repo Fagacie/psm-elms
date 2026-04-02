@@ -6,554 +6,426 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${enrollment.courseName} - PSM E-Learning</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/landing.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/app.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-courses.css">
+    <title>${enrollment.courseName} - Learning Hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/student-v2.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/enrollment-details-v2.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="student-page enrollment-details-page">
-<!-- Top Navigation Bar -->
-<header class="app-header">
-    <div class="header-left">
-        <div class="logo-section">
-            <i class="fas fa-graduation-cap"></i>
-            <span>PSM E-Learning</span>
-        </div>
-        <h1 class="page-title">${enrollment.courseName}</h1>
+<body class="sv-page">
+<header class="sv-topbar">
+    <div class="sv-top-left">
+        <button class="sv-menu-btn" id="svMenuBtn" type="button" aria-label="Toggle navigation"><i class="fas fa-bars"></i></button>
+        <a href="${pageContext.request.contextPath}/dashboard" class="sv-brand"><span class="sv-brand-main">PSM</span><span class="sv-brand-sub">E-Learning</span></a>
+        <div class="sv-page-title"><h1>Learning Hub</h1><p>${enrollment.courseName}</p></div>
     </div>
-    <div class="header-right">
-        <a href="${pageContext.request.contextPath}/logout" class="btn btn-secondary btn-sm">
-            <i class="fas fa-sign-out-alt"></i>
-            Logout
-        </a>
-    </div>
+    <div class="sv-top-right"><a href="${pageContext.request.contextPath}/logout" class="sv-logout"><i class="fas fa-right-from-bracket"></i> Logout</a></div>
 </header>
 
-<!-- Left Sidebar Navigation -->
-<aside class="app-sidebar">
-    <nav class="sidebar-nav">
-        <a href="${pageContext.request.contextPath}/dashboard" class="nav-item">
-            <i class="fas fa-home"></i>
-            <span>Dashboard</span>
-        </a>
-        <a href="${pageContext.request.contextPath}/student/my-enrollments" class="nav-item active">
-            <i class="fas fa-graduation-cap"></i>
-            <span>My Courses</span>
-        </a>
-        <a href="${pageContext.request.contextPath}/student/courses" class="nav-item">
-            <i class="fas fa-book"></i>
-            <span>Browse Courses</span>
-        </a>
-        <a href="${pageContext.request.contextPath}/student/assessments" class="nav-item">
-            <i class="fas fa-clipboard-list"></i>
-            <span>Assessments</span>
-        </a>
-        <a href="${pageContext.request.contextPath}/student/certificates" class="nav-item">
-            <i class="fas fa-certificate"></i>
-            <span>Certificates</span>
-        </a>
-        <a href="${pageContext.request.contextPath}/profile" class="nav-item">
-            <i class="fas fa-user"></i>
-            <span>Profile</span>
-        </a>
-    </nav>
-</aside>
+<div class="sv-layout">
+    <aside class="sv-sidebar" id="svSidebar">
+        <nav class="sv-nav">
+            <a href="${pageContext.request.contextPath}/dashboard" class="sv-nav-link"><i class="fas fa-house"></i><span>Dashboard</span></a>
+            <a href="${pageContext.request.contextPath}/student/my-enrollments" class="sv-nav-link active"><i class="fas fa-book-open"></i><span>My Courses</span></a>
+            <a href="${pageContext.request.contextPath}/student/courses" class="sv-nav-link"><i class="fas fa-compass"></i><span>Browse Courses</span></a>
+            <a href="${pageContext.request.contextPath}/student/certificates" class="sv-nav-link"><i class="fas fa-certificate"></i><span>Certificates</span></a>
+            <a href="${pageContext.request.contextPath}/profile" class="sv-nav-link"><i class="fas fa-user-gear"></i><span>Profile</span></a>
+        </nav>
+    </aside>
 
-<main class="app-main">
-    <div class="content-wrapper">
-        <!-- Breadcrumb Navigation -->
-        <div class="page-breadcrumb details-breadcrumb" style="margin-bottom: 24px; font-size: 14px; color: #5f6368;">
-            <a href="${pageContext.request.contextPath}/dashboard" style="color: #1a73e8; text-decoration: none;">
-                <i class="fas fa-home"></i> Dashboard
-            </a>
-            <span style="margin: 0 8px;">/</span>
-            <a href="${pageContext.request.contextPath}/student/my-enrollments" style="color: #1a73e8; text-decoration: none;">
-                My Courses
-            </a>
-            <span style="margin: 0 8px;">/</span>
+    <main class="sv-main">
+        <div class="sv-breadcrumb">
+            <a href="${pageContext.request.contextPath}/dashboard"><i class="fas fa-house"></i> Dashboard</a>
+            <span>/</span>
+            <a href="${pageContext.request.contextPath}/student/my-enrollments">My Courses</a>
+            <span>/</span>
             <span>${enrollment.courseName}</span>
         </div>
 
-        <!-- Page Actions with Payment Badge -->
         <c:set var="isPaymentComplete" value="${enrollment.paymentStatus == 'Paid' || enrollment.paymentStatus == 'COMPLETED' || enrollment.paymentStatus == 'Completed' || enrollment.paymentStatus == 'SUCCESS' || enrollment.paymentStatus == 'success'}"/>
-        <div class="page-actions details-page-actions" style="justify-content: space-between; align-items: center;">
-            <div>
-                <a href="${pageContext.request.contextPath}/student/my-enrollments" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left"></i> Back to My Courses
-                </a>
-            </div>
-            <span class="status-badge details-payment-badge ${isPaymentComplete ? 'status-Approved' : 'status-Pending'}" style="font-size: 14px;">
-                <i class="fas fa-${isPaymentComplete ? 'check-circle' : 'clock'}"></i>
-                ${isPaymentComplete ? 'Paid' : 'Payment Pending'}
-            </span>
-        </div>
 
-        <!-- Course Info Card -->
-        <div class="course-card details-hero-card">
-            <div class="course-header">
-                <h2 class="course-title">${enrollment.courseName}</h2>
+        <section class="ed-hero">
+            <div class="ed-hero-top">
+                <div>
+                    <h2>${enrollment.courseName}</h2>
+                    <p class="ed-sub">${enrollment.courseDescription}</p>
+                </div>
+                <span class="status-badge ${isPaymentComplete ? 'status-Approved' : 'status-Pending'}">
+                    <i class="fas fa-${isPaymentComplete ? 'check-circle' : 'clock'}"></i>
+                    ${isPaymentComplete ? 'Paid' : 'Payment Pending'}
+                </span>
+            </div>
+
+            <div class="ed-progress-wrap">
+                <div class="sv-progress"><div class="sv-progress-bar" style="width:${progressPercent}%;"></div></div>
+            </div>
+
+            <div class="ed-meta">
+                <div class="ed-meta-item"><span>Instructor</span><strong>${enrollment.instructorName}</strong></div>
+                <div class="ed-meta-item"><span>Enrolled</span><strong><c:out value="${enrollment.enrollmentDate != null ? enrollment.enrollmentDate.toLocalDate() : '-'}"/></strong></div>
+                <div class="ed-meta-item"><span>Course Fee</span><strong><fmt:formatNumber value="${enrollment.coursePrice}" type="number" minFractionDigits="2" maxFractionDigits="2"/></strong></div>
+                <div class="ed-meta-item"><span>Progress</span><strong>${progressPercent}%</strong></div>
+                <div class="ed-meta-item"><span>Materials Viewed</span><strong>${materialsViewedCount} / ${materialCount}</strong></div>
+            </div>
+        </section>
+
+        <section class="sv-card ed-readiness-card">
+            <div class="sv-card-head">
+                <div>
+                    <h3>Certificate Readiness</h3>
+                    <p class="sv-card-sub">Track the exact requirements the system uses before a certificate can be generated for this course.</p>
+                </div>
+                <span class="status-badge ${certificateEligible ? 'status-Approved' : 'status-Pending'}">
+                    ${certificateEligible ? 'Ready to Generate' : 'Requirements Pending'}
+                </span>
+            </div>
+            <div class="sv-card-body">
+                <div class="ed-readiness-panel">
+                    <div class="ed-readiness-overview">
+                        <span class="ed-readiness-kicker">Completion Tracker</span>
+                        <h4>${certificateReadinessPercent}% ready</h4>
+                        <p>${certificateReadinessHint}</p>
+                        <div class="ed-readiness-progress">
+                            <span>${certificateReadinessStepsComplete} of 3 checks complete</span>
+                            <div class="sv-progress"><div class="sv-progress-bar" style="width:${certificateReadinessPercent}%;"></div></div>
+                        </div>
+                        <div class="ed-readiness-actions">
+                            <a class="sv-btn primary" href="${certificatePrimaryActionUrl}">
+                                <i class="fas ${certificatePrimaryActionIcon}"></i>&nbsp;${certificatePrimaryActionLabel}
+                            </a>
+                            <a class="sv-btn" href="${pageContext.request.contextPath}/student/certificates">
+                                <i class="fas fa-arrow-up-right-from-square"></i>&nbsp;Certificate Area
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="ed-readiness-grid">
+                        <div class="ed-readiness-item ${certificatePaidReady ? 'is-ready' : 'is-pending'}">
+                            <div class="ed-readiness-item-top">
+                                <strong>Payment</strong>
+                                <span class="status-badge ${certificatePaidReady ? 'status-Approved' : 'status-Pending'}">${certificatePaidReady ? 'Done' : 'Pending'}</span>
+                            </div>
+                            <span>${certificatePaidReady ? 'Paid and verified' : 'Complete payment to continue'}</span>
+                            <small>${not empty enrollment.paymentRef ? enrollment.paymentRef : 'No verified payment reference yet'}</small>
+                        </div>
+                        <div class="ed-readiness-item ${certificateCompletedReady ? 'is-ready' : 'is-pending'}">
+                            <div class="ed-readiness-item-top">
+                                <strong>Course Progress</strong>
+                                <span class="status-badge ${certificateCompletedReady ? 'status-Approved' : 'status-Pending'}">${certificateCompletedReady ? 'Done' : 'Pending'}</span>
+                            </div>
+                            <span>
+                                <c:choose>
+                                    <c:when test="${certificateCompletedReady}">Learning requirements completed</c:when>
+                                    <c:otherwise>${materialsViewedCount} / ${totalMaterialsCount} materials viewed</c:otherwise>
+                                </c:choose>
+                            </span>
+                            <small>
+                                <c:choose>
+                                    <c:when test="${certificateRemainingMaterials > 0}">${certificateRemainingMaterials} material(s) still need to be opened or downloaded</c:when>
+                                    <c:otherwise>All current materials have been accessed in sequence</c:otherwise>
+                                </c:choose>
+                            </small>
+                        </div>
+                        <div class="ed-readiness-item ${certificateAssessmentsReady ? 'is-ready' : 'is-pending'}">
+                            <div class="ed-readiness-item-top">
+                                <strong>Assessments</strong>
+                                <span class="status-badge ${certificateAssessmentsReady ? 'status-Approved' : 'status-Pending'}">${certificateAssessmentsReady ? 'Done' : 'Pending'}</span>
+                            </div>
+                            <span>
+                                <c:choose>
+                                    <c:when test="${certificateAssessmentsReady}">All required assessments passed</c:when>
+                                    <c:otherwise>${passedAssessmentsCount} / ${totalAssessmentsCount} assessments passed</c:otherwise>
+                                </c:choose>
+                            </span>
+                            <small>
+                                <c:choose>
+                                    <c:when test="${certificateRemainingAssessments > 0}">${certificateRemainingAssessments} assessment(s) still need a passing result</c:when>
+                                    <c:otherwise>No remaining assessment blockers</c:otherwise>
+                                </c:choose>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
                 <c:choose>
-                    <c:when test="${isPaymentComplete}">
-                        <span class="status-badge status-Approved">Paid</span>
+                    <c:when test="${certificateEligible}">
+                        <div class="alert alert-success">
+                            You have met the current requirements for certificate generation. Open your certificate area to generate or review it.
+                        </div>
                     </c:when>
                     <c:otherwise>
-                        <span class="status-badge status-Pending">Pending Payment</span>
+                        <div class="alert alert-info">
+                            Your certificate is not blocked by guesswork anymore. Use the checklist above to see exactly what is still missing.
+                        </div>
                     </c:otherwise>
                 </c:choose>
             </div>
-            
-            <p class="course-description">${enrollment.courseDescription}</p>
-            
-            <div class="course-meta">
-                <div class="meta-item">
-                    <i class="fas fa-chalkboard-teacher"></i>
-                    <span>${enrollment.instructorName}</span>
-                </div>
-                <div class="meta-item">
-                    <i class="fas fa-calendar-check"></i>
-                    <span>Enrolled: <c:out value="${enrollment.enrollmentDate != null ? enrollment.enrollmentDate.toLocalDate() : '-'}"/></span>
-                </div>
-                <div class="meta-item">
-                    <i class="fas fa-money-bill-wave"></i>
-                    <span>Fee: ₦<fmt:formatNumber value="${enrollment.coursePrice}" type="number" minFractionDigits="2" maxFractionDigits="2"/></span>
-                </div>
-                <div class="meta-item">
-                    <i class="fas fa-chart-line"></i>
-                    <span>Progress: ${progressPercent}%</span>
-                </div>
-                <div class="meta-item">
-                    <i class="fas fa-check-circle"></i>
-                    <span>Materials Viewed: ${materialsViewedCount} / ${materialCount}</span>
-                </div>
-            </div>
+        </section>
+
+        <div class="ed-tabs">
+            <a class="ed-tab ${activeTab == 'learning' ? 'active' : ''}" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=learning"><i class="fas fa-layer-group"></i> Learning Hub</a>
+            <a class="ed-tab ${activeTab == 'overview' ? 'active' : ''}" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=overview"><i class="fas fa-info-circle"></i> Overview</a>
+            <a class="ed-tab ${activeTab == 'materials' ? 'active' : ''}" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=materials"><i class="fas fa-folder-open"></i> Materials</a>
+            <a class="ed-tab ${activeTab == 'assessments' ? 'active' : ''}" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=assessments"><i class="fas fa-clipboard-check"></i> Assessments</a>
         </div>
 
-        <!-- Tabs Navigation -->
-        <div class="tab-links">
-            <a class="tab-link ${activeTab == 'learning' ? 'active' : ''}" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=learning">
-                <i class="fas fa-layer-group"></i> Learning Hub
-            </a>
-            <a class="tab-link ${activeTab == 'overview' ? 'active' : ''}" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=overview">
-                <i class="fas fa-info-circle"></i> Overview
-            </a>
-            <a class="tab-link ${activeTab == 'materials' ? 'active' : ''}" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=materials">
-                <i class="fas fa-folder-open"></i> Materials
-            </a>
-            <a class="tab-link ${activeTab == 'assessments' ? 'active' : ''}" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=assessments">
-                <i class="fas fa-clipboard-list"></i> Assessments
-            </a>
-        </div>
-
-        <!-- Tab Content -->
         <c:choose>
             <c:when test="${activeTab == 'learning'}">
-                <div class="course-card">
-                    <div class="learning-header">
-                        <div>
-                            <h3 style="margin: 0; font-size: 18px; font-weight: 600; color: #202124;">Learning Hub</h3>
-                            <p style="margin: 6px 0 0; color: #5f6368; font-size: 14px;">Follow the sequence to complete materials and assessments in one place.</p>
-                        </div>
-                    </div>
-
-                    <c:if test="${not paidAccess}">
-                        <div class="alert alert-error" style="margin: 16px 0 20px;">
-                            <i class="fas fa-exclamation-circle"></i>
-                            Payment is required to open materials and take assessments.
-                        </div>
-                    </c:if>
-
-                    <c:choose>
-                        <c:when test="${not empty learningItems}">
-                            <div class="learning-list">
-                                <c:forEach var="item" items="${learningItems}">
-                                    <div class="course-card learning-item ${item.type == 'Material' ? 'learning-item-material' : 'learning-item-assessment'} ${item.locked ? 'learning-item-locked' : ''}">
-                                        <div class="learning-item-main">
-                                            <div class="learning-item-icon">
-                                                <i class="fas ${item.iconClass}"></i>
-                                            </div>
-                                            <div class="learning-item-content">
-                                                <div class="learning-item-title-row">
-                                                    <span class="learning-item-type">${item.type}</span>
-                                                    <span class="status-badge ${item.badgeClass}">${item.badgeText}</span>
-                                                </div>
-                                                <h4 class="learning-item-title">${item.title}</h4>
-                                                <c:if test="${not empty item.description}">
-                                                    <p class="learning-item-desc">${item.description}</p>
-                                                </c:if>
-                                                <div class="learning-item-meta">
-                                                    <c:if test="${not empty item.metaPrimary}">
-                                                        <span><i class="fas fa-clock"></i> ${item.metaPrimary}</span>
-                                                    </c:if>
-                                                    <c:if test="${not empty item.metaSecondary}">
-                                                        <span><i class="fas fa-chart-bar"></i> ${item.metaSecondary}</span>
-                                                    </c:if>
-                                                    <c:if test="${not empty item.metaTertiary}">
-                                                        <span><i class="fas fa-award"></i> ${item.metaTertiary}</span>
-                                                    </c:if>
-                                                </div>
-                                                <c:if test="${item.locked}">
-                                                    <div class="learning-item-lock">
-                                                        <i class="fas fa-lock"></i> ${item.lockReason}
-                                                    </div>
-                                                </c:if>
-                                            </div>
-                                            <div class="learning-item-status">
-                                                <c:if test="${not empty item.statusLabel}">
-                                                    <span class="status-badge ${item.statusClass}">${item.statusLabel}</span>
-                                                </c:if>
-                                            </div>
-                                        </div>
-                                        <div class="learning-item-actions">
-                                            <c:if test="${not item.locked}">
-                                                <c:if test="${not empty item.primaryActionUrl}">
-                                                    <a class="btn btn-primary btn-sm" href="${item.primaryActionUrl}">
-                                                        <i class="fas ${item.primaryActionIcon}"></i> ${item.primaryActionLabel}
-                                                    </a>
-                                                </c:if>
-                                                <c:if test="${not empty item.secondaryActionUrl}">
-                                                    <a class="btn btn-secondary btn-sm" href="${item.secondaryActionUrl}">
-                                                        <i class="fas ${item.secondaryActionIcon}"></i> ${item.secondaryActionLabel}
-                                                    </a>
-                                                </c:if>
-                                            </c:if>
-                                        </div>
+                <section class="sv-card">
+                    <div class="sv-card-head"><h3>Learning Sequence</h3></div>
+                    <div class="sv-card-body">
+                        <c:if test="${not paidAccess}"><div class="alert alert-error">Payment is required to open materials and take assessments.</div></c:if>
+                        <c:if test="${not empty recommendedItem}">
+                            <div class="ed-next-step">
+                                <div class="ed-next-copy">
+                                    <span class="ed-next-kicker">Recommended Next Step</span>
+                                    <h4>${recommendedItem.title}</h4>
+                                    <p>
+                                        <c:choose>
+                                            <c:when test="${not empty recommendedItem.description}">${recommendedItem.description}</c:when>
+                                            <c:otherwise>Continue your course in sequence and keep your progress moving toward completion.</c:otherwise>
+                                        </c:choose>
+                                    </p>
+                                    <div class="ed-learning-meta">
+                                        <c:if test="${not empty recommendedItem.metaPrimary}"><span><i class="fas fa-clock"></i> ${recommendedItem.metaPrimary}</span></c:if>
+                                        <c:if test="${not empty recommendedItem.metaSecondary}"><span><i class="fas fa-list-check"></i> ${recommendedItem.metaSecondary}</span></c:if>
                                     </div>
-                                </c:forEach>
+                                </div>
+                                <div class="ed-next-actions">
+                                    <span class="status-badge ${recommendedItem.statusClass}">${recommendedItem.statusLabel}</span>
+                                    <c:if test="${not recommendedItem.locked and not empty recommendedItem.primaryActionUrl}">
+                                        <a class="sv-btn primary" href="${recommendedItem.primaryActionUrl}">
+                                            <i class="fas ${recommendedItem.primaryActionIcon}"></i>&nbsp;${recommendedItem.primaryActionLabel}
+                                        </a>
+                                    </c:if>
+                                    <c:if test="${not recommendedItem.locked and empty recommendedItem.primaryActionUrl and not empty recommendedItem.secondaryActionUrl}">
+                                        <a class="sv-btn primary" href="${recommendedItem.secondaryActionUrl}">
+                                            <i class="fas ${recommendedItem.secondaryActionIcon}"></i>&nbsp;${recommendedItem.secondaryActionLabel}
+                                        </a>
+                                    </c:if>
+                                </div>
                             </div>
-                        </c:when>
-                        <c:otherwise>
-                            <div class="empty-state-box">
-                                <i class="fas fa-layer-group"></i>
-                                <p>No learning items available yet.</p>
-                            </div>
-                        </c:otherwise>
-                    </c:choose>
-                </div>
-            </c:when>
-            <c:when test="${activeTab == 'overview'}">
-                <!-- Overview Section -->
-                <div class="course-card details-overview-card">
-                    <h3 style="margin: 0 0 20px 0; font-size: 18px; font-weight: 600; color: #202124;">Course Information</h3>
-                    
-                    <div class="details-table-wrap" style="overflow-x: auto;">
-                    <table class="details-table" style="width: 100%; border-collapse: collapse;">
-                        <tr style="border-bottom: 1px solid #e5e7eb;">
-                            <td style="padding: 12px 0; font-weight: 500; color: #5f6368; width: 180px;">
-                                <i class="fas fa-chalkboard-teacher" style="margin-right: 8px;"></i>Instructor
-                            </td>
-                            <td style="padding: 12px 0; color: #202124;">${enrollment.instructorName}</td>
-                        </tr>
-                        <tr style="border-bottom: 1px solid #e5e7eb;">
-                            <td style="padding: 12px 0; font-weight: 500; color: #5f6368;">
-                                <i class="fas fa-envelope" style="margin-right: 8px;"></i>Instructor Email
-                            </td>
-                            <td style="padding: 12px 0; color: #202124;">
-                                <c:if test="${not empty enrollment.instructorEmail}">
-                                    <a href="mailto:${enrollment.instructorEmail}" style="color: #1a73e8; text-decoration: none;">
-                                        ${enrollment.instructorEmail}
-                                    </a>
-                                </c:if>
-                                <c:if test="${empty enrollment.instructorEmail}">
-                                    <span style="color: #9ca3af;">Not available</span>
-                                </c:if>
-                            </td>
-                        </tr>
-                        <tr style="border-bottom: 1px solid #e5e7eb;">
-                            <td style="padding: 12px 0; font-weight: 500; color: #5f6368;">
-                                <i class="fas fa-folder-open" style="margin-right: 8px;"></i>Materials
-                            </td>
-                            <td style="padding: 12px 0; color: #202124;">${materialCount} Learning Materials</td>
-                        </tr>
-                        <tr style="border-bottom: 1px solid #e5e7eb;">
-                            <td style="padding: 12px 0; font-weight: 500; color: #5f6368;">
-                                <i class="fas fa-clipboard-list" style="margin-right: 8px;"></i>Assessments
-                            </td>
-                            <td style="padding: 12px 0; color: #202124;">${assessmentCount} Assessments</td>
-                        </tr>
-                        <tr style="border-bottom: 1px solid #e5e7eb;">
-                            <td style="padding: 12px 0; font-weight: 500; color: #5f6368;">
-                                <i class="fas fa-chart-line" style="margin-right: 8px;"></i>Progress
-                            </td>
-                            <td style="padding: 12px 0; color: #202124;">${progressPercent}%</td>
-                        </tr>
-                        <tr style="border-bottom: 1px solid #e5e7eb;">
-                            <td style="padding: 12px 0; font-weight: 500; color: #5f6368;">
-                                <i class="fas fa-user-check" style="margin-right: 8px;"></i>Enrollment Status
-                            </td>
-                            <td style="padding: 12px 0; color: #202124;">${enrollment.status}</td>
-                        </tr>
-                        <tr style="border-bottom: 1px solid #e5e7eb;">
-                            <td style="padding: 12px 0; font-weight: 500; color: #5f6368;">
-                                <i class="fas fa-check-circle" style="margin-right: 8px;"></i>Completion
-                            </td>
-                            <td style="padding: 12px 0; color: #202124;">${enrollment.completionStatus}</td>
-                        </tr>
-                        <c:if test="${not empty enrollment.paymentRef}">
-                            <tr style="border-bottom: 1px solid #e5e7eb;">
-                                <td style="padding: 12px 0; font-weight: 500; color: #5f6368;">
-                                    <i class="fas fa-receipt" style="margin-right: 8px;"></i>Payment Reference
-                                </td>
-                                <td style="padding: 12px 0; color: #202124; font-family: monospace;">${enrollment.paymentRef}</td>
-                            </tr>
                         </c:if>
-                    </table>
+                        <c:choose>
+                            <c:when test="${not empty learningItems}">
+                                <div class="ed-learning-list">
+                                    <c:set var="currentGroup" value="" />
+                                    <c:forEach var="item" items="${learningItems}">
+                                        <c:if test="${currentGroup != item.groupLabel}">
+                                            <div class="ed-group-header">
+                                                <div class="ed-group-header-copy">
+                                                    <span class="ed-group-kicker">Sequence Block</span>
+                                                    <h4>${item.groupLabel}</h4>
+                                                    <p>${item.groupHint}</p>
+                                                </div>
+                                                <div class="ed-group-summary">
+                                                    <span class="status-badge ${item.groupStatusClass}">${item.groupStatusLabel}</span>
+                                                    <strong>${item.groupCompletedItems} / ${item.groupTotalItems}</strong>
+                                                    <span>${item.groupCompletionPercent}% complete</span>
+                                                </div>
+                                            </div>
+                                            <c:set var="currentGroup" value="${item.groupLabel}" />
+                                        </c:if>
+                                        <article class="ed-learning-item">
+                                            <div class="ed-learning-main">
+                                                <div class="ed-learning-icon"><i class="fas ${item.iconClass}"></i></div>
+                                                <div>
+                                                    <span class="ed-learning-type">${item.type}</span>
+                                                    <h4 class="ed-learning-title">${item.title}</h4>
+                                                    <c:if test="${not empty item.description}"><p class="ed-learning-desc">${item.description}</p></c:if>
+                                                    <div class="ed-learning-meta">
+                                                        <c:if test="${not empty item.metaPrimary}"><span><i class="fas fa-clock"></i> ${item.metaPrimary}</span></c:if>
+                                                        <c:if test="${not empty item.metaSecondary}"><span><i class="fas fa-chart-bar"></i> ${item.metaSecondary}</span></c:if>
+                                                        <c:if test="${not empty item.metaTertiary}"><span><i class="fas fa-award"></i> ${item.metaTertiary}</span></c:if>
+                                                    </div>
+                                                    <c:if test="${item.locked}"><div class="ed-learning-lock"><i class="fas fa-lock"></i> ${item.lockReason}</div></c:if>
+                                                </div>
+                                                <span class="status-badge ${item.statusClass}">${item.statusLabel}</span>
+                                            </div>
+                                            <div class="ed-learning-actions">
+                                                <c:if test="${not item.locked and not empty item.primaryActionUrl}"><a class="sv-btn primary" href="${item.primaryActionUrl}"><i class="fas ${item.primaryActionIcon}"></i>&nbsp;${item.primaryActionLabel}</a></c:if>
+                                                <c:if test="${not item.locked and not empty item.secondaryActionUrl}"><a class="sv-btn" href="${item.secondaryActionUrl}"><i class="fas ${item.secondaryActionIcon}"></i>&nbsp;${item.secondaryActionLabel}</a></c:if>
+                                            </div>
+                                        </article>
+                                    </c:forEach>
+                                </div>
+                            </c:when>
+                            <c:otherwise>
+                                <div class="empty-state-box"><i class="fas fa-layer-group"></i><p>No learning items available yet.</p></div>
+                            </c:otherwise>
+                        </c:choose>
                     </div>
+                </section>
+            </c:when>
 
-                    <!-- Announcements Section -->
-                    <div class="details-announcements" style="margin-top: 32px;">
-                        <h3 style="font-size: 16px; font-weight: 600; color: #202124; margin-bottom: 16px;">
-                            <i class="fas fa-megaphone" style="margin-right: 8px;"></i>Course Announcements
-                        </h3>
-                        <div id="announcementsContainer">
+            <c:when test="${activeTab == 'overview'}">
+                <section class="ed-grid">
+                    <article class="sv-card">
+                        <div class="sv-card-head"><h3>Course Summary</h3></div>
+                        <div class="sv-card-body">
+                            <div class="ed-stat-block"><strong>Enrollment Status:</strong> ${enrollment.status}</div>
+                            <div class="ed-stat-block"><strong>Completion Status:</strong> ${enrollment.completionStatus}</div>
+                            <div class="ed-stat-block"><strong>Materials:</strong> ${materialCount}</div>
+                            <div class="ed-stat-block"><strong>Assessments:</strong> ${assessmentCount}</div>
+                            <c:if test="${not empty enrollment.instructorEmail}"><div class="ed-stat-block"><strong>Instructor Email:</strong> ${enrollment.instructorEmail}</div></c:if>
+                            <c:if test="${not empty enrollment.paymentRef}"><div class="ed-stat-block"><strong>Payment Reference:</strong> ${enrollment.paymentRef}</div></c:if>
+                        </div>
+                    </article>
+                    <article class="sv-card">
+                        <div class="sv-card-head"><h3>Announcements</h3></div>
+                        <div class="sv-card-body">
                             <c:choose>
                                 <c:when test="${not empty announcements}">
-                                    <c:forEach var="ann" items="${announcements}" varStatus="annStatus">
-                                        <div class="course-card details-announcement-card ${annStatus.index > 2 ? 'extra-announcement' : ''}" style="margin-bottom: 12px; ${annStatus.index > 2 ? 'display: none;' : ''}">
-                                            <div style="padding: 16px;">
-                                                <div class="announcement-row" style="display: flex; justify-content: space-between; align-items: flex-start;">
-                                                    <div style="flex: 1;">
-                                                        <h4 style="font-size: 14px; font-weight: 600; color: #202124; margin-bottom: 4px;">
-                                                            ${ann.title}
-                                                        </h4>
-                                                        <div style="font-size: 13px; color: #5f6368; margin-bottom: 8px;">
-                                                            <i class="fas fa-calendar-alt" style="margin-right: 4px;"></i>
-                                                            <c:choose>
-                                                                <c:when test="${not empty ann.createdDate}">
-                                                                    ${ann.createdDate.toLocalDate()}
-                                                                </c:when>
-                                                                <c:otherwise>Recently</c:otherwise>
-                                                            </c:choose>
-                                                        </div>
-                                                        <div style="font-size: 13px; color: #3c4043; line-height: 1.5;">
-                                                            ${ann.content}
-                                                        </div>
-                                                    </div>
-                                                    <span class="status-badge status-Approved announcement-badge" style="margin-left: 12px; font-size: 11px;">
-                                                        <i class="fas fa-thumbtack"></i> Pinned
-                                                    </span>
-                                                </div>
-                                            </div>
+                                    <c:forEach var="ann" items="${announcements}">
+                                        <div class="ed-ann">
+                                            <h4>${ann.title}</h4>
+                                            <p>${ann.content}</p>
                                         </div>
                                     </c:forEach>
-                                    <c:if test="${announcements.size() > 3}">
-                                        <div style="text-align: center; margin-top: 12px;">
-                                            <button id="showMoreAnnouncementsBtn" class="btn btn-secondary btn-sm" onclick="showMoreAnnouncements()">
-                                                <i class="fas fa-chevron-down"></i> Show More (${announcements.size() - 3})
-                                            </button>
-                                        </div>
-                                    </c:if>
                                 </c:when>
                                 <c:otherwise>
-                                    <div style="text-align: center; padding: 24px; color: #5f6368;">
-                                        <i class="fas fa-bell-slash" style="font-size: 24px; color: #dadce0; margin-bottom: 8px;"></i>
-                                        <p>No announcements yet. Check back soon for course updates!</p>
-                                    </div>
+                                    <div class="empty-state-box"><i class="fas fa-bell-slash"></i><p>No announcements yet.</p></div>
                                 </c:otherwise>
                             </c:choose>
                         </div>
-                    </div>
-
-                    <div class="course-actions" style="margin-top: 24px;">
-                        <a class="btn btn-primary btn-sm" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=materials">
-                            <i class="fas fa-folder-open"></i> View Materials
-                        </a>
-                        <a class="btn btn-primary btn-sm" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=assessments">
-                            <i class="fas fa-clipboard-list"></i> View Assessments
-                        </a>
-                    </div>
-                </div>
+                    </article>
+                </section>
             </c:when>
 
             <c:when test="${activeTab == 'materials'}">
-                <!-- Materials Section -->
-                <c:if test="${not paidAccess}">
-                    <div class="alert alert-error" style="margin-bottom: 20px;">
-                        <i class="fas fa-exclamation-circle"></i>
-                        Payment is required to view and download course materials.
-                    </div>
-                </c:if>
-                
-                <c:if test="${paidAccess}">
-                    <c:choose>
-                        <c:when test="${not empty materials}">
-                            <div class="course-card">
-                                <div class="details-table-wrap" style="overflow-x: auto;">
-                                <table class="details-table" style="width: 100%; border-collapse: collapse;">
-                                    <thead>
-                                        <tr style="border-bottom: 2px solid #e5e7eb;">
-                                            <th style="padding: 12px; text-align: left; font-weight: 600; color: #202124;">Material</th>
-                                            <th style="padding: 12px; text-align: left; font-weight: 600; color: #202124; width: 120px;">Type</th>
-                                            <th style="padding: 12px; text-align: left; font-weight: 600; color: #202124; width: 150px;">Uploaded</th>
-                                            <th style="padding: 12px; text-align: center; font-weight: 600; color: #202124; width: 200px;">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
+                <section class="sv-card">
+                    <div class="sv-card-head"><h3>Course Materials</h3></div>
+                    <div class="sv-card-body">
+                        <c:if test="${not paidAccess}"><div class="alert alert-error">Payment is required to view and download materials.</div></c:if>
+                        <c:if test="${paidAccess}">
+                            <c:if test="${not empty focusMaterial}">
+                                <div class="ed-material-nav">
+                                    <div class="ed-material-nav-copy">
+                                        <span class="ed-next-kicker">Continue Sequence</span>
+                                        <h4>${focusMaterial.title}</h4>
+                                        <p>
+                                            <c:choose>
+                                                <c:when test="${viewedMaterialIds.contains(focusMaterial.materialId)}">You have reached the current end of your viewed materials. Revisit this chapter or continue to the next one.</c:when>
+                                                <c:otherwise>This is the next chapter the system recommends based on your learning sequence.</c:otherwise>
+                                            </c:choose>
+                                        </p>
+                                    </div>
+                                    <div class="ed-material-nav-actions">
+                                        <c:if test="${not empty previousMaterial}">
+                                            <a class="sv-btn" href="${pageContext.request.contextPath}/student/materials?action=view&id=${previousMaterial.materialId}">
+                                                <i class="fas fa-arrow-left"></i>&nbsp;Previous
+                                            </a>
+                                        </c:if>
+                                        <a class="sv-btn primary" href="${pageContext.request.contextPath}/student/materials?action=view&id=${focusMaterial.materialId}">
+                                            <i class="fas fa-book-open"></i>&nbsp;${viewedMaterialIds.contains(focusMaterial.materialId) ? 'Review Chapter' : 'Open Chapter'}
+                                        </a>
+                                        <c:if test="${not empty nextMaterial}">
+                                            <a class="sv-btn" href="${pageContext.request.contextPath}/student/materials?action=view&id=${nextMaterial.materialId}">
+                                                Next&nbsp;<i class="fas fa-arrow-right"></i>
+                                            </a>
+                                        </c:if>
+                                    </div>
+                                </div>
+                            </c:if>
+                            <c:choose>
+                                <c:when test="${not empty materials}">
+                                    <table class="ed-table">
+                                        <thead><tr><th>Material</th><th>Chapter</th><th>Type</th><th>Status</th><th>Uploaded</th><th>Actions</th></tr></thead>
+                                        <tbody>
                                         <c:forEach var="m" items="${materials}">
-                                            <tr style="border-bottom: 1px solid #e5e7eb;">
-                                                <td style="padding: 12px;">
-                                                    <div style="font-weight: 500; color: #202124; margin-bottom: 4px;">${m.title}</div>
-                                                    <c:if test="${not empty m.description}">
-                                                        <div style="font-size: 13px; color: #5f6368;">${m.description}</div>
-                                                    </c:if>
+                                            <tr>
+                                                <td>
+                                                    <strong>${m.title}</strong>
+                                                    <c:if test="${not empty m.description}"><div class="sv-course-line">${m.description}</div></c:if>
                                                 </td>
-                                                <td style="padding: 12px;">
-                                                    <span class="status-badge status-Approved" style="font-size: 12px;">
-                                                        <c:choose>
-                                                            <c:when test="${m.materialType == 'PDF'}">
-                                                                <i class="fas fa-file-pdf"></i>
-                                                            </c:when>
-                                                            <c:when test="${m.materialType == 'Video'}">
-                                                                <i class="fas fa-play-circle"></i>
-                                                            </c:when>
-                                                            <c:when test="${m.materialType == 'Slides'}">
-                                                                <i class="fas fa-file-powerpoint"></i>
-                                                            </c:when>
-                                                            <c:when test="${m.materialType == 'Link'}">
-                                                                <i class="fas fa-link"></i>
-                                                            </c:when>
-                                                        </c:choose>
-                                                        ${m.materialType}
-                                                    </span>
-                                                </td>
-                                                <td style="padding: 12px; color: #5f6368; font-size: 14px;">
+                                                <td><c:out value="${not empty m.displayOrder ? m.displayOrder : '-'}"/></td>
+                                                <td><span class="assessment-type-badge assessment-type-Assignment">${m.materialType}</span></td>
+                                                <td>
                                                     <c:choose>
-                                                        <c:when test="${not empty m.uploadDate}">
-                                                            ${m.uploadDate.toLocalDate()}
+                                                        <c:when test="${viewedMaterialIds.contains(m.materialId)}">
+                                                            <span class="status-badge status-Approved">Viewed</span>
                                                         </c:when>
-                                                        <c:otherwise>-</c:otherwise>
+                                                        <c:otherwise>
+                                                            <span class="status-badge status-Archived">Pending</span>
+                                                        </c:otherwise>
                                                     </c:choose>
                                                 </td>
-                                                <td style="padding: 12px; text-align: center;">
-                                                    <a class="btn btn-primary btn-sm" href="${pageContext.request.contextPath}/student/materials?action=view&id=${m.materialId}" target="_blank">
-                                                        <i class="fas fa-eye"></i> View
-                                                    </a>
-                                                    <c:if test="${m.materialType != 'Link'}">
-                                                        <a class="btn btn-secondary btn-sm" href="${pageContext.request.contextPath}/student/materials?action=download&id=${m.materialId}">
-                                                            <i class="fas fa-download"></i>
-                                                        </a>
-                                                    </c:if>
+                                                <td><c:out value="${not empty m.uploadDate ? m.uploadDate.toLocalDate() : '-'}"/></td>
+                                                <td>
+                                                    <a class="sv-btn" target="_blank" href="${pageContext.request.contextPath}/student/materials?action=view&id=${m.materialId}">${viewedMaterialIds.contains(m.materialId) ? 'Review' : 'Open'}</a>
+                                                    <c:if test="${m.materialType != 'Link'}"><a class="sv-btn" href="${pageContext.request.contextPath}/student/materials?action=download&id=${m.materialId}">Download</a></c:if>
                                                 </td>
                                             </tr>
                                         </c:forEach>
-                                    </tbody>
-                                </table>
-                                </div>
-                            </div>
-                        </c:when>
-                        <c:otherwise>
-                            <div class="empty-state-box">
-                                <i class="fas fa-folder-open"></i>
-                                <p>No materials available yet for this course.</p>
-                            </div>
-                        </c:otherwise>
-                    </c:choose>
-                </c:if>
+                                        </tbody>
+                                    </table>
+                                </c:when>
+                                <c:otherwise><div class="empty-state-box"><i class="fas fa-folder-open"></i><p>No materials available yet.</p></div></c:otherwise>
+                            </c:choose>
+                        </c:if>
+                    </div>
+                </section>
             </c:when>
 
             <c:when test="${activeTab == 'assessments'}">
-                <!-- Assessments Section -->
-                <c:if test="${not paidAccess}">
-                    <div class="alert alert-error" style="margin-bottom: 20px;">
-                        <i class="fas fa-exclamation-circle"></i>
-                        Payment is required before taking assessments.
-                    </div>
-                </c:if>
-                
-                <c:choose>
-                    <c:when test="${not empty assessments}">
-                        <div class="course-card">
-                            <div class="details-table-wrap" style="overflow-x: auto;">
-                            <table class="details-table" style="width: 100%; border-collapse: collapse;">
-                                <thead>
-                                    <tr style="border-bottom: 2px solid #e5e7eb;">
-                                        <th style="padding: 12px; text-align: left; font-weight: 600; color: #202124;">Assessment</th>
-                                        <th style="padding: 12px; text-align: left; font-weight: 600; color: #202124; width: 100px;">Type</th>
-                                        <th style="padding: 12px; text-align: center; font-weight: 600; color: #202124; width: 100px;">Duration</th>
-                                        <th style="padding: 12px; text-align: center; font-weight: 600; color: #202124; width: 120px;">Attempts</th>
-                                        <th style="padding: 12px; text-align: center; font-weight: 600; color: #202124; width: 150px;">Latest Result</th>
-                                        <th style="padding: 12px; text-align: center; font-weight: 600; color: #202124; width: 200px;">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
+                <section class="sv-card">
+                    <div class="sv-card-head"><h3>Course Assessments</h3></div>
+                    <div class="sv-card-body">
+                        <c:if test="${not paidAccess}"><div class="alert alert-error">Payment is required before taking assessments.</div></c:if>
+                        <c:choose>
+                            <c:when test="${not empty assessments}">
+                                <table class="ed-table">
+                                    <thead><tr><th>Assessment</th><th>Type</th><th>Duration</th><th>Attempts</th><th>Latest</th><th>Actions</th></tr></thead>
+                                    <tbody>
                                     <c:forEach var="a" items="${assessments}">
                                         <c:set var="usedAttempts" value="${usedAttemptsByAssessment[a.assessmentId]}"/>
                                         <c:set var="allowedAttempts" value="${allowedAttemptsByAssessment[a.assessmentId]}"/>
                                         <c:set var="latest" value="${latestSubmissionByAssessment[a.assessmentId]}"/>
                                         <c:set var="hasActiveAttempt" value="${activeAttemptByAssessment[a.assessmentId]}"/>
-                                        
-                                        <tr style="border-bottom: 1px solid #e5e7eb;">
-                                            <td style="padding: 12px; font-weight: 500; color: #202124;">${a.title}</td>
-                                            <td style="padding: 12px;">
-                                                <span class="status-badge status-${a.type == 'Quiz' ? 'Pending' : 'Approved'}" style="font-size: 12px;">
-                                                    ${a.type}
-                                                </span>
-                                            </td>
-                                            <td style="padding: 12px; text-align: center; color: #5f6368;">${a.duration} min</td>
-                                            <td style="padding: 12px; text-align: center; color: #5f6368;">${usedAttempts} / ${allowedAttempts}</td>
-                                            <td style="padding: 12px; text-align: center; color: #5f6368;">
+                                        <tr>
+                                            <td>${a.title}</td>
+                                            <td><span class="assessment-type-badge assessment-type-${a.type}">${a.type}</span></td>
+                                            <td>${a.duration} min</td>
+                                            <td>${usedAttempts} / ${allowedAttempts}</td>
+                                            <td>
                                                 <c:choose>
                                                     <c:when test="${not empty latest}">
-                                                        <div style="font-weight: 500; color: #202124;">
-                                                            <c:out value="${empty latest.status ? 'Submitted' : latest.status}"/>
-                                                        </div>
-                                                        <c:if test="${latest.score != null}">
-                                                            <div style="font-size: 13px; color: #1a73e8;">${latest.score}</div>
-                                                        </c:if>
+                                                        <div><c:out value="${empty latest.status ? 'Submitted' : latest.status}"/></div>
+                                                        <c:if test="${latest.score != null}"><div class="sv-course-line">${latest.score}</div></c:if>
                                                     </c:when>
                                                     <c:otherwise>-</c:otherwise>
                                                 </c:choose>
                                             </td>
-                                            <td style="padding: 12px; text-align: center;">
+                                            <td>
                                                 <c:if test="${paidAccess}">
                                                     <c:choose>
                                                         <c:when test="${hasActiveAttempt}">
-                                                            <a class="btn btn-primary btn-sm" href="${pageContext.request.contextPath}/student/assessments?courseId=${enrollment.courseId}&assessmentId=${a.assessmentId}&mode=attempt">
-                                                                <i class="fas fa-play"></i> Continue
-                                                            </a>
+                                                            <a class="sv-btn primary" href="${pageContext.request.contextPath}/student/assessments?courseId=${enrollment.courseId}&assessmentId=${a.assessmentId}&mode=attempt&fromHub=1&enrollmentId=${enrollment.enrollmentId}">Continue</a>
                                                         </c:when>
                                                         <c:when test="${usedAttempts < allowedAttempts}">
-                                                            <a class="btn btn-primary btn-sm" href="${pageContext.request.contextPath}/student/assessments?action=start&courseId=${enrollment.courseId}&assessmentId=${a.assessmentId}">
-                                                                <i class="fas fa-play"></i> Start
-                                                            </a>
+                                                            <a class="sv-btn primary" href="${pageContext.request.contextPath}/student/assessments?action=start&courseId=${enrollment.courseId}&assessmentId=${a.assessmentId}&fromHub=1&enrollmentId=${enrollment.enrollmentId}">Start</a>
                                                         </c:when>
                                                     </c:choose>
                                                 </c:if>
-                                                <a class="btn btn-secondary btn-sm" href="${pageContext.request.contextPath}/student/assessments?courseId=${enrollment.courseId}&assessmentId=${a.assessmentId}">
-                                                    <i class="fas fa-info-circle"></i> Details
-                                                </a>
+                                                <a class="sv-btn" href="${pageContext.request.contextPath}/student/assessments?courseId=${enrollment.courseId}&assessmentId=${a.assessmentId}&fromHub=1&enrollmentId=${enrollment.enrollmentId}">Details</a>
                                             </td>
                                         </tr>
                                     </c:forEach>
-                                </tbody>
-                            </table>
-                            </div>
-                        </div>
-                    </c:when>
-                    <c:otherwise>
-                        <div class="empty-state-box">
-                            <i class="fas fa-clipboard-list"></i>
-                            <p>No assessments published yet.</p>
-                        </div>
-                    </c:otherwise>
-                </c:choose>
+                                    </tbody>
+                                </table>
+                            </c:when>
+                            <c:otherwise><div class="empty-state-box"><i class="fas fa-clipboard-list"></i><p>No assessments published yet.</p></div></c:otherwise>
+                        </c:choose>
+                    </div>
+                </section>
             </c:when>
         </c:choose>
-        </div>
-    </div>
-</main>
-<script>
-function showMoreAnnouncements() {
-    const hiddenAnnouncements = document.querySelectorAll('.extra-announcement');
-    hiddenAnnouncements.forEach(function(card) {
-        card.style.display = 'block';
-    });
+    </main>
+</div>
 
-    const button = document.getElementById('showMoreAnnouncementsBtn');
-    if (button) {
-        button.style.display = 'none';
-    }
-}
-</script>
+<div class="sv-overlay" id="svOverlay"></div>
+<script src="${pageContext.request.contextPath}/js/student-v2.js"></script>
 </body>
 </html>

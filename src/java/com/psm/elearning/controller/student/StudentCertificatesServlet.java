@@ -39,20 +39,44 @@ public class StudentCertificatesServlet extends HttpServlet {
         List<Enrollment> enrollments = enrollmentDAO.getEnrollmentsByStudent(userId);
         if (enrollments == null) enrollments = new ArrayList<>();
         List<Enrollment> readyToGenerate = new ArrayList<>();
+        List<ReadinessItem> blockedEnrollments = new ArrayList<>();
 
         for (Enrollment enrollment : enrollments) {
             EnrollmentStateSyncService.SyncResult syncResult = enrollmentStateSyncService.syncEnrollmentState(enrollment);
-            if (!syncResult.isEligibleForCertificate()) continue;
-
             Certificate existing = certificateDAO.findByEnrollment(enrollment.getEnrollmentId());
-            if (existing == null) {
+            if (existing != null) {
+                continue;
+            }
+
+            if (syncResult.isEligibleForCertificate()) {
                 readyToGenerate.add(enrollment);
+            } else {
+                blockedEnrollments.add(new ReadinessItem(enrollment, syncResult));
             }
         }
 
         request.setAttribute("issuedCertificates", issuedCertificates);
         request.setAttribute("readyToGenerate", readyToGenerate);
+        request.setAttribute("blockedEnrollments", blockedEnrollments);
         request.getRequestDispatcher("/WEB-INF/views/student/certificates.jsp").forward(request, response);
+    }
+
+    public static class ReadinessItem {
+        private final Enrollment enrollment;
+        private final EnrollmentStateSyncService.SyncResult syncResult;
+
+        public ReadinessItem(Enrollment enrollment, EnrollmentStateSyncService.SyncResult syncResult) {
+            this.enrollment = enrollment;
+            this.syncResult = syncResult;
+        }
+
+        public Enrollment getEnrollment() {
+            return enrollment;
+        }
+
+        public EnrollmentStateSyncService.SyncResult getSyncResult() {
+            return syncResult;
+        }
     }
 
     private boolean isStudent(HttpSession session) {

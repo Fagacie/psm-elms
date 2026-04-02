@@ -7,7 +7,7 @@
             <i class="fas fa-chart-line"></i><span>Dashboard</span>
         </a>
         <a href="${pageContext.request.contextPath}/admin/users" class="nav-item ${fn:contains(currentPath, 'admin/users') and not fn:contains(currentPath, 'admin/user-form') ? 'active' : ''}">
-            <i class="fas fa-users"></i><span>User Management</span>
+            <i class="fas fa-users"></i><span>Users</span>
         </a>
         <a href="${pageContext.request.contextPath}/admin/users?role=Instructor" class="nav-item ${fn:contains(currentPath, 'admin/instructors') ? 'active' : ''}">
             <i class="fas fa-chalkboard-teacher"></i><span>Instructors</span>
@@ -37,7 +37,7 @@
             <i class="fas fa-cog"></i><span>System Settings</span>
         </a>
         <a href="${pageContext.request.contextPath}/profile" class="nav-item ${fn:contains(currentPath, '/profile') and not fn:contains(currentPath, 'admin') ? 'active' : ''}">
-            <i class="fas fa-user"></i><span>Profile / Settings</span>
+            <i class="fas fa-user"></i><span>Profile</span>
         </a>
     </nav>
 </aside>

@@ -60,6 +60,16 @@ public class EnrollmentDetailsServlet extends HttpServlet {
         private final String metaPrimary;
         private final String metaSecondary;
         private final String metaTertiary;
+        private final String groupLabel;
+        private final String groupHint;
+        private int groupCompletedItems;
+        private int groupStartedItems;
+        private int groupTotalItems;
+        private int groupCompletionPercent;
+        private String groupStatusLabel;
+        private String groupStatusClass;
+        private boolean completedForProgress;
+        private boolean startedForProgress;
         private final String statusLabel;
         private final String statusClass;
         private final boolean locked;
@@ -81,6 +91,8 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                              String metaPrimary,
                              String metaSecondary,
                              String metaTertiary,
+                             String groupLabel,
+                             String groupHint,
                              String statusLabel,
                              String statusClass,
                              boolean locked,
@@ -101,6 +113,8 @@ public class EnrollmentDetailsServlet extends HttpServlet {
             this.metaPrimary = metaPrimary;
             this.metaSecondary = metaSecondary;
             this.metaTertiary = metaTertiary;
+            this.groupLabel = groupLabel;
+            this.groupHint = groupHint;
             this.statusLabel = statusLabel;
             this.statusClass = statusClass;
             this.locked = locked;
@@ -123,6 +137,24 @@ public class EnrollmentDetailsServlet extends HttpServlet {
         public String getMetaPrimary() { return metaPrimary; }
         public String getMetaSecondary() { return metaSecondary; }
         public String getMetaTertiary() { return metaTertiary; }
+        public String getGroupLabel() { return groupLabel; }
+        public String getGroupHint() { return groupHint; }
+        public int getGroupCompletedItems() { return groupCompletedItems; }
+        public void setGroupCompletedItems(int groupCompletedItems) { this.groupCompletedItems = groupCompletedItems; }
+        public int getGroupStartedItems() { return groupStartedItems; }
+        public void setGroupStartedItems(int groupStartedItems) { this.groupStartedItems = groupStartedItems; }
+        public int getGroupTotalItems() { return groupTotalItems; }
+        public void setGroupTotalItems(int groupTotalItems) { this.groupTotalItems = groupTotalItems; }
+        public int getGroupCompletionPercent() { return groupCompletionPercent; }
+        public void setGroupCompletionPercent(int groupCompletionPercent) { this.groupCompletionPercent = groupCompletionPercent; }
+        public String getGroupStatusLabel() { return groupStatusLabel; }
+        public void setGroupStatusLabel(String groupStatusLabel) { this.groupStatusLabel = groupStatusLabel; }
+        public String getGroupStatusClass() { return groupStatusClass; }
+        public void setGroupStatusClass(String groupStatusClass) { this.groupStatusClass = groupStatusClass; }
+        public boolean isCompletedForProgress() { return completedForProgress; }
+        public void setCompletedForProgress(boolean completedForProgress) { this.completedForProgress = completedForProgress; }
+        public boolean isStartedForProgress() { return startedForProgress; }
+        public void setStartedForProgress(boolean startedForProgress) { this.startedForProgress = startedForProgress; }
         public String getStatusLabel() { return statusLabel; }
         public String getStatusClass() { return statusClass; }
         public boolean isLocked() { return locked; }
@@ -187,12 +219,14 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                 enrollment.setPaymentRef(payment.getPaystackReference());
             }
 
-            boolean paidAccess = "Paid".equalsIgnoreCase(enrollment.getPaymentStatus());
+            boolean paidAccess = isPaymentComplete(enrollment.getPaymentStatus());
             List<Material> materials = new ArrayList<>();
             List<Assessment> assessments = new ArrayList<>();
+            Set<Integer> viewedMaterialIds = new HashSet<>();
             if (enrollment.getCourseId() != null) {
                 materials = materialDAO.findByCourse(enrollment.getCourseId());
                 assessments = assessmentDAO.findByCourse(enrollment.getCourseId());
+                viewedMaterialIds = materialProgressDAO.findViewedMaterialIdsByCourse(userId, enrollment.getCourseId());
                 if (materials == null) materials = new ArrayList<>();
                 if (assessments == null) assessments = new ArrayList<>();
             }
@@ -267,17 +301,21 @@ public class EnrollmentDetailsServlet extends HttpServlet {
 
             int orderIndex = 1;
             for (Material material : orderedMaterials) {
+                boolean viewed = viewedMaterialIds.contains(material.getMaterialId());
+                String chapterLabel = material.getDisplayOrder() != null ? "Chapter " + material.getDisplayOrder() : "Learning Material";
+                String chapterHint = "Read the material first, then continue with any linked assessments.";
                 String iconClass = resolveMaterialIcon(material.getMaterialType());
                 String badgeText = material.getMaterialType();
                 String metaPrimary = material.getDisplayOrder() != null ? "Chapter " + material.getDisplayOrder() : "Material";
                 String metaSecondary = material.getUploadDate() != null ? material.getUploadDate().toLocalDate().toString() : "";
-                String statusLabel = paidAccess ? "Available" : "Locked";
-                String statusClass = paidAccess ? "status-Approved" : "status-Pending";
+                String metaTertiary = viewed ? "Viewed" : "Not yet viewed";
+                String statusLabel = !paidAccess ? "Locked" : (viewed ? "Completed" : "Ready");
+                String statusClass = !paidAccess ? "status-Pending" : (viewed ? "status-Approved" : "status-Archived");
                 String lockReason = paidAccess ? "" : "Payment required to access this material";
-                String primaryLabel = "Open";
+                String primaryLabel = viewed ? "Review" : "Open";
                 String primaryIcon = "fa-eye";
                 if ("Link".equalsIgnoreCase(material.getMaterialType())) {
-                    primaryLabel = "Open Link";
+                    primaryLabel = viewed ? "Reopen Link" : "Open Link";
                     primaryIcon = "fa-link";
                 }
                 String primaryUrl = paidAccess
@@ -298,7 +336,9 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                         "learning-badge",
                         metaPrimary,
                         metaSecondary,
-                        null,
+                        metaTertiary,
+                        chapterLabel,
+                        chapterHint,
                         statusLabel,
                         statusClass,
                         !paidAccess,
@@ -310,6 +350,9 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                         secondaryUrl,
                         secondaryIcon
                 ));
+                LearningItem currentItem = learningItems.get(learningItems.size() - 1);
+                currentItem.setStartedForProgress(viewed);
+                currentItem.setCompletedForProgress(viewed);
 
                 List<Assessment> tiedAssessments = assessmentsAfterMaterial.getOrDefault(material.getMaterialId(), new ArrayList<>());
                 for (Assessment assessment : tiedAssessments) {
@@ -317,6 +360,9 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                     int allowed = allowedAttemptsByAssessment.getOrDefault(assessment.getAssessmentId(), 0);
                     AssessmentSubmission latest = latestSubmissionByAssessment.get(assessment.getAssessmentId());
                     boolean hasActiveAttempt = activeAttemptByAssessment.getOrDefault(assessment.getAssessmentId(), false);
+                    List<AssessmentSubmission> submissions = submissionDAO.findByAssessmentAndUser(assessment.getAssessmentId(), userId);
+                    EnrollmentStateSyncService.AssessmentProgressState progressState =
+                            EnrollmentStateSyncService.resolveAssessmentProgress(assessment, submissions);
                     String assessmentStatusLabel;
                     String assessmentStatusClass;
                     if (!paidAccess) {
@@ -325,14 +371,19 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                     } else if (hasActiveAttempt) {
                         assessmentStatusLabel = "In Progress";
                         assessmentStatusClass = "status-Pending";
-                    } else if (latest != null) {
+                    } else if (progressState.isPassed()) {
                         assessmentStatusLabel = "Completed";
                         assessmentStatusClass = "status-Approved";
+                    } else if (progressState.isAttempted()) {
+                        assessmentStatusLabel = latest != null && latest.getScore() == null ? "Awaiting Grade" : "Attempted";
+                        assessmentStatusClass = "status-Pending";
                     } else {
                         assessmentStatusLabel = "Not Started";
                         assessmentStatusClass = "status-Archived";
                     }
                     String iconClassAssessment = resolveAssessmentIcon(assessment.getType());
+                    String groupLabel = material.getDisplayOrder() != null ? "Chapter " + material.getDisplayOrder() : "Learning Material";
+                    String groupHint = "This assessment follows the chapter immediately above.";
                     String metaPrimaryAssessment = (assessment.getDuration() != null ? assessment.getDuration() : 30) + " min";
                     String metaSecondaryAssessment = "Attempts: " + used + " / " + Math.max(allowed, 1);
                     String metaTertiaryAssessment = latest != null && latest.getScore() != null ? "Score: " + latest.getScore() : "";
@@ -363,6 +414,8 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                             metaPrimaryAssessment,
                             metaSecondaryAssessment,
                             metaTertiaryAssessment,
+                            groupLabel,
+                            groupHint,
                             assessmentStatusLabel,
                             assessmentStatusClass,
                             !paidAccess,
@@ -374,6 +427,9 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                             secondaryUrlAssessment,
                             secondaryIconAssessment
                     ));
+                    LearningItem addedAssessmentItem = learningItems.get(learningItems.size() - 1);
+                    addedAssessmentItem.setStartedForProgress(hasActiveAttempt || progressState.isAttempted());
+                    addedAssessmentItem.setCompletedForProgress(progressState.isPassed());
                 }
             }
 
@@ -382,6 +438,9 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                 int allowed = allowedAttemptsByAssessment.getOrDefault(assessment.getAssessmentId(), 0);
                 AssessmentSubmission latest = latestSubmissionByAssessment.get(assessment.getAssessmentId());
                 boolean hasActiveAttempt = activeAttemptByAssessment.getOrDefault(assessment.getAssessmentId(), false);
+                List<AssessmentSubmission> submissions = submissionDAO.findByAssessmentAndUser(assessment.getAssessmentId(), userId);
+                EnrollmentStateSyncService.AssessmentProgressState progressState =
+                        EnrollmentStateSyncService.resolveAssessmentProgress(assessment, submissions);
                 String statusLabel;
                 String statusClass;
                 if (!paidAccess) {
@@ -390,14 +449,19 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                 } else if (hasActiveAttempt) {
                     statusLabel = "In Progress";
                     statusClass = "status-Pending";
-                } else if (latest != null) {
+                } else if (progressState.isPassed()) {
                     statusLabel = "Completed";
                     statusClass = "status-Approved";
+                } else if (progressState.isAttempted()) {
+                    statusLabel = latest != null && latest.getScore() == null ? "Awaiting Grade" : "Attempted";
+                    statusClass = "status-Pending";
                 } else {
                     statusLabel = "Not Started";
                     statusClass = "status-Archived";
                 }
                 String iconClass = resolveAssessmentIcon(assessment.getType());
+                String groupLabel = "Final Assessment Stage";
+                String groupHint = "This assessment appears after the main learning materials.";
                 String metaPrimary = (assessment.getDuration() != null ? assessment.getDuration() : 30) + " min";
                 String metaSecondary = "Attempts: " + used + " / " + Math.max(allowed, 1);
                 String metaTertiary = latest != null && latest.getScore() != null ? "Score: " + latest.getScore() : "";
@@ -428,6 +492,8 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                         metaPrimary,
                         metaSecondary,
                         metaTertiary,
+                        groupLabel,
+                        groupHint,
                         statusLabel,
                         statusClass,
                         !paidAccess,
@@ -439,6 +505,83 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                         secondaryUrl,
                         secondaryIcon
                 ));
+                LearningItem addedFinalAssessmentItem = learningItems.get(learningItems.size() - 1);
+                addedFinalAssessmentItem.setStartedForProgress(hasActiveAttempt || progressState.isAttempted());
+                addedFinalAssessmentItem.setCompletedForProgress(progressState.isPassed());
+            }
+
+            Map<String, Integer> groupTotals = new LinkedHashMap<>();
+            Map<String, Integer> groupCompleted = new LinkedHashMap<>();
+            Map<String, Integer> groupStarted = new LinkedHashMap<>();
+            for (LearningItem item : learningItems) {
+                String key = item.getGroupLabel();
+                groupTotals.put(key, groupTotals.getOrDefault(key, 0) + 1);
+                if (item.isCompletedForProgress()) {
+                    groupCompleted.put(key, groupCompleted.getOrDefault(key, 0) + 1);
+                }
+                if (item.isStartedForProgress()) {
+                    groupStarted.put(key, groupStarted.getOrDefault(key, 0) + 1);
+                }
+            }
+            for (LearningItem item : learningItems) {
+                String key = item.getGroupLabel();
+                int total = groupTotals.getOrDefault(key, 0);
+                int completedCount = groupCompleted.getOrDefault(key, 0);
+                int startedCount = groupStarted.getOrDefault(key, 0);
+                int percent = total == 0 ? 0 : (int) Math.round((completedCount * 100.0) / total);
+                String groupStatusLabel;
+                String groupStatusClass;
+                if (completedCount == 0 && startedCount == 0) {
+                    groupStatusLabel = "Not Started";
+                    groupStatusClass = "status-Archived";
+                } else if (completedCount >= total) {
+                    groupStatusLabel = "Complete";
+                    groupStatusClass = "status-Approved";
+                } else {
+                    groupStatusLabel = "In Progress";
+                    groupStatusClass = "status-Pending";
+                }
+                item.setGroupTotalItems(total);
+                item.setGroupCompletedItems(completedCount);
+                item.setGroupStartedItems(startedCount);
+                item.setGroupCompletionPercent(percent);
+                item.setGroupStatusLabel(groupStatusLabel);
+                item.setGroupStatusClass(groupStatusClass);
+            }
+
+            LearningItem recommendedItem = null;
+            for (LearningItem item : learningItems) {
+                if (!item.isLocked() && !"Completed".equalsIgnoreCase(item.getStatusLabel())) {
+                    recommendedItem = item;
+                    break;
+                }
+            }
+            if (recommendedItem == null && !learningItems.isEmpty()) {
+                recommendedItem = learningItems.get(0);
+            }
+
+            Material focusMaterial = null;
+            Material previousMaterial = null;
+            Material nextMaterial = null;
+            if (!orderedMaterials.isEmpty()) {
+                int focusIndex = -1;
+                for (int i = 0; i < orderedMaterials.size(); i++) {
+                    Material candidate = orderedMaterials.get(i);
+                    if (!viewedMaterialIds.contains(candidate.getMaterialId())) {
+                        focusIndex = i;
+                        break;
+                    }
+                }
+                if (focusIndex < 0) {
+                    focusIndex = orderedMaterials.size() - 1;
+                }
+                focusMaterial = orderedMaterials.get(focusIndex);
+                if (focusIndex > 0) {
+                    previousMaterial = orderedMaterials.get(focusIndex - 1);
+                }
+                if (focusIndex + 1 < orderedMaterials.size()) {
+                    nextMaterial = orderedMaterials.get(focusIndex + 1);
+                }
             }
 
             String tab = request.getParameter("tab");
@@ -459,7 +602,67 @@ public class EnrollmentDetailsServlet extends HttpServlet {
             request.setAttribute("latestSubmissionByAssessment", latestSubmissionByAssessment);
             request.setAttribute("activeAttemptByAssessment", activeAttemptByAssessment);
             request.setAttribute("materialsViewedCount", syncResult.getViewedMaterials());
+            request.setAttribute("viewedMaterialIds", viewedMaterialIds);
             request.setAttribute("learningItems", learningItems);
+            request.setAttribute("recommendedItem", recommendedItem);
+            request.setAttribute("focusMaterial", focusMaterial);
+            request.setAttribute("previousMaterial", previousMaterial);
+            request.setAttribute("nextMaterial", nextMaterial);
+            int remainingMaterials = Math.max(0, syncResult.getTotalMaterials() - syncResult.getViewedMaterials());
+            int remainingAssessments = Math.max(0, syncResult.getTotalAssessments() - syncResult.getPassedAssessments());
+            int readinessStepsComplete = 0;
+            if (syncResult.isPaid()) readinessStepsComplete++;
+            if (syncResult.isCompleted()) readinessStepsComplete++;
+            if (syncResult.isPassedAllAssessments()) readinessStepsComplete++;
+            int readinessPercent = (int) Math.round((readinessStepsComplete / 3.0) * 100.0);
+
+            String readinessPrimaryLabel;
+            String readinessPrimaryUrl;
+            String readinessPrimaryIcon;
+            String readinessHint;
+            if (!syncResult.isPaid()) {
+                readinessPrimaryLabel = "Complete Payment";
+                readinessPrimaryUrl = request.getContextPath() + "/student/payment?enrollmentId=" + enrollment.getEnrollmentId();
+                readinessPrimaryIcon = "fa-credit-card";
+                readinessHint = "Payment must be successful before the system can unlock certificate generation.";
+            } else if (remainingMaterials > 0) {
+                readinessPrimaryLabel = "Continue Learning";
+                readinessPrimaryUrl = request.getContextPath() + "/student/enrollment-details?id=" + enrollment.getEnrollmentId() + "&tab=learning";
+                readinessPrimaryIcon = "fa-layer-group";
+                readinessHint = remainingMaterials == 1
+                        ? "You still need to complete 1 more learning material before the course can be marked complete."
+                        : "You still need to complete " + remainingMaterials + " more learning materials before the course can be marked complete.";
+            } else if (remainingAssessments > 0) {
+                readinessPrimaryLabel = "Finish Assessments";
+                readinessPrimaryUrl = request.getContextPath() + "/student/enrollment-details?id=" + enrollment.getEnrollmentId() + "&tab=assessments";
+                readinessPrimaryIcon = "fa-clipboard-check";
+                readinessHint = remainingAssessments == 1
+                        ? "You still need to pass 1 required assessment before certificate generation becomes available."
+                        : "You still need to pass " + remainingAssessments + " required assessments before certificate generation becomes available.";
+            } else {
+                readinessPrimaryLabel = "Open Certificates";
+                readinessPrimaryUrl = request.getContextPath() + "/student/certificates";
+                readinessPrimaryIcon = "fa-certificate";
+                readinessHint = syncResult.isEligibleForCertificate()
+                        ? "Everything is in place. You can open your certificate area and generate the certificate for this course."
+                        : "Your records are almost ready. Open the certificate area to review your current status.";
+            }
+
+            request.setAttribute("certificateEligible", syncResult.isEligibleForCertificate());
+            request.setAttribute("certificatePaidReady", syncResult.isPaid());
+            request.setAttribute("certificateCompletedReady", syncResult.isCompleted());
+            request.setAttribute("certificateAssessmentsReady", syncResult.isPassedAllAssessments());
+            request.setAttribute("certificateRemainingMaterials", remainingMaterials);
+            request.setAttribute("certificateRemainingAssessments", remainingAssessments);
+            request.setAttribute("certificateReadinessStepsComplete", readinessStepsComplete);
+            request.setAttribute("certificateReadinessPercent", readinessPercent);
+            request.setAttribute("certificatePrimaryActionLabel", readinessPrimaryLabel);
+            request.setAttribute("certificatePrimaryActionUrl", readinessPrimaryUrl);
+            request.setAttribute("certificatePrimaryActionIcon", readinessPrimaryIcon);
+            request.setAttribute("certificateReadinessHint", readinessHint);
+            request.setAttribute("totalMaterialsCount", syncResult.getTotalMaterials());
+            request.setAttribute("passedAssessmentsCount", syncResult.getPassedAssessments());
+            request.setAttribute("totalAssessmentsCount", syncResult.getTotalAssessments());
             request.getRequestDispatcher("/WEB-INF/views/student/enrollment-details.jsp").forward(request, response);
             
         } catch (NumberFormatException e) {
@@ -538,6 +741,14 @@ public class EnrollmentDetailsServlet extends HttpServlet {
             default:
                 return "fa-clipboard-list";
         }
+    }
+
+    private boolean isPaymentComplete(String paymentStatus) {
+        if (paymentStatus == null) return false;
+        String normalized = paymentStatus.trim();
+        return "Paid".equalsIgnoreCase(normalized)
+                || "Completed".equalsIgnoreCase(normalized)
+                || "Success".equalsIgnoreCase(normalized);
     }
 }
 

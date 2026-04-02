@@ -3,7 +3,6 @@ package com.psm.elearning.dao;
 import com.psm.elearning.model.Certificate;
 import com.psm.elearning.model.CertificateView;
 import com.psm.elearning.util.DBConnection;
-
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -82,8 +81,8 @@ public class CertificateDAOImpl implements CertificateDAO {
 
     private static final String CERTIFICATE_DETAIL_SELECT =
             "SELECT c.CertificateID, c.EnrollmentID, c.CertificateNo, c.IssueDate, c.GeneratedBy, c.VerificationURL, c.QRCodePath, c.Status, c.RevokedAt, c.RevokedBy, "
-                    + "e.CourseID, e.UserID AS StudentUserID, co.CreatedBy AS CourseCreatedBy, "
-                    + "u.FullName AS StudentName, u.Email AS StudentEmail, s.RegNumber, co.CourseName "
+                + "e.CourseID, e.UserID AS StudentUserID, co.InstructorID AS CourseCreatedBy, "
+                    + "u.FullName AS StudentName, u.Email AS StudentEmail, s.RegNumber, co.Title AS CourseName "
                     + "FROM Certificate c "
                     + "JOIN Enrollment e ON c.EnrollmentID = e.EnrollmentID "
                     + "JOIN User u ON e.UserID = u.UserID "
@@ -192,7 +191,7 @@ public class CertificateDAOImpl implements CertificateDAO {
     @Override
     public List<CertificateView> findByInstructorDetailed(int instructorId) {
         List<CertificateView> list = new ArrayList<>();
-        String sql = CERTIFICATE_DETAIL_SELECT + "WHERE co.CreatedBy=? ORDER BY c.IssueDate DESC";
+        String sql = CERTIFICATE_DETAIL_SELECT + "WHERE co.InstructorID=? ORDER BY c.IssueDate DESC";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, instructorId);

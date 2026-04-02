@@ -1,526 +1,164 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Course Students - ${course.courseName}</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        /* Reset and Base */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        html, body {
-            width: 100%;
-            height: 100%;
-            margin: 0;
-            padding: 0;
-        }
-        
-        body {
-            background: #f5f7fa;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            color: #1e293b;
-            line-height: 1.6;
-        }
-        
-        /* Top Navigation */
-        .top-navbar {
-            background: #1e293b;
-            border-bottom: 1px solid #334155;
-            padding: 0;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-        
-        .nav-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            height: 60px;
-        }
-        
-        .nav-left .logo {
-            font-size: 20px;
-            font-weight: 700;
-            color: white;
-        }
-        
-        .nav-right {
-            display: flex;
-            gap: 25px;
-            align-items: center;
-        }
-        
-        .nav-link {
-            color: #cbd5e1;
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 500;
-            transition: color 0.2s;
-        }
-        
-        .nav-link:hover {
-            color: white;
-        }
-        
-        /* Main Content */
-        .main-content {
-            padding: 30px;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-        
-        /* Page Header */
-        .page-header {
-            margin-bottom: 30px;
-        }
-        
-        /* Breadcrumb */
-        .breadcrumb {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 20px;
-            font-size: 14px;
-            color: #64748b;
-        }
-        
-        .breadcrumb a {
-            color: #3b82f6;
-            text-decoration: none;
-            transition: color 0.2s;
-        }
-        
-        .breadcrumb a:hover {
-            color: #2563eb;
-            text-decoration: underline;
-        }
-        
-        .breadcrumb-separator {
-            color: #cbd5e1;
-        }
-        
-        /* Back Button */
-        .back-button {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px 20px;
-            background: white;
-            border: 1px solid #e2e8f0;
-            color: #475569;
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.2s;
-            margin-bottom: 20px;
-            cursor: pointer;
-        }
-        
-        .back-button:hover {
-            background: #f8fafc;
-            border-color: #cbd5e1;
-            color: #1e293b;
-        }
-        
-        .back-button i {
-            font-size: 14px;
-        }
-        
-        /* Page Title Section */
-        .page-title-section {
-            background: white;
-            border: 1px solid #e2e8f0;
-            padding: 25px 30px;
-            margin-bottom: 25px;
-        }
-        
-        .page-title-section h1 {
-            margin: 0 0 15px 0;
-            font-size: 24px;
-            font-weight: 600;
-            color: #1e293b;
-        }
-        
-        /* Course Info Grid */
-        .course-info-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-        
-        .info-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .info-icon {
-            width: 36px;
-            height: 36px;
-            border: 1px solid #e2e8f0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #f8fafc;
-            color: #3b82f6;
-            flex-shrink: 0;
-        }
-        
-        .info-icon i {
-            font-size: 16px;
-        }
-        
-        .info-content {
-            flex: 1;
-            min-width: 0;
-        }
-        
-        .info-label {
-            font-size: 12px;
-            color: #64748b;
-            margin-bottom: 2px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .info-value {
-            font-size: 15px;
-            font-weight: 600;
-            color: #1e293b;
-        }
-        
-        /* Students Section */
-        .students-section {
-            background: white;
-            border: 1px solid #e2e8f0;
-        }
-        
-        .section-header {
-            padding: 20px 30px;
-            border-bottom: 1px solid #e2e8f0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .section-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: #1e293b;
-            margin: 0;
-        }
-        
-        .student-count-badge {
-            padding: 6px 14px;
-            background: #eff6ff;
-            border: 1px solid #bfdbfe;
-            color: #1e40af;
-            font-size: 13px;
-            font-weight: 600;
-        }
-        
-        /* Table */
-        .table-container {
-            overflow-x: auto;
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: white;
-        }
-        
-        thead {
-            background: #f8fafc;
-        }
-        
-        thead tr {
-            background: #f8fafc;
-        }
-        
-        th {
-            padding: 14px 30px;
-            text-align: left;
-            font-weight: 600;
-            font-size: 13px;
-            color: #475569;
-            border-bottom: 1px solid #e2e8f0;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            background: #f8fafc;
-        }
-        
-        td {
-            padding: 16px 30px;
-            border-bottom: 1px solid #f1f5f9;
-            color: #334155;
-            font-size: 14px;
-            vertical-align: middle;
-        }
-        
-        tbody tr {
-            transition: background 0.15s;
-            background: white;
-        }
-        
-        tbody tr:hover {
-            background: #f8fafc;
-        }
-        
-        tbody tr:last-child td {
-            border-bottom: none;
-        }
-        
-        .student-index {
-            color: #94a3b8;
-            font-weight: 500;
-        }
-        
-        .student-name {
-            font-weight: 600;
-            color: #1e293b;
-        }
-        
-        .student-email {
-            color: #64748b;
-        }
-        
-        /* Status Badges */
-        .status-badge {
-            display: inline-block;
-            padding: 5px 12px;
-            border: 1px solid;
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-        }
-        
-        .status-pending {
-            background: #fef3c7;
-            border-color: #fde047;
-            color: #854d0e;
-        }
-        
-        .status-active {
-            background: #dcfce7;
-            border-color: #86efac;
-            color: #166534;
-        }
-        
-        .status-completed {
-            background: #dbeafe;
-            border-color: #93c5fd;
-            color: #1e40af;
-        }
-        
-        .status-cancelled {
-            background: #fee2e2;
-            border-color: #fca5a5;
-            color: #991b1b;
-        }
-        
-        /* Empty State */
-        .empty-state {
-            padding: 80px 30px;
-            text-align: center;
-        }
-        
-        .empty-icon {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 20px;
-            border: 1px solid #e2e8f0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #f8fafc;
-        }
-        
-        .empty-icon i {
-            font-size: 36px;
-            color: #cbd5e1;
-        }
-        
-        .empty-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: #475569;
-            margin-bottom: 8px;
-        }
-        
-        .empty-description {
-            font-size: 14px;
-            color: #94a3b8;
-        }
-        
-        /* Responsive */
-        @media (max-width: 768px) {
-            .main-content {
-                padding: 20px 15px;
-            }
-            
-            .nav-container {
-                padding: 0 20px;
-            }
-            
-            .page-title-section {
-                padding: 20px;
-            }
-            
-            .page-title-section h1 {
-                font-size: 20px;
-            }
-            
-            .course-info-grid {
-                grid-template-columns: 1fr;
-                gap: 15px;
-            }
-            
-            .section-header {
-                padding: 15px 20px;
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 10px;
-            }
-            
-            th, td {
-                padding: 12px 20px;
-                font-size: 13px;
-            }
-            
-            .back-button {
-                padding: 8px 16px;
-                font-size: 13px;
-            }
-        }
-    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-shell.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-students.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
-    <!-- Top Navigation -->
-    <nav class="top-navbar">
-        <div class="nav-container">
-            <div class="nav-left">
-                <div class="logo">PSM E-Learning</div>
-            </div>
-            <div class="nav-right">
-                <a href="${pageContext.request.contextPath}/dashboard" class="nav-link">Dashboard</a>
-                <a href="${pageContext.request.contextPath}/logout" class="nav-link">Logout</a>
-            </div>
+<body class="instructor-ui">
+<header class="app-header">
+    <div class="header-left">
+        <div class="logo-section">
+            <i class="fas fa-graduation-cap"></i>
+            <span>PSM E-Learning</span>
         </div>
-    </nav>
-
-    <!-- Page Content -->
-    <div class="main-content">
-        <!-- Breadcrumb -->
-        <div class="breadcrumb">
-            <a href="${pageContext.request.contextPath}/instructor/courses">
-                <i class="fas fa-book"></i> Courses
-            </a>
-            <span class="breadcrumb-separator">/</span>
-            <span>${course.courseName}</span>
-            <span class="breadcrumb-separator">/</span>
-            <span>Students</span>
+        <h1 class="page-title">Course Students</h1>
+    </div>
+    <div class="header-right">
+        <div class="user-menu">
+            <div class="user-info">
+                <span class="user-name"><c:out value="${empty user ? sessionScope.user.fullName : user.fullName}"/></span>
+                <span class="user-role">Instructor</span>
+            </div>
+            <div class="user-avatar"><i class="fas fa-user"></i></div>
         </div>
-
-        <!-- Back Button -->
-        <a href="${pageContext.request.contextPath}/instructor/courses" class="back-button">
-            <i class="fas fa-arrow-left"></i>
-            Back to Courses
+        <a href="${pageContext.request.contextPath}/logout" class="btn btn-secondary btn-sm">
+            <i class="fas fa-sign-out-alt"></i> Logout
         </a>
+    </div>
+</header>
 
-        <!-- Page Title Section -->
-        <div class="page-title-section">
-            <h1>${course.courseName}</h1>
-            
-            <div class="course-info-grid">
-                <div class="info-item">
-                    <div class="info-icon">
-                        <i class="fas fa-layer-group"></i>
-                    </div>
-                    <div class="info-content">
-                        <div class="info-label">Category</div>
-                        <div class="info-value">${course.category}</div>
-                    </div>
+<aside class="app-sidebar">
+    <nav class="sidebar-nav">
+        <a href="${pageContext.request.contextPath}/dashboard" class="nav-item">
+            <i class="fas fa-home"></i><span>Dashboard</span>
+        </a>
+        <a href="${pageContext.request.contextPath}/instructor/courses" class="nav-item active">
+            <i class="fas fa-book"></i><span>Courses</span>
+        </a>
+        <a href="${pageContext.request.contextPath}/instructor/materials" class="nav-item">
+            <i class="fas fa-folder-open"></i><span>Materials</span>
+        </a>
+        <a href="${pageContext.request.contextPath}/instructor/assessments" class="nav-item">
+            <i class="fas fa-clipboard-list"></i><span>Assessments</span>
+        </a>
+        <a href="${pageContext.request.contextPath}/instructor/certificates" class="nav-item">
+            <i class="fas fa-certificate"></i><span>Certificates</span>
+        </a>
+        <a href="${pageContext.request.contextPath}/profile" class="nav-item">
+            <i class="fas fa-user"></i><span>Profile</span>
+        </a>
+    </nav>
+</aside>
+
+<main class="app-main">
+    <div class="content-wrapper">
+        <section class="ins-page-head">
+            <div>
+                <p class="ins-page-kicker">Course Roster</p>
+                <h2>Monitor who is enrolled and where learner progress stands</h2>
+                <p>This roster page now matches the instructor workspace, making it easier to review active learners, enrollment dates, and course completion status without leaving the course flow.</p>
+            </div>
+            <div class="ins-hero-actions">
+                <a href="${pageContext.request.contextPath}/instructor/courses" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Courses
+                </a>
+            </div>
+        </section>
+
+        <section class="ins-hero-card students-hero">
+            <div class="ins-hero-grid">
+                <div>
+                    <h3>${course.courseName}</h3>
+                    <p>Use this page to understand who is inside the course right now, which learners are still active, and who has already completed the learning journey.</p>
                 </div>
-                
-                <div class="info-item">
-                    <div class="info-icon">
-                        <i class="fas fa-signal"></i>
+                <div class="ins-hero-metrics">
+                    <div class="ins-metric">
+                        <strong>${studentCount}</strong>
+                        <span>Total enrolled students</span>
                     </div>
-                    <div class="info-content">
-                        <div class="info-label">Level</div>
-                        <div class="info-value">${course.level}</div>
+                    <div class="ins-metric">
+                        <strong><c:out value="${course.category}" default="General"/></strong>
+                        <span>Course category</span>
                     </div>
-                </div>
-                
-                <div class="info-item">
-                    <div class="info-icon">
-                        <i class="fas fa-clock"></i>
+                    <div class="ins-metric">
+                        <strong><c:out value="${course.level}" default="Standard"/></strong>
+                        <span>Course level</span>
                     </div>
-                    <div class="info-content">
-                        <div class="info-label">Duration</div>
-                        <div class="info-value">${course.duration} hours</div>
-                    </div>
-                </div>
-                
-                <div class="info-item">
-                    <div class="info-icon">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <div class="info-content">
-                        <div class="info-label">Total Enrolled</div>
-                        <div class="info-value">${studentCount} students</div>
+                    <div class="ins-metric">
+                        <strong><c:out value="${course.duration}" default="0"/></strong>
+                        <span>Duration in hours</span>
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <!-- Students Table -->
-        <div class="students-section">
+        <section class="course-context-grid">
+            <div class="context-card">
+                <span class="context-label">Category</span>
+                <strong>${course.category}</strong>
+            </div>
+            <div class="context-card">
+                <span class="context-label">Level</span>
+                <strong>${course.level}</strong>
+            </div>
+            <div class="context-card">
+                <span class="context-label">Duration</span>
+                <strong>${course.duration} hours</strong>
+            </div>
+            <div class="context-card">
+                <span class="context-label">Roster Size</span>
+                <strong>${studentCount} student<c:if test="${studentCount != 1}">s</c:if></strong>
+            </div>
+        </section>
+
+        <section class="section-card students-section">
             <div class="section-header">
-                <h2 class="section-title">Enrolled Students</h2>
+                <div>
+                    <h3 class="section-title">Enrolled Students</h3>
+                    <p class="section-caption">Review active course members and the enrollment state attached to each learner.</p>
+                </div>
                 <div class="student-count-badge">${studentCount} Students</div>
             </div>
 
             <c:choose>
                 <c:when test="${not empty enrollments && enrollments.size() > 0}">
                     <div class="table-container">
-                        <table>
+                        <table class="data-table">
                             <thead>
                                 <tr>
-                                    <th style="width: 60px;">#</th>
-                                    <th style="width: 30%;">Student Name</th>
-                                    <th style="width: 30%;">Email Address</th>
-                                    <th style="width: 20%;">Enrollment Date</th>
-                                    <th style="width: 15%;">Status</th>
+                                    <th>#</th>
+                                    <th>Student</th>
+                                    <th>Email Address</th>
+                                    <th>Enrollment Date</th>
+                                    <th>Status</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <c:forEach var="enrollment" items="${enrollments}" varStatus="status">
                                     <tr>
                                         <td class="student-index">${status.count}</td>
-                                        <td class="student-name">${enrollment.studentName}</td>
+                                        <td>
+                                            <div class="student-name">${enrollment.studentName}</div>
+                                        </td>
                                         <td class="student-email">${enrollment.studentEmail}</td>
                                         <td>
-                                            <c:if test="${not empty enrollment.enrollmentDate}">
-                                                ${enrollment.enrollmentDate}
-                                            </c:if>
-                                            <c:if test="${empty enrollment.enrollmentDate}">
-                                                <span style="color: #94a3b8;">—</span>
-                                            </c:if>
+                                            <c:choose>
+                                                <c:when test="${not empty enrollment.enrollmentDate}">
+                                                    ${enrollment.enrollmentDate}
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <span class="table-muted">-</span>
+                                                </c:otherwise>
+                                            </c:choose>
                                         </td>
                                         <td>
                                             <c:choose>
@@ -548,20 +186,15 @@
                     </div>
                 </c:when>
                 <c:otherwise>
-                    <div class="empty-state">
-                        <div class="empty-icon">
-                            <i class="fas fa-user-slash"></i>
-                        </div>
-                        <div class="empty-title">No Students Enrolled Yet</div>
-                        <div class="empty-description">
-                            Students who enroll in this course will appear here.
-                        </div>
+                    <div class="empty-state-box">
+                        <i class="fas fa-user-slash"></i>
+                        <p>No students are enrolled in this course yet.</p>
                     </div>
                 </c:otherwise>
             </c:choose>
-        </div>
+        </section>
     </div>
-
-    <script src="${pageContext.request.contextPath}/assets/js/main.js"></script>
+</main>
 </body>
 </html>
+

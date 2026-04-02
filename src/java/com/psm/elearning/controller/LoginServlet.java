@@ -20,9 +20,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.util.Locale;
 
 public class LoginServlet extends HttpServlet {
-    
+
     private UserDAO userDAO;
     private StudentDAO studentDAO;
     private InstructorDAO instructorDAO;
@@ -39,13 +40,12 @@ public class LoginServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // Check if already logged in
         HttpSession session = request.getSession(false);
         if (session != null && session.getAttribute("user") != null) {
             response.sendRedirect(request.getContextPath() + "/dashboard");
             return;
         }
-        
+
         request.getRequestDispatcher("/WEB-INF/views/login.jsp").forward(request, response);
     }
 
@@ -55,62 +55,60 @@ public class LoginServlet extends HttpServlet {
         String identifier = request.getParameter("identifier");
         String password = request.getParameter("password");
 
-        // Validate input (role is no longer required on the form)
         if (identifier == null || identifier.trim().isEmpty() || password == null || password.trim().isEmpty()) {
             request.setAttribute("error", "Identifier and password are required.");
+            request.setAttribute("identifier", identifier != null ? identifier.trim() : "");
             request.getRequestDispatcher("/WEB-INF/views/login.jsp").forward(request, response);
             return;
         }
 
         String trimmedIdentifier = identifier.trim();
+        String identifierUpper = trimmedIdentifier.toUpperCase(Locale.ROOT);
         User user = null;
 
-        // If the identifier looks like a student registration number, resolve to the linked user; otherwise treat as email
-        if (trimmedIdentifier.toUpperCase().startsWith("PSM") && trimmedIdentifier.toUpperCase().matches("PSM\\d+")) {
-            Student student = studentDAO.findByRegNumber(trimmedIdentifier.toUpperCase());
+        if (identifierUpper.matches("PSM\\d+")) {
+            Student student = studentDAO.findByRegNumber(identifierUpper);
             if (student != null) {
                 user = userDAO.findById(student.getUserId());
             }
         }
 
         if (user == null) {
-            user = userDAO.findByEmail(trimmedIdentifier);
+            user = userDAO.findByEmail(trimmedIdentifier.toLowerCase(Locale.ROOT));
         }
-        
+
         if (user == null) {
-            request.setAttribute("error", "Invalid email or password.");
+            request.setAttribute("error", "Invalid credentials.");
+            request.setAttribute("identifier", trimmedIdentifier);
             request.getRequestDispatcher("/WEB-INF/views/login.jsp").forward(request, response);
             return;
         }
 
-        // Check account status
         if (!User.STATUS_ACTIVE.equals(user.getStatus())) {
             request.setAttribute("error", "Your account is " + user.getStatus() + ". Please contact support.");
+            request.setAttribute("identifier", trimmedIdentifier);
             request.getRequestDispatcher("/WEB-INF/views/login.jsp").forward(request, response);
             return;
         }
 
-        // Verify password
         if (!PasswordUtil.verifyPassword(password, user.getPasswordHash())) {
-            request.setAttribute("error", "Invalid email or password.");
+            request.setAttribute("error", "Invalid credentials.");
+            request.setAttribute("identifier", trimmedIdentifier);
             request.getRequestDispatcher("/WEB-INF/views/login.jsp").forward(request, response);
             return;
         }
 
-        // Update last login
         userDAO.updateLastLogin(user.getUserId());
 
-        // Create session and set attributes
         HttpSession session = request.getSession(true);
         session.setAttribute("user", user);
         session.setAttribute("userId", user.getUserId());
-        session.setAttribute("role", user.getRole()); // Used by enrollment servlets
+        session.setAttribute("role", user.getRole());
         session.setAttribute("userRole", user.getRole());
-        session.setAttribute("email", user.getEmail()); // Required for Paystack payment
+        session.setAttribute("email", user.getEmail());
         session.setAttribute("userEmail", user.getEmail());
         session.setAttribute("userName", user.getFullName());
 
-        // Load role-specific data
         switch (user.getRole()) {
             case User.ROLE_STUDENT:
                 Student student = studentDAO.findByUserId(user.getUserId());
@@ -124,9 +122,10 @@ public class LoginServlet extends HttpServlet {
                 Admin admin = adminDAO.findByUserId(user.getUserId());
                 session.setAttribute("admin", admin);
                 break;
+            default:
+                break;
         }
 
-        // Redirect to dashboard
         response.sendRedirect(request.getContextPath() + "/dashboard");
     }
 }

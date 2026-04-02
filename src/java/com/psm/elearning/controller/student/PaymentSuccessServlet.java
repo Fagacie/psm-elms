@@ -32,10 +32,28 @@ public class PaymentSuccessServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
+
+        String role = (String) session.getAttribute("role");
+        if (role == null) {
+            role = (String) session.getAttribute("userRole");
+        }
+        if (!"Student".equals(role)) {
+            response.sendRedirect(request.getContextPath() + "/dashboard");
+            return;
+        }
         
         try {
+            Integer userId = (Integer) session.getAttribute("userId");
             Integer enrollmentId = Integer.parseInt(request.getParameter("enrollmentId"));
             Enrollment enrollment = enrollmentDAO.getEnrollment(enrollmentId);
+            if (enrollment == null) {
+                response.sendRedirect(request.getContextPath() + "/student/my-enrollments?error=notfound");
+                return;
+            }
+            if (enrollment.getUserId() == null || !enrollment.getUserId().equals(userId)) {
+                response.sendRedirect(request.getContextPath() + "/student/my-enrollments?error=unauthorized");
+                return;
+            }
             
             request.setAttribute("enrollment", enrollment);
             request.getRequestDispatcher("/WEB-INF/views/student/payment-success.jsp").forward(request, response);

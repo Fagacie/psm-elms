@@ -39,6 +39,9 @@ public class PaymentPageServlet extends HttpServlet {
         }
         
         String role = (String) session.getAttribute("role");
+        if (role == null) {
+            role = (String) session.getAttribute("userRole");
+        }
         if (!"Student".equals(role)) {
             response.sendRedirect(request.getContextPath() + "/dashboard");
             return;
@@ -66,7 +69,7 @@ public class PaymentPageServlet extends HttpServlet {
             Payment latestPayment = paymentDAO.getPaymentByEnrollmentId(enrollmentId);
             if (latestPayment != null) {
                 enrollment.setPaymentStatus(latestPayment.getStatus());
-                enrollment.setPaymentRef(latestPayment.getPaystackReference());
+                enrollment.setPaymentRef(latestPayment.getPaymentRef());
                 // If already paid redirect back
                 if ("Paid".equalsIgnoreCase(latestPayment.getStatus())) {
                     response.sendRedirect(request.getContextPath() + "/student/my-enrollments?message=alreadypaid");
@@ -75,6 +78,8 @@ public class PaymentPageServlet extends HttpServlet {
             } else {
                 enrollment.setPaymentStatus("Pending");
             }
+
+            request.setAttribute("paymentError", request.getParameter("error"));
             
             request.setAttribute("enrollment", enrollment);
             request.getRequestDispatcher("/WEB-INF/views/student/payment.jsp").forward(request, response);

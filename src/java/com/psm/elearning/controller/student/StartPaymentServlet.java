@@ -55,6 +55,9 @@ public class StartPaymentServlet extends HttpServlet {
         }
 
         String role = (String) session.getAttribute("role");
+        if (role == null) {
+            role = (String) session.getAttribute("userRole");
+        }
         if (!"Student".equals(role)) {
             System.out.println("StartPaymentServlet: unauthorized role=" + role);
             response.sendRedirect(request.getContextPath() + "/dashboard");
@@ -64,6 +67,10 @@ public class StartPaymentServlet extends HttpServlet {
         try {
             Integer userId = (Integer) session.getAttribute("userId");
             String userEmail = (String) session.getAttribute("email");
+            if (userEmail == null || userEmail.trim().isEmpty()) {
+                response.sendRedirect(request.getContextPath() + "/student/payment?enrollmentId=" + request.getParameter("enrollmentId") + "&error=noemail");
+                return;
+            }
             Integer enrollmentId = Integer.parseInt(request.getParameter("enrollmentId"));
 
             System.out.println("StartPaymentServlet: userId=" + userId + ", enrollmentId=" + enrollmentId);
@@ -121,6 +128,9 @@ public class StartPaymentServlet extends HttpServlet {
                 String authorizationUrl = initResult.getAuthorizationUrl();
                 String accessCode = initResult.getAccessCode();
                 String paystackReference = initResult.getPaystackReference();
+                if (paystackReference == null || paystackReference.trim().isEmpty()) {
+                    paystackReference = externalReference;
+                }
 
                 System.out.println("StartPaymentServlet: authorizationUrl=" + authorizationUrl);
                 System.out.println("StartPaymentServlet: accessCode=" + accessCode);
@@ -132,12 +142,20 @@ public class StartPaymentServlet extends HttpServlet {
                 payment.setAmount(amount.doubleValue());
                 payment.setStatus("Pending");
                 payment.setMethod("Paystack");
-                payment.setPaystackReference(externalReference);
+                payment.setPaymentRef(paystackReference);
+                payment.setPaystackReference(paystackReference);
                 payment.setAccessCode(accessCode);
+                payment.setAuthorizationUrl(authorizationUrl);
+                payment.setPaystackStatus("pending");
                 payment.setPaymentDate(LocalDateTime.now());
 
                 System.out.println("StartPaymentServlet: creating/updating Payment record...");
-                paymentDAO.createPayment(payment);
+                Payment createdPayment = paymentDAO.createPayment(payment);
+                if (createdPayment == null) {
+                    System.err.println("StartPaymentServlet: failed to persist payment record");
+                    response.sendRedirect(request.getContextPath() + "/student/payment?enrollmentId=" + enrollmentId + "&error=initstore");
+                    return;
+                }
                 System.out.println("StartPaymentServlet: Payment record created/updated");
 
                 // Redirect to Paystack authorization URL

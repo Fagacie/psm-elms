@@ -12,16 +12,19 @@ public class AppInitializer implements ServletContextListener {
 
     @Override
     public void contextInitialized(ServletContextEvent sce) {
-        // Try to run schema from classpath (if packaged under WEB-INF/classes/db/schema.sql)
-        SchemaSqlRunner.runFromClasspath("db/schema.sql");
-        // Also try typical webapp locations
-        SchemaSqlRunner.runFromServletContext(sce.getServletContext(),
-                "/WEB-INF/classes/db/schema.sql",
-                "/WEB-INF/db/schema.sql");
+        boolean schemaApplied = SchemaSqlRunner.runFromClasspath("db/schema.sql");
+        if (!schemaApplied) {
+            schemaApplied = SchemaSqlRunner.runFromServletContext(sce.getServletContext(),
+                    "/WEB-INF/classes/db/schema.sql",
+                    "/WEB-INF/db/schema.sql");
+        }
+        if (!schemaApplied) {
+            System.out.println("AppInitializer: schema runner skipped because no packaged schema.sql was found.");
+        }
     }
 
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
-        // No-op
+        com.psm.elearning.util.DBConnection.shutdown();
     }
 }

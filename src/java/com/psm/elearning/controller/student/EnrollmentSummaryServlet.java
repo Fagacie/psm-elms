@@ -38,6 +38,9 @@ public class EnrollmentSummaryServlet extends HttpServlet {
             return;
         }
         String role = (String) session.getAttribute("role");
+        if (role == null) {
+            role = (String) session.getAttribute("userRole");
+        }
         if (!"Student".equals(role)) {
             System.out.println("EnrollmentSummaryServlet: role=" + role + " redirecting to /dashboard");
             response.sendRedirect(request.getContextPath() + "/dashboard");

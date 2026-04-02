@@ -6,14 +6,20 @@ import com.psm.elearning.dao.EnrollmentDAO;
 import com.psm.elearning.dao.EnrollmentDAOImpl;
 import com.psm.elearning.model.Course;
 import com.psm.elearning.model.Enrollment;
+import com.psm.elearning.util.CloudinaryUtil;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.servlet.http.Part;
 import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
+import java.nio.file.Paths;
 import java.util.List;
+@MultipartConfig(maxFileSize = 5 * 1024 * 1024) // 5MB
 public class InstructorCourseServlet extends HttpServlet {
     
     private final CourseDAO courseDAO = new CourseDAOImpl();
@@ -145,6 +151,13 @@ public class InstructorCourseServlet extends HttpServlet {
             String durationStr = request.getParameter("duration");
             String feeStr = request.getParameter("courseFee");
             String level = request.getParameter("level");
+            String courseBannerUrl = uploadCourseBannerIfProvided(request);
+            if (courseBannerUrl == null && isBannerProvided(request)) {
+                request.setAttribute("errorMessage", "Course banner upload failed. Use JPG, PNG, WEBP up to 5MB.");
+                request.setAttribute("mode", "create");
+                request.getRequestDispatcher("/WEB-INF/views/instructor/instructor-course-form.jsp").forward(request, response);
+                return;
+            }
             
             // Validate required fields
             if (courseName == null || courseName.trim().isEmpty() || 
@@ -171,6 +184,7 @@ public class InstructorCourseServlet extends HttpServlet {
             course.setLevel(level != null ? level : Course.LEVEL_BEGINNER);
             course.setCreatedBy((Integer) session.getAttribute("userId"));
             course.setStatus(Course.STATUS_PENDING);
+            course.setCourseBanner(courseBannerUrl);
             
             // Save course
             Course created = courseDAO.create(course);
@@ -227,6 +241,14 @@ public class InstructorCourseServlet extends HttpServlet {
             String durationStr = request.getParameter("duration");
             String feeStr = request.getParameter("courseFee");
             String level = request.getParameter("level");
+            String courseBannerUrl = uploadCourseBannerIfProvided(request);
+            if (courseBannerUrl == null && isBannerProvided(request)) {
+                request.setAttribute("errorMessage", "Course banner upload failed. Use JPG, PNG, WEBP up to 5MB.");
+                request.setAttribute("course", existingCourse);
+                request.setAttribute("mode", "edit");
+                request.getRequestDispatcher("/WEB-INF/views/instructor/instructor-course-form.jsp").forward(request, response);
+                return;
+            }
             
             // Validate required fields
             if (courseName == null || courseName.trim().isEmpty() || 
@@ -251,6 +273,9 @@ public class InstructorCourseServlet extends HttpServlet {
             // Parse fee
             existingCourse.setCourseFee(new BigDecimal(feeStr));
             existingCourse.setLevel(level != null ? level : Course.LEVEL_BEGINNER);
+            if (courseBannerUrl != null && !courseBannerUrl.trim().isEmpty()) {
+                existingCourse.setCourseBanner(courseBannerUrl);
+            }
             
             // If course was approved, set back to pending after edit
             if (Course.STATUS_APPROVED.equals(existingCourse.getStatus())) {
@@ -357,5 +382,61 @@ public class InstructorCourseServlet extends HttpServlet {
             e.printStackTrace();
             response.sendRedirect(request.getContextPath() + "/instructor/courses?error=exception");
         }
+    }
+
+    private boolean isBannerProvided(HttpServletRequest request) {
+        try {
+            String contentType = request.getContentType();
+            if (contentType == null || !contentType.toLowerCase().contains("multipart/")) {
+                return false;
+            }
+            Part part = request.getPart("courseBanner");
+            return part != null && part.getSize() > 0;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private String uploadCourseBannerIfProvided(HttpServletRequest request) {
+        try {
+            String contentType = request.getContentType();
+            if (contentType == null || !contentType.toLowerCase().contains("multipart/")) {
+                return null;
+            }
+
+            Part bannerPart = request.getPart("courseBanner");
+            if (bannerPart == null || bannerPart.getSize() == 0) {
+                return null;
+            }
+
+            String fileName = Paths.get(bannerPart.getSubmittedFileName()).getFileName().toString();
+            String ext = extractExtension(fileName);
+            if (!isAllowedBannerExtension(ext)) {
+                return null;
+            }
+
+            try (InputStream in = bannerPart.getInputStream()) {
+                return CloudinaryUtil.uploadFile(
+                        in.readAllBytes(),
+                        fileName,
+                        CloudinaryUtil.getCourseBannersFolder(),
+                        "image"
+                );
+            }
+        } catch (Exception e) {
+            System.err.println("Course banner upload failed: " + e.getMessage());
+            return null;
+        }
+    }
+
+    private String extractExtension(String fileName) {
+        if (fileName == null) return "";
+        int index = fileName.lastIndexOf('.');
+        if (index < 0 || index == fileName.length() - 1) return "";
+        return fileName.substring(index + 1).toLowerCase();
+    }
+
+    private boolean isAllowedBannerExtension(String ext) {
+        return "jpg".equals(ext) || "jpeg".equals(ext) || "png".equals(ext) || "webp".equals(ext);
     }
 }

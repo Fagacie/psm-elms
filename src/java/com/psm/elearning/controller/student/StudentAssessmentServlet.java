@@ -21,6 +21,7 @@ import com.psm.elearning.model.AssessmentSubmission;
 import com.psm.elearning.model.Course;
 import com.psm.elearning.model.Enrollment;
 import com.psm.elearning.model.Payment;
+import com.psm.elearning.service.EnrollmentStateSyncService;
 import com.psm.elearning.util.AssessmentPlacementUtil;
 import com.psm.elearning.util.CloudinaryUtil;
 
@@ -51,6 +52,7 @@ public class StudentAssessmentServlet extends HttpServlet {
     private final AssessmentQuestionDAO questionDAO = new AssessmentQuestionDAOImpl();
     private final AssessmentSubmissionDAO submissionDAO = new AssessmentSubmissionDAOImpl();
     private final AssessmentRetakeRequestDAO retakeRequestDAO = new AssessmentRetakeRequestDAOImpl();
+    private final EnrollmentStateSyncService enrollmentStateSyncService = new EnrollmentStateSyncService();
 
     private static class AttemptState {
         int courseId;
@@ -99,7 +101,24 @@ public class StudentAssessmentServlet extends HttpServlet {
         if (selectedEnrollment == null) {
             request.setAttribute("errorMessage", "You do not have paid access to this course.");
             selectedCourseId = paidEnrollments.get(0).getCourseId();
+            final Integer fallbackCourseId = selectedCourseId;
+            selectedEnrollment = paidEnrollments.stream()
+                    .filter(e -> e.getCourseId() != null && e.getCourseId().equals(fallbackCourseId))
+                    .findFirst()
+                    .orElse(null);
         }
+
+        if (fromHub && (fromHubEnrollmentId == null
+                || selectedEnrollment == null
+                || selectedEnrollment.getEnrollmentId() == null
+                || !fromHubEnrollmentId.equals(selectedEnrollment.getEnrollmentId()))) {
+            fromHub = false;
+            fromHubEnrollmentId = null;
+        }
+
+        EnrollmentStateSyncService.SyncResult selectedEnrollmentSync = selectedEnrollment != null
+                ? enrollmentStateSyncService.syncEnrollmentState(selectedEnrollment)
+                : null;
 
         Course selectedCourse = courseDAO.findById(selectedCourseId);
         List<Assessment> assessments = assessmentDAO.findByCourse(selectedCourseId);
@@ -109,8 +128,22 @@ public class StudentAssessmentServlet extends HttpServlet {
         }
 
         Map<Integer, AssessmentSubmission> latestSubmissionByAssessment = new LinkedHashMap<>();
+        Map<Integer, Integer> usedAttemptsByAssessment = new LinkedHashMap<>();
+        Map<Integer, Integer> allowedAttemptsByAssessment = new LinkedHashMap<>();
+        Map<Integer, Boolean> hasPendingRetakeByAssessment = new LinkedHashMap<>();
+        Map<Integer, Boolean> activeAttemptByAssessment = new LinkedHashMap<>();
         for (Assessment assessment : assessments) {
             List<AssessmentSubmission> attempts = submissionDAO.findByAssessmentAndUser(assessment.getAssessmentId(), userId);
+            int usedAttempts = attempts != null ? attempts.size() : 0;
+            int allowedAttempts = getAllowedAttempts(userId, assessment);
+            boolean hasPendingRetake = retakeRequestDAO.hasPending(assessment.getAssessmentId(), userId);
+            Object attemptState = session.getAttribute(attemptSessionKey(assessment.getAssessmentId()));
+
+            usedAttemptsByAssessment.put(assessment.getAssessmentId(), usedAttempts);
+            allowedAttemptsByAssessment.put(assessment.getAssessmentId(), allowedAttempts);
+            hasPendingRetakeByAssessment.put(assessment.getAssessmentId(), hasPendingRetake);
+            activeAttemptByAssessment.put(assessment.getAssessmentId(), attemptState != null);
+
             if (attempts != null && !attempts.isEmpty()) {
                 latestSubmissionByAssessment.put(assessment.getAssessmentId(), attempts.get(0));
             }
@@ -144,7 +177,7 @@ public class StudentAssessmentServlet extends HttpServlet {
             state.questionsPerPage = assessment.getQuestionsPerPage() != null && assessment.getQuestionsPerPage() > 0 ? assessment.getQuestionsPerPage() : 2;
             session.setAttribute(attemptSessionKey(selectedAssessmentId), state);
 
-            response.sendRedirect(request.getContextPath() + "/student/assessments?courseId=" + selectedCourseId + "&assessmentId=" + selectedAssessmentId + "&page=1&mode=attempt");
+            response.sendRedirect(request.getContextPath() + "/student/assessments?courseId=" + selectedCourseId + "&assessmentId=" + selectedAssessmentId + "&page=1&mode=attempt" + buildHubQuerySuffix(fromHub, fromHubEnrollmentId));
             return;
         }
 
@@ -176,12 +209,14 @@ public class StudentAssessmentServlet extends HttpServlet {
                 request.setAttribute("allowedAttempts", allowedAttempts);
                 request.setAttribute("canRequestRetake", usedAttempts >= allowedAttempts && !hasPendingRetake);
                 request.setAttribute("hasPendingRetake", hasPendingRetake);
+                request.setAttribute("assessmentHasActiveAttempt", activeAttemptByAssessment.getOrDefault(selectedAssessmentId, false));
+                request.setAttribute("assessmentCanStart", usedAttempts < allowedAttempts);
 
                 activeState = (AttemptState) session.getAttribute(attemptSessionKey(selectedAssessmentId));
                 if (activeState != null && activeState.assessmentId == selectedAssessmentId && activeState.courseId == selectedCourseId) {
                     if (System.currentTimeMillis() >= activeState.deadlineMillis) {
-                        autoSubmitTimedOut(activeState, questions, userId, session);
-                        response.sendRedirect(request.getContextPath() + "/student/assessments?courseId=" + selectedCourseId + "&assessmentId=" + selectedAssessmentId + "&error=timeout");
+                        boolean timedOutSubmitted = autoSubmitTimedOut(activeState, questions, userId, session);
+                        response.sendRedirect(request.getContextPath() + "/student/assessments?courseId=" + selectedCourseId + "&assessmentId=" + selectedAssessmentId + (timedOutSubmitted ? "&error=timeout" : "&error=submitfailed"));
                         return;
                     }
 
@@ -202,8 +237,14 @@ public class StudentAssessmentServlet extends HttpServlet {
 
         request.setAttribute("selectedCourse", selectedCourse);
         request.setAttribute("selectedCourseId", selectedCourseId);
+        request.setAttribute("selectedEnrollment", selectedEnrollment);
+        request.setAttribute("selectedEnrollmentSync", selectedEnrollmentSync);
         request.setAttribute("assessments", assessments);
         request.setAttribute("latestSubmissionByAssessment", latestSubmissionByAssessment);
+        request.setAttribute("usedAttemptsByAssessment", usedAttemptsByAssessment);
+        request.setAttribute("allowedAttemptsByAssessment", allowedAttemptsByAssessment);
+        request.setAttribute("hasPendingRetakeByAssessment", hasPendingRetakeByAssessment);
+        request.setAttribute("activeAttemptByAssessment", activeAttemptByAssessment);
         request.setAttribute("selectedAssessment", selectedAssessment);
         request.setAttribute("questions", questions);
         request.setAttribute("submissionHistory", submissionHistory);
@@ -240,8 +281,11 @@ public class StudentAssessmentServlet extends HttpServlet {
             return;
         }
 
+        boolean fromHub = isFromHub(request);
+        Integer enrollmentId = sanitizeHubEnrollmentId(userId, courseId, parseInt(request.getParameter("enrollmentId")), fromHub);
+
         if (courseId == null || assessmentId == null) {
-            response.sendRedirect(request.getContextPath() + "/student/assessments?error=invalid");
+            response.sendRedirect(request.getContextPath() + "/student/assessments?error=invalid" + buildHubQuerySuffix(fromHub, enrollmentId));
             return;
         }
 
@@ -255,8 +299,8 @@ public class StudentAssessmentServlet extends HttpServlet {
         if (questions == null) questions = new ArrayList<>();
 
         AttemptState state = (AttemptState) session.getAttribute(attemptSessionKey(assessmentId));
-        if (state == null) {
-            response.sendRedirect(request.getContextPath() + "/student/assessments?courseId=" + courseId + "&assessmentId=" + assessmentId + "&error=noattempt");
+        if (state == null || state.assessmentId != assessmentId || state.courseId != courseId) {
+            response.sendRedirect(request.getContextPath() + "/student/assessments?courseId=" + courseId + "&assessmentId=" + assessmentId + "&error=noattempt" + buildHubQuerySuffix(isFromHub(request), parseInt(request.getParameter("enrollmentId"))));
             return;
         }
 
@@ -264,8 +308,8 @@ public class StudentAssessmentServlet extends HttpServlet {
         savePageAnswers(request, state, questions, page);
 
         if (System.currentTimeMillis() >= state.deadlineMillis) {
-            autoSubmitTimedOut(state, questions, userId, session);
-            response.sendRedirect(request.getContextPath() + "/student/assessments?courseId=" + courseId + "&assessmentId=" + assessmentId + "&error=timeout");
+            boolean timedOutSubmitted = autoSubmitTimedOut(state, questions, userId, session);
+            response.sendRedirect(request.getContextPath() + "/student/assessments?courseId=" + courseId + "&assessmentId=" + assessmentId + (timedOutSubmitted ? "&error=timeout" : "&error=submitfailed") + buildHubQuerySuffix(isFromHub(request), parseInt(request.getParameter("enrollmentId"))));
             return;
         }
 
@@ -278,7 +322,7 @@ public class StudentAssessmentServlet extends HttpServlet {
             } else {
                 page = Math.min(totalPages, page + 1);
             }
-            response.sendRedirect(request.getContextPath() + "/student/assessments?courseId=" + courseId + "&assessmentId=" + assessmentId + "&page=" + page + "&mode=attempt");
+            response.sendRedirect(request.getContextPath() + "/student/assessments?courseId=" + courseId + "&assessmentId=" + assessmentId + "&page=" + page + "&mode=attempt" + buildHubQuerySuffix(isFromHub(request), parseInt(request.getParameter("enrollmentId"))));
             return;
         }
 
@@ -313,8 +357,8 @@ public class StudentAssessmentServlet extends HttpServlet {
                 }
             }
 
-            submitAttempt(state, assessment, questions, userId, session, "Submitted", uploadedAnswerUrl);
-            response.sendRedirect(request.getContextPath() + "/student/assessments?courseId=" + courseId + "&assessmentId=" + assessmentId + "&success=submitted");
+            boolean submitted = submitAttempt(state, assessment, questions, userId, session, "Submitted", uploadedAnswerUrl);
+            response.sendRedirect(request.getContextPath() + "/student/assessments?courseId=" + courseId + "&assessmentId=" + assessmentId + (submitted ? "&success=submitted" : "&error=submitfailed") + buildHubQuerySuffix(isFromHub(request), parseInt(request.getParameter("enrollmentId"))));
             return;
         }
 
@@ -323,37 +367,45 @@ public class StudentAssessmentServlet extends HttpServlet {
 
     private void handleRetakeRequest(HttpServletRequest request, HttpServletResponse response, Integer userId, Integer courseId, Integer assessmentId)
             throws IOException {
+        boolean fromHub = isFromHub(request);
+        Integer enrollmentId = parseInt(request.getParameter("enrollmentId"));
+
         if (courseId == null || assessmentId == null) {
-            response.sendRedirect(request.getContextPath() + "/student/assessments?error=invalid");
+            response.sendRedirect(request.getContextPath() + "/student/assessments?error=invalid" + buildHubQuerySuffix(fromHub, enrollmentId));
             return;
         }
 
         Assessment assessment = assessmentDAO.findById(assessmentId);
         if (assessment == null || !courseId.equals(assessment.getCourseId()) || !hasPaidAccess(userId, courseId)) {
-            response.sendRedirect(request.getContextPath() + "/student/assessments?courseId=" + courseId + "&assessmentId=" + assessmentId + "&error=permission");
+            response.sendRedirect(request.getContextPath() + "/student/assessments?courseId=" + courseId + "&assessmentId=" + assessmentId + "&error=permission" + buildHubQuerySuffix(fromHub, enrollmentId));
             return;
         }
 
         int usedAttempts = countUsedAttempts(userId, assessmentId);
         int allowedAttempts = getAllowedAttempts(userId, assessment);
         if (usedAttempts < allowedAttempts) {
-            response.sendRedirect(request.getContextPath() + "/student/assessments?courseId=" + courseId + "&assessmentId=" + assessmentId + "&error=retakenotneeded");
+            response.sendRedirect(request.getContextPath() + "/student/assessments?courseId=" + courseId + "&assessmentId=" + assessmentId + "&error=retakenotneeded" + buildHubQuerySuffix(fromHub, enrollmentId));
             return;
         }
 
         if (retakeRequestDAO.hasPending(assessmentId, userId)) {
-            response.sendRedirect(request.getContextPath() + "/student/assessments?courseId=" + courseId + "&assessmentId=" + assessmentId + "&error=retakepending");
+            response.sendRedirect(request.getContextPath() + "/student/assessments?courseId=" + courseId + "&assessmentId=" + assessmentId + "&error=retakepending" + buildHubQuerySuffix(fromHub, enrollmentId));
             return;
         }
 
         AssessmentRetakeRequest retake = new AssessmentRetakeRequest();
         retake.setAssessmentId(assessmentId);
         retake.setUserId(userId);
-        retake.setReason(normalize(request.getParameter("reason")));
+        String reason = normalize(request.getParameter("reason"));
+        if (reason.isEmpty()) {
+            response.sendRedirect(request.getContextPath() + "/student/assessments?courseId=" + courseId + "&assessmentId=" + assessmentId + "&error=retakereason" + buildHubQuerySuffix(fromHub, enrollmentId));
+            return;
+        }
+        retake.setReason(reason);
         retake.setStatus("Pending");
 
         AssessmentRetakeRequest created = retakeRequestDAO.create(retake);
-        response.sendRedirect(request.getContextPath() + "/student/assessments?courseId=" + courseId + "&assessmentId=" + assessmentId + (created != null ? "&success=retakerequested" : "&error=retakefailed"));
+        response.sendRedirect(request.getContextPath() + "/student/assessments?courseId=" + courseId + "&assessmentId=" + assessmentId + (created != null ? "&success=retakerequested" : "&error=retakefailed") + buildHubQuerySuffix(fromHub, enrollmentId));
     }
 
     private void savePageAnswers(HttpServletRequest request, AttemptState state, List<AssessmentQuestion> questions, int page) {
@@ -379,13 +431,13 @@ public class StudentAssessmentServlet extends HttpServlet {
         }
     }
 
-    private void autoSubmitTimedOut(AttemptState state, List<AssessmentQuestion> questions, Integer userId, HttpSession session) {
-        submitAttempt(state, assessmentDAO.findById(state.assessmentId), questions, userId, session, "TimedOut", null);
+    private boolean autoSubmitTimedOut(AttemptState state, List<AssessmentQuestion> questions, Integer userId, HttpSession session) {
+        return submitAttempt(state, assessmentDAO.findById(state.assessmentId), questions, userId, session, "TimedOut", null);
     }
 
-    private void submitAttempt(AttemptState state, Assessment assessment, List<AssessmentQuestion> questions,
+    private boolean submitAttempt(AttemptState state, Assessment assessment, List<AssessmentQuestion> questions,
                                Integer userId, HttpSession session, String status, String uploadedAnswerUrl) {
-        if (assessment == null) return;
+        if (assessment == null) return false;
 
         double earned = 0.0;
         double totalObjectiveMarks = 0.0;
@@ -433,9 +485,43 @@ public class StudentAssessmentServlet extends HttpServlet {
         } else {
             submission.setAnswersFilePath(answersSummary.isEmpty() ? null : answersSummary);
         }
-        submissionDAO.submit(submission);
+        AssessmentSubmission createdSubmission = submissionDAO.submit(submission);
+        if (createdSubmission == null) {
+            return false;
+        }
+        syncEnrollmentProgress(userId, state.courseId);
 
         session.removeAttribute(attemptSessionKey(state.assessmentId));
+        return true;
+    }
+
+    private void syncEnrollmentProgress(Integer userId, Integer courseId) {
+        if (userId == null || courseId == null) {
+            return;
+        }
+
+        List<Enrollment> enrollments = enrollmentDAO.getEnrollmentsByStudent(userId);
+        if (enrollments == null) {
+            return;
+        }
+
+        for (Enrollment enrollment : enrollments) {
+            if (enrollment != null && enrollment.getCourseId() != null && enrollment.getCourseId().equals(courseId)) {
+                enrollmentStateSyncService.syncEnrollmentState(enrollment);
+                return;
+            }
+        }
+    }
+
+    private boolean isFromHub(HttpServletRequest request) {
+        return "1".equals(normalize(request.getParameter("fromHub")));
+    }
+
+    private String buildHubQuerySuffix(boolean fromHub, Integer enrollmentId) {
+        if (!fromHub || enrollmentId == null) {
+            return "";
+        }
+        return "&fromHub=1&enrollmentId=" + enrollmentId;
     }
 
     private int countUsedAttempts(Integer userId, Integer assessmentId) {
@@ -461,7 +547,7 @@ public class StudentAssessmentServlet extends HttpServlet {
                 .filter(e -> e.getEnrollmentId() != null)
                 .filter(e -> {
                     Payment payment = paymentDAO.getPaymentByEnrollmentId(e.getEnrollmentId());
-                    return payment != null && "Paid".equalsIgnoreCase(payment.getStatus());
+                    return payment != null && isPaymentComplete(payment.getStatus());
                 })
                 .collect(Collectors.toList());
     }
@@ -487,6 +573,29 @@ public class StudentAssessmentServlet extends HttpServlet {
 
     private String normalize(String value) {
         return value == null ? "" : value.trim();
+    }
+
+    private boolean isPaymentComplete(String paymentStatus) {
+        if (paymentStatus == null) return false;
+        String normalized = paymentStatus.trim();
+        return "Paid".equalsIgnoreCase(normalized)
+                || "Completed".equalsIgnoreCase(normalized)
+                || "Success".equalsIgnoreCase(normalized);
+    }
+
+    private Integer sanitizeHubEnrollmentId(Integer userId, Integer courseId, Integer enrollmentId, boolean fromHub) {
+        if (!fromHub || userId == null || courseId == null || enrollmentId == null) {
+            return null;
+        }
+
+        List<Enrollment> paidEnrollments = getPaidEnrollments(userId);
+        for (Enrollment enrollment : paidEnrollments) {
+            if (enrollment.getEnrollmentId() == null || enrollment.getCourseId() == null) continue;
+            if (enrollmentId.equals(enrollment.getEnrollmentId()) && courseId.equals(enrollment.getCourseId())) {
+                return enrollmentId;
+            }
+        }
+        return null;
     }
 
     private String extractFileName(Part part) {

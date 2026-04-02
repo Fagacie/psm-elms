@@ -5,115 +5,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - PSM E-Learning Platform</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/landing.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/app.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/auth.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Login - PSM E-Learning</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/auth-v2.css">
 </head>
-<body>
-    <div class="auth-page">
-        <div class="auth-wrapper">
-            <div class="split-card">
-                <section class="left-panel">
-                    <div class="brand-section">
-                        <div class="brand-icon">
-                            <i class="fas fa-graduation-cap"></i>
-                        </div>
-                        <h1 class="brand-title">PSM E-Learning</h1>
-                        <p class="brand-tagline">Empowering Education Through Innovation</p>
-                        <div class="brand-features">
-                            <div class="feature-item">
-                                <i class="fas fa-book-open"></i>
-                                <span>Comprehensive Courses</span>
-                            </div>
-                            <div class="feature-item">
-                                <i class="fas fa-chart-line"></i>
-                                <span>Track Progress</span>
-                            </div>
-                            <div class="feature-item">
-                                <i class="fas fa-users"></i>
-                                <span>Expert Instructors</span>
-                            </div>
-                        </div>
-                    </div>
-                </section>
+<body class="av2-page">
+    <main class="av2-shell">
+        <section class="av2-panel av2-brand" aria-hidden="true">
+            <p class="av2-kicker">PSM E-Learning</p>
+            <h1>Welcome Back</h1>
+            <div class="av2-scene" role="presentation">
+                <span class="av2-obj av2-book" data-depth="16"></span>
+                <span class="av2-obj av2-pen" data-depth="24"></span>
+                <span class="av2-obj av2-cap" data-depth="12"></span>
+                <span class="av2-obj av2-paper" data-depth="20"></span>
+                <span class="av2-obj av2-ring" data-depth="28"></span>
+            </div>
+            <a class="av2-link" href="${pageContext.request.contextPath}/">Back to Home</a>
+        </section>
 
-                <section class="right-panel">
-                    <div class="form-container">
-                        <header class="form-header">
-                            <h2 class="form-title">Welcome Back</h2>
-                            <p class="form-subtitle">Sign in to your account</p>
-                        </header>
+        <section class="av2-panel av2-form-panel">
+            <div class="av2-form-wrap">
+                <header class="av2-form-head">
+                    <h2>Sign In</h2>
+                    <p>Enter your account credentials to continue.</p>
+                </header>
 
                 <c:if test="${not empty sessionScope.successMessage}">
-                    <div class="alert alert-success alert-icon">
-                        <i class="fas fa-check-circle"></i>
-                        ${sessionScope.successMessage}
-                    </div>
+                    <div class="av2-alert av2-alert-success">${sessionScope.successMessage}</div>
                     <c:remove var="successMessage" scope="session"/>
                 </c:if>
-                
+
                 <c:if test="${not empty error}">
-                    <div class="alert alert-danger alert-icon">
-                        <i class="fas fa-exclamation-circle"></i>
-                        ${error}
-                    </div>
+                    <div class="av2-alert av2-alert-error">${error}</div>
                 </c:if>
 
-                <form action="${pageContext.request.contextPath}/login" method="post" class="login-form">
-                    <div class="form-group">
-                        <label for="identifier" class="form-label">
-                            <i class="fas fa-user-circle"></i> Student Reg Number or Email
-                        </label>
-                        <input type="text" class="form-control" id="identifier" name="identifier"
-                               placeholder="e.g. PSM1783 or email@example.com" required autofocus>
-                        <div class="form-helper" id="identifierHelp">
-                            <i class="fas fa-info-circle"></i>
-                            Students use registration number (e.g. PSM1783). Others use email.
-                        </div>
+                <form action="${pageContext.request.contextPath}/login" method="post" class="av2-form" novalidate>
+                    <div class="av2-group">
+                        <label for="identifier">Registration Number or Email</label>
+                        <input
+                            id="identifier"
+                            name="identifier"
+                            type="text"
+                            value="${identifier}"
+                            placeholder="e.g. PSM1783 or user@example.com"
+                            required
+                            autofocus>
+                        <small>Students can use registration number. All users can use email.</small>
                     </div>
 
-                    <div class="form-group">
-                        <label for="password" class="form-label">
-                            <i class="fas fa-lock"></i> Password
-                        </label>
-                        <input type="password" class="form-control" id="password" name="password" 
-                               placeholder="Enter your password" required>
+                    <div class="av2-group">
+                        <label for="password">Password</label>
+                        <input id="password" name="password" type="password" placeholder="Enter your password" required>
                     </div>
 
-                    <div class="form-options">
-                        <div class="form-check">
-                            <input type="checkbox" class="form-check-input" id="remember" name="remember">
-                            <label class="form-check-label" for="remember">Remember me</label>
-                        </div>
-                        <a href="${pageContext.request.contextPath}/forgot-password" class="forgot-link">
-                            <i class="fas fa-question-circle"></i> Forgot password?
-                        </a>
+                    <div class="av2-row">
+                        <a href="${pageContext.request.contextPath}/forgot-password" class="av2-link-inline">Forgot password?</a>
                     </div>
 
-                    <button type="submit" class="btn btn-primary btn-full btn-large btn-sign-in">
-                        <i class="fas fa-sign-in-alt"></i> Sign In
-                    </button>
+                    <button type="submit" class="av2-btn av2-btn-solid">Login</button>
                 </form>
-                
-                <div class="auth-divider">
-                    <span class="divider-text">Don't have an account?</span>
-                </div>
-                
-                <a href="${pageContext.request.contextPath}/register" class="btn btn-secondary btn-full">
-                    <i class="fas fa-user-plus"></i> Create Account
-                </a>
 
-                    <footer class="form-footer">
-                        <a href="${pageContext.request.contextPath}/" class="back-home-link">
-                            <i class="fas fa-arrow-left"></i> Back to Home
-                        </a>
-                    </footer>
-                    </div>
-                </section>
+                <div class="av2-switch">
+                    <span>New student?</span>
+                    <a href="${pageContext.request.contextPath}/register">Create account</a>
+                </div>
             </div>
-        </div>
-    </div>
-</body>
+        </section>
+    </main>
+    <script src="${pageContext.request.contextPath}/js/auth-v2.js"></script></body>
 </html>
+
+

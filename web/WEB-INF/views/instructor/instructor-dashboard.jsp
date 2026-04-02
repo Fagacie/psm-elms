@@ -8,12 +8,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Instructor Dashboard - PSM E-Learning</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/landing.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/app.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-shell.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
+<body class="instructor-ui">
     <!-- Top Navigation Bar -->
     <header class="app-header">
         <div class="header-left">
@@ -47,33 +49,21 @@
     <!-- Left Sidebar Navigation -->
     <aside class="app-sidebar">
         <nav class="sidebar-nav">
-            <a href="${pageContext.request.contextPath}/instructor/dashboard" class="nav-item active">
+            <a href="${pageContext.request.contextPath}/dashboard" class="nav-item active">
                 <i class="fas fa-home"></i>
                 <span>Dashboard</span>
             </a>
             <a href="${pageContext.request.contextPath}/instructor/courses" class="nav-item">
                 <i class="fas fa-book"></i>
-                <span>My Courses</span>
+                <span>Courses</span>
             </a>
-            <a href="${pageContext.request.contextPath}/instructor/assignments" class="nav-item">
-                <i class="fas fa-tasks"></i>
-                <span>Assignments</span>
+            <a href="${pageContext.request.contextPath}/instructor/materials" class="nav-item">
+                <i class="fas fa-folder-open"></i>
+                <span>Materials</span>
             </a>
-            <a href="${pageContext.request.contextPath}/instructor/quizzes" class="nav-item">
-                <i class="fas fa-clipboard-question"></i>
-                <span>Quizzes / Exams</span>
-            </a>
-            <a href="${pageContext.request.contextPath}/instructor/submissions" class="nav-item">
-                <i class="fas fa-inbox"></i>
-                <span>Student Submissions</span>
-            </a>
-            <a href="${pageContext.request.contextPath}/instructor/grades" class="nav-item">
-                <i class="fas fa-chart-line"></i>
-                <span>Grades / Evaluation</span>
-            </a>
-            <a href="${pageContext.request.contextPath}/instructor/announcements" class="nav-item">
-                <i class="fas fa-bullhorn"></i>
-                <span>Announcements</span>
+            <a href="${pageContext.request.contextPath}/instructor/assessments" class="nav-item">
+                <i class="fas fa-clipboard-list"></i>
+                <span>Assessments</span>
             </a>
             <a href="${pageContext.request.contextPath}/instructor/certificates" class="nav-item">
                 <i class="fas fa-certificate"></i>
@@ -89,6 +79,45 @@
     <!-- Main Content Area -->
     <main class="app-main">
         <div class="content-wrapper">
+            <section class="ins-page-head">
+                <div>
+                    <p class="ins-page-kicker">Instructor Workspace</p>
+                    <h2>Operate your courses from one command center</h2>
+                    <p>Track courses, monitor activity, and move quickly into content, assessment, and certificate tasks without jumping across disconnected screens.</p>
+                </div>
+                <div class="ins-hero-actions">
+                    <a href="${pageContext.request.contextPath}/instructor/courses?action=create" class="btn btn-primary"><i class="fas fa-plus"></i> Create Course</a>
+                    <a href="${pageContext.request.contextPath}/instructor/assessments" class="btn btn-secondary"><i class="fas fa-clipboard-list"></i> Open Assessments</a>
+                </div>
+            </section>
+
+            <section class="ins-hero-card">
+                <div class="ins-hero-grid">
+                    <div>
+                        <h3>Today’s teaching snapshot</h3>
+                        <p>Your dashboard should answer three questions quickly: what needs attention, which courses are active, and where students are blocked. This layout is tuned around that workflow.</p>
+                    </div>
+                    <div class="ins-hero-metrics">
+                        <div class="ins-metric">
+                            <strong>${not empty totalCourses ? totalCourses : 0}</strong>
+                            <span>Courses you manage</span>
+                        </div>
+                        <div class="ins-metric">
+                            <strong>${not empty totalStudents ? totalStudents : 0}</strong>
+                            <span>Students across your courses</span>
+                        </div>
+                        <div class="ins-metric">
+                            <strong>${not empty totalEnrollments ? totalEnrollments : 0}</strong>
+                            <span>Total enrollments</span>
+                        </div>
+                        <div class="ins-metric">
+                            <strong>${not empty pendingEnrollments ? pendingEnrollments : 0}</strong>
+                            <span>Items needing attention</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <!-- Dashboard Statistics Section -->
             <section class="dashboard-stats">
                 <div class="stat-card">
@@ -132,7 +161,7 @@
                 </div>
             </section>
 
-            <div class="grid two-column">
+            <div class="ins-two-col">
                 <!-- My Courses Section -->
                 <section class="section-card courses-section">
                     <div class="section-header">
@@ -168,7 +197,7 @@
                 </section>
 
                 <!-- Pending Instructor Tasks -->
-                <section class="section-card">
+                <section class="section-card ins-stack">
                     <h3 class="section-title">Pending Tasks</h3>
                     <c:choose>
                         <c:when test="${not empty pendingTasks}">
@@ -188,6 +217,14 @@
                             <div class="empty-state">No data available.</div>
                         </c:otherwise>
                     </c:choose>
+
+                    <div class="section-card" style="margin-bottom:0;">
+                        <h3 class="section-title">Quick Actions</h3>
+                        <div class="ins-hero-actions">
+                            <a class="btn btn-secondary" href="${pageContext.request.contextPath}/instructor/materials"><i class="fas fa-folder-open"></i> Manage Materials</a>
+                            <a class="btn btn-secondary" href="${pageContext.request.contextPath}/instructor/certificates"><i class="fas fa-certificate"></i> Review Certificates</a>
+                        </div>
+                    </div>
                 </section>
             </div>
 
@@ -217,3 +254,4 @@
     </main>
 </body>
 </html>
+

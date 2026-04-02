@@ -6,12 +6,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Course Materials - Instructor</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/landing.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/app.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-shell.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-materials.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
+<body class="instructor-ui">
 <header class="app-header">
     <div class="header-left">
         <div class="logo-section">
@@ -21,6 +23,13 @@
         <h1 class="page-title">Course Materials</h1>
     </div>
     <div class="header-right">
+        <div class="user-menu">
+            <div class="user-info">
+                <span class="user-name"><c:out value="${empty user ? sessionScope.user.fullName : user.fullName}"/></span>
+                <span class="user-role">Instructor</span>
+            </div>
+            <div class="user-avatar"><i class="fas fa-user"></i></div>
+        </div>
         <a href="${pageContext.request.contextPath}/logout" class="btn btn-secondary btn-sm">
             <i class="fas fa-sign-out-alt"></i> Logout
         </a>
@@ -33,7 +42,7 @@
             <i class="fas fa-home"></i><span>Dashboard</span>
         </a>
         <a href="${pageContext.request.contextPath}/instructor/courses" class="nav-item">
-            <i class="fas fa-book"></i><span>My Courses</span>
+            <i class="fas fa-book"></i><span>Courses</span>
         </a>
         <a href="${pageContext.request.contextPath}/instructor/materials" class="nav-item active">
             <i class="fas fa-folder-open"></i><span>Materials</span>
@@ -52,8 +61,26 @@
 
 <main class="app-main">
     <div class="content-wrapper">
-        <div class="section-card" style="margin-bottom:16px;">
-            <form method="get" action="${pageContext.request.contextPath}/instructor/materials" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+        <section class="ins-page-head">
+            <div>
+                <p class="ins-page-kicker">Learning Content</p>
+                <h2>Organize course materials with clearer teaching flow</h2>
+                <p>This page now follows the instructor workspace pattern so uploading, ordering, editing, and archiving materials feels more like a professional content studio.</p>
+            </div>
+            <div class="ins-hero-actions">
+                <c:if test="${not empty selectedCourse}">
+                    <button class="btn btn-primary" type="button" onclick="openUploadModal()">
+                        <i class="fas fa-plus"></i> Add Material
+                    </button>
+                </c:if>
+                <a href="${pageContext.request.contextPath}/instructor/courses" class="btn btn-secondary">
+                    <i class="fas fa-book"></i> Open Courses
+                </a>
+            </div>
+        </section>
+
+        <div class="section-card course-filter-card">
+            <form method="get" action="${pageContext.request.contextPath}/instructor/materials" class="course-filter-form">
                 <label for="courseId"><strong>Select Course</strong></label>
                 <select id="courseId" name="courseId" required>
                     <option value="">-- Select --</option>
@@ -105,6 +132,33 @@
         </c:if>
 
         <c:if test="${not empty selectedCourse}">
+            <section class="ins-hero-card materials-hero">
+                <div class="ins-hero-grid">
+                    <div>
+                        <h3>${selectedCourse.courseName}</h3>
+                        <p>Use the display order to place content exactly where students should encounter it. That gives you flexibility when chapters are uploaded later or revised out of sequence.</p>
+                    </div>
+                    <div class="ins-hero-metrics">
+                        <div class="ins-metric">
+                            <strong>${materials.size()}</strong>
+                            <span>Published materials</span>
+                        </div>
+                        <div class="ins-metric">
+                            <strong>${deletedMaterials.size()}</strong>
+                            <span>Archived items</span>
+                        </div>
+                        <div class="ins-metric">
+                            <strong>${empty materials ? 'Empty' : 'Structured'}</strong>
+                            <span>Content state</span>
+                        </div>
+                        <div class="ins-metric">
+                            <strong>${param.success != null ? 'Updated' : 'Ready'}</strong>
+                            <span>Workspace signal</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <div class="page-actions">
                 <div class="materials-summary">
                     <div class="summary-item">
@@ -122,7 +176,7 @@
             </div>
 
             <div class="section-card">
-                <h3 style="margin: 0 0 20px 0; font-size: 18px; font-weight: 600; padding-bottom: 12px; border-bottom: 2px solid var(--border-color);">Materials List</h3>
+                <h3 class="section-block-title">Materials Library</h3>
                 <c:choose>
                     <c:when test="${empty materials}">
                         <div class="empty-state-box">
@@ -228,11 +282,11 @@
                     </c:otherwise>
                 </c:choose>
 
-                <div style="margin-top: 32px; padding-top: 24px; border-top: 2px solid var(--border-color);">
-                    <h4 style="font-size: 16px; font-weight: 600; color: var(--text-secondary); margin: 0 0 16px 0;">Archived Materials</h4>
+                <div class="archived-block">
+                    <h4 class="archived-title">Archived Materials</h4>
                     <c:choose>
                         <c:when test="${empty deletedMaterials}">
-                            <p style="color: var(--text-muted); font-size: 13px;">No archived materials.</p>
+                            <p class="archived-empty">No archived materials.</p>
                         </c:when>
                         <c:otherwise>
                             <c:forEach var="m" items="${deletedMaterials}">
@@ -275,7 +329,7 @@
         <div class="modal-body">
             <c:if test="${not empty selectedCourse}">
                 <p class="modal-subtitle">Course: <strong>${selectedCourse.courseName}</strong></p>
-                <p class="modal-subtitle" style="margin-bottom: 20px;">Set chapter/order number to control learning flow. Leave empty to append at the end.</p>
+                <p class="modal-subtitle modal-subtitle-spaced">Set chapter/order number to control learning flow. Leave empty to append at the end.</p>
                 <form id="uploadForm" method="post" action="${pageContext.request.contextPath}/instructor/materials" enctype="multipart/form-data">
                     <input type="hidden" name="courseId" value="${selectedCourse.courseId}">
                     <div class="upload-form-grid">
@@ -373,3 +427,4 @@
 </script>
 </body>
 </html>
+

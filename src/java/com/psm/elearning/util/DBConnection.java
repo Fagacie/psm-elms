@@ -1,10 +1,13 @@
 package com.psm.elearning.util;
 
+import com.mysql.cj.jdbc.AbandonedConnectionCleanupThread;
+import java.sql.Driver;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Enumeration;
 import java.util.Properties;
 
 /**
@@ -88,7 +91,6 @@ public class DBConnection {
     public static Connection getConnection() throws SQLException {
         try {
             Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-            System.out.println("Database connection established");
             return conn;
         } catch (SQLException e) {
             System.err.println("Failed to establish database connection: " + e.getMessage());
@@ -119,9 +121,42 @@ public class DBConnection {
         if (conn != null) {
             try {
                 conn.close();
-                System.out.println("Database connection closed");
             } catch (SQLException e) {
                 System.err.println("Error closing connection: " + e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Cleans up JDBC resources during webapp shutdown to avoid Tomcat memory leak warnings.
+     */
+    public static void shutdown() {
+        shutdownMysqlCleanupThread();
+        deregisterJdbcDrivers();
+    }
+
+    private static void shutdownMysqlCleanupThread() {
+        try {
+            AbandonedConnectionCleanupThread.checkedShutdown();
+            System.out.println("MySQL abandoned connection cleanup thread stopped");
+        } catch (Throwable t) {
+            System.err.println("Unable to stop MySQL cleanup thread cleanly: " + t.getMessage());
+        }
+    }
+
+    private static void deregisterJdbcDrivers() {
+        ClassLoader appClassLoader = DBConnection.class.getClassLoader();
+        Enumeration<Driver> drivers = DriverManager.getDrivers();
+        while (drivers.hasMoreElements()) {
+            Driver driver = drivers.nextElement();
+            if (driver.getClass().getClassLoader() != appClassLoader) {
+                continue;
+            }
+            try {
+                DriverManager.deregisterDriver(driver);
+                System.out.println("Deregistered JDBC driver: " + driver.getClass().getName());
+            } catch (SQLException e) {
+                System.err.println("Failed to deregister JDBC driver " + driver.getClass().getName() + ": " + e.getMessage());
             }
         }
     }

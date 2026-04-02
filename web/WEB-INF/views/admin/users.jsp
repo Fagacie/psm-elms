@@ -7,192 +7,222 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Management - PSM E-Learning</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/landing.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/app.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin-dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
 </head>
 <body>
-    <jsp:include page="/WEB-INF/views/common/admin-header.jsp">
-        <jsp:param name="pageTitle" value="User Management"/>
-    </jsp:include>
+<jsp:include page="/WEB-INF/views/common/admin-header.jsp">
+    <jsp:param name="pageTitle" value="Users"/>
+</jsp:include>
 
-    <jsp:include page="/WEB-INF/views/common/admin-sidebar.jsp"/>
+<jsp:include page="/WEB-INF/views/common/admin-sidebar.jsp"/>
 
-    <main class="app-main">
-        <div class="content-wrapper">
-            <!-- User Statistics -->
-            <c:set var="totalUsers" value="${fn:length(users)}"/>
-            <c:set var="studentsCount" value="0"/>
-            <c:set var="instructorsCount" value="0"/>
-            <c:set var="adminsCount" value="0"/>
-            <c:set var="activeCount" value="0"/>
-            <c:set var="suspendedCount" value="0"/>
-            <c:forEach items="${users}" var="u">
-                <c:choose>
-                    <c:when test="${u.role eq 'Student'}"><c:set var="studentsCount" value="${studentsCount + 1}"/></c:when>
-                    <c:when test="${u.role eq 'Instructor'}"><c:set var="instructorsCount" value="${instructorsCount + 1}"/></c:when>
-                    <c:when test="${u.role eq 'Admin'}"><c:set var="adminsCount" value="${adminsCount + 1}"/></c:when>
-                </c:choose>
-                <c:choose>
-                    <c:when test="${u.status eq 'Active' or u.status eq 'active'}"><c:set var="activeCount" value="${activeCount + 1}"/></c:when>
-                    <c:when test="${u.status eq 'Suspended' or u.status eq 'suspended'}"><c:set var="suspendedCount" value="${suspendedCount + 1}"/></c:when>
-                </c:choose>
-            </c:forEach>
+<main class="app-main">
+    <div class="content-wrapper">
+        <c:set var="totalUsers" value="${fn:length(users)}"/>
+        <c:set var="studentsCount" value="0"/>
+        <c:set var="instructorsCount" value="0"/>
+        <c:set var="adminsCount" value="0"/>
+        <c:set var="activeCount" value="0"/>
+        <c:set var="suspendedCount" value="0"/>
+        <c:forEach items="${users}" var="u">
+            <c:choose>
+                <c:when test="${u.role eq 'Student'}"><c:set var="studentsCount" value="${studentsCount + 1}"/></c:when>
+                <c:when test="${u.role eq 'Instructor'}"><c:set var="instructorsCount" value="${instructorsCount + 1}"/></c:when>
+                <c:when test="${u.role eq 'Admin'}"><c:set var="adminsCount" value="${adminsCount + 1}"/></c:when>
+            </c:choose>
+            <c:choose>
+                <c:when test="${u.status eq 'Active' or u.status eq 'active'}"><c:set var="activeCount" value="${activeCount + 1}"/></c:when>
+                <c:when test="${u.status eq 'Suspended' or u.status eq 'suspended'}"><c:set var="suspendedCount" value="${suspendedCount + 1}"/></c:when>
+            </c:choose>
+        </c:forEach>
 
-            <section class="section-card">
-                <div class="section-header">
-                    <h2>User Statistics</h2>
-                </div>
-                <div class="metrics-grid">
-                    <div class="metric-card">
-                        <div class="metric-label">Total Users</div>
-                        <div class="metric-value">${totalUsers}</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-label">Students</div>
-                        <div class="metric-value">${studentsCount}</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-label">Instructors</div>
-                        <div class="metric-value">${instructorsCount}</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-label">Admins</div>
-                        <div class="metric-value">${adminsCount}</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-label">Active</div>
-                        <div class="metric-value">${activeCount}</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-label">Suspended</div>
-                        <div class="metric-value">${suspendedCount}</div>
-                    </div>
-                </div>
-            </section>
-            <!-- Alerts -->
-            <c:if test="${not empty sessionScope.success}">
-                <div class="alert alert-success">
-                    <i class="fas fa-check-circle"></i> <c:out value="${sessionScope.success}"/>
-                </div>
-                <c:remove var="success" scope="session"/>
-            </c:if>
-            <c:if test="${not empty sessionScope.error}">
-                <div class="alert alert-error">
-                    <i class="fas fa-exclamation-circle"></i> <c:out value="${sessionScope.error}"/>
-                </div>
-                <c:remove var="error" scope="session"/>
-            </c:if>
-            <c:if test="${not empty sessionScope.warning}">
-                <div class="alert alert-warning">
-                    <i class="fas fa-info-circle"></i> <c:out value="${sessionScope.warning}"/>
-                </div>
-                <c:remove var="warning" scope="session"/>
-            </c:if>
+        <section class="admin-page-head">
+            <div class="admin-breadcrumb">
+                <a href="${pageContext.request.contextPath}/dashboard">Dashboard</a>
+                <i class="fas fa-angle-right"></i>
+                <span>Users</span>
+            </div>
 
-            <!-- Filters and Search -->
-            <section class="section-card">
-                <div class="section-header">
-                    <h2>Filters & Actions</h2>
-                    <a href="${pageContext.request.contextPath}/admin/users?action=create" class="link" style="color: var(--color-primary); text-decoration: none; font-weight: 600; font-size: 14px;">
-                        <i class="fas fa-plus"></i> Create New User
-                    </a>
+            <div class="admin-hero">
+                <div class="admin-hero-copy">
+                    <p class="admin-kicker">Identity Management</p>
+                    <h2>Manage students, instructors, and administrators from one secure workspace</h2>
+                    <p>Filter by role and account status, search quickly, and take actions on user records without leaving the admin workflow.</p>
                 </div>
-                <form method="get" action="${pageContext.request.contextPath}/admin/users" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px;">
-                    <div style="display: flex; flex-direction: column; gap: 5px;">
-                        <label for="roleFilter" style="font-size: 14px; font-weight: 500; color: var(--color-text);">Role</label>
-                        <select name="role" id="roleFilter" style="padding: 8px 12px; border: 1px solid var(--color-light-grey); background: var(--color-white); color: var(--color-text); font-size: 14px; border-radius: 2px;">
+                <div class="admin-hero-scene" aria-hidden="true">
+                    <span class="admin-orb admin-orb-a"></span>
+                    <span class="admin-orb admin-orb-b"></span>
+                    <span class="admin-shape admin-shape-a"></span>
+                    <span class="admin-shape admin-shape-b"></span>
+                    <div class="admin-scene-panel admin-scene-panel-a">
+                        <span>Total Users</span>
+                        <strong>${totalUsers}</strong>
+                    </div>
+                    <div class="admin-scene-panel admin-scene-panel-b">
+                        <span>Active</span>
+                        <strong>${activeCount}</strong>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section-card">
+            <div class="section-header">
+                <h2>User Overview</h2>
+                <a href="${pageContext.request.contextPath}/admin/users?action=create" class="admin-btn primary"><i class="fas fa-plus"></i>&nbsp;Create User</a>
+            </div>
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-label">Total Users</div>
+                    <div class="metric-value">${totalUsers}</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Students</div>
+                    <div class="metric-value">${studentsCount}</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Instructors</div>
+                    <div class="metric-value">${instructorsCount}</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Admins</div>
+                    <div class="metric-value">${adminsCount}</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Active</div>
+                    <div class="metric-value">${activeCount}</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Suspended</div>
+                    <div class="metric-value">${suspendedCount}</div>
+                </div>
+            </div>
+        </section>
+
+        <c:if test="${not empty sessionScope.success}">
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle"></i> <c:out value="${sessionScope.success}"/>
+            </div>
+            <c:remove var="success" scope="session"/>
+        </c:if>
+        <c:if test="${not empty sessionScope.error}">
+            <div class="alert alert-error">
+                <i class="fas fa-exclamation-circle"></i> <c:out value="${sessionScope.error}"/>
+            </div>
+            <c:remove var="error" scope="session"/>
+        </c:if>
+        <c:if test="${not empty sessionScope.warning}">
+            <div class="alert alert-warning">
+                <i class="fas fa-info-circle"></i> <c:out value="${sessionScope.warning}"/>
+            </div>
+            <c:remove var="warning" scope="session"/>
+        </c:if>
+
+        <section class="section-card">
+            <div class="section-header">
+                <h2>Filters and Search</h2>
+            </div>
+            <div style="padding: 14px 16px 16px;">
+                <form method="get" action="${pageContext.request.contextPath}/admin/users" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; align-items:end;">
+                    <div>
+                        <label for="roleFilter" style="display:block; margin-bottom:6px; color:var(--admin-muted); font-size:0.78rem; text-transform:uppercase; letter-spacing:0.55px;">Role</label>
+                        <select name="role" id="roleFilter">
                             <option value="">All Roles</option>
                             <option value="Student" ${param.role == 'Student' ? 'selected' : ''}>Student</option>
                             <option value="Instructor" ${param.role == 'Instructor' ? 'selected' : ''}>Instructor</option>
                             <option value="Admin" ${param.role == 'Admin' ? 'selected' : ''}>Admin</option>
                         </select>
                     </div>
-                    <div style="display: flex; flex-direction: column; gap: 5px;">
-                        <label for="statusFilter" style="font-size: 14px; font-weight: 500; color: var(--color-text);">Status</label>
-                        <select name="status" id="statusFilter" style="padding: 8px 12px; border: 1px solid var(--color-light-grey); background: var(--color-white); color: var(--color-text); font-size: 14px; border-radius: 2px;">
+                    <div>
+                        <label for="statusFilter" style="display:block; margin-bottom:6px; color:var(--admin-muted); font-size:0.78rem; text-transform:uppercase; letter-spacing:0.55px;">Status</label>
+                        <select name="status" id="statusFilter">
                             <option value="">All Statuses</option>
                             <option value="Active" ${param.status == 'Active' ? 'selected' : ''}>Active</option>
                             <option value="Suspended" ${param.status == 'Suspended' ? 'selected' : ''}>Suspended</option>
                         </select>
                     </div>
-                    <div style="display: flex; flex-direction: column; gap: 5px;">
-                        <label for="searchQuery" style="font-size: 14px; font-weight: 500; color: var(--color-text);">Search</label>
-                        <input type="text" name="search" id="searchQuery" style="padding: 8px 12px; border: 1px solid var(--color-light-grey); background: var(--color-white); color: var(--color-text); font-size: 14px; border-radius: 2px;" 
-                               placeholder="Search by name or email" value="${fn:escapeXml(param.search)}">
+                    <div>
+                        <label for="searchQuery" style="display:block; margin-bottom:6px; color:var(--admin-muted); font-size:0.78rem; text-transform:uppercase; letter-spacing:0.55px;">Search</label>
+                        <input type="text" name="search" id="searchQuery" placeholder="Search by name or email" value="${fn:escapeXml(param.search)}">
                     </div>
-                    <div style="display: flex; flex-direction: column; gap: 5px; justify-content: flex-end;">
-                        <button type="submit" style="padding: 8px 16px; background: var(--color-primary); color: white; border: 1px solid var(--color-primary); font-size: 14px; font-weight: 600; cursor: pointer; border-radius: 2px;"><i class="fas fa-search"></i> Filter</button>
+                    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                        <button type="submit" class="admin-btn primary"><i class="fas fa-search"></i>&nbsp;Filter</button>
+                        <a href="${pageContext.request.contextPath}/admin/users" class="admin-btn secondary">Clear</a>
                     </div>
                 </form>
-                <a href="${pageContext.request.contextPath}/admin/users" style="display: inline-block; padding: 8px 16px; background: var(--color-background); border: 1px solid var(--color-light-grey); color: var(--color-text); text-decoration: none; font-size: 14px; font-weight: 600; cursor: pointer; border-radius: 2px;">Clear Filters</a>
-            </section>
+            </div>
+        </section>
 
-            <!-- Users Table -->
-            <section class="section-card">
-                <div class="section-header">
-                    <h2>All Users</h2>
-                </div>
-                <div class="table-wrapper">
-                    <table id="usersTable" class="data-table">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Full Name</th>
-                                <th>Email</th>
-                                <th>Phone</th>
-                                <th>Role</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <c:choose>
-                                <c:when test="${empty users}">
+        <section class="section-card">
+            <div class="section-header">
+                <h2>All Users</h2>
+            </div>
+            <div class="table-wrapper">
+                <table id="usersTable" class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Full Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <c:choose>
+                            <c:when test="${empty users}">
+                                <tr>
+                                    <td colspan="7">
+                                        <div class="empty-state" style="margin:12px;">
+                                            <i class="fas fa-inbox"></i>
+                                            <p>No users found.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </c:when>
+                            <c:otherwise>
+                                <c:forEach items="${users}" var="user">
                                     <tr>
-                                        <td colspan="7" style="text-align: center; padding: 40px; color: var(--color-text-light);"><i class="fas fa-inbox fa-2x" style="display: block; margin-bottom: 10px;"></i>No users found</td>
-                                    </tr>
-                                </c:when>
-                                <c:otherwise>
-                                    <c:forEach items="${users}" var="user">
-                                        <tr>
-                                            <td>${user.userId}</td>
-                                            <td><strong>${user.fullName}</strong></td>
-                                            <td>${user.email}</td>
-                                            <td>${user.phone}</td>
-                                            <td><span class="status-badge status-${user.role eq 'Student' ? 'success' : user.role eq 'Instructor' ? 'warning' : 'secondary'}">${user.role}</span></td>
-                                            <td><span class="status-badge status-${user.status eq 'Active' or user.status eq 'active' ? 'success' : 'danger'}">${user.status}</span></td>
-                                            <td style="font-size: 13px;">
-                                                <a href="${pageContext.request.contextPath}/admin/users?action=edit&userId=${user.userId}" class="link"><i class="fas fa-edit"></i> Edit</a> |
-                                                <a href="${pageContext.request.contextPath}/admin/users?action=toggle-status&userId=${user.userId}" class="link" onclick="return confirm('Toggle status for ${user.fullName}?');"><i class="fas fa-exchange-alt"></i> Toggle</a>
+                                        <td>${user.userId}</td>
+                                        <td><strong>${user.fullName}</strong></td>
+                                        <td>${user.email}</td>
+                                        <td><c:out value="${not empty user.phone ? user.phone : '-'}"/></td>
+                                        <td><span class="status-badge status-${user.role eq 'Student' ? 'success' : user.role eq 'Instructor' ? 'warning' : 'secondary'}">${user.role}</span></td>
+                                        <td><span class="status-badge status-${user.status eq 'Active' or user.status eq 'active' ? 'success' : 'danger'}">${user.status}</span></td>
+                                        <td>
+                                            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                                                <a href="${pageContext.request.contextPath}/admin/users?action=edit&userId=${user.userId}" class="admin-btn secondary">Edit</a>
+                                                <a href="${pageContext.request.contextPath}/admin/users?action=toggle-status&userId=${user.userId}" class="admin-btn secondary" onclick="return confirm('Toggle status for ${user.fullName}?');">Toggle</a>
                                                 <c:if test="${user.userId != sessionScope.user.userId}">
-                                                    | <a href="${pageContext.request.contextPath}/admin/users?action=delete&userId=${user.userId}" class="link" style="color: var(--color-danger);" onclick="return confirm('Are you sure you want to delete ${user.fullName}?');"><i class="fas fa-trash"></i> Delete</a>
+                                                    <a href="${pageContext.request.contextPath}/admin/users?action=delete&userId=${user.userId}" class="admin-btn secondary" style="border-color:#a55058; color:#ffc2c6;" onclick="return confirm('Are you sure you want to delete ${user.fullName}?');">Delete</a>
                                                 </c:if>
-                                            </td>
-                                        </tr>
-                                    </c:forEach>
-                                </c:otherwise>
-                            </c:choose>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-            
-            <!-- DataTables styling and initialization -->
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </c:forEach>
+                            </c:otherwise>
+                        </c:choose>
+                    </tbody>
+                </table>
+            </div>
             <style>
-                .dataTables_wrapper { padding: 15px 0; }
+                .dataTables_wrapper { padding: 14px 16px 16px; color: var(--admin-muted); }
                 .dataTables_length, .dataTables_filter { margin-bottom: 15px; }
-                .dataTables_length label, .dataTables_filter label { display:flex; align-items:center; gap:10px; font-size:14px; color: var(--color-text); font-weight:500; }
-                .dataTables_length select, .dataTables_filter input { padding:8px 12px; border:1px solid var(--color-light-grey); background: var(--color-white); color: var(--color-text); font-size:14px; margin:0 5px; border-radius: 2px; }
-                .dataTables_length select:focus, .dataTables_filter input:focus { outline:none; border-color: var(--color-primary); }
-                .dataTables_info { padding:15px 0; color: var(--color-text-light); font-size:14px; }
+                .dataTables_length label, .dataTables_filter label { display:flex; align-items:center; gap:10px; color: var(--admin-muted); font-weight:500; }
+                .dataTables_length select, .dataTables_filter input { margin:0 5px; }
+                .dataTables_info { padding:15px 0; color: var(--admin-muted); }
                 .dataTables_paginate { padding:15px 0; }
-                .dataTables_paginate .paginate_button { padding:6px 12px; margin:0 2px; border:1px solid var(--color-light-grey); background: var(--color-white); color: var(--color-text); cursor:pointer; font-size:14px; border-radius: 2px; }
-                .dataTables_paginate .paginate_button:hover { background: var(--color-background); border-color: var(--color-primary); color: var(--color-primary); }
-                .dataTables_paginate .paginate_button.current { background: var(--color-primary); border-color: var(--color-primary); color:#fff; font-weight:600; }
+                .dataTables_paginate .paginate_button { padding:6px 12px; margin:0 2px; border:1px solid var(--admin-border); background: rgba(17, 39, 64, 0.6); color: #d8ebff !important; cursor:pointer; font-size:14px; }
+                .dataTables_paginate .paginate_button:hover { border-color: var(--admin-accent); color: #fff !important; }
+                .dataTables_paginate .paginate_button.current { background: linear-gradient(120deg, #19a3d7, #2485ff); border-color:#1e78e0; color:#fff !important; font-weight:600; }
                 .dataTables_paginate .paginate_button.disabled { opacity:0.5; cursor:not-allowed; }
                 .dataTables_length { float:left; } .dataTables_filter { float:right; }
                 .dataTables_info { float:left; clear:both; } .dataTables_paginate { float:right; clear:both; }
@@ -223,7 +253,8 @@
                     }
                 });
             </script>
-        </div>
-    </main>
+        </section>
+    </div>
+</main>
 </body>
 </html>

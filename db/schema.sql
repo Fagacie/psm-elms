@@ -1,4 +1,4 @@
-﻿-- PSM E-Learning schema (MySQL)
+-- PSM E-Learning schema (MySQL)
 -- Aligned to current Java code (DAOs + models)
 
 CREATE DATABASE IF NOT EXISTS `psm_elearning` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS `User` (
 -- Students (1:1 with User)
 CREATE TABLE IF NOT EXISTS `Student` (
   `UserID` INT NOT NULL,
-  `RegNumber` VARCHAR(20) NULL,
+  `RegNumber` VARCHAR(20) NOT NULL,
   `Qualification` VARCHAR(100) NULL,
   `Country` VARCHAR(100) NOT NULL,
   `State` VARCHAR(100) NULL,
@@ -261,3 +261,4 @@ CREATE TABLE IF NOT EXISTS `PasswordResetToken` (
   KEY `idx_token_user` (`UserID`),
   CONSTRAINT `fk_token_user` FOREIGN KEY (`UserID`) REFERENCES `User`(`UserID`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+

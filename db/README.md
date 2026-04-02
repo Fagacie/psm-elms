@@ -26,3 +26,26 @@ mysql -u root -p < "c:\Users\ACER\Desktop\FYP\elearning\PSME\db\schema.sql"
 - Column names match the Java DAO code exactly (e.g., `UserID`, `RegNumber`, `RegistrationDate`).
 - If you already have data, the script won’t drop tables; it only creates missing ones and adds the `RegNumber` unique index.
 - Ensure your app DB config (`db.properties`) points to `psm_elearning`.
+
+## Certificate eligibility test matrix
+
+Use `db/certificate_eligibility_matrix.sql` to validate the certificate gate end-to-end using live state:
+- payment confirmed,
+- all materials viewed,
+- all required assessments passed.
+
+What it gives you:
+- per-enrollment eligibility result (`READY`/`BLOCKED`),
+- missing requirement list (`payment`, `materials`, `assessments`),
+- matrix bucket classification for state combinations,
+- anomaly detection (certificate exists for ineligible enrollment).
+
+How to run:
+
+```sql
+SOURCE db/certificate_eligibility_matrix.sql;
+```
+
+Optional scoping (inside the script):
+- set `@target_enrollment_id` to validate one enrollment,
+- set `@target_user_id` to validate one student.

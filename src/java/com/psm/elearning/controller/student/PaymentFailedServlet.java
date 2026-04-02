@@ -21,6 +21,15 @@ public class PaymentFailedServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
+
+        String role = (String) session.getAttribute("role");
+        if (role == null) {
+            role = (String) session.getAttribute("userRole");
+        }
+        if (!"Student".equals(role)) {
+            response.sendRedirect(request.getContextPath() + "/dashboard");
+            return;
+        }
         
         request.getRequestDispatcher("/WEB-INF/views/student/payment-failed.jsp").forward(request, response);
     }

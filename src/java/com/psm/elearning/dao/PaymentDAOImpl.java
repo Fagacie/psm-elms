@@ -12,9 +12,8 @@ public class PaymentDAOImpl implements PaymentDAO {
     
     @Override
     public Payment createPayment(Payment payment) {
-        // Payment table schema: PaymentID, EnrollmentID, Amount, PaymentDate, PaymentStatus, PaymentMethod, Reference, VerifiedBy
-            String sql = "INSERT INTO Payment (EnrollmentID, Amount, PaymentMethod, PaymentStatus, Reference) " +
-                    "VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO Payment (EnrollmentID, Amount, PaymentMethod, PaymentStatus, Reference, PaymentRef, PaystackReference, AccessCode, AuthorizationUrl, PaystackStatus) " +
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         
         System.out.println("PaymentDAO: Creating payment for enrollment " + payment.getEnrollmentId());
         System.out.println("PaymentDAO: Paystack Reference: " + payment.getPaystackReference());
@@ -24,9 +23,14 @@ public class PaymentDAOImpl implements PaymentDAO {
             
             ps.setInt(1, payment.getEnrollmentId());
             ps.setDouble(2, payment.getAmount());
-                ps.setString(3, payment.getMethod()); // PaymentMethod
-                ps.setString(4, payment.getStatus()); // PaymentStatus
-                ps.setString(5, payment.getPaystackReference()); // Reference
+            ps.setString(3, payment.getMethod());
+            ps.setString(4, payment.getStatus());
+            ps.setString(5, payment.getPaystackReference());
+            ps.setString(6, payment.getPaymentRef());
+            ps.setString(7, payment.getPaystackReference());
+            ps.setString(8, payment.getAccessCode());
+            ps.setString(9, payment.getAuthorizationUrl());
+            ps.setString(10, payment.getPaystackStatus() == null ? "pending" : payment.getPaystackStatus());
             
             int affected = ps.executeUpdate();
             
@@ -49,8 +53,7 @@ public class PaymentDAOImpl implements PaymentDAO {
     
     @Override
     public boolean updatePaymentStatus(Integer paymentId, String status, String method, String paystackStatus) {
-        // Update PaymentStatus and PaymentMethod in Payment table
-            String sql = "UPDATE Payment SET PaymentStatus = ?, PaymentMethod = ? WHERE PaymentID = ?";
+        String sql = "UPDATE Payment SET PaymentStatus = ?, PaymentMethod = ?, PaystackStatus = ?, PaymentDate = CASE WHEN ? = 'Paid' THEN NOW() ELSE PaymentDate END WHERE PaymentID = ?";
         
         System.out.println("PaymentDAO: Updating payment " + paymentId);
         System.out.println("PaymentDAO: Status: " + status + ", Method: " + method + ", Paystack Status: " + paystackStatus);
@@ -60,7 +63,9 @@ public class PaymentDAOImpl implements PaymentDAO {
             
             ps.setString(1, status);
             ps.setString(2, method);
-            ps.setInt(3, paymentId);
+            ps.setString(3, paystackStatus);
+            ps.setString(4, status);
+            ps.setInt(5, paymentId);
             
             int affected = ps.executeUpdate();
             return affected > 0;
@@ -73,7 +78,7 @@ public class PaymentDAOImpl implements PaymentDAO {
     
     @Override
     public Payment getPaymentByEnrollmentId(Integer enrollmentId) {
-        String sql = "SELECT * FROM Payment WHERE EnrollmentID = ? ORDER BY PaymentDate DESC LIMIT 1";
+        String sql = "SELECT * FROM Payment WHERE EnrollmentID = ? ORDER BY PaymentID DESC LIMIT 1";
         
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -148,8 +153,7 @@ public class PaymentDAOImpl implements PaymentDAO {
 
     @Override
     public Payment getPaymentByPaystackReference(String paystackReference) {
-        // Paystack reference is stored in Reference column
-        String sql = "SELECT * FROM Payment WHERE Reference = ?";
+        String sql = "SELECT * FROM Payment WHERE PaystackReference = ? OR Reference = ? OR PaymentRef = ? ORDER BY PaymentID DESC LIMIT 1";
         
         System.out.println("PaymentDAO: Fetching payment by Paystack reference: " + paystackReference);
         
@@ -157,6 +161,8 @@ public class PaymentDAOImpl implements PaymentDAO {
              PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setString(1, paystackReference);
+            ps.setString(2, paystackReference);
+            ps.setString(3, paystackReference);
             
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -181,10 +187,23 @@ public class PaymentDAOImpl implements PaymentDAO {
         // Map DB columns to model fields
         payment.setMethod(rs.getString("PaymentMethod"));
         payment.setStatus(normalizePaymentStatus(rs.getString("PaymentStatus")));
-        // Reference column stores the Paystack reference
-        String ref = rs.getString("Reference");
-        payment.setPaymentRef(ref);
-        payment.setPaystackReference(ref);
+
+        String paystackRef = rs.getString("PaystackReference");
+        String reference = rs.getString("Reference");
+        String paymentRef = rs.getString("PaymentRef");
+
+        if (paystackRef == null || paystackRef.trim().isEmpty()) {
+            paystackRef = (reference != null && !reference.trim().isEmpty()) ? reference : paymentRef;
+        }
+        if (paymentRef == null || paymentRef.trim().isEmpty()) {
+            paymentRef = (reference != null && !reference.trim().isEmpty()) ? reference : paystackRef;
+        }
+
+        payment.setPaystackReference(paystackRef);
+        payment.setPaymentRef(paymentRef);
+        payment.setAccessCode(rs.getString("AccessCode"));
+        payment.setAuthorizationUrl(rs.getString("AuthorizationUrl"));
+        payment.setPaystackStatus(rs.getString("PaystackStatus"));
         
         Timestamp paymentTs = rs.getTimestamp("PaymentDate");
         if (paymentTs != null) {

@@ -6,12 +6,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${mode == 'create' ? 'Create' : 'Edit'} Course - PSM E-Learning</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/landing.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/app.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-shell.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-course-form.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
+<body class="instructor-ui">
     <!-- Top Navigation Bar -->
     <header class="app-header">
         <div class="header-left">
@@ -45,27 +47,15 @@
             </a>
             <a href="${pageContext.request.contextPath}/instructor/courses" class="nav-item active">
                 <i class="fas fa-book"></i>
-                <span>My Courses</span>
+                <span>Courses</span>
             </a>
-            <a href="${pageContext.request.contextPath}/instructor/assignments" class="nav-item">
-                <i class="fas fa-tasks"></i>
-                <span>Assignments</span>
+            <a href="${pageContext.request.contextPath}/instructor/materials" class="nav-item">
+                <i class="fas fa-folder-open"></i>
+                <span>Materials</span>
             </a>
-            <a href="${pageContext.request.contextPath}/instructor/quizzes" class="nav-item">
-                <i class="fas fa-clipboard-question"></i>
-                <span>Quizzes / Exams</span>
-            </a>
-            <a href="${pageContext.request.contextPath}/instructor/submissions" class="nav-item">
-                <i class="fas fa-inbox"></i>
-                <span>Student Submissions</span>
-            </a>
-            <a href="${pageContext.request.contextPath}/instructor/grades" class="nav-item">
-                <i class="fas fa-chart-line"></i>
-                <span>Grades / Evaluation</span>
-            </a>
-            <a href="${pageContext.request.contextPath}/instructor/announcements" class="nav-item">
-                <i class="fas fa-bullhorn"></i>
-                <span>Announcements</span>
+            <a href="${pageContext.request.contextPath}/instructor/assessments" class="nav-item">
+                <i class="fas fa-clipboard-list"></i>
+                <span>Assessments</span>
             </a>
             <a href="${pageContext.request.contextPath}/instructor/certificates" class="nav-item">
                 <i class="fas fa-certificate"></i>
@@ -81,6 +71,41 @@
     <!-- Main Content Area -->
     <main class="app-main">
         <div class="content-wrapper">
+            <section class="ins-page-head">
+                <div>
+                    <p class="ins-page-kicker">Course Editor</p>
+                    <h2>${mode == 'create' ? 'Create a course students will want to open' : 'Refine the course workspace and presentation'}</h2>
+                    <p>${mode == 'create' ? 'Set the title, banner, pricing, level, and teaching context cleanly from one form. This page should feel like a proper publishing studio, not a raw admin form.' : 'Update the metadata, banner, and learning details while keeping the course approval flow clear.'}</p>
+                </div>
+            </section>
+
+            <section class="ins-hero-card">
+                <div class="ins-hero-grid">
+                    <div>
+                        <h3>${mode == 'create' ? 'Publishing checklist' : 'Editing checklist'}</h3>
+                        <p>Use a strong title, a clean banner, the correct level, and accurate pricing. Those four details shape how professional the student-facing catalog feels.</p>
+                    </div>
+                    <div class="ins-hero-metrics">
+                        <div class="ins-metric">
+                            <strong>${mode == 'create' ? 'Draft' : 'Live Edit'}</strong>
+                            <span>Current workflow state</span>
+                        </div>
+                        <div class="ins-metric">
+                            <strong>Banner</strong>
+                            <span>JPG, PNG, WEBP up to 5MB</span>
+                        </div>
+                        <div class="ins-metric">
+                            <strong>Pricing</strong>
+                            <span>Keep catalog display accurate</span>
+                        </div>
+                        <div class="ins-metric">
+                            <strong>${mode == 'edit' && course.status == 'Approved' ? 'Re-Approval' : 'Submit'}</strong>
+                            <span>${mode == 'edit' && course.status == 'Approved' ? 'Changes return course to pending review' : 'Ready for course publishing'}</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <!-- Breadcrumb Navigation -->
             <div class="breadcrumb">
                 <a href="${pageContext.request.contextPath}/instructor/courses">
@@ -103,7 +128,7 @@
                 </div>
                 
                 <div class="form-card">
-                <form method="post" action="${pageContext.request.contextPath}/instructor/courses" class="course-form">
+                <form method="post" action="${pageContext.request.contextPath}/instructor/courses" enctype="multipart/form-data" class="course-form">
                     <input type="hidden" name="action" value="${mode == 'create' ? 'create' : 'update'}">
                     <c:if test="${mode == 'edit'}">
                         <input type="hidden" name="courseId" value="${course.courseId}">
@@ -153,6 +178,17 @@
                         </div>
                     </div>
 
+                    <div class="form-group">
+                        <label for="courseBanner">Course Banner (JPG, PNG, WEBP)</label>
+                        <input type="file" id="courseBanner" name="courseBanner" class="form-input" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">
+                        <small class="text-muted">Recommended size: 1280x720. Max: 5MB.</small>
+                        <c:if test="${mode == 'edit' && not empty course.courseBanner}">
+                            <div style="margin-top:8px;">
+                                <img src="${course.courseBanner}" alt="Current course banner" style="max-width:280px; width:100%; border:1px solid #ddd;">
+                            </div>
+                        </c:if>
+                    </div>
+
                     <!-- Status Warning -->
                     <c:if test="${mode == 'edit' && course.status == 'Approved'}">
                         <div class="alert alert-warning">
@@ -177,3 +213,4 @@
     </main>
 </body>
 </html>
+

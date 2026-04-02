@@ -68,6 +68,9 @@ public class Course {
     @NotBlank(message = "Status is required")
     @Pattern(regexp = "^(Pending|Approved|Archived)$", message = "Status must be Pending, Approved, or Archived")
     private String status;
+    
+    @Size(max = 255, message = "Course banner URL must not exceed 255 characters")
+    private String courseBanner;
 
     // Status constants
     public static final String LEVEL_BEGINNER = "Beginner";
@@ -114,5 +117,8 @@ public class Course {
     
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+
+    public String getCourseBanner() { return courseBanner; }
+    public void setCourseBanner(String courseBanner) { this.courseBanner = courseBanner; }
 }
 

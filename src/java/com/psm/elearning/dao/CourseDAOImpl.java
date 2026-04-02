@@ -28,12 +28,13 @@ public class CourseDAOImpl implements CourseDAO {
         c.setCreatedAt(cAt != null ? cAt.toLocalDateTime() : null);
         c.setUpdatedAt(uAt != null ? uAt.toLocalDateTime() : null);
         c.setStatus(rs.getString("Status"));
+        c.setCourseBanner(rs.getString("CourseBanner"));
         return c;
     }
 
     @Override
     public Course create(Course course) {
-        String sql = "INSERT INTO Course (Title, Description, Category, Duration, CourseFee, Level, InstructorID, Status) VALUES (?,?,?,?,?,?,?,?)";
+        String sql = "INSERT INTO Course (Title, Description, Category, Duration, CourseFee, Level, InstructorID, Status, CourseBanner) VALUES (?,?,?,?,?,?,?,?,?)";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, course.getCourseName());
@@ -44,6 +45,7 @@ public class CourseDAOImpl implements CourseDAO {
             ps.setString(6, course.getLevel());
             if (course.getCreatedBy() != null) ps.setInt(7, course.getCreatedBy()); else ps.setNull(7, Types.INTEGER);
             ps.setString(8, course.getStatus() != null ? course.getStatus() : Course.STATUS_PENDING);
+            ps.setString(9, course.getCourseBanner());
             int affected = ps.executeUpdate();
             if (affected == 0) return null;
             try (ResultSet rs = ps.getGeneratedKeys()) {
@@ -58,7 +60,7 @@ public class CourseDAOImpl implements CourseDAO {
 
     @Override
     public boolean update(Course course) {
-        String sql = "UPDATE Course SET Title=?, Description=?, Category=?, Duration=?, CourseFee=?, Level=?, ApprovedBy=?, Status=? WHERE CourseID=?";
+        String sql = "UPDATE Course SET Title=?, Description=?, Category=?, Duration=?, CourseFee=?, Level=?, ApprovedBy=?, Status=?, CourseBanner=? WHERE CourseID=?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, course.getCourseName());
@@ -69,7 +71,8 @@ public class CourseDAOImpl implements CourseDAO {
             ps.setString(6, course.getLevel());
             if (course.getApprovedBy() != null) ps.setInt(7, course.getApprovedBy()); else ps.setNull(7, Types.INTEGER);
             ps.setString(8, course.getStatus());
-            ps.setInt(9, course.getCourseId());
+            ps.setString(9, course.getCourseBanner());
+            ps.setInt(10, course.getCourseId());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             System.err.println("Course update failed: " + e.getMessage());

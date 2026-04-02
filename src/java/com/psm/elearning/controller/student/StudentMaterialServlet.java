@@ -30,6 +30,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.Comparator;
 import java.util.stream.Collectors;
 
@@ -54,13 +55,8 @@ public class StudentMaterialServlet extends HttpServlet {
         Integer userId = (Integer) session.getAttribute("userId");
         String action = request.getParameter("action");
         if ("view".equalsIgnoreCase(action) || "download".equalsIgnoreCase(action)) {
-            if ("view".equalsIgnoreCase(action)) {
-                Integer materialId = parseInt(request.getParameter("id"));
-                if (materialId != null) {
-                    progressDAO.markViewed(userId, materialId);
-                }
-            }
-            serveMaterialFile(request, response, userId, "download".equalsIgnoreCase(action));
+            boolean markViewed = "view".equalsIgnoreCase(action);
+            serveMaterialFile(request, response, userId, "download".equalsIgnoreCase(action), markViewed);
             return;
         }
 
@@ -121,7 +117,9 @@ public class StudentMaterialServlet extends HttpServlet {
 
         Map<Integer, List<Material>> materialsByCourse = new LinkedHashMap<>();
         Map<Integer, Course> courseById = new LinkedHashMap<>();
+        Map<Integer, Set<Integer>> viewedMaterialIdsByCourse = new LinkedHashMap<>();
         int totalMaterials = 0;
+        int totalViewedMaterials = 0;
 
         for (Enrollment enrollment : displayEnrollments) {
             if (enrollment.getCourseId() == null) continue;
@@ -132,6 +130,15 @@ public class StudentMaterialServlet extends HttpServlet {
             materials = sortMaterials(materials, sort);
             materialsByCourse.put(courseId, materials);
             totalMaterials += materials.size();
+            Set<Integer> viewedIds = progressDAO.findViewedMaterialIdsByCourse(userId, courseId);
+            viewedMaterialIdsByCourse.put(courseId, viewedIds);
+            int viewedInFilteredSet = 0;
+            for (Material material : materials) {
+                if (viewedIds.contains(material.getMaterialId())) {
+                    viewedInFilteredSet++;
+                }
+            }
+            totalViewedMaterials += viewedInFilteredSet;
 
             Course course = courseDAO.findById(courseId);
             if (course != null) {
@@ -145,11 +152,17 @@ public class StudentMaterialServlet extends HttpServlet {
         request.setAttribute("courseById", courseById);
         request.setAttribute("visibleCourseCount", displayEnrollments.size());
         request.setAttribute("totalMaterials", totalMaterials);
+        request.setAttribute("totalViewedMaterials", totalViewedMaterials);
+        request.setAttribute("viewedMaterialIdsByCourse", viewedMaterialIdsByCourse);
 
         request.getRequestDispatcher("/WEB-INF/views/student/materials.jsp").forward(request, response);
     }
 
-    private void serveMaterialFile(HttpServletRequest request, HttpServletResponse response, Integer userId, boolean download)
+    private void serveMaterialFile(HttpServletRequest request,
+                                   HttpServletResponse response,
+                                   Integer userId,
+                                   boolean download,
+                                   boolean markViewed)
             throws IOException {
 
         String idStr = normalize(request.getParameter("id"));
@@ -177,8 +190,18 @@ public class StudentMaterialServlet extends HttpServlet {
             return;
         }
 
+        if (markViewed) {
+            progressDAO.markViewed(userId, materialId);
+        }
+
         if ("Link".equalsIgnoreCase(material.getMaterialType())) {
-            response.sendRedirect(material.getFilePath());
+            String link = normalize(material.getFilePath());
+            String lowerLink = link.toLowerCase(Locale.ENGLISH);
+            if (link.isEmpty() || (!lowerLink.startsWith("http://") && !lowerLink.startsWith("https://"))) {
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid material link.");
+                return;
+            }
+            response.sendRedirect(link);
             return;
         }
 
@@ -258,7 +281,7 @@ public class StudentMaterialServlet extends HttpServlet {
             if (enrollment.getCourseId() == null || !enrollment.getCourseId().equals(courseId)) continue;
             if (enrollment.getEnrollmentId() == null) continue;
             Payment payment = paymentDAO.getPaymentByEnrollmentId(enrollment.getEnrollmentId());
-            if (payment != null && "Paid".equalsIgnoreCase(payment.getStatus())) {
+            if (payment != null && isPaymentComplete(payment.getStatus())) {
                 return true;
             }
         }
@@ -307,13 +330,21 @@ public class StudentMaterialServlet extends HttpServlet {
                 .filter(e -> e.getEnrollmentId() != null)
                 .filter(e -> {
                     Payment payment = paymentDAO.getPaymentByEnrollmentId(e.getEnrollmentId());
-                    return payment != null && "Paid".equalsIgnoreCase(payment.getStatus());
+                    return payment != null && isPaymentComplete(payment.getStatus());
                 })
                 .collect(Collectors.toList());
     }
 
     private String normalize(String value) {
         return value == null ? "" : value.trim();
+    }
+
+    private boolean isPaymentComplete(String paymentStatus) {
+        if (paymentStatus == null) return false;
+        String normalized = paymentStatus.trim();
+        return "Paid".equalsIgnoreCase(normalized)
+                || "Completed".equalsIgnoreCase(normalized)
+                || "Success".equalsIgnoreCase(normalized);
     }
 
     private boolean isStudent(HttpSession session) {

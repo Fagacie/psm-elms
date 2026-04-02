@@ -43,6 +43,9 @@ public class PaymentCallbackServlet extends HttpServlet {
         }
         
         String role = (String) session.getAttribute("role");
+        if (role == null) {
+            role = (String) session.getAttribute("userRole");
+        }
         if (!"Student".equals(role)) {
             response.sendRedirect(request.getContextPath() + "/dashboard");
             return;
@@ -113,23 +116,26 @@ public class PaymentCallbackServlet extends HttpServlet {
                     }
                     case "failed": {
                         paymentDAO.updatePaymentStatus(payment.getPaymentId(), "Failed", paymentMethod, paystackStatus);
-                        // Keep enrollment pending
+                        enrollmentDAO.updatePaymentStatus(enrollment.getEnrollmentId(), "Failed", reference);
                         response.sendRedirect(request.getContextPath() + "/student/payment-failed?error=failed");
                         break;
                     }
                     case "abandoned": {
                         paymentDAO.updatePaymentStatus(payment.getPaymentId(), "Abandoned", paymentMethod, paystackStatus);
-                        response.sendRedirect(request.getContextPath() + "/student/payment-incomplete?enrollmentId=" + enrollment.getEnrollmentId());
+                        enrollmentDAO.updatePaymentStatus(enrollment.getEnrollmentId(), "Pending", reference);
+                        response.sendRedirect(request.getContextPath() + "/student/payment-failed?error=abandoned&enrollmentId=" + enrollment.getEnrollmentId());
                         break;
                     }
                     default: {
                         paymentDAO.updatePaymentStatus(payment.getPaymentId(), "Failed", paymentMethod, paystackStatus);
+                        enrollmentDAO.updatePaymentStatus(enrollment.getEnrollmentId(), "Failed", reference);
                         response.sendRedirect(request.getContextPath() + "/student/payment-failed?error=unknownstatus");
                     }
                 }
             } else {
                 System.err.println("PaymentCallbackServlet: Verification returned null (network or API error)");
                 paymentDAO.updatePaymentStatus(payment.getPaymentId(), "Failed", "paystack", "failed");
+                enrollmentDAO.updatePaymentStatus(enrollment.getEnrollmentId(), "Failed", reference);
                 response.sendRedirect(request.getContextPath() + "/student/payment-failed?error=verification");
             }
             

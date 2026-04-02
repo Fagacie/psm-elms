@@ -5,265 +5,231 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Change Password - PSM E-Learning</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/landing.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/app.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/change-password.css">
+    <title>Change Password | PSM E-Learning</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/student-v2.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/change-password-v2.css">
 </head>
-<body>
-    <!-- Top Navigation Bar (Dashboard style) -->
-    <nav class="top-navbar">
-        <div class="top-navbar-inner">
-            <div class="top-navbar-left">
-                <a href="${pageContext.request.contextPath}/dashboard" class="navbar-logo">
-                    <span class="logo-text">PSM</span>
-                    <span class="logo-subtext">E-Learning</span>
-                </a>
-                <h1 class="page-title-nav">Change Password</h1>
-            </div>
-            <div class="top-navbar-right">
-                <button class="notification-btn" aria-label="Notifications">
-                    <i class="fas fa-bell"></i>
-                    <span class="notification-badge">3</span>
-                </button>
-                <div class="user-display">
-                    <div class="user-avatar-small">
-                        <c:choose>
-                            <c:when test="${not empty student.passportPath}">
-                                <c:choose>
-                                    <c:when test="${student.passportPath.startsWith('http')}">
-                                        <img src="${student.passportPath}" alt="Profile">
-                                    </c:when>
-                                    <c:otherwise>
-                                        <img src="${pageContext.request.contextPath}/${student.passportPath}" alt="Profile">
-                                    </c:otherwise>
-                                </c:choose>
-                            </c:when>
-                            <c:otherwise>
-                                <i class="fas fa-user"></i>
-                            </c:otherwise>
-                        </c:choose>
-                    </div>
-                    <span class="user-name-display">${sessionScope.userName}</span>
-                </div>
-                <a href="${pageContext.request.contextPath}/logout" class="logout-btn">
-                    <i class="fas fa-sign-out-alt"></i> Logout
-                </a>
+<body class="sv-page password-v2-page">
+<nav class="sv-topbar">
+    <div class="sv-top-left">
+        <button id="svMenuBtn" class="sv-menu-btn" type="button" aria-label="Open menu">
+            <i class="fas fa-bars"></i>
+        </button>
+        <a href="${pageContext.request.contextPath}/dashboard" class="sv-brand">
+            <span class="sv-brand-main">PSM</span>
+            <span class="sv-brand-sub">E-Learning</span>
+        </a>
+        <div class="sv-page-title">
+            <h1>Change Password</h1>
+            <p>Keep your account secure with a fresh password</p>
+        </div>
+    </div>
+    <div class="sv-top-right">
+        <div class="password-v2-user">
+            <span class="password-v2-user-icon"><i class="fas fa-user-shield"></i></span>
+            <div class="password-v2-user-copy">
+                <strong>${sessionScope.userName}</strong>
+                <span>${sessionScope.userRole}</span>
             </div>
         </div>
-    </nav>
+        <a href="${pageContext.request.contextPath}/logout" class="sv-logout">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Logout</span>
+        </a>
+    </div>
+</nav>
 
-    <!-- Left Sidebar -->
-    <aside class="app-sidebar">
-        <nav class="sidebar-nav">
-            <a href="${pageContext.request.contextPath}/dashboard" class="nav-item">
+<div class="sv-layout">
+    <aside id="svSidebar" class="sv-sidebar">
+        <nav class="sv-nav">
+            <a href="${pageContext.request.contextPath}/dashboard" class="sv-nav-link">
                 <i class="fas fa-home"></i>
                 <span>Dashboard</span>
             </a>
-            <a href="${pageContext.request.contextPath}/student/courses" class="nav-item">
-                <i class="fas fa-book"></i>
-                <span>Browse Courses</span>
-            </a>
-            <a href="${pageContext.request.contextPath}/student/my-enrollments" class="nav-item">
-                <i class="fas fa-graduation-cap"></i>
-                <span>My Courses</span>
-            </a>
-            <a href="${pageContext.request.contextPath}/profile" class="nav-item">
+            <c:choose>
+                <c:when test="${sessionScope.userRole == 'Instructor'}">
+                    <a href="${pageContext.request.contextPath}/instructor/courses" class="sv-nav-link">
+                        <i class="fas fa-book"></i>
+                        <span>Courses</span>
+                    </a>
+                    <a href="${pageContext.request.contextPath}/instructor/materials" class="sv-nav-link">
+                        <i class="fas fa-folder-open"></i>
+                        <span>Materials</span>
+                    </a>
+                    <a href="${pageContext.request.contextPath}/instructor/assessments" class="sv-nav-link">
+                        <i class="fas fa-clipboard-check"></i>
+                        <span>Assessments</span>
+                    </a>
+                    <a href="${pageContext.request.contextPath}/instructor/certificates" class="sv-nav-link">
+                        <i class="fas fa-certificate"></i>
+                        <span>Certificates</span>
+                    </a>
+                </c:when>
+                <c:otherwise>
+                    <a href="${pageContext.request.contextPath}/student/courses" class="sv-nav-link">
+                        <i class="fas fa-book"></i>
+                        <span>Browse Courses</span>
+                    </a>
+                    <a href="${pageContext.request.contextPath}/student/my-enrollments" class="sv-nav-link">
+                        <i class="fas fa-graduation-cap"></i>
+                        <span>My Courses</span>
+                    </a>
+                    <a href="${pageContext.request.contextPath}/student/certificates" class="sv-nav-link">
+                        <i class="fas fa-certificate"></i>
+                        <span>Certificates</span>
+                    </a>
+                </c:otherwise>
+            </c:choose>
+            <a href="${pageContext.request.contextPath}/profile" class="sv-nav-link active">
                 <i class="fas fa-user"></i>
                 <span>Profile</span>
             </a>
         </nav>
     </aside>
 
-    <!-- Main Content -->
-    <main class="app-main">
-        <div class="content-wrapper">
-            <!-- Page Header -->
-            <div class="password-header">
-                <h1>Change Password</h1>
-                <p>Update your account password to keep your account secure.</p>
-            </div>
-
-            <!-- Feedback Messages -->
-            <c:if test="${not empty sessionScope.passwordSuccess}">
-                <div class="alert alert-success">
-                    <i class="fas fa-check-circle"></i>
-                    <span>${sessionScope.passwordSuccess}</span>
-                </div>
-                <c:remove var="passwordSuccess" scope="session"/>
-            </c:if>
-            
-            <c:if test="${not empty sessionScope.passwordError}">
-                <div class="alert alert-error">
-                    <i class="fas fa-exclamation-circle"></i>
-                    <span>${sessionScope.passwordError}</span>
-                </div>
-                <c:remove var="passwordError" scope="session"/>
-            </c:if>
-
-            <!-- Password Change Form -->
-            <div class="password-container">
-                <!-- Left: Form -->
-                <div class="password-form-section">
-                    <div class="form-card">
-                        <h2 class="form-title">Update Your Password</h2>
-                        
-                        <form action="${pageContext.request.contextPath}/change-password" method="post" id="passwordForm">
-                            <!-- Current Password -->
-                            <div class="form-group">
-                                <label for="currentPassword" class="form-label">
-                                    Current Password <span class="required">*</span>
-                                </label>
-                                <div class="password-input-wrapper">
-                                    <input 
-                                        type="password" 
-                                        id="currentPassword" 
-                                        name="currentPassword" 
-                                        class="form-control" 
-                                        placeholder="Enter your current password"
-                                        required>
-                                    <button type="button" class="toggle-password" data-target="currentPassword">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- New Password -->
-                            <div class="form-group">
-                                <label for="newPassword" class="form-label">
-                                    New Password <span class="required">*</span>
-                                </label>
-                                <div class="password-input-wrapper">
-                                    <input 
-                                        type="password" 
-                                        id="newPassword" 
-                                        name="newPassword" 
-                                        class="form-control" 
-                                        placeholder="Enter your new password"
-                                        required>
-                                    <button type="button" class="toggle-password" data-target="newPassword">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Confirm New Password -->
-                            <div class="form-group">
-                                <label for="confirmPassword" class="form-label">
-                                    Confirm New Password <span class="required">*</span>
-                                </label>
-                                <div class="password-input-wrapper">
-                                    <input 
-                                        type="password" 
-                                        id="confirmPassword" 
-                                        name="confirmPassword" 
-                                        class="form-control" 
-                                        placeholder="Re-enter your new password"
-                                        required>
-                                    <button type="button" class="toggle-password" data-target="confirmPassword">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Action Buttons -->
-                            <div class="form-actions">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-lock"></i>
-                                    Update Password
-                                </button>
-                                <a href="${pageContext.request.contextPath}/profile" class="btn btn-secondary">
-                                    <i class="fas fa-times"></i>
-                                    Cancel
-                                </a>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-
-                <!-- Right: Password Guidelines -->
-                <div class="password-guidelines-section">
-                    <div class="guidelines-card">
-                        <h3 class="guidelines-title">
-                            <i class="fas fa-shield-alt"></i>
-                            Password Security Guidelines
-                        </h3>
-                        <p class="guidelines-intro">Your password should include:</p>
-                        
-                        <ul class="guidelines-list">
-                            <li class="guideline-item">
-                                <span class="guideline-icon">
-                                    <i class="fas fa-check"></i>
-                                </span>
-                                <span class="guideline-text">At least 8 characters long</span>
-                            </li>
-                            <li class="guideline-item">
-                                <span class="guideline-icon">
-                                    <i class="fas fa-check"></i>
-                                </span>
-                                <span class="guideline-text">Mix of uppercase and lowercase letters</span>
-                            </li>
-                            <li class="guideline-item">
-                                <span class="guideline-icon">
-                                    <i class="fas fa-check"></i>
-                                </span>
-                                <span class="guideline-text">At least one number (0-9)</span>
-                            </li>
-                            <li class="guideline-item">
-                                <span class="guideline-icon">
-                                    <i class="fas fa-check"></i>
-                                </span>
-                                <span class="guideline-text">At least one special character (!@#$%^&*)</span>
-                            </li>
-                        </ul>
-
-                        <div class="guidelines-note">
-                            <p><strong>Important:</strong></p>
-                            <ul>
-                                <li>Your new password must be different from your current password</li>
-                                <li>Do not share your password with anyone</li>
-                                <li>Use a unique password for your account</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <main class="sv-main">
+        <div class="sv-breadcrumb">
+            <a href="${pageContext.request.contextPath}/dashboard">Dashboard</a>
+            <i class="fas fa-angle-right"></i>
+            <a href="${pageContext.request.contextPath}/profile">Profile</a>
+            <i class="fas fa-angle-right"></i>
+            <span>Change Password</span>
         </div>
+
+        <section class="password-v2-hero" aria-label="Password security overview">
+            <div class="password-v2-hero-copy">
+                <p class="password-v2-kicker">Security Workspace</p>
+                <h2>Protect your account with a stronger password</h2>
+                <p>Update your password from a cleaner account security page with clear guidance and quick access back to your profile workspace.</p>
+                <div class="password-v2-hero-actions">
+                    <a href="${pageContext.request.contextPath}/profile" class="sv-btn primary">Back to Profile</a>
+                    <a href="${pageContext.request.contextPath}/dashboard" class="sv-btn">Dashboard</a>
+                </div>
+            </div>
+            <div class="password-v2-hero-scene" id="passwordHeroScene" aria-hidden="true">
+                <span class="password-v2-orb password-v2-orb-a" data-depth="20"></span>
+                <span class="password-v2-orb password-v2-orb-b" data-depth="26"></span>
+                <span class="password-v2-shape password-v2-shape-a" data-depth="16"></span>
+                <span class="password-v2-shape password-v2-shape-b" data-depth="12"></span>
+                <div class="password-v2-scene-panel password-v2-scene-panel-a">
+                    <span>Security</span>
+                    <strong>Active</strong>
+                </div>
+                <div class="password-v2-scene-panel password-v2-scene-panel-b">
+                    <span>Reset Flow</span>
+                    <strong>Ready</strong>
+                </div>
+            </div>
+        </section>
+
+        <c:if test="${not empty success || not empty sessionScope.passwordSuccess}">
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle"></i>
+                <span><c:out value="${not empty success ? success : sessionScope.passwordSuccess}"/></span>
+            </div>
+            <c:remove var="passwordSuccess" scope="session"/>
+        </c:if>
+
+        <c:if test="${not empty error || not empty sessionScope.passwordError}">
+            <div class="alert alert-error">
+                <i class="fas fa-exclamation-circle"></i>
+                <span><c:out value="${not empty error ? error : sessionScope.passwordError}"/></span>
+            </div>
+            <c:remove var="passwordError" scope="session"/>
+        </c:if>
+
+        <section class="password-v2-grid">
+            <article class="sv-card password-v2-card password-v2-tilt">
+                <div class="sv-card-head">
+                    <h2>Update Your Password</h2>
+                </div>
+                <div class="sv-card-body">
+                    <form action="${pageContext.request.contextPath}/change-password" method="post" id="passwordForm" class="password-v2-form-grid">
+                        <div class="password-v2-field">
+                            <label for="currentPassword">Current Password</label>
+                            <div class="password-v2-input-wrap">
+                                <input type="password" id="currentPassword" name="currentPassword" placeholder="Enter your current password" required>
+                                <button type="button" class="password-v2-toggle" data-target="currentPassword" aria-label="Toggle current password visibility">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="password-v2-field">
+                            <label for="newPassword">New Password</label>
+                            <div class="password-v2-input-wrap">
+                                <input type="password" id="newPassword" name="newPassword" placeholder="Create your new password" required>
+                                <button type="button" class="password-v2-toggle" data-target="newPassword" aria-label="Toggle new password visibility">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="password-v2-field">
+                            <label for="confirmPassword">Confirm New Password</label>
+                            <div class="password-v2-input-wrap">
+                                <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Re-enter your new password" required>
+                                <button type="button" class="password-v2-toggle" data-target="confirmPassword" aria-label="Toggle confirm password visibility">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="password-v2-actions">
+                            <button type="submit" class="sv-btn primary password-v2-btn">
+                                <i class="fas fa-lock"></i>
+                                <span>Update Password</span>
+                            </button>
+                            <a href="${pageContext.request.contextPath}/profile" class="sv-btn password-v2-btn">
+                                <i class="fas fa-arrow-left"></i>
+                                <span>Back to Profile</span>
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </article>
+
+            <aside class="sv-card password-v2-card password-v2-tilt">
+                <div class="sv-card-head">
+                    <h2>Password Guide</h2>
+                </div>
+                <div class="sv-card-body">
+                    <ul class="password-v2-grid-list">
+                        <li>
+                            <strong>Use at least 8 characters</strong>
+                            Longer passwords are easier to defend and harder to guess.
+                        </li>
+                        <li>
+                            <strong>Mix character types</strong>
+                            Use uppercase, lowercase, numbers, and symbols together.
+                        </li>
+                        <li>
+                            <strong>Make it unique</strong>
+                            Avoid reusing the same password from other platforms.
+                        </li>
+                        <li>
+                            <strong>Keep it private</strong>
+                            Never share your account password with anyone else.
+                        </li>
+                    </ul>
+
+                    <div class="password-v2-note">
+                        <strong>Important</strong>
+                        Your new password should be different from the current one and easy for you to remember securely.
+                    </div>
+                </div>
+            </aside>
+        </section>
     </main>
+</div>
 
-    <script>
-        // Toggle password visibility
-        document.querySelectorAll('.toggle-password').forEach(button => {
-            button.addEventListener('click', function(e) {
-                e.preventDefault();
-                const targetId = this.dataset.target;
-                const input = document.getElementById(targetId);
-                const icon = this.querySelector('i');
-                
-                if (input.type === 'password') {
-                    input.type = 'text';
-                    icon.classList.remove('fa-eye');
-                    icon.classList.add('fa-eye-slash');
-                } else {
-                    input.type = 'password';
-                    icon.classList.remove('fa-eye-slash');
-                    icon.classList.add('fa-eye');
-                }
-            });
-        });
+<div id="svOverlay" class="sv-overlay"></div>
 
-        // Form validation
-        document.getElementById('passwordForm').addEventListener('submit', function(e) {
-            const newPassword = document.getElementById('newPassword').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-            
-            if (newPassword !== confirmPassword) {
-                e.preventDefault();
-                alert('New password and confirmation password do not match. Please try again.');
-                return false;
-            }
-        });
-    </script>
+<script src="${pageContext.request.contextPath}/js/student-v2.js"></script>
+<script src="${pageContext.request.contextPath}/js/change-password-v2.js"></script>
 </body>
 </html>

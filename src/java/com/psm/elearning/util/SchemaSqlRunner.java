@@ -17,24 +17,26 @@ import javax.servlet.ServletContext;
  */
 public class SchemaSqlRunner {
 
-    public static void runFromClasspath(String resourcePath) {
+    public static boolean runFromClasspath(String resourcePath) {
         try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream(resourcePath)) {
             if (in == null) {
-                System.err.println("SchemaSqlRunner: Resource not found: " + resourcePath);
-                return;
+                return false;
             }
             String sql = readAll(in);
             List<String> statements = splitStatements(sql);
             applyStatements(statements);
+            System.out.println("SchemaSqlRunner applied schema from classpath: " + resourcePath);
+            return true;
         } catch (Exception e) {
             System.err.println("SchemaSqlRunner failed: " + e.getMessage());
+            return false;
         }
     }
 
     /**
      * Attempts to load and run SQL from servlet context paths (e.g., /WEB-INF/db/schema.sql).
      */
-    public static void runFromServletContext(ServletContext ctx, String... candidatePaths) {
+    public static boolean runFromServletContext(ServletContext ctx, String... candidatePaths) {
         for (String path : candidatePaths) {
             try (InputStream in = ctx.getResourceAsStream(path)) {
                 if (in == null) continue;
@@ -42,12 +44,12 @@ public class SchemaSqlRunner {
                 List<String> statements = splitStatements(sql);
                 applyStatements(statements);
                 System.out.println("SchemaSqlRunner applied schema from: " + path);
-                return; // stop at first successful path
+                return true; // stop at first successful path
             } catch (Exception e) {
                 System.err.println("SchemaSqlRunner path failed (" + path + "): " + e.getMessage());
             }
         }
-        System.err.println("SchemaSqlRunner: No schema.sql found in servlet context paths.");
+        return false;
     }
 
     private static String readAll(InputStream in) throws Exception {

@@ -12,6 +12,7 @@ cloudinary.folder_passports=psm/passports
 cloudinary.folder_materials=psm/materials
 cloudinary.folder_certificates=psm/certificates
 cloudinary.folder_assessment_answers=psm/assessment-answers
+cloudinary.folder_course_banners=psm/course-banners
 
 # Transformations
 cloudinary.passport_width=400
