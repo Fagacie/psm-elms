@@ -1,18 +1,28 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <header class="app-header">
     <div class="header-left">
-        <div class="logo-section">
-            <i class="fas fa-university"></i>
-            <span>PSM E-Learning</span>
+        <a href="${pageContext.request.contextPath}/dashboard" class="dashboard-brand" aria-label="PSM E-Learning home">
+            <span class="dashboard-brand-main">PSM</span>
+            <span class="dashboard-brand-sub">E-Learning</span>
+        </a>
+        <div class="dashboard-title-copy">
+            <c:choose>
+                <c:when test="${not empty param.pageTitle}">
+                    <h1 class="page-title"><c:out value="${param.pageTitle}"/></h1>
+                </c:when>
+                <c:otherwise>
+                    <h1 class="page-title">Admin</h1>
+                </c:otherwise>
+            </c:choose>
+            <c:choose>
+                <c:when test="${not empty param.pageSubtitle}">
+                    <p><c:out value="${param.pageSubtitle}"/></p>
+                </c:when>
+                <c:otherwise>
+                    <p>Manage platform operations and governance</p>
+                </c:otherwise>
+            </c:choose>
         </div>
-        <c:choose>
-            <c:when test="${not empty param.pageTitle}">
-                <h1 class="page-title"><c:out value="${param.pageTitle}"/></h1>
-            </c:when>
-            <c:otherwise>
-                <h1 class="page-title">Admin</h1>
-            </c:otherwise>
-        </c:choose>
     </div>
     <div class="header-right">
         <div class="user-menu">

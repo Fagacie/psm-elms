@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimal E-Learning Frontend</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #FFFFFF;
+            --text: #0F172A;
+            --text-muted: #64748B;
+            --border: #F1F5F9;
+            --accent: #111111;
+            --radius-card: 12px;
+            --radius-button: 8px;
+            --space-1: 8px;
+            --space-2: 16px;
+            --space-3: 24px;
+            --space-4: 32px;
+            --shadow-soft: 0 8px 24px rgba(15, 23, 42, 0.04);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100%;
+            background: var(--bg);
+            color: var(--text);
+            font-family: "Inter", sans-serif;
+        }
+
+        body {
+            line-height: 1.5;
+        }
+
+        button,
+        input {
+            font: inherit;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .app {
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: 248px 1fr;
+            background: var(--bg);
+        }
+
+        .sidebar {
+            border-right: 1px solid var(--border);
+            padding: var(--space-4) var(--space-3);
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-4);
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            background: var(--bg);
+        }
+
+        .brand {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .brand-title {
+            font-size: 1.125rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        .brand-subtitle {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        .nav {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-1);
+        }
+
+        .nav-link {
+            border: 1px solid transparent;
+            border-radius: 10px;
+            padding: 12px 14px;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+        }
+
+        .nav-link:hover {
+            border-color: var(--border);
+            color: var(--text);
+            background: #FCFCFC;
+        }
+
+        .nav-link.active {
+            border-color: var(--border);
+            color: var(--text);
+            background: #FCFCFC;
+            font-weight: 600;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-card);
+            padding: var(--space-2);
+        }
+
+        .sidebar-footer-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin: 0 0 4px;
+        }
+
+        .sidebar-footer-copy {
+            margin: 0;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        .content {
+            padding: var(--space-4);
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-4);
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: var(--space-3);
+        }
+
+        .page-title {
+            margin: 0;
+            font-size: clamp(1.75rem, 2.5vw, 2.4rem);
+            font-weight: 800;
+            letter-spacing: -0.03em;
+        }
+
+        .page-copy {
+            margin: 8px 0 0;
+            max-width: 640px;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 42px;
+            padding: 0 16px;
+            border-radius: var(--radius-button);
+            border: 1px solid var(--border);
+            background: var(--bg);
+            color: var(--text);
+            font-size: 0.92rem;
+            font-weight: 600;
+            transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+            cursor: pointer;
+        }
+
+        .button:hover {
+            transform: translateY(-1px);
+            opacity: 0.92;
+        }
+
+        .button-primary {
+            border-color: var(--accent);
+            background: var(--accent);
+            color: #FFFFFF;
+        }
+
+        .button-secondary {
+            background: #FFFFFF;
+            color: var(--text);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: var(--space-3);
+        }
+
+        .stat-card,
+        .course-card {
+            border: 1px solid var(--border);
+            background: #FFFFFF;
+            border-radius: var(--radius-card);
+            padding: 24px;
+            box-shadow: var(--shadow-soft);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .stat-card:hover,
+        .course-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 36px rgba(15, 23, 42, 0.06);
+        }
+
+        .stat-label {
+            margin: 0 0 8px;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        .stat-value {
+            margin: 0;
+            font-size: 1.6rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+        }
+
+        .section-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: var(--space-2);
+        }
+
+        .section-title {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .section-copy {
+            margin: 6px 0 0;
+            color: var(--text-muted);
+            font-size: 0.92rem;
+        }
+
+        .courses-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: var(--space-3);
+        }
+
+        .course-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: var(--space-2);
+            margin-bottom: 18px;
+        }
+
+        .course-title {
+            margin: 0;
+            font-size: 1.02rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .course-instructor {
+            margin: 6px 0 0;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .course-tag {
+            display: inline-flex;
+            align-items: center;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            padding: 6px 10px;
+            color: var(--text-muted);
+            font-size: 0.78rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .progress-block {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .progress-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: var(--space-2);
+        }
+
+        .progress-label {
+            color: var(--text-muted);
+            font-size: 0.88rem;
+        }
+
+        .progress-value {
+            font-size: 0.88rem;
+            font-weight: 600;
+        }
+
+        .progress-track {
+            width: 100%;
+            height: 8px;
+            border-radius: 999px;
+            background: #F8FAFC;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0;
+            background: #111111;
+            transition: width 0.4s ease;
+        }
+
+        .course-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: var(--space-2);
+            flex-wrap: wrap;
+        }
+
+        .course-meta {
+            color: var(--text-muted);
+            font-size: 0.88rem;
+        }
+
+        @media (max-width: 1100px) {
+            .stats,
+            .courses-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 840px) {
+            .app {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: static;
+                height: auto;
+                border-right: 0;
+                border-bottom: 1px solid var(--border);
+            }
+
+            .content {
+                padding: 24px;
+            }
+
+            .topbar,
+            .section-head {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+
+        @media (max-width: 560px) {
+            .content {
+                padding: 20px;
+                gap: 24px;
+            }
+
+            .actions,
+            .course-actions {
+                width: 100%;
+            }
+
+            .button {
+                width: 100%;
+            }
+
+            .course-top {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-title">PSM E-Learning</div>
+                <div class="brand-subtitle">Minimal student workspace</div>
+            </div>
+
+            <nav class="nav" id="nav">
+                <a class="nav-link active" href="#" data-page="Dashboard">Dashboard</a>
+                <a class="nav-link" href="#" data-page="My Courses">My Courses</a>
+                <a class="nav-link" href="#" data-page="Progress">Progress</a>
+                <a class="nav-link" href="#" data-page="Settings">Settings</a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <p class="sidebar-footer-title">Focused learning</p>
+                <p class="sidebar-footer-copy">A minimal layout built around clarity, whitespace, and steady progress.</p>
+            </div>
+        </aside>
+
+        <main class="content">
+            <header class="topbar">
+                <div>
+                    <h1 class="page-title" id="pageTitle">My Courses</h1>
+                    <p class="page-copy">
+                        Continue your active courses, monitor progress, and return to the right lesson with minimal distraction.
+                    </p>
+                </div>
+
+                <div class="actions">
+                    <button class="button button-secondary" type="button">View Progress</button>
+                    <button class="button button-primary" type="button">Continue Learning</button>
+                </div>
+            </header>
+
+            <section class="stats">
+                <article class="stat-card">
+                    <p class="stat-label">Active Courses</p>
+                    <h2 class="stat-value">04</h2>
+                </article>
+                <article class="stat-card">
+                    <p class="stat-label">Average Progress</p>
+                    <h2 class="stat-value">68%</h2>
+                </article>
+                <article class="stat-card">
+                    <p class="stat-label">Certificates Earned</p>
+                    <h2 class="stat-value">02</h2>
+                </article>
+            </section>
+
+            <section>
+                <div class="section-head">
+                    <div>
+                        <h2 class="section-title">Course Library</h2>
+                        <p class="section-copy">A clean course grid with reusable card patterns and subtle interactions.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="courses-grid">
+                <article class="course-card">
+                    <div class="course-top">
+                        <div>
+                            <h3 class="course-title">Project Management Essentials</h3>
+                            <p class="course-instructor">Instructor: Sarah Johnson</p>
+                        </div>
+                        <span class="course-tag">In Progress</span>
+                    </div>
+
+                    <div class="progress-block">
+                        <div class="progress-top">
+                            <span class="progress-label">Progress</span>
+                            <span class="progress-value">72%</span>
+                        </div>
+                        <div class="progress-track">
+                            <div class="progress-bar" data-progress="72"></div>
+                        </div>
+                    </div>
+
+                    <div class="course-actions">
+                        <span class="course-meta">12 modules</span>
+                        <button class="button button-primary" type="button">Continue</button>
+                    </div>
+                </article>
+
+                <article class="course-card">
+                    <div class="course-top">
+                        <div>
+                            <h3 class="course-title">Full-Stack Web Development</h3>
+                            <p class="course-instructor">Instructor: Daniel Morris</p>
+                        </div>
+                        <span class="course-tag">In Progress</span>
+                    </div>
+
+                    <div class="progress-block">
+                        <div class="progress-top">
+                            <span class="progress-label">Progress</span>
+                            <span class="progress-value">54%</span>
+                        </div>
+                        <div class="progress-track">
+                            <div class="progress-bar" data-progress="54"></div>
+                        </div>
+                    </div>
+
+                    <div class="course-actions">
+                        <span class="course-meta">18 modules</span>
+                        <button class="button button-primary" type="button">Continue</button>
+                    </div>
+                </article>
+
+                <article class="course-card">
+                    <div class="course-top">
+                        <div>
+                            <h3 class="course-title">Data Analysis Foundations</h3>
+                            <p class="course-instructor">Instructor: Grace Kim</p>
+                        </div>
+                        <span class="course-tag">Reviewing</span>
+                    </div>
+
+                    <div class="progress-block">
+                        <div class="progress-top">
+                            <span class="progress-label">Progress</span>
+                            <span class="progress-value">89%</span>
+                        </div>
+                        <div class="progress-track">
+                            <div class="progress-bar" data-progress="89"></div>
+                        </div>
+                    </div>
+
+                    <div class="course-actions">
+                        <span class="course-meta">10 modules</span>
+                        <button class="button button-primary" type="button">Continue</button>
+                    </div>
+                </article>
+
+                <article class="course-card">
+                    <div class="course-top">
+                        <div>
+                            <h3 class="course-title">Digital Marketing Strategy</h3>
+                            <p class="course-instructor">Instructor: Naomi Carter</p>
+                        </div>
+                        <span class="course-tag">New</span>
+                    </div>
+
+                    <div class="progress-block">
+                        <div class="progress-top">
+                            <span class="progress-label">Progress</span>
+                            <span class="progress-value">24%</span>
+                        </div>
+                        <div class="progress-track">
+                            <div class="progress-bar" data-progress="24"></div>
+                        </div>
+                    </div>
+
+                    <div class="course-actions">
+                        <span class="course-meta">14 modules</span>
+                        <button class="button button-primary" type="button">Continue</button>
+                    </div>
+                </article>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        (function () {
+            var navLinks = document.querySelectorAll(".nav-link");
+            var pageTitle = document.getElementById("pageTitle");
+            var bars = document.querySelectorAll(".progress-bar");
+
+            navLinks.forEach(function (link) {
+                link.addEventListener("click", function (event) {
+                    event.preventDefault();
+                    navLinks.forEach(function (item) {
+                        item.classList.remove("active");
+                    });
+                    link.classList.add("active");
+                    pageTitle.textContent = link.getAttribute("data-page");
+                });
+            });
+
+            window.addEventListener("load", function () {
+                bars.forEach(function (bar) {
+                    var value = bar.getAttribute("data-progress") || "0";
+                    bar.style.width = value + "%";
+                });
+            });
+        })();
+    </script>
+</body>
+</html>

@@ -8,7 +8,7 @@
     <title>Course Materials - Instructor</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-shell.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-materials.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -16,11 +16,14 @@
 <body class="instructor-ui">
 <header class="app-header">
     <div class="header-left">
-        <div class="logo-section">
-            <i class="fas fa-graduation-cap"></i>
-            <span>PSM E-Learning</span>
+        <a href="${pageContext.request.contextPath}/dashboard" class="dashboard-brand" aria-label="PSM E-Learning home">
+            <span class="dashboard-brand-main">PSM</span>
+            <span class="dashboard-brand-sub">E-Learning</span>
+        </a>
+        <div class="dashboard-title-copy">
+            <h1 class="page-title">Course Materials</h1>
+            <p>Organize learning assets by course and content type</p>
         </div>
-        <h1 class="page-title">Course Materials</h1>
     </div>
     <div class="header-right">
         <div class="user-menu">
@@ -61,6 +64,14 @@
 
 <main class="app-main">
     <div class="content-wrapper">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="${pageContext.request.contextPath}/instructor/dashboard">Dashboard</a>
+            <span>&gt;</span>
+            <a href="${pageContext.request.contextPath}/instructor/courses">Courses</a>
+            <span>&gt;</span>
+            <span>Materials</span>
+        </nav>
+
         <section class="ins-page-head">
             <div>
                 <p class="ins-page-kicker">Learning Content</p>
@@ -176,7 +187,12 @@
             </div>
 
             <div class="section-card">
-                <h3 class="section-block-title">Materials Library</h3>
+                <div class="section-header">
+                    <div>
+                        <h3 class="section-title">Materials Library</h3>
+                        <p class="section-caption">Review published materials, edit details, or archive outdated resources.</p>
+                    </div>
+                </div>
                 <c:choose>
                     <c:when test="${empty materials}">
                         <div class="empty-state-box">
@@ -185,28 +201,47 @@
                         </div>
                     </c:when>
                     <c:otherwise>
-                        <div class="materials-grid">
-                            <c:forEach var="m" items="${materials}">
-                                <div class="material-card">
-                                    <div class="material-header">
-                                        <h4 class="material-title">${m.title}</h4>
-                                        <span class="type-badge type-${m.materialType}">${m.materialType}</span>
-                                    </div>
-                                    <c:if test="${not empty m.description}">
-                                        <p class="material-description">${m.description}</p>
-                                    </c:if>
-                                    <div class="material-meta">
-                                        <div class="meta-item">
-                                            <i class="fas fa-hashtag"></i>
-                                            <span>Order: <c:out value="${m.displayOrder}" default="N/A"/></span>
-                                        </div>
-                                        <div class="meta-item">
-                                            <i class="fas fa-code-branch"></i>
-                                            <span>${m.versionNumber}</span>
-                                        </div>
-                                        <div class="meta-item">
-                                            <i class="fas fa-calendar"></i>
-                                            <span>
+                        <div class="materials-table-wrap">
+                            <table class="materials-table">
+                                <thead>
+                                <tr>
+                                    <th>Material</th>
+                                    <th>Type</th>
+                                    <th>Order</th>
+                                    <th>Version</th>
+                                    <th>Uploaded</th>
+                                    <th>Actions</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <c:forEach var="m" items="${materials}">
+                                    <tr>
+                                        <td>
+                                            <div class="material-cell">
+                                                <div class="material-cell-title"><c:out value="${m.title}"/></div>
+                                                <div class="material-cell-subtitle">
+                                                    <c:choose>
+                                                        <c:when test="${not empty m.description && m.description.length() > 90}">
+                                                            <c:out value="${m.description.substring(0, 90)}"/>...
+                                                        </c:when>
+                                                        <c:when test="${not empty m.description}">
+                                                            <c:out value="${m.description}"/>
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            <c:choose>
+                                                                <c:when test="${m.materialType == 'Link'}">External link resource</c:when>
+                                                                <c:otherwise>Course asset</c:otherwise>
+                                                            </c:choose>
+                                                        </c:otherwise>
+                                                    </c:choose>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td><span class="type-badge type-${m.materialType}">${m.materialType}</span></td>
+                                        <td><span class="table-pill"><c:out value="${m.displayOrder}" default="N/A"/></span></td>
+                                        <td><span class="table-pill table-pill-muted"><c:out value="${m.versionNumber}" default="N/A"/></span></td>
+                                        <td>
+                                            <span class="table-muted">
                                                 <c:choose>
                                                     <c:when test="${not empty m.uploadDate}">
                                                         ${m.uploadDate.toLocalDate()}
@@ -214,70 +249,48 @@
                                                     <c:otherwise>-</c:otherwise>
                                                 </c:choose>
                                             </span>
-                                        </div>
-                                    </div>
-                                    <div class="material-actions">
-                                        <a href="${m.filePath}" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm">
-                                            <i class="fas fa-eye"></i> View
-                                        </a>
-                                        <button class="btn btn-secondary btn-sm" onclick="toggleEdit(${m.materialId})">
-                                            <i class="fas fa-pen"></i> Edit
-                                        </button>
-                                        <form method="get" action="${pageContext.request.contextPath}/instructor/materials" style="display:inline;">
-                                            <input type="hidden" name="action" value="delete">
-                                            <input type="hidden" name="id" value="${m.materialId}">
-                                            <input type="hidden" name="courseId" value="${selectedCourse.courseId}">
-                                            <button class="btn btn-danger btn-sm" type="submit" onclick="return confirm('Archive this material?');">
-                                                <i class="fas fa-archive"></i> Archive
-                                            </button>
-                                        </form>
-                                    </div>
-                                    <div id="edit-form-${m.materialId}" class="edit-dropdown-content" style="display:none; margin-top:12px; border-top: 1px solid var(--border-color); padding-top: 12px;">
-                                        <form method="post" action="${pageContext.request.contextPath}/instructor/materials" enctype="multipart/form-data">
-                                            <input type="hidden" name="action" value="update">
-                                            <input type="hidden" name="materialId" value="${m.materialId}">
-                                            <input type="hidden" name="courseId" value="${selectedCourse.courseId}">
-                                            <div class="upload-form-grid">
-                                                <div class="field">
-                                                    <label>Title</label>
-                                                    <input type="text" name="title" value="${m.title}" required>
-                                                </div>
-                                                <div class="field">
-                                                    <label>Type</label>
-                                                    <select name="materialType" required>
-                                                        <option value="PDF" ${m.materialType == 'PDF' ? 'selected' : ''}>PDF</option>
-                                                        <option value="Video" ${m.materialType == 'Video' ? 'selected' : ''}>Video</option>
-                                                        <option value="Slides" ${m.materialType == 'Slides' ? 'selected' : ''}>Slides</option>
-                                                        <option value="Link" ${m.materialType == 'Link' ? 'selected' : ''}>Link</option>
-                                                    </select>
-                                                </div>
-                                                <div class="field">
-                                                    <label>Version</label>
-                                                    <input type="text" name="versionNumber" value="${m.versionNumber}">
-                                                </div>
-                                                <div class="field">
-                                                    <label>Order</label>
-                                                    <input type="number" name="displayOrder" min="1" value="${m.displayOrder}">
-                                                </div>
-                                                <div class="field">
-                                                    <label>External URL</label>
-                                                    <input type="url" name="externalUrl" value="${m.materialType == 'Link' ? m.filePath : ''}" placeholder="For Link type">
-                                                </div>
-                                                <div class="field">
-                                                    <label>Replace File</label>
-                                                    <input type="file" name="materialFile">
-                                                </div>
-                                                <div class="field full">
-                                                    <label>Description</label>
-                                                    <textarea name="description" rows="2">${m.description}</textarea>
-                                                </div>
+                                        </td>
+                                        <td>
+                                            <div class="row-actions">
+                                                <a href="${m.filePath}" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm">
+                                                    <i class="fas fa-eye"></i> View
+                                                </a>
+                                                <button type="button"
+                                                        class="btn btn-secondary btn-sm"
+                                                        onclick="openEditMaterialModal(this)"
+                                                        data-material-id="${m.materialId}"
+                                                        data-title="<c:out value='${m.title}'/>"
+                                                        data-type="<c:out value='${m.materialType}'/>"
+                                                        data-version="<c:out value='${m.versionNumber}'/>"
+                                                        data-order="<c:out value='${m.displayOrder}'/>"
+                                                        data-description="<c:out value='${m.description}'/>"
+                                                        data-external-url="${m.materialType == 'Link' ? m.filePath : ''}">
+                                                    <i class="fas fa-edit"></i> Edit
+                                                </button>
+                                                <details class="more-actions" data-menu="material-actions">
+                                                    <summary class="btn btn-secondary btn-sm" aria-label="Open more actions">
+                                                        <i class="fas fa-ellipsis-h"></i> More
+                                                    </summary>
+                                                    <div class="more-actions-menu" role="menu" aria-label="Material actions menu">
+                                                        <form method="get" action="${pageContext.request.contextPath}/instructor/materials">
+                                                            <input type="hidden" name="action" value="delete">
+                                                            <input type="hidden" name="id" value="${m.materialId}">
+                                                            <input type="hidden" name="courseId" value="${selectedCourse.courseId}">
+                                                            <button type="submit" class="more-action-item is-danger" onclick="return confirm('Archive this material?');">
+                                                                <i class="fas fa-archive"></i> Archive
+                                                            </button>
+                                                        </form>
+                                                        <a href="${m.filePath}" target="_blank" rel="noopener noreferrer" class="more-action-item">
+                                                            <i class="fas fa-up-right-from-square"></i> Open
+                                                        </a>
+                                                    </div>
+                                                </details>
                                             </div>
-                                            <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-save"></i> Save Changes</button>
-                                            <button type="button" class="btn btn-secondary btn-sm" onclick="toggleEdit(${m.materialId})">Cancel</button>
-                                        </form>
-                                    </div>
-                                </div>
-                            </c:forEach>
+                                        </td>
+                                    </tr>
+                                </c:forEach>
+                                </tbody>
+                            </table>
                         </div>
                     </c:otherwise>
                 </c:choose>
@@ -289,26 +302,46 @@
                             <p class="archived-empty">No archived materials.</p>
                         </c:when>
                         <c:otherwise>
-                            <c:forEach var="m" items="${deletedMaterials}">
-                                <div class="archived-item">
-                                    <div class="archived-item-info">
-                                        <div class="archived-item-title">${m.title}</div>
-                                        <div class="archived-item-meta">
-                                            Order: <c:out value="${m.displayOrder}" default="N/A"/> | 
-                                            Type: ${m.materialType} | 
-                                            Version: ${m.versionNumber}
-                                        </div>
-                                    </div>
-                                    <form method="get" action="${pageContext.request.contextPath}/instructor/materials">
-                                        <input type="hidden" name="action" value="restore">
-                                        <input type="hidden" name="id" value="${m.materialId}">
-                                        <input type="hidden" name="courseId" value="${selectedCourse.courseId}">
-                                        <button class="btn btn-secondary btn-sm" type="submit">
-                                            <i class="fas fa-undo"></i> Restore
-                                        </button>
-                                    </form>
-                                </div>
-                            </c:forEach>
+                            <div class="archived-table-wrap">
+                                <table class="archived-table">
+                                    <thead>
+                                    <tr>
+                                        <th>Material</th>
+                                        <th>Type</th>
+                                        <th>Order</th>
+                                        <th>Version</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <c:forEach var="m" items="${deletedMaterials}">
+                                        <tr>
+                                            <td>
+                                                <div class="material-cell">
+                                                    <div class="material-cell-title">${m.title}</div>
+                                                    <div class="material-cell-subtitle">Archived from this course</div>
+                                                </div>
+                                            </td>
+                                            <td><span class="type-badge type-${m.materialType}">${m.materialType}</span></td>
+                                            <td><span class="table-pill"><c:out value="${m.displayOrder}" default="N/A"/></span></td>
+                                            <td><span class="table-pill table-pill-muted"><c:out value="${m.versionNumber}" default="N/A"/></span></td>
+                                            <td>
+                                                <div class="row-actions">
+                                                    <form method="get" action="${pageContext.request.contextPath}/instructor/materials" class="inline-form">
+                                                        <input type="hidden" name="action" value="restore">
+                                                        <input type="hidden" name="id" value="${m.materialId}">
+                                                        <input type="hidden" name="courseId" value="${selectedCourse.courseId}">
+                                                        <button class="btn btn-secondary btn-sm" type="submit">
+                                                            <i class="fas fa-undo"></i> Restore
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </c:forEach>
+                                    </tbody>
+                                </table>
+                            </div>
                         </c:otherwise>
                     </c:choose>
                 </div>
@@ -378,6 +411,66 @@
     </div>
 </div>
 
+<div id="editMaterialModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Edit Material</h3>
+            <button class="modal-close" onclick="closeEditMaterialModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <c:if test="${not empty selectedCourse}">
+                <p class="modal-subtitle">Course: <strong>${selectedCourse.courseName}</strong></p>
+                <form id="editMaterialForm" method="post" action="${pageContext.request.contextPath}/instructor/materials" enctype="multipart/form-data">
+                    <input type="hidden" name="action" value="update">
+                    <input type="hidden" name="materialId" id="editMaterialId">
+                    <input type="hidden" name="courseId" value="${selectedCourse.courseId}">
+                    <div class="upload-form-grid">
+                        <div class="field">
+                            <label>Title *</label>
+                            <input id="editTitle" type="text" name="title" required>
+                        </div>
+                        <div class="field">
+                            <label>Type *</label>
+                            <select id="editType" name="materialType" required>
+                                <option value="PDF">PDF</option>
+                                <option value="Video">Video</option>
+                                <option value="Slides">Slides</option>
+                                <option value="Link">Link</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label>Version</label>
+                            <input id="editVersion" type="text" name="versionNumber">
+                        </div>
+                        <div class="field">
+                            <label>Chapter / Order</label>
+                            <input id="editOrder" type="number" name="displayOrder" min="1">
+                        </div>
+                        <div class="field">
+                            <label>Replace File</label>
+                            <input id="editFile" type="file" name="materialFile">
+                        </div>
+                        <div class="field">
+                            <label>External URL (for Link type)</label>
+                            <input id="editExternalUrl" type="url" name="externalUrl" placeholder="https://example.com/resource">
+                        </div>
+                        <div class="field full">
+                            <label>Description</label>
+                            <textarea id="editDescription" name="description" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" onclick="closeEditMaterialModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Changes</button>
+                    </div>
+                </form>
+            </c:if>
+        </div>
+    </div>
+</div>
+
 <script>
     // Modal functions
     function openUploadModal() {
@@ -392,22 +485,52 @@
         document.body.style.overflow = 'auto';
         document.getElementById('uploadForm').reset();
     }
+
+    function openEditMaterialModal(button) {
+        document.getElementById('editMaterialId').value = button.dataset.materialId || '';
+        document.getElementById('editTitle').value = button.dataset.title || '';
+        document.getElementById('editType').value = button.dataset.type || 'PDF';
+        document.getElementById('editVersion').value = button.dataset.version || '';
+        document.getElementById('editOrder').value = button.dataset.order || '';
+        document.getElementById('editDescription').value = button.dataset.description || '';
+        document.getElementById('editExternalUrl').value = button.dataset.externalUrl || '';
+        document.getElementById('editFile').value = '';
+
+        const modal = document.getElementById('editMaterialModal');
+        modal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeEditMaterialModal() {
+        const modal = document.getElementById('editMaterialModal');
+        modal.classList.remove('show');
+        document.body.style.overflow = 'auto';
+        document.getElementById('editFile').value = '';
+    }
     
     // Close modal on outside click
     window.onclick = function(event) {
-        const modal = document.getElementById('uploadModal');
-        if (event.target === modal) {
+        const uploadModal = document.getElementById('uploadModal');
+        const editModal = document.getElementById('editMaterialModal');
+        if (event.target === uploadModal) {
             closeUploadModal();
         }
-    }
-    
-    // Toggle edit form visibility
-    function toggleEdit(materialId) {
-        const editForm = document.getElementById('edit-form-' + materialId);
-        if (editForm) {
-            editForm.style.display = editForm.style.display === 'none' ? 'block' : 'none';
+        if (event.target === editModal) {
+            closeEditMaterialModal();
         }
     }
+
+    window.addEventListener('keydown', function(event) {
+        if (event.key !== 'Escape') return;
+        const uploadModal = document.getElementById('uploadModal');
+        const editModal = document.getElementById('editMaterialModal');
+        if (uploadModal.classList.contains('show')) {
+            closeUploadModal();
+        }
+        if (editModal.classList.contains('show')) {
+            closeEditMaterialModal();
+        }
+    });
     
     // File requirement based on material type
     (function () {

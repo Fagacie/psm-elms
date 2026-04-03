@@ -65,6 +65,9 @@ public class Enrollment {
     @Email(message = "Instructor email should be valid")
     @Size(max = 150, message = "Instructor email must not exceed 150 characters")
     private String instructorEmail;
+
+    @Size(max = 255, message = "Course banner path must not exceed 255 characters")
+    private String courseBanner;
     
     // Status constants
     public static final String STATUS_PENDING = "Pending";
@@ -157,4 +160,7 @@ public class Enrollment {
 
     public String getInstructorEmail() { return instructorEmail; }
     public void setInstructorEmail(String instructorEmail) { this.instructorEmail = instructorEmail; }
+
+    public String getCourseBanner() { return courseBanner; }
+    public void setCourseBanner(String courseBanner) { this.courseBanner = courseBanner; }
 }

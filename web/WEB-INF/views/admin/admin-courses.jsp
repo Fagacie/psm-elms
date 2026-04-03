@@ -10,15 +10,14 @@
     <title>Course Management - PSM E-Learning</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin-dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
 </head>
 <body>
 <jsp:include page="/WEB-INF/views/common/admin-header.jsp">
     <jsp:param name="pageTitle" value="Courses"/>
+    <jsp:param name="pageSubtitle" value="Review approvals and keep the course catalog organized"/>
 </jsp:include>
 
 <jsp:include page="/WEB-INF/views/common/admin-sidebar.jsp"/>
@@ -41,7 +40,7 @@
         <section class="admin-page-head">
             <div class="admin-breadcrumb">
                 <a href="${pageContext.request.contextPath}/dashboard">Dashboard</a>
-                <i class="fas fa-angle-right"></i>
+                <span>&gt;</span>
                 <span>Courses</span>
             </div>
 
@@ -117,7 +116,7 @@
             <div class="section-header">
                 <h2>Status Filters</h2>
             </div>
-            <div style="padding: 14px 16px 16px; display:flex; gap:10px; flex-wrap:wrap;">
+            <div class="section-actions-inset">
                 <a href="${pageContext.request.contextPath}/admin/courses" class="admin-btn ${empty param.status ? 'primary' : 'secondary'}">All Courses</a>
                 <a href="${pageContext.request.contextPath}/admin/courses?status=Pending" class="admin-btn ${param.status == 'Pending' ? 'primary' : 'secondary'}">Pending Review</a>
                 <a href="${pageContext.request.contextPath}/admin/courses?status=Approved" class="admin-btn ${param.status == 'Approved' ? 'primary' : 'secondary'}">Approved</a>
@@ -128,6 +127,10 @@
         <section class="section-card">
             <div class="section-header">
                 <h2>All Courses</h2>
+            </div>
+            <div class="admin-table-toolbar">
+                <span class="section-caption">${totalCourses} courses in view</span>
+                <a href="${pageContext.request.contextPath}/admin/courses" class="admin-btn secondary">Reset Filters</a>
             </div>
             <div class="table-wrapper">
                 <table id="coursesTable" class="data-table">
@@ -148,7 +151,7 @@
                             <c:when test="${empty courses}">
                                 <tr>
                                     <td colspan="8">
-                                        <div class="empty-state" style="margin:12px;">
+                                        <div class="empty-state empty-state-inset">
                                             <i class="fas fa-inbox"></i>
                                             <p>No courses found.</p>
                                         </div>
@@ -161,7 +164,7 @@
                                         <td>
                                             <strong>${course.courseName}</strong>
                                             <c:if test="${not empty course.description}">
-                                                <div style="font-size:12px; color:var(--admin-muted); margin-top:4px;">
+                                                <div class="table-subtext">
                                                     <c:set var="desc" value="${course.description}"/>
                                                     <c:choose>
                                                         <c:when test="${fn:length(desc) > 70}">${fn:substring(desc, 0, 70)}...</c:when>
@@ -185,11 +188,11 @@
                                             </c:choose>
                                         </td>
                                         <td>
-                                            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                                            <div class="admin-table-actions">
                                                 <c:choose>
                                                     <c:when test="${course.status eq 'Pending'}">
                                                         <a href="${pageContext.request.contextPath}/admin/courses?action=approve&id=${course.courseId}" class="admin-btn primary" onclick="return confirm('Approve this course?');">Approve</a>
-                                                        <a href="${pageContext.request.contextPath}/admin/courses?action=reject&id=${course.courseId}" class="admin-btn secondary" style="border-color:#a55058; color:#ffc2c6;" onclick="return confirm('Reject this course?');">Reject</a>
+                                                        <a href="${pageContext.request.contextPath}/admin/courses?action=reject&id=${course.courseId}" class="admin-btn danger" onclick="return confirm('Reject this course?');">Reject</a>
                                                     </c:when>
                                                     <c:when test="${course.status eq 'Approved'}">
                                                         <a href="${pageContext.request.contextPath}/admin/courses?action=archive&id=${course.courseId}" class="admin-btn secondary" onclick="return confirm('Archive this course? Students will no longer see it.');">Archive</a>
@@ -198,7 +201,7 @@
                                                         <a href="${pageContext.request.contextPath}/admin/courses?action=restore&id=${course.courseId}" class="admin-btn secondary" onclick="return confirm('Restore this course to Approved?');">Restore</a>
                                                     </c:when>
                                                     <c:otherwise>
-                                                        <span style="color: var(--admin-muted);">-</span>
+                                                        <span class="text-muted-inline">-</span>
                                                     </c:otherwise>
                                                 </c:choose>
                                             </div>
@@ -210,21 +213,6 @@
                     </tbody>
                 </table>
             </div>
-            <style>
-                .dataTables_wrapper { padding: 14px 16px 16px; color: var(--admin-muted); }
-                .dataTables_length, .dataTables_filter { margin-bottom: 15px; }
-                .dataTables_length label, .dataTables_filter label { display:flex; align-items:center; gap:10px; color: var(--admin-muted); font-weight:500; }
-                .dataTables_length select, .dataTables_filter input { margin:0 5px; }
-                .dataTables_info { padding:15px 0; color: var(--admin-muted); }
-                .dataTables_paginate { padding:15px 0; }
-                .dataTables_paginate .paginate_button { padding:6px 12px; margin:0 2px; border:1px solid var(--admin-border); background: rgba(17, 39, 64, 0.6); color: #d8ebff !important; cursor:pointer; font-size:14px; }
-                .dataTables_paginate .paginate_button:hover { border-color: var(--admin-accent); color: #fff !important; }
-                .dataTables_paginate .paginate_button.current { background: linear-gradient(120deg, #19a3d7, #2485ff); border-color:#1e78e0; color:#fff !important; font-weight:600; }
-                .dataTables_paginate .paginate_button.disabled { opacity:0.5; cursor:not-allowed; }
-                .dataTables_length { float:left; } .dataTables_filter { float:right; }
-                .dataTables_info { float:left; clear:both; } .dataTables_paginate { float:right; clear:both; }
-                @media (max-width:768px){ .dataTables_length, .dataTables_filter, .dataTables_info, .dataTables_paginate { float:none; text-align:center; margin:10px 0; } .dataTables_length label, .dataTables_filter label { justify-content:center; } }
-            </style>
             <script>
                 $(function(){
                     if ($('#coursesTable').length && $('#coursesTable tbody tr').length > 1) {

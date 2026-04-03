@@ -1,5 +1,5 @@
 (function () {
-    var scenes = document.querySelectorAll('.av2-scene');
+    var scenes = document.querySelectorAll('[data-auth-scene]');
     if (!scenes.length) return;
 
     var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -9,7 +9,7 @@
         var rect = scene.getBoundingClientRect();
         var x = ((event.clientX - rect.left) / rect.width) - 0.5;
         var y = ((event.clientY - rect.top) / rect.height) - 0.5;
-        var objs = scene.querySelectorAll('.av2-obj');
+        var objs = scene.querySelectorAll('.auth-shape');
 
         objs.forEach(function (obj) {
             var depth = parseFloat(obj.getAttribute('data-depth')) || 14;
@@ -20,14 +20,13 @@
     }
 
     function reset(scene) {
-        var objs = scene.querySelectorAll('.av2-obj');
+        var objs = scene.querySelectorAll('.auth-shape');
         objs.forEach(function (obj) {
             obj.style.transform = 'translate3d(0,0,0)';
         });
     }
 
     scenes.forEach(function (scene) {
-        scene.classList.add('is-parallax');
         scene.addEventListener('mousemove', function (event) {
             applyTransform(scene, event);
         });

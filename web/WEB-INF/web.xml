@@ -358,13 +358,22 @@
         <url-pattern>/admin/enrollment-details</url-pattern>
     </servlet-mapping>
 
-    <!-- Admin Payment Servlets -->
     <servlet>
-        <servlet-name>AdminPaymentListServlet</servlet-name>
-        <servlet-class>com.psm.elearning.controller.admin.AdminPaymentListServlet</servlet-class>
+        <servlet-name>AdminSettingsServlet</servlet-name>
+        <servlet-class>com.psm.elearning.controller.admin.AdminSettingsServlet</servlet-class>
     </servlet>
     <servlet-mapping>
-        <servlet-name>AdminPaymentListServlet</servlet-name>
+        <servlet-name>AdminSettingsServlet</servlet-name>
+        <url-pattern>/admin/settings</url-pattern>
+    </servlet-mapping>
+
+    <!-- Admin Payment Servlets -->
+    <servlet>
+        <servlet-name>AdminPaymentsPageServlet</servlet-name>
+        <servlet-class>com.psm.elearning.controller.admin.AdminPaymentsPageServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>AdminPaymentsPageServlet</servlet-name>
         <url-pattern>/admin/payments</url-pattern>
     </servlet-mapping>
 

@@ -8,7 +8,7 @@
     <title>Organize Course Content - PSM E-Learning</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-shell.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-organizer.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -16,11 +16,14 @@
 <body class="instructor-ui">
 <header class="app-header">
     <div class="header-left">
-        <div class="logo-section">
-            <i class="fas fa-graduation-cap"></i>
-            <span>PSM E-Learning</span>
+        <a href="${pageContext.request.contextPath}/dashboard" class="dashboard-brand" aria-label="PSM E-Learning home">
+            <span class="dashboard-brand-main">PSM</span>
+            <span class="dashboard-brand-sub">E-Learning</span>
+        </a>
+        <div class="dashboard-title-copy">
+            <h1 class="page-title">Content Organizer</h1>
+            <p>Arrange materials and assessments into a clear course flow</p>
         </div>
-        <h1 class="page-title">Content Organizer</h1>
     </div>
     <div class="header-right">
         <div class="user-menu">
@@ -61,6 +64,14 @@
 
 <main class="app-main">
     <div class="content-wrapper">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="${pageContext.request.contextPath}/instructor/dashboard">Dashboard</a>
+            <span>&gt;</span>
+            <a href="${pageContext.request.contextPath}/instructor/courses">Courses</a>
+            <span>&gt;</span>
+            <span>Organizer</span>
+        </nav>
+
         <section class="ins-page-head">
             <div>
                 <p class="ins-page-kicker">Course Flow Studio</p>

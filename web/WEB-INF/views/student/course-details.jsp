@@ -9,8 +9,9 @@
     <title><c:out value="${course.courseName}"/> - PSM E-Learning</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/student-v2.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/course-details-v2.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="sv-page">
@@ -20,7 +21,7 @@
         <a href="${pageContext.request.contextPath}/dashboard" class="sv-brand"><span class="sv-brand-main">PSM</span><span class="sv-brand-sub">E-Learning</span></a>
         <div class="sv-page-title"><h1>Course Details</h1><p>Review and continue course flow</p></div>
     </div>
-    <div class="sv-top-right"><a href="${pageContext.request.contextPath}/logout" class="sv-logout"><i class="fas fa-right-from-bracket"></i> Logout</a></div>
+    <div class="sv-top-right"><a href="${pageContext.request.contextPath}/profile" class="sv-profile-link"><i class="fas fa-user"></i><span>${sessionScope.userName}</span></a><a href="${pageContext.request.contextPath}/logout" class="sv-logout"><i class="fas fa-right-from-bracket"></i> Logout</a></div>
 </header>
 
 <div class="sv-layout">
@@ -34,7 +35,7 @@
         </nav>
     </aside>
 
-    <main class="sv-main">
+    <main class="sv-main cd-main">
         <div class="sv-breadcrumb">
             <a href="${pageContext.request.contextPath}/dashboard"><i class="fas fa-house"></i> Dashboard</a>
             <span>/</span>
@@ -61,32 +62,48 @@
                     <a href="${pageContext.request.contextPath}/student/courses" class="sv-btn">Back</a>
                 </div>
             </div>
-            <div class="sv-card-body">
-                <div class="sv-course-banner-wrap" style="margin-bottom:14px;">
-                    <c:choose>
-                        <c:when test="${not empty course.courseBanner}">
-                            <img src="${course.courseBanner}" alt="${course.courseName} banner" style="width:100%;max-height:260px;object-fit:cover;border:1px solid #2a486d;">
-                        </c:when>
-                        <c:otherwise>
-                            <div style="height:220px;border:1px solid #2a486d;background:linear-gradient(180deg, rgba(14, 30, 50, 0.86), rgba(8, 18, 31, 0.9));display:flex;align-items:center;justify-content:center;color:#a7bed8;">
-                                <span><i class="fas fa-image"></i> No course banner uploaded</span>
-                            </div>
-                        </c:otherwise>
-                    </c:choose>
+            <div class="sv-card-body cd-hero-grid">
+                <div>
+                    <div class="cd-banner-wrap">
+                        <c:choose>
+                            <c:when test="${not empty course.courseBanner}">
+                                <c:choose>
+                                    <c:when test="${course.courseBanner.startsWith('http')}">
+                                        <img class="cd-banner" src="${course.courseBanner}" alt="${course.courseName} banner">
+                                    </c:when>
+                                    <c:otherwise>
+                                        <img class="cd-banner" src="${pageContext.request.contextPath}/${course.courseBanner}" alt="${course.courseName} banner">
+                                    </c:otherwise>
+                                </c:choose>
+                            </c:when>
+                            <c:otherwise>
+                                <div class="cd-banner-placeholder">
+                                    <span><i class="fas fa-image"></i> No course banner uploaded</span>
+                                </div>
+                            </c:otherwise>
+                        </c:choose>
+                    </div>
+                    <p class="cd-description"><c:out value="${course.description}"/></p>
+                    <div class="cd-meta-grid">
+                        <div class="cd-meta-card"><span>Category</span><strong><c:out value="${course.category}"/></strong></div>
+                        <div class="cd-meta-card"><span>Level</span><strong><c:out value="${course.level}"/></strong></div>
+                        <div class="cd-meta-card"><span>Duration</span><strong><c:out value="${course.duration}"/> hours</strong></div>
+                        <div class="cd-meta-card"><span>Fee</span><strong><fmt:formatNumber value="${course.courseFee}" type="number" minFractionDigits="2" maxFractionDigits="2"/></strong></div>
+                        <div class="cd-meta-card"><span>Instructor</span><strong><c:out value="${instructor.fullName}" default="TBA"/></strong></div>
+                        <div class="cd-meta-card"><span>Language</span><strong><c:out value="${course.language}" default="English"/></strong></div>
+                    </div>
                 </div>
-                <p class="sv-course-line"><c:out value="${course.description}"/></p>
-                <div class="sv-course-meta sv-course-meta-3">
-                    <div><i class="fas fa-folder"></i><span><c:out value="${course.category}"/></span></div>
-                    <div><i class="fas fa-signal"></i><span><c:out value="${course.level}"/></span></div>
-                    <div><i class="fas fa-clock"></i><span><c:out value="${course.duration}"/> hours</span></div>
-                    <div><i class="fas fa-money-bill-wave"></i><span><fmt:formatNumber value="${course.courseFee}" type="number" minFractionDigits="2" maxFractionDigits="2"/></span></div>
-                    <div><i class="fas fa-chalkboard-teacher"></i><span><c:out value="${instructor.fullName}" default="TBA"/></span></div>
-                    <div><i class="fas fa-language"></i><span><c:out value="${course.language}" default="English"/></span></div>
-                </div>
-                <div class="sv-course-actions sv-course-actions-top">
-                    <a class="sv-btn" href="${pageContext.request.contextPath}/student/materials?courseId=${course.courseId}"><i class="fas fa-folder-open"></i>&nbsp;Materials</a>
-                    <a class="sv-btn" href="${pageContext.request.contextPath}/student/assessments?courseId=${course.courseId}"><i class="fas fa-clipboard-list"></i>&nbsp;Assessments</a>
-                </div>
+                <aside class="cd-side-panel">
+                    <h3>Course Actions</h3>
+                    <p>Open supporting resources, review assessments, or continue your enrollment flow from one clear panel.</p>
+                    <div class="cd-action-stack">
+                        <a class="sv-btn" href="${pageContext.request.contextPath}/student/materials?courseId=${course.courseId}"><i class="fas fa-folder-open"></i>&nbsp;Materials</a>
+                        <a class="sv-btn" href="${pageContext.request.contextPath}/student/assessments?courseId=${course.courseId}"><i class="fas fa-clipboard-list"></i>&nbsp;Assessments</a>
+                        <c:if test="${not isEnrolled}">
+                            <a class="sv-btn primary" href="${pageContext.request.contextPath}/student/enrollment-summary?courseId=${course.courseId}">Proceed to Enroll</a>
+                        </c:if>
+                    </div>
+                </aside>
             </div>
         </section>
     </main>
@@ -96,3 +113,4 @@
 <script src="${pageContext.request.contextPath}/js/student-v2.js"></script>
 </body>
 </html>
+

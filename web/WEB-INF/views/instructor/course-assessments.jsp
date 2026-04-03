@@ -9,7 +9,7 @@
     <title>Course Assessments - Instructor</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-shell.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-assessments.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -17,11 +17,14 @@
 <body class="instructor-ui">
 <header class="app-header">
     <div class="header-left">
-        <div class="logo-section">
-            <i class="fas fa-graduation-cap"></i>
-            <span>PSM E-Learning</span>
+        <a href="${pageContext.request.contextPath}/dashboard" class="dashboard-brand" aria-label="PSM E-Learning home">
+            <span class="dashboard-brand-main">PSM</span>
+            <span class="dashboard-brand-sub">E-Learning</span>
+        </a>
+        <div class="dashboard-title-copy">
+            <h1 class="page-title">Course Assessments</h1>
+            <p>Create, grade, and review assessment workflows</p>
         </div>
-        <h1 class="page-title">Course Assessments</h1>
     </div>
     <div class="header-right">
         <div class="user-menu">
@@ -62,6 +65,14 @@
 
 <main class="app-main">
     <div class="content-wrapper">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="${pageContext.request.contextPath}/instructor/dashboard">Dashboard</a>
+            <span>&gt;</span>
+            <a href="${pageContext.request.contextPath}/instructor/courses">Courses</a>
+            <span>&gt;</span>
+            <span>Assessments</span>
+        </nav>
+
         <section class="ins-page-head">
             <div>
                 <p class="ins-page-kicker">Assessment Workspace</p>
@@ -70,9 +81,9 @@
             </div>
             <div class="ins-hero-actions">
                 <c:if test="${not empty selectedCourse}">
-                    <a href="${pageContext.request.contextPath}/instructor/assessments?courseId=${selectedCourse.courseId}&view=create" class="btn btn-primary">
+                    <button type="button" class="btn btn-primary" onclick="openCreateAssessmentModal()">
                         <i class="fas fa-plus-circle"></i> New Assessment
-                    </a>
+                    </button>
                 </c:if>
                 <a href="${pageContext.request.contextPath}/instructor/materials" class="btn btn-secondary">
                     <i class="fas fa-folder-open"></i> Open Materials
@@ -156,60 +167,10 @@
             <div id="create-tab" class="tab-content ${defaultTab == 'create' ? 'active' : ''}">
                 <div class="assessment-form-section">
                     <h3><i class="fas fa-plus-circle"></i> Create New Assessment for: ${selectedCourse.courseName}</h3>
-                    <form method="post" action="${pageContext.request.contextPath}/instructor/assessments">
-                        <input type="hidden" name="action" value="createAssessment">
-                        <input type="hidden" name="courseId" value="${selectedCourse.courseId}">
-                        <div class="upload-form-grid">
-                            <div class="field">
-                                <label>Title *</label>
-                                <input type="text" name="title" placeholder="e.g., Final Exam, Week 1 Quiz" required>
-                            </div>
-                            <div class="field">
-                                <label>Type *</label>
-                                <select name="type" required>
-                                    <option value="">-- Select Type --</option>
-                                    <option value="Assignment">Assignment (Student uploads answer)</option>
-                                    <option value="Quiz">Quiz (MCQ - auto-graded)</option>
-                                    <option value="Exam">Exam (MCQ - auto-graded)</option>
-                                </select>
-                            </div>
-                            <div class="field">
-                                <label>Duration (minutes)</label>
-                                <input type="number" min="1" name="duration" placeholder="e.g., 60">
-                                <small class="helper-text">Leave blank for no time limit</small>
-                            </div>
-                            <div class="field">
-                                <label>Total Marks</label>
-                                <input type="number" min="1" name="totalMarks" placeholder="e.g., 100">
-                                <small class="helper-text">Sum of all question marks</small>
-                            </div>
-                            <div class="field">
-                                <label>Max Attempts *</label>
-                                <input type="number" min="1" max="10" name="maxAttempts" value="1" required>
-                                <small class="helper-text">Number of times students can attempt</small>
-                            </div>
-                            <div class="field">
-                                <label>Questions Per Page *</label>
-                                <input type="number" min="1" max="20" name="questionsPerPage" value="2" required>
-                                <small class="helper-text">For pagination during assessment</small>
-                            </div>
-                            <div class="field full">
-                                <label>Placement in Course Flow</label>
-                                <select name="placement">
-                                    <option value="final">After all materials (Final Assessment)</option>
-                                    <c:forEach var="m" items="${materials}">
-                                        <option value="material:${m.materialId}">After: ${m.title}</option>
-                                    </c:forEach>
-                                </select>
-                                <small class="helper-text">Choose where this assessment appears in the learning sequence</small>
-                            </div>
-                            <div class="field full">
-                                <label>Instructions</label>
-                                <textarea name="instructions" rows="3" placeholder="Enter instructions for students taking this assessment..."></textarea>
-                            </div>
-                        </div>
-                        <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> Create Assessment</button>
-                    </form>
+                    <p class="section-caption">Assessment setup now opens in a focused modal to keep this workspace cleaner.</p>
+                    <button type="button" class="btn btn-primary" onclick="openCreateAssessmentModal()">
+                        <i class="fas fa-plus"></i> Open Create Assessment Modal
+                    </button>
                 </div>
             </div>
 
@@ -222,7 +183,7 @@
                             <div class="empty-state-box">
                                 <i class="fas fa-clipboard-list"></i>
                                 <p>No assessments created for this course yet.</p>
-                                <button type="button" class="btn btn-primary" onclick="showTab(event, 'create-tab')">
+                                <button type="button" class="btn btn-primary" onclick="openCreateAssessmentModal()">
                                     <i class="fas fa-plus"></i> Create First Assessment
                                 </button>
                             </div>
@@ -230,7 +191,7 @@
                         <c:otherwise>
                             <div class="assessments-grid">
                             <c:forEach var="a" items="${assessments}">
-                                <div class="assessment-card">
+                                <div class="assessment-card" aria-label="Assessment ${a.title}">
                                     <div class="assessment-card-header">
                                         <h4 class="assessment-title">${a.title}</h4>
                                         <span class="assessment-type-badge type-${a.type}">${a.type}</span>
@@ -455,9 +416,11 @@
                                                     </div>
                                                 </c:if>
                                             </div>
-                                            <a class="btn btn-danger btn-sm" href="${pageContext.request.contextPath}/instructor/assessments?action=deleteQuestion&id=${q.questionId}&assessmentId=${selectedAssessment.assessmentId}&courseId=${selectedCourse.courseId}" onclick="return confirm('Delete this question?');">
-                                                <i class="fas fa-trash"></i> Delete
-                                            </a>
+                                            <div class="question-actions">
+                                                <a class="btn btn-danger btn-sm" href="${pageContext.request.contextPath}/instructor/assessments?action=deleteQuestion&id=${q.questionId}&assessmentId=${selectedAssessment.assessmentId}&courseId=${selectedCourse.courseId}" onclick="return confirm('Delete this question?');">
+                                                    <i class="fas fa-trash"></i> Delete
+                                                </a>
+                                            </div>
                                         </div>
                                     </c:forEach>
                                     </div>
@@ -470,7 +433,10 @@
                     <div id="submissions-section" class="sub-tab-content">
                         <div class="submissions-section">
                             <div class="section-header">
-                                <h3><i class="fas fa-users"></i> Student Submissions</h3>
+                                <div>
+                                    <h3><i class="fas fa-users"></i> Student Submissions</h3>
+                                    <p class="section-caption">Filter, grade, and export submissions from one concise panel.</p>
+                                </div>
                                 <div class="submissions-toolbar">
                                     <form method="get" action="${pageContext.request.contextPath}/instructor/assessments" class="submissions-filter-form">
                                         <input type="hidden" name="courseId" value="${selectedCourse.courseId}">
@@ -676,7 +642,95 @@
         </c:if>
     </div>
 </main>
+
+<c:if test="${not empty selectedCourse}">
+    <div id="createAssessmentModal" class="assessment-modal" aria-hidden="true">
+        <div class="assessment-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="createAssessmentModalTitle">
+            <div class="assessment-modal-header">
+                <h3 id="createAssessmentModalTitle"><i class="fas fa-plus-circle"></i> Create Assessment</h3>
+                <button type="button" class="assessment-modal-close" aria-label="Close" onclick="closeCreateAssessmentModal()">&times;</button>
+            </div>
+            <div class="assessment-modal-body">
+                <p class="section-caption">Course: <strong>${selectedCourse.courseName}</strong></p>
+                <form method="post" action="${pageContext.request.contextPath}/instructor/assessments">
+                    <input type="hidden" name="action" value="createAssessment">
+                    <input type="hidden" name="courseId" value="${selectedCourse.courseId}">
+                    <div class="upload-form-grid">
+                        <div class="field">
+                            <label>Title *</label>
+                            <input type="text" name="title" placeholder="e.g., Final Exam, Week 1 Quiz" required>
+                        </div>
+                        <div class="field">
+                            <label>Type *</label>
+                            <select name="type" required>
+                                <option value="">-- Select Type --</option>
+                                <option value="Assignment">Assignment (Student uploads answer)</option>
+                                <option value="Quiz">Quiz (MCQ - auto-graded)</option>
+                                <option value="Exam">Exam (MCQ - auto-graded)</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label>Duration (minutes)</label>
+                            <input type="number" min="1" name="duration" placeholder="e.g., 60">
+                            <small class="helper-text">Leave blank for no time limit</small>
+                        </div>
+                        <div class="field">
+                            <label>Total Marks</label>
+                            <input type="number" min="1" name="totalMarks" placeholder="e.g., 100">
+                            <small class="helper-text">Sum of all question marks</small>
+                        </div>
+                        <div class="field">
+                            <label>Max Attempts *</label>
+                            <input type="number" min="1" max="10" name="maxAttempts" value="1" required>
+                            <small class="helper-text">Number of times students can attempt</small>
+                        </div>
+                        <div class="field">
+                            <label>Questions Per Page *</label>
+                            <input type="number" min="1" max="20" name="questionsPerPage" value="2" required>
+                            <small class="helper-text">For pagination during assessment</small>
+                        </div>
+                        <div class="field full">
+                            <label>Placement in Course Flow</label>
+                            <select name="placement">
+                                <option value="final">After all materials (Final Assessment)</option>
+                                <c:forEach var="m" items="${materials}">
+                                    <option value="material:${m.materialId}">After: ${m.title}</option>
+                                </c:forEach>
+                            </select>
+                            <small class="helper-text">Choose where this assessment appears in the learning sequence</small>
+                        </div>
+                        <div class="field full">
+                            <label>Instructions</label>
+                            <textarea name="instructions" rows="3" placeholder="Enter instructions for students taking this assessment..."></textarea>
+                        </div>
+                    </div>
+                    <div class="assessment-modal-footer">
+                        <button type="button" class="btn btn-secondary" onclick="closeCreateAssessmentModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> Create Assessment</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</c:if>
+
 <script>
+    function openCreateAssessmentModal() {
+        const modal = document.getElementById('createAssessmentModal');
+        if (!modal) return;
+        modal.classList.add('open');
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeCreateAssessmentModal() {
+        const modal = document.getElementById('createAssessmentModal');
+        if (!modal) return;
+        modal.classList.remove('open');
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+    }
+
     // Tab navigation
     function showTab(tabId, trigger) {
         document.querySelectorAll('.tab-content').forEach(tab => {
@@ -802,6 +856,21 @@
                 document.getElementById('avg-score').textContent = 'N/A';
             }
         }
+
+        const createAssessmentModal = document.getElementById('createAssessmentModal');
+        if (createAssessmentModal) {
+            createAssessmentModal.addEventListener('click', function(event) {
+                if (event.target === createAssessmentModal) {
+                    closeCreateAssessmentModal();
+                }
+            });
+        }
+
+        window.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeCreateAssessmentModal();
+            }
+        });
     });
 </script>
 </body>

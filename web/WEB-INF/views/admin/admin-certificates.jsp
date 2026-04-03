@@ -16,6 +16,7 @@
 <body>
 <jsp:include page="/WEB-INF/views/common/admin-header.jsp">
     <jsp:param name="pageTitle" value="Certificates"/>
+    <jsp:param name="pageSubtitle" value="Review issued credentials and revocations"/>
 </jsp:include>
 
 <jsp:include page="/WEB-INF/views/common/admin-sidebar.jsp"/>
@@ -35,7 +36,7 @@
         <section class="admin-page-head">
             <div class="admin-breadcrumb">
                 <a href="${pageContext.request.contextPath}/dashboard">Dashboard</a>
-                <i class="fas fa-angle-right"></i>
+                <span>&gt;</span>
                 <span>Certificates</span>
             </div>
 
@@ -65,7 +66,7 @@
         <section class="section-card">
             <div class="section-header">
                 <h2>Certificate Overview</h2>
-                <form method="post" action="${pageContext.request.contextPath}/admin/certificates" style="display:inline-flex;">
+                <form method="post" action="${pageContext.request.contextPath}/admin/certificates" class="form-actions-inline">
                     <input type="hidden" name="action" value="backfill">
                     <button class="admin-btn primary" type="submit" onclick="return confirm('Run enrollment backfill now? This recalculates payment, progress, and completion for all enrollments.');">Backfill Enrollment State</button>
                 </form>
@@ -115,9 +116,12 @@
             <div class="section-header">
                 <h2>Issued Certificates</h2>
             </div>
+            <div class="admin-table-toolbar">
+                <span class="section-caption">${totalCertificates} certificates</span>
+            </div>
             <c:choose>
                 <c:when test="${empty certificates}">
-                    <div class="empty-state" style="margin: 14px 16px 16px;">
+                    <div class="empty-state empty-state-inset">
                         <i class="fas fa-certificate"></i>
                         <p>No certificates issued yet.</p>
                     </div>
@@ -142,7 +146,7 @@
                                     <td>${cert.certificateNo}</td>
                                     <td>
                                         <strong>${cert.studentName}</strong>
-                                        <div style="font-size:12px; color:var(--admin-muted); margin-top:4px;">${cert.studentEmail}</div>
+                                        <div class="table-subtext">${cert.studentEmail}</div>
                                     </td>
                                     <td><c:out value="${cert.regNumber}" default="-"/></td>
                                     <td>${cert.courseName}</td>
@@ -159,21 +163,21 @@
                                         </c:choose>
                                     </td>
                                     <td>
-                                        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                                        <div class="admin-table-actions">
                                             <a class="admin-btn secondary" href="${pageContext.request.contextPath}/certificate/template?certificateId=${cert.certificateId}&back=${pageContext.request.contextPath}/admin/certificates">Template</a>
                                             <c:choose>
                                                 <c:when test="${not empty cert.verificationURL}">
                                                     <a class="admin-btn primary" target="_blank" href="${cert.verificationURL}">Verify</a>
                                                 </c:when>
                                                 <c:otherwise>
-                                                    <span class="admin-btn secondary" style="opacity:.7; cursor:not-allowed;">No Verify URL</span>
+                                                    <span class="admin-btn secondary admin-btn-disabled">No Verify URL</span>
                                                 </c:otherwise>
                                             </c:choose>
                                             <c:if test="${cert.status != 'Revoked'}">
-                                                <form method="post" action="${pageContext.request.contextPath}/admin/certificates" style="display:inline-flex;">
+                                                <form method="post" action="${pageContext.request.contextPath}/admin/certificates" class="admin-table-actions">
                                                     <input type="hidden" name="action" value="revoke">
                                                     <input type="hidden" name="certificateId" value="${cert.certificateId}">
-                                                    <button class="admin-btn secondary" style="border-color:#a55058; color:#ffc2c6;" type="submit" onclick="return confirm('Revoke this certificate?');">Revoke</button>
+                                                    <button class="admin-btn danger" type="submit" onclick="return confirm('Revoke this certificate?');">Revoke</button>
                                                 </form>
                                             </c:if>
                                         </div>
@@ -191,7 +195,7 @@
             <div class="section-header">
                 <h2>Template Preview</h2>
             </div>
-            <div style="padding: 14px 16px 16px; display:flex; gap:8px; flex-wrap:wrap;">
+            <div class="section-actions-inset">
                 <a class="admin-btn primary" href="${pageContext.request.contextPath}/certificate/template?back=${pageContext.request.contextPath}/admin/certificates">Open Preview Template</a>
             </div>
         </section>

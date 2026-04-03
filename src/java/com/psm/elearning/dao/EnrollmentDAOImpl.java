@@ -137,7 +137,7 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
     @Override
     public List<Enrollment> getEnrollmentsByStudent(Integer userId) {
         List<Enrollment> enrollments = new ArrayList<>();
-        String sql = "SELECT e.*, c.Title AS CourseTitle, c.Description, c.CourseFee, u.FullName AS InstructorName " +
+        String sql = "SELECT e.*, c.Title AS CourseTitle, c.Description, c.CourseFee, c.CourseBanner, u.FullName AS InstructorName " +
                 "FROM Enrollment e " +
                 "JOIN Course c ON e.CourseID = c.CourseID " +
                 "LEFT JOIN User u ON c.InstructorID = u.UserID " +
@@ -155,6 +155,7 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
                     enrollment.setCourseName(rs.getString("CourseTitle"));
                     enrollment.setCourseDescription(rs.getString("Description"));
                     enrollment.setCoursePrice(rs.getDouble("CourseFee"));
+                    enrollment.setCourseBanner(rs.getString("CourseBanner"));
                     enrollment.setInstructorName(rs.getString("InstructorName"));
                     enrollments.add(enrollment);
                 }
@@ -168,7 +169,7 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
 
     @Override
     public Enrollment getEnrollment(Integer enrollmentId) {
-        String sql = "SELECT e.*, c.Title AS CourseTitle, c.Description, c.CourseFee, u.FullName AS InstructorName " +
+        String sql = "SELECT e.*, c.Title AS CourseTitle, c.Description, c.CourseFee, c.CourseBanner, u.FullName AS InstructorName " +
                 "FROM Enrollment e " +
                 "JOIN Course c ON e.CourseID = c.CourseID " +
                 "LEFT JOIN User u ON c.InstructorID = u.UserID " +
@@ -185,6 +186,7 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
                     enrollment.setCourseName(rs.getString("CourseTitle"));
                     enrollment.setCourseDescription(rs.getString("Description"));
                     enrollment.setCoursePrice(rs.getDouble("CourseFee"));
+                    enrollment.setCourseBanner(rs.getString("CourseBanner"));
                     enrollment.setInstructorName(rs.getString("InstructorName"));
                     return enrollment;
                 }

@@ -9,8 +9,9 @@
     <title>Assessments - PSM E-Learning</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/student-v2.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/student-assessments-v2.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="sv-page">
@@ -20,7 +21,7 @@
         <a href="${pageContext.request.contextPath}/dashboard" class="sv-brand"><span class="sv-brand-main">PSM</span><span class="sv-brand-sub">E-Learning</span></a>
         <div class="sv-page-title"><h1>Assessments</h1><p>Attempt flow, grading, and retakes</p></div>
     </div>
-    <div class="sv-top-right"><a href="${pageContext.request.contextPath}/logout" class="sv-logout"><i class="fas fa-right-from-bracket"></i> Logout</a></div>
+    <div class="sv-top-right"><a href="${pageContext.request.contextPath}/profile" class="sv-profile-link"><i class="fas fa-user"></i><span>${sessionScope.userName}</span></a><a href="${pageContext.request.contextPath}/logout" class="sv-logout"><i class="fas fa-right-from-bracket"></i> Logout</a></div>
 </header>
 
 <div class="sv-layout">
@@ -70,9 +71,12 @@
         </div>
 
         <c:if test="${selectedEnrollmentSync != null}">
-            <section class="sv-card sv-gap-top-12">
+            <section class="sv-card sv-gap-top-12 ass-list-card">
                 <div class="sv-card-head">
-                    <h3>Assessment Impact on Certificate</h3>
+                    <div class="ass-summary-copy">
+                        <h3>Assessment Impact on Certificate</h3>
+                        <p>See how your assessment results affect certificate readiness for the selected course.</p>
+                    </div>
                     <span class="status-badge ${selectedEnrollmentSync.eligibleForCertificate ? 'status-Approved' : 'status-Pending'}">
                         ${selectedEnrollmentSync.eligibleForCertificate ? 'Certificate Ready' : 'Still In Progress'}
                     </span>
@@ -119,8 +123,9 @@
             </c:when>
             <c:otherwise>
                 <c:if test="${not modeAttempt and not fromHub}">
-                    <section class="sv-card">
+                    <section class="sv-card ass-course-selector">
                         <div class="sv-card-body">
+                            <p class="ass-selector-note">Choose a paid course to load its assessment workspace.</p>
                             <form method="get" action="${pageContext.request.contextPath}/student/assessments" class="sv-flow-form-inline">
                                 <label for="courseId"><strong>Select Paid Course</strong></label>
                                 <select id="courseId" name="courseId" required>
@@ -133,9 +138,12 @@
                         </div>
                     </section>
 
-                    <section class="sv-card">
+                    <section class="sv-card ass-list-card">
                         <div class="sv-card-head">
-                            <h3>Assessments: ${selectedCourse.courseName}</h3>
+                            <div class="ass-summary-copy">
+                                <h3>Assessments: ${selectedCourse.courseName}</h3>
+                                <p>Start, continue, or review assessment attempts for this course from one clear list.</p>
+                            </div>
                             <span class="assessment-type-badge assessment-type-Quiz">Assessment List</span>
                         </div>
                         <div class="sv-card-body">
@@ -219,7 +227,7 @@
                 </c:if>
 
                 <c:if test="${not empty selectedAssessment}">
-                    <section class="sv-card">
+                    <section class="sv-card ass-detail-card">
                         <div class="sv-card-body">
                             <div class="attempt-header">
                                 <div>
@@ -403,3 +411,4 @@
 </c:if>
 </body>
 </html>
+

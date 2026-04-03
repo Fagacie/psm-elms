@@ -1,6 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<c:set var="embeddedMode" value="${param.modal eq '1'}"/>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,39 +10,29 @@
     <title><c:out value="${empty user ? 'Create' : 'Edit'}"/> User - PSM E-Learning</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin-dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        .admin-form-layout { display:grid; gap:14px; }
-        .admin-form-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:12px; }
-        .admin-form-group { display:grid; gap:6px; }
-        .admin-form-group label { color:var(--admin-muted); font-size:0.78rem; text-transform:uppercase; letter-spacing:0.55px; }
-        .admin-required { color:#ffc2c6; }
-        .admin-note { color:var(--admin-muted); font-size:0.78rem; }
-        .admin-role-panel { display:none; border:1px solid #2a486d; background:rgba(16, 33, 56, 0.46); padding:14px; }
-        .admin-role-panel-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
-        .admin-role-panel-head h3 { margin:0; font-family:"Space Grotesk", sans-serif; font-size:0.98rem; color:#eef6ff; }
-        .admin-form-actions { display:flex; gap:8px; flex-wrap:wrap; }
-        textarea.form-input { min-height: 96px; resize: vertical; }
-        @media (max-width:760px){ .admin-form-actions { flex-direction:column; } .admin-form-actions .admin-btn { width:100%; } }
-    </style>
 </head>
-<body>
+<body class="${embeddedMode ? 'admin-embedded' : ''}">
+<c:if test="${not embeddedMode}">
 <jsp:include page="/WEB-INF/views/common/admin-header.jsp">
     <jsp:param name="pageTitle" value="${empty user ? 'Create User' : 'Edit User'}"/>
+    <jsp:param name="pageSubtitle" value="Configure account records and role profile details"/>
 </jsp:include>
 
 <jsp:include page="/WEB-INF/views/common/admin-sidebar.jsp"/>
+</c:if>
 
 <main class="app-main">
     <div class="content-wrapper">
+        <c:if test="${not embeddedMode}">
         <section class="admin-page-head">
             <div class="admin-breadcrumb">
                 <a href="${pageContext.request.contextPath}/dashboard">Dashboard</a>
-                <i class="fas fa-angle-right"></i>
+                <span>&gt;</span>
                 <a href="${pageContext.request.contextPath}/admin/users">Users</a>
-                <i class="fas fa-angle-right"></i>
+                <span>&gt;</span>
                 <span><c:out value="${empty user ? 'Create User' : 'Edit User'}"/></span>
             </div>
 
@@ -67,6 +58,7 @@
                 </div>
             </div>
         </section>
+        </c:if>
 
         <c:if test="${not empty sessionScope.success}">
             <div class="alert alert-success">
@@ -90,7 +82,9 @@
         <section class="section-card">
             <div class="section-header">
                 <h2><c:out value="${empty user ? 'Create New User' : 'Edit User'}"/></h2>
+                <c:if test="${not embeddedMode}">
                 <a href="${pageContext.request.contextPath}/admin/users" class="admin-btn secondary"><i class="fas fa-arrow-left"></i>&nbsp;Back to List</a>
+                </c:if>
             </div>
 
             <div style="padding:14px 16px 16px;">
@@ -255,7 +249,7 @@
         const studentFields = document.getElementById('studentFields');
         const instructorFields = document.getElementById('instructorFields');
         const adminFields = document.getElementById('adminFields');
-        const isEditMode = ${not empty requestScope.user ? 'true' : 'false'};
+        const isEditMode = '<c:out value="${not empty requestScope.user}" />' === 'true';
 
         function updateRoleFields() {
             const selectedRole = roleSelect.value;

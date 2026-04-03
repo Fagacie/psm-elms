@@ -10,15 +10,14 @@
     <title>Enrollment Management - PSM E-Learning</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin-dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
 </head>
 <body>
 <jsp:include page="/WEB-INF/views/common/admin-header.jsp">
     <jsp:param name="pageTitle" value="Enrollments"/>
+    <jsp:param name="pageSubtitle" value="Track payments, progress, and enrollment movement"/>
 </jsp:include>
 
 <jsp:include page="/WEB-INF/views/common/admin-sidebar.jsp"/>
@@ -47,7 +46,7 @@
         <section class="admin-page-head">
             <div class="admin-breadcrumb">
                 <a href="${pageContext.request.contextPath}/dashboard">Dashboard</a>
-                <i class="fas fa-angle-right"></i>
+                <span>&gt;</span>
                 <span>Enrollments</span>
             </div>
 
@@ -56,21 +55,6 @@
                     <p class="admin-kicker">Enrollment Operations</p>
                     <h2>Track learning access, payment progress, and overall enrollment movement</h2>
                     <p>Use this workspace to review payment state, monitor completion progress, and open full enrollment records for operational follow-up.</p>
-                </div>
-                <div class="admin-hero-scene" aria-hidden="true">
-                    <span class="admin-orb admin-orb-a"></span>
-                    <span class="admin-orb admin-orb-b"></span>
-                    <span class="admin-shape admin-shape-a"></span>
-                    <span class="admin-shape admin-shape-b"></span>
-                    <div class="admin-scene-panel admin-scene-panel-a">
-                        <span>Total Enrollments</span>
-                        <strong>${totalCount}</strong>
-                    </div>
-                    <div class="admin-scene-panel admin-scene-panel-b">
-                        <span>Paid</span>
-                        <strong>${paidCount}</strong>
-                    </div>
-                </div>
             </div>
         </section>
 
@@ -178,7 +162,7 @@
                                                 <c:otherwise>N/A</c:otherwise>
                                             </c:choose>
                                         </td>
-                                        <td><a href="${pageContext.request.contextPath}/admin/enrollment-details?id=${enrollment.enrollmentId}" class="admin-btn secondary">View</a></td>
+                                        <td><div class="admin-table-actions"><a href="${pageContext.request.contextPath}/admin/enrollment-details?id=${enrollment.enrollmentId}" class="admin-btn secondary">View</a></div></td>
                                     </tr>
                                 </c:forEach>
                             </tbody>
@@ -186,21 +170,6 @@
                     </div>
                 </c:otherwise>
             </c:choose>
-            <style>
-                .dataTables_wrapper { padding: 14px 16px 16px; color: var(--admin-muted); }
-                .dataTables_length, .dataTables_filter { margin-bottom: 15px; }
-                .dataTables_length label, .dataTables_filter label { display:flex; align-items:center; gap:10px; color: var(--admin-muted); font-weight:500; }
-                .dataTables_length select, .dataTables_filter input { margin:0 5px; }
-                .dataTables_info { padding:15px 0; color: var(--admin-muted); }
-                .dataTables_paginate { padding:15px 0; }
-                .dataTables_paginate .paginate_button { padding:6px 12px; margin:0 2px; border:1px solid var(--admin-border); background: rgba(17, 39, 64, 0.6); color: #d8ebff !important; cursor:pointer; font-size:14px; }
-                .dataTables_paginate .paginate_button:hover { border-color: var(--admin-accent); color: #fff !important; }
-                .dataTables_paginate .paginate_button.current { background: linear-gradient(120deg, #19a3d7, #2485ff); border-color:#1e78e0; color:#fff !important; font-weight:600; }
-                .dataTables_paginate .paginate_button.disabled { opacity:0.5; cursor:not-allowed; }
-                .dataTables_length { float:left; } .dataTables_filter { float:right; }
-                .dataTables_info { float:left; clear:both; } .dataTables_paginate { float:right; clear:both; }
-                @media (max-width:768px){ .dataTables_length, .dataTables_filter, .dataTables_info, .dataTables_paginate { float:none; text-align:center; margin:10px 0; } .dataTables_length label, .dataTables_filter label { justify-content:center; } }
-            </style>
         </section>
     </div>
 </main>

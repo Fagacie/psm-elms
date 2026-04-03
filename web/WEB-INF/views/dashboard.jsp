@@ -8,7 +8,7 @@
     <title>Student Dashboard - PSM E-Learning</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/student-v2.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/student-dashboard-v3.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -22,12 +22,12 @@
             <span class="sv-brand-sub">E-Learning</span>
         </a>
         <div class="sv-page-title">
-            <h1>Student Workspace</h1>
+            <h1>Dashboard</h1>
             <p>${dashboardDate}</p>
         </div>
     </div>
     <div class="sv-top-right">
-        <div class="sd3-user">
+        <a href="${pageContext.request.contextPath}/profile" class="sd3-user">
             <div class="sd3-avatar">
                 <c:choose>
                     <c:when test="${not empty student.passportPath}">
@@ -45,8 +45,11 @@
                     </c:otherwise>
                 </c:choose>
             </div>
-            <span>${sessionScope.userName}</span>
-        </div>
+            <div class="sd3-user-copy">
+                <strong>${sessionScope.userName}</strong>
+                <span>Student workspace</span>
+            </div>
+        </a>
         <a href="${pageContext.request.contextPath}/logout" class="sv-logout"><i class="fas fa-right-from-bracket"></i> Logout</a>
     </div>
 </header>
@@ -66,73 +69,80 @@
         <div class="sv-breadcrumb">
             <a href="${pageContext.request.contextPath}/dashboard"><i class="fas fa-house"></i> Dashboard</a>
             <span>/</span>
-            <span>Student Workspace</span>
+            <span>Overview</span>
         </div>
 
-        <section class="sd3-intro sv-card">
-            <div class="sv-card-body">
-                <p class="sd3-kicker">Learning Command Center</p>
-                <h2>Welcome back, ${sessionScope.userName}</h2>
-                <p>Track your course progress, continue learning, review payment-backed enrollments, and stay on top of certificate readiness from one consistent workspace.</p>
-            </div>
-        </section>
-
-        <section class="sd3-hero sv-card" id="sd3Hero" aria-label="Dashboard highlights">
+        <section class="sd3-hero sv-card">
             <div class="sv-card-body sd3-hero-body">
                 <div class="sd3-hero-copy">
-                    <h3>Professional Student Workspace</h3>
-                    <p>Use your dashboard as the starting point for every action: continue a course, check progress, review achievements, and jump into the next learning step without friction.</p>
+                    <p class="sd3-kicker">Student Workspace</p>
+                    <h2>Learn with clarity, track real progress, and keep moving.</h2>
+                    <p>Everything important is here: your active courses, current progress, and the next place to continue without distraction.</p>
                     <div class="sd3-hero-actions">
-                        <a href="${pageContext.request.contextPath}/student/my-enrollments" class="sv-btn primary">Open My Courses</a>
-                        <a href="${pageContext.request.contextPath}/student/courses" class="sv-btn">Browse New Courses</a>
+                        <a href="${pageContext.request.contextPath}/student/my-enrollments" class="sv-btn primary">My Courses</a>
+                        <a href="${pageContext.request.contextPath}/student/courses" class="sv-btn">Browse Courses</a>
                     </div>
                 </div>
-                <div class="sd3-hero-scene" id="sd3HeroScene" aria-hidden="true">
-                    <span class="sd3-orb sd3-orb-a" data-depth="22"></span>
-                    <span class="sd3-orb sd3-orb-b" data-depth="16"></span>
-                    <span class="sd3-orb sd3-orb-c" data-depth="28"></span>
-                    <span class="sd3-shape sd3-shape-a" data-depth="26"></span>
-                    <span class="sd3-shape sd3-shape-b" data-depth="14"></span>
-                    <span class="sd3-shape sd3-shape-c" data-depth="18"></span>
+                <div class="sd3-summary-card">
+                    <div class="sd3-summary-row">
+                        <span>Average Progress</span>
+                        <strong>${overallProgress}%</strong>
+                    </div>
+                    <div class="sv-progress">
+                        <div class="sv-progress-bar sd3-progress-bar" data-progress="${overallProgress}" style="width:${overallProgress}%;"></div>
+                    </div>
+                    <div class="sd3-summary-grid">
+                        <div>
+                            <span>Active</span>
+                            <strong>${activeCoursesCount}</strong>
+                        </div>
+                        <div>
+                            <span>Completed</span>
+                            <strong>${completedCoursesCount}</strong>
+                        </div>
+                        <div>
+                            <span>Paid</span>
+                            <strong>${paidEnrollmentsCount}</strong>
+                        </div>
+                        <div>
+                            <span>Certificates</span>
+                            <strong>${certificatesCount}</strong>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
 
         <section class="sv-metrics sd3-metrics">
-            <article class="sv-metric sd3-tilt">
-                <h3 class="sd3-count" data-counter="${enrolledCoursesCount}">${enrolledCoursesCount}</h3>
+            <article class="sv-metric">
                 <p>Total Enrollments</p>
+                <h3 class="sd3-count" data-counter="${enrolledCoursesCount}">${enrolledCoursesCount}</h3>
             </article>
-            <article class="sv-metric sd3-tilt">
-                <h3 class="sd3-count" data-counter="${activeCoursesCount}">${activeCoursesCount}</h3>
+            <article class="sv-metric">
                 <p>Active Courses</p>
+                <h3 class="sd3-count" data-counter="${activeCoursesCount}">${activeCoursesCount}</h3>
             </article>
-            <article class="sv-metric sd3-tilt">
-                <h3 class="sd3-count" data-counter="${completedCoursesCount}">${completedCoursesCount}</h3>
+            <article class="sv-metric">
                 <p>Completed Courses</p>
+                <h3 class="sd3-count" data-counter="${completedCoursesCount}">${completedCoursesCount}</h3>
             </article>
-            <article class="sv-metric sd3-tilt">
-                <h3 class="sd3-count" data-counter="${paidEnrollmentsCount}">${paidEnrollmentsCount}</h3>
-                <p>Paid Enrollments</p>
-            </article>
-            <article class="sv-metric sd3-tilt">
-                <h3 class="sd3-count" data-counter="${overallProgress}" data-suffix="%">${overallProgress}%</h3>
-                <p>Average Progress</p>
-            </article>
-            <article class="sv-metric sd3-tilt">
-                <h3 class="sd3-count" data-counter="${certificatesCount}">${certificatesCount}</h3>
+            <article class="sv-metric">
                 <p>Certificates Issued</p>
+                <h3 class="sd3-count" data-counter="${certificatesCount}">${certificatesCount}</h3>
             </article>
         </section>
 
         <section class="sd3-grid">
-            <article class="sv-card sd3-tilt">
+            <article class="sv-card">
                 <div class="sv-card-head">
-                    <h2>Learning Pipeline</h2>
-                    <a href="${pageContext.request.contextPath}/student/my-enrollments" class="sv-btn">Open My Courses</a>
+                    <div>
+                        <h2>Continue Learning</h2>
+                        <p class="sd3-head-copy">Your top courses, arranged as reusable product cards instead of a dense table.</p>
+                    </div>
+                    <a href="${pageContext.request.contextPath}/student/my-enrollments" class="sv-btn">View All</a>
                 </div>
 
-                <div class="sd3-controlbar" aria-label="Course pipeline filters">
+                <div class="sd3-controlbar">
                     <div class="sd3-filter-group">
                         <button type="button" class="sd3-filter active" data-filter="all">All</button>
                         <button type="button" class="sd3-filter" data-filter="live">In Progress</button>
@@ -148,47 +158,50 @@
                 <div class="sv-card-body">
                     <c:choose>
                         <c:when test="${not empty enrolledCourses}">
-                            <div class="sd3-table-wrap">
-                                <table class="sd3-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Course</th>
-                                            <th>Instructor</th>
-                                            <th>Progress</th>
-                                            <th>Status</th>
-                                            <th>Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <c:forEach var="course" items="${enrolledCourses}" varStatus="loop">
-                                            <c:if test="${loop.index < 6}">
-                                                <tr data-status="${course.completionStatus == 'Completed' ? 'done' : (course.completionStatus == 'In Progress' ? 'live' : 'hold')}" data-course="${course.courseName}" class="sd3-row">
-                                                    <td>
-                                                        <strong>${course.courseName}</strong>
-                                                        <small>ID: ${course.courseId}</small>
-                                                    </td>
-                                                    <td>${course.instructorName}</td>
-                                                    <td>
-                                                        <div class="sv-progress">
-                                                            <div class="sv-progress-bar sd3-progress-bar" data-progress="${not empty course.progress ? course.progress : 0}" style="width:${not empty course.progress ? course.progress : 0}%;"></div>
-                                                        </div>
-                                                        <small>${not empty course.progress ? course.progress : 0}%</small>
-                                                    </td>
-                                                    <td>
+                            <div class="sd3-course-grid">
+                                <c:forEach var="course" items="${enrolledCourses}" varStatus="loop">
+                                    <c:if test="${loop.index < 6}">
+                                        <c:set var="courseProgress" value="${not empty course.progress ? course.progress : 0}"/>
+                                        <c:set var="courseStatus" value="${course.completionStatus == 'Completed' ? 'done' : (course.completionStatus == 'In Progress' ? 'live' : 'hold')}"/>
+                                        <article class="sv-course-card sd3-row" data-status="${courseStatus}" data-course="${course.courseName}">
+                                            <div class="sv-course-media">
+                                                <c:choose>
+                                                    <c:when test="${not empty course.courseBanner}">
                                                         <c:choose>
-                                                            <c:when test="${course.completionStatus == 'Completed'}"><span class="sv-chip done">Completed</span></c:when>
-                                                            <c:when test="${course.completionStatus == 'In Progress'}"><span class="sv-chip live">In Progress</span></c:when>
-                                                            <c:otherwise><span class="sv-chip hold">Not Started</span></c:otherwise>
+                                                            <c:when test="${course.courseBanner.startsWith('http')}">
+                                                                <img class="sv-course-banner" src="${course.courseBanner}" alt="${course.courseName} banner">
+                                                            </c:when>
+                                                            <c:otherwise>
+                                                                <img class="sv-course-banner" src="${pageContext.request.contextPath}/${course.courseBanner}" alt="${course.courseName} banner">
+                                                            </c:otherwise>
                                                         </c:choose>
-                                                    </td>
-                                                    <td>
-                                                        <a href="${pageContext.request.contextPath}/student/my-enrollments" class="sv-btn">Continue</a>
-                                                    </td>
-                                                </tr>
-                                            </c:if>
-                                        </c:forEach>
-                                    </tbody>
-                                </table>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <div class="sv-course-banner-placeholder">
+                                                            <i class="fas fa-book-open"></i>
+                                                        </div>
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </div>
+                                            <div class="sv-course-copy">
+                                                <h3 class="sv-course-title">${course.courseName}</h3>
+                                                <p class="sv-course-line">Instructor: ${course.instructorName}</p>
+                                            </div>
+                                            <div class="sv-course-progress-block">
+                                                <div class="sv-course-progress-top">
+                                                    <span>Progress</span>
+                                                    <strong>${courseProgress}%</strong>
+                                                </div>
+                                                <div class="sv-progress">
+                                                    <div class="sv-progress-bar sd3-progress-bar" data-progress="${courseProgress}" style="width:${courseProgress}%;"></div>
+                                                </div>
+                                            </div>
+                                            <div class="sv-course-actions">
+                                                <a href="${pageContext.request.contextPath}/student/enrollment-details?id=${course.enrollmentId}" class="sv-btn primary">Continue</a>
+                                            </div>
+                                        </article>
+                                    </c:if>
+                                </c:forEach>
                             </div>
                             <div class="empty-state-box sd3-empty-hidden" id="sd3NoRows">
                                 <i class="fas fa-magnifying-glass"></i>
@@ -206,39 +219,27 @@
                 </div>
             </article>
 
-            <article class="sv-card sd3-tilt">
+            <article class="sv-card">
                 <div class="sv-card-head">
-                    <h2>Action Center</h2>
+                    <h2>Quick Actions</h2>
                 </div>
                 <div class="sv-card-body">
                     <div class="sd3-actions">
-                        <a href="${pageContext.request.contextPath}/student/my-enrollments" class="sd3-action-item sd3-tilt">
-                            <i class="fas fa-play"></i>
-                            <div>
-                                <h4>Continue Learning</h4>
-                                <p>Resume where you stopped in your enrolled courses.</p>
-                            </div>
+                        <a href="${pageContext.request.contextPath}/student/my-enrollments" class="sd3-action-item">
+                            <strong>My Courses</strong>
+                            <p>Return to your enrolled courses and continue learning.</p>
                         </a>
-                        <a href="${pageContext.request.contextPath}/student/my-enrollments" class="sd3-action-item sd3-tilt">
-                            <i class="fas fa-layer-group"></i>
-                            <div>
-                                <h4>Open Learning Hub</h4>
-                                <p>Access materials and assessments directly inside each enrolled course.</p>
-                            </div>
+                        <a href="${pageContext.request.contextPath}/student/courses" class="sd3-action-item">
+                            <strong>Browse Courses</strong>
+                            <p>Discover new courses and expand your path.</p>
                         </a>
-                        <a href="${pageContext.request.contextPath}/student/certificates" class="sd3-action-item sd3-tilt">
-                            <i class="fas fa-medal"></i>
-                            <div>
-                                <h4>Certificate Status</h4>
-                                <p>Review eligibility and download issued certificates.</p>
-                            </div>
+                        <a href="${pageContext.request.contextPath}/student/certificates" class="sd3-action-item">
+                            <strong>Certificates</strong>
+                            <p>Review issued certificates and readiness status.</p>
                         </a>
-                        <a href="${pageContext.request.contextPath}/profile" class="sd3-action-item sd3-tilt">
-                            <i class="fas fa-id-card"></i>
-                            <div>
-                                <h4>Update Profile</h4>
-                                <p>Keep your identity and contact details current.</p>
-                            </div>
+                        <a href="${pageContext.request.contextPath}/profile" class="sd3-action-item">
+                            <strong>Settings</strong>
+                            <p>Update your profile and manage account details.</p>
                         </a>
                     </div>
                 </div>

@@ -8,7 +8,7 @@
     <title>${mode == 'create' ? 'Create' : 'Edit'} Course - PSM E-Learning</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-shell.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-course-form.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -17,11 +17,14 @@
     <!-- Top Navigation Bar -->
     <header class="app-header">
         <div class="header-left">
-            <div class="logo-section">
-                <i class="fas fa-graduation-cap"></i>
-                <span>PSM E-Learning</span>
+            <a href="${pageContext.request.contextPath}/dashboard" class="dashboard-brand" aria-label="PSM E-Learning home">
+                <span class="dashboard-brand-main">PSM</span>
+                <span class="dashboard-brand-sub">E-Learning</span>
+            </a>
+            <div class="dashboard-title-copy">
+                <h1 class="page-title">${mode == 'create' ? 'Create New Course' : 'Edit Course'}</h1>
+                <p>Build and update course details cleanly</p>
             </div>
-            <h1 class="page-title">${mode == 'create' ? 'Create New Course' : 'Edit Course'}</h1>
         </div>
         <div class="header-right">
             <div class="user-menu">
@@ -71,6 +74,14 @@
     <!-- Main Content Area -->
     <main class="app-main">
         <div class="content-wrapper">
+            <nav class="breadcrumb" aria-label="Breadcrumb">
+                <a href="${pageContext.request.contextPath}/instructor/dashboard">Dashboard</a>
+                <span>&gt;</span>
+                <a href="${pageContext.request.contextPath}/instructor/courses">Courses</a>
+                <span>&gt;</span>
+                <span>Course Form</span>
+            </nav>
+
             <section class="ins-page-head">
                 <div>
                     <p class="ins-page-kicker">Course Editor</p>
@@ -128,86 +139,74 @@
                 </div>
                 
                 <div class="form-card">
-                <form method="post" action="${pageContext.request.contextPath}/instructor/courses" enctype="multipart/form-data" class="course-form">
-                    <input type="hidden" name="action" value="${mode == 'create' ? 'create' : 'update'}">
-                    <c:if test="${mode == 'edit'}">
-                        <input type="hidden" name="courseId" value="${course.courseId}">
-                    </c:if>
+                    <form method="post" action="${pageContext.request.contextPath}/instructor/courses" enctype="multipart/form-data" class="course-form">
+                        <input type="hidden" name="action" value="${mode == 'create' ? 'create' : 'update'}">
+                        <c:if test="${mode == 'edit'}">
+                            <input type="hidden" name="courseId" value="${course.courseId}">
+                        </c:if>
 
-                    <!-- Course Name & Fee Row -->
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="courseName">Course Name <span class="required">*</span></label>
-                            <input type="text" id="courseName" name="courseName" class="form-input" 
-                                   value="${course != null ? course.courseName : ''}" required>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="courseName">Course Name <span class="required">*</span></label>
+                                <input type="text" id="courseName" name="courseName" class="form-input" value="${course != null ? course.courseName : ''}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="courseFee">Course Fee (₦) <span class="required">*</span></label>
+                                <input type="number" id="courseFee" name="courseFee" class="form-input" step="0.01" min="0" value="${course != null ? course.courseFee : ''}" required>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="courseFee">Course Fee (₦) <span class="required">*</span></label>
-                            <input type="number" id="courseFee" name="courseFee" class="form-input" 
-                                   step="0.01" min="0" 
-                                   value="${course != null ? course.courseFee : ''}" required>
-                        </div>
-                    </div>
 
-                    <!-- Description -->
-                    <div class="form-group">
-                        <label for="description">Description</label>
-                        <textarea id="description" name="description" class="form-textarea" rows="5">${course != null ? course.description : ''}</textarea>
-                    </div>
+                        <div class="form-group">
+                            <label for="description">Description</label>
+                            <textarea id="description" name="description" class="form-textarea" rows="5">${course != null ? course.description : ''}</textarea>
+                        </div>
 
-                    <!-- Category, Level, Duration Row -->
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="category">Category</label>
-                            <input type="text" id="category" name="category" class="form-input" 
-                                   value="${course != null ? course.category : ''}"
-                                   placeholder="e.g., Programming, Design, Business">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="category">Category</label>
+                                <input type="text" id="category" name="category" class="form-input" value="${course != null ? course.category : ''}" placeholder="e.g., Programming, Design, Business">
+                            </div>
+                            <div class="form-group">
+                                <label for="level">Level</label>
+                                <select id="level" name="level" class="form-select">
+                                    <option value="Beginner" ${course != null && course.level == 'Beginner' ? 'selected' : ''}>Beginner</option>
+                                    <option value="Intermediate" ${course != null && course.level == 'Intermediate' ? 'selected' : ''}>Intermediate</option>
+                                    <option value="Advanced" ${course != null && course.level == 'Advanced' ? 'selected' : ''}>Advanced</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="duration">Duration (hours)</label>
+                                <input type="number" id="duration" name="duration" class="form-input" min="1" value="${course != null ? course.duration : ''}">
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="level">Level</label>
-                            <select id="level" name="level" class="form-select">
-                                <option value="Beginner" ${course != null && course.level == 'Beginner' ? 'selected' : ''}>Beginner</option>
-                                <option value="Intermediate" ${course != null && course.level == 'Intermediate' ? 'selected' : ''}>Intermediate</option>
-                                <option value="Advanced" ${course != null && course.level == 'Advanced' ? 'selected' : ''}>Advanced</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="duration">Duration (hours)</label>
-                            <input type="number" id="duration" name="duration" class="form-input" 
-                                   min="1" value="${course != null ? course.duration : ''}">
-                        </div>
-                    </div>
 
-                    <div class="form-group">
-                        <label for="courseBanner">Course Banner (JPG, PNG, WEBP)</label>
-                        <input type="file" id="courseBanner" name="courseBanner" class="form-input" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">
-                        <small class="text-muted">Recommended size: 1280x720. Max: 5MB.</small>
-                        <c:if test="${mode == 'edit' && not empty course.courseBanner}">
-                            <div style="margin-top:8px;">
-                                <img src="${course.courseBanner}" alt="Current course banner" style="max-width:280px; width:100%; border:1px solid #ddd;">
+                        <div class="form-group">
+                            <label for="courseBanner">Course Banner (JPG, PNG, WEBP)</label>
+                            <input type="file" id="courseBanner" name="courseBanner" class="form-input" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">
+                            <small class="text-muted">Recommended size: 1280x720. Max: 5MB.</small>
+                            <c:if test="${mode == 'edit' && not empty course.courseBanner}">
+                                <div style="margin-top:12px;">
+                                    <img src="${course.courseBanner}" alt="Current course banner" style="max-width:320px; width:100%; border:1px solid #ddd; border-radius:12px;">
+                                </div>
+                            </c:if>
+                        </div>
+
+                        <c:if test="${mode == 'edit' && course.status == 'Approved'}">
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <span>Editing an approved course will reset its status to "Pending" and require admin re-approval.</span>
                             </div>
                         </c:if>
-                    </div>
 
-                    <!-- Status Warning -->
-                    <c:if test="${mode == 'edit' && course.status == 'Approved'}">
-                        <div class="alert alert-warning">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            <span>Editing an approved course will reset its status to "Pending" and require admin re-approval.</span>
+                        <div class="form-actions">
+                            <a href="${pageContext.request.contextPath}/instructor/courses" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i>
+                                ${mode == 'create' ? 'Submit for Approval' : 'Save Changes'}
+                            </button>
                         </div>
-                    </c:if>
-
-                    <!-- Form Actions -->
-                    <div class="form-actions">
-                        <a href="${pageContext.request.contextPath}/instructor/courses" class="btn btn-secondary">
-                            Cancel
-                        </a>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save"></i>
-                            ${mode == 'create' ? 'Submit for Approval' : 'Save Changes'}
-                        </button>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
         </div>
     </main>

@@ -16,6 +16,7 @@
 <body>
 <jsp:include page="/WEB-INF/views/common/admin-header.jsp">
     <jsp:param name="pageTitle" value="Enrollment Details"/>
+    <jsp:param name="pageSubtitle" value="Inspect one enrollment record in detail"/>
 </jsp:include>
 <jsp:include page="/WEB-INF/views/common/admin-sidebar.jsp"/>
 
@@ -24,9 +25,9 @@
         <section class="admin-page-head">
             <div class="admin-breadcrumb">
                 <a href="${pageContext.request.contextPath}/dashboard">Dashboard</a>
-                <i class="fas fa-angle-right"></i>
+                <span>&gt;</span>
                 <a href="${pageContext.request.contextPath}/admin/enrollments">Enrollments</a>
-                <i class="fas fa-angle-right"></i>
+                <span>&gt;</span>
                 <span>#${enrollment.enrollmentId}</span>
             </div>
 
@@ -141,7 +142,7 @@
             <div class="section-header">
                 <h2>Actions</h2>
             </div>
-            <div style="padding: 14px 16px 16px; display:flex; gap:8px; flex-wrap:wrap;">
+            <div class="section-actions-inset">
                 <a href="${pageContext.request.contextPath}/admin/enrollments" class="admin-btn secondary">Back to List</a>
                 <a href="${pageContext.request.contextPath}/admin/users?action=edit&userId=${enrollment.userId}" class="admin-btn primary">Open Student</a>
                 <a href="${pageContext.request.contextPath}/admin/courses" class="admin-btn secondary">Open Courses</a>

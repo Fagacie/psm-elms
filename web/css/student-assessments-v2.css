@@ -1,0 +1,181 @@
+.ass-metrics {
+  margin-bottom: 32px;
+}
+
+.ass-page-section + .ass-page-section,
+.assessment-flow-card,
+.ass-course-selector,
+.ass-list-card,
+.ass-detail-card {
+  margin-top: 0;
+}
+
+.ass-alert-stack {
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.ass-course-selector .sv-card-body,
+.ass-list-card .sv-card-body,
+.ass-detail-card .sv-card-body {
+  display: grid;
+  gap: 0;
+}
+
+.ass-course-selector .sv-flow-form-inline {
+  gap: 14px;
+}
+
+.ass-course-selector label {
+  font-size: 0.95rem;
+}
+
+.ass-selector-note {
+  margin: 0 0 18px;
+  color: var(--sv-muted);
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+.ass-summary-copy {
+  max-width: 56ch;
+}
+
+.assessment-table td .sv-btn,
+.history-table td .sv-btn {
+  margin-right: 8px;
+  margin-bottom: 8px;
+}
+
+.attempt-header {
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.attempt-header h3 {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.3;
+}
+
+.attempt-meta {
+  gap: 14px;
+  margin-top: 12px;
+  font-size: 0.9rem;
+}
+
+.timer-bar {
+  min-height: 42px;
+}
+
+.attempt-toolbar {
+  gap: 10px;
+  margin-top: 20px;
+  margin-bottom: 4px;
+}
+
+.question-card {
+  padding: 24px;
+  margin-bottom: 18px;
+}
+
+.question-title {
+  margin-bottom: 16px;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.question-options {
+  gap: 12px;
+}
+
+.question-option {
+  gap: 10px;
+  min-height: 42px;
+  padding: 10px 12px;
+  border: 1px solid var(--sv-border);
+  border-radius: 10px;
+  background: #ffffff;
+  line-height: 1.55;
+}
+
+.question-textarea {
+  min-height: 120px;
+}
+
+.upload-panel {
+  padding: 18px;
+  margin-bottom: 20px;
+}
+
+.upload-panel p {
+  margin: 0;
+}
+
+.upload-panel p + label,
+.upload-panel p + input,
+.upload-panel input + p {
+  margin-top: 10px;
+}
+
+.assessment-type-badge {
+  min-height: 30px;
+  padding: 0 10px;
+}
+
+.assessment-table th,
+.assessment-table td,
+.history-table th,
+.history-table td {
+  padding: 16px 14px;
+  vertical-align: top;
+}
+
+.assessment-table td,
+.history-table td {
+  line-height: 1.6;
+}
+
+@media (max-width: 760px) {
+  .ass-course-selector .sv-flow-form-inline {
+    align-items: stretch;
+  }
+
+  .ass-course-selector label {
+    margin-bottom: -2px;
+  }
+
+  .assessment-table,
+  .assessment-table thead,
+  .assessment-table tbody,
+  .assessment-table tr,
+  .assessment-table th,
+  .assessment-table td,
+  .history-table,
+  .history-table thead,
+  .history-table tbody,
+  .history-table tr,
+  .history-table th,
+  .history-table td {
+    display: block;
+  }
+
+  .assessment-table thead,
+  .history-table thead {
+    display: none;
+  }
+
+  .assessment-table tr,
+  .history-table tr {
+    padding: 16px 0;
+    border-bottom: 1px solid var(--sv-border);
+  }
+
+  .assessment-table td,
+  .history-table td {
+    padding: 8px 0;
+    border-bottom: none;
+  }
+}

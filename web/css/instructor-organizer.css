@@ -1,14 +1,14 @@
 .organizer-hero {
-    margin-bottom: 20px;
+    margin-bottom: 24px;
 }
 
 .organizer-section .section-header {
-    margin-bottom: 18px;
+    margin-bottom: 20px;
 }
 
 .section-title {
     margin: 0;
-    font-family: "Sora", "Inter", sans-serif;
+    font-family: "Inter", "Segoe UI", sans-serif;
     font-size: 1.08rem;
     color: var(--ins-text);
 }
@@ -22,7 +22,7 @@
 .organizer-shell {
     display: flex;
     flex-direction: column;
-    gap: 18px;
+    gap: 20px;
 }
 
 .organizer-section-label {
@@ -40,11 +40,11 @@
 .final-assessments-container {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
 }
 
 .organizer-item {
-    padding: 14px 16px;
+    padding: 16px 18px;
     border: 1px solid rgba(191, 209, 227, 0.88);
     border-radius: 18px;
     box-shadow: var(--ins-shadow-sm);
@@ -52,7 +52,7 @@
 }
 
 .organizer-item:hover {
-    transform: translateY(-3px);
+    transform: translateY(-2px);
     box-shadow: var(--ins-shadow-md);
 }
 
@@ -73,7 +73,7 @@
 .organizer-item-header {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 14px;
 }
 
 .organizer-drag-handle {
@@ -86,8 +86,8 @@
 }
 
 .organizer-item-icon {
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -107,7 +107,7 @@
 }
 
 .organizer-item-title {
-    margin: 0 0 4px;
+    margin: 0 0 6px;
     color: var(--ins-text);
     font-weight: 700;
     font-size: 0.94rem;
@@ -120,7 +120,7 @@
 
 .organizer-item-actions {
     display: flex;
-    gap: 8px;
+    gap: 10px;
 }
 
 .organizer-item-actions .btn {
@@ -128,8 +128,8 @@
 }
 
 .organizer-final-section {
-    margin-top: 8px;
-    padding-top: 20px;
+    margin-top: 10px;
+    padding-top: 22px;
     border-top: 1px dashed rgba(191, 209, 227, 0.9);
 }
 
@@ -137,8 +137,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
-    padding: 22px;
+    gap: 12px;
+    padding: 26px;
     border: 2px dashed rgba(191, 209, 227, 0.88);
     border-radius: 18px;
     background: #f8fbff;
@@ -156,7 +156,7 @@
 }
 
 .empty-state-box {
-    padding: 50px 24px;
+    padding: 54px 24px;
     text-align: center;
 }
 
@@ -201,4 +201,39 @@
         flex-direction: column;
         text-align: center;
     }
+}
+
+/* Ultra-minimal consistency overrides */
+.organizer-shell,
+.organizer-list,
+.final-assessments-container {
+    gap: 24px;
+}
+
+.organizer-item,
+.drop-zone-placeholder,
+.empty-state-box {
+    background: #ffffff;
+    border: 1px solid #f1f5f9;
+    border-radius: 12px;
+    box-shadow: none;
+}
+
+.organizer-item {
+    padding: 24px;
+}
+
+.organizer-item-material,
+.organizer-item-assessment {
+    background: #ffffff;
+    border-color: #f1f5f9;
+}
+
+.organizer-item:hover {
+    transform: translateY(-2px);
+    box-shadow: none;
+}
+
+.organizer-final-section {
+    border-top: 1px solid #f1f5f9;
 }

@@ -9,7 +9,7 @@
     <title>Certificates | PSM E-Learning</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/student-v2.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/certificates-v2.css">
@@ -38,13 +38,13 @@
         </div>
     </div>
     <div class="sv-top-right">
-        <div class="cert-user">
+        <a href="${pageContext.request.contextPath}/profile" class="cert-user">
             <span class="cert-user-icon"><i class="fas fa-user-graduate"></i></span>
             <div class="cert-user-copy">
                 <strong>${sessionScope.userName}</strong>
                 <span>Student</span>
             </div>
-        </div>
+        </a>
         <a href="${pageContext.request.contextPath}/logout" class="sv-logout">
             <i class="fas fa-sign-out-alt"></i>
             <span>Logout</span>
@@ -191,7 +191,6 @@
                                         <td>
                                             <form method="post" action="${pageContext.request.contextPath}/student/certificate" class="cert-inline-form">
                                                 <input type="hidden" name="enrollmentId" value="${enrollment.enrollmentId}">
-                                                <input type="hidden" name="redirectTo" value="certificates">
                                                 <button class="sv-btn primary cert-generate-btn" type="submit">
                                                     <i class="fas fa-file-signature"></i>
                                                     <span>Generate</span>
@@ -314,6 +313,10 @@
                                         </td>
                                         <td>
                                             <div class="cert-actions">
+                                                <a class="sv-btn" href="${pageContext.request.contextPath}/student/certificate?enrollmentId=${cert.enrollmentId}">
+                                                    <i class="fas fa-award"></i>
+                                                    <span>Open</span>
+                                                </a>
                                                 <a class="sv-btn" href="${pageContext.request.contextPath}/certificate/template?certificateId=${cert.certificateId}&back=${pageContext.request.contextPath}/student/certificates">
                                                     <i class="fas fa-eye"></i>
                                                     <span>Template</span>

@@ -8,7 +8,7 @@
     <title>Profile | PSM E-Learning</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/student-v2.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/profile-v2.css">
@@ -29,13 +29,13 @@
         </div>
     </div>
     <div class="sv-top-right">
-        <div class="profile-v2-user">
+        <a href="${pageContext.request.contextPath}/profile" class="profile-v2-user">
             <span class="profile-v2-user-icon"><i class="fas fa-user-circle"></i></span>
             <div class="profile-v2-user-copy">
                 <strong>${sessionScope.userName}</strong>
                 <span>${sessionScope.userRole}</span>
             </div>
-        </div>
+        </a>
         <a href="${pageContext.request.contextPath}/logout" class="sv-logout">
             <i class="fas fa-sign-out-alt"></i>
             <span>Logout</span>
@@ -98,19 +98,31 @@
             <span>Profile</span>
         </div>
 
-        <section class="profile-v2-hero" id="profileHero" aria-label="Profile overview highlights">
+        <section class="profile-v2-hero" aria-label="Profile overview highlights">
             <div class="profile-v2-hero-copy">
-                <p class="profile-v2-kicker">Identity Workspace</p>
-                <h2>Professional Account Control</h2>
-                <p>Manage personal details, profile media, and account security through an interactive dashboard-grade profile experience.</p>
+                <p class="profile-v2-kicker">Account Center</p>
+                <h2>Keep your profile complete and up to date.</h2>
+                <p>Update your personal details, contact information, and account settings from one clean workspace.</p>
             </div>
-            <div class="profile-v2-hero-scene" id="profileHeroScene" aria-hidden="true">
-                <span class="profile-v2-orb profile-v2-orb-a" data-depth="20"></span>
-                <span class="profile-v2-orb profile-v2-orb-b" data-depth="26"></span>
-                <span class="profile-v2-shape profile-v2-shape-a" data-depth="16"></span>
-                <span class="profile-v2-shape profile-v2-shape-b" data-depth="12"></span>
+            <div class="profile-v2-hero-actions">
+                <button type="button" class="sv-btn primary" data-open-password-modal>Change Password</button>
+                <a href="${pageContext.request.contextPath}/dashboard" class="sv-btn">Back to Dashboard</a>
             </div>
         </section>
+
+        <c:if test="${not empty sessionScope.passwordSuccess}">
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle"></i> ${sessionScope.passwordSuccess}
+            </div>
+            <c:remove var="passwordSuccess" scope="session"/>
+        </c:if>
+
+        <c:if test="${not empty sessionScope.passwordError}">
+            <div class="alert alert-error">
+                <i class="fas fa-exclamation-circle"></i> ${sessionScope.passwordError}
+            </div>
+            <c:remove var="passwordError" scope="session"/>
+        </c:if>
 
         <section class="sv-metrics profile-v2-metrics">
             <article class="sv-metric profile-v2-tilt">
@@ -146,12 +158,12 @@
         </c:if>
 
         <section class="profile-v2-grid">
-            <aside class="sv-card profile-v2-side profile-v2-animated profile-v2-tilt">
+            <aside class="sv-card profile-v2-side">
                 <div class="sv-card-head">
                     <h2>Account Overview</h2>
                 </div>
                 <div class="sv-card-body">
-                    <div class="profile-v2-photo profile-v2-tilt">
+                    <div class="profile-v2-photo">
                         <c:choose>
                             <c:when test="${not empty student.passportPath}">
                                 <c:choose>
@@ -215,9 +227,9 @@
                 </div>
             </aside>
 
-            <section class="profile-v2-main profile-v2-animated profile-v2-delay">
+            <section class="profile-v2-main">
                 <form action="${pageContext.request.contextPath}/profile" method="post">
-                    <div class="sv-card profile-v2-card profile-v2-tilt">
+                    <div class="sv-card profile-v2-card">
                         <div class="sv-card-head">
                             <h2>Personal Information</h2>
                         </div>
@@ -273,7 +285,7 @@
                     </div>
 
                     <c:if test="${sessionScope.userRole == 'Student'}">
-                        <div class="sv-card profile-v2-card profile-v2-tilt">
+                        <div class="sv-card profile-v2-card">
                             <div class="sv-card-head">
                                 <h2>Academic Information</h2>
                             </div>
@@ -294,7 +306,7 @@
                     </c:if>
 
                     <c:if test="${sessionScope.userRole == 'Instructor'}">
-                        <div class="sv-card profile-v2-card profile-v2-tilt">
+                        <div class="sv-card profile-v2-card">
                             <div class="sv-card-head">
                                 <h2>Instructor Information</h2>
                             </div>
@@ -329,7 +341,7 @@
                         </div>
                     </c:if>
 
-                    <div class="sv-card profile-v2-card profile-v2-tilt">
+                    <div class="sv-card profile-v2-card">
                         <div class="sv-card-head">
                             <h2>Account Settings</h2>
                         </div>
@@ -339,10 +351,10 @@
                                     <i class="fas fa-save"></i>
                                     <span>Save Changes</span>
                                 </button>
-                                <a href="${pageContext.request.contextPath}/change-password" class="sv-btn profile-v2-action-btn">
+                                <button type="button" class="sv-btn profile-v2-action-btn" data-open-password-modal>
                                     <i class="fas fa-key"></i>
                                     <span>Change Password</span>
-                                </a>
+                                </button>
                                 <a href="${pageContext.request.contextPath}/dashboard" class="sv-btn profile-v2-action-btn">
                                     <i class="fas fa-arrow-left"></i>
                                     <span>Back to Dashboard</span>
@@ -356,16 +368,165 @@
     </main>
 </div>
 
+<div class="profile-v2-password-modal" id="passwordModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="passwordModalTitle">
+    <div class="profile-v2-password-dialog">
+        <div class="profile-v2-password-header">
+            <div>
+                <p class="profile-v2-password-kicker">Security Workspace</p>
+                <h2 id="passwordModalTitle">Change Password</h2>
+                <p>Update your password without leaving the profile screen.</p>
+            </div>
+            <button type="button" class="profile-v2-password-close" data-close-password-modal aria-label="Close password modal">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <form action="${pageContext.request.contextPath}/change-password" method="post" id="passwordForm" class="profile-v2-password-form">
+            <div class="profile-v2-password-field">
+                <label for="currentPassword">Current Password</label>
+                <div class="profile-v2-password-input-wrap">
+                    <input type="password" id="currentPassword" name="currentPassword" placeholder="Enter your current password" required>
+                    <button type="button" class="profile-v2-password-toggle" data-target="currentPassword" aria-label="Toggle current password visibility">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="profile-v2-password-field">
+                <label for="newPassword">New Password</label>
+                <div class="profile-v2-password-input-wrap">
+                    <input type="password" id="newPassword" name="newPassword" placeholder="Create your new password" required>
+                    <button type="button" class="profile-v2-password-toggle" data-target="newPassword" aria-label="Toggle new password visibility">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="profile-v2-password-field">
+                <label for="confirmPassword">Confirm New Password</label>
+                <div class="profile-v2-password-input-wrap">
+                    <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Re-enter your new password" required>
+                    <button type="button" class="profile-v2-password-toggle" data-target="confirmPassword" aria-label="Toggle confirm password visibility">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="profile-v2-password-note">
+                Use at least 8 characters, mix letters and numbers, and avoid reusing an old password.
+            </div>
+
+            <div class="profile-v2-password-actions">
+                <button type="submit" class="sv-btn primary profile-v2-password-submit">
+                    <i class="fas fa-lock"></i>
+                    <span>Update Password</span>
+                </button>
+                <button type="button" class="sv-btn profile-v2-password-submit" data-close-password-modal>
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Close</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <div id="svOverlay" class="sv-overlay"></div>
 
+<c:set var="openPasswordModal" value="${param.openPasswordModal == '1' or not empty sessionScope.passwordError}" />
+
 <script src="${pageContext.request.contextPath}/js/student-v2.js"></script>
-<script src="${pageContext.request.contextPath}/js/profile-v2.js"></script>
 <script>
     document.getElementById('photoInput')?.addEventListener('change', function() {
         if (this.files && this.files[0]) {
             document.getElementById('photoUploadForm').submit();
         }
     });
+
+    (function () {
+        var modal = document.getElementById('passwordModal');
+        var overlay = document.getElementById('svOverlay');
+        var openButtons = document.querySelectorAll('[data-open-password-modal]');
+        var closeButtons = document.querySelectorAll('[data-close-password-modal]');
+        var passwordForm = document.getElementById('passwordForm');
+        var currentPasswordInput = document.getElementById('currentPassword');
+        var passwordToggles = modal ? modal.querySelectorAll('.profile-v2-password-toggle') : [];
+        var shouldOpen = '<c:out value="${openPasswordModal}" />' === 'true';
+
+        function openPasswordModal() {
+            if (!modal || !overlay) return;
+            modal.classList.add('show');
+            overlay.classList.add('show');
+            modal.setAttribute('aria-hidden', 'false');
+            if (currentPasswordInput) {
+                setTimeout(function () {
+                    currentPasswordInput.focus();
+                }, 0);
+            }
+        }
+
+        function closePasswordModal() {
+            if (!modal || !overlay) return;
+            modal.classList.remove('show');
+            overlay.classList.remove('show');
+            modal.setAttribute('aria-hidden', 'true');
+        }
+
+        openButtons.forEach(function (button) {
+            button.addEventListener('click', openPasswordModal);
+        });
+
+        closeButtons.forEach(function (button) {
+            button.addEventListener('click', closePasswordModal);
+        });
+
+        if (overlay) {
+            overlay.addEventListener('click', function () {
+                closePasswordModal();
+            });
+        }
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') {
+                closePasswordModal();
+            }
+        });
+
+        passwordToggles.forEach(function (toggle) {
+            toggle.addEventListener('click', function () {
+                var targetId = toggle.getAttribute('data-target');
+                var input = document.getElementById(targetId);
+                var icon = toggle.querySelector('i');
+
+                if (!input || !icon) return;
+
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
+                } else {
+                    input.type = 'password';
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
+                }
+            });
+        });
+
+        if (passwordForm) {
+            passwordForm.addEventListener('submit', function (event) {
+                var newPassword = document.getElementById('newPassword');
+                var confirmPassword = document.getElementById('confirmPassword');
+
+                if (newPassword && confirmPassword && newPassword.value !== confirmPassword.value) {
+                    event.preventDefault();
+                    window.alert('New password and confirmation password do not match. Please try again.');
+                }
+            });
+        }
+
+        if (shouldOpen) {
+            openPasswordModal();
+        }
+    })();
 </script>
 </body>
 </html>

@@ -4,7 +4,7 @@
 }
 
 .breadcrumb {
-    margin-bottom: 18px;
+    margin-bottom: 20px;
     padding-bottom: 0;
     border-bottom: none;
 }
@@ -23,13 +23,13 @@
 }
 
 .form-header {
-    margin-bottom: 18px;
-    padding-bottom: 14px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
 }
 
 .form-header h2 {
     margin: 0 0 8px;
-    font-size: 1.5rem;
+    font-size: 1.45rem;
 }
 
 .form-description {
@@ -39,7 +39,7 @@
 }
 
 .form-card {
-    padding: 28px;
+    padding: 30px;
 }
 
 .form-card:hover {
@@ -48,18 +48,18 @@
 
 .course-form {
     display: grid;
-    gap: 24px;
+    gap: 26px;
 }
 
 .form-row {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 18px;
+    gap: 20px;
 }
 
 .form-group {
     display: grid;
-    gap: 8px;
+    gap: 9px;
 }
 
 .form-group label {
@@ -80,7 +80,7 @@
 .form-input,
 .form-textarea,
 .form-select {
-    padding: 12px 14px;
+    padding: 13px 14px;
     font-size: 0.95rem;
     color: var(--ins-text);
 }
@@ -91,7 +91,7 @@
 }
 
 .form-textarea {
-    min-height: 140px;
+    min-height: 150px;
     resize: vertical;
     line-height: 1.6;
 }
@@ -108,8 +108,8 @@
 .form-actions {
     display: flex;
     justify-content: flex-end;
-    gap: 12px;
-    padding-top: 20px;
+    gap: 14px;
+    padding-top: 22px;
     margin-top: 8px;
     border-top: 1px solid rgba(191, 209, 227, 0.8);
 }
@@ -129,7 +129,7 @@ img[alt="Current course banner"] {
 
 @media (max-width: 768px) {
     .form-card {
-        padding: 20px;
+        padding: 22px;
     }
 
     .form-row {
@@ -144,4 +144,33 @@ img[alt="Current course banner"] {
     .form-actions .btn {
         width: 100%;
     }
+}
+
+/* Ultra-minimal consistency overrides */
+.form-card {
+    background: #ffffff;
+    border: 1px solid #f1f5f9;
+    border-radius: 12px;
+    box-shadow: none;
+    padding: 24px;
+}
+
+.form-card:hover {
+    box-shadow: none;
+    transform: translateY(-2px);
+}
+
+.form-select {
+    background-image: none;
+    padding-right: 14px;
+}
+
+.form-actions {
+    border-top: 1px solid #f1f5f9;
+}
+
+img[alt="Current course banner"] {
+    border: 1px solid #f1f5f9;
+    border-radius: 12px;
+    box-shadow: none;
 }

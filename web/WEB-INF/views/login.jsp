@@ -8,44 +8,50 @@
     <title>Login - PSM E-Learning</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/auth-v2.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/auth-premium.css">
 </head>
-<body class="av2-page">
-    <main class="av2-shell">
-        <section class="av2-panel av2-brand" aria-hidden="true">
-            <p class="av2-kicker">PSM E-Learning</p>
-            <h1>Welcome Back</h1>
-            <div class="av2-scene" role="presentation">
-                <span class="av2-obj av2-book" data-depth="16"></span>
-                <span class="av2-obj av2-pen" data-depth="24"></span>
-                <span class="av2-obj av2-cap" data-depth="12"></span>
-                <span class="av2-obj av2-paper" data-depth="20"></span>
-                <span class="av2-obj av2-ring" data-depth="28"></span>
+<body class="auth-page">
+<main class="auth-shell">
+    <section class="auth-layout auth-layout-login" aria-labelledby="login-title">
+        <aside class="auth-visual" aria-hidden="true">
+            <p class="auth-kicker">PSM E-Learning</p>
+            <h2>Learn Smarter, Anywhere</h2>
+            <p class="auth-visual-text">Pick up where you left off. Your courses, progress, and certificates await.</p>
+            
+            <ul class="auth-visual-list">
+                <li>Access courses instantly</li>
+                <li>Track your progress in real-time</li>
+                <li>Earn recognized certificates</li>
+            </ul>
+            
+            <div class="auth-scene" data-auth-scene>
+                <span class="auth-shape auth-shape-a" data-depth="18"></span>
+                <span class="auth-shape auth-shape-b" data-depth="28"></span>
+                <span class="auth-shape auth-shape-c" data-depth="22"></span>
+                <span class="auth-shape auth-shape-d" data-depth="14"></span>
             </div>
-            <a class="av2-link" href="${pageContext.request.contextPath}/">Back to Home</a>
-        </section>
+        </aside>
 
-        <section class="av2-panel av2-form-panel">
-            <div class="av2-form-wrap">
-                <header class="av2-form-head">
-                    <h2>Sign In</h2>
-                    <p>Enter your account credentials to continue.</p>
-                </header>
+        <section class="auth-card">
+            <header class="auth-head">
+                <h1 id="login-title">Login</h1>
+                <p>Access your account using your registration number or email.</p>
+            </header>
 
-                <c:if test="${not empty sessionScope.successMessage}">
-                    <div class="av2-alert av2-alert-success">${sessionScope.successMessage}</div>
-                    <c:remove var="successMessage" scope="session"/>
-                </c:if>
+            <c:if test="${not empty sessionScope.successMessage}">
+                <div class="auth-alert auth-alert-success">${sessionScope.successMessage}</div>
+                <c:remove var="successMessage" scope="session"/>
+            </c:if>
 
-                <c:if test="${not empty error}">
-                    <div class="av2-alert av2-alert-error">${error}</div>
-                </c:if>
+            <c:if test="${not empty error}">
+                <div class="auth-alert auth-alert-error">${error}</div>
+            </c:if>
 
-                <form action="${pageContext.request.contextPath}/login" method="post" class="av2-form" novalidate>
-                    <div class="av2-group">
-                        <label for="identifier">Registration Number or Email</label>
-                        <input
+            <form action="${pageContext.request.contextPath}/login" method="post" class="auth-form" novalidate>
+                <div class="auth-field">
+                    <label for="identifier">Registration Number or Email</label>
+                    <input
                             id="identifier"
                             name="identifier"
                             type="text"
@@ -53,29 +59,29 @@
                             placeholder="e.g. PSM1783 or user@example.com"
                             required
                             autofocus>
-                        <small>Students can use registration number. All users can use email.</small>
-                    </div>
-
-                    <div class="av2-group">
-                        <label for="password">Password</label>
-                        <input id="password" name="password" type="password" placeholder="Enter your password" required>
-                    </div>
-
-                    <div class="av2-row">
-                        <a href="${pageContext.request.contextPath}/forgot-password" class="av2-link-inline">Forgot password?</a>
-                    </div>
-
-                    <button type="submit" class="av2-btn av2-btn-solid">Login</button>
-                </form>
-
-                <div class="av2-switch">
-                    <span>New student?</span>
-                    <a href="${pageContext.request.contextPath}/register">Create account</a>
                 </div>
-            </div>
+
+                <div class="auth-field">
+                    <label for="password">Password</label>
+                    <input id="password" name="password" type="password" placeholder="Enter your password" required>
+                </div>
+
+                <div class="auth-row">
+                    <a href="${pageContext.request.contextPath}/forgot-password" class="auth-link">Forgot password?</a>
+                </div>
+
+                <button type="submit" class="auth-btn">Login</button>
+            </form>
+
+            <p class="auth-switch">
+                New student?
+                <a href="${pageContext.request.contextPath}/register" class="auth-link">Create Account</a>
+            </p>
         </section>
-    </main>
-    <script src="${pageContext.request.contextPath}/js/auth-v2.js"></script></body>
+    </section>
+</main>
+<script src="${pageContext.request.contextPath}/js/auth-v2.js"></script>
+</body>
 </html>
 
 

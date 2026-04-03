@@ -1,359 +1,365 @@
 :root {
-  --lp-bg: #050b14;
-  --lp-bg-soft: #0b1828;
-  --lp-panel: #101f33;
-  --lp-panel-2: #122742;
-  --lp-border: #223b5c;
-  --lp-text: #eaf2ff;
-  --lp-muted: #9fb2cc;
-  --lp-accent: #41c6ff;
-  --lp-warm: #f4b85d;
-  --lp-good: #3ed187;
+  --auth-bg: #ffffff;
+  --auth-text: #0f172a;
+  --auth-muted: #64748b;
+  --auth-border: #f1f5f9;
+  --auth-input-border: #e5e7eb;
+  --auth-input-focus: #cbd5e1;
+  --auth-button: #111111;
 }
 
 * {
   box-sizing: border-box;
 }
 
-body.av2-page {
+body.auth-page {
   margin: 0;
   min-height: 100vh;
-  font-family: "IBM Plex Sans", "Segoe UI", Arial, sans-serif;
-  color: var(--lp-text);
-  background: linear-gradient(180deg, #040a12 0%, #081526 40%, #0b1729 100%);
-  display: grid;
-  place-items: center;
-  padding: 28px;
+  background: var(--auth-bg);
+  color: var(--auth-text);
+  font-family: "Inter", "Segoe UI", Arial, sans-serif;
 }
 
-.av2-shell {
+.auth-shell {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.auth-layout {
   width: min(1100px, 100%);
   min-height: 680px;
+  border: 1px solid var(--auth-border);
+  border-radius: 20px;
+  overflow: hidden;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  border: 1px solid var(--lp-border);
-  background: linear-gradient(180deg, rgba(16, 31, 51, 0.94), rgba(9, 18, 31, 0.94));
-  box-shadow: 0 18px 45px rgba(4, 12, 22, 0.55);
+  background: #ffffff;
 }
 
-.av2-shell-register {
+.auth-layout-register {
   min-height: 760px;
 }
 
-.av2-panel {
-  padding: 42px;
-}
-
-.av2-brand {
-  background:
-    linear-gradient(180deg, rgba(18, 39, 66, 0.8), rgba(10, 22, 37, 0.85)),
-    repeating-linear-gradient(90deg, rgba(65, 198, 255, 0.04) 0, rgba(65, 198, 255, 0.04) 1px, transparent 1px, transparent 30px);
-  border-right: 1px solid var(--lp-border);
+.auth-visual {
+  padding: 36px;
+  border-right: 1px solid var(--auth-border);
   display: flex;
   flex-direction: column;
+  gap: 14px;
+  background: #fcfcfd;
 }
 
-.av2-kicker {
+.auth-kicker {
   margin: 0;
-  font-size: 0.84rem;
+  color: var(--auth-muted);
+  font-size: 0.78rem;
+  font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--lp-accent);
-  font-weight: 600;
 }
 
-.av2-brand h1 {
-  font-family: "Space Grotesk", sans-serif;
-  font-size: clamp(1.8rem, 2.4vw, 2.45rem);
-  line-height: 1.2;
-  margin: 14px 0 18px;
-  max-width: 14ch;
+.auth-visual h2 {
+  margin: 0;
+  font-size: clamp(2rem, 2.8vw, 2.6rem);
+  line-height: 1.05;
+  font-weight: 700;
+  letter-spacing: -0.03em;
 }
 
-.av2-scene {
+.auth-visual-text {
+  margin: 0;
+  max-width: 44ch;
+  color: var(--auth-muted);
+  line-height: 1.6;
+}
+
+.auth-scene {
   position: relative;
   flex: 1;
-  min-height: 240px;
-  border: 1px solid #2a486d;
-  background:
-    radial-gradient(circle at 18% 20%, rgba(65, 198, 255, 0.17), transparent 45%),
-    radial-gradient(circle at 80% 82%, rgba(244, 184, 93, 0.14), transparent 45%),
-    linear-gradient(180deg, rgba(14, 30, 50, 0.86), rgba(8, 18, 31, 0.9));
+  min-height: 260px;
+  border: 1px solid var(--auth-input-border);
+  border-radius: 16px;
   overflow: hidden;
+  background: #ffffff;
+  background: radial-gradient(circle 800px at 20% 30%, rgba(15, 23, 42, 0.04) 0%, transparent 100%);
 }
 
-.av2-obj {
+.auth-shape {
   position: absolute;
-  border: 1px solid #3b5f87;
-  background: #10233d;
-  animation: av2Float 7s ease-in-out infinite;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  transition: transform 0.22s ease;
+  animation: authFloat 8s ease-in-out infinite;
+  box-shadow: 0 0 0 0 rgba(148, 163, 184, 0.1);
+  will-change: transform;
 }
 
-.av2-book {
-  width: 80px;
-  height: 56px;
+.auth-shape-a {
+  width: 132px;
+  height: 88px;
+  top: 16%;
   left: 12%;
-  top: 18%;
-  background: linear-gradient(160deg, #1b3659, #10233c);
-  box-shadow: inset 16px 0 0 #294a73;
+  animation: authFloat 8s ease-in-out infinite, authGlow 4s ease-in-out infinite;
+  animation-delay: 0.2s, 0.1s;
 }
 
-.av2-pen {
-  width: 96px;
-  height: 12px;
-  left: 56%;
-  top: 24%;
-  background: linear-gradient(90deg, #19a3d7, #2485ff);
-  border-color: #1e78e0;
-  animation-duration: 6s;
+.auth-shape-b {
+  width: 170px;
+  height: 108px;
+  top: 54%;
+  left: 58%;
+  animation: authFloat 8.4s ease-in-out infinite, authGlow 5s ease-in-out infinite, authRotate 12s linear infinite;
+  animation-delay: 0.6s, 0.3s, 0s;
 }
 
-.av2-cap {
-  width: 66px;
-  height: 46px;
-  left: 28%;
-  top: 56%;
-  background: linear-gradient(160deg, #17375d, #0f2741);
-  border-color: #33567d;
-  animation-duration: 8s;
+.auth-shape-c {
+  width: 92px;
+  height: 92px;
+  top: 22%;
+  left: 64%;
+  border-radius: 999px;
+  animation: authFloat 7.6s ease-in-out infinite, authGlow 3.8s ease-in-out infinite, authRotate 15s linear infinite reverse;
+  animation-delay: 0.9s, 0.5s, 0s;
+  background: linear-gradient(135deg, #f8fafc 0%, rgba(248, 250, 252, 0.8) 100%);
 }
 
-.av2-paper {
-  width: 70px;
-  height: 84px;
-  left: 66%;
-  top: 52%;
-  background: repeating-linear-gradient(0deg, #dfeafe, #dfeafe 9px, #b9cde7 9px, #b9cde7 10px);
-  border-color: #7b9ec5;
-  animation-duration: 5.8s;
+.auth-shape-d {
+  width: 110px;
+  height: 62px;
+  top: 70%;
+  left: 20%;
+  animation: authFloat 7.8s ease-in-out infinite, authGlow 4.5s ease-in-out infinite;
+  animation-delay: 1.2s, 0.7s;
 }
 
-.av2-ring {
-  width: 74px;
-  height: 74px;
-  left: 42%;
-  top: 38%;
-  border: 7px solid #587da8;
-  background: transparent;
-  animation-duration: 9s;
+.auth-layout-login .auth-shape {
+  border-color: rgba(15, 23, 42, 0.12);
+  background: #fcfcfd;
 }
 
-@keyframes av2Float {
-  0% { transform: translateY(0) rotate(0deg); }
-  50% { transform: translateY(-10px) rotate(1.6deg); }
-  100% { transform: translateY(0) rotate(0deg); }
+.auth-layout-login .auth-shape-b {
+  background: linear-gradient(135deg, #f0f4ff 0%, #faf8ff 100%);
+  border-color: rgba(100, 116, 139, 0.15);
 }
 
-
-.av2-scene.is-parallax .av2-obj {
-  animation: none;
-  transition: transform 120ms ease-out;
-}
-.av2-link {
-  margin-top: 18px;
-  color: #cce0ff;
-  text-decoration: none;
-  font-weight: 600;
+.auth-layout-register .auth-shape {
+  border-color: rgba(20, 83, 45, 0.1);
+  background: rgba(240, 253, 244, 0.5);
 }
 
-.av2-link:hover {
-  color: var(--lp-accent);
+.auth-layout-register .auth-shape-c {
+  background: linear-gradient(135deg, rgba(240, 253, 244, 0.8) 0%, rgba(187, 247, 208, 0.2) 100%);
+  border-color: rgba(20, 83, 45, 0.15);
 }
 
-.av2-form-panel {
-  display: flex;
-  align-items: center;
+@keyframes authFloat {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
 }
 
-.av2-form-wrap {
-  width: 100%;
-  max-width: 460px;
-  margin: 0 auto;
+@keyframes authGlow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(148, 163, 184, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 12px 2px rgba(148, 163, 184, 0.15);
+  }
 }
 
-.av2-form-head h2 {
+@keyframes authRotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.auth-card {
+  width: min(100%, 520px);
+  background: #ffffff;
+  padding: 36px;
+  margin: auto;
+}
+
+.auth-head {
+  margin-bottom: 24px;
+}
+
+.auth-head h1 {
   margin: 0;
-  font-family: "Space Grotesk", sans-serif;
-  font-size: 1.9rem;
+  font-size: 1.85rem;
+  line-height: 1.2;
+  font-weight: 700;
+  color: var(--auth-text);
 }
 
-.av2-form-head p {
-  margin: 8px 0 20px;
-  color: var(--lp-muted);
+.auth-head p {
+  margin: 10px 0 0;
+  color: var(--auth-muted);
+  font-size: 0.94rem;
+  line-height: 1.5;
 }
 
-.av2-alert {
-  border-left: 4px solid;
-  padding: 12px 14px;
+.auth-alert {
+  border: 1px solid var(--auth-border);
+  border-radius: 8px;
+  padding: 10px 12px;
   margin-bottom: 16px;
-  font-size: 0.92rem;
+  font-size: 0.9rem;
+  line-height: 1.45;
 }
 
-.av2-alert-error {
-  border-color: #d24b5d;
-  background: rgba(210, 75, 93, 0.15);
+.auth-alert-error {
+  color: #7f1d1d;
+  border-color: #fecaca;
+  background: #fef2f2;
 }
 
-.av2-alert-success {
-  border-color: var(--lp-good);
-  background: rgba(62, 209, 135, 0.12);
+.auth-alert-success {
+  color: #14532d;
+  border-color: #bbf7d0;
+  background: #f0fdf4;
 }
 
-.av2-form {
+.auth-form {
   display: grid;
-  gap: 14px;
+  gap: 16px;
 }
 
-.av2-form-grid {
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
-}
-
-.av2-group {
+.auth-field {
   display: grid;
-  gap: 7px;
+  gap: 8px;
 }
 
-.av2-form-grid .av2-group:nth-child(5),
-.av2-form-grid .av2-group:nth-child(6),
-.av2-form-grid .av2-meta,
-.av2-form-grid .av2-btn {
-  grid-column: 1 / -1;
-}
-
-.av2-group label {
-  font-size: 0.88rem;
+.auth-field label {
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--auth-muted);
   font-weight: 600;
 }
 
-.av2-group input {
+.auth-field input {
   width: 100%;
-  border: 1px solid #2b4b71;
-  background: linear-gradient(180deg, rgba(16, 33, 56, 0.9), rgba(8, 18, 31, 0.9));
-  color: var(--lp-text);
-  padding: 12px;
-  font-size: 0.94rem;
+  border: 1px solid var(--auth-input-border);
+  border-radius: 8px;
+  background: #ffffff;
+  color: var(--auth-text);
+  padding: 11px 12px;
+  font-size: 0.95rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.av2-group input::placeholder {
-  color: #8ea7c4;
+.auth-field input::placeholder {
+  color: #94a3b8;
 }
 
-.av2-group input:focus {
-  outline: 2px solid #7fd3ff;
-  outline-offset: 0;
-  border-color: #7fd3ff;
+.auth-field input:focus {
+  outline: none;
+  border-color: var(--auth-input-focus);
+  box-shadow: 0 0 0 3px rgba(148, 163, 184, 0.15);
 }
 
-.av2-group small {
-  color: var(--lp-muted);
-  font-size: 0.78rem;
-}
-
-.av2-row {
+.auth-row {
   display: flex;
   justify-content: flex-end;
-  margin-top: -2px;
 }
 
-.av2-link-inline {
-  color: #cce0ff;
-  text-decoration: none;
-  font-size: 0.9rem;
-  font-weight: 600;
-}
-
-.av2-link-inline:hover {
-  color: var(--lp-accent);
-}
-
-.av2-meta {
-  border: 1px solid #2a486d;
-  background: linear-gradient(180deg, rgba(14, 30, 50, 0.85), rgba(8, 18, 31, 0.85));
-  padding: 10px 12px;
-  font-size: 0.84rem;
-  color: #9fc0df;
-}
-
-.av2-btn {
-  border: 1px solid #1e78e0;
-  padding: 12px 14px;
+.auth-btn {
+  width: 100%;
+  border: 1px solid var(--auth-button);
+  border-radius: 8px;
+  background: var(--auth-button);
+  color: #ffffff;
+  padding: 12px;
+  min-height: 44px;
   font-size: 0.95rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-  cursor: pointer;
-}
-
-.av2-btn-solid {
-  background: linear-gradient(120deg, #19a3d7, #2485ff);
-  color: #f4faff;
-}
-
-.av2-btn-solid:hover {
-  background: linear-gradient(120deg, #178fbd, #1f74de);
-  border-color: #1f74de;
-}
-
-.av2-switch {
-  margin-top: 16px;
-  font-size: 0.92rem;
-  color: var(--lp-muted);
-}
-
-.av2-switch a {
-  margin-left: 8px;
-  color: #cce0ff;
-  text-decoration: none;
   font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
 }
 
-.av2-switch a:hover {
-  color: var(--lp-accent);
+.auth-btn:hover {
+  opacity: 0.92;
 }
 
-@media (max-width: 960px) {
-  .av2-shell,
-  .av2-shell-register {
-    grid-template-columns: 1fr;
-    min-height: auto;
-  }
+.auth-link {
+  color: var(--auth-text);
+  text-decoration: none;
+  font-weight: 500;
+  transition: opacity 0.2s ease;
+}
 
-  .av2-brand {
-    border-right: 0;
-    border-bottom: 1px solid var(--lp-border);
-  }
+.auth-link:hover {
+  opacity: 0.72;
+}
 
-  .av2-form-wrap {
-    max-width: 100%;
-  }
+.auth-note {
+  margin: 0;
+  color: var(--auth-muted);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
 
-  .av2-scene {
-    min-height: 180px;
-  }
+.auth-switch {
+  margin: 20px 0 0;
+  color: var(--auth-muted);
+  font-size: 0.92rem;
 }
 
 @media (max-width: 640px) {
-  body.av2-page {
-    padding: 12px;
+  .auth-shell {
+    padding: 16px;
   }
 
-  .av2-panel {
-    padding: 22px;
-  }
-
-  .av2-form-grid {
+  .auth-layout {
+    border-radius: 14px;
+    min-height: auto;
     grid-template-columns: 1fr;
   }
 
-  .av2-obj {
-    transform: scale(0.9);
+  .auth-visual {
+    border-right: 0;
+    border-bottom: 1px solid var(--auth-border);
+    padding: 22px;
+  }
+
+  .auth-scene {
+    min-height: 180px;
+  }
+
+  .auth-card {
+    border-radius: 0;
+    padding: 22px;
+    width: 100%;
+  }
+
+  .auth-head {
+    margin-bottom: 20px;
+  }
+
+  .auth-head h1 {
+    font-size: 1.6rem;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .av2-obj {
+  .auth-shape {
     animation: none !important;
+    transition: none !important;
+    box-shadow: 0 0 0 0 rgba(148, 163, 184, 0.1);
   }
 }
 

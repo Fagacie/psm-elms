@@ -9,7 +9,7 @@
     <title>Certificate | PSM E-Learning</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/student-v2.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/student-certificate-v2.css">
@@ -21,7 +21,7 @@
         <a href="${pageContext.request.contextPath}/dashboard" class="sv-brand"><span class="sv-brand-main">PSM</span><span class="sv-brand-sub">E-Learning</span></a>
         <div class="sv-page-title"><h1>Certificate</h1><p>Issue and verify course credential</p></div>
     </div>
-    <div class="sv-top-right"><a href="${pageContext.request.contextPath}/logout" class="sv-logout"><i class="fas fa-right-from-bracket"></i> Logout</a></div>
+    <div class="sv-top-right"><a href="${pageContext.request.contextPath}/profile" class="sv-profile-link"><i class="fas fa-user"></i><span>${sessionScope.userName}</span></a><a href="${pageContext.request.contextPath}/logout" class="sv-logout"><i class="fas fa-right-from-bracket"></i> Logout</a></div>
 </header>
 
 <div class="sv-layout">
@@ -61,7 +61,7 @@
             <div class="sv-card-body sc-toolbar">
                 <a class="sv-btn" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=learning">Back to Learning Hub</a>
                 <button class="sv-btn primary" type="button" onclick="window.print()">Download / Print</button>
-                <c:if test="${not empty certificate}">
+                <c:if test="${not empty certificate and not empty certificate.verificationURL}">
                     <a class="sv-btn" target="_blank" href="${certificate.verificationURL}">Verify</a>
                 </c:if>
             </div>
@@ -151,7 +151,14 @@
 
                     <c:if test="${not empty certificate.qrCodePath}">
                         <div class="sc-qr">
-                            <img src="${certificate.qrCodePath}" alt="Certificate QR Code">
+                            <c:choose>
+                                <c:when test="${certificate.qrCodePath.startsWith('http')}">
+                                    <img src="${certificate.qrCodePath}" alt="Certificate QR Code">
+                                </c:when>
+                                <c:otherwise>
+                                    <img src="${pageContext.request.contextPath}/${certificate.qrCodePath}" alt="Certificate QR Code">
+                                </c:otherwise>
+                            </c:choose>
                         </div>
                     </c:if>
                     <div class="sc-verify">

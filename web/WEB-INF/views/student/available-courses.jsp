@@ -10,7 +10,7 @@
     <title>Browse Courses - PSM E-Learning</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/student-v2.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/browse-courses-v2.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -22,7 +22,7 @@
         <a href="${pageContext.request.contextPath}/dashboard" class="sv-brand"><span class="sv-brand-main">PSM</span><span class="sv-brand-sub">E-Learning</span></a>
         <div class="sv-page-title"><h1>Browse Courses</h1><p>Discover and enroll in new courses</p></div>
     </div>
-    <div class="sv-top-right"><a href="${pageContext.request.contextPath}/logout" class="sv-logout"><i class="fas fa-right-from-bracket"></i> Logout</a></div>
+    <div class="sv-top-right"><a href="${pageContext.request.contextPath}/profile" class="sv-profile-link"><i class="fas fa-user"></i><span>${sessionScope.userName}</span></a><a href="${pageContext.request.contextPath}/logout" class="sv-logout"><i class="fas fa-right-from-bracket"></i> Logout</a></div>
 </header>
 
 <div class="sv-layout">
@@ -144,11 +144,18 @@
                             </div>
                             <div class="sv-card-body">
                                 <div class="bc-banner-wrap">
-                                    <c:choose>
-                                        <c:when test="${not empty course.courseBanner}">
-                                            <img class="bc-banner" src="${course.courseBanner}" alt="${course.courseName} banner">
-                                        </c:when>
-                                        <c:otherwise>
+                                        <c:choose>
+                                            <c:when test="${not empty course.courseBanner}">
+                                                <c:choose>
+                                                    <c:when test="${course.courseBanner.startsWith('http')}">
+                                                        <img class="bc-banner" src="${course.courseBanner}" alt="${course.courseName} banner">
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <img class="bc-banner" src="${pageContext.request.contextPath}/${course.courseBanner}" alt="${course.courseName} banner">
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </c:when>
+                                            <c:otherwise>
                                             <div class="bc-banner bc-banner-placeholder">
                                                 <i class="fas fa-image"></i>
                                                 <span>Course Banner</span>
@@ -201,3 +208,4 @@
 <script src="${pageContext.request.contextPath}/js/browse-courses-v2.js"></script>
 </body>
 </html>
+

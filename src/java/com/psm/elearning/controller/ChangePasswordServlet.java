@@ -30,7 +30,7 @@ public class ChangePasswordServlet extends HttpServlet {
             return;
         }
 
-        request.getRequestDispatcher("/WEB-INF/views/change-password.jsp").forward(request, response);
+        response.sendRedirect(request.getContextPath() + "/profile?openPasswordModal=1");
     }
 
     @Override
@@ -52,36 +52,36 @@ public class ChangePasswordServlet extends HttpServlet {
         if (currentPassword == null || currentPassword.trim().isEmpty() ||
             newPassword == null || newPassword.trim().isEmpty() ||
             confirmPassword == null || confirmPassword.trim().isEmpty()) {
-            request.setAttribute("error", "All fields are required.");
-            request.getRequestDispatcher("/WEB-INF/views/change-password.jsp").forward(request, response);
+            session.setAttribute("passwordError", "All fields are required.");
+            response.sendRedirect(request.getContextPath() + "/profile?openPasswordModal=1");
             return;
         }
 
         // Check new password length
         if (newPassword.length() < 6) {
-            request.setAttribute("error", "New password must be at least 6 characters long.");
-            request.getRequestDispatcher("/WEB-INF/views/change-password.jsp").forward(request, response);
+            session.setAttribute("passwordError", "New password must be at least 6 characters long.");
+            response.sendRedirect(request.getContextPath() + "/profile?openPasswordModal=1");
             return;
         }
 
         // Check new password match
         if (!newPassword.equals(confirmPassword)) {
-            request.setAttribute("error", "New passwords do not match.");
-            request.getRequestDispatcher("/WEB-INF/views/change-password.jsp").forward(request, response);
+            session.setAttribute("passwordError", "New passwords do not match.");
+            response.sendRedirect(request.getContextPath() + "/profile?openPasswordModal=1");
             return;
         }
 
         // Verify current password
         User user = userDAO.findById(sessionUser.getUserId());
         if (user == null) {
-            request.setAttribute("error", "User not found.");
-            request.getRequestDispatcher("/WEB-INF/views/change-password.jsp").forward(request, response);
+            session.setAttribute("passwordError", "User not found.");
+            response.sendRedirect(request.getContextPath() + "/profile?openPasswordModal=1");
             return;
         }
 
         if (!PasswordUtil.verifyPassword(currentPassword, user.getPasswordHash())) {
-            request.setAttribute("error", "Current password is incorrect.");
-            request.getRequestDispatcher("/WEB-INF/views/change-password.jsp").forward(request, response);
+            session.setAttribute("passwordError", "Current password is incorrect.");
+            response.sendRedirect(request.getContextPath() + "/profile?openPasswordModal=1");
             return;
         }
 
@@ -102,11 +102,11 @@ public class ChangePasswordServlet extends HttpServlet {
                 System.err.println("Failed to send password change confirmation: " + emailEx.getMessage());
             }
             
-            request.setAttribute("success", "Password changed successfully! A confirmation email has been sent.");
+            session.setAttribute("passwordSuccess", "Password changed successfully! A confirmation email has been sent.");
         } else {
-            request.setAttribute("error", "Failed to change password. Please try again.");
+            session.setAttribute("passwordError", "Failed to change password. Please try again.");
         }
 
-        request.getRequestDispatcher("/WEB-INF/views/change-password.jsp").forward(request, response);
+        response.sendRedirect(request.getContextPath() + "/profile");
     }
 }

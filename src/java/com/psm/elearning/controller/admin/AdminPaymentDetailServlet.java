@@ -4,13 +4,11 @@ import com.psm.elearning.dao.PaymentDAO;
 import com.psm.elearning.dao.PaymentDAOImpl;
 import com.psm.elearning.model.Payment;
 import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-@WebServlet(name = "AdminPaymentDetailServlet", urlPatterns = {"/admin/payment"})
 public class AdminPaymentDetailServlet extends HttpServlet {
     private final PaymentDAO paymentDAO = new PaymentDAOImpl();
 

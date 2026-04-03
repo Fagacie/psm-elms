@@ -235,8 +235,16 @@ public class EnrollmentStateSyncService {
             return viewedMaterials >= totalMaterials;
         }
 
+        public boolean isViewedAllMaterials() {
+            return hasViewedAllMaterials();
+        }
+
         public boolean hasPassedRequiredAssessments() {
             return passedAssessments >= totalAssessments;
+        }
+
+        public boolean isPassedRequiredAssessments() {
+            return hasPassedRequiredAssessments();
         }
 
         public List<String> getMissingRequirements() {

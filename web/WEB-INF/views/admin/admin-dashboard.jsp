@@ -10,14 +10,14 @@
     <title>Admin Dashboard - PSM E-Learning</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin-dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 </head>
 <body>
 <jsp:include page="/WEB-INF/views/common/admin-header.jsp">
     <jsp:param name="pageTitle" value="Admin Dashboard"/>
+    <jsp:param name="pageSubtitle" value="Manage platform operations from one structured workspace"/>
 </jsp:include>
 
 <jsp:include page="/WEB-INF/views/common/admin-sidebar.jsp"/>
@@ -27,27 +27,27 @@
         <section class="admin-page-head">
             <div class="admin-breadcrumb">
                 <a href="${pageContext.request.contextPath}/dashboard">Dashboard</a>
-                <i class="fas fa-angle-right"></i>
+                <span>&gt;</span>
                 <span>Admin Workspace</span>
             </div>
 
             <div class="admin-hero">
                 <div class="admin-hero-copy">
-                    <p class="admin-kicker">System Control Center</p>
-                    <h2>Monitor users, courses, enrollments, and revenue from one admin workspace</h2>
-                    <p>Use this dashboard to track platform health, review operational bottlenecks, and move quickly into the modules that need attention.</p>
+                    <p class="admin-kicker">Admin Overview</p>
+                    <h2>Monitor users, courses, enrollments, payments, and certificates in one place.</h2>
+                    <p>Everything here is arranged for fast scanning, clear hierarchy, and minimal visual noise.</p>
                 </div>
                 <div class="admin-hero-scene" aria-hidden="true">
-                    <span class="admin-orb admin-orb-a"></span>
-                    <span class="admin-orb admin-orb-b"></span>
-                    <span class="admin-shape admin-shape-a"></span>
-                    <span class="admin-shape admin-shape-b"></span>
-                    <div class="admin-scene-panel admin-scene-panel-a">
-                        <span>Users</span>
+                    <div class="admin-scene-panel">
+                        <span>Total Users</span>
                         <strong><c:out value="${systemMetrics['totalUsers'] != null ? systemMetrics['totalUsers'] : 0}"/></strong>
                     </div>
-                    <div class="admin-scene-panel admin-scene-panel-b">
-                        <span>Revenue</span>
+                    <div class="admin-scene-panel">
+                        <span>Active Courses</span>
+                        <strong><c:out value="${systemMetrics['activeCourses'] != null ? systemMetrics['activeCourses'] : 0}"/></strong>
+                    </div>
+                    <div class="admin-scene-panel">
+                        <span>Total Revenue</span>
                         <strong>NGN <fmt:formatNumber value="${systemMetrics['totalRevenue'] != null ? systemMetrics['totalRevenue'] : 0}" type="number" minFractionDigits="0" maxFractionDigits="0"/></strong>
                     </div>
                 </div>
@@ -56,44 +56,28 @@
 
         <section class="section-card">
             <div class="section-header">
-                <h2>Key Performance Indicators</h2>
+                <h2>Core Metrics</h2>
             </div>
             <div class="metrics-grid">
                 <div class="metric-card">
-                    <div class="metric-icon"><i class="fas fa-users"></i></div>
-                    <div class="metric-label">Total Users</div>
+                    <div class="metric-label">Users</div>
                     <div class="metric-value"><c:out value="${systemMetrics['totalUsers'] != null ? systemMetrics['totalUsers'] : 0}"/></div>
-                    <div class="metric-meta">
-                        <i class="fas fa-user-graduate" style="margin-right: 5px;"></i><span id="students-count">0</span> Students
-                        <i class="fas fa-chalkboard-teacher" style="margin-left: 10px; margin-right: 5px;"></i><span id="instructors-count">0</span> Instructors
-                    </div>
+                    <div class="metric-meta">Students <c:out value="${systemMetrics['studentsCount'] != null ? systemMetrics['studentsCount'] : 0}"/> and instructors <c:out value="${systemMetrics['instructorsCount'] != null ? systemMetrics['instructorsCount'] : 0}"/></div>
                 </div>
-
                 <div class="metric-card">
-                    <div class="metric-icon"><i class="fas fa-book"></i></div>
-                    <div class="metric-label">Active Courses</div>
+                    <div class="metric-label">Courses</div>
                     <div class="metric-value"><c:out value="${systemMetrics['activeCourses'] != null ? systemMetrics['activeCourses'] : 0}"/></div>
-                    <div class="metric-meta">
-                        <i class="fas fa-clock" style="margin-right: 5px;"></i><span id="pending-courses">0</span> Pending Review
-                    </div>
+                    <div class="metric-meta">Pending review <c:out value="${systemMetrics['pendingCourses'] != null ? systemMetrics['pendingCourses'] : 0}"/></div>
                 </div>
-
                 <div class="metric-card">
-                    <div class="metric-icon"><i class="fas fa-id-card"></i></div>
-                    <div class="metric-label">Total Enrollments</div>
+                    <div class="metric-label">Enrollments</div>
                     <div class="metric-value"><c:out value="${systemMetrics['totalEnrollments'] != null ? systemMetrics['totalEnrollments'] : 0}"/></div>
-                    <div class="metric-meta">
-                        <i class="fas fa-check-circle" style="margin-right: 5px;"></i><span id="paid-enrollments">0</span> Paid
-                    </div>
+                    <div class="metric-meta">Paid <c:out value="${systemMetrics['paidEnrollments'] != null ? systemMetrics['paidEnrollments'] : 0}"/> / Pending <c:out value="${systemMetrics['pendingEnrollments'] != null ? systemMetrics['pendingEnrollments'] : 0}"/></div>
                 </div>
-
                 <div class="metric-card">
-                    <div class="metric-icon"><i class="fas fa-credit-card"></i></div>
-                    <div class="metric-label">Total Revenue</div>
+                    <div class="metric-label">Revenue</div>
                     <div class="metric-value">NGN <fmt:formatNumber value="${systemMetrics['totalRevenue'] != null ? systemMetrics['totalRevenue'] : 0}" type="number" minFractionDigits="0" maxFractionDigits="0"/></div>
-                    <div class="metric-meta">
-                        <i class="fas fa-arrow-up" style="margin-right: 5px;"></i>Monthly Income
-                    </div>
+                    <div class="metric-meta">Current month collections</div>
                 </div>
             </div>
         </section>
@@ -101,32 +85,40 @@
         <section class="admin-grid-2">
             <section class="section-card">
                 <div class="section-header">
-                    <h2>Enrollment Status Distribution</h2>
+                    <h2>Operational Review</h2>
                 </div>
-                <div class="chart-wrap">
-                    <canvas id="enrollmentChart"></canvas>
-                </div>
-            </section>
-
-            <section class="section-card">
-                <div class="section-header">
-                    <h2>Course Status Overview</h2>
-                </div>
-                <div class="chart-wrap">
-                    <canvas id="courseChart"></canvas>
-                </div>
-            </section>
-        </section>
-
-        <section class="admin-grid-2">
-            <section class="section-card">
-                <div class="section-header">
-                    <h2>Pending Actions</h2>
-                </div>
-                <div id="pending-actions" class="panel-stack">
-                    <div class="empty-state">
-                        <i class="fas fa-spinner fa-spin"></i> Loading...
-                    </div>
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Area</th>
+                                <th>Status</th>
+                                <th>Count</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Pending courses</td>
+                                <td><span class="status-badge">Review</span></td>
+                                <td><c:out value="${systemMetrics['pendingCourses'] != null ? systemMetrics['pendingCourses'] : 0}"/></td>
+                            </tr>
+                            <tr>
+                                <td>Pending enrollments</td>
+                                <td><span class="status-badge">Watch</span></td>
+                                <td><c:out value="${systemMetrics['pendingEnrollments'] != null ? systemMetrics['pendingEnrollments'] : 0}"/></td>
+                            </tr>
+                            <tr>
+                                <td>Approved courses</td>
+                                <td><span class="status-badge">Live</span></td>
+                                <td><c:out value="${systemMetrics['approvedCourses'] != null ? systemMetrics['approvedCourses'] : 0}"/></td>
+                            </tr>
+                            <tr>
+                                <td>Archived courses</td>
+                                <td><span class="status-badge">Stored</span></td>
+                                <td><c:out value="${systemMetrics['archivedCourses'] != null ? systemMetrics['archivedCourses'] : 0}"/></td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </section>
 
@@ -140,21 +132,21 @@
                             <strong>Database</strong>
                             <span>All systems operational</span>
                         </div>
-                        <div class="status-state good"><i class="fas fa-check-circle"></i> Healthy</div>
+                        <div class="status-state good">Healthy</div>
                     </div>
                     <div class="status-item">
                         <div class="status-item-copy">
-                            <strong>API Server</strong>
+                            <strong>Application</strong>
                             <span>Response time normal</span>
                         </div>
-                        <div class="status-state good"><i class="fas fa-check-circle"></i> Stable</div>
+                        <div class="status-state good">Stable</div>
                     </div>
                     <div class="status-item">
                         <div class="status-item-copy">
                             <strong>Storage</strong>
-                            <span>85% capacity used</span>
+                            <span>Capacity within safe range</span>
                         </div>
-                        <div class="status-state good"><i class="fas fa-check-circle"></i> Available</div>
+                        <div class="status-state good">Available</div>
                     </div>
                 </div>
             </section>
@@ -162,144 +154,32 @@
 
         <section class="section-card">
             <div class="section-header">
-                <h2>Quick Navigation</h2>
+                <h2>Quick Actions</h2>
             </div>
             <div class="quick-links">
                 <a href="${pageContext.request.contextPath}/admin/users" class="quick-link-card">
                     <i class="fas fa-users"></i>
-                    <div><strong>User Management</strong></div>
-                    <span>Manage all users</span>
+                    <strong>Users</strong>
+                    <span>Open user management</span>
                 </a>
                 <a href="${pageContext.request.contextPath}/admin/courses" class="quick-link-card">
                     <i class="fas fa-book"></i>
-                    <div><strong>Courses</strong></div>
-                    <span>Review and approve courses</span>
+                    <strong>Courses</strong>
+                    <span>Review course approvals</span>
                 </a>
                 <a href="${pageContext.request.contextPath}/admin/enrollments" class="quick-link-card">
                     <i class="fas fa-id-card"></i>
-                    <div><strong>Enrollments</strong></div>
-                    <span>Track enrollments and payments</span>
+                    <strong>Enrollment</strong>
+                    <span>Check enrollment records</span>
                 </a>
                 <a href="${pageContext.request.contextPath}/admin/payments" class="quick-link-card">
                     <i class="fas fa-credit-card"></i>
-                    <div><strong>Payments</strong></div>
-                    <span>Payment records and reports</span>
+                    <strong>Payment</strong>
+                    <span>View transaction records</span>
                 </a>
             </div>
         </section>
     </div>
 </main>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        initializeCharts();
-        loadPendingActions();
-    });
-
-    function initializeCharts() {
-        const enrollmentCtx = document.getElementById('enrollmentChart').getContext('2d');
-        new Chart(enrollmentCtx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Paid', 'Pending', 'Cancelled'],
-                datasets: [{
-                    data: [${systemMetrics['paidEnrollments'] != null ? systemMetrics['paidEnrollments'] : 0}, ${systemMetrics['pendingEnrollments'] != null ? systemMetrics['pendingEnrollments'] : 0}, ${systemMetrics['cancelledEnrollments'] != null ? systemMetrics['cancelledEnrollments'] : 0}],
-                    backgroundColor: ['#22c55e', '#f59e0b', '#ef4444'],
-                    borderColor: 'white',
-                    borderWidth: 2
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            font: { size: 12 },
-                            padding: 15,
-                            color: '#c7d8ef'
-                        }
-                    }
-                }
-            }
-        });
-
-        const courseCtx = document.getElementById('courseChart').getContext('2d');
-        new Chart(courseCtx, {
-            type: 'bar',
-            data: {
-                labels: ['Approved', 'Pending', 'Archived'],
-                datasets: [{
-                    label: 'Courses',
-                    data: [${systemMetrics['approvedCourses'] != null ? systemMetrics['approvedCourses'] : 0}, ${systemMetrics['pendingCourses'] != null ? systemMetrics['pendingCourses'] : 0}, ${systemMetrics['archivedCourses'] != null ? systemMetrics['archivedCourses'] : 0}],
-                    backgroundColor: ['#3b82f6', '#f59e0b', '#9ca3af'],
-                    borderColor: '#1d3554',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: {
-                            color: '#1d3554'
-                        },
-                        ticks: {
-                            font: { size: 12 },
-                            color: '#9db2cf'
-                        }
-                    },
-                    x: {
-                        grid: {
-                            display: false
-                        },
-                        ticks: {
-                            font: { size: 12 },
-                            color: '#9db2cf'
-                        }
-                    }
-                }
-            }
-        });
-    }
-
-    function loadPendingActions() {
-        const pendingCourses = ${systemMetrics['pendingCourses'] != null ? systemMetrics['pendingCourses'] : 0};
-        const pendingEnrollments = ${systemMetrics['pendingEnrollments'] != null ? systemMetrics['pendingEnrollments'] : 0};
-        let html = '';
-
-        if (pendingCourses > 0) {
-            html += '<div class="action-item">';
-            html += '<div class="action-item-copy"><strong>Courses Pending Review</strong><span>' + pendingCourses + ' course' + (pendingCourses > 1 ? 's' : '') + ' awaiting approval</span></div>';
-            html += '<a href="${pageContext.request.contextPath}/admin/courses?status=Pending" class="admin-btn">Review</a>';
-            html += '</div>';
-        }
-
-        if (pendingEnrollments > 0) {
-            html += '<div class="action-item">';
-            html += '<div class="action-item-copy"><strong>Payments Pending</strong><span>' + pendingEnrollments + ' enrollment' + (pendingEnrollments > 1 ? 's' : '') + ' awaiting payment</span></div>';
-            html += '<a href="${pageContext.request.contextPath}/admin/enrollments" class="admin-btn primary">View</a>';
-            html += '</div>';
-        }
-
-        if (pendingCourses === 0 && pendingEnrollments === 0) {
-            html = '<div class="empty-state"><i class="fas fa-check-circle" style="font-size:32px; color:#46d28a;"></i><strong>All Clear!</strong><div>No pending actions required</div></div>';
-        }
-
-        document.getElementById('pending-actions').innerHTML = html;
-        document.getElementById('students-count').textContent = ${systemMetrics['studentsCount'] != null ? systemMetrics['studentsCount'] : 0};
-        document.getElementById('instructors-count').textContent = ${systemMetrics['instructorsCount'] != null ? systemMetrics['instructorsCount'] : 0};
-        document.getElementById('pending-courses').textContent = pendingCourses;
-        document.getElementById('paid-enrollments').textContent = ${systemMetrics['paidEnrollments'] != null ? systemMetrics['paidEnrollments'] : 0};
-    }
-</script>
 </body>
 </html>

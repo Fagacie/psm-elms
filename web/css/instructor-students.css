@@ -5,12 +5,12 @@
 .course-context-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 14px;
-    margin-bottom: 20px;
+    gap: 16px;
+    margin-bottom: 24px;
 }
 
 .context-card {
-    padding: 16px 18px;
+    padding: 18px 20px;
     border: 1px solid rgba(191, 209, 227, 0.88);
     border-radius: 16px;
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(245, 250, 255, 0.95));
@@ -29,7 +29,7 @@
 
 .context-card strong {
     color: var(--ins-text);
-    font-family: "Sora", "Inter", sans-serif;
+    font-family: "Inter", "Segoe UI", sans-serif;
     font-size: 0.98rem;
 }
 
@@ -38,12 +38,12 @@
     justify-content: space-between;
     align-items: flex-start;
     gap: 16px;
-    margin-bottom: 16px;
+    margin-bottom: 18px;
 }
 
 .section-title {
     margin: 0;
-    font-family: "Sora", "Inter", sans-serif;
+    font-family: "Inter", "Segoe UI", sans-serif;
     font-size: 1.05rem;
     color: var(--ins-text);
 }
@@ -84,7 +84,7 @@
 
 .data-table th,
 .data-table td {
-    padding: 14px 16px;
+    padding: 16px 18px;
     border-bottom: 1px solid rgba(191, 209, 227, 0.82);
     text-align: left;
     vertical-align: middle;
@@ -163,7 +163,7 @@
 }
 
 .empty-state-box {
-    padding: 48px 24px;
+    padding: 52px 24px;
     text-align: center;
 }
 
@@ -205,4 +205,39 @@
     .data-table td {
         padding: 12px 14px;
     }
+}
+
+/* Ultra-minimal consistency overrides */
+.course-context-grid {
+    gap: 24px;
+}
+
+.context-card,
+.student-count-badge,
+.data-table,
+.empty-state-box,
+.status-badge {
+    background: #ffffff;
+    color: #64748b;
+    border: 1px solid #f1f5f9;
+    border-radius: 12px;
+    box-shadow: none;
+}
+
+.status-pending,
+.status-active,
+.status-completed,
+.status-cancelled {
+    background: #ffffff;
+    color: #64748b;
+    border-color: #f1f5f9;
+}
+
+.data-table th {
+    background: #ffffff;
+    color: #64748b;
+}
+
+.data-table tbody tr:hover {
+    background: #fafafa;
 }
