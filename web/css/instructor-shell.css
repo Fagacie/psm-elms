@@ -100,15 +100,15 @@ body.instructor-ui {
 }
 
 .instructor-ui .dashboard-brand {
-    display: grid;
-    gap: 2px;
-    min-width: 162px;
+    display: inline-flex;
+    align-items: baseline;
+    gap: 8px;
     text-decoration: none;
     color: var(--ins-text);
 }
 
 .instructor-ui .dashboard-brand-main {
-    font-size: 1rem;
+    font-size: 1.2rem;
     font-weight: 800;
     letter-spacing: -0.03em;
     line-height: 1;
@@ -116,10 +116,7 @@ body.instructor-ui {
 
 .instructor-ui .dashboard-brand-sub {
     color: var(--ins-muted);
-    font-size: 0.76rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+    font-size: 0.85rem;
     line-height: 1;
 }
 
@@ -158,6 +155,16 @@ body.instructor-ui {
     background: #ffffff;
 }
 
+.instructor-ui .user-menu-link {
+    text-decoration: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.instructor-ui .user-menu-link:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+}
+
 .instructor-ui .user-info {
     display: flex;
     flex-direction: column;
@@ -177,10 +184,27 @@ body.instructor-ui {
 .instructor-ui .user-avatar {
     width: 40px;
     height: 40px;
+    min-width: 40px;
+    min-height: 40px;
+    flex: 0 0 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
     border-radius: 10px;
     background: var(--ins-primary);
     color: #ffffff;
     box-shadow: none;
+}
+
+.instructor-ui .user-avatar img {
+    width: 40px !important;
+    height: 40px !important;
+    max-width: 40px !important;
+    max-height: 40px !important;
+    object-fit: cover;
+    border-radius: inherit;
+    display: block;
 }
 
 .instructor-ui .notifications {

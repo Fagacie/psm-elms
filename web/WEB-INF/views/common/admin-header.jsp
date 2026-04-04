@@ -1,4 +1,6 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<c:set var="adminProfilePicture" value="${not empty sessionScope.user.profilePicture ? sessionScope.user.profilePicture : null}"/>
 <header class="app-header">
     <div class="header-left">
         <a href="${pageContext.request.contextPath}/dashboard" class="dashboard-brand" aria-label="PSM E-Learning home">
@@ -25,13 +27,13 @@
         </div>
     </div>
     <div class="header-right">
-        <div class="user-menu">
+        <a href="${pageContext.request.contextPath}/profile" class="user-menu user-menu-link">
             <div class="user-info">
                 <span class="user-name"><c:out value="${sessionScope.user.fullName}"/></span>
                 <span class="user-role">Administrator</span>
             </div>
-            <div class="user-avatar"><i class="fas fa-user-shield"></i></div>
-        </div>
+            <div class="user-avatar"><c:choose><c:when test="${not empty adminProfilePicture}"><c:choose><c:when test="${fn:startsWith(adminProfilePicture, 'http')}"><img src="${adminProfilePicture}" alt="Profile" class="admin-avatar-img"></c:when><c:otherwise><img src="${pageContext.request.contextPath}${adminProfilePicture}" alt="Profile" class="admin-avatar-img"></c:otherwise></c:choose></c:when><c:otherwise><i class="fas fa-user-shield"></i></c:otherwise></c:choose></div>
+        </a>
         <a href="${pageContext.request.contextPath}/logout" class="btn btn-secondary btn-sm">
             <i class="fas fa-sign-out-alt"></i> Logout
         </a>

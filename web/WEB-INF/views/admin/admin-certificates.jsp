@@ -28,7 +28,7 @@
         <c:set var="revokedCertificates" value="0"/>
         <c:forEach var="cert" items="${certificates}">
             <c:choose>
-                <c:when test="${cert.status == 'Revoked'}"><c:set var="revokedCertificates" value="${revokedCertificates + 1}"/></c:when>
+                <c:when test="${fn:toLowerCase(cert.status) == 'revoked'}"><c:set var="revokedCertificates" value="${revokedCertificates + 1}"/></c:when>
                 <c:otherwise><c:set var="activeCertificates" value="${activeCertificates + 1}"/></c:otherwise>
             </c:choose>
         </c:forEach>
@@ -128,7 +128,7 @@
                 </c:when>
                 <c:otherwise>
                     <div class="table-wrapper">
-                        <table class="data-table">
+                        <table class="data-table admin-cert-table">
                             <thead>
                             <tr>
                                 <th>Certificate No</th>
@@ -142,8 +142,15 @@
                             </thead>
                             <tbody>
                             <c:forEach var="cert" items="${certificates}">
+                                <c:set var="isRevoked" value="${fn:toLowerCase(cert.status) == 'revoked'}"/>
+                                <c:url var="verifyUrl" value="/certificate/verify">
+                                    <c:param name="code" value="${cert.certificateNo}"/>
+                                </c:url>
                                 <tr>
-                                    <td>${cert.certificateNo}</td>
+                                    <td>
+                                        <span class="admin-code admin-cert-code">${cert.certificateNo}</span>
+                                        <div class="table-subtext">Verification code</div>
+                                    </td>
                                     <td>
                                         <strong>${cert.studentName}</strong>
                                         <div class="table-subtext">${cert.studentEmail}</div>
@@ -152,29 +159,32 @@
                                     <td>${cert.courseName}</td>
                                     <td>
                                         <c:choose>
-                                            <c:when test="${not empty cert.issueDate}">${cert.issueDate.toLocalDate()}</c:when>
+                                            <c:when test="${not empty cert.issueDate}">
+                                                ${cert.issueDate.toLocalDate()}
+                                                <div class="table-subtext">${cert.issueDate.toLocalTime()}</div>
+                                            </c:when>
                                             <c:otherwise>-</c:otherwise>
                                         </c:choose>
                                     </td>
                                     <td>
                                         <c:choose>
-                                            <c:when test="${cert.status == 'Revoked'}"><span class="status-badge status-danger">Revoked</span></c:when>
+                                            <c:when test="${isRevoked}">
+                                                <span class="status-badge status-danger">Revoked</span>
+                                                <div class="table-subtext">
+                                                    <c:choose>
+                                                        <c:when test="${not empty cert.revokedAt}">Revoked on ${cert.revokedAt.toLocalDate()}</c:when>
+                                                        <c:otherwise>Revocation recorded</c:otherwise>
+                                                    </c:choose>
+                                                </div>
+                                            </c:when>
                                             <c:otherwise><span class="status-badge status-success">Active</span></c:otherwise>
                                         </c:choose>
                                     </td>
                                     <td>
                                         <div class="admin-table-actions">
-                                            <a class="admin-btn secondary" href="${pageContext.request.contextPath}/certificate/template?certificateId=${cert.certificateId}&back=${pageContext.request.contextPath}/admin/certificates">Template</a>
-                                            <c:choose>
-                                                <c:when test="${not empty cert.verificationURL}">
-                                                    <a class="admin-btn primary" target="_blank" href="${cert.verificationURL}">Verify</a>
-                                                </c:when>
-                                                <c:otherwise>
-                                                    <span class="admin-btn secondary admin-btn-disabled">No Verify URL</span>
-                                                </c:otherwise>
-                                            </c:choose>
-                                            <c:if test="${cert.status != 'Revoked'}">
-                                                <form method="post" action="${pageContext.request.contextPath}/admin/certificates" class="admin-table-actions">
+                                            <a class="admin-btn primary" target="_blank" rel="noopener noreferrer" href="${pageContext.request.contextPath}${verifyUrl}">Verify</a>
+                                            <c:if test="${not isRevoked}">
+                                                <form method="post" action="${pageContext.request.contextPath}/admin/certificates" class="admin-inline-form">
                                                     <input type="hidden" name="action" value="revoke">
                                                     <input type="hidden" name="certificateId" value="${cert.certificateId}">
                                                     <button class="admin-btn danger" type="submit" onclick="return confirm('Revoke this certificate?');">Revoke</button>

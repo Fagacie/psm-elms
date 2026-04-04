@@ -522,6 +522,84 @@ select {
     background: var(--color-white);
 }
 
+/* ====================================
+   Public Certificate Verification
+   ==================================== */
+
+.verify-certificate {
+    padding: var(--spacing-xxl) 0;
+    background: radial-gradient(circle at 12% 18%, #ffffff, transparent 34%),
+                radial-gradient(circle at 86% 10%, #e3eefb, transparent 30%),
+                linear-gradient(180deg, #f6f9fc 0%, #edf3fa 100%);
+}
+
+.verify-card {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
+    gap: var(--spacing-lg);
+    border: 1px solid #d5dfeb;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #ffffff 0%, #f6fbff 100%);
+    padding: var(--spacing-lg);
+    box-shadow: 0 18px 34px rgba(19, 40, 66, 0.08);
+}
+
+.verify-copy h3 {
+    font-size: 1.5rem;
+    color: var(--color-text);
+    margin-bottom: var(--spacing-sm);
+    letter-spacing: -0.01em;
+}
+
+.verify-copy p {
+    color: var(--color-text-light);
+    line-height: 1.7;
+}
+
+.verify-form {
+    display: grid;
+    gap: var(--spacing-sm);
+}
+
+.verify-form label {
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+    color: var(--color-secondary);
+}
+
+.verify-form-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: var(--spacing-sm);
+}
+
+.verify-form-row input {
+    min-height: 50px;
+    border: 1px solid #c5d3e2;
+    border-radius: 10px;
+    padding: 0 0.9rem;
+    font-size: 0.95rem;
+    color: var(--color-text);
+    background: #ffffff;
+}
+
+.verify-form-row input:focus {
+    outline: 2px solid rgba(43, 90, 142, 0.24);
+    border-color: var(--color-primary);
+}
+
+.verify-form-row .btn {
+    border-radius: 10px;
+    box-shadow: 0 10px 18px rgba(28, 72, 122, 0.18);
+}
+
+.verify-form small {
+    color: var(--color-text-light);
+    line-height: 1.6;
+}
+
 .roles-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -756,6 +834,14 @@ select {
     
     .hero-actions {
         justify-content: center;
+    }
+
+    .verify-card {
+        grid-template-columns: 1fr;
+    }
+
+    .verify-form-row {
+        grid-template-columns: 1fr;
     }
     
     .hero-stats {

@@ -1,6 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<c:set var="studentProfilePicture" value="${not empty sessionScope.student.passportPath ? sessionScope.student.passportPath : null}"/>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -19,9 +20,9 @@
     <div class="sv-top-left">
         <button class="sv-menu-btn" id="svMenuBtn" type="button" aria-label="Toggle navigation"><i class="fas fa-bars"></i></button>
         <a href="${pageContext.request.contextPath}/dashboard" class="sv-brand"><span class="sv-brand-main">PSM</span><span class="sv-brand-sub">E-Learning</span></a>
-        <div class="sv-page-title"><h1>Certificate</h1><p>Issue and verify course credential</p></div>
+        <div class="sv-page-title"><h1>Certificate</h1><p>View and download your course credential</p></div>
     </div>
-    <div class="sv-top-right"><a href="${pageContext.request.contextPath}/profile" class="sv-profile-link"><i class="fas fa-user"></i><span>${sessionScope.userName}</span></a><a href="${pageContext.request.contextPath}/logout" class="sv-logout"><i class="fas fa-right-from-bracket"></i> Logout</a></div>
+    <div class="sv-top-right"><a href="${pageContext.request.contextPath}/profile" class="sv-profile-link"><c:choose><c:when test="${not empty studentProfilePicture}"><c:choose><c:when test="${fn:startsWith(studentProfilePicture, 'http')}"><img src="${studentProfilePicture}" alt="Profile" class="sv-avatar-img"></c:when><c:otherwise><img src="${pageContext.request.contextPath}${studentProfilePicture}" alt="Profile" class="sv-avatar-img"></c:otherwise></c:choose></c:when><c:otherwise><i class="fas fa-user"></i></c:otherwise></c:choose><span>${sessionScope.userName}</span></a><a href="${pageContext.request.contextPath}/logout" class="sv-logout"><i class="fas fa-right-from-bracket"></i> Logout</a></div>
 </header>
 
 <div class="sv-layout">
@@ -57,13 +58,23 @@
             </div>
         </c:if>
 
-        <section class="sv-card">
-            <div class="sv-card-body sc-toolbar">
-                <a class="sv-btn" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=learning">Back to Learning Hub</a>
-                <button class="sv-btn primary" type="button" onclick="window.print()">Download / Print</button>
-                <c:if test="${not empty certificate and not empty certificate.verificationURL}">
-                    <a class="sv-btn" target="_blank" href="${certificate.verificationURL}">Verify</a>
-                </c:if>
+        <section class="sv-card sc-header-card">
+            <div class="sv-card-body sc-header-body">
+                <div class="sc-header-copy">
+                    <span class="sc-label">Verified Learning Credential</span>
+                    <h2>Your Course Certificate</h2>
+                    <p>Designed for printing and PDF export with verification details preserved.</p>
+                </div>
+                <div class="sc-toolbar" role="group" aria-label="Certificate actions">
+                    <a class="sv-btn" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=learning">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>Back to Learning Hub</span>
+                    </a>
+                    <button class="sv-btn primary sc-print-btn" type="button" onclick="window.print()">
+                        <i class="fas fa-download"></i>
+                        <span>Download / Print</span>
+                    </button>
+                </div>
             </div>
         </section>
 
@@ -111,6 +122,9 @@
                     <div class="alert alert-error">This certificate has been revoked. Please contact support for clarification.</div>
                 </c:if>
                 <section class="sc-sheet">
+                    <div class="sc-corners" aria-hidden="true">
+                        <span></span><span></span><span></span><span></span>
+                    </div>
                     <div class="sc-header">
                         <div>
                             <div class="sc-kicker">PSM E-Learning Platform</div>
@@ -162,7 +176,8 @@
                         </div>
                     </c:if>
                     <div class="sc-verify">
-                        <strong>Verification URL:</strong> ${certificate.verificationURL}
+                        <strong>Verification Code:</strong> ${certificate.certificateNo}
+                        <span class="sc-verify-help">Use this code on the public verification page from the landing site.</span>
                     </div>
                 </section>
             </c:otherwise>

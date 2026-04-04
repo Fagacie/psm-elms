@@ -1,6 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<c:set var="studentProfilePicture" value="${not empty sessionScope.student.passportPath ? sessionScope.student.passportPath : null}"/>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -34,12 +35,12 @@
         </a>
         <div class="sv-page-title">
             <h1>Certificates</h1>
-            <p>Generate and verify your learning credentials</p>
+            <p>Generate and share your learning credentials</p>
         </div>
     </div>
     <div class="sv-top-right">
         <a href="${pageContext.request.contextPath}/profile" class="cert-user">
-            <span class="cert-user-icon"><i class="fas fa-user-graduate"></i></span>
+            <span class="cert-user-icon"><c:choose><c:when test="${not empty studentProfilePicture}"><c:choose><c:when test="${fn:startsWith(studentProfilePicture, 'http')}"><img src="${studentProfilePicture}" alt="Profile" class="cert-avatar-img"></c:when><c:otherwise><img src="${pageContext.request.contextPath}${studentProfilePicture}" alt="Profile" class="cert-avatar-img"></c:otherwise></c:choose></c:when><c:otherwise><i class="fas fa-user-graduate"></i></c:otherwise></c:choose></span>
             <div class="cert-user-copy">
                 <strong>${sessionScope.userName}</strong>
                 <span>Student</span>
@@ -136,6 +137,18 @@
             </article>
         </section>
 
+        <section class="sv-card cert-card cert-card-animated cert-public-verify-note">
+            <div class="sv-card-body">
+                <div class="cert-public-verify-copy">
+                    <i class="fas fa-shield-check"></i>
+                    <div>
+                        <strong>Verification is public.</strong>
+                        <p>Share certificate code with employers or institutions. They can verify authenticity from the landing page under Public Certificate Verification.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <section class="sv-card cert-controls cert-card cert-card-animated">
             <div class="sv-card-body cert-controls-body" aria-label="Certificate list controls">
                 <div class="cert-filter-group">
@@ -191,6 +204,7 @@
                                         <td>
                                             <form method="post" action="${pageContext.request.contextPath}/student/certificate" class="cert-inline-form">
                                                 <input type="hidden" name="enrollmentId" value="${enrollment.enrollmentId}">
+                                                <input type="hidden" name="redirectTo" value="certificates">
                                                 <button class="sv-btn primary cert-generate-btn" type="submit">
                                                     <i class="fas fa-file-signature"></i>
                                                     <span>Generate</span>
@@ -269,8 +283,8 @@
             <div class="sv-card-body">
                 <div class="cert-section-intro cert-section-intro-compact">
                     <div>
-                        <strong>Review, preview, and verify every issued certificate.</strong>
-                        <p>Use search and filters to find a course certificate quickly, then open the template or verification link.</p>
+                        <strong>Review and share every issued certificate.</strong>
+                        <p>Use search and filters to find a certificate, open the template, then share certificate code for public verification on the landing page.</p>
                     </div>
                 </div>
                 <c:choose>
@@ -317,24 +331,10 @@
                                                     <i class="fas fa-award"></i>
                                                     <span>Open</span>
                                                 </a>
-                                                <a class="sv-btn" href="${pageContext.request.contextPath}/certificate/template?certificateId=${cert.certificateId}&back=${pageContext.request.contextPath}/student/certificates">
-                                                    <i class="fas fa-eye"></i>
-                                                    <span>Template</span>
-                                                </a>
-                                                <c:choose>
-                                                    <c:when test="${not empty cert.verificationURL}">
-                                                        <a class="sv-btn primary" target="_blank" href="${cert.verificationURL}">
-                                                            <i class="fas fa-shield-check"></i>
-                                                            <span>Verify</span>
-                                                        </a>
-                                                    </c:when>
-                                                    <c:otherwise>
-                                                        <span class="sv-btn cert-disabled-btn">
-                                                            <i class="fas fa-link-slash"></i>
-                                                            <span>No Verify URL</span>
-                                                        </span>
-                                                    </c:otherwise>
-                                                </c:choose>
+                                                <button type="button" class="sv-btn cert-copy-code-btn" data-cert-copy="${cert.certificateNo}">
+                                                    <i class="fas fa-copy"></i>
+                                                    <span>Copy Code</span>
+                                                </button>
                                             </div>
                                         </td>
                                     </tr>
@@ -354,6 +354,7 @@
 </div>
 
 <div id="svOverlay" class="sv-overlay"></div>
+<div id="certCopyToast" class="cert-copy-toast" role="status" aria-live="polite">Certificate code copied</div>
 
 <script src="${pageContext.request.contextPath}/js/student-v2.js"></script>
 <script src="${pageContext.request.contextPath}/js/certificates-v2.js"></script>

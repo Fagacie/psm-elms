@@ -213,6 +213,46 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                 return;
             }
 
+            boolean safeMode = "1".equals(request.getParameter("safe")) || "true".equalsIgnoreCase(request.getParameter("safe"));
+            if (safeMode) {
+                request.setAttribute("enrollment", enrollment);
+                request.setAttribute("materials", new ArrayList<Material>());
+                request.setAttribute("assessments", new ArrayList<Assessment>());
+                request.setAttribute("materialCount", 0);
+                request.setAttribute("assessmentCount", 0);
+                request.setAttribute("paidAccess", isPaymentComplete(enrollment.getPaymentStatus()));
+                request.setAttribute("activeTab", "learning");
+                request.setAttribute("progressPercent", enrollment.getProgress() != null ? enrollment.getProgress() : 0);
+                request.setAttribute("usedAttemptsByAssessment", new LinkedHashMap<Integer, Integer>());
+                request.setAttribute("allowedAttemptsByAssessment", new LinkedHashMap<Integer, Integer>());
+                request.setAttribute("latestSubmissionByAssessment", new LinkedHashMap<Integer, AssessmentSubmission>());
+                request.setAttribute("activeAttemptByAssessment", new LinkedHashMap<Integer, Boolean>());
+                request.setAttribute("materialsViewedCount", 0);
+                request.setAttribute("viewedMaterialIds", new HashSet<Integer>());
+                request.setAttribute("learningItems", new ArrayList<LearningItem>());
+                request.setAttribute("recommendedItem", null);
+                request.setAttribute("focusMaterial", null);
+                request.setAttribute("previousMaterial", null);
+                request.setAttribute("nextMaterial", null);
+                request.setAttribute("certificateEligible", false);
+                request.setAttribute("certificatePaidReady", isPaymentComplete(enrollment.getPaymentStatus()));
+                request.setAttribute("certificateCompletedReady", false);
+                request.setAttribute("certificateAssessmentsReady", false);
+                request.setAttribute("certificateRemainingMaterials", 0);
+                request.setAttribute("certificateRemainingAssessments", 0);
+                request.setAttribute("certificateReadinessStepsComplete", 0);
+                request.setAttribute("certificateReadinessPercent", 0);
+                request.setAttribute("certificatePrimaryActionLabel", "Back to Courses");
+                request.setAttribute("certificatePrimaryActionUrl", request.getContextPath() + "/student/my-enrollments");
+                request.setAttribute("certificatePrimaryActionIcon", "fa-arrow-left");
+                request.setAttribute("certificateReadinessHint", "We could not fully load this enrollment. Return to your course list and reopen it.");
+                request.setAttribute("totalMaterialsCount", 0);
+                request.setAttribute("passedAssessmentsCount", 0);
+                request.setAttribute("totalAssessmentsCount", 0);
+                request.getRequestDispatcher("/WEB-INF/views/student/enrollment-details.jsp").forward(request, response);
+                return;
+            }
+
             Payment payment = paymentDAO.getPaymentByEnrollmentId(enrollment.getEnrollmentId());
             if (payment != null) {
                 enrollment.setPaymentStatus(payment.getStatus());
@@ -245,8 +285,22 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                 allowedAttemptsByAssessment.put(assessment.getAssessmentId(), allowed);
                 latestSubmissionByAssessment.put(assessment.getAssessmentId(), (submissions != null && !submissions.isEmpty()) ? submissions.get(0) : null);
 
-                Object attemptState = session.getAttribute("assessmentAttempt_" + assessment.getAssessmentId());
-                activeAttemptByAssessment.put(assessment.getAssessmentId(), attemptState != null);
+                Object attemptStateObj = session.getAttribute("assessmentAttempt_" + assessment.getAssessmentId());
+                boolean hasValidAttempt = false;
+                if (attemptStateObj != null) {
+                    try {
+                        java.lang.reflect.Field deadlineField = attemptStateObj.getClass().getDeclaredField("deadlineMillis");
+                        deadlineField.setAccessible(true);
+                        long deadlineMillis = deadlineField.getLong(attemptStateObj);
+                        hasValidAttempt = System.currentTimeMillis() < deadlineMillis;
+                        if (!hasValidAttempt) {
+                            session.removeAttribute("assessmentAttempt_" + assessment.getAssessmentId());
+                        }
+                    } catch (Exception e) {
+                        hasValidAttempt = true;
+                    }
+                }
+                activeAttemptByAssessment.put(assessment.getAssessmentId(), hasValidAttempt);
             }
 
             List<LearningItem> learningItems = new ArrayList<>();
@@ -586,8 +640,26 @@ public class EnrollmentDetailsServlet extends HttpServlet {
 
             String tab = request.getParameter("tab");
             if (tab == null || tab.trim().isEmpty()) tab = "learning";
-            EnrollmentStateSyncService.SyncResult syncResult = enrollmentStateSyncService.syncEnrollmentState(enrollment);
-            int progressPercent = syncResult.getProgressPercent();
+
+            EnrollmentStateSyncService.SyncResult syncResult;
+            try {
+                syncResult = enrollmentStateSyncService.syncEnrollmentState(enrollment);
+            } catch (Exception syncException) {
+                System.err.println("EnrollmentDetailsServlet: sync failed: " + syncException.getMessage());
+                syncException.printStackTrace();
+                syncResult = null;
+            }
+
+            int progressPercent = syncResult != null
+                    ? syncResult.getProgressPercent()
+                    : resolveProgressPercent(enrollment, materials, assessments, userId);
+            int materialsViewedCount = syncResult != null ? syncResult.getViewedMaterials() : viewedMaterialIds.size();
+            int totalMaterialsCount = syncResult != null ? syncResult.getTotalMaterials() : materials.size();
+            int passedAssessmentsCount = syncResult != null ? syncResult.getPassedAssessments() : 0;
+            int totalAssessmentsCount = syncResult != null ? syncResult.getTotalAssessments() : assessments.size();
+            boolean eligibleForCertificate = syncResult != null
+                    ? syncResult.isEligibleForCertificate()
+                    : (paidAccess && totalMaterialsCount > 0 && materialsViewedCount >= totalMaterialsCount && passedAssessmentsCount >= totalAssessmentsCount);
             
             request.setAttribute("enrollment", enrollment);
             request.setAttribute("materials", materials);
@@ -601,26 +673,30 @@ public class EnrollmentDetailsServlet extends HttpServlet {
             request.setAttribute("allowedAttemptsByAssessment", allowedAttemptsByAssessment);
             request.setAttribute("latestSubmissionByAssessment", latestSubmissionByAssessment);
             request.setAttribute("activeAttemptByAssessment", activeAttemptByAssessment);
-            request.setAttribute("materialsViewedCount", syncResult.getViewedMaterials());
+            request.setAttribute("materialsViewedCount", materialsViewedCount);
             request.setAttribute("viewedMaterialIds", viewedMaterialIds);
             request.setAttribute("learningItems", learningItems);
             request.setAttribute("recommendedItem", recommendedItem);
             request.setAttribute("focusMaterial", focusMaterial);
             request.setAttribute("previousMaterial", previousMaterial);
             request.setAttribute("nextMaterial", nextMaterial);
-            int remainingMaterials = Math.max(0, syncResult.getTotalMaterials() - syncResult.getViewedMaterials());
-            int remainingAssessments = Math.max(0, syncResult.getTotalAssessments() - syncResult.getPassedAssessments());
+            int remainingMaterials = Math.max(0, totalMaterialsCount - materialsViewedCount);
+            int remainingAssessments = Math.max(0, totalAssessmentsCount - passedAssessmentsCount);
             int readinessStepsComplete = 0;
-            if (syncResult.isPaid()) readinessStepsComplete++;
-            if (syncResult.isCompleted()) readinessStepsComplete++;
-            if (syncResult.isPassedAllAssessments()) readinessStepsComplete++;
+            if (syncResult != null ? syncResult.isPaid() : paidAccess) readinessStepsComplete++;
+            if (syncResult != null ? syncResult.isCompleted() : (remainingMaterials == 0 && remainingAssessments == 0)) readinessStepsComplete++;
+            if (syncResult != null ? syncResult.isPassedAllAssessments() : remainingAssessments == 0) readinessStepsComplete++;
             int readinessPercent = (int) Math.round((readinessStepsComplete / 3.0) * 100.0);
+
+            boolean paid = syncResult != null ? syncResult.isPaid() : paidAccess;
+            boolean completed = syncResult != null ? syncResult.isCompleted() : (remainingMaterials == 0 && remainingAssessments == 0);
+            boolean passedAllAssessments = syncResult != null ? syncResult.isPassedAllAssessments() : remainingAssessments == 0;
 
             String readinessPrimaryLabel;
             String readinessPrimaryUrl;
             String readinessPrimaryIcon;
             String readinessHint;
-            if (!syncResult.isPaid()) {
+            if (!paid) {
                 readinessPrimaryLabel = "Complete Payment";
                 readinessPrimaryUrl = request.getContextPath() + "/student/payment?enrollmentId=" + enrollment.getEnrollmentId();
                 readinessPrimaryIcon = "fa-credit-card";
@@ -643,15 +719,15 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                 readinessPrimaryLabel = "Open Certificates";
                 readinessPrimaryUrl = request.getContextPath() + "/student/certificates";
                 readinessPrimaryIcon = "fa-certificate";
-                readinessHint = syncResult.isEligibleForCertificate()
+                readinessHint = eligibleForCertificate
                         ? "Everything is in place. You can open your certificate area and generate the certificate for this course."
                         : "Your records are almost ready. Open the certificate area to review your current status.";
             }
 
-            request.setAttribute("certificateEligible", syncResult.isEligibleForCertificate());
-            request.setAttribute("certificatePaidReady", syncResult.isPaid());
-            request.setAttribute("certificateCompletedReady", syncResult.isCompleted());
-            request.setAttribute("certificateAssessmentsReady", syncResult.isPassedAllAssessments());
+            request.setAttribute("certificateEligible", eligibleForCertificate);
+            request.setAttribute("certificatePaidReady", paid);
+            request.setAttribute("certificateCompletedReady", completed);
+            request.setAttribute("certificateAssessmentsReady", passedAllAssessments);
             request.setAttribute("certificateRemainingMaterials", remainingMaterials);
             request.setAttribute("certificateRemainingAssessments", remainingAssessments);
             request.setAttribute("certificateReadinessStepsComplete", readinessStepsComplete);
@@ -660,9 +736,9 @@ public class EnrollmentDetailsServlet extends HttpServlet {
             request.setAttribute("certificatePrimaryActionUrl", readinessPrimaryUrl);
             request.setAttribute("certificatePrimaryActionIcon", readinessPrimaryIcon);
             request.setAttribute("certificateReadinessHint", readinessHint);
-            request.setAttribute("totalMaterialsCount", syncResult.getTotalMaterials());
-            request.setAttribute("passedAssessmentsCount", syncResult.getPassedAssessments());
-            request.setAttribute("totalAssessmentsCount", syncResult.getTotalAssessments());
+            request.setAttribute("totalMaterialsCount", totalMaterialsCount);
+            request.setAttribute("passedAssessmentsCount", passedAssessmentsCount);
+            request.setAttribute("totalAssessmentsCount", totalAssessmentsCount);
             request.getRequestDispatcher("/WEB-INF/views/student/enrollment-details.jsp").forward(request, response);
             
         } catch (NumberFormatException e) {
@@ -670,6 +746,56 @@ public class EnrollmentDetailsServlet extends HttpServlet {
         } catch (Exception e) {
             System.err.println("EnrollmentDetailsServlet: Error: " + e.getMessage());
             e.printStackTrace();
+            try {
+                Integer userId = (Integer) session.getAttribute("userId");
+                Integer fallbackEnrollmentId = null;
+                String fallbackId = request.getParameter("id");
+                if (fallbackId != null && !fallbackId.trim().isEmpty()) {
+                    fallbackEnrollmentId = Integer.valueOf(fallbackId.trim());
+                }
+                Enrollment fallbackEnrollment = fallbackEnrollmentId != null ? enrollmentDAO.getEnrollment(fallbackEnrollmentId) : null;
+                if (fallbackEnrollment != null && fallbackEnrollment.getUserId() != null && fallbackEnrollment.getUserId().equals(userId)) {
+                    request.setAttribute("enrollment", fallbackEnrollment);
+                    request.setAttribute("materials", new ArrayList<Material>());
+                    request.setAttribute("assessments", new ArrayList<Assessment>());
+                    request.setAttribute("materialCount", 0);
+                    request.setAttribute("assessmentCount", 0);
+                    request.setAttribute("paidAccess", false);
+                    request.setAttribute("activeTab", "learning");
+                    request.setAttribute("progressPercent", 0);
+                    request.setAttribute("usedAttemptsByAssessment", new LinkedHashMap<Integer, Integer>());
+                    request.setAttribute("allowedAttemptsByAssessment", new LinkedHashMap<Integer, Integer>());
+                    request.setAttribute("latestSubmissionByAssessment", new LinkedHashMap<Integer, AssessmentSubmission>());
+                    request.setAttribute("activeAttemptByAssessment", new LinkedHashMap<Integer, Boolean>());
+                    request.setAttribute("materialsViewedCount", 0);
+                    request.setAttribute("viewedMaterialIds", new HashSet<Integer>());
+                    request.setAttribute("learningItems", new ArrayList<LearningItem>());
+                    request.setAttribute("recommendedItem", null);
+                    request.setAttribute("focusMaterial", null);
+                    request.setAttribute("previousMaterial", null);
+                    request.setAttribute("nextMaterial", null);
+                    request.setAttribute("certificateEligible", false);
+                    request.setAttribute("certificatePaidReady", false);
+                    request.setAttribute("certificateCompletedReady", false);
+                    request.setAttribute("certificateAssessmentsReady", false);
+                    request.setAttribute("certificateRemainingMaterials", 0);
+                    request.setAttribute("certificateRemainingAssessments", 0);
+                    request.setAttribute("certificateReadinessStepsComplete", 0);
+                    request.setAttribute("certificateReadinessPercent", 0);
+                    request.setAttribute("certificatePrimaryActionLabel", "Back to Courses");
+                    request.setAttribute("certificatePrimaryActionUrl", request.getContextPath() + "/student/my-enrollments");
+                    request.setAttribute("certificatePrimaryActionIcon", "fa-arrow-left");
+                    request.setAttribute("certificateReadinessHint", "We could not fully load this enrollment. Return to your course list and reopen it.");
+                    request.setAttribute("totalMaterialsCount", 0);
+                    request.setAttribute("passedAssessmentsCount", 0);
+                    request.setAttribute("totalAssessmentsCount", 0);
+                    request.getRequestDispatcher("/WEB-INF/views/student/enrollment-details.jsp").forward(request, response);
+                    return;
+                }
+            } catch (Exception fallbackException) {
+                System.err.println("EnrollmentDetailsServlet: fallback render failed: " + fallbackException.getMessage());
+                fallbackException.printStackTrace();
+            }
             response.sendRedirect(request.getContextPath() + "/student/my-enrollments?error=exception");
         }
     }

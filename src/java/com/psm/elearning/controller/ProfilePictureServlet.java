@@ -2,6 +2,8 @@ package com.psm.elearning.controller;
 
 import com.psm.elearning.dao.StudentDAO;
 import com.psm.elearning.dao.StudentDAOImpl;
+import com.psm.elearning.dao.UserDAO;
+import com.psm.elearning.dao.UserDAOImpl;
 import com.psm.elearning.model.Student;
 import com.psm.elearning.model.User;
 import com.psm.elearning.util.CloudinaryUtil;
@@ -20,6 +22,7 @@ import javax.servlet.http.Part;
 public class ProfilePictureServlet extends HttpServlet {
     
     private final StudentDAO studentDAO = new StudentDAOImpl();
+    private final UserDAO userDAO = new UserDAOImpl();
     private static final long MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
     @Override
@@ -35,13 +38,6 @@ public class ProfilePictureServlet extends HttpServlet {
         Integer userId = (Integer) session.getAttribute("userId");
         String userRole = (String) session.getAttribute("userRole");
         
-        // Only students can upload passport photos
-        if (!User.ROLE_STUDENT.equals(userRole)) {
-            session.setAttribute("profileError", "Only students can upload passport photos.");
-            response.sendRedirect(request.getContextPath() + "/profile");
-            return;
-        }
-
         Part filePart = request.getPart("passportPhoto");
         
         if (filePart == null || filePart.getSize() == 0) {
@@ -84,30 +80,55 @@ public class ProfilePictureServlet extends HttpServlet {
                 return;
             }
 
-            // Update database
-            Student student = studentDAO.findByUserId(userId);
-            
-            if (student != null) {
-                // Delete old Cloudinary image if exists
-                String oldPath = student.getPassportPath();
+            if (User.ROLE_STUDENT.equals(userRole)) {
+                Student student = studentDAO.findByUserId(userId);
+
+                if (student != null) {
+                    // Delete old Cloudinary image if exists
+                    String oldPath = student.getPassportPath();
+                    if (oldPath != null && oldPath.startsWith("http")) {
+                        String oldPublicId = extractPublicIdFromUrl(oldPath);
+                        if (oldPublicId != null) {
+                            CloudinaryUtil.deleteFile(oldPublicId, "image");
+                        }
+                    }
+
+                    student.setPassportPath(cloudinaryUrl);
+                    boolean updated = studentDAO.updateProfile(student);
+
+                    if (updated) {
+                        session.setAttribute("student", student);
+                        session.setAttribute("profileSuccess", "Profile picture uploaded successfully!");
+                    } else {
+                        session.setAttribute("profileError", "Failed to save profile picture.");
+                    }
+                } else {
+                    session.setAttribute("profileError", "Student record not found.");
+                }
+            } else {
+                User user = userDAO.findById(userId);
+                if (user == null) {
+                    session.setAttribute("profileError", "User record not found.");
+                    response.sendRedirect(request.getContextPath() + "/profile");
+                    return;
+                }
+
+                String oldPath = user.getProfilePicture();
                 if (oldPath != null && oldPath.startsWith("http")) {
                     String oldPublicId = extractPublicIdFromUrl(oldPath);
                     if (oldPublicId != null) {
                         CloudinaryUtil.deleteFile(oldPublicId, "image");
                     }
                 }
-                
-                student.setPassportPath(cloudinaryUrl);
-                boolean updated = studentDAO.updateProfile(student);
-                
+
+                boolean updated = userDAO.updateProfilePicture(userId, cloudinaryUrl);
                 if (updated) {
-                    session.setAttribute("student", student);
+                    user.setProfilePicture(cloudinaryUrl);
+                    session.setAttribute("user", user);
                     session.setAttribute("profileSuccess", "Profile picture uploaded successfully!");
                 } else {
                     session.setAttribute("profileError", "Failed to save profile picture.");
                 }
-            } else {
-                session.setAttribute("profileError", "Student record not found.");
             }
             
         } catch (Exception e) {

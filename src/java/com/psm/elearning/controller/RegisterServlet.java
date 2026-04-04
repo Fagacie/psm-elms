@@ -6,16 +6,22 @@ import com.psm.elearning.dao.UserDAO;
 import com.psm.elearning.dao.UserDAOImpl;
 import com.psm.elearning.model.Student;
 import com.psm.elearning.model.User;
+import com.psm.elearning.util.CloudinaryUtil;
 import com.psm.elearning.util.EmailUtil;
 import com.psm.elearning.util.PasswordUtil;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.Part;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Paths;
 import java.util.Locale;
 
+@MultipartConfig(maxFileSize = 5242880)
 public class RegisterServlet extends HttpServlet {
 
     private UserDAO userDAO;
@@ -43,6 +49,16 @@ public class RegisterServlet extends HttpServlet {
         String country = trim(request.getParameter("country"));
         String password = request.getParameter("password");
         String confirmPassword = request.getParameter("confirmPassword");
+        
+        // Optional fields
+        String dob = trim(request.getParameter("dob"));
+        String gender = trim(request.getParameter("gender"));
+        String state = trim(request.getParameter("state"));
+        String qualification = trim(request.getParameter("qualification"));
+        String emergencyContact = trim(request.getParameter("emergencyContact"));
+
+        Part passportPhotoPart = request.getPart("passportPhoto");
+        String passportPath = null;
 
         StringBuilder missing = new StringBuilder();
         if (isBlank(fullName)) missing.append("Full Name, ");
@@ -105,14 +121,73 @@ public class RegisterServlet extends HttpServlet {
             return;
         }
 
+        if (passportPhotoPart != null && passportPhotoPart.getSize() > 0) {
+            String fileName = Paths.get(passportPhotoPart.getSubmittedFileName()).getFileName().toString();
+            int lastDot = fileName.lastIndexOf('.');
+            String fileExtension = lastDot > 0 ? fileName.substring(lastDot + 1).toLowerCase(Locale.ROOT) : "";
+
+            if (!fileExtension.matches("jpg|jpeg|png|gif")) {
+                userDAO.delete(createdUser.getUserId());
+                request.setAttribute("error", "Only JPG, PNG, and GIF files are allowed.");
+                request.getRequestDispatcher("/WEB-INF/views/register.jsp").forward(request, response);
+                return;
+            }
+
+            if (passportPhotoPart.getSize() > 5 * 1024 * 1024) {
+                userDAO.delete(createdUser.getUserId());
+                request.setAttribute("error", "Profile photo must not exceed 5MB.");
+                request.getRequestDispatcher("/WEB-INF/views/register.jsp").forward(request, response);
+                return;
+            }
+
+            try (InputStream inputStream = passportPhotoPart.getInputStream()) {
+                byte[] fileBytes = inputStream.readAllBytes();
+                String uploadedUrl = CloudinaryUtil.uploadFile(fileBytes, fileName, CloudinaryUtil.getPassportFolder(), "image");
+                if (uploadedUrl == null) {
+                    userDAO.delete(createdUser.getUserId());
+                    request.setAttribute("error", "Profile photo upload failed. Please try again.");
+                    request.getRequestDispatcher("/WEB-INF/views/register.jsp").forward(request, response);
+                    return;
+                }
+                passportPath = uploadedUrl;
+            } catch (Exception e) {
+                userDAO.delete(createdUser.getUserId());
+                request.setAttribute("error", "Profile photo upload failed: " + e.getMessage());
+                request.getRequestDispatcher("/WEB-INF/views/register.jsp").forward(request, response);
+                return;
+            }
+        }
+
         Student student = new Student();
         student.setUserId(createdUser.getUserId());
         String generatedReg = studentDAO.getNextRegNumber();
         student.setRegNumber(generatedReg);
         student.setCountry(country);
+        student.setPassportPath(passportPath);
+        
+        // Set optional fields
+        if (!isBlank(qualification)) student.setQualification(qualification);
+        if (!isBlank(state)) student.setState(state);
+        if (!isBlank(gender)) student.setGender(gender);
+        if (!isBlank(emergencyContact)) student.setEmergencyContact(emergencyContact);
+        
+        // Parse Date of Birth if provided
+        if (!isBlank(dob)) {
+            try {
+                student.setDob(java.time.LocalDate.parse(dob));
+            } catch (Exception e) {
+                System.err.println("Failed to parse DOB: " + e.getMessage());
+            }
+        }
 
         boolean studentCreated = studentDAO.create(student);
         if (!studentCreated) {
+            if (passportPath != null && passportPath.startsWith("http")) {
+                String uploadedPublicId = extractPublicIdFromUrl(passportPath);
+                if (uploadedPublicId != null) {
+                    CloudinaryUtil.deleteFile(uploadedPublicId, "image");
+                }
+            }
             userDAO.delete(createdUser.getUserId());
             request.setAttribute("error", "Registration failed. Could not create student record.");
             request.getRequestDispatcher("/WEB-INF/views/register.jsp").forward(request, response);
@@ -141,5 +216,21 @@ public class RegisterServlet extends HttpServlet {
 
     private static boolean isBlank(String value) {
         return value == null || value.trim().isEmpty();
+    }
+
+    private String extractPublicIdFromUrl(String url) {
+        if (url == null || !url.contains("/upload/")) return null;
+
+        String afterUpload = url.substring(url.indexOf("/upload/") + 8);
+        if (afterUpload.contains("/")) {
+            afterUpload = afterUpload.substring(afterUpload.indexOf("/") + 1);
+        }
+
+        int lastDot = afterUpload.lastIndexOf('.');
+        if (lastDot > 0) {
+            return afterUpload.substring(0, lastDot);
+        }
+
+        return afterUpload;
     }
 }

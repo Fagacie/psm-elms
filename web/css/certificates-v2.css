@@ -4,6 +4,8 @@
   --cert-accent-border: var(--sv-accent-border);
   display: grid;
   gap: 32px;
+  background: radial-gradient(circle at 12% 0%, #f7fbff, transparent 38%),
+              radial-gradient(circle at 88% 22%, #eef6ff, transparent 34%);
 }
 
 .cert-user {
@@ -25,6 +27,19 @@
   border-radius: 10px;
   color: var(--sv-text);
   background: #fcfcfd;
+}
+
+.cert-avatar-img {
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
+  min-height: 34px;
+  max-width: 34px;
+  max-height: 34px;
+  border-radius: 8px;
+  object-fit: cover;
+  display: block;
+  border: 1px solid var(--sv-border);
 }
 
 .cert-user-copy {
@@ -235,6 +250,35 @@
   border-color: var(--cert-accent-border);
 }
 
+.cert-public-verify-note {
+  border-color: #d8e4f3;
+  background: linear-gradient(120deg, #f8fbff 0%, #eef5ff 100%);
+}
+
+.cert-public-verify-copy {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.cert-public-verify-copy i {
+  color: #1f5e9b;
+  font-size: 1.05rem;
+  margin-top: 2px;
+}
+
+.cert-public-verify-copy strong {
+  display: block;
+  color: #173b63;
+  margin-bottom: 4px;
+}
+
+.cert-public-verify-copy p {
+  margin: 0;
+  color: #50657d;
+  line-height: 1.6;
+}
+
 .cert-card-animated {
   animation: certCardIn 420ms ease-out;
 }
@@ -304,13 +348,54 @@
   flex-wrap: wrap;
 }
 
+.cert-copy-code-btn {
+  border-color: #c6d7eb;
+  background: #f8fbff;
+  color: #1c4f82;
+}
+
+.cert-copy-code-btn:hover {
+  border-color: #9fb9d8;
+  background: #eef5ff;
+}
+
 .cert-disabled-btn {
   opacity: 0.72;
   cursor: not-allowed;
 }
 
+.cert-copy-code-btn {
+  border-style: dashed;
+}
+
+.cert-copy-code-btn i {
+  color: var(--cert-accent);
+}
+
 .cert-empty-hidden {
   display: none;
+}
+
+.cert-copy-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 20px;
+  transform: translateX(-50%) translateY(12px);
+  opacity: 0;
+  pointer-events: none;
+  background: #122942;
+  color: #f3f8ff;
+  border: 1px solid #2a4a6a;
+  border-radius: 999px;
+  padding: 10px 16px;
+  font-size: 0.84rem;
+  z-index: 2000;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.cert-copy-toast.is-visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
 }
 
 .cert-chip-revoked {

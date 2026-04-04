@@ -59,48 +59,43 @@ textarea {
 
 .dashboard-brand {
   display: inline-flex;
-  flex-direction: column;
-  align-items: flex-start;
+  align-items: baseline;
+  gap: 8px;
   text-decoration: none;
 }
 
 .dashboard-brand-main {
-  font-size: 1rem;
+  font-size: 1.2rem;
   font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  letter-spacing: -0.03em;
   line-height: 1;
 }
 
 .dashboard-brand-sub {
-  margin-top: 2px;
   color: var(--admin-muted);
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-size: 0.85rem;
   line-height: 1;
 }
 
 .dashboard-title-copy {
   display: grid;
-  gap: 3px;
-  padding-left: 14px;
+  gap: 4px;
+  padding-left: 16px;
   border-left: 1px solid var(--admin-border);
 }
 
 .page-title {
   margin: 0;
-  font-size: 0.98rem;
+  font-size: 1rem;
   font-weight: 700;
-  line-height: 1.15;
+  line-height: 1.1;
 }
 
 .dashboard-title-copy p {
   margin: 0;
   color: var(--admin-muted);
-  font-size: 0.8rem;
-  line-height: 1.4;
+  font-size: 0.84rem;
+  line-height: 1.45;
 }
 
 .user-menu {
@@ -134,11 +129,21 @@ textarea {
 .user-avatar {
   width: 34px;
   height: 34px;
-  display: inline-grid;
-  place-items: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: 1px solid var(--admin-border-strong);
   border-radius: 10px;
   background: #ffffff;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.user-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 9px;
 }
 
 .app-sidebar {
@@ -677,10 +682,39 @@ a:focus-visible {
   align-items: center;
 }
 
+.admin-inline-form {
+  display: inline-flex;
+}
+
 .admin-table-actions .admin-btn,
 .admin-table-actions .link {
   white-space: nowrap;
   min-width: 84px;
+}
+
+.admin-cert-table th:nth-child(1) {
+  min-width: 220px;
+}
+
+.admin-cert-table th:nth-child(2) {
+  min-width: 220px;
+}
+
+.admin-cert-table th:nth-child(4) {
+  min-width: 180px;
+}
+
+.admin-cert-table td {
+  vertical-align: top;
+}
+
+.admin-cert-code {
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.admin-cert-table .table-subtext {
+  line-height: 1.45;
 }
 
 .admin-table-toolbar {

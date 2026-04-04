@@ -31,6 +31,7 @@
                     <li><a href="#features" class="nav-link">Features</a></li>
                     <li><a href="#how-it-works" class="nav-link">How It Works</a></li>
                     <li><a href="#user-roles" class="nav-link">User Roles</a></li>
+                    <li><a href="#verify-certificate" class="nav-link">Verify Certificate</a></li>
                     <li><a href="#contact" class="nav-link">Contact</a></li>
                 </ul>
                 
@@ -80,6 +81,33 @@
                         <div class="visual-item visual-light"></div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Public Certificate Verification -->
+    <section class="verify-certificate" id="verify-certificate">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Public Certificate Verification</h2>
+                <p class="section-description">
+                    Employers, institutions, or any third party can verify a certificate by entering the certificate code below.
+                </p>
+            </div>
+
+            <div class="verify-card">
+                <div class="verify-copy">
+                    <h3>Check Authenticity Instantly</h3>
+                    <p>Only certificates issued by PSM E-Learning will be validated. Enter the certificate code exactly as shown on the document.</p>
+                </div>
+                <form class="verify-form" method="get" action="${pageContext.request.contextPath}/certificate/verify">
+                    <label for="landingCertificateCode">Certificate Code</label>
+                    <div class="verify-form-row">
+                        <input id="landingCertificateCode" type="text" name="code" placeholder="e.g. PSM-CERT-20260404-ABC123" required>
+                        <button class="btn btn-primary" type="submit">Verify Certificate</button>
+                    </div>
+                    <small>Verification result shows student name, course, issue date, and certificate status.</small>
+                </form>
             </div>
         </div>
     </section>
@@ -356,6 +384,7 @@
                         <li><a href="#home">Home</a></li>
                         <li><a href="#features">Features</a></li>
                         <li><a href="#how-it-works">How It Works</a></li>
+                        <li><a href="#verify-certificate">Verify Certificate</a></li>
                         <li><a href="${pageContext.request.contextPath}/student/courses">Courses</a></li>
                     </ul>
                 </div>

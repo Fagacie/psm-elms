@@ -36,6 +36,10 @@
                 <span>${sessionScope.userRole}</span>
             </div>
         </div>
+        <a href="${pageContext.request.contextPath}/profile" class="sv-profile-link">
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
+        </a>
         <a href="${pageContext.request.contextPath}/logout" class="sv-logout">
             <i class="fas fa-sign-out-alt"></i>
             <span>Logout</span>

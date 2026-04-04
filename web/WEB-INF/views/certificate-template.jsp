@@ -17,6 +17,10 @@
             --gold: #c4a24a;
             --paper: #f7f4ee;
         }
+        @page {
+            size: A4 landscape;
+            margin: 10mm;
+        }
         body { background: #e9edf2; margin: 0; font-family: 'Source Sans 3', sans-serif; color: var(--ink); }
         .wrap { max-width: 1100px; margin: 24px auto; padding: 0 12px; }
         .toolbar { display:flex; gap:10px; margin-bottom: 14px; flex-wrap: wrap; }
@@ -25,7 +29,10 @@
         .badge { display:inline-block; padding:6px 10px; border:1px solid #9a7a22; background:#fff6df; color:#7a5b12; }
 
         .certificate {
-            background: var(--paper);
+            background:
+                radial-gradient(circle at 18% 18%, rgba(163, 131, 69, 0.1), transparent 36%),
+                radial-gradient(circle at 86% 72%, rgba(10, 42, 67, 0.1), transparent 45%),
+                var(--paper);
             border: 16px solid var(--accent);
             padding: 42px 52px;
             position: relative;
@@ -78,6 +85,7 @@
         .qr img { width: 120px; height: 120px; border: 2px solid var(--gold); padding: 6px; background: #fff; }
 
         @media print {
+            * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
             .toolbar { display:none; }
             .wrap { margin:0; max-width:none; }
             body { background:#fff; }
@@ -90,9 +98,6 @@
     <div class="toolbar">
         <a class="btn" href="${backUrl}">Back</a>
         <button class="btn primary" onclick="window.print()">Download / Print</button>
-        <c:if test="${not empty certificate.verificationURL}">
-            <a class="btn" target="_blank" href="${certificate.verificationURL}">Verify</a>
-        </c:if>
         <c:if test="${previewMode == true}">
             <span class="badge">Preview Template</span>
         </c:if>
@@ -140,11 +145,19 @@
 
         <c:if test="${not empty certificate.qrCodePath}">
             <div class="qr">
-                <img src="${certificate.qrCodePath}" alt="Certificate QR Code">
+                <c:choose>
+                    <c:when test="${certificate.qrCodePath.startsWith('http')}">
+                        <img src="${certificate.qrCodePath}" alt="Certificate QR Code">
+                    </c:when>
+                    <c:otherwise>
+                        <img src="${pageContext.request.contextPath}/${certificate.qrCodePath}" alt="Certificate QR Code">
+                    </c:otherwise>
+                </c:choose>
             </div>
         </c:if>
         <div class="verify">
-            Verification URL: ${certificate.verificationURL}
+            Verification Code: ${certificate.certificateNo}<br>
+            Public verification: use this code on the institution landing page certificate verification section.
         </div>
     </section>
 </div>

@@ -35,13 +35,30 @@
                     <span class="badge">${notificationCount}</span>
                 </div>
             </c:if>
-            <div class="user-menu">
+            <a href="${pageContext.request.contextPath}/profile" class="user-menu user-menu-link">
                 <div class="user-info">
                     <span class="user-name"><c:out value="${empty user ? sessionScope.user.fullName : user.fullName}"/></span>
                     <span class="user-role">Instructor</span>
                 </div>
-                <div class="user-avatar"><i class="fas fa-user"></i></div>
-            </div>
+                <c:set var="topProfilePicture" value="${empty user ? sessionScope.user.profilePicture : user.profilePicture}"/>
+                <div class="user-avatar">
+                    <c:choose>
+                        <c:when test="${not empty topProfilePicture}">
+                            <c:choose>
+                                <c:when test="${topProfilePicture.startsWith('http')}">
+                                    <img src="${topProfilePicture}" alt="Profile picture">
+                                </c:when>
+                                <c:otherwise>
+                                    <img src="${pageContext.request.contextPath}/${topProfilePicture}" alt="Profile picture">
+                                </c:otherwise>
+                            </c:choose>
+                        </c:when>
+                        <c:otherwise>
+                            <i class="fas fa-user"></i>
+                        </c:otherwise>
+                    </c:choose>
+                </div>
+            </a>
             <a href="${pageContext.request.contextPath}/logout" class="btn btn-secondary btn-sm">
                 <i class="fas fa-sign-out-alt"></i>
                 Logout

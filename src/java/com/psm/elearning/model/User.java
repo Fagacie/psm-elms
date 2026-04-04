@@ -65,6 +65,9 @@ public class User {
     
     @Size(max = 10, message = "Gender must not exceed 10 characters")
     private String gender;
+
+    @Size(max = 255, message = "Profile picture path must not exceed 255 characters")
+    private String profilePicture;
     
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -110,6 +113,9 @@ public class User {
     
     public String getGender() { return gender; }
     public void setGender(String gender) { this.gender = gender; }
+
+    public String getProfilePicture() { return profilePicture; }
+    public void setProfilePicture(String profilePicture) { this.profilePicture = profilePicture; }
     
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

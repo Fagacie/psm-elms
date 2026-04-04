@@ -78,6 +78,18 @@ a {
   box-shadow: var(--sv-shadow-sm);
 }
 
+.sv-avatar-img {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  min-height: 28px;
+  max-width: 28px;
+  max-height: 28px;
+  border-radius: 6px;
+  object-fit: cover;
+  display: block;
+}
+
 .sv-menu-btn {
   display: none;
   width: 40px;

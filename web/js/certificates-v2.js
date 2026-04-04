@@ -6,7 +6,68 @@
     var noRows = document.getElementById('certNoRows');
     var counters = document.querySelectorAll('.cert-count[data-counter]');
     var tiltEls = document.querySelectorAll('.cert-card, .cert-metric, .cert-actions .sv-btn');
+    var copyButtons = document.querySelectorAll('[data-cert-copy]');
+    var copyToast = document.getElementById('certCopyToast');
     var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function showCopyToast(message) {
+        if (!copyToast) return;
+        copyToast.textContent = message;
+        copyToast.classList.add('is-visible');
+        window.clearTimeout(showCopyToast._timer);
+        showCopyToast._timer = window.setTimeout(function () {
+            copyToast.classList.remove('is-visible');
+        }, 1800);
+    }
+
+    function flashCopyState(button, text) {
+        var original = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-check"></i><span>' + text + '</span>';
+        window.setTimeout(function () {
+            button.innerHTML = original;
+        }, 1200);
+    }
+
+    function copyCertificateCode(code, button) {
+        if (!code) return;
+
+        function onSuccess() {
+            if (button) flashCopyState(button, 'Code Copied');
+            showCopyToast('Certificate code copied: ' + code);
+        }
+
+        function onFailure() {
+            if (button) flashCopyState(button, 'Copy Failed');
+            showCopyToast('Copy failed. Please copy manually: ' + code);
+        }
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(code).then(onSuccess).catch(onFailure);
+            return;
+        }
+
+        var temp = document.createElement('input');
+        temp.type = 'text';
+        temp.value = code;
+        document.body.appendChild(temp);
+        temp.select();
+        try {
+            document.execCommand('copy');
+            onSuccess();
+        } catch (e) {
+            onFailure();
+        }
+        document.body.removeChild(temp);
+    }
+
+    function wireCopyButtons() {
+        if (!copyButtons.length) return;
+        copyButtons.forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                copyCertificateCode(btn.getAttribute('data-cert-copy'), btn);
+            });
+        });
+    }
 
     function animateCounters() {
         counters.forEach(function (counter) {
@@ -120,6 +181,7 @@
         });
     }
 
+    wireCopyButtons();
     animateCounters();
     applyFilters();
 })();

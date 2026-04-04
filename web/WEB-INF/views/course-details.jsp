@@ -31,6 +31,10 @@
                     <i class="fas fa-user"></i>
                 </div>
             </div>
+            <a href="${pageContext.request.contextPath}/profile" class="btn btn-secondary btn-sm">
+                <i class="fas fa-user"></i>
+                Profile
+            </a>
             <a href="${pageContext.request.contextPath}/logout" class="btn btn-secondary btn-sm">
                 <i class="fas fa-sign-out-alt"></i>
                 Logout

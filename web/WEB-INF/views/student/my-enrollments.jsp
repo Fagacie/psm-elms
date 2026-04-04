@@ -1,6 +1,8 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<c:set var="studentProfilePicture" value="${not empty sessionScope.student.passportPath ? sessionScope.student.passportPath : null}"/>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -29,7 +31,7 @@
     </div>
     <div class="sv-top-right">
         <a href="${pageContext.request.contextPath}/profile" class="me-user">
-            <span class="me-user-icon"><i class="fas fa-user-graduate"></i></span>
+            <span class="me-user-icon"><c:choose><c:when test="${not empty studentProfilePicture}"><c:choose><c:when test="${fn:startsWith(studentProfilePicture, 'http')}"><img src="${studentProfilePicture}" alt="Profile" class="me-avatar-img"></c:when><c:otherwise><img src="${pageContext.request.contextPath}${studentProfilePicture}" alt="Profile" class="me-avatar-img"></c:otherwise></c:choose></c:when><c:otherwise><i class="fas fa-user-graduate"></i></c:otherwise></c:choose></span>
             <div class="me-user-copy">
                 <strong>${sessionScope.userName}</strong>
                 <span>Student</span>
@@ -195,7 +197,7 @@
                                             <span>${progress}% complete</span>
                                             <span>#${enrollment.enrollmentId}</span>
                                         </div>
-                                        <a href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}" class="sv-btn primary">Continue</a>
+                                        <button type="button" class="sv-btn primary me-continue-link" data-href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}">Continue</button>
                                     </div>
                                 </article>
                             </c:forEach>

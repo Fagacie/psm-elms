@@ -20,6 +20,7 @@ public class UserDAOImpl implements UserDAO {
         u.setPasswordHash(rs.getString("PasswordHash"));
         u.setRole(rs.getString("Role"));
         u.setStatus(rs.getString("Status"));
+        u.setProfilePicture(rs.getString("ProfilePicture"));
         Timestamp cAt = rs.getTimestamp("CreatedAt");
         Timestamp uAt = rs.getTimestamp("UpdatedAt");
         u.setCreatedAt(cAt != null ? cAt.toLocalDateTime() : null);
@@ -112,6 +113,20 @@ public class UserDAOImpl implements UserDAO {
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             System.err.println("User update failed: " + e.getMessage());
+            return false;
+        }
+    }
+
+    @Override
+    public boolean updateProfilePicture(int userId, String profilePicture) {
+        String sql = "UPDATE User SET ProfilePicture=? WHERE UserID=?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, profilePicture);
+            ps.setInt(2, userId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("updateProfilePicture failed: " + e.getMessage());
             return false;
         }
     }

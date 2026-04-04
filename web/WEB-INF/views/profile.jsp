@@ -165,6 +165,16 @@
                 <div class="sv-card-body">
                     <div class="profile-v2-photo">
                         <c:choose>
+                            <c:when test="${not empty user.profilePicture}">
+                                <c:choose>
+                                    <c:when test="${user.profilePicture.startsWith('http')}">
+                                        <img src="${user.profilePicture}" alt="Profile Picture">
+                                    </c:when>
+                                    <c:otherwise>
+                                        <img src="${pageContext.request.contextPath}/${user.profilePicture}" alt="Profile Picture">
+                                    </c:otherwise>
+                                </c:choose>
+                            </c:when>
                             <c:when test="${not empty student.passportPath}">
                                 <c:choose>
                                     <c:when test="${student.passportPath.startsWith('http')}">
@@ -184,15 +194,13 @@
                     <div class="profile-v2-name">${user.fullName}</div>
                     <div class="profile-v2-role">${sessionScope.userRole}</div>
 
-                    <c:if test="${sessionScope.userRole == 'Student'}">
-                        <form action="${pageContext.request.contextPath}/profile-picture" method="post" enctype="multipart/form-data" id="photoUploadForm" class="profile-v2-photo-form">
-                            <input type="file" name="passportPhoto" id="photoInput" accept="image/jpeg,image/png,image/gif" required>
-                            <label for="photoInput" class="sv-btn profile-v2-upload-btn">
-                                <i class="fas fa-camera"></i>
-                                <span>Upload Photo</span>
-                            </label>
-                        </form>
-                    </c:if>
+                    <form action="${pageContext.request.contextPath}/profile-picture" method="post" enctype="multipart/form-data" id="photoUploadForm" class="profile-v2-photo-form">
+                        <input type="file" name="passportPhoto" id="photoInput" accept="image/jpeg,image/png,image/gif" required>
+                        <label for="photoInput" class="sv-btn profile-v2-upload-btn">
+                            <i class="fas fa-camera"></i>
+                            <span>Upload Photo</span>
+                        </label>
+                    </form>
 
                     <div class="profile-v2-meta">
                         <div class="profile-v2-meta-item">

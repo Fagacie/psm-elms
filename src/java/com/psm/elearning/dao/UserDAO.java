@@ -12,6 +12,7 @@ public interface UserDAO {
     User findByEmail(String email);
     List<User> findAll();
     boolean update(User user);
+    boolean updateProfilePicture(int userId, String profilePicture);
     boolean updateStatus(int userId, String status);
     boolean updateLastLogin(int userId);
     boolean delete(int userId);

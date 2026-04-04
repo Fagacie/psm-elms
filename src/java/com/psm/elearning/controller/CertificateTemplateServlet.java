@@ -43,10 +43,7 @@ public class CertificateTemplateServlet extends HttpServlet {
             request.setAttribute("previewMode", true);
         }
 
-        String backUrl = request.getParameter("back");
-        if (backUrl == null || backUrl.trim().isEmpty()) {
-            backUrl = request.getContextPath() + "/dashboard";
-        }
+        String backUrl = sanitizeBackUrl(request, request.getParameter("back"));
 
         request.setAttribute("certificate", certificateView);
         request.setAttribute("backUrl", backUrl);
@@ -72,6 +69,27 @@ public class CertificateTemplateServlet extends HttpServlet {
         } catch (NumberFormatException e) {
             return null;
         }
+    }
+
+    private String sanitizeBackUrl(HttpServletRequest request, String rawBackUrl) {
+        String defaultBack = request.getContextPath() + "/dashboard";
+        if (rawBackUrl == null) {
+            return defaultBack;
+        }
+
+        String back = rawBackUrl.trim();
+        if (back.isEmpty()) {
+            return defaultBack;
+        }
+
+        String contextPath = request.getContextPath();
+        if (back.startsWith(contextPath + "/") || back.equals(contextPath)) {
+            return back;
+        }
+        if (back.startsWith("/") && !back.startsWith("//")) {
+            return contextPath + back;
+        }
+        return defaultBack;
     }
 
     private boolean canViewCertificate(HttpSession session, CertificateView certificate) {

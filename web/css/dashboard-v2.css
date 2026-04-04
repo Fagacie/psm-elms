@@ -505,6 +505,11 @@ body.sd-page {
   color: var(--sd-accent);
 }
 
+.sd-course-actions .sd3-continue-link {
+  position: relative;
+  z-index: 2;
+}
+
 .sd-table-wrap {
   overflow-x: auto;
 }

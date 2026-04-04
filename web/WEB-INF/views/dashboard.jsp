@@ -197,7 +197,7 @@
                                                 </div>
                                             </div>
                                             <div class="sv-course-actions">
-                                                <a href="${pageContext.request.contextPath}/student/enrollment-details?id=${course.enrollmentId}" class="sv-btn primary">Continue</a>
+                                                <button type="button" class="sv-btn primary sd3-continue-link" data-href="${pageContext.request.contextPath}/student/enrollment-details?id=${course.enrollmentId}">Continue</button>
                                             </div>
                                         </article>
                                     </c:if>
