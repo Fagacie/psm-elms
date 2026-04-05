@@ -249,6 +249,37 @@ CREATE TABLE IF NOT EXISTS `Certificate` (
   CONSTRAINT `fk_certificate_enrollment` FOREIGN KEY (`EnrollmentID`) REFERENCES `Enrollment`(`EnrollmentID`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- Report Exports (stores generated report metadata)
+CREATE TABLE IF NOT EXISTS `ReportExport` (
+  `ExportID` INT AUTO_INCREMENT PRIMARY KEY,
+  `UserID` INT NOT NULL,
+  `RoleName` VARCHAR(50) NOT NULL,
+  `ReportType` VARCHAR(100) NOT NULL,
+  `FiltersJson` LONGTEXT NULL,
+  `ExportFormat` VARCHAR(20) NULL,
+  `FilePath` VARCHAR(255) NULL,
+  `CreatedAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  KEY `idx_report_export_user` (`UserID`),
+  KEY `idx_report_export_type` (`ReportType`),
+  CONSTRAINT `fk_report_export_user` FOREIGN KEY (`UserID`) REFERENCES `User`(`UserID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Report Access Log (audit trail for report module usage)
+CREATE TABLE IF NOT EXISTS `ReportAccessLog` (
+  `LogID` INT AUTO_INCREMENT PRIMARY KEY,
+  `UserID` INT NOT NULL,
+  `RoleName` VARCHAR(50) NOT NULL,
+  `ReportType` VARCHAR(100) NOT NULL,
+  `FiltersJson` LONGTEXT NULL,
+  `AccessStatus` VARCHAR(20) NOT NULL,
+  `IPAddress` VARCHAR(64) NULL,
+  `AccessedAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  KEY `idx_report_log_user` (`UserID`),
+  KEY `idx_report_log_type` (`ReportType`),
+  KEY `idx_report_log_status` (`AccessStatus`),
+  CONSTRAINT `fk_report_log_user` FOREIGN KEY (`UserID`) REFERENCES `User`(`UserID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 -- Password Reset Tokens
 CREATE TABLE IF NOT EXISTS `PasswordResetToken` (
   `TokenID` INT AUTO_INCREMENT PRIMARY KEY,

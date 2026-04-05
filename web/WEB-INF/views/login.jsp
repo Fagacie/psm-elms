@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/auth-premium.css">
 </head>
 <body class="auth-page">
@@ -25,11 +26,15 @@
                 <li>Earn recognized certificates</li>
             </ul>
             
-            <div class="auth-scene" data-auth-scene>
-                <span class="auth-shape auth-shape-a" data-depth="18"></span>
-                <span class="auth-shape auth-shape-b" data-depth="28"></span>
-                <span class="auth-shape auth-shape-c" data-depth="22"></span>
-                <span class="auth-shape auth-shape-d" data-depth="14"></span>
+            <div class="auth-scene">
+                <lottie-player
+                        class="auth-lottie"
+                        src="${pageContext.request.contextPath}/img/auth/login-circle-animation.json"
+                        background="transparent"
+                        speed="1"
+                        loop
+                        autoplay>
+                </lottie-player>
             </div>
         </aside>
 

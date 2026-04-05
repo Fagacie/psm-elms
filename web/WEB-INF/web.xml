@@ -114,6 +114,15 @@
     </servlet-mapping>
 
     <servlet>
+        <servlet-name>ReportServlet</servlet-name>
+        <servlet-class>com.psm.elearning.controller.ReportServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ReportServlet</servlet-name>
+        <url-pattern>/reports</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
         <servlet-name>MailTestServlet</servlet-name>
         <servlet-class>com.psm.elearning.controller.MailTestServlet</servlet-class>
     </servlet>

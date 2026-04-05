@@ -25,6 +25,9 @@
         <a href="${pageContext.request.contextPath}/admin/payments" class="nav-item ${fn:contains(currentPath, 'admin/payments') ? 'active' : ''}">
             <i class="fas fa-credit-card"></i><span>Payment</span>
         </a>
+        <a href="${pageContext.request.contextPath}/reports" class="nav-item ${fn:contains(currentPath, 'reports') ? 'active' : ''}">
+            <i class="fas fa-chart-column"></i><span>Reports</span>
+        </a>
         <a href="${pageContext.request.contextPath}/admin/certificates" class="nav-item ${fn:contains(currentPath, 'admin/certificates') ? 'active' : ''}">
             <i class="fas fa-certificate"></i><span>Certificate</span>
         </a>
