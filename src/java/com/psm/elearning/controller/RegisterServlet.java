@@ -99,6 +99,12 @@ public class RegisterServlet extends HttpServlet {
             return;
         }
 
+        if (!isBlank(gender) && !isAllowedGender(gender)) {
+            request.setAttribute("error", "Gender must be Male or Female.");
+            request.getRequestDispatcher("/WEB-INF/views/register.jsp").forward(request, response);
+            return;
+        }
+
         String normalizedEmail = email.toLowerCase(Locale.ROOT);
         if (userDAO.findByEmail(normalizedEmail) != null) {
             request.setAttribute("error", "Email is already registered.");
@@ -232,5 +238,9 @@ public class RegisterServlet extends HttpServlet {
         }
 
         return afterUpload;
+    }
+
+    private boolean isAllowedGender(String gender) {
+        return "Male".equalsIgnoreCase(gender) || "Female".equalsIgnoreCase(gender);
     }
 }

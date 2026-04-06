@@ -12,7 +12,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin-dashboard.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <jsp:include page="/WEB-INF/views/common/head-external-assets.jsp"/>
 </head>
 <body>
 <jsp:include page="/WEB-INF/views/common/admin-header.jsp">
@@ -139,7 +139,7 @@
                             <th>Course Name</th>
                             <th>Category</th>
                             <th>Level</th>
-                            <th>Duration (hrs)</th>
+                            <th>Duration</th>
                             <th>Fee (NGN)</th>
                             <th>Status</th>
                             <th>Created</th>
@@ -175,8 +175,13 @@
                                         </td>
                                         <td>${course.category}</td>
                                         <td><span class="status-badge status-${course.level eq 'Beginner' ? 'success' : course.level eq 'Intermediate' ? 'warning' : 'secondary'}">${course.level}</span></td>
-                                        <td>${course.duration}</td>
-                                        <td><fmt:formatNumber value="${course.courseFee}" type="number" minFractionDigits="2" maxFractionDigits="2"/></td>
+                                        <td>${course.displayDuration}</td>
+                                        <td>
+                                            <c:choose>
+                                                <c:when test="${course.courseFee == 0}">Free</c:when>
+                                                <c:otherwise><fmt:formatNumber value="${course.courseFee}" type="number" minFractionDigits="2" maxFractionDigits="2"/></c:otherwise>
+                                            </c:choose>
+                                        </td>
                                         <td><span class="status-badge status-${course.status eq 'Pending' ? 'warning' : course.status eq 'Approved' ? 'success' : 'secondary'}">${course.status}</span></td>
                                         <td>
                                             <c:choose>

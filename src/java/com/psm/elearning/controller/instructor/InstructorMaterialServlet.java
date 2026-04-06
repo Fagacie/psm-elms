@@ -425,7 +425,8 @@ public class InstructorMaterialServlet extends HttpServlet {
     private boolean isAllowedExtension(String ext) {
         return "pdf".equals(ext) || "doc".equals(ext) || "docx".equals(ext)
                 || "ppt".equals(ext) || "pptx".equals(ext) || "zip".equals(ext)
-                || "txt".equals(ext) || "mp4".equals(ext) || "mp3".equals(ext);
+                || "txt".equals(ext) || "mp4".equals(ext) || "mp3".equals(ext)
+                || "webm".equals(ext) || "mov".equals(ext) || "m4v".equals(ext);
     }
 
     private String normalizeMaterialType(String value) {
@@ -447,7 +448,8 @@ public class InstructorMaterialServlet extends HttpServlet {
             return "ppt".equals(e) || "pptx".equals(e) || "pdf".equals(e) || "zip".equals(e);
         }
         if (Material.TYPE_VIDEO.equals(materialType)) {
-            return "mp4".equals(e) || "mp3".equals(e);
+            return "mp4".equals(e) || "mp3".equals(e)
+                    || "webm".equals(e) || "mov".equals(e) || "m4v".equals(e);
         }
         return Material.TYPE_LINK.equals(materialType);
     }
@@ -472,10 +474,8 @@ public class InstructorMaterialServlet extends HttpServlet {
     }
 
     private String resolveResourceType(String ext) {
-        if ("pdf".equals(ext) || "jpg".equals(ext) || "jpeg".equals(ext) || "png".equals(ext) || "gif".equals(ext) || "webp".equals(ext)) {
-            return "image";
-        }
-        if ("mp4".equals(ext) || "mp3".equals(ext)) {
+        if ("mp4".equals(ext) || "mp3".equals(ext)
+                || "webm".equals(ext) || "mov".equals(ext) || "m4v".equals(ext)) {
             return "video";
         }
         return "raw";

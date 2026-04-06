@@ -569,6 +569,112 @@ input {
   animation: verifySweep 1.5s ease-in-out infinite alternate;
 }
 
+.application-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(340px, 0.95fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.application-points {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.application-points span {
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--muted);
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+
+.application-card {
+  display: grid;
+  gap: 16px;
+  padding: 22px;
+  border-radius: calc(var(--radius) - 2px);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.95));
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+}
+
+.application-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.application-field {
+  display: grid;
+  gap: 8px;
+}
+
+.application-field-full {
+  grid-column: 1 / -1;
+}
+
+.application-field label {
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.application-field input,
+.application-field textarea {
+  width: 100%;
+  min-height: 46px;
+  border-radius: 14px;
+  border: 1px solid var(--line-strong);
+  background: #ffffff;
+  padding: 0 14px;
+  color: var(--text);
+  transition: border-color var(--transition), box-shadow var(--transition), transform var(--transition);
+}
+
+.application-field textarea {
+  min-height: 150px;
+  padding: 14px;
+  resize: vertical;
+}
+
+.application-field input:focus,
+.application-field textarea:focus {
+  outline: none;
+  border-color: var(--text);
+  box-shadow: 0 0 0 4px rgba(15, 23, 42, 0.08);
+  transform: translateY(-1px);
+}
+
+.application-submit {
+  justify-self: start;
+}
+
+.landing-alert {
+  margin-top: 18px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-soft);
+  font-size: 0.94rem;
+}
+
+.landing-alert-success {
+  background: rgba(20, 83, 45, 0.08);
+  border-color: rgba(20, 83, 45, 0.2);
+}
+
+.landing-alert-error {
+  background: rgba(153, 27, 27, 0.08);
+  border-color: rgba(153, 27, 27, 0.2);
+}
+
 .courses .section-heading {
   margin-bottom: 26px;
 }
@@ -990,6 +1096,7 @@ input {
 @media (max-width: 980px) {
   .hero-grid,
   .preview-grid,
+  .application-grid,
   .verify-grid,
   .cta-box,
   .footer-grid {
@@ -1014,6 +1121,10 @@ input {
   .preview-sidebar {
     grid-auto-flow: column;
     grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .application-form-grid {
+    grid-template-columns: 1fr;
   }
 
   .verify-command-row {
@@ -1106,7 +1217,8 @@ input {
   }
 
   .hero-actions .btn,
-  .cta-actions .btn {
+  .cta-actions .btn,
+  .application-submit {
     width: 100%;
   }
 

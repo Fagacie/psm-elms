@@ -13,46 +13,17 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-shell.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-dashboard.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/report-module.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <jsp:include page="/WEB-INF/views/common/head-external-assets.jsp"/>
 </head>
 <body class="instructor-ui">
-<header class="app-header">
-    <div class="header-left">
-        <a href="${pageContext.request.contextPath}/dashboard" class="dashboard-brand" aria-label="PSM E-Learning home">
-            <span class="dashboard-brand-main">PSM</span>
-            <span class="dashboard-brand-sub">E-Learning</span>
-        </a>
-        <div class="dashboard-title-copy">
-            <h1 class="page-title">Instructor Reports</h1>
-            <p>Performance insights across your own courses</p>
-        </div>
-    </div>
-    <div class="header-right">
-        <a href="${pageContext.request.contextPath}/profile" class="user-menu user-menu-link">
-            <div class="user-info">
-                <span class="user-name"><c:out value="${empty user ? sessionScope.user.fullName : user.fullName}"/></span>
-                <span class="user-role">Instructor</span>
-            </div>
-            <div class="user-avatar"><i class="fas fa-user"></i></div>
-        </a>
-        <a href="${pageContext.request.contextPath}/logout" class="btn btn-secondary btn-sm">
-            <i class="fas fa-sign-out-alt"></i>
-            Logout
-        </a>
-    </div>
-</header>
+<jsp:include page="/WEB-INF/views/common/instructor-header.jsp">
+    <jsp:param name="pageTitle" value="Instructor Reports"/>
+    <jsp:param name="pageSubtitle" value="Performance insights across your own courses"/>
+</jsp:include>
 
-<aside class="app-sidebar">
-    <nav class="sidebar-nav">
-        <a href="${pageContext.request.contextPath}/dashboard" class="nav-item"><i class="fas fa-home"></i><span>Dashboard</span></a>
-        <a href="${pageContext.request.contextPath}/instructor/courses" class="nav-item"><i class="fas fa-book"></i><span>Courses</span></a>
-        <a href="${pageContext.request.contextPath}/instructor/materials" class="nav-item"><i class="fas fa-folder-open"></i><span>Materials</span></a>
-        <a href="${pageContext.request.contextPath}/instructor/assessments" class="nav-item"><i class="fas fa-clipboard-list"></i><span>Assessments</span></a>
-        <a href="${pageContext.request.contextPath}/instructor/certificates" class="nav-item"><i class="fas fa-certificate"></i><span>Certificates</span></a>
-        <a href="${pageContext.request.contextPath}/reports" class="nav-item active"><i class="fas fa-chart-column"></i><span>Reports</span></a>
-        <a href="${pageContext.request.contextPath}/profile" class="nav-item"><i class="fas fa-user"></i><span>Profile / Settings</span></a>
-    </nav>
-</aside>
+<c:set var="activeInstructorPage" value="reports"/>
+<c:set var="showInstructorReports" value="true"/>
+<jsp:include page="/WEB-INF/views/common/instructor-sidebar.jsp"/>
 
 <main class="app-main">
     <div class="content-wrapper report-shell">

@@ -9,48 +9,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Courses - PSM E-Learning</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/student-v2.css">
+    <jsp:include page="/WEB-INF/views/common/student-head-assets.jsp"/>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/my-enrollments-v2.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="sv-page">
-<header class="sv-topbar">
-    <div class="sv-top-left">
-        <button class="sv-menu-btn" id="svMenuBtn" type="button" aria-label="Toggle navigation"><i class="fas fa-bars"></i></button>
-        <a href="${pageContext.request.contextPath}/dashboard" class="sv-brand">
-            <span class="sv-brand-main">PSM</span>
-            <span class="sv-brand-sub">E-Learning</span>
-        </a>
-        <div class="sv-page-title">
-            <h1>My Courses</h1>
-            <p>All active learning paths in one place</p>
-        </div>
-    </div>
-    <div class="sv-top-right">
-        <a href="${pageContext.request.contextPath}/profile" class="me-user">
-            <span class="me-user-icon"><c:choose><c:when test="${not empty studentProfilePicture}"><c:choose><c:when test="${fn:startsWith(studentProfilePicture, 'http')}"><img src="${studentProfilePicture}" alt="Profile" class="me-avatar-img"></c:when><c:otherwise><img src="${pageContext.request.contextPath}${studentProfilePicture}" alt="Profile" class="me-avatar-img"></c:otherwise></c:choose></c:when><c:otherwise><i class="fas fa-user-graduate"></i></c:otherwise></c:choose></span>
-            <div class="me-user-copy">
-                <strong>${sessionScope.userName}</strong>
-                <span>Student</span>
-            </div>
-        </a>
-        <a href="${pageContext.request.contextPath}/logout" class="sv-logout"><i class="fas fa-right-from-bracket"></i> Logout</a>
-    </div>
-</header>
+<c:set var="topbarTitle" value="My Courses"/>
+<c:set var="topbarSubtitle" value="All active learning paths in one place"/>
+<jsp:include page="/WEB-INF/views/common/student-topbar.jsp"/>
 
 <div class="sv-layout">
-    <aside class="sv-sidebar" id="svSidebar">
-        <nav class="sv-nav">
-            <a href="${pageContext.request.contextPath}/dashboard" class="sv-nav-link"><i class="fas fa-house"></i><span>Dashboard</span></a>
-            <a href="${pageContext.request.contextPath}/student/my-enrollments" class="sv-nav-link active"><i class="fas fa-book-open"></i><span>My Courses</span></a>
-            <a href="${pageContext.request.contextPath}/student/courses" class="sv-nav-link"><i class="fas fa-compass"></i><span>Browse Courses</span></a>
-            <a href="${pageContext.request.contextPath}/student/certificates" class="sv-nav-link"><i class="fas fa-certificate"></i><span>Certificates</span></a>
-            <a href="${pageContext.request.contextPath}/profile" class="sv-nav-link"><i class="fas fa-user-gear"></i><span>Profile</span></a>
-        </nav>
-    </aside>
+    <c:set var="activePage" value="my-courses"/>
+    <jsp:include page="/WEB-INF/views/common/student-sidebar.jsp"/>
 
     <main class="sv-main me-page">
         <div class="sv-breadcrumb">
@@ -155,6 +124,7 @@
                             <c:forEach var="enrollment" items="${enrollments}">
                                 <c:set var="lifecycleStatus" value="${not empty enrollment.completionStatus ? enrollment.completionStatus : (enrollment.status == 'Completed' ? 'Completed' : (enrollment.status == 'Active' || enrollment.status == 'Enrolled' ? 'In Progress' : 'Not Started'))}"/>
                                 <c:set var="progress" value="${not empty enrollment.progress ? enrollment.progress : (lifecycleStatus == 'Completed' ? 100 : (lifecycleStatus == 'In Progress' ? 65 : 0))}"/>
+                                <c:set var="enrollmentPaid" value="${enrollment.paymentStatus == 'Paid' || enrollment.paymentStatus == 'Completed' || enrollment.paymentStatus == 'COMPLETED' || enrollment.paymentStatus == 'Success' || enrollment.paymentStatus == 'SUCCESS'}"/>
                                 <article class="sv-course-card me-card" data-status="${lifecycleStatus == 'Completed' ? 'done' : (lifecycleStatus == 'In Progress' ? 'live' : 'hold')}" data-course="${enrollment.courseName}" data-instructor="${enrollment.instructorName}">
                                     <div class="sv-course-media">
                                         <c:choose>
@@ -177,7 +147,7 @@
                                     </div>
                                     <div class="me-card-top">
                                         <span class="sv-chip ${lifecycleStatus == 'Completed' ? 'done' : 'status-Pending'}">${lifecycleStatus}</span>
-                                        <span class="sv-chip ${enrollment.paymentStatus == 'Paid' ? 'done' : 'status-Pending'}">${empty enrollment.paymentStatus ? 'Pending' : enrollment.paymentStatus}</span>
+                                        <span class="sv-chip ${enrollmentPaid ? 'done' : 'status-Pending'}">${empty enrollment.paymentStatus ? 'Pending' : enrollment.paymentStatus}</span>
                                     </div>
                                     <div class="sv-course-copy">
                                         <h3 class="sv-course-title">${enrollment.courseName}</h3>
@@ -197,7 +167,7 @@
                                             <span>${progress}% complete</span>
                                             <span>#${enrollment.enrollmentId}</span>
                                         </div>
-                                        <button type="button" class="sv-btn primary me-continue-link" data-href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}">Continue</button>
+                                        <button type="button" class="sv-btn primary me-continue-link" data-href="${enrollmentPaid ? pageContext.request.contextPath.concat('/student/enrollment-details?id=').concat(enrollment.enrollmentId) : pageContext.request.contextPath.concat('/student/payment?enrollmentId=').concat(enrollment.enrollmentId).concat('&error=required')}">${enrollmentPaid ? 'Continue' : 'Pay Now'}</button>
                                     </div>
                                 </article>
                             </c:forEach>

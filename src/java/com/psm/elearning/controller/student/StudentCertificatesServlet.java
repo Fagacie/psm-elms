@@ -42,6 +42,9 @@ public class StudentCertificatesServlet extends HttpServlet {
         List<ReadinessItem> blockedEnrollments = new ArrayList<>();
 
         for (Enrollment enrollment : enrollments) {
+            if (enrollment.getCoursePrice() <= 0) {
+                continue;
+            }
             EnrollmentStateSyncService.SyncResult syncResult = enrollmentStateSyncService.syncEnrollmentState(enrollment);
             Certificate existing = certificateDAO.findByEnrollment(enrollment.getEnrollmentId());
             if (existing != null) {

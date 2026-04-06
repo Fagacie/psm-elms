@@ -1,6 +1,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
-<c:set var="adminProfilePicture" value="${not empty sessionScope.user.profilePicture ? sessionScope.user.profilePicture : null}"/>
+<c:set var="headerUser" value="${empty user ? sessionScope.user : user}"/>
+<c:set var="headerProfilePicture" value="${not empty headerUser ? headerUser.profilePicture : null}"/>
 <header class="app-header">
     <div class="header-left">
         <a href="${pageContext.request.contextPath}/dashboard" class="dashboard-brand" aria-label="PSM E-Learning home">
@@ -27,12 +28,34 @@
         </div>
     </div>
     <div class="header-right">
+        <c:if test="${param.showNotifications == 'true' and not empty notificationCount and notificationCount > 0}">
+            <div class="notifications" aria-label="Notifications">
+                <i class="fas fa-bell"></i>
+                <span class="badge"><c:out value="${notificationCount}"/></span>
+            </div>
+        </c:if>
         <a href="${pageContext.request.contextPath}/profile" class="user-menu user-menu-link">
             <div class="user-info">
-                <span class="user-name"><c:out value="${sessionScope.user.fullName}"/></span>
+                <span class="user-name"><c:out value="${headerUser.fullName}"/></span>
                 <span class="user-role">Administrator</span>
             </div>
-            <div class="user-avatar"><c:choose><c:when test="${not empty adminProfilePicture}"><c:choose><c:when test="${fn:startsWith(adminProfilePicture, 'http')}"><img src="${adminProfilePicture}" alt="Profile" class="admin-avatar-img"></c:when><c:otherwise><img src="${pageContext.request.contextPath}${adminProfilePicture}" alt="Profile" class="admin-avatar-img"></c:otherwise></c:choose></c:when><c:otherwise><i class="fas fa-user-shield"></i></c:otherwise></c:choose></div>
+            <div class="user-avatar">
+                <c:choose>
+                    <c:when test="${not empty headerProfilePicture}">
+                        <c:choose>
+                            <c:when test="${fn:startsWith(headerProfilePicture, 'http')}">
+                                <img src="${headerProfilePicture}" alt="Profile picture">
+                            </c:when>
+                            <c:otherwise>
+                                <img src="${pageContext.request.contextPath}/${headerProfilePicture}" alt="Profile picture">
+                            </c:otherwise>
+                        </c:choose>
+                    </c:when>
+                    <c:otherwise>
+                        <i class="fas fa-user-shield"></i>
+                    </c:otherwise>
+                </c:choose>
+            </div>
         </a>
         <a href="${pageContext.request.contextPath}/logout" class="btn btn-secondary btn-sm">
             <i class="fas fa-sign-out-alt"></i> Logout

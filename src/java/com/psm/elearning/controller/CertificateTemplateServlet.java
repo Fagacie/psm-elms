@@ -57,6 +57,7 @@ public class CertificateTemplateServlet extends HttpServlet {
         c.setStudentName("Student Full Name");
         c.setRegNumber("PSM/STU/2026/0001");
         c.setGeneratedBy("System Auto");
+        c.setInstructorName("Lead Instructor");
         c.setIssueDate(LocalDateTime.now());
         c.setVerificationURL("https://example.com/certificate/verify?code=PSM-CERT-20260216-PREVIEW");
         return c;

@@ -6,94 +6,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Change Password | PSM E-Learning</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/student-v2.css">
+    <jsp:include page="/WEB-INF/views/common/student-head-assets.jsp"/>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/change-password-v2.css">
 </head>
 <body class="sv-page password-v2-page">
-<nav class="sv-topbar">
-    <div class="sv-top-left">
-        <button id="svMenuBtn" class="sv-menu-btn" type="button" aria-label="Open menu">
-            <i class="fas fa-bars"></i>
-        </button>
-        <a href="${pageContext.request.contextPath}/dashboard" class="sv-brand">
-            <span class="sv-brand-main">PSM</span>
-            <span class="sv-brand-sub">E-Learning</span>
-        </a>
-        <div class="sv-page-title">
-            <h1>Change Password</h1>
-            <p>Keep your account secure with a fresh password</p>
-        </div>
-    </div>
-    <div class="sv-top-right">
-        <div class="password-v2-user">
-            <span class="password-v2-user-icon"><i class="fas fa-user-shield"></i></span>
-            <div class="password-v2-user-copy">
-                <strong>${sessionScope.userName}</strong>
-                <span>${sessionScope.userRole}</span>
-            </div>
-        </div>
-        <a href="${pageContext.request.contextPath}/profile" class="sv-profile-link">
-            <i class="fas fa-user"></i>
-            <span>Profile</span>
-        </a>
-        <a href="${pageContext.request.contextPath}/logout" class="sv-logout">
-            <i class="fas fa-sign-out-alt"></i>
-            <span>Logout</span>
-        </a>
-    </div>
-</nav>
+<c:set var="topbarTitle" value="Change Password"/>
+<c:set var="topbarSubtitle" value="Keep your account secure with a fresh password"/>
+<jsp:include page="/WEB-INF/views/common/account-topbar.jsp"/>
 
 <div class="sv-layout">
-    <aside id="svSidebar" class="sv-sidebar">
-        <nav class="sv-nav">
-            <a href="${pageContext.request.contextPath}/dashboard" class="sv-nav-link">
-                <i class="fas fa-home"></i>
-                <span>Dashboard</span>
-            </a>
-            <c:choose>
-                <c:when test="${sessionScope.userRole == 'Instructor'}">
-                    <a href="${pageContext.request.contextPath}/instructor/courses" class="sv-nav-link">
-                        <i class="fas fa-book"></i>
-                        <span>Courses</span>
-                    </a>
-                    <a href="${pageContext.request.contextPath}/instructor/materials" class="sv-nav-link">
-                        <i class="fas fa-folder-open"></i>
-                        <span>Materials</span>
-                    </a>
-                    <a href="${pageContext.request.contextPath}/instructor/assessments" class="sv-nav-link">
-                        <i class="fas fa-clipboard-check"></i>
-                        <span>Assessments</span>
-                    </a>
-                    <a href="${pageContext.request.contextPath}/instructor/certificates" class="sv-nav-link">
-                        <i class="fas fa-certificate"></i>
-                        <span>Certificates</span>
-                    </a>
-                </c:when>
-                <c:otherwise>
-                    <a href="${pageContext.request.contextPath}/student/courses" class="sv-nav-link">
-                        <i class="fas fa-book"></i>
-                        <span>Browse Courses</span>
-                    </a>
-                    <a href="${pageContext.request.contextPath}/student/my-enrollments" class="sv-nav-link">
-                        <i class="fas fa-graduation-cap"></i>
-                        <span>My Courses</span>
-                    </a>
-                    <a href="${pageContext.request.contextPath}/student/certificates" class="sv-nav-link">
-                        <i class="fas fa-certificate"></i>
-                        <span>Certificates</span>
-                    </a>
-                </c:otherwise>
-            </c:choose>
-            <a href="${pageContext.request.contextPath}/profile" class="sv-nav-link active">
-                <i class="fas fa-user"></i>
-                <span>Profile</span>
-            </a>
-        </nav>
-    </aside>
+    <c:set var="activePage" value="profile"/>
+    <jsp:include page="/WEB-INF/views/common/account-sidebar.jsp"/>
 
     <main class="sv-main">
         <div class="sv-breadcrumb">

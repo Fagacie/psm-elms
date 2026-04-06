@@ -19,6 +19,7 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Locale;
 @MultipartConfig(maxFileSize = 5 * 1024 * 1024) // 5MB
 public class InstructorCourseServlet extends HttpServlet {
     
@@ -149,6 +150,7 @@ public class InstructorCourseServlet extends HttpServlet {
             String description = request.getParameter("description");
             String category = request.getParameter("category");
             String durationStr = request.getParameter("duration");
+            String durationUnit = request.getParameter("durationUnit");
             String feeStr = request.getParameter("courseFee");
             String level = request.getParameter("level");
             String courseBannerUrl = uploadCourseBannerIfProvided(request);
@@ -174,9 +176,10 @@ public class InstructorCourseServlet extends HttpServlet {
             course.setDescription(description != null ? description.trim() : "");
             course.setCategory(category != null ? category.trim() : "");
             
-            // Parse duration
+            // Parse duration (stored internally as days)
             if (durationStr != null && !durationStr.trim().isEmpty()) {
-                course.setDuration(Integer.parseInt(durationStr));
+                int durationValue = Integer.parseInt(durationStr);
+                course.setDuration(toDays(durationValue, durationUnit));
             }
             
             // Parse fee
@@ -239,6 +242,7 @@ public class InstructorCourseServlet extends HttpServlet {
             String description = request.getParameter("description");
             String category = request.getParameter("category");
             String durationStr = request.getParameter("duration");
+            String durationUnit = request.getParameter("durationUnit");
             String feeStr = request.getParameter("courseFee");
             String level = request.getParameter("level");
             String courseBannerUrl = uploadCourseBannerIfProvided(request);
@@ -265,9 +269,10 @@ public class InstructorCourseServlet extends HttpServlet {
             existingCourse.setDescription(description != null ? description.trim() : "");
             existingCourse.setCategory(category != null ? category.trim() : "");
             
-            // Parse duration
+            // Parse duration (stored internally as days)
             if (durationStr != null && !durationStr.trim().isEmpty()) {
-                existingCourse.setDuration(Integer.parseInt(durationStr));
+                int durationValue = Integer.parseInt(durationStr);
+                existingCourse.setDuration(toDays(durationValue, durationUnit));
             }
             
             // Parse fee
@@ -438,5 +443,22 @@ public class InstructorCourseServlet extends HttpServlet {
 
     private boolean isAllowedBannerExtension(String ext) {
         return "jpg".equals(ext) || "jpeg".equals(ext) || "png".equals(ext) || "webp".equals(ext);
+    }
+
+    private int toDays(int durationValue, String durationUnit) {
+        if (durationValue < 1) {
+            throw new NumberFormatException("Duration must be at least 1");
+        }
+
+        String normalizedUnit = durationUnit == null ? "days" : durationUnit.trim().toLowerCase(Locale.ENGLISH);
+        switch (normalizedUnit) {
+            case "weeks":
+                return durationValue * 7;
+            case "months":
+                return durationValue * 30;
+            case "days":
+            default:
+                return durationValue;
+        }
     }
 }

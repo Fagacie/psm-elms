@@ -44,12 +44,12 @@ public class Course {
     @Size(max = 100, message = "Category must not exceed 100 characters")
     private String category;
     
-    @Min(value = 1, message = "Duration must be at least 1 hour")
-    @Max(value = 10000, message = "Duration must not exceed 10000 hours")
+    @Min(value = 1, message = "Duration must be at least 1 day")
+    @Max(value = 36500, message = "Duration must not exceed 36500 days")
     private Integer duration;
     
     @NotNull(message = "Course fee is required")
-    @DecimalMin(value = "0.0", inclusive = false, message = "Course fee must be greater than 0")
+    @DecimalMin(value = "0.0", inclusive = true, message = "Course fee must be zero or greater")
     @DecimalMax(value = "999999.99", message = "Course fee must not exceed 999999.99")
     private BigDecimal courseFee;
     
@@ -120,5 +120,48 @@ public class Course {
 
     public String getCourseBanner() { return courseBanner; }
     public void setCourseBanner(String courseBanner) { this.courseBanner = courseBanner; }
+
+    // Duration is stored in days; these helpers keep UI expressive (days/weeks/months).
+    public String getDurationUnitGuess() {
+        if (duration == null || duration <= 0) {
+            return "days";
+        }
+        if (duration % 30 == 0) {
+            return "months";
+        }
+        if (duration % 7 == 0) {
+            return "weeks";
+        }
+        return "days";
+    }
+
+    public Integer getDurationValueForDisplay() {
+        if (duration == null || duration <= 0) {
+            return duration;
+        }
+        if (duration % 30 == 0) {
+            return duration / 30;
+        }
+        if (duration % 7 == 0) {
+            return duration / 7;
+        }
+        return duration;
+    }
+
+    public String getDisplayDuration() {
+        if (duration == null || duration <= 0) {
+            return "-";
+        }
+        String unit = getDurationUnitGuess();
+        Integer value = getDurationValueForDisplay();
+        String singular = "day";
+        if ("weeks".equals(unit)) {
+            singular = "week";
+        } else if ("months".equals(unit)) {
+            singular = "month";
+        }
+        String label = value != null && value == 1 ? singular : unit;
+        return value + " " + label;
+    }
 }
 

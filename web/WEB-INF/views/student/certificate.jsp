@@ -8,33 +8,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Certificate | PSM E-Learning</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/student-v2.css">
+    <jsp:include page="/WEB-INF/views/common/student-head-assets.jsp"/>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/student-certificate-v2.css">
 </head>
 <body class="sv-page">
-<header class="sv-topbar">
-    <div class="sv-top-left">
-        <button class="sv-menu-btn" id="svMenuBtn" type="button" aria-label="Toggle navigation"><i class="fas fa-bars"></i></button>
-        <a href="${pageContext.request.contextPath}/dashboard" class="sv-brand"><span class="sv-brand-main">PSM</span><span class="sv-brand-sub">E-Learning</span></a>
-        <div class="sv-page-title"><h1>Certificate</h1><p>View and download your course credential</p></div>
-    </div>
-    <div class="sv-top-right"><a href="${pageContext.request.contextPath}/profile" class="sv-profile-link"><c:choose><c:when test="${not empty studentProfilePicture}"><c:choose><c:when test="${fn:startsWith(studentProfilePicture, 'http')}"><img src="${studentProfilePicture}" alt="Profile" class="sv-avatar-img"></c:when><c:otherwise><img src="${pageContext.request.contextPath}${studentProfilePicture}" alt="Profile" class="sv-avatar-img"></c:otherwise></c:choose></c:when><c:otherwise><i class="fas fa-user"></i></c:otherwise></c:choose><span>${sessionScope.userName}</span></a><a href="${pageContext.request.contextPath}/logout" class="sv-logout"><i class="fas fa-right-from-bracket"></i> Logout</a></div>
-</header>
+<c:set var="topbarTitle" value="Certificate"/>
+<c:set var="topbarSubtitle" value="View and download your course credential"/>
+<jsp:include page="/WEB-INF/views/common/student-topbar.jsp"/>
 
 <div class="sv-layout">
-    <aside class="sv-sidebar" id="svSidebar">
-        <nav class="sv-nav">
-            <a href="${pageContext.request.contextPath}/dashboard" class="sv-nav-link"><i class="fas fa-house"></i><span>Dashboard</span></a>
-            <a href="${pageContext.request.contextPath}/student/my-enrollments" class="sv-nav-link"><i class="fas fa-book-open"></i><span>My Courses</span></a>
-            <a href="${pageContext.request.contextPath}/student/courses" class="sv-nav-link"><i class="fas fa-compass"></i><span>Browse Courses</span></a>
-            <a href="${pageContext.request.contextPath}/student/certificates" class="sv-nav-link active"><i class="fas fa-certificate"></i><span>Certificates</span></a>
-            <a href="${pageContext.request.contextPath}/profile" class="sv-nav-link"><i class="fas fa-user-gear"></i><span>Profile</span></a>
-        </nav>
-    </aside>
+    <c:set var="activePage" value="certificates"/>
+    <jsp:include page="/WEB-INF/views/common/student-sidebar.jsp"/>
 
     <main class="sv-main sc-page">
         <div class="sv-breadcrumb">
@@ -55,6 +39,12 @@
             <div class="alert alert-error">
                 <i class="fas fa-triangle-exclamation"></i>
                 Certificate generation did not complete. Please retry in a moment.
+            </div>
+        </c:if>
+        <c:if test="${param.error == 'nocertificatefree'}">
+            <div class="alert alert-info">
+                <i class="fas fa-circle-info"></i>
+                Free courses do not issue certificates. Continue learning directly from your learning hub.
             </div>
         </c:if>
 
@@ -122,23 +112,24 @@
                     <div class="alert alert-error">This certificate has been revoked. Please contact support for clarification.</div>
                 </c:if>
                 <section class="sc-sheet">
-                    <div class="sc-corners" aria-hidden="true">
-                        <span></span><span></span><span></span><span></span>
-                    </div>
                     <div class="sc-header">
                         <div>
                             <div class="sc-kicker">PSM E-Learning Platform</div>
                             <h2 class="sc-title">Certificate of Completion</h2>
                             <p class="sc-sub">Official Learning Credential</p>
                         </div>
-                        <span class="sc-seal">Official Certificate</span>
+                        <div class="sc-header-meta">
+                            <span class="sc-seal">Digitally Issued</span>
+                            <span class="status-badge ${certificate.status == 'Revoked' ? 'status-Archived' : 'status-Approved'}">${certificate.status == 'Revoked' ? 'Revoked' : 'Active'}</span>
+                        </div>
                     </div>
 
-                    <p class="sc-line">This is to certify that</p>
+                    <p class="sc-line">This certifies that</p>
                     <div class="sc-name-wrap"><div class="sc-name">${studentUser.fullName}</div></div>
 
                     <div class="sc-details">
                         Registration Number: <strong><c:out value="${studentProfile.regNumber}" default="N/A"/></strong><br>
+                        Student Email: <strong><c:out value="${studentUser.email}" default="N/A"/></strong><br>
                         has successfully completed the course<br>
                         <strong>${course.courseName}</strong>
                     </div>
@@ -158,8 +149,25 @@
                             </strong>
                         </div>
                         <div class="sc-box">
-                            <span>Generated By</span>
+                            <span>Enrollment ID</span>
+                            <strong>#${enrollment.enrollmentId}</strong>
+                        </div>
+                    </div>
+
+                    <div class="sc-endorsements">
+                        <div class="sc-signature-block">
+                            <div class="sc-sign-line"></div>
+                            <strong><c:out value="${certificate.instructorName}" default="Instructor of Record"/></strong>
+                            <span>Instructor Signature</span>
+                        </div>
+                        <div class="sc-stamp-block" aria-label="Institutional validation stamp">
+                            <span>PSM</span>
+                            <small>Verified Credential</small>
+                        </div>
+                        <div class="sc-signature-block">
+                            <div class="sc-sign-line"></div>
                             <strong>${certificate.generatedBy}</strong>
+                            <span>Authorized Signatory</span>
                         </div>
                     </div>
 
@@ -177,7 +185,7 @@
                     </c:if>
                     <div class="sc-verify">
                         <strong>Verification Code:</strong> ${certificate.certificateNo}
-                        <span class="sc-verify-help">Use this code on the public verification page from the landing site.</span>
+                        <span class="sc-verify-help">Verify at: <c:out value="${certificate.verificationURL}" default="${pageContext.request.contextPath}/certificate/verify"/></span>
                     </div>
                 </section>
             </c:otherwise>

@@ -18,6 +18,7 @@ public class CertificateView {
     private String studentEmail;
     private String regNumber;
     private String courseName;
+    private String instructorName;
     private Integer studentUserId;
     private Integer courseCreatedBy;
 
@@ -139,6 +140,14 @@ public class CertificateView {
 
     public void setCourseName(String courseName) {
         this.courseName = courseName;
+    }
+
+    public String getInstructorName() {
+        return instructorName;
+    }
+
+    public void setInstructorName(String instructorName) {
+        this.instructorName = instructorName;
     }
 
     public Integer getStudentUserId() {

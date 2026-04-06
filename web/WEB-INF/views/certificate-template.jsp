@@ -8,88 +8,136 @@
     <title>Certificate Template</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --ink: #0a1f2d;
-            --muted: #4b5563;
-            --accent: #0a2a43;
-            --gold: #c4a24a;
-            --paper: #f7f4ee;
+            --ink: #14263a;
+            --muted: #5f7085;
+            --accent: #1e4f86;
+            --line: #d8e1ec;
+            --soft: #f6f9fc;
         }
         @page {
             size: A4 landscape;
             margin: 10mm;
         }
-        body { background: #e9edf2; margin: 0; font-family: 'Source Sans 3', sans-serif; color: var(--ink); }
+        body { background: #eef3f8; margin: 0; font-family: 'Inter', sans-serif; color: var(--ink); }
         .wrap { max-width: 1100px; margin: 24px auto; padding: 0 12px; }
         .toolbar { display:flex; gap:10px; margin-bottom: 14px; flex-wrap: wrap; }
-        .btn { display:inline-block; padding:10px 14px; text-decoration:none; border:1px solid #111827; color:#111827; background:#fff; }
-        .btn.primary { background:#111827; color:#fff; cursor: pointer; }
-        .badge { display:inline-block; padding:6px 10px; border:1px solid #9a7a22; background:#fff6df; color:#7a5b12; }
+        .btn { display:inline-block; padding:10px 14px; text-decoration:none; border:1px solid #223750; color:#162a40; background:#fff; border-radius: 8px; }
+        .btn.primary { background:#162a40; color:#fff; cursor: pointer; }
+        .badge { display:inline-block; padding:6px 10px; border:1px solid #cfe0f4; background:#f1f7ff; color:#2e5e8e; border-radius: 999px; font-size: 12px; font-weight: 700; }
 
         .certificate {
-            background:
-                radial-gradient(circle at 18% 18%, rgba(163, 131, 69, 0.1), transparent 36%),
-                radial-gradient(circle at 86% 72%, rgba(10, 42, 67, 0.1), transparent 45%),
-                var(--paper);
-            border: 16px solid var(--accent);
-            padding: 42px 52px;
             position: relative;
-            box-shadow: 0 18px 48px rgba(15, 23, 42, 0.12);
-            overflow: hidden;
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            background: #ffffff;
+            box-shadow: 0 18px 40px rgba(17, 33, 52, 0.12);
+            padding: 42px;
+            position: relative;
         }
         .certificate:before,
         .certificate:after {
             content: "";
             position: absolute;
-            inset: 10px;
-            border: 2px solid var(--gold);
+            inset: 14px;
+            border: 1px solid #cfd9e5;
+            border-radius: 10px;
             pointer-events: none;
         }
-        .watermark {
-            position: absolute;
-            inset: 0;
-            background:
-                radial-gradient(circle at 20% 20%, rgba(11,59,102,0.08), transparent 40%),
-                radial-gradient(circle at 80% 70%, rgba(179,139,46,0.08), transparent 45%);
-            pointer-events: none;
+        .header,
+        .line,
+        .center,
+        .details,
+        .meta,
+        .endorsements,
+        .qr,
+        .verify,
+        .title,
+        .subtitle {
+            position: relative;
+            z-index: 1;
         }
         .header {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            font-size: 12px;
-            color: var(--muted);
+            align-items: flex-start;
+            border-bottom: 1px solid var(--line);
+            padding-bottom: 18px;
         }
         .seal {
-            border: 2px solid var(--gold);
-            padding: 10px 14px;
-            font-weight: 600;
-            color: var(--accent);
+            border: 1px solid #c8d6e8;
+            border-radius: 999px;
+            background: #f7fbff;
+            color: #315b88;
+            padding: 8px 14px;
+            font-size: 0.74rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.09em;
         }
-        .title { text-align:center; font-family: 'Playfair Display', serif; font-size: 48px; font-weight:700; color: var(--accent); margin-top: 18px; }
-        .subtitle { text-align:center; color: var(--muted); margin-top: 6px; font-size: 14px; text-transform: uppercase; letter-spacing: 3px; }
-        .line { text-align:center; margin-top: 26px; font-size: 18px; color: var(--muted); }
-        .name { text-align:center; margin-top: 12px; font-family: 'Playfair Display', serif; font-size: 44px; color: var(--ink); font-weight:700; border-bottom: 2px solid var(--gold); display:inline-block; padding: 0 18px 8px; }
+        .kicker {
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 0.16em;
+            font-size: 0.72rem;
+            font-weight: 700;
+        }
+        .title { text-align:center; font-size: 44px; font-weight:800; color: var(--ink); margin: 18px 0 0; letter-spacing: -0.03em; }
+        .subtitle { text-align:center; color: var(--muted); margin-top: 8px; font-size: 0.92rem; text-transform: uppercase; letter-spacing: 0.1em; }
+        .line { text-align:center; margin-top: 26px; font-size: 0.95rem; color: var(--muted); }
+        .name { text-align:center; margin-top: 16px; font-size: 40px; color: var(--ink); font-weight:800; border-bottom: 2px solid #c9d6e4; display:inline-block; padding: 0 20px 10px; letter-spacing: -0.02em; }
         .center { text-align:center; }
-        .details { margin-top: 18px; text-align:center; color: var(--ink); font-size: 18px; line-height:1.7; }
-        .details strong { color: var(--accent); }
-        .meta { margin-top: 32px; display:grid; grid-template-columns: repeat(3,1fr); gap: 22px; }
-        .meta-box { border-top:2px solid var(--gold); padding-top:10px; font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
-        .meta-value { font-size: 15px; color: var(--ink); font-weight: 600; margin-top:6px; word-break: break-word; text-transform:none; letter-spacing: 0; }
-        .verify { margin-top: 22px; text-align:center; font-size: 12px; color: var(--muted); word-break: break-all; }
+        .details { margin-top: 18px; text-align:center; color: #22374e; font-size: 0.98rem; line-height:1.85; }
+        .details strong { color: #163454; }
+        .meta { margin-top: 28px; display:grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
+        .meta-box { border: 1px solid var(--line); border-radius: 12px; background: var(--soft); padding: 16px; }
+        .meta-box span { display: block; color: #63758a; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; }
+        .meta-value { font-size: 15px; color: #10253d; font-weight: 700; margin-top:8px; word-break: break-word; line-height: 1.5; }
+        .endorsements {
+            margin-top: 26px;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 160px minmax(0, 1fr);
+            gap: 16px;
+            align-items: end;
+        }
+        .signature-block { display: grid; gap: 6px; justify-items: center; }
+        .sign-line { width: 100%; border-bottom: 1px solid #8da5c0; height: 24px; }
+        .signature-block strong { color: #14324f; font-size: 0.92rem; }
+        .signature-block span { color: var(--muted); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; }
+        .stamp-block {
+            width: 140px;
+            height: 140px;
+            border: 2px solid #8aa8c7;
+            border-radius: 50%;
+            display: grid;
+            align-content: center;
+            justify-items: center;
+            text-align: center;
+            color: #285784;
+            background: #f7fbff;
+        }
+        .stamp-block span { font-size: 1.45rem; font-weight: 800; letter-spacing: 0.04em; }
+        .stamp-block small { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; }
+        .verify { margin-top: 20px; text-align:center; font-size: 12px; color: var(--muted); word-break: break-all; }
+        .verify-help { display: block; margin-top: 6px; font-size: 11px; word-break: break-word; }
         .qr { display:flex; justify-content:center; margin-top: 22px; }
-        .qr img { width: 120px; height: 120px; border: 2px solid var(--gold); padding: 6px; background: #fff; }
+        .qr img { width: 122px; height: 122px; border: 1px solid #d1dce8; border-radius: 12px; padding: 8px; background: #fff; }
 
         @media print {
             * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
             .toolbar { display:none; }
             .wrap { margin:0; max-width:none; }
             body { background:#fff; }
-            .certificate { box-shadow:none; }
+            .certificate { box-shadow:none; border-radius: 0; }
+        }
+
+        @media (max-width: 920px) {
+            .header { flex-direction: column; gap: 12px; }
+            .meta,
+            .endorsements { grid-template-columns: 1fr; }
+            .stamp-block { margin-inline: auto; }
         }
     </style>
 </head>
@@ -104,9 +152,8 @@
     </div>
 
     <section class="certificate">
-        <div class="watermark"></div>
         <div class="header">
-            <span>PSM E-Learning</span>
+            <span class="kicker">PSM E-Learning Platform</span>
             <span class="seal">Official Certificate</span>
         </div>
         <div class="subtitle">PSM E-Learning Platform</div>
@@ -117,17 +164,18 @@
 
         <div class="details">
             Registration Number: <strong><c:out value="${certificate.regNumber}" default="N/A"/></strong><br>
+            Student Email: <strong><c:out value="${certificate.studentEmail}" default="N/A"/></strong><br>
             has successfully completed the course<br>
             <strong>${certificate.courseName}</strong>
         </div>
 
         <div class="meta">
             <div class="meta-box">
-                Certificate Number
+                <span>Certificate Number</span>
                 <div class="meta-value">${certificate.certificateNo}</div>
             </div>
             <div class="meta-box">
-                Issue Date
+                <span>Issue Date</span>
                 <div class="meta-value">
                     <c:choose>
                         <c:when test="${not empty certificate.issueDate}">
@@ -138,8 +186,30 @@
                 </div>
             </div>
             <div class="meta-box">
-                Generated By
-                <div class="meta-value">${certificate.generatedBy}</div>
+                <span>Status</span>
+                <div class="meta-value">
+                    <c:choose>
+                        <c:when test="${certificate.status == 'Revoked'}">Revoked</c:when>
+                        <c:otherwise>Active</c:otherwise>
+                    </c:choose>
+                </div>
+            </div>
+        </div>
+
+        <div class="endorsements">
+            <div class="signature-block">
+                <div class="sign-line"></div>
+                <strong><c:out value="${certificate.instructorName}" default="Instructor of Record"/></strong>
+                <span>Instructor Signature</span>
+            </div>
+            <div class="stamp-block" aria-label="Institutional validation stamp">
+                <span>PSM</span>
+                <small>Verified Credential</small>
+            </div>
+            <div class="signature-block">
+                <div class="sign-line"></div>
+                <strong><c:out value="${certificate.generatedBy}" default="Registrar"/></strong>
+                <span>Authorized Signatory</span>
             </div>
         </div>
 
@@ -156,8 +226,8 @@
             </div>
         </c:if>
         <div class="verify">
-            Verification Code: ${certificate.certificateNo}<br>
-            Public verification: use this code on the institution landing page certificate verification section.
+            Verification Code: ${certificate.certificateNo}
+            <span class="verify-help">Public verification URL: <c:out value="${certificate.verificationURL}" default="${pageContext.request.contextPath}/certificate/verify"/></span>
         </div>
     </section>
 </div>

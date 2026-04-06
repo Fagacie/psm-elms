@@ -333,6 +333,20 @@
     gap: 6px;
 }
 
+.field-hint {
+    color: var(--ins-muted);
+    font-size: 0.78rem;
+    line-height: 1.45;
+}
+
+.upload-form-grid input:disabled,
+.upload-form-grid select:disabled,
+.upload-form-grid textarea:disabled {
+    background: #f8fafc;
+    color: #64748b;
+    cursor: not-allowed;
+}
+
 .upload-form-grid .field.full {
     grid-column: 1 / -1;
 }

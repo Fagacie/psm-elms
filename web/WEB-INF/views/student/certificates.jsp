@@ -8,11 +8,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Certificates | PSM E-Learning</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/student-v2.css">
+    <jsp:include page="/WEB-INF/views/common/student-head-assets.jsp"/>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/certificates-v2.css">
 </head>
 <body class="sv-page">
@@ -24,45 +20,13 @@
 </c:forEach>
 <c:set var="activeCount" value="${fn:length(issuedCertificates) - revokedCount}" />
 
-<nav class="sv-topbar">
-    <div class="sv-top-left">
-        <button id="svMenuBtn" class="sv-menu-btn" type="button" aria-label="Open menu">
-            <i class="fas fa-bars"></i>
-        </button>
-        <a href="${pageContext.request.contextPath}/dashboard" class="sv-brand">
-            <span class="sv-brand-main">PSM</span>
-            <span class="sv-brand-sub">E-Learning</span>
-        </a>
-        <div class="sv-page-title">
-            <h1>Certificates</h1>
-            <p>Generate and share your learning credentials</p>
-        </div>
-    </div>
-    <div class="sv-top-right">
-        <a href="${pageContext.request.contextPath}/profile" class="cert-user">
-            <span class="cert-user-icon"><c:choose><c:when test="${not empty studentProfilePicture}"><c:choose><c:when test="${fn:startsWith(studentProfilePicture, 'http')}"><img src="${studentProfilePicture}" alt="Profile" class="cert-avatar-img"></c:when><c:otherwise><img src="${pageContext.request.contextPath}${studentProfilePicture}" alt="Profile" class="cert-avatar-img"></c:otherwise></c:choose></c:when><c:otherwise><i class="fas fa-user-graduate"></i></c:otherwise></c:choose></span>
-            <div class="cert-user-copy">
-                <strong>${sessionScope.userName}</strong>
-                <span>Student</span>
-            </div>
-        </a>
-        <a href="${pageContext.request.contextPath}/logout" class="sv-logout">
-            <i class="fas fa-sign-out-alt"></i>
-            <span>Logout</span>
-        </a>
-    </div>
-</nav>
+<c:set var="topbarTitle" value="Certificates"/>
+<c:set var="topbarSubtitle" value="Generate and share your learning credentials"/>
+<jsp:include page="/WEB-INF/views/common/student-topbar.jsp"/>
 
 <div class="sv-layout">
-    <aside id="svSidebar" class="sv-sidebar">
-        <nav class="sv-nav">
-            <a href="${pageContext.request.contextPath}/dashboard" class="sv-nav-link"><i class="fas fa-home"></i><span>Dashboard</span></a>
-            <a href="${pageContext.request.contextPath}/student/courses" class="sv-nav-link"><i class="fas fa-book"></i><span>Browse Courses</span></a>
-            <a href="${pageContext.request.contextPath}/student/my-enrollments" class="sv-nav-link"><i class="fas fa-graduation-cap"></i><span>My Courses</span></a>
-            <a href="${pageContext.request.contextPath}/student/certificates" class="sv-nav-link active"><i class="fas fa-certificate"></i><span>Certificates</span></a>
-            <a href="${pageContext.request.contextPath}/profile" class="sv-nav-link"><i class="fas fa-user"></i><span>Profile</span></a>
-        </nav>
-    </aside>
+    <c:set var="activePage" value="certificates"/>
+    <jsp:include page="/WEB-INF/views/common/student-sidebar.jsp"/>
 
     <main class="sv-main cert-page">
         <div class="sv-breadcrumb">

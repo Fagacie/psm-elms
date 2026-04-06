@@ -21,6 +21,27 @@
         </cookie-config>
     </session-config>
 
+    <filter>
+        <filter-name>RoleGuardFilter</filter-name>
+        <filter-class>com.psm.elearning.filter.RoleGuardFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>RoleGuardFilter</filter-name>
+        <url-pattern>/admin/*</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>RoleGuardFilter</filter-name>
+        <url-pattern>/student/*</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>RoleGuardFilter</filter-name>
+        <url-pattern>/instructor/*</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>RoleGuardFilter</filter-name>
+        <url-pattern>/reports</url-pattern>
+    </filter-mapping>
+
     <!-- Landing Page -->
     <servlet>
         <servlet-name>LandingServlet</servlet-name>
@@ -29,6 +50,15 @@
     <servlet-mapping>
         <servlet-name>LandingServlet</servlet-name>
         <url-pattern>/landing</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>InstructorApplicationServlet</servlet-name>
+        <servlet-class>com.psm.elearning.controller.InstructorApplicationServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>InstructorApplicationServlet</servlet-name>
+        <url-pattern>/apply-instructor</url-pattern>
     </servlet-mapping>
 
     <!-- Authentication Servlets -->
@@ -138,6 +168,15 @@
     <servlet-mapping>
         <servlet-name>UserManagementServlet</servlet-name>
         <url-pattern>/admin/users</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>AdminInstructorApplicationServlet</servlet-name>
+        <servlet-class>com.psm.elearning.controller.admin.AdminInstructorApplicationServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>AdminInstructorApplicationServlet</servlet-name>
+        <url-pattern>/admin/instructor-applications</url-pattern>
     </servlet-mapping>
 
     <!-- Course Management Servlets -->

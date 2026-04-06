@@ -4,19 +4,22 @@ import com.psm.elearning.model.Payment;
 import com.psm.elearning.util.DBConnection;
 import java.sql.*;
 import java.time.LocalDateTime;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Implementation of PaymentDAO using JDBC with Paystack integration.
  */
 public class PaymentDAOImpl implements PaymentDAO {
+
+    private static final Logger LOGGER = Logger.getLogger(PaymentDAOImpl.class.getName());
     
     @Override
     public Payment createPayment(Payment payment) {
         String sql = "INSERT INTO Payment (EnrollmentID, Amount, PaymentMethod, PaymentStatus, Reference, PaymentRef, PaystackReference, AccessCode, AuthorizationUrl, PaystackStatus) " +
             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         
-        System.out.println("PaymentDAO: Creating payment for enrollment " + payment.getEnrollmentId());
-        System.out.println("PaymentDAO: Paystack Reference: " + payment.getPaystackReference());
+        LOGGER.info("Creating payment for enrollmentId=" + payment.getEnrollmentId());
         
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -39,14 +42,13 @@ public class PaymentDAOImpl implements PaymentDAO {
                     if (rs.next()) {
                         payment.setPaymentId(rs.getInt(1));
                         payment.setPaymentDate(LocalDateTime.now());
-                        System.out.println("PaymentDAO: Payment created successfully with ID " + payment.getPaymentId());
+                        LOGGER.info("Payment created successfully paymentId=" + payment.getPaymentId());
                         return payment;
                     }
                 }
             }
         } catch (SQLException e) {
-            System.err.println("PaymentDAO: Error creating payment: " + e.getMessage());
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Error creating payment", e);
         }
         return null;
     }
@@ -55,8 +57,7 @@ public class PaymentDAOImpl implements PaymentDAO {
     public boolean updatePaymentStatus(Integer paymentId, String status, String method, String paystackStatus) {
         String sql = "UPDATE Payment SET PaymentStatus = ?, PaymentMethod = ?, PaystackStatus = ?, PaymentDate = CASE WHEN ? = 'Paid' THEN NOW() ELSE PaymentDate END WHERE PaymentID = ?";
         
-        System.out.println("PaymentDAO: Updating payment " + paymentId);
-        System.out.println("PaymentDAO: Status: " + status + ", Method: " + method + ", Paystack Status: " + paystackStatus);
+        LOGGER.info("Updating payment status paymentId=" + paymentId + ", status=" + status + ", paystackStatus=" + paystackStatus);
         
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -70,8 +71,7 @@ public class PaymentDAOImpl implements PaymentDAO {
             int affected = ps.executeUpdate();
             return affected > 0;
         } catch (SQLException e) {
-            System.err.println("PaymentDAO: Error updating payment status: " + e.getMessage());
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Error updating payment status for paymentId=" + paymentId, e);
         }
         return false;
     }
@@ -91,8 +91,7 @@ public class PaymentDAOImpl implements PaymentDAO {
                 }
             }
         } catch (SQLException e) {
-            System.err.println("PaymentDAO: Error fetching payment: " + e.getMessage());
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Error fetching payment by enrollmentId=" + enrollmentId, e);
         }
         return null;
     }
@@ -109,8 +108,7 @@ public class PaymentDAOImpl implements PaymentDAO {
                 }
             }
         } catch (SQLException e) {
-            System.err.println("PaymentDAO: Error fetching payment by id: " + e.getMessage());
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Error fetching payment by paymentId=" + paymentId, e);
         }
         return null;
     }
@@ -145,8 +143,7 @@ public class PaymentDAOImpl implements PaymentDAO {
                 }
             }
         } catch (SQLException e) {
-            System.err.println("PaymentDAO: Error listing payments: " + e.getMessage());
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Error listing payments", e);
         }
         return list;
     }
@@ -155,7 +152,7 @@ public class PaymentDAOImpl implements PaymentDAO {
     public Payment getPaymentByPaystackReference(String paystackReference) {
         String sql = "SELECT * FROM Payment WHERE PaystackReference = ? OR Reference = ? OR PaymentRef = ? ORDER BY PaymentID DESC LIMIT 1";
         
-        System.out.println("PaymentDAO: Fetching payment by Paystack reference: " + paystackReference);
+        LOGGER.info("Fetching payment by external reference");
         
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -170,8 +167,7 @@ public class PaymentDAOImpl implements PaymentDAO {
                 }
             }
         } catch (SQLException e) {
-            System.err.println("PaymentDAO: Error fetching payment by reference: " + e.getMessage());
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Error fetching payment by external reference", e);
         }
         return null;
     }

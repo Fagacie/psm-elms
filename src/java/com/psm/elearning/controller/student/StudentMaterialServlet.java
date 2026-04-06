@@ -54,6 +54,10 @@ public class StudentMaterialServlet extends HttpServlet {
 
         Integer userId = (Integer) session.getAttribute("userId");
         String action = request.getParameter("action");
+        if ("preview".equalsIgnoreCase(action)) {
+            showMaterialPreview(request, response, userId);
+            return;
+        }
         if ("view".equalsIgnoreCase(action) || "download".equalsIgnoreCase(action)) {
             boolean markViewed = "view".equalsIgnoreCase(action);
             serveMaterialFile(request, response, userId, "download".equalsIgnoreCase(action), markViewed);
@@ -236,7 +240,59 @@ public class StudentMaterialServlet extends HttpServlet {
                 out.write(buffer, 0, bytesRead);
             }
             out.flush();
+        } finally {
+            connection.disconnect();
         }
+    }
+
+    private void showMaterialPreview(HttpServletRequest request,
+                                     HttpServletResponse response,
+                                     Integer userId)
+            throws IOException, ServletException {
+
+        Integer materialId = parseInt(request.getParameter("id"));
+        if (materialId == null) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid material ID.");
+            return;
+        }
+
+        Material material = materialDAO.findById(materialId);
+        if (material == null) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND, "Material not found.");
+            return;
+        }
+
+        if (!hasPaidAccess(userId, material.getCourseId())) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "You are not authorized to preview this material.");
+            return;
+        }
+
+        // Preview entry marks this material as viewed in the learning flow.
+        progressDAO.markViewed(userId, materialId);
+
+        String filePath = normalize(material.getFilePath());
+        String extension = extractFileExtension(filePath);
+        String streamUrl = request.getContextPath() + "/student/materials?action=view&id=" + materialId;
+
+        boolean isLink = Material.TYPE_LINK.equalsIgnoreCase(material.getMaterialType());
+        boolean isPdf = "pdf".equals(extension);
+        boolean isVideo = "mp4".equals(extension)
+                || "webm".equals(extension)
+                || "mov".equals(extension)
+                || "m4v".equals(extension)
+                || Material.TYPE_VIDEO.equalsIgnoreCase(material.getMaterialType());
+        boolean isAudio = "mp3".equals(extension);
+        boolean canInlinePreview = isPdf || isVideo || isAudio;
+
+        request.setAttribute("material", material);
+        request.setAttribute("streamUrl", streamUrl);
+        request.setAttribute("isLinkMaterial", isLink);
+        request.setAttribute("isPdfMaterial", isPdf);
+        request.setAttribute("isVideoMaterial", isVideo);
+        request.setAttribute("isAudioMaterial", isAudio);
+        request.setAttribute("canInlinePreview", canInlinePreview);
+
+        request.getRequestDispatcher("/WEB-INF/views/student/material-viewer.jsp").forward(request, response);
     }
 
     private List<Material> filterMaterials(List<Material> materials, String keyword, String materialType) {
@@ -306,6 +362,9 @@ public class StudentMaterialServlet extends HttpServlet {
         String lower = normalize(filePath).toLowerCase(Locale.ENGLISH);
         if (lower.endsWith(".pdf")) return "application/pdf";
         if (lower.endsWith(".mp4")) return "video/mp4";
+        if (lower.endsWith(".webm")) return "video/webm";
+        if (lower.endsWith(".mov")) return "video/quicktime";
+        if (lower.endsWith(".m4v")) return "video/x-m4v";
         if (lower.endsWith(".mp3")) return "audio/mpeg";
         if (lower.endsWith(".ppt")) return "application/vnd.ms-powerpoint";
         if (lower.endsWith(".pptx")) return "application/vnd.openxmlformats-officedocument.presentationml.presentation";
@@ -337,6 +396,19 @@ public class StudentMaterialServlet extends HttpServlet {
 
     private String normalize(String value) {
         return value == null ? "" : value.trim();
+    }
+
+    private String extractFileExtension(String path) {
+        String cleanPath = normalize(path);
+        int queryIndex = cleanPath.indexOf('?');
+        if (queryIndex > -1) {
+            cleanPath = cleanPath.substring(0, queryIndex);
+        }
+        int dotIndex = cleanPath.lastIndexOf('.');
+        if (dotIndex < 0 || dotIndex == cleanPath.length() - 1) {
+            return "";
+        }
+        return cleanPath.substring(dotIndex + 1).toLowerCase(Locale.ENGLISH);
     }
 
     private boolean isPaymentComplete(String paymentStatus) {

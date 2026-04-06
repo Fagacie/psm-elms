@@ -1,6 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -34,6 +35,7 @@
             <a href="#verify">Verify</a>
             <a href="#features">Features</a>
             <a href="#courses">Courses</a>
+            <a href="#apply">Apply</a>
             <a href="#preview">Preview</a>
             <a href="#contact">Contact</a>
         </nav>
@@ -45,6 +47,19 @@
     </div>
 </header>
 
+<c:if test="${not empty sessionScope.success}">
+    <div class="container landing-alert landing-alert-success">
+        <c:out value="${sessionScope.success}"/>
+    </div>
+    <c:remove var="success" scope="session"/>
+</c:if>
+<c:if test="${not empty sessionScope.error}">
+    <div class="container landing-alert landing-alert-error">
+        <c:out value="${sessionScope.error}"/>
+    </div>
+    <c:remove var="error" scope="session"/>
+</c:if>
+
 <main>
     <section class="hero section" id="home">
         <div class="container hero-grid">
@@ -54,6 +69,7 @@
                 <p class="hero-lead">A minimal e-learning system built to keep teaching, tracking, and public verification simple, fast, and easy to scan.</p>
                 <div class="hero-actions">
                     <a class="btn btn-solid" href="${pageContext.request.contextPath}/register">Get Started</a>
+                    <a class="btn btn-ghost" href="#apply">Become an Instructor</a>
                     <a class="btn btn-ghost" href="#features">Learn More</a>
                 </div>
             </div>
@@ -199,6 +215,58 @@
         </div>
     </section>
 
+    <section class="application section" id="apply">
+        <div class="container application-grid reveal">
+            <div class="section-heading compact">
+                <p class="eyebrow">Instructor applications</p>
+                <h2>Send your CV and teaching profile to the admin team for review.</h2>
+                <p>Use this form if you want to apply as an instructor. The admin team receives your application by email, reviews the CV, and responds with the result.</p>
+                <div class="application-points">
+                    <span>CV upload</span>
+                    <span>Specialization review</span>
+                    <span>Email decision</span>
+                </div>
+            </div>
+            <form class="application-card" method="post" action="${pageContext.request.contextPath}/apply-instructor" enctype="multipart/form-data">
+                <div class="application-form-grid">
+                    <div class="application-field">
+                        <label for="appFullName">Full name</label>
+                        <input id="appFullName" name="fullName" type="text" required>
+                    </div>
+                    <div class="application-field">
+                        <label for="appEmail">Email</label>
+                        <input id="appEmail" name="email" type="email" required>
+                    </div>
+                    <div class="application-field">
+                        <label for="appPhone">Phone</label>
+                        <input id="appPhone" name="phone" type="tel" required>
+                    </div>
+                    <div class="application-field">
+                        <label for="appSpecialization">Specialization</label>
+                        <input id="appSpecialization" name="specialization" type="text" required>
+                    </div>
+                    <div class="application-field">
+                        <label for="appYearsOfExperience">Years of experience</label>
+                        <input id="appYearsOfExperience" name="yearsOfExperience" type="number" min="0" step="1" placeholder="Optional">
+                    </div>
+                    <div class="application-field">
+                        <label for="appQualification">Qualification</label>
+                        <input id="appQualification" name="qualification" type="text" required>
+                    </div>
+                    <div class="application-field application-field-full">
+                        <label for="appCvFile">CV or supporting document</label>
+                        <input id="appCvFile" name="cvFile" type="file" accept=".pdf,.doc,.docx" required>
+                    </div>
+                    <div class="application-field application-field-full">
+                        <label for="appCoverMessage">Short cover message</label>
+                        <textarea id="appCoverMessage" name="coverMessage" rows="5" placeholder="Tell the admin team why you want to teach here."></textarea>
+                    </div>
+                </div>
+                <button class="btn btn-solid application-submit" type="submit">Submit application</button>
+            </form>
+        </div>
+    </section>
+
     <section class="preview section" id="preview">
         <div class="container preview-grid">
             <div class="section-heading reveal">
@@ -222,6 +290,7 @@
             </div>
             <div class="cta-actions">
                 <a class="btn btn-solid" href="${pageContext.request.contextPath}/register">Get Started</a>
+                <a class="btn btn-ghost" href="#apply">Apply to Teach</a>
                 <a class="btn btn-ghost" href="${pageContext.request.contextPath}/login">Login</a>
             </div>
         </div>

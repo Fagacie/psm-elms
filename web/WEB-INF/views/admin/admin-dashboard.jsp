@@ -12,12 +12,13 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin-dashboard.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <jsp:include page="/WEB-INF/views/common/head-external-assets.jsp"/>
 </head>
 <body>
 <jsp:include page="/WEB-INF/views/common/admin-header.jsp">
     <jsp:param name="pageTitle" value="Admin Dashboard"/>
     <jsp:param name="pageSubtitle" value="Manage platform operations from one structured workspace"/>
+    <jsp:param name="showNotifications" value="true"/>
 </jsp:include>
 
 <jsp:include page="/WEB-INF/views/common/admin-sidebar.jsp"/>
@@ -65,6 +66,11 @@
                     <div class="metric-meta">Students <c:out value="${systemMetrics['studentsCount'] != null ? systemMetrics['studentsCount'] : 0}"/> and instructors <c:out value="${systemMetrics['instructorsCount'] != null ? systemMetrics['instructorsCount'] : 0}"/></div>
                 </div>
                 <div class="metric-card">
+                    <div class="metric-label">Applications</div>
+                    <div class="metric-value"><c:out value="${systemMetrics['pendingApplications'] != null ? systemMetrics['pendingApplications'] : 0}"/></div>
+                    <div class="metric-meta">Instructor submissions waiting for review</div>
+                </div>
+                <div class="metric-card">
                     <div class="metric-label">Courses</div>
                     <div class="metric-value"><c:out value="${systemMetrics['activeCourses'] != null ? systemMetrics['activeCourses'] : 0}"/></div>
                     <div class="metric-meta">Pending review <c:out value="${systemMetrics['pendingCourses'] != null ? systemMetrics['pendingCourses'] : 0}"/></div>
@@ -106,6 +112,11 @@
                                 <td>Pending enrollments</td>
                                 <td><span class="status-badge">Watch</span></td>
                                 <td><c:out value="${systemMetrics['pendingEnrollments'] != null ? systemMetrics['pendingEnrollments'] : 0}"/></td>
+                            </tr>
+                            <tr>
+                                <td>Instructor applications</td>
+                                <td><span class="status-badge">Review</span></td>
+                                <td><c:out value="${systemMetrics['pendingApplications'] != null ? systemMetrics['pendingApplications'] : 0}"/></td>
                             </tr>
                             <tr>
                                 <td>Approved courses</td>
@@ -161,6 +172,11 @@
                     <i class="fas fa-users"></i>
                     <strong>Users</strong>
                     <span>Open user management</span>
+                </a>
+                <a href="${pageContext.request.contextPath}/admin/instructor-applications" class="quick-link-card">
+                    <i class="fas fa-file-signature"></i>
+                    <strong>Applications</strong>
+                    <span>Review instructor requests</span>
                 </a>
                 <a href="${pageContext.request.contextPath}/admin/courses" class="quick-link-card">
                     <i class="fas fa-book"></i>

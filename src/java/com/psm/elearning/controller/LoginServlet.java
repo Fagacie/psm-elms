@@ -100,6 +100,11 @@ public class LoginServlet extends HttpServlet {
 
         userDAO.updateLastLogin(user.getUserId());
 
+        HttpSession existingSession = request.getSession(false);
+        if (existingSession != null) {
+            existingSession.invalidate();
+        }
+
         HttpSession session = request.getSession(true);
         session.setAttribute("user", user);
         session.setAttribute("userId", user.getUserId());

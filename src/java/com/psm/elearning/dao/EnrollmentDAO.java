@@ -22,6 +22,14 @@ public interface EnrollmentDAO {
      * @return true if enrollment exists, false otherwise
      */
     boolean checkExistingEnrollment(Integer userId, Integer courseId);
+
+    /**
+     * Get the latest enrollment record for a student-course pair.
+     * @param userId Student user ID
+     * @param courseId Course ID
+     * @return Latest enrollment or null if none exists
+     */
+    Enrollment findLatestEnrollmentByUserAndCourse(Integer userId, Integer courseId);
     
     /**
      * Update payment status of an enrollment.

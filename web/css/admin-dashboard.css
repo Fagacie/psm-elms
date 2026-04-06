@@ -40,14 +40,16 @@ textarea {
 .app-header {
   position: fixed;
   inset: 0 0 auto 0;
-  height: 72px;
+  height: 74px;
   z-index: 100;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 24px;
+  padding: 0 22px 0 26px;
   border-bottom: 1px solid var(--admin-border);
   background: #ffffff;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 1px 0 rgba(15, 23, 42, 0.02);
 }
 
 .header-left,
@@ -84,6 +86,12 @@ textarea {
   border-left: 1px solid var(--admin-border);
 }
 
+.dashboard-title-copy .page-title {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
 .page-title {
   margin: 0;
   font-size: 1rem;
@@ -101,15 +109,27 @@ textarea {
 .user-menu {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  padding: 8px 10px 8px 8px;
-  border: 1px solid var(--admin-border-strong);
+  gap: 12px;
+  padding: 8px 10px 8px 14px;
+  border: 1px solid var(--admin-border);
   border-radius: 12px;
   background: #ffffff;
 }
 
+.user-menu-link {
+  text-decoration: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.user-menu-link:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+}
+
 .user-info {
-  display: grid;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
   gap: 2px;
   line-height: 1.1;
 }
@@ -127,14 +147,17 @@ textarea {
 }
 
 .user-avatar {
-  width: 34px;
-  height: 34px;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  flex: 0 0 40px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid var(--admin-border-strong);
   border-radius: 10px;
-  background: #ffffff;
+  background: var(--admin-accent);
+  color: #ffffff;
   overflow: hidden;
   flex-shrink: 0;
 }
@@ -143,15 +166,43 @@ textarea {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 9px;
+  border-radius: inherit;
+}
+
+.notifications {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--admin-border);
+  border-radius: 10px;
+  background: #ffffff;
+  color: var(--admin-accent);
+}
+
+.notifications .badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--admin-accent);
+  color: #ffffff;
+  font-size: 0.68rem;
+  line-height: 18px;
+  text-align: center;
 }
 
 .app-sidebar {
   position: fixed;
-  top: 72px;
+  top: 74px;
   left: 0;
   width: 244px;
-  height: calc(100vh - 72px);
+  height: calc(100vh - 74px);
   padding: 16px 12px;
   border-right: 1px solid var(--admin-border);
   background: #ffffff;
@@ -221,7 +272,7 @@ textarea {
 
 .app-main {
   margin-left: 244px;
-  padding-top: 72px;
+  padding-top: 74px;
   min-height: 100vh;
   background: #ffffff;
 }
@@ -431,6 +482,108 @@ textarea {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 24px;
+}
+
+.application-detail-card {
+  display: grid;
+  gap: 18px;
+}
+
+.application-detail-header {
+  padding-bottom: 0;
+}
+
+.application-detail-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.95fr);
+  gap: 16px;
+  padding: 0 24px 24px;
+}
+
+.application-detail-panel {
+  display: grid;
+  gap: 16px;
+  padding: 20px;
+  border: 1px solid var(--admin-border);
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.detail-status-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.detail-status-row strong {
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.detail-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.detail-meta-grid div {
+  display: grid;
+  gap: 4px;
+  padding: 12px;
+  border: 1px solid var(--admin-border);
+  border-radius: 10px;
+  background: var(--admin-surface-soft);
+}
+
+.detail-meta-grid span,
+.detail-label {
+  color: var(--admin-muted);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+}
+
+.detail-meta-grid strong,
+.application-detail-message p {
+  color: var(--admin-text);
+}
+
+.application-detail-message {
+  align-content: start;
+}
+
+.application-detail-message a {
+  color: var(--admin-accent-strong);
+  font-weight: 600;
+}
+
+.application-decision-form {
+  padding: 0 24px 24px;
+}
+
+.full-width {
+  grid-column: 1 / -1;
+}
+
+.application-decision-form textarea {
+  width: 100%;
+  min-height: 128px;
+  padding: 12px 14px;
+  border: 1px solid var(--admin-border-strong);
+  border-radius: 10px;
+  resize: vertical;
+  background: #ffffff;
+  color: var(--admin-text);
+}
+
+.detail-actions-inline {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
 }
 
 .chart-wrap {
@@ -690,6 +843,26 @@ a:focus-visible {
 .admin-table-actions .link {
   white-space: nowrap;
   min-width: 84px;
+}
+
+.application-detail-panel .section-caption {
+  margin: 0;
+}
+
+.application-detail-message p {
+  margin: 8px 0 0;
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+
+@media (max-width: 1024px) {
+  .application-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-meta-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .admin-cert-table th:nth-child(1) {

@@ -11,73 +11,16 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-shell.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-students.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <jsp:include page="/WEB-INF/views/common/head-external-assets.jsp"/>
 </head>
 <body class="instructor-ui">
-<header class="app-header">
-    <div class="header-left">
-        <a href="${pageContext.request.contextPath}/dashboard" class="dashboard-brand" aria-label="PSM E-Learning home">
-            <span class="dashboard-brand-main">PSM</span>
-            <span class="dashboard-brand-sub">E-Learning</span>
-        </a>
-        <div class="dashboard-title-copy">
-            <h1 class="page-title">Course Students</h1>
-            <p>View learners, status, and participation for the course</p>
-        </div>
-    </div>
-    <div class="header-right">
-        <a href="${pageContext.request.contextPath}/profile" class="user-menu user-menu-link">
-            <div class="user-info">
-                <span class="user-name"><c:out value="${empty user ? sessionScope.user.fullName : user.fullName}"/></span>
-                <span class="user-role">Instructor</span>
-            </div>
-            <c:set var="topProfilePicture" value="${empty user ? sessionScope.user.profilePicture : user.profilePicture}"/>
-            <div class="user-avatar">
-                <c:choose>
-                    <c:when test="${not empty topProfilePicture}">
-                        <c:choose>
-                            <c:when test="${topProfilePicture.startsWith('http')}">
-                                <img src="${topProfilePicture}" alt="Profile picture">
-                            </c:when>
-                            <c:otherwise>
-                                <img src="${pageContext.request.contextPath}/${topProfilePicture}" alt="Profile picture">
-                            </c:otherwise>
-                        </c:choose>
-                    </c:when>
-                    <c:otherwise>
-                        <i class="fas fa-user"></i>
-                    </c:otherwise>
-                </c:choose>
-            </div>
-        </a>
-        <a href="${pageContext.request.contextPath}/logout" class="btn btn-secondary btn-sm">
-            <i class="fas fa-sign-out-alt"></i> Logout
-        </a>
-    </div>
-</header>
+<jsp:include page="/WEB-INF/views/common/instructor-header.jsp">
+    <jsp:param name="pageTitle" value="Course Students"/>
+    <jsp:param name="pageSubtitle" value="View learners, status, and participation for the course"/>
+</jsp:include>
 
-<aside class="app-sidebar">
-    <nav class="sidebar-nav">
-        <a href="${pageContext.request.contextPath}/dashboard" class="nav-item">
-            <i class="fas fa-home"></i><span>Dashboard</span>
-        </a>
-        <a href="${pageContext.request.contextPath}/instructor/courses" class="nav-item active">
-            <i class="fas fa-book"></i><span>Courses</span>
-        </a>
-        <a href="${pageContext.request.contextPath}/instructor/materials" class="nav-item">
-            <i class="fas fa-folder-open"></i><span>Materials</span>
-        </a>
-        <a href="${pageContext.request.contextPath}/instructor/assessments" class="nav-item">
-            <i class="fas fa-clipboard-list"></i><span>Assessments</span>
-        </a>
-        <a href="${pageContext.request.contextPath}/instructor/certificates" class="nav-item">
-            <i class="fas fa-certificate"></i><span>Certificates</span>
-        </a>
-        <a href="${pageContext.request.contextPath}/profile" class="nav-item">
-            <i class="fas fa-user"></i><span>Profile</span>
-        </a>
-    </nav>
-</aside>
+<c:set var="activeInstructorPage" value="courses"/>
+<jsp:include page="/WEB-INF/views/common/instructor-sidebar.jsp"/>
 
 <main class="app-main">
     <div class="content-wrapper">
@@ -122,8 +65,8 @@
                         <span>Course level</span>
                     </div>
                     <div class="ins-metric">
-                        <strong><c:out value="${course.duration}" default="0"/></strong>
-                        <span>Duration in hours</span>
+                        <strong><c:out value="${course.displayDuration}" default="-"/></strong>
+                        <span>Course duration</span>
                     </div>
                 </div>
             </div>
@@ -140,7 +83,7 @@
             </div>
             <div class="context-card">
                 <span class="context-label">Duration</span>
-                <strong>${course.duration} hours</strong>
+                <strong>${course.displayDuration}</strong>
             </div>
             <div class="context-card">
                 <span class="context-label">Roster Size</span>

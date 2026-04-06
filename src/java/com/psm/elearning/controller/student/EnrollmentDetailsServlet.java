@@ -260,6 +260,12 @@ public class EnrollmentDetailsServlet extends HttpServlet {
             }
 
             boolean paidAccess = isPaymentComplete(enrollment.getPaymentStatus());
+            boolean paymentRequired = enrollment.getCoursePrice() != null && enrollment.getCoursePrice() > 0;
+            if (paymentRequired && !paidAccess) {
+                response.sendRedirect(request.getContextPath() + "/student/payment?enrollmentId=" + enrollment.getEnrollmentId() + "&error=required");
+                return;
+            }
+
             List<Material> materials = new ArrayList<>();
             List<Assessment> assessments = new ArrayList<>();
             Set<Integer> viewedMaterialIds = new HashSet<>();
@@ -657,9 +663,13 @@ public class EnrollmentDetailsServlet extends HttpServlet {
             int totalMaterialsCount = syncResult != null ? syncResult.getTotalMaterials() : materials.size();
             int passedAssessmentsCount = syncResult != null ? syncResult.getPassedAssessments() : 0;
             int totalAssessmentsCount = syncResult != null ? syncResult.getTotalAssessments() : assessments.size();
+            boolean freeCourse = enrollment.getCoursePrice() <= 0;
             boolean eligibleForCertificate = syncResult != null
                     ? syncResult.isEligibleForCertificate()
                     : (paidAccess && totalMaterialsCount > 0 && materialsViewedCount >= totalMaterialsCount && passedAssessmentsCount >= totalAssessmentsCount);
+            if (freeCourse) {
+                eligibleForCertificate = false;
+            }
             
             request.setAttribute("enrollment", enrollment);
             request.setAttribute("materials", materials);
@@ -696,7 +706,12 @@ public class EnrollmentDetailsServlet extends HttpServlet {
             String readinessPrimaryUrl;
             String readinessPrimaryIcon;
             String readinessHint;
-            if (!paid) {
+            if (freeCourse) {
+                readinessPrimaryLabel = "Continue Learning";
+                readinessPrimaryUrl = request.getContextPath() + "/student/enrollment-details?id=" + enrollment.getEnrollmentId() + "&tab=learning";
+                readinessPrimaryIcon = "fa-layer-group";
+                readinessHint = "Free courses do not include certificates. Continue learning materials and assessments directly.";
+            } else if (!paid) {
                 readinessPrimaryLabel = "Complete Payment";
                 readinessPrimaryUrl = request.getContextPath() + "/student/payment?enrollmentId=" + enrollment.getEnrollmentId();
                 readinessPrimaryIcon = "fa-credit-card";

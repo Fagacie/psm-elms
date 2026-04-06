@@ -65,10 +65,11 @@ public class StudentCertificateServlet extends HttpServlet {
         User studentUser = userDAO.findById(userId);
         Student studentProfile = studentDAO.findByUserId(userId);
         EnrollmentStateSyncService.SyncResult syncResult = enrollmentStateSyncService.syncEnrollmentState(enrollment);
+        boolean freeCourse = course != null && course.getCourseFee() != null && course.getCourseFee().doubleValue() <= 0d;
 
         Certificate certificate = certificateDAO.findByEnrollment(enrollmentId);
 
-        request.setAttribute("eligible", syncResult.isEligibleForCertificate());
+        request.setAttribute("eligible", !freeCourse && syncResult.isEligibleForCertificate());
         request.setAttribute("diagPaid", syncResult.isPaid());
         request.setAttribute("diagCompleted", syncResult.isCompleted());
         request.setAttribute("diagPassedAllAssessments", syncResult.isPassedAllAssessments());
@@ -79,14 +80,16 @@ public class StudentCertificateServlet extends HttpServlet {
         request.setAttribute("diagTotalAssessments", syncResult.getTotalAssessments());
         request.setAttribute("diagViewedAllMaterials", syncResult.hasViewedAllMaterials());
         request.setAttribute("diagPassedRequiredAssessments", syncResult.hasPassedRequiredAssessments());
-        request.setAttribute("eligibilitySummary", syncResult.getBlockingReasonSummary());
+        request.setAttribute("eligibilitySummary", freeCourse
+            ? "Free courses do not issue completion certificates."
+            : syncResult.getBlockingReasonSummary());
         request.setAttribute("missingRequirements", syncResult.getMissingRequirements());
         request.setAttribute("enrollment", enrollment);
         request.setAttribute("course", course);
         request.setAttribute("studentUser", studentUser);
         request.setAttribute("studentProfile", studentProfile);
         request.setAttribute("certificate", certificate);
-        request.setAttribute("canGenerate", syncResult.isEligibleForCertificate() && certificate == null);
+        request.setAttribute("canGenerate", !freeCourse && syncResult.isEligibleForCertificate() && certificate == null);
         request.getRequestDispatcher("/WEB-INF/views/student/certificate.jsp").forward(request, response);
     }
 
@@ -112,6 +115,17 @@ public class StudentCertificateServlet extends HttpServlet {
         Enrollment enrollment = enrollmentDAO.getEnrollment(enrollmentId);
         if (enrollment == null || enrollment.getUserId() == null || !enrollment.getUserId().equals(userId)) {
             response.sendRedirect(request.getContextPath() + "/student/my-enrollments?error=permission");
+            return;
+        }
+
+        Course course = courseDAO.findById(enrollment.getCourseId());
+        boolean freeCourse = course != null && course.getCourseFee() != null && course.getCourseFee().doubleValue() <= 0d;
+        if (freeCourse) {
+            if (backToCertificates) {
+                response.sendRedirect(request.getContextPath() + "/student/certificates?error=nocertificatefree");
+            } else {
+                response.sendRedirect(request.getContextPath() + "/student/certificate?enrollmentId=" + enrollmentId + "&error=nocertificatefree");
+            }
             return;
         }
 

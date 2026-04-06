@@ -64,14 +64,23 @@ public class PaymentPageServlet extends HttpServlet {
                 response.sendRedirect(request.getContextPath() + "/student/my-enrollments?error=unauthorized");
                 return;
             }
+
+            if (enrollment.getCoursePrice() != null && enrollment.getCoursePrice() <= 0) {
+                response.sendRedirect(request.getContextPath() + "/student/enrollment-details?id=" + enrollment.getEnrollmentId() + "&message=freeenrolled");
+                return;
+            }
             
             // Derive payment status from Payment table (no payment columns on Enrollment table)
             Payment latestPayment = paymentDAO.getPaymentByEnrollmentId(enrollmentId);
             if (latestPayment != null) {
                 enrollment.setPaymentStatus(latestPayment.getStatus());
-                enrollment.setPaymentRef(latestPayment.getPaymentRef());
+                String latestReference = latestPayment.getPaystackReference();
+                if (latestReference == null || latestReference.trim().isEmpty()) {
+                    latestReference = latestPayment.getPaymentRef();
+                }
+                enrollment.setPaymentRef(latestReference);
                 // If already paid redirect back
-                if ("Paid".equalsIgnoreCase(latestPayment.getStatus())) {
+                if (isPaid(latestPayment.getStatus())) {
                     response.sendRedirect(request.getContextPath() + "/student/my-enrollments?message=alreadypaid");
                     return;
                 }
@@ -91,5 +100,15 @@ public class PaymentPageServlet extends HttpServlet {
             e.printStackTrace();
             response.sendRedirect(request.getContextPath() + "/student/my-enrollments?error=exception");
         }
+    }
+
+    private boolean isPaid(String status) {
+        if (status == null) {
+            return false;
+        }
+        String normalized = status.trim();
+        return "Paid".equalsIgnoreCase(normalized)
+                || "Completed".equalsIgnoreCase(normalized)
+                || "Success".equalsIgnoreCase(normalized);
     }
 }

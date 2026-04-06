@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/landing.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/app.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/course-details.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <jsp:include page="/WEB-INF/views/common/head-external-assets.jsp"/>
 </head>
 <body>
     <!-- Top Navigation Bar -->
@@ -133,8 +133,8 @@
                                 <span class="fact-value"><c:out value="${empty course.department ? course.category : course.department}"/></span>
                             </div>
                             <div class="fact-row">
-                                <span class="fact-label">Credit Hours</span>
-                                <span class="fact-value"><c:out value="${empty course.creditHours ? course.duration : course.creditHours}"/></span>
+                                <span class="fact-label">Duration</span>
+                                <span class="fact-value"><c:out value="${course.displayDuration}"/></span>
                             </div>
                             <div class="fact-row">
                                 <span class="fact-label">Status</span>
@@ -169,8 +169,8 @@
                                 <td><c:out value="${course.level}" default="—"/></td>
                             </tr>
                             <tr>
-                                <th>Credit Value</th>
-                                <td><c:out value="${empty course.creditHours ? course.duration : course.creditHours}"/></td>
+                                <th>Duration</th>
+                                <td><c:out value="${course.displayDuration}"/></td>
                             </tr>
                             <tr>
                                 <th>Class Schedule</th>

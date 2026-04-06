@@ -19,6 +19,7 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Locale;
 import java.util.UUID;
 
 /**
@@ -100,13 +101,17 @@ public class StartPaymentServlet extends HttpServlet {
 
             // Check if already paid
             Payment existingPayment = paymentDAO.getPaymentByEnrollmentId(enrollmentId);
-            if (existingPayment != null && "Paid".equalsIgnoreCase(existingPayment.getStatus())) {
+            if (existingPayment != null && isPaid(existingPayment.getStatus())) {
                 System.out.println("StartPaymentServlet: enrollment already paid id=" + enrollmentId);
                 response.sendRedirect(request.getContextPath() + "/student/my-enrollments?message=alreadypaid");
                 return;
             }
 
             BigDecimal amount = course.getCourseFee();
+            if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
+                response.sendRedirect(request.getContextPath() + "/student/enrollment-details?id=" + enrollmentId + "&message=freeenrolled");
+                return;
+            }
             System.out.println("StartPaymentServlet: amount=" + amount + ", email=" + userEmail);
 
             // Generate external reference
@@ -114,15 +119,15 @@ public class StartPaymentServlet extends HttpServlet {
             System.out.println("StartPaymentServlet: generated externalReference=" + externalReference);
 
             // Initialize Paystack transaction with external reference
-                System.out.println("StartPaymentServlet: calling PaystackService.initializeTransaction...");
-                Payment initResult = paystackService.initializeTransaction(
+            System.out.println("StartPaymentServlet: calling PaystackService.initializeTransaction...");
+            Payment initResult = paystackService.initializeTransaction(
                     userEmail,
                     amount.doubleValue(),
                     enrollmentId,
                     externalReference
-                );
+            );
 
-                if (initResult != null) {
+            if (initResult != null) {
                 System.out.println("StartPaymentServlet: Paystack initialization successful");
 
                 String authorizationUrl = initResult.getAuthorizationUrl();
@@ -156,6 +161,8 @@ public class StartPaymentServlet extends HttpServlet {
                     response.sendRedirect(request.getContextPath() + "/student/payment?enrollmentId=" + enrollmentId + "&error=initstore");
                     return;
                 }
+
+                enrollmentDAO.updatePaymentStatus(enrollmentId, "Pending", paystackReference);
                 System.out.println("StartPaymentServlet: Payment record created/updated");
 
                 // Redirect to Paystack authorization URL
@@ -164,8 +171,6 @@ public class StartPaymentServlet extends HttpServlet {
 
             } else {
                 System.err.println("StartPaymentServlet: Paystack initialization failed");
-                String errorMsg = "Unknown error";
-                System.err.println("StartPaymentServlet: error message=" + errorMsg);
                 response.sendRedirect(request.getContextPath() + "/student/payment?enrollmentId=" + enrollmentId + "&error=paystack");
             }
 
@@ -178,5 +183,13 @@ public class StartPaymentServlet extends HttpServlet {
             e.printStackTrace();
             response.sendRedirect(request.getContextPath() + "/student/my-enrollments?error=exception");
         }
+    }
+
+    private boolean isPaid(String status) {
+        if (status == null) {
+            return false;
+        }
+        String normalized = status.trim().toLowerCase(Locale.ENGLISH);
+        return "paid".equals(normalized) || "completed".equals(normalized) || "success".equals(normalized);
     }
 }

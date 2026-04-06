@@ -9,21 +9,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Payment Successful - PSM E-Learning</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/student-v2.css">
+    <jsp:include page="/WEB-INF/views/common/student-head-assets.jsp"/>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/enrollment-flow-v2.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="sv-page">
-<header class="sv-topbar">
-    <div class="sv-top-left">
-        <a href="${pageContext.request.contextPath}/dashboard" class="sv-brand"><span class="sv-brand-main">PSM</span><span class="sv-brand-sub">E-Learning</span></a>
-        <div class="sv-page-title"><h1>Payment Success</h1><p>Enrollment completed</p></div>
-    </div>
-    <div class="sv-top-right"><a href="${pageContext.request.contextPath}/profile" class="sv-profile-link"><c:choose><c:when test="${not empty studentProfilePicture}"><c:choose><c:when test="${fn:startsWith(studentProfilePicture, 'http')}"><img src="${studentProfilePicture}" alt="Profile" class="sv-avatar-img"></c:when><c:otherwise><img src="${pageContext.request.contextPath}${studentProfilePicture}" alt="Profile" class="sv-avatar-img"></c:otherwise></c:choose></c:when><c:otherwise><i class="fas fa-user"></i></c:otherwise></c:choose><span>${sessionScope.userName}</span></a><a href="${pageContext.request.contextPath}/logout" class="sv-logout"><i class="fas fa-right-from-bracket"></i> Logout</a></div>
-</header>
+<c:set var="topbarTitle" value="Payment Success"/>
+<c:set var="topbarSubtitle" value="Enrollment completed"/>
+<c:set var="topbarShowMenu" value="false"/>
+<jsp:include page="/WEB-INF/views/common/student-topbar.jsp"/>
 
 <div class="sv-layout ef-layout-flat">
     <main class="sv-main ef-main-centered">

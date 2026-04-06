@@ -13,80 +13,16 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-shell.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-courses.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <jsp:include page="/WEB-INF/views/common/head-external-assets.jsp"/>
 </head>
 <body class="instructor-ui">
-    <header class="app-header">
-        <div class="header-left">
-            <a href="${pageContext.request.contextPath}/dashboard" class="dashboard-brand" aria-label="PSM E-Learning home">
-                <span class="dashboard-brand-main">PSM</span>
-                <span class="dashboard-brand-sub">E-Learning</span>
-            </a>
-            <div class="dashboard-title-copy">
-                <h1 class="page-title">My Courses</h1>
-                <p>Manage courses, content, and enrollments from one workspace</p>
-            </div>
-        </div>
-        <div class="header-right">
-            <a href="${pageContext.request.contextPath}/profile" class="user-menu user-menu-link">
-                <div class="user-info">
-                    <span class="user-name"><c:out value="${empty user ? sessionScope.user.fullName : user.fullName}"/></span>
-                    <span class="user-role">Instructor</span>
-                </div>
-                <c:set var="topProfilePicture" value="${empty user ? sessionScope.user.profilePicture : user.profilePicture}"/>
-                <div class="user-avatar">
-                    <c:choose>
-                        <c:when test="${not empty topProfilePicture}">
-                            <c:choose>
-                                <c:when test="${topProfilePicture.startsWith('http')}">
-                                    <img src="${topProfilePicture}" alt="Profile picture">
-                                </c:when>
-                                <c:otherwise>
-                                    <img src="${pageContext.request.contextPath}/${topProfilePicture}" alt="Profile picture">
-                                </c:otherwise>
-                            </c:choose>
-                        </c:when>
-                        <c:otherwise>
-                            <i class="fas fa-user"></i>
-                        </c:otherwise>
-                    </c:choose>
-                </div>
-            </a>
-            <a href="${pageContext.request.contextPath}/logout" class="btn btn-secondary btn-sm">
-                <i class="fas fa-sign-out-alt"></i>
-                Logout
-            </a>
-        </div>
-    </header>
+    <jsp:include page="/WEB-INF/views/common/instructor-header.jsp">
+        <jsp:param name="pageTitle" value="My Courses"/>
+        <jsp:param name="pageSubtitle" value="Manage courses, content, and enrollments from one workspace"/>
+    </jsp:include>
 
-    <aside class="app-sidebar">
-        <nav class="sidebar-nav">
-            <a href="${pageContext.request.contextPath}/dashboard" class="nav-item">
-                <i class="fas fa-home"></i>
-                <span>Dashboard</span>
-            </a>
-            <a href="${pageContext.request.contextPath}/instructor/courses" class="nav-item active">
-                <i class="fas fa-book"></i>
-                <span>Courses</span>
-            </a>
-            <a href="${pageContext.request.contextPath}/instructor/materials" class="nav-item">
-                <i class="fas fa-folder-open"></i>
-                <span>Materials</span>
-            </a>
-            <a href="${pageContext.request.contextPath}/instructor/assessments" class="nav-item">
-                <i class="fas fa-clipboard-list"></i>
-                <span>Assessments</span>
-            </a>
-            <a href="${pageContext.request.contextPath}/instructor/certificates" class="nav-item">
-                <i class="fas fa-certificate"></i>
-                <span>Certificates</span>
-            </a>
-            <a href="${pageContext.request.contextPath}/profile" class="nav-item">
-                <i class="fas fa-user"></i>
-                <span>Profile / Settings</span>
-            </a>
-        </nav>
-    </aside>
+    <c:set var="activeInstructorPage" value="courses"/>
+    <jsp:include page="/WEB-INF/views/common/instructor-sidebar.jsp"/>
 
     <main class="app-main">
         <div class="content-wrapper">
@@ -202,8 +138,13 @@
                                             </td>
                                             <td><c:out value="${course.category}"/></td>
                                             <td><c:out value="${course.level}"/></td>
-                                            <td><c:out value="${course.duration}"/> hrs</td>
-                                            <td>₦<fmt:formatNumber value="${course.courseFee}" type="number" minFractionDigits="2" maxFractionDigits="2"/></td>
+                                            <td><c:out value="${course.displayDuration}"/></td>
+                                            <td>
+                                                <c:choose>
+                                                    <c:when test="${course.courseFee == 0}">Free</c:when>
+                                                    <c:otherwise>₦<fmt:formatNumber value="${course.courseFee}" type="number" minFractionDigits="2" maxFractionDigits="2"/></c:otherwise>
+                                                </c:choose>
+                                            </td>
                                             <td>
                                                 <span class="status-badge status-${course.status}"><c:out value="${course.status}"/></span>
                                             </td>
@@ -220,7 +161,8 @@
                                                             data-course-fee="<c:out value='${course.courseFee}'/>"
                                                             data-category="<c:out value='${course.category}'/>"
                                                             data-level="<c:out value='${course.level}'/>"
-                                                            data-duration="<c:out value='${course.duration}'/>"
+                                                            data-duration="<c:out value='${course.durationValueForDisplay}'/>"
+                                                            data-duration-unit="<c:out value='${course.durationUnitGuess}'/>"
                                                             data-description="<c:out value='${course.description}'/>"
                                                             data-course-banner="<c:out value='${course.courseBanner}'/>">
                                                         <i class="fas fa-edit"></i> Edit
@@ -300,8 +242,15 @@
                         </select>
                     </div>
                     <div class="field-group">
-                        <label for="modalDuration">Duration (hours)</label>
-                        <input id="modalDuration" name="duration" type="number" min="1">
+                        <label for="modalDuration">Duration</label>
+                        <div style="display:grid; grid-template-columns: 1fr auto; gap:10px;">
+                            <input id="modalDuration" name="duration" type="number" min="1">
+                            <select id="modalDurationUnit" name="durationUnit">
+                                <option value="days">Days</option>
+                                <option value="weeks">Weeks</option>
+                                <option value="months">Months</option>
+                            </select>
+                        </div>
                     </div>
                     <div class="field-group">
                         <label for="modalBanner">Course Banner</label>
@@ -364,8 +313,15 @@
                         </select>
                     </div>
                     <div class="field-group">
-                        <label for="editDuration">Duration (hours)</label>
-                        <input id="editDuration" name="duration" type="number" min="1">
+                        <label for="editDuration">Duration</label>
+                        <div style="display:grid; grid-template-columns: 1fr auto; gap:10px;">
+                            <input id="editDuration" name="duration" type="number" min="1">
+                            <select id="editDurationUnit" name="durationUnit">
+                                <option value="days">Days</option>
+                                <option value="weeks">Weeks</option>
+                                <option value="months">Months</option>
+                            </select>
+                        </div>
                     </div>
                     <div class="field-group">
                         <label for="editBanner">Replace Banner</label>
@@ -511,6 +467,7 @@
                 byId('editCategory').value = trigger.dataset.category || '';
                 byId('editLevel').value = trigger.dataset.level || 'Beginner';
                 byId('editDuration').value = trigger.dataset.duration || '';
+                byId('editDurationUnit').value = trigger.dataset.durationUnit || 'days';
                 byId('editDescription').value = trigger.dataset.description || '';
                 byId('editBanner').value = '';
 

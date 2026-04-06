@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.UUID;
 
 /**
@@ -74,10 +75,15 @@ public class ProcessEnrollmentServlet extends HttpServlet {
                 return;
             }
             
-            // Check if already enrolled
-            if (enrollmentDAO.checkExistingEnrollment(userId, courseId)) {
-                System.out.println("ProcessEnrollmentServlet: User already enrolled");
-                response.sendRedirect(request.getContextPath() + "/student/my-enrollments?error=already");
+            Enrollment existingEnrollment = enrollmentDAO.findLatestEnrollmentByUserAndCourse(userId, courseId);
+            if (existingEnrollment != null) {
+                Payment existingPayment = paymentDAO.getPaymentByEnrollmentId(existingEnrollment.getEnrollmentId());
+                String paymentStatus = existingPayment != null ? existingPayment.getStatus() : existingEnrollment.getPaymentStatus();
+                if (isPaidStatus(paymentStatus)) {
+                    response.sendRedirect(request.getContextPath() + "/student/my-enrollments?error=already");
+                } else {
+                    response.sendRedirect(request.getContextPath() + "/student/payment?enrollmentId=" + existingEnrollment.getEnrollmentId());
+                }
                 return;
             }
             
@@ -92,14 +98,33 @@ public class ProcessEnrollmentServlet extends HttpServlet {
             System.out.println("Course found: " + course.getCourseName());
             System.out.println("Course fee: " + course.getCourseFee());
             
-            // Create enrollment with Enrolled status (DB doesn't support Pending in Status enum)
-            // Payment status tracked separately in Payment table
+            // Create enrollment first; payment gating is resolved below.
             Enrollment enrollment = new Enrollment(userId, courseId, "Enrolled", "Pending");
             enrollment = enrollmentDAO.createEnrollment(enrollment);
 
             if (enrollment != null) {
                 System.out.println("ProcessEnrollmentServlet: Enrollment created with ID " + enrollment.getEnrollmentId());
-                // Redirect student to payment page for this enrollment
+
+                boolean freeCourse = isFreeCourse(course.getCourseFee());
+                if (freeCourse) {
+                    String freeReference = "FREE-" + enrollment.getEnrollmentId() + "-" + UUID.randomUUID().toString().substring(0, 8);
+                    enrollmentDAO.updatePaymentStatus(enrollment.getEnrollmentId(), "Paid", freeReference);
+                    enrollmentDAO.updateStatus(enrollment.getEnrollmentId(), "Enrolled");
+
+                    Payment freePayment = new Payment();
+                    freePayment.setEnrollmentId(enrollment.getEnrollmentId());
+                    freePayment.setAmount(0.0);
+                    freePayment.setMethod("Free");
+                    freePayment.setStatus("Paid");
+                    freePayment.setPaymentRef(freeReference);
+                    freePayment.setPaystackReference(freeReference);
+                    freePayment.setPaystackStatus("success");
+                    paymentDAO.createPayment(freePayment);
+
+                    response.sendRedirect(request.getContextPath() + "/student/enrollment-details?id=" + enrollment.getEnrollmentId() + "&message=freeenrolled");
+                    return;
+                }
+
                 response.sendRedirect(request.getContextPath() + "/student/payment?enrollmentId=" + enrollment.getEnrollmentId());
             } else {
                 System.err.println("ProcessEnrollmentServlet: Failed to create enrollment");
@@ -114,5 +139,19 @@ public class ProcessEnrollmentServlet extends HttpServlet {
             e.printStackTrace();
             response.sendRedirect(request.getContextPath() + "/student/courses?error=exception");
         }
+    }
+
+    private boolean isFreeCourse(BigDecimal fee) {
+        return fee == null || fee.compareTo(BigDecimal.ZERO) <= 0;
+    }
+
+    private boolean isPaidStatus(String status) {
+        if (status == null) {
+            return false;
+        }
+        String normalized = status.trim();
+        return "Paid".equalsIgnoreCase(normalized)
+                || "Completed".equalsIgnoreCase(normalized)
+                || "Success".equalsIgnoreCase(normalized);
     }
 }

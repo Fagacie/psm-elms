@@ -11,73 +11,16 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-shell.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-materials.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <jsp:include page="/WEB-INF/views/common/head-external-assets.jsp"/>
 </head>
 <body class="instructor-ui">
-<header class="app-header">
-    <div class="header-left">
-        <a href="${pageContext.request.contextPath}/dashboard" class="dashboard-brand" aria-label="PSM E-Learning home">
-            <span class="dashboard-brand-main">PSM</span>
-            <span class="dashboard-brand-sub">E-Learning</span>
-        </a>
-        <div class="dashboard-title-copy">
-            <h1 class="page-title">Course Materials</h1>
-            <p>Organize learning assets by course and content type</p>
-        </div>
-    </div>
-    <div class="header-right">
-        <a href="${pageContext.request.contextPath}/profile" class="user-menu user-menu-link">
-            <div class="user-info">
-                <span class="user-name"><c:out value="${empty user ? sessionScope.user.fullName : user.fullName}"/></span>
-                <span class="user-role">Instructor</span>
-            </div>
-            <c:set var="topProfilePicture" value="${empty user ? sessionScope.user.profilePicture : user.profilePicture}"/>
-            <div class="user-avatar">
-                <c:choose>
-                    <c:when test="${not empty topProfilePicture}">
-                        <c:choose>
-                            <c:when test="${topProfilePicture.startsWith('http')}">
-                                <img src="${topProfilePicture}" alt="Profile picture">
-                            </c:when>
-                            <c:otherwise>
-                                <img src="${pageContext.request.contextPath}/${topProfilePicture}" alt="Profile picture">
-                            </c:otherwise>
-                        </c:choose>
-                    </c:when>
-                    <c:otherwise>
-                        <i class="fas fa-user"></i>
-                    </c:otherwise>
-                </c:choose>
-            </div>
-        </a>
-        <a href="${pageContext.request.contextPath}/logout" class="btn btn-secondary btn-sm">
-            <i class="fas fa-sign-out-alt"></i> Logout
-        </a>
-    </div>
-</header>
+<jsp:include page="/WEB-INF/views/common/instructor-header.jsp">
+    <jsp:param name="pageTitle" value="Course Materials"/>
+    <jsp:param name="pageSubtitle" value="Organize learning assets by course and content type"/>
+</jsp:include>
 
-<aside class="app-sidebar">
-    <nav class="sidebar-nav">
-        <a href="${pageContext.request.contextPath}/dashboard" class="nav-item">
-            <i class="fas fa-home"></i><span>Dashboard</span>
-        </a>
-        <a href="${pageContext.request.contextPath}/instructor/courses" class="nav-item">
-            <i class="fas fa-book"></i><span>Courses</span>
-        </a>
-        <a href="${pageContext.request.contextPath}/instructor/materials" class="nav-item active">
-            <i class="fas fa-folder-open"></i><span>Materials</span>
-        </a>
-        <a href="${pageContext.request.contextPath}/instructor/assessments" class="nav-item">
-            <i class="fas fa-clipboard-list"></i><span>Assessments</span>
-        </a>
-        <a href="${pageContext.request.contextPath}/instructor/certificates" class="nav-item">
-            <i class="fas fa-certificate"></i><span>Certificates</span>
-        </a>
-        <a href="${pageContext.request.contextPath}/profile" class="nav-item">
-            <i class="fas fa-user"></i><span>Profile</span>
-        </a>
-    </nav>
-</aside>
+<c:set var="activeInstructorPage" value="materials"/>
+<jsp:include page="/WEB-INF/views/common/instructor-sidebar.jsp"/>
 
 <main class="app-main">
     <div class="content-wrapper">
@@ -396,6 +339,7 @@
                                 <option value="Slides">Slides</option>
                                 <option value="Link">Link</option>
                             </select>
+                            <small id="uploadTypeHint" class="field-hint">Select a type to see allowed file formats.</small>
                         </div>
                         <div class="field">
                             <label>Version</label>
@@ -407,11 +351,13 @@
                         </div>
                         <div class="field">
                             <label>File</label>
-                            <input type="file" name="materialFile" id="materialFile">
+                            <input type="file" name="materialFile" id="materialFile" accept=".pdf,.doc,.docx,.txt,.ppt,.pptx,.zip,.mp4,.webm,.mov,.m4v,.mp3">
+                            <small id="uploadFileHint" class="field-hint">Allowed: PDF, DOC/DOCX, TXT, PPT/PPTX, ZIP, MP4/WEBM/MOV/M4V, MP3 (max 50MB).</small>
                         </div>
                         <div class="field">
                             <label>External URL (for Link type)</label>
                             <input type="url" name="externalUrl" id="externalUrl" placeholder="https://example.com/resource">
+                            <small class="field-hint">Use only full HTTP/HTTPS links.</small>
                         </div>
                         <div class="field full">
                             <label>Description</label>
@@ -456,6 +402,7 @@
                                 <option value="Slides">Slides</option>
                                 <option value="Link">Link</option>
                             </select>
+                            <small id="editTypeHint" class="field-hint">Update type carefully to avoid format mismatch.</small>
                         </div>
                         <div class="field">
                             <label>Version</label>
@@ -467,7 +414,8 @@
                         </div>
                         <div class="field">
                             <label>Replace File</label>
-                            <input id="editFile" type="file" name="materialFile">
+                            <input id="editFile" type="file" name="materialFile" accept=".pdf,.doc,.docx,.txt,.ppt,.pptx,.zip,.mp4,.webm,.mov,.m4v,.mp3">
+                            <small id="editFileHint" class="field-hint">Upload a replacement only if needed. Current file remains otherwise.</small>
                         </div>
                         <div class="field">
                             <label>External URL (for Link type)</label>
@@ -554,15 +502,72 @@
         const type = document.getElementById('materialType');
         const file = document.getElementById('materialFile');
         const url = document.getElementById('externalUrl');
+        const typeHint = document.getElementById('uploadTypeHint');
+        const fileHint = document.getElementById('uploadFileHint');
+        const editType = document.getElementById('editType');
+        const editFile = document.getElementById('editFile');
+        const editUrl = document.getElementById('editExternalUrl');
+        const editTypeHint = document.getElementById('editTypeHint');
+        const editFileHint = document.getElementById('editFileHint');
+
+        const typeMeta = {
+            PDF: {
+                accept: '.pdf,.doc,.docx,.txt',
+                fileHint: 'Allowed: PDF, DOC, DOCX, TXT (max 50MB).',
+                typeHint: 'Best for notes, handouts, and reading packs.'
+            },
+            Video: {
+                accept: '.mp4,.webm,.mov,.m4v,.mp3',
+                fileHint: 'Allowed: MP4, WEBM, MOV, M4V, MP3 (max 50MB).',
+                typeHint: 'Best for lectures, demonstrations, and audio explainers.'
+            },
+            Slides: {
+                accept: '.ppt,.pptx,.pdf,.zip',
+                fileHint: 'Allowed: PPT, PPTX, PDF, ZIP (max 50MB).',
+                typeHint: 'Best for presentation decks and session slide packs.'
+            },
+            Link: {
+                accept: '',
+                fileHint: 'No file needed for links. Provide a valid URL.',
+                typeHint: 'Best for YouTube, docs, external labs, and reference pages.'
+            }
+        };
+
+        const applyTypeRules = function (selectedType, fileInput, urlInput, typeHintNode, fileHintNode) {
+            const meta = typeMeta[selectedType] || null;
+            const isLink = selectedType === 'Link';
+
+            if (fileInput) {
+                fileInput.required = !!selectedType && !isLink;
+                fileInput.disabled = !!selectedType && isLink;
+                fileInput.accept = meta ? meta.accept : '.pdf,.doc,.docx,.txt,.ppt,.pptx,.zip,.mp4,.webm,.mov,.m4v,.mp3';
+            }
+            if (urlInput) {
+                urlInput.required = !!selectedType && isLink;
+                urlInput.disabled = !!selectedType && !isLink;
+            }
+            if (typeHintNode) {
+                typeHintNode.textContent = meta ? meta.typeHint : 'Select a type to see allowed file formats.';
+            }
+            if (fileHintNode) {
+                fileHintNode.textContent = meta ? meta.fileHint : 'Allowed: PDF, DOC/DOCX, TXT, PPT/PPTX, ZIP, MP4/WEBM/MOV/M4V, MP3 (max 50MB).';
+            }
+        };
         
         const syncRequired = function () {
-            const isLink = type && type.value === 'Link';
-            if (file) file.required = !isLink;
-            if (url) url.required = isLink;
+            const selected = type ? type.value : '';
+            applyTypeRules(selected, file, url, typeHint, fileHint);
+        };
+
+        const syncEditRequired = function () {
+            const selected = editType ? editType.value : '';
+            applyTypeRules(selected, editFile, editUrl, editTypeHint, editFileHint);
         };
         
         if (type) type.addEventListener('change', syncRequired);
+        if (editType) editType.addEventListener('change', syncEditRequired);
         syncRequired();
+        syncEditRequired();
     })();
 </script>
 </body>

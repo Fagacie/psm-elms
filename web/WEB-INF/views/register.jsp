@@ -9,8 +9,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/auth-premium.css">
+    <jsp:include page="/WEB-INF/views/common/head-external-assets.jsp"/>
 </head>
 <body class="auth-page">
 <main class="auth-shell">
@@ -277,7 +277,6 @@
                         <option value="">Select Gender</option>
                         <option value="Male" ${param.gender == 'Male' ? 'selected' : ''}>Male</option>
                         <option value="Female" ${param.gender == 'Female' ? 'selected' : ''}>Female</option>
-                        <option value="Other" ${param.gender == 'Other' ? 'selected' : ''}>Other</option>
                     </select>
                 </div>
 

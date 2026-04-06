@@ -19,6 +19,8 @@ public class DashboardServlet extends HttpServlet {
     private UserDAO userDAO;
     private PaymentDAO paymentDAO;
     private CertificateDAO certificateDAO;
+    private InstructorApplicationDAO applicationDAO;
+    private NotificationDAO notificationDAO;
 
     @Override
     public void init() throws ServletException {
@@ -28,6 +30,8 @@ public class DashboardServlet extends HttpServlet {
         userDAO = new UserDAOImpl();
         paymentDAO = new PaymentDAOImpl();
         certificateDAO = new CertificateDAOImpl();
+        applicationDAO = new InstructorApplicationDAOImpl();
+        notificationDAO = new NotificationDAOImpl();
     }
 
     @Override
@@ -136,6 +140,8 @@ public class DashboardServlet extends HttpServlet {
                 systemMetrics.put("studentsCount", studentsCount);
                 systemMetrics.put("instructorsCount", instructorsCount);
                 systemMetrics.put("adminsCount", adminsCount);
+                systemMetrics.put("pendingApplications", applicationDAO.countByStatus(InstructorApplication.STATUS_PENDING));
+                request.setAttribute("notificationCount", notificationDAO.countUnreadByRecipientUserId(user.getUserId()));
                 
                 // Get all courses and count by status
                 List<Course> allCourses = courseDAO.findAll();

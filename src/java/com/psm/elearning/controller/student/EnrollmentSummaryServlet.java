@@ -4,7 +4,11 @@ import com.psm.elearning.dao.CourseDAO;
 import com.psm.elearning.dao.CourseDAOImpl;
 import com.psm.elearning.dao.EnrollmentDAO;
 import com.psm.elearning.dao.EnrollmentDAOImpl;
+import com.psm.elearning.dao.PaymentDAO;
+import com.psm.elearning.dao.PaymentDAOImpl;
 import com.psm.elearning.model.Course;
+import com.psm.elearning.model.Enrollment;
+import com.psm.elearning.model.Payment;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -20,12 +24,14 @@ public class EnrollmentSummaryServlet extends HttpServlet {
 
     private CourseDAO courseDAO;
     private EnrollmentDAO enrollmentDAO;
+    private PaymentDAO paymentDAO;
 
     @Override
     public void init() {
         System.out.println("EnrollmentSummaryServlet.init: initializing");
         courseDAO = new CourseDAOImpl();
         enrollmentDAO = new EnrollmentDAOImpl();
+        paymentDAO = new PaymentDAOImpl();
     }
 
     @Override
@@ -57,10 +63,15 @@ public class EnrollmentSummaryServlet extends HttpServlet {
                 response.sendRedirect(request.getContextPath() + "/student/courses?error=notfound");
                 return;
             }
-            // Already enrolled?
-            if (enrollmentDAO.checkExistingEnrollment(userId, courseId)) {
-                System.out.println("EnrollmentSummaryServlet: already enrolled userId=" + userId + ", courseId=" + courseId);
-                response.sendRedirect(request.getContextPath() + "/student/my-enrollments?error=already");
+            Enrollment latestEnrollment = enrollmentDAO.findLatestEnrollmentByUserAndCourse(userId, courseId);
+            if (latestEnrollment != null) {
+                Payment payment = paymentDAO.getPaymentByEnrollmentId(latestEnrollment.getEnrollmentId());
+                String paymentStatus = payment != null ? payment.getStatus() : latestEnrollment.getPaymentStatus();
+                if (isPaid(paymentStatus)) {
+                    response.sendRedirect(request.getContextPath() + "/student/my-enrollments?error=already");
+                } else {
+                    response.sendRedirect(request.getContextPath() + "/student/payment?enrollmentId=" + latestEnrollment.getEnrollmentId());
+                }
                 return;
             }
             System.out.println("EnrollmentSummaryServlet: forwarding to enrollment-summary.jsp");
@@ -74,5 +85,15 @@ public class EnrollmentSummaryServlet extends HttpServlet {
             e.printStackTrace();
             response.sendRedirect(request.getContextPath() + "/student/courses?error=exception");
         }
+    }
+
+    private boolean isPaid(String status) {
+        if (status == null) {
+            return false;
+        }
+        String normalized = status.trim();
+        return "Paid".equalsIgnoreCase(normalized)
+                || "Completed".equalsIgnoreCase(normalized)
+                || "Success".equalsIgnoreCase(normalized);
     }
 }

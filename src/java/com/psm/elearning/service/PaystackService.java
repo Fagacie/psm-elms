@@ -7,12 +7,16 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Paystack Payment Gateway Service
  * Handles payment initialization and verification with Paystack API
  */
 public class PaystackService {
+
+    private static final Logger LOGGER = Logger.getLogger(PaystackService.class.getName());
     
     private String secretKey;
     private String publicKey;
@@ -42,7 +46,7 @@ public class PaystackService {
                 input = getClass().getClassLoader().getResourceAsStream("com/psm/elearning/config/paystack.properties");
             }
             if (input == null) {
-                System.err.println("Unable to find paystack.properties on classpath. Using defaults.");
+                LOGGER.warning("Unable to find paystack.properties on classpath. Using defaults.");
                 this.secretKey = "sk_test_YOUR_SECRET_KEY_HERE";
                 this.publicKey = "pk_test_YOUR_PUBLIC_KEY_HERE";
                 this.apiUrl = "https://api.paystack.co";
@@ -57,15 +61,11 @@ public class PaystackService {
             this.apiUrl = props.getProperty("paystack.api.url", "https://api.paystack.co").trim();
             this.currency = props.getProperty("paystack.currency", "NGN").trim();
             this.callbackUrl = props.getProperty("paystack.callback.url", "").trim();
-            
-            System.out.println("Paystack configuration loaded successfully");
-            System.out.println("API URL: " + this.apiUrl);
-            System.out.println("Currency: " + this.currency);
-            System.out.println("Callback URL: " + this.callbackUrl);
+
+            LOGGER.info("Paystack configuration loaded successfully. API URL=" + this.apiUrl + ", currency=" + this.currency);
             
         } catch (IOException ex) {
-            System.err.println("Error loading Paystack configuration: " + ex.getMessage());
-            ex.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Error loading Paystack configuration", ex);
             // Set defaults in case of error
             this.secretKey = "sk_test_YOUR_SECRET_KEY_HERE";
             this.publicKey = "pk_test_YOUR_PUBLIC_KEY_HERE";
@@ -83,11 +83,7 @@ public class PaystackService {
      * @return Payment object with Paystack details (authorization URL, access code, reference)
      */
     public Payment initializeTransaction(String email, Double amount, int enrollmentId) {
-        System.out.println("=== Initializing Paystack Transaction ===");
-        System.out.println("Email: " + email);
-        System.out.println("Amount: " + amount);
-        System.out.println("Enrollment ID: " + enrollmentId);
-        System.out.println("API URL: " + apiUrl);
+        LOGGER.info("Initializing Paystack transaction for enrollmentId=" + enrollmentId + ", amount=" + amount);
         
         if (apiUrl == null || apiUrl.isEmpty()) {
             throw new RuntimeException("Paystack API URL is not configured");
@@ -114,8 +110,6 @@ public class PaystackService {
                 )
             );
             
-            System.out.println("Request Payload: " + payload.toString());
-            
             // Make API call
             URL url = new URL(apiUrl + "/transaction/initialize");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -134,7 +128,7 @@ public class PaystackService {
             
             // Read response
             int responseCode = conn.getResponseCode();
-            System.out.println("Paystack Response Code: " + responseCode);
+            LOGGER.info("Paystack initialize responseCode=" + responseCode + " for enrollmentId=" + enrollmentId);
             
             InputStream responseStream = (responseCode == 200) ? conn.getInputStream() : conn.getErrorStream();
             BufferedReader br = new BufferedReader(new InputStreamReader(responseStream, StandardCharsets.UTF_8));
@@ -145,7 +139,6 @@ public class PaystackService {
             }
             
             String jsonResponse = response.toString();
-            System.out.println("Paystack Response: " + jsonResponse);
             
             // Parse response
             JSONObject jsonObject = new JSONObject(jsonResponse);
@@ -156,10 +149,8 @@ public class PaystackService {
                 String authorizationUrl = data.getString("authorization_url");
                 String accessCode = data.getString("access_code");
                 String reference = data.getString("reference");
-                
-                System.out.println("Transaction initialized successfully!");
-                System.out.println("Reference: " + reference);
-                System.out.println("Authorization URL: " + authorizationUrl);
+
+                LOGGER.info("Paystack transaction initialized successfully. reference=" + reference);
                 
                 // Create Payment object with Paystack details
                 Payment payment = new Payment(enrollmentId, amount, reference, accessCode, authorizationUrl);
@@ -167,13 +158,12 @@ public class PaystackService {
                 
             } else {
                 String message = jsonObject.getString("message");
-                System.err.println("Paystack initialization failed: " + message);
+                LOGGER.warning("Paystack initialization failed: " + message);
                 throw new RuntimeException("Payment initialization failed: " + message);
             }
             
         } catch (Exception e) {
-            System.err.println("Error initializing Paystack transaction: " + e.getMessage());
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Error initializing Paystack transaction", e);
             throw new RuntimeException("Payment initialization error: " + e.getMessage());
         }
     }
@@ -184,8 +174,7 @@ public class PaystackService {
      * @return JSONObject with payment details if successful, null if failed
      */
     public JSONObject verifyTransaction(String reference) {
-        System.out.println("=== Verifying Paystack Transaction ===");
-        System.out.println("Reference: " + reference);
+        LOGGER.info("Verifying Paystack transaction for reference=" + reference);
         
         try {
             // Make API call
@@ -199,7 +188,7 @@ public class PaystackService {
             
             // Read response
             int responseCode = conn.getResponseCode();
-            System.out.println("Paystack Verification Response Code: " + responseCode);
+            LOGGER.info("Paystack verify responseCode=" + responseCode + " for reference=" + reference);
             
             InputStream responseStream = (responseCode == 200) ? conn.getInputStream() : conn.getErrorStream();
             BufferedReader br = new BufferedReader(new InputStreamReader(responseStream, StandardCharsets.UTF_8));
@@ -210,7 +199,6 @@ public class PaystackService {
             }
             
             String jsonResponse = response.toString();
-            System.out.println("Paystack Verification Response: " + jsonResponse);
             
             // Parse response
             JSONObject jsonObject = new JSONObject(jsonResponse);
@@ -218,25 +206,24 @@ public class PaystackService {
             if (jsonObject.getBoolean("status")) {
                 JSONObject data = jsonObject.getJSONObject("data");
                 String status = data.getString("status");
-                
-                System.out.println("Transaction Status: " + status);
+
+                LOGGER.info("Paystack verification status=" + status + " for reference=" + reference);
                 
                 // Return data object regardless of status; caller will branch on success/failed/abandoned
                 if ("success".equals(status)) {
-                    System.out.println("Payment verified successfully!");
+                    LOGGER.info("Paystack payment verified successfully for reference=" + reference);
                 } else {
-                    System.err.println("Payment completed with status: " + status);
+                    LOGGER.warning("Paystack payment completed with non-success status=" + status + " for reference=" + reference);
                 }
                 return data;
             } else {
                 String message = jsonObject.getString("message");
-                System.err.println("Paystack verification failed: " + message);
+                LOGGER.warning("Paystack verification failed for reference=" + reference + ": " + message);
                 return null;
             }
             
         } catch (Exception e) {
-            System.err.println("Error verifying Paystack transaction: " + e.getMessage());
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Error verifying Paystack transaction for reference=" + reference, e);
             return null;
         }
     }
@@ -245,11 +232,7 @@ public class PaystackService {
      * Initialize a transaction with externally supplied reference (align internal ref & Paystack ref)
      */
     public Payment initializeTransaction(String email, Double amount, int enrollmentId, String reference) {
-        System.out.println("=== Initializing Paystack Transaction (External Reference) ===");
-        System.out.println("Email: " + email);
-        System.out.println("Amount: " + amount);
-        System.out.println("Enrollment ID: " + enrollmentId);
-        System.out.println("Reference: " + reference);
+        LOGGER.info("Initializing Paystack transaction (external reference) enrollmentId=" + enrollmentId + ", reference=" + reference);
         try {
             int amountInKobo = (int) (amount * 100);
             JSONObject payload = new JSONObject();
@@ -260,9 +243,7 @@ public class PaystackService {
             payload.put("reference", reference);
             payload.put("metadata", new JSONObject().put("enrollment_id", enrollmentId));
             
-            System.out.println("API URL: " + apiUrl);
             String fullUrl = apiUrl + "/transaction/initialize";
-            System.out.println("Full URL: " + fullUrl);
             URL url = new URL(fullUrl);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
@@ -280,22 +261,21 @@ public class PaystackService {
             BufferedReader br = new BufferedReader(new InputStreamReader(responseStream, StandardCharsets.UTF_8));
             StringBuilder response = new StringBuilder();
             String line; while ((line = br.readLine()) != null) { response.append(line.trim()); }
-            System.out.println("Paystack init response code: " + responseCode);
-            System.out.println("Paystack init response body: " + response);
+            LOGGER.info("Paystack initialize (external reference) responseCode=" + responseCode + " for reference=" + reference);
             JSONObject jsonObject = new JSONObject(response.toString());
             if (jsonObject.getBoolean("status")) {
                 JSONObject data = jsonObject.getJSONObject("data");
                 String authorizationUrl = data.getString("authorization_url");
                 String accessCode = data.getString("access_code");
                 String refReturned = data.getString("reference");
+                LOGGER.info("Paystack transaction initialized (external reference) successfully. reference=" + refReturned);
                 Payment payment = new Payment(enrollmentId, amount, refReturned, accessCode, authorizationUrl);
                 return payment;
             } else {
                 throw new RuntimeException("Payment initialization failed: " + jsonObject.optString("message"));
             }
         } catch (Exception e) {
-            System.err.println("Error initializing Paystack transaction with external reference: " + e.getMessage());
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Error initializing Paystack transaction with external reference=" + reference, e);
             throw new RuntimeException("Payment initialization error: " + e.getMessage());
         }
     }

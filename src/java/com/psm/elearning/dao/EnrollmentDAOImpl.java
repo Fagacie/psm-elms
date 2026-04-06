@@ -6,17 +6,21 @@ import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Implementation of EnrollmentDAO using JDBC.
  */
 public class EnrollmentDAOImpl implements EnrollmentDAO {
 
+    private static final Logger LOGGER = Logger.getLogger(EnrollmentDAOImpl.class.getName());
+
     @Override
     public Enrollment createEnrollment(Enrollment enrollment) {
         String sql = "INSERT INTO Enrollment (UserID, CourseID, Status, EnrollmentDate) VALUES (?, ?, ?, NOW())";
 
-        System.out.println("EnrollmentDAO: Creating enrollment for user " + enrollment.getUserId() + " in course " + enrollment.getCourseId());
+        LOGGER.info("Creating enrollment userId=" + enrollment.getUserId() + ", courseId=" + enrollment.getCourseId());
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -34,14 +38,13 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
                         enrollment.setEnrollmentId(rs.getInt(1));
                         enrollment.setStatus(initialStatus);
                         enrollment.setEnrollmentDate(LocalDateTime.now());
-                        System.out.println("EnrollmentDAO: Enrollment created successfully with ID " + enrollment.getEnrollmentId());
+                        LOGGER.info("Enrollment created successfully enrollmentId=" + enrollment.getEnrollmentId());
                         return enrollment;
                     }
                 }
             }
         } catch (SQLException e) {
-            System.err.println("EnrollmentDAO: Error creating enrollment: " + e.getMessage());
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Error creating enrollment", e);
         }
         return null;
     }
@@ -62,9 +65,31 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
                 }
             }
         } catch (SQLException e) {
-            System.err.println("EnrollmentDAO: Error checking existing enrollment: " + e.getMessage());
+            LOGGER.log(Level.SEVERE, "Error checking existing enrollment userId=" + userId + ", courseId=" + courseId, e);
         }
         return false;
+    }
+
+    @Override
+    public Enrollment findLatestEnrollmentByUserAndCourse(Integer userId, Integer courseId) {
+        String sql = "SELECT EnrollmentID FROM Enrollment WHERE UserID = ? AND CourseID = ? ORDER BY EnrollmentDate DESC, EnrollmentID DESC LIMIT 1";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, userId);
+            ps.setInt(2, courseId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    int enrollmentId = rs.getInt("EnrollmentID");
+                    return getEnrollment(enrollmentId);
+                }
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error finding latest enrollment userId=" + userId + ", courseId=" + courseId, e);
+        }
+        return null;
     }
 
     @Override
@@ -84,8 +109,7 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
 
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            System.err.println("EnrollmentDAO: Error updating payment status: " + e.getMessage());
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Error updating enrollment payment status enrollmentId=" + enrollmentId, e);
         }
         return false;
     }
@@ -94,7 +118,7 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
     public boolean updateStatus(Integer enrollmentId, String status) {
         String sql = "UPDATE Enrollment SET Status = ? WHERE EnrollmentID = ?";
 
-        System.out.println("EnrollmentDAO: Updating status to " + status + " for enrollment " + enrollmentId);
+        LOGGER.info("Updating enrollment status enrollmentId=" + enrollmentId + ", status=" + status);
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -105,7 +129,7 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
             int affected = ps.executeUpdate();
             return affected > 0;
         } catch (SQLException e) {
-            System.err.println("EnrollmentDAO: Error updating status: " + e.getMessage());
+            LOGGER.log(Level.SEVERE, "Error updating enrollment status enrollmentId=" + enrollmentId, e);
         }
         return false;
     }
@@ -128,8 +152,7 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
 
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            System.err.println("EnrollmentDAO: Error updating learning progress: " + e.getMessage());
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Error updating learning progress enrollmentId=" + enrollmentId, e);
         }
         return false;
     }
@@ -161,8 +184,7 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
                 }
             }
         } catch (SQLException e) {
-            System.err.println("EnrollmentDAO: Error getting enrollments by student: " + e.getMessage());
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Error getting enrollments by student userId=" + userId, e);
         }
         return enrollments;
     }
@@ -192,7 +214,7 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
                 }
             }
         } catch (SQLException e) {
-            System.err.println("EnrollmentDAO: Error getting enrollment: " + e.getMessage());
+            LOGGER.log(Level.SEVERE, "Error getting enrollment enrollmentId=" + enrollmentId, e);
         }
         return null;
     }
@@ -219,7 +241,7 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
                 enrollments.add(enrollment);
             }
         } catch (SQLException e) {
-            System.err.println("EnrollmentDAO: Error getting all enrollments: " + e.getMessage());
+            LOGGER.log(Level.SEVERE, "Error getting all enrollments", e);
         }
         return enrollments;
     }
@@ -290,8 +312,7 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
                 }
             }
         } catch (SQLException e) {
-            System.err.println("EnrollmentDAO: Error getting enrollments by course: " + e.getMessage());
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Error getting enrollments by course courseId=" + courseId, e);
         }
         return enrollments;
     }
@@ -325,13 +346,12 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     int count = rs.getInt("student_count");
-                    System.out.println("[DEBUG] countStudentsByInstructor for ID " + instructorId + ": " + count);
+                    LOGGER.fine("countStudentsByInstructor instructorId=" + instructorId + ", count=" + count);
                     return count;
                 }
             }
         } catch (SQLException e) {
-            System.err.println("EnrollmentDAO: Error counting students by instructor: " + e.getMessage());
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Error counting students by instructor instructorId=" + instructorId, e);
         }
         return 0;
     }
@@ -350,13 +370,12 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     int count = rs.getInt("enrollment_count");
-                    System.out.println("[DEBUG] countEnrollmentsByInstructor for ID " + instructorId + ": " + count);
+                    LOGGER.fine("countEnrollmentsByInstructor instructorId=" + instructorId + ", count=" + count);
                     return count;
                 }
             }
         } catch (SQLException e) {
-            System.err.println("EnrollmentDAO: Error counting enrollments by instructor: " + e.getMessage());
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Error counting enrollments by instructor instructorId=" + instructorId, e);
         }
         return 0;
     }
@@ -375,13 +394,12 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     int count = rs.getInt("pending_count");
-                    System.out.println("[DEBUG] countPendingEnrollmentsByInstructor for ID " + instructorId + ": " + count);
+                    LOGGER.fine("countPendingEnrollmentsByInstructor instructorId=" + instructorId + ", count=" + count);
                     return count;
                 }
             }
         } catch (SQLException e) {
-            System.err.println("EnrollmentDAO: Error counting pending enrollments: " + e.getMessage());
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Error counting pending enrollments by instructor instructorId=" + instructorId, e);
         }
         return 0;
     }
@@ -400,13 +418,12 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     int count = rs.getInt("active_count");
-                    System.out.println("[DEBUG] countActiveEnrollmentsByInstructor for ID " + instructorId + ": " + count);
+                    LOGGER.fine("countActiveEnrollmentsByInstructor instructorId=" + instructorId + ", count=" + count);
                     return count;
                 }
             }
         } catch (SQLException e) {
-            System.err.println("EnrollmentDAO: Error counting active enrollments: " + e.getMessage());
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Error counting active enrollments by instructor instructorId=" + instructorId, e);
         }
         return 0;
     }

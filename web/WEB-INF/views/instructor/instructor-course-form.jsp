@@ -11,82 +11,16 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-shell.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-course-form.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <jsp:include page="/WEB-INF/views/common/head-external-assets.jsp"/>
 </head>
 <body class="instructor-ui">
-    <!-- Top Navigation Bar -->
-    <header class="app-header">
-        <div class="header-left">
-            <a href="${pageContext.request.contextPath}/dashboard" class="dashboard-brand" aria-label="PSM E-Learning home">
-                <span class="dashboard-brand-main">PSM</span>
-                <span class="dashboard-brand-sub">E-Learning</span>
-            </a>
-            <div class="dashboard-title-copy">
-                <h1 class="page-title">${mode == 'create' ? 'Create New Course' : 'Edit Course'}</h1>
-                <p>Build and update course details cleanly</p>
-            </div>
-        </div>
-        <div class="header-right">
-            <a href="${pageContext.request.contextPath}/profile" class="user-menu user-menu-link">
-                <div class="user-info">
-                    <span class="user-name"><c:out value="${empty user ? sessionScope.user.fullName : user.fullName}"/></span>
-                    <span class="user-role">Instructor</span>
-                </div>
-                <c:set var="topProfilePicture" value="${empty user ? sessionScope.user.profilePicture : user.profilePicture}"/>
-                <div class="user-avatar">
-                    <c:choose>
-                        <c:when test="${not empty topProfilePicture}">
-                            <c:choose>
-                                <c:when test="${topProfilePicture.startsWith('http')}">
-                                    <img src="${topProfilePicture}" alt="Profile picture">
-                                </c:when>
-                                <c:otherwise>
-                                    <img src="${pageContext.request.contextPath}/${topProfilePicture}" alt="Profile picture">
-                                </c:otherwise>
-                            </c:choose>
-                        </c:when>
-                        <c:otherwise>
-                            <i class="fas fa-user"></i>
-                        </c:otherwise>
-                    </c:choose>
-                </div>
-            </a>
-            <a href="${pageContext.request.contextPath}/logout" class="btn btn-secondary btn-sm">
-                <i class="fas fa-sign-out-alt"></i>
-                Logout
-            </a>
-        </div>
-    </header>
+    <jsp:include page="/WEB-INF/views/common/instructor-header.jsp">
+        <jsp:param name="pageTitle" value="${mode == 'create' ? 'Create New Course' : 'Edit Course'}"/>
+        <jsp:param name="pageSubtitle" value="Build and update course details cleanly"/>
+    </jsp:include>
 
-    <!-- Left Sidebar Navigation -->
-    <aside class="app-sidebar">
-        <nav class="sidebar-nav">
-            <a href="${pageContext.request.contextPath}/dashboard" class="nav-item">
-                <i class="fas fa-home"></i>
-                <span>Dashboard</span>
-            </a>
-            <a href="${pageContext.request.contextPath}/instructor/courses" class="nav-item active">
-                <i class="fas fa-book"></i>
-                <span>Courses</span>
-            </a>
-            <a href="${pageContext.request.contextPath}/instructor/materials" class="nav-item">
-                <i class="fas fa-folder-open"></i>
-                <span>Materials</span>
-            </a>
-            <a href="${pageContext.request.contextPath}/instructor/assessments" class="nav-item">
-                <i class="fas fa-clipboard-list"></i>
-                <span>Assessments</span>
-            </a>
-            <a href="${pageContext.request.contextPath}/instructor/certificates" class="nav-item">
-                <i class="fas fa-certificate"></i>
-                <span>Certificates</span>
-            </a>
-            <a href="${pageContext.request.contextPath}/profile" class="nav-item">
-                <i class="fas fa-user"></i>
-                <span>Profile / Settings</span>
-            </a>
-        </nav>
-    </aside>
+    <c:set var="activeInstructorPage" value="courses"/>
+    <jsp:include page="/WEB-INF/views/common/instructor-sidebar.jsp"/>
 
     <!-- Main Content Area -->
     <main class="app-main">
@@ -170,6 +104,7 @@
                             <div class="form-group">
                                 <label for="courseFee">Course Fee (₦) <span class="required">*</span></label>
                                 <input type="number" id="courseFee" name="courseFee" class="form-input" step="0.01" min="0" value="${course != null ? course.courseFee : ''}" required>
+                                <small class="text-muted">Set 0 for a free course (students enroll without payment).</small>
                             </div>
                         </div>
 
@@ -192,8 +127,15 @@
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label for="duration">Duration (hours)</label>
-                                <input type="number" id="duration" name="duration" class="form-input" min="1" value="${course != null ? course.duration : ''}">
+                                <label for="duration">Duration</label>
+                                <div style="display:grid; grid-template-columns: 1fr auto; gap:10px;">
+                                    <input type="number" id="duration" name="duration" class="form-input" min="1" value="${course != null ? course.durationValueForDisplay : ''}">
+                                    <select id="durationUnit" name="durationUnit" class="form-select">
+                                        <option value="days" ${course != null && course.durationUnitGuess == 'days' ? 'selected' : ''}>Days</option>
+                                        <option value="weeks" ${course != null && course.durationUnitGuess == 'weeks' ? 'selected' : ''}>Weeks</option>
+                                        <option value="months" ${course != null && course.durationUnitGuess == 'months' ? 'selected' : ''}>Months</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
 

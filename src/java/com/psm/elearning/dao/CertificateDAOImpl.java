@@ -74,6 +74,7 @@ public class CertificateDAOImpl implements CertificateDAO {
         c.setStudentEmail(rs.getString("StudentEmail"));
         c.setRegNumber(rs.getString("RegNumber"));
         c.setCourseName(rs.getString("CourseName"));
+        c.setInstructorName(rs.getString("InstructorName"));
         c.setStudentUserId(rs.getInt("StudentUserID"));
         c.setCourseCreatedBy(rs.getInt("CourseCreatedBy"));
         return c;
@@ -82,12 +83,13 @@ public class CertificateDAOImpl implements CertificateDAO {
     private static final String CERTIFICATE_DETAIL_SELECT =
             "SELECT c.CertificateID, c.EnrollmentID, c.CertificateNo, c.IssueDate, c.GeneratedBy, c.VerificationURL, c.QRCodePath, c.Status, c.RevokedAt, c.RevokedBy, "
                 + "e.CourseID, e.UserID AS StudentUserID, co.InstructorID AS CourseCreatedBy, "
-                    + "u.FullName AS StudentName, u.Email AS StudentEmail, s.RegNumber, co.Title AS CourseName "
+                    + "u.FullName AS StudentName, u.Email AS StudentEmail, s.RegNumber, co.Title AS CourseName, iu.FullName AS InstructorName "
                     + "FROM Certificate c "
                     + "JOIN Enrollment e ON c.EnrollmentID = e.EnrollmentID "
                     + "JOIN User u ON e.UserID = u.UserID "
                     + "LEFT JOIN Student s ON s.UserID = u.UserID "
-                    + "JOIN Course co ON e.CourseID = co.CourseID ";
+                    + "JOIN Course co ON e.CourseID = co.CourseID "
+                    + "LEFT JOIN User iu ON co.InstructorID = iu.UserID ";
 
     @Override
     public Certificate create(Certificate certificate) {

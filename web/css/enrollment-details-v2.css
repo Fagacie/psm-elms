@@ -72,6 +72,75 @@
   line-height: 1.5;
 }
 
+.ed-flow-banner {
+  border: 1px solid var(--sv-border);
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: var(--sv-shadow-sm);
+  padding: 24px;
+  margin-bottom: 20px;
+  display: grid;
+  gap: 16px;
+}
+
+.ed-flow-kicker {
+  color: var(--ed-accent);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+}
+
+.ed-flow-copy h3 {
+  margin: 8px 0 8px;
+  font-size: 1.15rem;
+  line-height: 1.35;
+}
+
+.ed-flow-copy p {
+  margin: 0;
+  color: var(--sv-muted);
+  line-height: 1.7;
+}
+
+.ed-flow-steps {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.ed-flow-step {
+  border: 1px solid var(--sv-border);
+  border-radius: 10px;
+  background: #ffffff;
+  padding: 14px;
+  display: grid;
+  gap: 6px;
+}
+
+.ed-flow-step span {
+  font-size: 0.78rem;
+  color: var(--sv-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+}
+
+.ed-flow-step strong {
+  font-size: 0.95rem;
+}
+
+.ed-flow-step.is-done {
+  border-color: var(--ed-accent-border);
+  background: var(--ed-accent-soft);
+}
+
+.ed-flow-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
 .ed-tabs {
   display: flex;
   gap: 10px;
@@ -337,6 +406,10 @@
   flex-wrap: wrap;
 }
 
+.alert .sv-btn {
+  margin-left: 10px;
+}
+
 .ed-table {
   width: 100%;
   border-collapse: collapse;
@@ -445,6 +518,10 @@
 @media (max-width: 1200px) {
   .ed-meta {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .ed-flow-steps {
+    grid-template-columns: 1fr;
   }
 
   .ed-grid,

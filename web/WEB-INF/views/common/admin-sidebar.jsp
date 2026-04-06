@@ -10,6 +10,9 @@
         <a href="${pageContext.request.contextPath}/admin/users" class="nav-item ${fn:contains(currentPath, 'admin/users') and not fn:contains(currentPath, 'admin/user-form') ? 'active' : ''}">
             <i class="fas fa-users"></i><span>Users</span>
         </a>
+        <a href="${pageContext.request.contextPath}/admin/instructor-applications" class="nav-item ${fn:contains(currentPath, 'admin/instructor-applications') ? 'active' : ''}">
+            <i class="fas fa-file-signature"></i><span>Applications</span>
+        </a>
         <a href="${pageContext.request.contextPath}/admin/courses" class="nav-item ${fn:contains(currentPath, 'admin/courses') ? 'active' : ''}">
             <i class="fas fa-book"></i><span>Courses</span>
         </a>

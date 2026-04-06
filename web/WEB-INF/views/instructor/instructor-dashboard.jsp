@@ -13,88 +13,17 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-shell.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-dashboard.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <jsp:include page="/WEB-INF/views/common/head-external-assets.jsp"/>
 </head>
 <body class="instructor-ui">
-    <!-- Top Navigation Bar -->
-    <header class="app-header">
-        <div class="header-left">
-            <a href="${pageContext.request.contextPath}/dashboard" class="dashboard-brand" aria-label="PSM E-Learning home">
-                <span class="dashboard-brand-main">PSM</span>
-                <span class="dashboard-brand-sub">E-Learning</span>
-            </a>
-            <div class="dashboard-title-copy">
-                <h1 class="page-title">Instructor Dashboard</h1>
-                <p>Overview of courses, enrollments, and teaching operations</p>
-            </div>
-        </div>
-        <div class="header-right">
-            <c:if test="${not empty notificationCount && notificationCount > 0}">
-                <div class="notifications" aria-label="Notifications">
-                    <i class="fas fa-bell"></i>
-                    <span class="badge">${notificationCount}</span>
-                </div>
-            </c:if>
-            <a href="${pageContext.request.contextPath}/profile" class="user-menu user-menu-link">
-                <div class="user-info">
-                    <span class="user-name"><c:out value="${empty user ? sessionScope.user.fullName : user.fullName}"/></span>
-                    <span class="user-role">Instructor</span>
-                </div>
-                <c:set var="topProfilePicture" value="${empty user ? sessionScope.user.profilePicture : user.profilePicture}"/>
-                <div class="user-avatar">
-                    <c:choose>
-                        <c:when test="${not empty topProfilePicture}">
-                            <c:choose>
-                                <c:when test="${topProfilePicture.startsWith('http')}">
-                                    <img src="${topProfilePicture}" alt="Profile picture">
-                                </c:when>
-                                <c:otherwise>
-                                    <img src="${pageContext.request.contextPath}/${topProfilePicture}" alt="Profile picture">
-                                </c:otherwise>
-                            </c:choose>
-                        </c:when>
-                        <c:otherwise>
-                            <i class="fas fa-user"></i>
-                        </c:otherwise>
-                    </c:choose>
-                </div>
-            </a>
-            <a href="${pageContext.request.contextPath}/logout" class="btn btn-secondary btn-sm">
-                <i class="fas fa-sign-out-alt"></i>
-                Logout
-            </a>
-        </div>
-    </header>
+    <jsp:include page="/WEB-INF/views/common/instructor-header.jsp">
+        <jsp:param name="pageTitle" value="Instructor Dashboard"/>
+        <jsp:param name="pageSubtitle" value="Overview of courses, enrollments, and teaching operations"/>
+        <jsp:param name="showNotifications" value="true"/>
+    </jsp:include>
 
-    <!-- Left Sidebar Navigation -->
-    <aside class="app-sidebar">
-        <nav class="sidebar-nav">
-            <a href="${pageContext.request.contextPath}/dashboard" class="nav-item active">
-                <i class="fas fa-home"></i>
-                <span>Dashboard</span>
-            </a>
-            <a href="${pageContext.request.contextPath}/instructor/courses" class="nav-item">
-                <i class="fas fa-book"></i>
-                <span>Courses</span>
-            </a>
-            <a href="${pageContext.request.contextPath}/instructor/materials" class="nav-item">
-                <i class="fas fa-folder-open"></i>
-                <span>Materials</span>
-            </a>
-            <a href="${pageContext.request.contextPath}/instructor/assessments" class="nav-item">
-                <i class="fas fa-clipboard-list"></i>
-                <span>Assessments</span>
-            </a>
-            <a href="${pageContext.request.contextPath}/instructor/certificates" class="nav-item">
-                <i class="fas fa-certificate"></i>
-                <span>Certificates</span>
-            </a>
-            <a href="${pageContext.request.contextPath}/profile" class="nav-item">
-                <i class="fas fa-user"></i>
-                <span>Profile / Settings</span>
-            </a>
-        </nav>
-    </aside>
+    <c:set var="activeInstructorPage" value="dashboard"/>
+    <jsp:include page="/WEB-INF/views/common/instructor-sidebar.jsp"/>
 
     <!-- Main Content Area -->
     <main class="app-main">
@@ -199,8 +128,8 @@
                                                     <div class="course-portfolio-meta">
                                                         <span><c:out value="${course.level}"/></span>
                                                         <span><c:out value="${course.category}"/></span>
-                                                        <span>₦<fmt:formatNumber value="${course.courseFee}" type="number" minFractionDigits="2" maxFractionDigits="2"/></span>
-                                                        <span>${course.duration} hrs</span>
+                                                        <span><c:choose><c:when test="${course.courseFee == 0}">Free</c:when><c:otherwise>₦<fmt:formatNumber value="${course.courseFee}" type="number" minFractionDigits="2" maxFractionDigits="2"/></c:otherwise></c:choose></span>
+                                                        <span>${course.displayDuration}</span>
                                                     </div>
                                                     <div class="course-portfolio-desc">
                                                         <c:choose>

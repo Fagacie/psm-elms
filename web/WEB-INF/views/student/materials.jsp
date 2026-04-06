@@ -8,33 +8,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Learning Materials - Student</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/student-v2.css">
+    <jsp:include page="/WEB-INF/views/common/student-head-assets.jsp"/>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/materials-v2.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="sv-page">
-<header class="sv-topbar">
-    <div class="sv-top-left">
-        <button class="sv-menu-btn" id="svMenuBtn" type="button" aria-label="Toggle navigation"><i class="fas fa-bars"></i></button>
-        <a href="${pageContext.request.contextPath}/dashboard" class="sv-brand"><span class="sv-brand-main">PSM</span><span class="sv-brand-sub">E-Learning</span></a>
-        <div class="sv-page-title"><h1>Learning Materials</h1><p>Organized by your paid courses</p></div>
-    </div>
-    <div class="sv-top-right"><a href="${pageContext.request.contextPath}/profile" class="sv-profile-link"><c:choose><c:when test="${not empty studentProfilePicture}"><c:choose><c:when test="${fn:startsWith(studentProfilePicture, 'http')}"><img src="${studentProfilePicture}" alt="Profile" class="sv-avatar-img"></c:when><c:otherwise><img src="${pageContext.request.contextPath}${studentProfilePicture}" alt="Profile" class="sv-avatar-img"></c:otherwise></c:choose></c:when><c:otherwise><i class="fas fa-user"></i></c:otherwise></c:choose><span>${sessionScope.userName}</span></a><a href="${pageContext.request.contextPath}/logout" class="sv-logout"><i class="fas fa-right-from-bracket"></i> Logout</a></div>
-</header>
+<c:set var="topbarTitle" value="Learning Materials"/>
+<c:set var="topbarSubtitle" value="Organized by your paid courses"/>
+<jsp:include page="/WEB-INF/views/common/student-topbar.jsp"/>
 
 <div class="sv-layout">
-    <aside class="sv-sidebar" id="svSidebar">
-        <nav class="sv-nav">
-            <a href="${pageContext.request.contextPath}/dashboard" class="sv-nav-link"><i class="fas fa-house"></i><span>Dashboard</span></a>
-            <a href="${pageContext.request.contextPath}/student/my-enrollments" class="sv-nav-link active"><i class="fas fa-book-open"></i><span>My Courses</span></a>
-            <a href="${pageContext.request.contextPath}/student/courses" class="sv-nav-link"><i class="fas fa-compass"></i><span>Browse Courses</span></a>
-            <a href="${pageContext.request.contextPath}/student/certificates" class="sv-nav-link"><i class="fas fa-certificate"></i><span>Certificates</span></a>
-            <a href="${pageContext.request.contextPath}/profile" class="sv-nav-link"><i class="fas fa-user-gear"></i><span>Profile</span></a>
-        </nav>
-    </aside>
+    <c:set var="activePage" value="materials"/>
+    <jsp:include page="/WEB-INF/views/common/student-sidebar.jsp"/>
 
     <main class="sv-main">
         <div class="sv-breadcrumb">
@@ -61,6 +45,7 @@
                         </div>
                     </div>
                 </section>
+
             </c:when>
             <c:otherwise>
                 <section class="sv-card">
@@ -148,8 +133,16 @@
                                                         <span><i class="fas fa-circle-check"></i> ${viewedInCourse ? 'Viewed' : 'Pending'}</span>
                                                     </div>
                                                     <div class="mat-actions">
-                                                        <a class="sv-btn" target="_blank" rel="noopener noreferrer" href="${pageContext.request.contextPath}/student/materials?action=view&id=${m.materialId}">${viewedInCourse ? 'Review' : 'Open'}</a>
-                                                        <c:if test="${m.materialType != 'Link'}"><a class="sv-btn" href="${pageContext.request.contextPath}/student/materials?action=download&id=${m.materialId}">Download</a></c:if>
+                                                        <c:choose>
+                                                            <c:when test="${m.materialType == 'Link'}">
+                                                                <a class="sv-btn" target="_blank" rel="noopener noreferrer" href="${pageContext.request.contextPath}/student/materials?action=view&id=${m.materialId}">Open Link</a>
+                                                            </c:when>
+                                                            <c:otherwise>
+                                                                <a class="sv-btn primary" href="${pageContext.request.contextPath}/student/materials?action=preview&id=${m.materialId}">${viewedInCourse ? 'Review in App' : 'Preview in App'}</a>
+                                                                <a class="sv-btn" target="_blank" rel="noopener noreferrer" href="${pageContext.request.contextPath}/student/materials?action=view&id=${m.materialId}">Open New Tab</a>
+                                                                <a class="sv-btn" href="${pageContext.request.contextPath}/student/materials?action=download&id=${m.materialId}">Download</a>
+                                                            </c:otherwise>
+                                                        </c:choose>
                                                     </div>
                                                 </article>
                                             </c:forEach>

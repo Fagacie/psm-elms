@@ -8,33 +8,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${enrollment.courseName} - Learning Hub</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/student-v2.css">
+    <jsp:include page="/WEB-INF/views/common/student-head-assets.jsp"/>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/enrollment-details-v2.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="sv-page">
-<header class="sv-topbar">
-    <div class="sv-top-left">
-        <button class="sv-menu-btn" id="svMenuBtn" type="button" aria-label="Toggle navigation"><i class="fas fa-bars"></i></button>
-        <a href="${pageContext.request.contextPath}/dashboard" class="sv-brand"><span class="sv-brand-main">PSM</span><span class="sv-brand-sub">E-Learning</span></a>
-        <div class="sv-page-title"><h1>Learning Hub</h1><p>${enrollment.courseName}</p></div>
-    </div>
-    <div class="sv-top-right"><a href="${pageContext.request.contextPath}/profile" class="sv-profile-link"><c:choose><c:when test="${not empty studentProfilePicture}"><c:choose><c:when test="${fn:startsWith(studentProfilePicture, 'http')}"><img src="${studentProfilePicture}" alt="Profile" class="sv-avatar-img"></c:when><c:otherwise><img src="${pageContext.request.contextPath}${studentProfilePicture}" alt="Profile" class="sv-avatar-img"></c:otherwise></c:choose></c:when><c:otherwise><i class="fas fa-user"></i></c:otherwise></c:choose><span>${sessionScope.userName}</span></a><a href="${pageContext.request.contextPath}/logout" class="sv-logout"><i class="fas fa-right-from-bracket"></i> Logout</a></div>
-</header>
+<c:set var="topbarTitle" value="Learning Hub"/>
+<c:set var="topbarSubtitle" value="${enrollment.courseName}"/>
+<jsp:include page="/WEB-INF/views/common/student-topbar.jsp"/>
 
 <div class="sv-layout">
-    <aside class="sv-sidebar" id="svSidebar">
-        <nav class="sv-nav">
-            <a href="${pageContext.request.contextPath}/dashboard" class="sv-nav-link"><i class="fas fa-house"></i><span>Dashboard</span></a>
-            <a href="${pageContext.request.contextPath}/student/my-enrollments" class="sv-nav-link active"><i class="fas fa-book-open"></i><span>My Courses</span></a>
-            <a href="${pageContext.request.contextPath}/student/courses" class="sv-nav-link"><i class="fas fa-compass"></i><span>Browse Courses</span></a>
-            <a href="${pageContext.request.contextPath}/student/certificates" class="sv-nav-link"><i class="fas fa-certificate"></i><span>Certificates</span></a>
-            <a href="${pageContext.request.contextPath}/profile" class="sv-nav-link"><i class="fas fa-user-gear"></i><span>Profile</span></a>
-        </nav>
-    </aside>
+    <c:set var="activePage" value="my-courses"/>
+    <jsp:include page="/WEB-INF/views/common/student-sidebar.jsp"/>
 
     <main class="sv-main">
         <div class="sv-breadcrumb">
@@ -72,96 +56,43 @@
             </div>
         </section>
 
-        <section class="sv-card ed-readiness-card">
-            <div class="sv-card-head">
-                <div>
-                    <h3>Certificate Readiness</h3>
-                    <p class="sv-card-sub">Track the exact requirements the system uses before a certificate can be generated for this course.</p>
-                </div>
-                <span class="status-badge ${certificateEligible ? 'status-Approved' : 'status-Pending'}">
-                    ${certificateEligible ? 'Ready to Generate' : 'Requirements Pending'}
-                </span>
+        <section class="ed-flow-banner">
+            <div class="ed-flow-copy">
+                <span class="ed-flow-kicker">Enrollment Flow Status</span>
+                <h3>${certificatePrimaryActionLabel}</h3>
+                <p>${certificateReadinessHint}</p>
             </div>
-            <div class="sv-card-body">
-                <div class="ed-readiness-panel">
-                    <div class="ed-readiness-overview">
-                        <span class="ed-readiness-kicker">Completion Tracker</span>
-                        <h4>${certificateReadinessPercent}% ready</h4>
-                        <p>${certificateReadinessHint}</p>
-                        <div class="ed-readiness-progress">
-                            <span>${certificateReadinessStepsComplete} of 3 checks complete</span>
-                            <div class="sv-progress"><div class="sv-progress-bar" style="width:${certificateReadinessPercent}%;"></div></div>
-                        </div>
-                        <div class="ed-readiness-actions">
-                            <a class="sv-btn primary" href="${certificatePrimaryActionUrl}">
-                                <i class="fas ${certificatePrimaryActionIcon}"></i>&nbsp;${certificatePrimaryActionLabel}
-                            </a>
-                            <a class="sv-btn" href="${pageContext.request.contextPath}/student/certificates">
-                                <i class="fas fa-arrow-up-right-from-square"></i>&nbsp;Certificate Area
-                            </a>
-                        </div>
-                    </div>
-
-                    <div class="ed-readiness-grid">
-                        <div class="ed-readiness-item ${certificatePaidReady ? 'is-ready' : 'is-pending'}">
-                            <div class="ed-readiness-item-top">
-                                <strong>Payment</strong>
-                                <span class="status-badge ${certificatePaidReady ? 'status-Approved' : 'status-Pending'}">${certificatePaidReady ? 'Done' : 'Pending'}</span>
-                            </div>
-                            <span>${certificatePaidReady ? 'Paid and verified' : 'Complete payment to continue'}</span>
-                            <small>${not empty enrollment.paymentRef ? enrollment.paymentRef : 'No verified payment reference yet'}</small>
-                        </div>
-                        <div class="ed-readiness-item ${certificateCompletedReady ? 'is-ready' : 'is-pending'}">
-                            <div class="ed-readiness-item-top">
-                                <strong>Course Progress</strong>
-                                <span class="status-badge ${certificateCompletedReady ? 'status-Approved' : 'status-Pending'}">${certificateCompletedReady ? 'Done' : 'Pending'}</span>
-                            </div>
-                            <span>
-                                <c:choose>
-                                    <c:when test="${certificateCompletedReady}">Learning requirements completed</c:when>
-                                    <c:otherwise>${materialsViewedCount} / ${totalMaterialsCount} materials viewed</c:otherwise>
-                                </c:choose>
-                            </span>
-                            <small>
-                                <c:choose>
-                                    <c:when test="${certificateRemainingMaterials > 0}">${certificateRemainingMaterials} material(s) still need to be opened or downloaded</c:when>
-                                    <c:otherwise>All current materials have been accessed in sequence</c:otherwise>
-                                </c:choose>
-                            </small>
-                        </div>
-                        <div class="ed-readiness-item ${certificateAssessmentsReady ? 'is-ready' : 'is-pending'}">
-                            <div class="ed-readiness-item-top">
-                                <strong>Assessments</strong>
-                                <span class="status-badge ${certificateAssessmentsReady ? 'status-Approved' : 'status-Pending'}">${certificateAssessmentsReady ? 'Done' : 'Pending'}</span>
-                            </div>
-                            <span>
-                                <c:choose>
-                                    <c:when test="${certificateAssessmentsReady}">All required assessments passed</c:when>
-                                    <c:otherwise>${passedAssessmentsCount} / ${totalAssessmentsCount} assessments passed</c:otherwise>
-                                </c:choose>
-                            </span>
-                            <small>
-                                <c:choose>
-                                    <c:when test="${certificateRemainingAssessments > 0}">${certificateRemainingAssessments} assessment(s) still need a passing result</c:when>
-                                    <c:otherwise>No remaining assessment blockers</c:otherwise>
-                                </c:choose>
-                            </small>
-                        </div>
-                    </div>
+            <div class="ed-flow-steps">
+                <div class="ed-flow-step ${certificatePaidReady ? 'is-done' : 'is-pending'}">
+                    <span>1. Payment</span>
+                    <strong>${certificatePaidReady ? 'Complete' : 'Pending'}</strong>
                 </div>
-
-                <c:choose>
-                    <c:when test="${certificateEligible}">
-                        <div class="alert alert-success">
-                            You have met the current requirements for certificate generation. Open your certificate area to generate or review it.
-                        </div>
-                    </c:when>
-                    <c:otherwise>
-                        <div class="alert alert-info">
-                            Your certificate is not blocked by guesswork anymore. Use the checklist above to see exactly what is still missing.
-                        </div>
-                    </c:otherwise>
-                </c:choose>
+                <div class="ed-flow-step ${certificateCompletedReady ? 'is-done' : 'is-pending'}">
+                    <span>2. Learning</span>
+                    <strong>
+                        <c:choose>
+                            <c:when test="${certificateCompletedReady}">Complete</c:when>
+                            <c:otherwise>${certificateRemainingMaterials} left</c:otherwise>
+                        </c:choose>
+                    </strong>
+                </div>
+                <div class="ed-flow-step ${certificateAssessmentsReady ? 'is-done' : 'is-pending'}">
+                    <span>3. Assessments</span>
+                    <strong>
+                        <c:choose>
+                            <c:when test="${certificateAssessmentsReady}">Complete</c:when>
+                            <c:otherwise>${certificateRemainingAssessments} left</c:otherwise>
+                        </c:choose>
+                    </strong>
+                </div>
+            </div>
+            <div class="ed-flow-actions">
+                <a class="sv-btn primary" href="${certificatePrimaryActionUrl}">
+                    <i class="fas ${certificatePrimaryActionIcon}"></i>&nbsp;${certificatePrimaryActionLabel}
+                </a>
+                <a class="sv-btn" href="${pageContext.request.contextPath}/student/certificates">
+                    <i class="fas fa-certificate"></i>&nbsp;Certificate Area
+                </a>
             </div>
         </section>
 
@@ -177,7 +108,14 @@
                 <section class="sv-card">
                     <div class="sv-card-head"><h3>Learning Sequence</h3></div>
                     <div class="sv-card-body">
-                        <c:if test="${not paidAccess}"><div class="alert alert-error">Payment is required to open materials and take assessments.</div></c:if>
+                        <c:if test="${not paidAccess}">
+                            <div class="alert alert-error">
+                                Payment is required to open materials and take assessments.
+                                <a class="sv-btn primary" href="${pageContext.request.contextPath}/student/payment?enrollmentId=${enrollment.enrollmentId}">
+                                    <i class="fas fa-credit-card"></i>&nbsp;Complete Payment
+                                </a>
+                            </div>
+                        </c:if>
                         <c:if test="${not empty recommendedItem}">
                             <div class="ed-next-step">
                                 <div class="ed-next-copy">
@@ -248,6 +186,11 @@
                                             <div class="ed-learning-actions">
                                                 <c:if test="${not item.locked and not empty item.primaryActionUrl}"><a class="sv-btn primary" href="${item.primaryActionUrl}"><i class="fas ${item.primaryActionIcon}"></i>&nbsp;${item.primaryActionLabel}</a></c:if>
                                                 <c:if test="${not item.locked and not empty item.secondaryActionUrl}"><a class="sv-btn" href="${item.secondaryActionUrl}"><i class="fas ${item.secondaryActionIcon}"></i>&nbsp;${item.secondaryActionLabel}</a></c:if>
+                                                <c:if test="${item.locked and not paidAccess}">
+                                                    <a class="sv-btn primary" href="${pageContext.request.contextPath}/student/payment?enrollmentId=${enrollment.enrollmentId}">
+                                                        <i class="fas fa-credit-card"></i>&nbsp;Unlock with Payment
+                                                    </a>
+                                                </c:if>
                                             </div>
                                         </article>
                                     </c:forEach>
@@ -299,7 +242,14 @@
                 <section class="sv-card">
                     <div class="sv-card-head"><h3>Course Materials</h3></div>
                     <div class="sv-card-body">
-                        <c:if test="${not paidAccess}"><div class="alert alert-error">Payment is required to view and download materials.</div></c:if>
+                        <c:if test="${not paidAccess}">
+                            <div class="alert alert-error">
+                                Payment is required to view and download materials.
+                                <a class="sv-btn primary" href="${pageContext.request.contextPath}/student/payment?enrollmentId=${enrollment.enrollmentId}">
+                                    <i class="fas fa-credit-card"></i>&nbsp;Complete Payment
+                                </a>
+                            </div>
+                        </c:if>
                         <c:if test="${paidAccess}">
                             <c:if test="${not empty focusMaterial}">
                                 <div class="ed-material-nav">
@@ -319,8 +269,8 @@
                                                 <i class="fas fa-arrow-left"></i>&nbsp;Previous
                                             </a>
                                         </c:if>
-                                        <a class="sv-btn primary" href="${pageContext.request.contextPath}/student/materials?action=view&id=${focusMaterial.materialId}">
-                                            <i class="fas fa-book-open"></i>&nbsp;${viewedMaterialIds.contains(focusMaterial.materialId) ? 'Review Chapter' : 'Open Chapter'}
+                                        <a class="sv-btn primary" href="${pageContext.request.contextPath}/student/materials?action=preview&id=${focusMaterial.materialId}">
+                                            <i class="fas fa-book-open"></i>&nbsp;${viewedMaterialIds.contains(focusMaterial.materialId) ? 'Review in App' : 'Preview in App'}
                                         </a>
                                         <c:if test="${not empty nextMaterial}">
                                             <a class="sv-btn" href="${pageContext.request.contextPath}/student/materials?action=view&id=${nextMaterial.materialId}">
@@ -355,8 +305,16 @@
                                                 </td>
                                                 <td><c:out value="${not empty m.uploadDate ? m.uploadDate.toLocalDate() : '-'}"/></td>
                                                 <td>
-                                                    <a class="sv-btn" target="_blank" href="${pageContext.request.contextPath}/student/materials?action=view&id=${m.materialId}">${viewedMaterialIds.contains(m.materialId) ? 'Review' : 'Open'}</a>
-                                                    <c:if test="${m.materialType != 'Link'}"><a class="sv-btn" href="${pageContext.request.contextPath}/student/materials?action=download&id=${m.materialId}">Download</a></c:if>
+                                                    <c:choose>
+                                                        <c:when test="${m.materialType == 'Link'}">
+                                                            <a class="sv-btn" target="_blank" href="${pageContext.request.contextPath}/student/materials?action=view&id=${m.materialId}">Open Link</a>
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            <a class="sv-btn primary" href="${pageContext.request.contextPath}/student/materials?action=preview&id=${m.materialId}">${viewedMaterialIds.contains(m.materialId) ? 'Review in App' : 'Preview in App'}</a>
+                                                            <a class="sv-btn" target="_blank" href="${pageContext.request.contextPath}/student/materials?action=view&id=${m.materialId}">Open Tab</a>
+                                                            <a class="sv-btn" href="${pageContext.request.contextPath}/student/materials?action=download&id=${m.materialId}">Download</a>
+                                                        </c:otherwise>
+                                                    </c:choose>
                                                 </td>
                                             </tr>
                                         </c:forEach>
@@ -374,7 +332,14 @@
                 <section class="sv-card">
                     <div class="sv-card-head"><h3>Course Assessments</h3></div>
                     <div class="sv-card-body">
-                        <c:if test="${not paidAccess}"><div class="alert alert-error">Payment is required before taking assessments.</div></c:if>
+                        <c:if test="${not paidAccess}">
+                            <div class="alert alert-error">
+                                Payment is required before taking assessments.
+                                <a class="sv-btn primary" href="${pageContext.request.contextPath}/student/payment?enrollmentId=${enrollment.enrollmentId}">
+                                    <i class="fas fa-credit-card"></i>&nbsp;Complete Payment
+                                </a>
+                            </div>
+                        </c:if>
                         <c:choose>
                             <c:when test="${not empty assessments}">
                                 <table class="ed-table">
