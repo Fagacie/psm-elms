@@ -6,8 +6,11 @@ import com.psm.elearning.dao.PaymentDAO;
 import com.psm.elearning.dao.PaymentDAOImpl;
 import com.psm.elearning.model.Enrollment;
 import com.psm.elearning.model.Payment;
+import com.psm.elearning.service.AppSettingsService;
 import com.psm.elearning.service.PaystackService;
+import com.psm.elearning.util.DBConnection;
 import org.json.JSONObject;
+import org.json.JSONArray;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -15,16 +18,25 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 
 /**
  * Servlet to handle Paystack payment callback (verifies payment and updates enrollment).
  */
 public class PaymentCallbackServlet extends HttpServlet {
 
-    private static final double AMOUNT_TOLERANCE = 0.01d;
+    private static final Pattern PAYMENT_REFERENCE_PATTERN =
+            Pattern.compile("^[A-Za-z0-9][A-Za-z0-9_\\-.:]{7,119}$");
     private static final Logger LOGGER = Logger.getLogger(PaymentCallbackServlet.class.getName());
     
     private EnrollmentDAO enrollmentDAO;
@@ -42,23 +54,7 @@ public class PaymentCallbackServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         
-        HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("userId") == null) {
-            response.sendRedirect(request.getContextPath() + "/login");
-            return;
-        }
-        
-        String role = (String) session.getAttribute("role");
-        if (role == null) {
-            role = (String) session.getAttribute("userRole");
-        }
-        if (!"Student".equals(role)) {
-            response.sendRedirect(request.getContextPath() + "/dashboard");
-            return;
-        }
-        
         try {
-            Integer userId = (Integer) session.getAttribute("userId");
             String reference = request.getParameter("reference");
             
             if (reference == null || reference.isEmpty()) {
@@ -67,7 +63,13 @@ public class PaymentCallbackServlet extends HttpServlet {
                 return;
             }
 
-            LOGGER.info("Verifying payment callback for reference=" + reference);
+            if (!isValidReference(reference)) {
+                LOGGER.warning("Payment callback rejected: invalid payment reference format");
+                response.sendRedirect(request.getContextPath() + "/student/payment-failed?error=badreference");
+                return;
+            }
+
+            LOGGER.info("Verifying payment callback for reference=" + maskReference(reference));
             
             // Get payment record by Paystack reference
             Payment payment = paymentDAO.getPaymentByPaystackReference(reference);
@@ -99,24 +101,24 @@ public class PaymentCallbackServlet extends HttpServlet {
                 return;
             }
             
-            // Verify ownership
-            if (!enrollment.getUserId().equals(userId)) {
-                LOGGER.warning("Payment callback blocked: unauthorized access for enrollmentId=" + enrollment.getEnrollmentId());
-                response.sendRedirect(failedBaseUrl + "&error=unauthorized");
-                return;
-            }
-            
             // Verify payment with Paystack
             JSONObject verificationResult = paystackService.verifyTransaction(reference);
 
             if (verificationResult != null) {
                 String paystackStatus = normalizeProviderStatus(verificationResult.optString("status", "failed"));
                 String paymentMethod = normalizePaymentMethod(verificationResult.optString("channel", "paystack"));
+                if (!isMetadataEnrollmentMatch(verificationResult, payment.getEnrollmentId())) {
+                    LOGGER.warning("Payment callback metadata mismatch for reference=" + maskReference(reference));
+                    paymentDAO.updatePaymentStatus(payment.getPaymentId(), "Failed", paymentMethod, "metadata_mismatch");
+                    enrollmentDAO.updatePaymentStatus(payment.getEnrollmentId(), "Failed", reference);
+                    response.sendRedirect(failedBaseUrl + "&error=metadatamismatch");
+                    return;
+                }
                 int verifiedAmountKobo = verificationResult.optInt("amount", -1);
                 if (verifiedAmountKobo > -1) {
-                    double expectedAmountKobo = payment.getAmount() != null ? payment.getAmount() * 100d : 0d;
-                    if (Math.abs(expectedAmountKobo - verifiedAmountKobo) > AMOUNT_TOLERANCE) {
-                        LOGGER.warning("Payment callback amount mismatch reference=" + reference +
+                    long expectedAmountKobo = toAmountKobo(payment.getAmount());
+                    if (expectedAmountKobo != verifiedAmountKobo) {
+                        LOGGER.warning("Payment callback amount mismatch reference=" + maskReference(reference) +
                                 " expectedKobo=" + expectedAmountKobo + " verifiedKobo=" + verifiedAmountKobo);
                         paymentDAO.updatePaymentStatus(payment.getPaymentId(), "Failed", paymentMethod, "amount_mismatch");
                         enrollmentDAO.updatePaymentStatus(payment.getEnrollmentId(), "Failed", reference);
@@ -174,23 +176,170 @@ public class PaymentCallbackServlet extends HttpServlet {
         }
     }
 
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String webhookSecret = AppSettingsService.getString(AppSettingsService.KEY_PAYMENT_PAYSTACK_WEBHOOK, "");
+        if (webhookSecret == null || webhookSecret.trim().isEmpty()) {
+            LOGGER.warning("Paystack webhook rejected: webhook secret not configured");
+            response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+            response.getWriter().write("Webhook secret not configured");
+            return;
+        }
+
+        String signatureHeader = request.getHeader("X-Paystack-Signature");
+        if (signatureHeader == null || signatureHeader.trim().isEmpty()) {
+            LOGGER.warning("Paystack webhook rejected: missing signature header");
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("Missing signature");
+            return;
+        }
+
+        StringBuilder rawBodyBuilder = new StringBuilder();
+        String line;
+        while ((line = request.getReader().readLine()) != null) {
+            rawBodyBuilder.append(line);
+        }
+        String rawBody = rawBodyBuilder.toString();
+
+        if (!isValidWebhookSignature(rawBody, signatureHeader, webhookSecret)) {
+            LOGGER.warning("Paystack webhook rejected: invalid signature");
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("Invalid signature");
+            return;
+        }
+
+        try {
+            JSONObject payload = new JSONObject(rawBody);
+            String event = payload.optString("event", "").trim();
+            JSONObject data = payload.optJSONObject("data");
+            if (data == null) {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().write("Missing event data");
+                return;
+            }
+
+            String reference = data.optString("reference", "").trim();
+            if (reference.isEmpty()) {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().write("Missing payment reference");
+                return;
+            }
+
+            if (!isValidReference(reference)) {
+                LOGGER.warning("Paystack webhook rejected: invalid payment reference format");
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().write("Invalid payment reference");
+                return;
+            }
+
+            Payment payment = paymentDAO.getPaymentByPaystackReference(reference);
+            if (payment == null) {
+                LOGGER.warning("Paystack webhook: payment not found for reference=" + reference);
+                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                response.getWriter().write("Payment not found");
+                return;
+            }
+
+            if (isPaid(payment.getStatus())) {
+                response.setStatus(HttpServletResponse.SC_OK);
+                response.getWriter().write("OK");
+                return;
+            }
+
+            Enrollment enrollment = enrollmentDAO.getEnrollment(payment.getEnrollmentId());
+            if (enrollment == null) {
+                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                response.getWriter().write("Enrollment not found");
+                return;
+            }
+
+            String providerStatus = normalizeProviderStatus(data.optString("status", "failed"));
+            String paymentMethod = normalizePaymentMethod(data.optString("channel", "paystack"));
+            if (!isMetadataEnrollmentMatch(data, payment.getEnrollmentId())) {
+                LOGGER.warning("Paystack webhook metadata mismatch for reference=" + maskReference(reference));
+                paymentDAO.updatePaymentStatus(payment.getPaymentId(), "Failed", paymentMethod, "metadata_mismatch");
+                enrollmentDAO.updatePaymentStatus(payment.getEnrollmentId(), "Failed", reference);
+                response.setStatus(HttpServletResponse.SC_OK);
+                response.getWriter().write("OK");
+                return;
+            }
+            int verifiedAmountKobo = data.optInt("amount", -1);
+
+            if (verifiedAmountKobo > -1) {
+                long expectedAmountKobo = toAmountKobo(payment.getAmount());
+                if (expectedAmountKobo != verifiedAmountKobo) {
+                    LOGGER.warning("Paystack webhook amount mismatch reference=" + maskReference(reference) +
+                            " expectedKobo=" + expectedAmountKobo + " verifiedKobo=" + verifiedAmountKobo);
+                    paymentDAO.updatePaymentStatus(payment.getPaymentId(), "Failed", paymentMethod, "amount_mismatch");
+                    enrollmentDAO.updatePaymentStatus(payment.getEnrollmentId(), "Failed", reference);
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    response.getWriter().write("OK");
+                    return;
+                }
+            }
+
+            if ("charge.success".equalsIgnoreCase(event) || "success".equals(providerStatus)) {
+                boolean updated = markPaymentSuccessful(payment, enrollment, paymentMethod, providerStatus);
+                response.setStatus(updated ? HttpServletResponse.SC_OK : HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                response.getWriter().write(updated ? "OK" : "Update failed");
+                return;
+            }
+
+            if ("failed".equals(providerStatus)) {
+                paymentDAO.updatePaymentStatus(payment.getPaymentId(), "Failed", paymentMethod, providerStatus);
+                enrollmentDAO.updatePaymentStatus(enrollment.getEnrollmentId(), "Failed", reference);
+                response.setStatus(HttpServletResponse.SC_OK);
+                response.getWriter().write("OK");
+                return;
+            }
+
+            if ("abandoned".equals(providerStatus)) {
+                paymentDAO.updatePaymentStatus(payment.getPaymentId(), "Abandoned", paymentMethod, providerStatus);
+                enrollmentDAO.updatePaymentStatus(enrollment.getEnrollmentId(), "Pending", reference);
+                response.setStatus(HttpServletResponse.SC_OK);
+                response.getWriter().write("OK");
+                return;
+            }
+
+            response.setStatus(HttpServletResponse.SC_OK);
+            response.getWriter().write("Ignored");
+        } catch (Exception ex) {
+            LOGGER.log(Level.SEVERE, "Paystack webhook processing error", ex);
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.getWriter().write("Webhook error");
+        }
+    }
+
     private boolean markPaymentSuccessful(Payment payment,
                                           Enrollment enrollment,
                                           String paymentMethod,
                                           String providerStatus) {
-        boolean paymentUpdated = paymentDAO.updatePaymentStatus(
-                payment.getPaymentId(), "Paid", paymentMethod, providerStatus);
-        boolean enrollmentStatusUpdated = enrollmentDAO.updateStatus(
-                enrollment.getEnrollmentId(), "Enrolled");
-        boolean enrollmentPaymentUpdated = enrollmentDAO.updatePaymentStatus(
-                enrollment.getEnrollmentId(), "Paid", payment.getPaystackReference());
-        return paymentUpdated && enrollmentStatusUpdated && enrollmentPaymentUpdated;
+        String nextEnrollmentStatus = AppSettingsService.getBoolean(AppSettingsService.KEY_ENROLLMENT_AUTO_ACTIVATE, true)
+                ? "Enrolled"
+                : (enrollment.getStatus() == null || enrollment.getStatus().trim().isEmpty() ? "Pending" : enrollment.getStatus());
+        return applySuccessfulStateTransaction(
+            payment.getPaymentId(),
+            enrollment.getEnrollmentId(),
+            payment.getPaystackReference(),
+            paymentMethod,
+            providerStatus,
+            nextEnrollmentStatus
+        );
     }
 
     private boolean ensureEnrollmentPaidState(Payment payment, String reference) {
-        boolean enrollmentStatusUpdated = enrollmentDAO.updateStatus(payment.getEnrollmentId(), "Enrolled");
-        boolean enrollmentPaymentUpdated = enrollmentDAO.updatePaymentStatus(payment.getEnrollmentId(), "Paid", reference);
-        return enrollmentStatusUpdated && enrollmentPaymentUpdated;
+        String nextEnrollmentStatus = AppSettingsService.getBoolean(AppSettingsService.KEY_ENROLLMENT_AUTO_ACTIVATE, true)
+                ? "Enrolled"
+                : "Pending";
+        return applySuccessfulStateTransaction(
+            payment.getPaymentId(),
+            payment.getEnrollmentId(),
+            reference,
+            payment.getMethod(),
+            payment.getPaystackStatus(),
+            nextEnrollmentStatus
+        );
     }
 
     private boolean isPaid(String status) {
@@ -217,5 +366,157 @@ public class PaymentCallbackServlet extends HttpServlet {
             return "paystack";
         }
         return method.trim().toLowerCase(Locale.ENGLISH);
+    }
+
+    private boolean isValidWebhookSignature(String rawBody, String providedSignature, String secret) {
+        try {
+            Mac sha512 = Mac.getInstance("HmacSHA512");
+            sha512.init(new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "HmacSHA512"));
+            byte[] digest = sha512.doFinal(rawBody.getBytes(StandardCharsets.UTF_8));
+            StringBuilder hex = new StringBuilder(digest.length * 2);
+            for (byte b : digest) {
+                hex.append(String.format("%02x", b));
+            }
+            byte[] expected = hex.toString().toLowerCase(Locale.ENGLISH).getBytes(StandardCharsets.UTF_8);
+            byte[] actual = providedSignature.trim().toLowerCase(Locale.ENGLISH).getBytes(StandardCharsets.UTF_8);
+            return MessageDigest.isEqual(expected, actual);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Webhook signature validation failed", e);
+            return false;
+        }
+    }
+
+    private boolean isValidReference(String reference) {
+        if (reference == null) {
+            return false;
+        }
+        String normalized = reference.trim();
+        if (!normalized.equals(reference)) {
+            return false;
+        }
+        if (normalized.contains("\n") || normalized.contains("\r")) {
+            return false;
+        }
+        return PAYMENT_REFERENCE_PATTERN.matcher(normalized).matches();
+    }
+
+    private long toAmountKobo(Double amount) {
+        if (amount == null) {
+            return 0L;
+        }
+        return Math.round(amount * 100d);
+    }
+
+    private boolean isMetadataEnrollmentMatch(JSONObject providerData, Integer expectedEnrollmentId) {
+        Integer metadataEnrollmentId = extractEnrollmentIdFromMetadata(providerData);
+        return metadataEnrollmentId != null && metadataEnrollmentId.equals(expectedEnrollmentId);
+    }
+
+    private Integer extractEnrollmentIdFromMetadata(JSONObject providerData) {
+        if (providerData == null) {
+            return null;
+        }
+        JSONObject metadata = providerData.optJSONObject("metadata");
+        if (metadata == null) {
+            return null;
+        }
+
+        Integer fromPrimary = parseIntegerSafe(metadata.opt("enrollment_id"));
+        if (fromPrimary != null) {
+            return fromPrimary;
+        }
+
+        JSONArray customFields = metadata.optJSONArray("custom_fields");
+        if (customFields == null) {
+            return null;
+        }
+
+        for (int i = 0; i < customFields.length(); i++) {
+            JSONObject field = customFields.optJSONObject(i);
+            if (field == null) {
+                continue;
+            }
+            String variableName = field.optString("variable_name", "").trim();
+            if (!"enrollment_id".equalsIgnoreCase(variableName)) {
+                continue;
+            }
+            Integer parsed = parseIntegerSafe(field.opt("value"));
+            if (parsed != null) {
+                return parsed;
+            }
+        }
+
+        return null;
+    }
+
+    private Integer parseIntegerSafe(Object value) {
+        if (value == null) {
+            return null;
+        }
+        try {
+            return Integer.valueOf(String.valueOf(value).trim());
+        } catch (NumberFormatException ex) {
+            return null;
+        }
+    }
+
+    private boolean applySuccessfulStateTransaction(Integer paymentId,
+                                                    Integer enrollmentId,
+                                                    String reference,
+                                                    String paymentMethod,
+                                                    String paystackStatus,
+                                                    String enrollmentStatus) {
+        String updatePaymentSql = "UPDATE Payment SET PaymentStatus=?, PaymentMethod=?, PaystackStatus=?, PaymentRef=?, PaystackReference=? WHERE PaymentID=?";
+        String updateEnrollmentSql = "UPDATE Enrollment SET Status=?, PaymentStatus=?, PaymentRef=? WHERE EnrollmentID=?";
+
+        try (Connection connection = DBConnection.getConnection()) {
+            connection.setAutoCommit(false);
+            try (PreparedStatement updatePayment = connection.prepareStatement(updatePaymentSql);
+                 PreparedStatement updateEnrollment = connection.prepareStatement(updateEnrollmentSql)) {
+
+                updatePayment.setString(1, "Paid");
+                updatePayment.setString(2, normalizePaymentMethod(paymentMethod));
+                updatePayment.setString(3, normalizeProviderStatus(paystackStatus));
+                updatePayment.setString(4, reference);
+                updatePayment.setString(5, reference);
+                updatePayment.setInt(6, paymentId);
+                int paymentRows = updatePayment.executeUpdate();
+
+                updateEnrollment.setString(1, enrollmentStatus);
+                updateEnrollment.setString(2, "Paid");
+                updateEnrollment.setString(3, reference);
+                updateEnrollment.setInt(4, enrollmentId);
+                int enrollmentRows = updateEnrollment.executeUpdate();
+
+                if (paymentRows != 1 || enrollmentRows != 1) {
+                    connection.rollback();
+                    LOGGER.warning("Payment success transaction rollback due to unexpected row counts for reference=" + maskReference(reference));
+                    return false;
+                }
+
+                connection.commit();
+                return true;
+            } catch (SQLException sqlException) {
+                connection.rollback();
+                LOGGER.log(Level.SEVERE, "Payment success transaction failed for reference=" + maskReference(reference), sqlException);
+                return false;
+            } finally {
+                connection.setAutoCommit(true);
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Unable to open transaction for payment success update", e);
+            return false;
+        }
+    }
+
+    private String maskReference(String reference) {
+        if (reference == null || reference.trim().isEmpty()) {
+            return "-";
+        }
+        String normalized = reference.trim();
+        if (normalized.length() <= 8) {
+            return "****";
+        }
+        return normalized.substring(0, 4) + "..." + normalized.substring(normalized.length() - 4);
     }
 }

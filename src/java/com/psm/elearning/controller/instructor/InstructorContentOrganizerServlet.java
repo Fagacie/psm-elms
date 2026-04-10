@@ -40,7 +40,11 @@ public class InstructorContentOrganizerServlet extends HttpServlet {
             return;
         }
 
-        Integer userId = (Integer) session.getAttribute("userId");
+        Integer userId = resolveUserId(session);
+        if (userId == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
         Integer courseId = parseInt(request.getParameter("courseId"));
 
         if (courseId == null) {
@@ -79,7 +83,7 @@ public class InstructorContentOrganizerServlet extends HttpServlet {
         List<Assessment> finalAssessments = new ArrayList<>();
 
         for (Assessment assessment : assessments) {
-            AssessmentPlacementUtil.Placement placement = AssessmentPlacementUtil.parsePlacement(assessment.getInstructions());
+            AssessmentPlacementUtil.Placement placement = resolvePlacement(assessment);
             assessment.setInstructions(AssessmentPlacementUtil.stripPlacement(assessment.getInstructions()));
             if ("afterMaterial".equals(placement.type)
                     && placement.materialId != null
@@ -188,18 +192,27 @@ public class InstructorContentOrganizerServlet extends HttpServlet {
                 if (assessmentId != null) {
                     Assessment assessment = assessmentDAO.findById(assessmentId);
                     if (assessment != null && assessment.getCourseId().equals(courseId)) {
-                        // Strip existing placement
                         String cleanInstructions = AssessmentPlacementUtil.stripPlacement(assessment.getInstructions());
-                        
-                        // Apply new placement
-                        String newInstructions;
+                        AssessmentPlacementUtil.Placement placement;
                         if ("final".equals(materialIdStr)) {
-                            newInstructions = AssessmentPlacementUtil.applyPlacement(cleanInstructions, "final");
+                            placement = new AssessmentPlacementUtil.Placement("final", null);
                         } else {
-                            newInstructions = AssessmentPlacementUtil.applyPlacement(cleanInstructions, "material:" + materialIdStr);
+                            Integer materialId = parseInt(materialIdStr);
+                            if (materialId != null) {
+                                Material targetMaterial = materialDAO.findById(materialId);
+                                if (targetMaterial != null && courseId.equals(targetMaterial.getCourseId())) {
+                                    placement = new AssessmentPlacementUtil.Placement("afterMaterial", materialId);
+                                } else {
+                                    placement = new AssessmentPlacementUtil.Placement("final", null);
+                                }
+                            } else {
+                                placement = new AssessmentPlacementUtil.Placement("final", null);
+                            }
                         }
-                        
-                        assessment.setInstructions(newInstructions);
+
+                        assessment.setInstructions(cleanInstructions);
+                        assessment.setPlacementType(placement.type);
+                        assessment.setPlacementMaterialId(placement.materialId);
                         assessmentDAO.update(assessment);
                     }
                 }
@@ -222,7 +235,40 @@ public class InstructorContentOrganizerServlet extends HttpServlet {
         }
     }
 
+    private Integer resolveUserId(HttpSession session) {
+        if (session == null) return null;
+        Object userId = session.getAttribute("userId");
+        if (userId == null) return null;
+        
+        if (userId instanceof Integer) {
+            int id = (Integer) userId;
+            return id > 0 ? id : null;
+        }
+        
+        if (userId instanceof String) {
+            try {
+                int id = Integer.parseInt((String) userId);
+                return id > 0 ? id : null;
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        }
+        return null;
+    }
+
     private String normalize(String value) {
         return value == null ? "" : value.trim();
+    }
+
+    private AssessmentPlacementUtil.Placement resolvePlacement(Assessment assessment) {
+        String type = normalize(assessment.getPlacementType());
+        if (!type.isEmpty()) {
+            Integer materialId = assessment.getPlacementMaterialId();
+            if ("afterMaterial".equals(type) && materialId == null) {
+                type = "final";
+            }
+            return new AssessmentPlacementUtil.Placement(type, materialId);
+        }
+        return AssessmentPlacementUtil.parsePlacement(assessment.getInstructions());
     }
 }

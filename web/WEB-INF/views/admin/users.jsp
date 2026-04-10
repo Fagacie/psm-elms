@@ -14,7 +14,7 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css" />
     <jsp:include page="/WEB-INF/views/common/head-external-assets.jsp"/>
 </head>
-<body>
+<body class="admin-page">
 <jsp:include page="/WEB-INF/views/common/admin-header.jsp">
     <jsp:param name="pageTitle" value="Users"/>
     <jsp:param name="pageSubtitle" value="Manage student, instructor, and administrator accounts"/>

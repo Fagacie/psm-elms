@@ -15,14 +15,14 @@
 <jsp:include page="/WEB-INF/views/common/student-topbar.jsp"/>
 
 <div class="sv-layout">
-    <c:set var="activePage" value="materials"/>
+    <c:set var="activePage" value="my-courses"/>
     <jsp:include page="/WEB-INF/views/common/student-sidebar.jsp"/>
 
     <main class="sv-main mv-main">
         <div class="sv-breadcrumb">
             <a href="${pageContext.request.contextPath}/dashboard"><i class="fas fa-house"></i> Dashboard</a>
             <span>/</span>
-            <a href="${pageContext.request.contextPath}/student/materials">Learning Materials</a>
+            <a href="${backToHubUrl}">Learning Hub</a>
             <span>/</span>
             <span>Preview</span>
         </div>
@@ -40,7 +40,7 @@
                     </p>
                 </div>
                 <div class="mv-head-actions">
-                    <a class="sv-btn" href="${pageContext.request.contextPath}/student/materials">Back to Materials</a>
+                    <a class="sv-btn" href="${backToHubUrl}">${backToHubLabel}</a>
                     <a class="sv-btn" target="_blank" rel="noopener noreferrer" href="${pageContext.request.contextPath}/student/materials?action=view&id=${material.materialId}">Open in New Tab</a>
                     <c:if test="${material.materialType != 'Link'}">
                         <a class="sv-btn primary" href="${pageContext.request.contextPath}/student/materials?action=download&id=${material.materialId}">Download</a>

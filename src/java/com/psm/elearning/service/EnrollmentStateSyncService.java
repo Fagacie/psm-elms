@@ -51,7 +51,7 @@ public class EnrollmentStateSyncService {
         if (enrollment == null || enrollment.getEnrollmentId() == null
                 || enrollment.getCourseId() == null || enrollment.getUserId() == null) {
             return new SyncResult(false, false, false, false, 0, 0, 0, 0, 0,
-                    "Pending", null, "Not Started", "Pending");
+                    false, false, "Pending", null, "Not Started", "Pending");
         }
 
         Payment payment = paymentDAO.getPaymentByEnrollmentId(enrollment.getEnrollmentId());
@@ -70,6 +70,9 @@ public class EnrollmentStateSyncService {
         int totalMaterials = materials.size();
         int viewedMaterials = materialProgressDAO.countViewedByCourse(enrollment.getUserId(), enrollment.getCourseId());
         double materialRatio = totalMaterials == 0 ? 1.0 : Math.min(1.0, (double) viewedMaterials / totalMaterials);
+        int completionThresholdPercent = AppSettingsService.getInt(
+                AppSettingsService.KEY_LEARNING_COMPLETION_PERCENT, 100, 1, 100
+        );
 
         List<Assessment> assessments = assessmentDAO.findByCourse(enrollment.getCourseId());
         if (assessments == null) assessments = new ArrayList<>();
@@ -93,8 +96,9 @@ public class EnrollmentStateSyncService {
         int progressPercent = (int) Math.round((materialRatio * 60.0) + (assessmentRatio * 40.0));
         progressPercent = Math.max(0, Math.min(100, progressPercent));
 
-        boolean viewedAllMaterials = viewedMaterials >= totalMaterials;
-        boolean passedRequiredAssessments = passedAssessments >= totalAssessments;
+        boolean viewedAllMaterials = totalMaterials == 0
+                || (materialRatio * 100.0) >= completionThresholdPercent;
+        boolean passedRequiredAssessments = totalAssessments == 0 || passedAssessments >= totalAssessments;
         boolean completed = viewedAllMaterials && passedRequiredAssessments;
         String completionStatus = completed ? "Completed" : (progressPercent > 0 ? "In Progress" : "Not Started");
         String enrollmentStatus = completed ? "Completed" : "Enrolled";
@@ -116,18 +120,13 @@ public class EnrollmentStateSyncService {
                 totalMaterials,
                 passedAssessments,
                 totalAssessments,
+                viewedAllMaterials,
+                passedRequiredAssessments,
                 paymentStatus,
                 paymentRef,
                 completionStatus,
                 enrollmentStatus
         );
-    }
-
-    private double resolvePassThreshold(Integer totalMarks) {
-        if (totalMarks == null || totalMarks <= 0) {
-            return 50.0;
-        }
-        return totalMarks * 0.5;
     }
 
     public static AssessmentProgressState resolveAssessmentProgress(Assessment assessment, List<AssessmentSubmission> submissions) {
@@ -168,10 +167,13 @@ public class EnrollmentStateSyncService {
     }
 
     private static double resolvePassThresholdStatic(Integer totalMarks) {
+        int passMarkPercent = AppSettingsService.getInt(
+                AppSettingsService.KEY_ASSESSMENT_PASS_MARK, 70, 1, 100
+        );
         if (totalMarks == null || totalMarks <= 0) {
-            return 50.0;
+            return passMarkPercent;
         }
-        return totalMarks * 0.5;
+        return totalMarks * (passMarkPercent / 100.0);
     }
 
     public static class SyncResult {
@@ -184,6 +186,8 @@ public class EnrollmentStateSyncService {
         private final int totalMaterials;
         private final int passedAssessments;
         private final int totalAssessments;
+        private final boolean viewedAllMaterials;
+        private final boolean passedRequiredAssessments;
         private final String paymentStatus;
         private final String paymentRef;
         private final String completionStatus;
@@ -198,6 +202,8 @@ public class EnrollmentStateSyncService {
                           int totalMaterials,
                           int passedAssessments,
                           int totalAssessments,
+                          boolean viewedAllMaterials,
+                          boolean passedRequiredAssessments,
                           String paymentStatus,
                           String paymentRef,
                           String completionStatus,
@@ -211,6 +217,8 @@ public class EnrollmentStateSyncService {
             this.totalMaterials = totalMaterials;
             this.passedAssessments = passedAssessments;
             this.totalAssessments = totalAssessments;
+            this.viewedAllMaterials = viewedAllMaterials;
+            this.passedRequiredAssessments = passedRequiredAssessments;
             this.paymentStatus = paymentStatus;
             this.paymentRef = paymentRef;
             this.completionStatus = completionStatus;
@@ -232,7 +240,7 @@ public class EnrollmentStateSyncService {
         public String getEnrollmentStatus() { return enrollmentStatus; }
 
         public boolean hasViewedAllMaterials() {
-            return viewedMaterials >= totalMaterials;
+            return viewedAllMaterials;
         }
 
         public boolean isViewedAllMaterials() {
@@ -240,7 +248,7 @@ public class EnrollmentStateSyncService {
         }
 
         public boolean hasPassedRequiredAssessments() {
-            return passedAssessments >= totalAssessments;
+            return passedRequiredAssessments;
         }
 
         public boolean isPassedRequiredAssessments() {

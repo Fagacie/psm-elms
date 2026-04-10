@@ -1,4 +1,4 @@
-.bc-main {
+﻿.bc-main {
   --bc-accent: var(--sv-accent);
   --bc-accent-soft: var(--sv-accent-soft);
   --bc-accent-border: var(--sv-accent-border);
@@ -47,7 +47,7 @@
 .bc-hero-stats div {
   border: 1px solid var(--sv-border);
   border-radius: 12px;
-  background: #ffffff;
+  background: var(--sv-surface);
   padding: 18px;
   display: grid;
   gap: 6px;
@@ -71,7 +71,7 @@
   height: 240px;
   border: 1px solid var(--sv-border);
   border-radius: 16px;
-  background: #fcfcfd;
+  background: var(--sv-surface-soft);
   overflow: hidden;
 }
 
@@ -101,7 +101,7 @@
   position: absolute;
   border: 1px solid var(--sv-border);
   border-radius: 14px;
-  background: #ffffff;
+  background: var(--sv-surface);
   box-shadow: var(--sv-shadow-sm);
   transition: transform 160ms ease-out;
 }
@@ -179,7 +179,7 @@
   padding: 0 14px;
   border: 1px solid var(--sv-border);
   border-radius: 999px;
-  background: #ffffff;
+  background: var(--sv-surface);
   color: var(--sv-muted);
   font-size: 0.82rem;
   letter-spacing: 0;
@@ -268,7 +268,7 @@
   border-radius: 12px;
   object-fit: cover;
   display: block;
-  background: #fcfcfd;
+  background: var(--sv-surface-soft);
 }
 
 .bc-banner-placeholder {
@@ -352,3 +352,4 @@
     transition: none !important;
   }
 }
+

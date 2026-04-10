@@ -26,7 +26,11 @@ public class InstructorCertificateServlet extends HttpServlet {
             return;
         }
 
-        Integer userId = (Integer) session.getAttribute("userId");
+        Integer userId = resolveUserId(session);
+        if (userId == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
         List<CertificateView> certificates = certificateDAO.findByInstructorDetailed(userId);
         request.setAttribute("certificates", certificates);
         request.getRequestDispatcher("/WEB-INF/views/instructor/course-certificates.jsp").forward(request, response);
@@ -48,7 +52,11 @@ public class InstructorCertificateServlet extends HttpServlet {
             return;
         }
 
-        Integer userId = (Integer) session.getAttribute("userId");
+        Integer userId = resolveUserId(session);
+        if (userId == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
         Integer certificateId = parseInt(request.getParameter("certificateId"));
         if (certificateId == null) {
             response.sendRedirect(request.getContextPath() + "/instructor/certificates?error=invalid");
@@ -66,6 +74,27 @@ public class InstructorCertificateServlet extends HttpServlet {
         } catch (NumberFormatException e) {
             return null;
         }
+    }
+
+    private Integer resolveUserId(HttpSession session) {
+        if (session == null) return null;
+        Object userId = session.getAttribute("userId");
+        if (userId == null) return null;
+        
+        if (userId instanceof Integer) {
+            int id = (Integer) userId;
+            return id > 0 ? id : null;
+        }
+        
+        if (userId instanceof String) {
+            try {
+                int id = Integer.parseInt((String) userId);
+                return id > 0 ? id : null;
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        }
+        return null;
     }
 
     private boolean isInstructor(HttpSession session) {

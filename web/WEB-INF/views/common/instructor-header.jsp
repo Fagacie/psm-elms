@@ -37,6 +37,9 @@
                 <span class="badge"><c:out value="${notificationCount}"/></span>
             </div>
         </c:if>
+        <button type="button" class="theme-toggle" data-theme-toggle aria-pressed="false">
+            <span class="theme-toggle-label">Dark mode</span>
+        </button>
         <a href="${pageContext.request.contextPath}/profile" class="user-menu user-menu-link">
             <div class="user-info">
                 <span class="user-name"><c:out value="${headerUser.fullName}"/></span>

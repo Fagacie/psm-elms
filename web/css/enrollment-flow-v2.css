@@ -1,4 +1,4 @@
-.ef-main {
+﻿.ef-main {
   display: grid;
   gap: 28px;
 }
@@ -28,7 +28,7 @@
 .ef-step {
   border: 1px solid var(--sv-border);
   border-radius: 12px;
-  background: #ffffff;
+  background: var(--sv-surface);
   padding: 16px 18px;
   font-size: 0.84rem;
   color: var(--sv-muted);
@@ -47,7 +47,7 @@
 .ef-result {
   border: 1px solid var(--sv-border);
   border-radius: 12px;
-  background: #ffffff;
+  background: var(--sv-surface);
   box-shadow: var(--sv-shadow-sm);
   padding: 28px;
 }
@@ -79,7 +79,7 @@
 .ef-meta {
   border: 1px solid var(--sv-border);
   border-radius: 12px;
-  background: #ffffff;
+  background: var(--sv-surface);
   padding: 18px;
 }
 
@@ -102,7 +102,7 @@
   margin-top: 24px;
   border: 1px solid var(--sv-border);
   border-radius: 12px;
-  background: #fcfcfd;
+  background: var(--sv-surface-soft);
   padding: 24px;
   text-align: center;
 }
@@ -144,7 +144,7 @@
   display: grid;
   place-items: center;
   font-size: 1.2rem;
-  background: #fcfcfd;
+  background: var(--sv-surface-soft);
   color: var(--sv-text);
 }
 
@@ -152,7 +152,7 @@
   margin-top: 24px;
   border: 1px solid var(--sv-border);
   border-radius: 12px;
-  background: #ffffff;
+  background: var(--sv-surface);
   padding: 20px;
 }
 
@@ -197,3 +197,4 @@
     align-items: flex-start;
   }
 }
+

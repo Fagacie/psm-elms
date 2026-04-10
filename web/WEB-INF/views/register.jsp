@@ -22,6 +22,12 @@
                 <p>Set up your account and begin learning today.</p>
             </header>
 
+            <div class="theme-toolbar">
+                <button type="button" class="theme-toggle" data-theme-toggle aria-pressed="false">
+                    <span class="theme-toggle-label">Dark mode</span>
+                </button>
+            </div>
+
             <c:if test="${not empty error}">
                 <div class="auth-alert auth-alert-error">${error}</div>
             </c:if>

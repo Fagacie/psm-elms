@@ -8,6 +8,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Certificate | PSM E-Learning</title>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <jsp:include page="/WEB-INF/views/common/student-head-assets.jsp"/>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/student-certificate-v2.css">
 </head>
@@ -52,17 +56,21 @@
             <div class="sv-card-body sc-header-body">
                 <div class="sc-header-copy">
                     <span class="sc-label">Verified Learning Credential</span>
-                    <h2>Your Course Certificate</h2>
-                    <p>Designed for printing and PDF export with verification details preserved.</p>
+                    <h2>Course Certificate</h2>
+                    <p>System auto generated credential for completed learning.</p>
                 </div>
                 <div class="sc-toolbar" role="group" aria-label="Certificate actions">
                     <a class="sv-btn" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=learning">
                         <i class="fas fa-arrow-left"></i>
                         <span>Back to Learning Hub</span>
                     </a>
-                    <button class="sv-btn primary sc-print-btn" type="button" onclick="window.print()">
+                    <button id="studentCertDownloadPngBtn" class="sv-btn primary" type="button">
+                        <i class="fas fa-image"></i>
+                        <span>Download PNG</span>
+                    </button>
+                    <button class="sv-btn sc-print-btn" type="button" onclick="window.print()">
                         <i class="fas fa-download"></i>
-                        <span>Download / Print</span>
+                        <span>Print</span>
                     </button>
                 </div>
             </div>
@@ -112,80 +120,80 @@
                     <div class="alert alert-error">This certificate has been revoked. Please contact support for clarification.</div>
                 </c:if>
                 <section class="sc-sheet">
-                    <div class="sc-header">
-                        <div>
-                            <div class="sc-kicker">PSM E-Learning Platform</div>
-                            <h2 class="sc-title">Certificate of Completion</h2>
-                            <p class="sc-sub">Official Learning Credential</p>
+                    <div class="sc-top-art">
+                        <div class="sc-wave sc-wave-back"></div>
+                        <div class="sc-wave sc-wave-mid"></div>
+                        <div class="sc-wave sc-wave-front"></div>
+                        <div class="sc-award-badge" aria-hidden="true">
+                            <div class="sc-award-core">
+                                <span>PSM</span>
+                                <strong>AWARD</strong>
+                            </div>
                         </div>
-                        <div class="sc-header-meta">
-                            <span class="sc-seal">Digitally Issued</span>
-                            <span class="status-badge ${certificate.status == 'Revoked' ? 'status-Archived' : 'status-Approved'}">${certificate.status == 'Revoked' ? 'Revoked' : 'Active'}</span>
+                        <div class="sc-title-panel">
+                            <span class="sc-title-main">CERTIFICATE</span>
+                            <span class="sc-title-sub">OF ACHIEVEMENT</span>
                         </div>
                     </div>
 
-                    <p class="sc-line">This certifies that</p>
-                    <div class="sc-name-wrap"><div class="sc-name">${studentUser.fullName}</div></div>
-
-                    <div class="sc-details">
-                        Registration Number: <strong><c:out value="${studentProfile.regNumber}" default="N/A"/></strong><br>
-                        Student Email: <strong><c:out value="${studentUser.email}" default="N/A"/></strong><br>
-                        has successfully completed the course<br>
-                        <strong>${course.courseName}</strong>
-                    </div>
-
-                    <div class="sc-grid">
-                        <div class="sc-box">
-                            <span>Certificate Number</span>
-                            <strong>${certificate.certificateNo}</strong>
+                    <div class="sc-body">
+                        <div class="sc-content">
+                            <p class="sc-kicker">Proudly Presented To</p>
+                            <div class="sc-name-wrap"><div class="sc-name">${studentUser.fullName}</div></div>
+                            <p class="sc-statement">
+                                This certifies that registration number
+                                <strong><c:out value="${studentProfile.regNumber}" default="N/A"/></strong>
+                                has successfully completed the approved learning requirements for
+                            </p>
+                            <div class="sc-course-pill">${course.courseName}</div>
+                            <div class="sc-meta-inline">
+                                <span><strong>Reg No:</strong> <c:out value="${studentProfile.regNumber}" default="N/A"/></span>
+                                <span>
+                                    <strong>Issue Date:</strong>
+                                    <c:choose>
+                                        <c:when test="${not empty certificate.issueDate}">${certificate.issueDate.toLocalDate()}</c:when>
+                                        <c:otherwise>-</c:otherwise>
+                                    </c:choose>
+                                </span>
+                                <span><strong>Certificate No:</strong> ${certificate.certificateNo}</span>
+                            </div>
                         </div>
-                        <div class="sc-box">
-                            <span>Issue Date</span>
-                            <strong>
+
+                        <div class="sc-footer">
+                            <div class="sc-signature-block">
+                                <strong>PSM E-Learning Platform</strong>
+                                <small>Academic Records</small>
+                            </div>
+
+                            <div class="sc-signature-block">
+                                <strong>Registrar</strong>
+                                <small>
+                                    <c:choose>
+                                        <c:when test="${not empty certificate.issueDate}">${certificate.issueDate.toLocalDate()}</c:when>
+                                        <c:otherwise>Issue date pending</c:otherwise>
+                                    </c:choose>
+                                </small>
+                            </div>
+
+                            <div class="sc-verify-panel">
+                                <span class="sc-verify-label">Verification Code</span>
+                                <strong>${certificate.certificateNo}</strong>
+                                <small><c:out value="${certificate.verificationURL}" default="${pageContext.request.contextPath}/certificate/verify"/></small>
+                            </div>
+                        </div>
+
+                        <c:if test="${not empty certificate.qrCodePath}">
+                            <div class="sc-qr">
                                 <c:choose>
-                                    <c:when test="${not empty certificate.issueDate}">${certificate.issueDate.toLocalDate()}</c:when>
-                                    <c:otherwise>-</c:otherwise>
+                                    <c:when test="${certificate.qrCodePath.startsWith('http')}">
+                                        <img src="${certificate.qrCodePath}" alt="Certificate QR Code">
+                                    </c:when>
+                                    <c:otherwise>
+                                        <img src="${pageContext.request.contextPath}/${certificate.qrCodePath}" alt="Certificate QR Code">
+                                    </c:otherwise>
                                 </c:choose>
-                            </strong>
-                        </div>
-                        <div class="sc-box">
-                            <span>Enrollment ID</span>
-                            <strong>#${enrollment.enrollmentId}</strong>
-                        </div>
-                    </div>
-
-                    <div class="sc-endorsements">
-                        <div class="sc-signature-block">
-                            <div class="sc-sign-line"></div>
-                            <strong><c:out value="${certificate.instructorName}" default="Instructor of Record"/></strong>
-                            <span>Instructor Signature</span>
-                        </div>
-                        <div class="sc-stamp-block" aria-label="Institutional validation stamp">
-                            <span>PSM</span>
-                            <small>Verified Credential</small>
-                        </div>
-                        <div class="sc-signature-block">
-                            <div class="sc-sign-line"></div>
-                            <strong>${certificate.generatedBy}</strong>
-                            <span>Authorized Signatory</span>
-                        </div>
-                    </div>
-
-                    <c:if test="${not empty certificate.qrCodePath}">
-                        <div class="sc-qr">
-                            <c:choose>
-                                <c:when test="${certificate.qrCodePath.startsWith('http')}">
-                                    <img src="${certificate.qrCodePath}" alt="Certificate QR Code">
-                                </c:when>
-                                <c:otherwise>
-                                    <img src="${pageContext.request.contextPath}/${certificate.qrCodePath}" alt="Certificate QR Code">
-                                </c:otherwise>
-                            </c:choose>
-                        </div>
-                    </c:if>
-                    <div class="sc-verify">
-                        <strong>Verification Code:</strong> ${certificate.certificateNo}
-                        <span class="sc-verify-help">Verify at: <c:out value="${certificate.verificationURL}" default="${pageContext.request.contextPath}/certificate/verify"/></span>
+                            </div>
+                        </c:if>
                     </div>
                 </section>
             </c:otherwise>
@@ -194,7 +202,100 @@
 </div>
 
 <div class="sv-overlay" id="svOverlay"></div>
+<script>
+    (function () {
+        var downloadBtn = document.getElementById('studentCertDownloadPngBtn');
+        var certificateNode = document.querySelector('.sc-sheet');
+
+        if (!downloadBtn || !certificateNode) {
+            return;
+        }
+
+        function waitForImages(node) {
+            var images = Array.prototype.slice.call(node.querySelectorAll('img'));
+            if (!images.length) {
+                return Promise.resolve();
+            }
+
+            return Promise.all(images.map(function (img) {
+                if (img.complete) {
+                    return Promise.resolve();
+                }
+                return new Promise(function (resolve) {
+                    img.addEventListener('load', resolve, { once: true });
+                    img.addEventListener('error', resolve, { once: true });
+                });
+            }));
+        }
+
+        function exportPng() {
+            if (typeof html2canvas === 'undefined') {
+                alert('PNG export is unavailable right now. Please try print.');
+                return;
+            }
+
+            var targetWidth = 2000;
+            var targetHeight = 1414;
+            var originalLabel = downloadBtn.innerHTML;
+            downloadBtn.disabled = true;
+            downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Preparing PNG...</span>';
+
+            var afterFonts = document.fonts && document.fonts.ready
+                ? document.fonts.ready
+                : Promise.resolve();
+
+            afterFonts
+                .then(function () {
+                    return waitForImages(certificateNode);
+                })
+                .then(function () {
+                    var ratioScale = Math.max(targetWidth / Math.max(certificateNode.clientWidth, 1), 2);
+                    return html2canvas(certificateNode, {
+                        backgroundColor: '#ffffff',
+                        useCORS: true,
+                        allowTaint: false,
+                        scale: Math.min(ratioScale, 4)
+                    });
+                })
+                .then(function (canvas) {
+                var output = document.createElement('canvas');
+                output.width = targetWidth;
+                output.height = targetHeight;
+                var ctx = output.getContext('2d');
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, targetWidth, targetHeight);
+
+                var fitScale = Math.min(targetWidth / canvas.width, targetHeight / canvas.height);
+                var drawWidth = canvas.width * fitScale;
+                var drawHeight = canvas.height * fitScale;
+                var dx = (targetWidth - drawWidth) / 2;
+                var dy = (targetHeight - drawHeight) / 2;
+                ctx.drawImage(canvas, dx, dy, drawWidth, drawHeight);
+
+                var certNo = '${certificate.certificateNo}' || 'certificate';
+                var filename = certNo.replace(/[^a-z0-9_-]+/gi, '_').replace(/^_+|_+$/g, '') + '.png';
+                if (filename === '.png') {
+                    filename = 'certificate.png';
+                }
+
+                var link = document.createElement('a');
+                link.href = output.toDataURL('image/png');
+                link.download = filename;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }).catch(function (error) {
+                console.error('Student certificate PNG export failed:', error);
+                alert('Could not export PNG. Please try again or use print.');
+            }).finally(function () {
+                downloadBtn.disabled = false;
+                downloadBtn.innerHTML = originalLabel;
+            });
+        }
+
+        downloadBtn.addEventListener('click', exportPng);
+    })();
+</script>
 <script src="${pageContext.request.contextPath}/js/student-v2.js"></script>
 </body>
 </html>
-

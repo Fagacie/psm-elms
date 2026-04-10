@@ -27,6 +27,13 @@ mysql -u root -p < "c:\Users\ACER\Desktop\FYP\elearning\PSME\db\schema.sql"
 - If you already have data, the script won’t drop tables; it only creates missing ones and adds the `RegNumber` unique index.
 - Ensure your app DB config (`db.properties`) points to `psm_elearning`.
 
+## Incremental migrations
+
+If your environment already has data and you only need selected updates, run the targeted migration scripts in `db/`.
+
+- `migration_align_schema.sql`: broad alignment migration for older installations.
+- `migration_assessment_placement.sql`: moves assessment placement metadata from `Instructions` to dedicated columns (`PlacementType`, `PlacementMaterialID`).
+
 ## Certificate eligibility test matrix
 
 Use `db/certificate_eligibility_matrix.sql` to validate the certificate gate end-to-end using live state:

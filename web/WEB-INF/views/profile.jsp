@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<c:set var="isAdminProfile" value="${sessionScope.userRole == 'Admin'}"/>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,16 +8,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile | PSM E-Learning</title>
     <jsp:include page="/WEB-INF/views/common/student-head-assets.jsp"/>
+    <c:if test="${isAdminProfile}">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin-dashboard.css">
+    </c:if>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/profile-v2.css">
 </head>
-<body class="sv-page">
-<c:set var="topbarTitle" value="Profile"/>
-<c:set var="topbarSubtitle" value="Manage your account details and personal information"/>
-<jsp:include page="/WEB-INF/views/common/account-topbar.jsp"/>
+<body class="sv-page ${isAdminProfile ? 'admin-page profile-admin' : ''}">
+<c:choose>
+    <c:when test="${isAdminProfile}">
+        <jsp:include page="/WEB-INF/views/common/admin-header.jsp">
+            <jsp:param name="pageTitle" value="Profile"/>
+            <jsp:param name="pageSubtitle" value="Manage your account details and personal information"/>
+        </jsp:include>
+    </c:when>
+    <c:otherwise>
+        <c:set var="topbarTitle" value="Profile"/>
+        <c:set var="topbarSubtitle" value="Manage your account details and personal information"/>
+        <jsp:include page="/WEB-INF/views/common/account-topbar.jsp"/>
+    </c:otherwise>
+</c:choose>
 
 <div class="sv-layout">
-    <c:set var="activePage" value="profile"/>
-    <jsp:include page="/WEB-INF/views/common/account-sidebar.jsp"/>
+    <c:choose>
+        <c:when test="${isAdminProfile}">
+            <jsp:include page="/WEB-INF/views/common/admin-sidebar.jsp"/>
+        </c:when>
+        <c:otherwise>
+            <c:set var="activePage" value="profile"/>
+            <jsp:include page="/WEB-INF/views/common/account-sidebar.jsp"/>
+        </c:otherwise>
+    </c:choose>
 
     <main class="sv-main profile-page">
         <div class="sv-breadcrumb">

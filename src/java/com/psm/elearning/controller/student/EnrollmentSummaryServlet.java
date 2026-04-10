@@ -16,11 +16,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Shows enrollment summary before payment begins.
  */
 public class EnrollmentSummaryServlet extends HttpServlet {
+
+    private static final Logger LOGGER = Logger.getLogger(EnrollmentSummaryServlet.class.getName());
 
     private CourseDAO courseDAO;
     private EnrollmentDAO enrollmentDAO;
@@ -28,7 +32,6 @@ public class EnrollmentSummaryServlet extends HttpServlet {
 
     @Override
     public void init() {
-        System.out.println("EnrollmentSummaryServlet.init: initializing");
         courseDAO = new CourseDAOImpl();
         enrollmentDAO = new EnrollmentDAOImpl();
         paymentDAO = new PaymentDAOImpl();
@@ -36,10 +39,8 @@ public class EnrollmentSummaryServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        System.out.println("EnrollmentSummaryServlet.doGet: start");
         HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute("userId") == null) {
-            System.out.println("EnrollmentSummaryServlet: no session or userId; redirecting to /login");
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
@@ -48,18 +49,15 @@ public class EnrollmentSummaryServlet extends HttpServlet {
             role = (String) session.getAttribute("userRole");
         }
         if (!"Student".equals(role)) {
-            System.out.println("EnrollmentSummaryServlet: role=" + role + " redirecting to /dashboard");
             response.sendRedirect(request.getContextPath() + "/dashboard");
             return;
         }
         try {
             Integer userId = (Integer) session.getAttribute("userId");
             String courseIdParam = request.getParameter("courseId");
-            System.out.println("EnrollmentSummaryServlet: userId=" + userId + ", courseIdParam=" + courseIdParam);
             Integer courseId = Integer.parseInt(courseIdParam);
             Course course = courseDAO.findById(courseId);
             if (course == null) {
-                System.out.println("EnrollmentSummaryServlet: course not found id=" + courseId);
                 response.sendRedirect(request.getContextPath() + "/student/courses?error=notfound");
                 return;
             }
@@ -74,15 +72,13 @@ public class EnrollmentSummaryServlet extends HttpServlet {
                 }
                 return;
             }
-            System.out.println("EnrollmentSummaryServlet: forwarding to enrollment-summary.jsp");
             request.setAttribute("course", course);
             request.getRequestDispatcher("/WEB-INF/views/student/enrollment-summary.jsp").forward(request, response);
         } catch (NumberFormatException e) {
-            System.err.println("EnrollmentSummaryServlet: invalid courseId: " + e.getMessage());
+            LOGGER.log(Level.WARNING, "EnrollmentSummaryServlet invalid courseId", e);
             response.sendRedirect(request.getContextPath() + "/student/courses?error=invalid");
         } catch (Exception e) {
-            System.err.println("EnrollmentSummaryServlet: Error: " + e.getMessage());
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "EnrollmentSummaryServlet failed", e);
             response.sendRedirect(request.getContextPath() + "/student/courses?error=exception");
         }
     }

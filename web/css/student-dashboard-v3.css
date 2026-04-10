@@ -1,4 +1,4 @@
-.sd3-main {
+﻿.sd3-main {
   --sd3-accent: #14532d;
   --sd3-accent-soft: rgba(20, 83, 45, 0.08);
   --sd3-accent-border: rgba(20, 83, 45, 0.18);
@@ -12,7 +12,7 @@
   padding: 8px 10px 8px 8px;
   border: 1px solid var(--sv-border);
   border-radius: 12px;
-  background: #ffffff;
+  background: var(--sv-surface);
 }
 
 .sd3-avatar {
@@ -23,7 +23,7 @@
   display: grid;
   place-items: center;
   overflow: hidden;
-  background: #fcfcfd;
+  background: var(--sv-surface-soft);
   color: var(--sv-text);
 }
 
@@ -92,7 +92,7 @@
   border: 1px solid var(--sd3-accent-border);
   border-radius: 12px;
   padding: 28px;
-  background: #ffffff;
+  background: var(--sv-surface);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.65);
 }
 
@@ -171,7 +171,7 @@
   padding: 0 14px;
   border: 1px solid var(--sv-border);
   border-radius: 999px;
-  background: #ffffff;
+  background: var(--sv-surface);
   color: var(--sv-muted);
   font-size: 0.82rem;
   font-weight: 600;
@@ -196,7 +196,7 @@
   padding: 0 14px;
   border: 1px solid var(--sv-border);
   border-radius: 10px;
-  background: #ffffff;
+  background: var(--sv-surface);
   color: var(--sv-text);
 }
 
@@ -261,7 +261,7 @@
   border: 1px solid var(--sv-border);
   border-radius: 12px;
   padding: 22px;
-  background: #ffffff;
+  background: var(--sv-surface);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -381,3 +381,4 @@
     width: 100%;
   }
 }
+

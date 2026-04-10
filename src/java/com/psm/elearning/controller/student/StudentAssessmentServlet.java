@@ -21,6 +21,7 @@ import com.psm.elearning.model.AssessmentSubmission;
 import com.psm.elearning.model.Course;
 import com.psm.elearning.model.Enrollment;
 import com.psm.elearning.model.Payment;
+import com.psm.elearning.service.AppSettingsService;
 import com.psm.elearning.service.EnrollmentStateSyncService;
 import com.psm.elearning.util.AssessmentPlacementUtil;
 import com.psm.elearning.util.CloudinaryUtil;
@@ -74,7 +75,11 @@ public class StudentAssessmentServlet extends HttpServlet {
             return;
         }
 
-        Integer userId = (Integer) session.getAttribute("userId");
+        Integer userId = resolveUserId(session);
+        if (userId == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
         Integer selectedCourseId = parseInt(request.getParameter("courseId"));
         Integer selectedAssessmentId = parseInt(request.getParameter("assessmentId"));
         String action = normalize(request.getParameter("action"));
@@ -88,6 +93,8 @@ public class StudentAssessmentServlet extends HttpServlet {
             request.getRequestDispatcher("/WEB-INF/views/student/assessments.jsp").forward(request, response);
             return;
         }
+
+        Map<Integer, List<AssessmentSubmission>> submissionsByAssessment = getSubmissionsByAssessment(userId);
 
         if (selectedCourseId == null) {
             selectedCourseId = paidEnrollments.get(0).getCourseId();
@@ -133,7 +140,7 @@ public class StudentAssessmentServlet extends HttpServlet {
         Map<Integer, Boolean> hasPendingRetakeByAssessment = new LinkedHashMap<>();
         Map<Integer, Boolean> activeAttemptByAssessment = new LinkedHashMap<>();
         for (Assessment assessment : assessments) {
-            List<AssessmentSubmission> attempts = submissionDAO.findByAssessmentAndUser(assessment.getAssessmentId(), userId);
+            List<AssessmentSubmission> attempts = submissionsByAssessment.getOrDefault(assessment.getAssessmentId(), new ArrayList<>());
             int usedAttempts = attempts != null ? attempts.size() : 0;
             int allowedAttempts = getAllowedAttempts(userId, assessment);
             boolean hasPendingRetake = retakeRequestDAO.hasPending(assessment.getAssessmentId(), userId);
@@ -199,10 +206,9 @@ public class StudentAssessmentServlet extends HttpServlet {
                 selectedAssessment.setInstructions(AssessmentPlacementUtil.stripPlacement(selectedAssessment.getInstructions()));
                 questions = questionDAO.findByAssessment(selectedAssessmentId);
                 if (questions == null) questions = new ArrayList<>();
-                submissionHistory = submissionDAO.findByAssessmentAndUser(selectedAssessmentId, userId);
-                if (submissionHistory == null) submissionHistory = new ArrayList<>();
+                submissionHistory = submissionsByAssessment.getOrDefault(selectedAssessmentId, new ArrayList<>());
 
-                int usedAttempts = countUsedAttempts(userId, selectedAssessmentId);
+                int usedAttempts = usedAttemptsByAssessment.getOrDefault(selectedAssessmentId, 0);
                 int allowedAttempts = getAllowedAttempts(userId, selectedAssessment);
                 boolean hasPendingRetake = retakeRequestDAO.hasPending(selectedAssessmentId, userId);
                 request.setAttribute("usedAttempts", usedAttempts);
@@ -271,7 +277,11 @@ public class StudentAssessmentServlet extends HttpServlet {
             return;
         }
 
-        Integer userId = (Integer) session.getAttribute("userId");
+        Integer userId = resolveUserId(session);
+        if (userId == null) {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
+        }
         String action = normalize(request.getParameter("action"));
         Integer courseId = parseInt(request.getParameter("courseId"));
         Integer assessmentId = parseInt(request.getParameter("assessmentId"));
@@ -329,7 +339,7 @@ public class StudentAssessmentServlet extends HttpServlet {
         if ("submit".equalsIgnoreCase(action)) {
             String uploadedAnswerUrl = null;
             boolean isAssignment = Assessment.TYPE_ASSIGNMENT.equalsIgnoreCase(assessment.getType());
-            if (!Assessment.TYPE_QUIZ.equalsIgnoreCase(assessment.getType())) {
+            if (isAssignment) {
                 try {
                     Part answerFile = request.getPart("answerFile");
                     if (answerFile != null && answerFile.getSize() > 0) {
@@ -345,15 +355,13 @@ public class StudentAssessmentServlet extends HttpServlet {
                             }
                         }
                     }
-                    if (isAssignment && (answerFile == null || answerFile.getSize() == 0)) {
+                    if (answerFile == null || answerFile.getSize() == 0) {
                         response.sendRedirect(request.getContextPath() + "/student/assessments?courseId=" + courseId + "&assessmentId=" + assessmentId + "&error=assignmentfile");
                         return;
                     }
                 } catch (Exception ignored) {
-                    if (isAssignment) {
-                        response.sendRedirect(request.getContextPath() + "/student/assessments?courseId=" + courseId + "&assessmentId=" + assessmentId + "&error=assignmentfile");
-                        return;
-                    }
+                    response.sendRedirect(request.getContextPath() + "/student/assessments?courseId=" + courseId + "&assessmentId=" + assessmentId + "&error=assignmentfile");
+                    return;
                 }
             }
 
@@ -529,8 +537,27 @@ public class StudentAssessmentServlet extends HttpServlet {
         return submissions == null ? 0 : submissions.size();
     }
 
+    private Map<Integer, List<AssessmentSubmission>> getSubmissionsByAssessment(Integer userId) {
+        List<AssessmentSubmission> submissions = submissionDAO.findByUser(userId);
+        Map<Integer, List<AssessmentSubmission>> submissionsByAssessment = new LinkedHashMap<>();
+        if (submissions == null) {
+            return submissionsByAssessment;
+        }
+
+        for (AssessmentSubmission submission : submissions) {
+            if (submission == null || submission.getAssessmentId() == null) {
+                continue;
+            }
+            submissionsByAssessment
+                    .computeIfAbsent(submission.getAssessmentId(), key -> new ArrayList<>())
+                    .add(submission);
+        }
+        return submissionsByAssessment;
+    }
+
     private int getAllowedAttempts(Integer userId, Assessment assessment) {
-        int base = assessment.getMaxAttempts() != null && assessment.getMaxAttempts() > 0 ? assessment.getMaxAttempts() : 1;
+        int defaultMaxAttempts = AppSettingsService.getInt(AppSettingsService.KEY_ASSESSMENT_MAX_ATTEMPTS, 3, 1, 10);
+        int base = assessment.getMaxAttempts() != null && assessment.getMaxAttempts() > 0 ? assessment.getMaxAttempts() : defaultMaxAttempts;
         int approvedExtra = retakeRequestDAO.countApproved(assessment.getAssessmentId(), userId);
         return base + approvedExtra;
     }
@@ -546,6 +573,9 @@ public class StudentAssessmentServlet extends HttpServlet {
         return enrollments.stream()
                 .filter(e -> e.getEnrollmentId() != null)
                 .filter(e -> {
+                    if (e.getCoursePrice() != null && e.getCoursePrice() <= 0) {
+                        return true;
+                    }
                     Payment payment = paymentDAO.getPaymentByEnrollmentId(e.getEnrollmentId());
                     return payment != null && isPaymentComplete(payment.getStatus());
                 })
@@ -564,6 +594,27 @@ public class StudentAssessmentServlet extends HttpServlet {
         } catch (NumberFormatException e) {
             return null;
         }
+    }
+
+    private Integer resolveUserId(HttpSession session) {
+        if (session == null) return null;
+        Object userId = session.getAttribute("userId");
+        if (userId == null) return null;
+        
+        if (userId instanceof Integer) {
+            int id = (Integer) userId;
+            return id > 0 ? id : null;
+        }
+        
+        if (userId instanceof String) {
+            try {
+                int id = Integer.parseInt((String) userId);
+                return id > 0 ? id : null;
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        }
+        return null;
     }
 
     private int parseIntOrDefault(String value, int defaultValue) {

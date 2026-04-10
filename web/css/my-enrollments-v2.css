@@ -1,4 +1,4 @@
-.me-page,
+﻿.me-page,
 .me-hero,
 .me-metrics,
 .me-grid,
@@ -15,7 +15,7 @@
   padding: 8px 10px 8px 8px;
   border: 1px solid var(--sv-border);
   border-radius: 12px;
-  background: #ffffff;
+  background: var(--sv-surface);
 }
 
 .me-user-icon {
@@ -25,7 +25,7 @@
   place-items: center;
   border: 1px solid var(--sv-border);
   border-radius: 10px;
-  background: #fcfcfd;
+  background: var(--sv-surface-soft);
   color: var(--sv-text);
 }
 
@@ -102,7 +102,7 @@
   border: 1px solid var(--me-accent-border);
   border-radius: 12px;
   padding: 28px;
-  background: #ffffff;
+  background: var(--sv-surface);
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 20px;
@@ -156,7 +156,7 @@
   padding: 0 14px;
   border: 1px solid var(--sv-border);
   border-radius: 999px;
-  background: #ffffff;
+  background: var(--sv-surface);
   color: var(--sv-muted);
   font-size: 0.82rem;
   font-weight: 600;
@@ -181,7 +181,7 @@
   padding: 0 14px;
   border: 1px solid var(--sv-border);
   border-radius: 10px;
-  background: #ffffff;
+  background: var(--sv-surface);
   color: var(--sv-text);
 }
 
@@ -400,3 +400,4 @@
     align-items: stretch;
   }
 }
+

@@ -12,6 +12,7 @@ import com.psm.elearning.model.User;
 import com.psm.elearning.model.Student;
 import com.psm.elearning.model.Instructor;
 import com.psm.elearning.model.Admin;
+import com.psm.elearning.service.AppSettingsService;
 import com.psm.elearning.util.PasswordUtil;
 
 import javax.servlet.ServletException;
@@ -106,6 +107,9 @@ public class LoginServlet extends HttpServlet {
         }
 
         HttpSession session = request.getSession(true);
+        session.setMaxInactiveInterval(
+                AppSettingsService.getInt(AppSettingsService.KEY_SECURITY_SESSION_TIMEOUT, 30, 5, 480) * 60
+        );
         session.setAttribute("user", user);
         session.setAttribute("userId", user.getUserId());
         session.setAttribute("role", user.getRole());

@@ -12,6 +12,7 @@ import com.psm.elearning.model.Material;
 import com.psm.elearning.model.Assessment;
 import com.psm.elearning.model.Payment;
 import com.psm.elearning.model.Enrollment;
+import com.psm.elearning.service.EnrollmentStateSyncService;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -23,16 +24,22 @@ import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ArrayList;
+import java.util.Locale;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Servlet to display student's enrollments.
  */
 public class MyEnrollmentsServlet extends HttpServlet {
+
+    private static final Logger LOGGER = Logger.getLogger(MyEnrollmentsServlet.class.getName());
     
     private EnrollmentDAO enrollmentDAO;
     private PaymentDAO paymentDAO;
     private MaterialDAO materialDAO;
     private AssessmentDAO assessmentDAO;
+    private EnrollmentStateSyncService enrollmentStateSyncService;
     
     @Override
     public void init() {
@@ -40,6 +47,7 @@ public class MyEnrollmentsServlet extends HttpServlet {
         paymentDAO = new PaymentDAOImpl();
         materialDAO = new MaterialDAOImpl();
         assessmentDAO = new AssessmentDAOImpl();
+        enrollmentStateSyncService = new EnrollmentStateSyncService();
     }
     
     @Override
@@ -52,15 +60,14 @@ public class MyEnrollmentsServlet extends HttpServlet {
             return;
         }
         
-        String role = (String) session.getAttribute("role");
-        if (role == null) role = (String) session.getAttribute("userRole");
+        String role = resolveRole(session);
         if (!"Student".equals(role)) {
             response.sendRedirect(request.getContextPath() + "/dashboard");
             return;
         }
         
         try {
-            Integer userId = (Integer) session.getAttribute("userId");
+            Integer userId = resolveUserId(session);
             
             // Get all enrollments for this student
             List<Enrollment> enrollments = enrollmentDAO.getEnrollmentsByStudent(userId);
@@ -73,6 +80,7 @@ public class MyEnrollmentsServlet extends HttpServlet {
 
             // Enrich each enrollment with latest payment status/reference
             for (Enrollment e : enrollments) {
+                enrollmentStateSyncService.syncEnrollmentState(e);
                 Payment p = paymentDAO.getPaymentByEnrollmentId(e.getEnrollmentId());
                 if (p != null) {
                     e.setPaymentStatus(p.getStatus());
@@ -81,7 +89,7 @@ public class MyEnrollmentsServlet extends HttpServlet {
                     e.setPaymentStatus("Pending");
                 }
 
-                if ("Paid".equalsIgnoreCase(e.getPaymentStatus())) {
+                if (isPaymentComplete(e.getPaymentStatus())) {
                     paidCount++;
                 }
                 if ("Completed".equalsIgnoreCase(e.getCompletionStatus()) || "Completed".equalsIgnoreCase(e.getStatus())) {
@@ -92,7 +100,7 @@ public class MyEnrollmentsServlet extends HttpServlet {
                     inProgressCount++;
                 }
 
-                if (e.getCourseId() != null) {
+                if (e.getCourseId() != null && !materialCountByCourse.containsKey(e.getCourseId())) {
                     List<Material> materials = materialDAO.findByCourse(e.getCourseId());
                     List<Assessment> assessments = assessmentDAO.findByCourse(e.getCourseId());
                     materialCountByCourse.put(e.getCourseId(), materials != null ? materials.size() : 0);
@@ -109,9 +117,52 @@ public class MyEnrollmentsServlet extends HttpServlet {
             request.getRequestDispatcher("/WEB-INF/views/student/my-enrollments.jsp").forward(request, response);
             
         } catch (Exception e) {
-            System.err.println("MyEnrollmentsServlet: Error: " + e.getMessage());
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "MyEnrollmentsServlet failed to load enrollments", e);
             response.sendRedirect(request.getContextPath() + "/dashboard?error=exception");
         }
+    }
+
+    private Integer resolveUserId(HttpSession session) {
+        if (session == null) return null;
+        Object userId = session.getAttribute("userId");
+        if (userId == null) return null;
+        
+        if (userId instanceof Integer) {
+            int id = (Integer) userId;
+            return id > 0 ? id : null;
+        }
+        
+        if (userId instanceof String) {
+            try {
+                int id = Integer.parseInt((String) userId);
+                return id > 0 ? id : null;
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        }
+        return null;
+    }
+
+    private String resolveRole(HttpSession session) {
+        if (session == null) return null;
+        Object role = session.getAttribute("userRole");
+        if (role == null) role = session.getAttribute("role");
+        if (role == null) return null;
+        
+        String roleStr = role.toString().trim();
+        if ("Admin".equalsIgnoreCase(roleStr)) return "Admin";
+        if ("Student".equalsIgnoreCase(roleStr)) return "Student";
+        if ("Instructor".equalsIgnoreCase(roleStr)) return "Instructor";
+        return null;
+    }
+
+    private boolean isPaymentComplete(String paymentStatus) {
+        if (paymentStatus == null) {
+            return false;
+        }
+        String normalized = paymentStatus.trim().toLowerCase(Locale.ENGLISH);
+        return "paid".equals(normalized)
+                || "completed".equals(normalized)
+                || "success".equals(normalized);
     }
 }

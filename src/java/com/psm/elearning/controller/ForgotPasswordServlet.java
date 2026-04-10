@@ -14,8 +14,12 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ForgotPasswordServlet extends HttpServlet {
+
+    private static final Logger LOGGER = Logger.getLogger(ForgotPasswordServlet.class.getName());
     
     private final UserDAO userDAO = new UserDAOImpl();
     private final PasswordResetTokenDAO tokenDAO = new PasswordResetTokenDAOImpl();
@@ -85,7 +89,7 @@ public class ForgotPasswordServlet extends HttpServlet {
                 request.setAttribute("warning", "Reset link generated but email failed to send. Please contact support.");
             }
         } catch (Exception e) {
-            System.err.println("Failed to send password reset email: " + e.getMessage());
+            LOGGER.log(Level.WARNING, "Failed to send password reset email", e);
             request.setAttribute("warning", "Reset link generated but email failed to send. Please contact support.");
         }
         

@@ -1,4 +1,4 @@
-.cd-main {
+﻿.cd-main {
   display: grid;
   gap: 32px;
 }
@@ -21,14 +21,14 @@
   border: 1px solid var(--sv-border);
   border-radius: 12px;
   display: block;
-  background: #fcfcfd;
+  background: var(--sv-surface-soft);
 }
 
 .cd-banner-placeholder {
   height: 240px;
   border: 1px solid var(--sv-border);
   border-radius: 12px;
-  background: #fcfcfd;
+  background: var(--sv-surface-soft);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -51,7 +51,7 @@
 .cd-meta-card {
   border: 1px solid var(--sv-border);
   border-radius: 12px;
-  background: #ffffff;
+  background: var(--sv-surface);
   padding: 18px;
 }
 
@@ -73,7 +73,7 @@
 .cd-side-panel {
   border: 1px solid var(--sv-border);
   border-radius: 12px;
-  background: #ffffff;
+  background: var(--sv-surface);
   padding: 24px;
   box-shadow: var(--sv-shadow-sm);
   display: grid;
@@ -108,3 +108,4 @@
     grid-template-columns: 1fr;
   }
 }
+

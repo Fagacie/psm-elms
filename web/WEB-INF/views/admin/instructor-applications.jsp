@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin-dashboard.css">
     <jsp:include page="/WEB-INF/views/common/head-external-assets.jsp"/>
 </head>
-<body>
+<body class="admin-page">
 <jsp:include page="/WEB-INF/views/common/admin-header.jsp">
     <jsp:param name="pageTitle" value="Instructor Applications"/>
     <jsp:param name="pageSubtitle" value="Review public instructor requests and convert approved applicants into active instructors"/>

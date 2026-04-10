@@ -14,8 +14,9 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin-dashboard.css" />
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css" />
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.dataTables.min.css" />
+    <jsp:include page="/WEB-INF/views/common/head-external-assets.jsp"/>
 </head>
-<body>
+<body class="admin-page">
 <jsp:include page="/WEB-INF/views/common/admin-header.jsp">
     <jsp:param name="pageTitle" value="Payments"/>
     <jsp:param name="pageSubtitle" value="Track transactions, monitor statuses, and inspect payment records."/>
@@ -25,12 +26,70 @@
 
 <main class="app-main">
     <div class="content-wrapper">
+        <c:set var="paidCount" value="0"/>
+        <c:set var="pendingCount" value="0"/>
+        <c:set var="failedCount" value="0"/>
+        <c:forEach var="row" items="${payments}">
+            <c:choose>
+                <c:when test="${row.status eq 'Paid'}">
+                    <c:set var="paidCount" value="${paidCount + 1}"/>
+                </c:when>
+                <c:when test="${row.status eq 'Pending'}">
+                    <c:set var="pendingCount" value="${pendingCount + 1}"/>
+                </c:when>
+                <c:when test="${row.status eq 'Failed'}">
+                    <c:set var="failedCount" value="${failedCount + 1}"/>
+                </c:when>
+            </c:choose>
+        </c:forEach>
+
         <section class="admin-page-head">
             <div class="admin-breadcrumb">
                 <a href="${pageContext.request.contextPath}/dashboard">Dashboard</a>
                 <span>&gt;</span>
                 <span>Payments</span>
             </div>
+
+            <div class="admin-hero">
+                <div class="admin-hero-copy">
+                    <p class="admin-kicker">Payment Operations</p>
+                    <h2>Track transaction health from one clean payments workspace</h2>
+                    <p>Review payment status, inspect details in context, and export records without falling back to a raw admin table experience.</p>
+                </div>
+                <div class="admin-hero-scene" aria-hidden="true">
+                    <div class="admin-scene-panel">
+                        <span>Total Payments</span>
+                        <strong>${payments.size()}</strong>
+                    </div>
+                    <div class="admin-scene-panel">
+                        <span>Paid</span>
+                        <strong>${paidCount}</strong>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="metrics-grid">
+            <article class="metric-card">
+                <span class="metric-label">Total Records</span>
+                <div class="metric-value">${payments.size()}</div>
+                <p class="metric-meta">All payment rows currently loaded into the workspace.</p>
+            </article>
+            <article class="metric-card">
+                <span class="metric-label">Paid</span>
+                <div class="metric-value">${paidCount}</div>
+                <p class="metric-meta">Successful transactions available for audit and review.</p>
+            </article>
+            <article class="metric-card">
+                <span class="metric-label">Pending</span>
+                <div class="metric-value">${pendingCount}</div>
+                <p class="metric-meta">Payments that still need completion or callback confirmation.</p>
+            </article>
+            <article class="metric-card">
+                <span class="metric-label">Failed</span>
+                <div class="metric-value">${failedCount}</div>
+                <p class="metric-meta">Transactions that were declined or interrupted.</p>
+            </article>
         </section>
 
         <c:if test="${not empty success}">
@@ -54,8 +113,6 @@
                 <table id="paymentsTable" class="data-table display nowrap" style="width:100%">
                     <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>Ref</th>
                             <th>Student</th>
                             <th>Course</th>
                             <th>Amount</th>
@@ -67,13 +124,6 @@
                     <tbody>
                         <c:forEach var="p" items="${payments}">
                             <tr>
-                                <td>${p.paymentId}</td>
-                                <td>
-                                    <c:choose>
-                                        <c:when test="${not empty p.paystackReference}">${p.paystackReference}</c:when>
-                                        <c:otherwise>${p.paymentRef}</c:otherwise>
-                                    </c:choose>
-                                </td>
                                 <td>${p.studentName}</td>
                                 <td>${p.courseName}</td>
                                 <td>NGN ${p.amount}</td>
@@ -109,7 +159,7 @@
 <script>
     $(function() {
         $('#paymentsTable').DataTable({
-            order: [[0, 'desc']],
+            order: [[4, 'desc']],
             pageLength: 10,
             lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
             dom: 'Bfrtip',
@@ -127,7 +177,7 @@
     <div class="admin-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="paymentDetailModalTitle">
         <div class="admin-modal-header">
             <h3 id="paymentDetailModalTitle" class="admin-modal-title">Payment Detail</h3>
-            <button type="button" class="admin-modal-close" data-close-modal="paymentDetailModal" aria-label="Close">x</button>
+            <button type="button" class="admin-modal-close" data-close-modal="paymentDetailModal" aria-label="Close">&times;</button>
         </div>
         <iframe id="paymentDetailModalFrame" class="admin-modal-iframe" title="Payment Detail"></iframe>
     </div>

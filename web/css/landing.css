@@ -595,23 +595,58 @@ input {
 
 .application-card {
   display: grid;
-  gap: 16px;
-  padding: 22px;
+  gap: 20px;
+  padding: 28px;
   border-radius: calc(var(--radius) - 2px);
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.95));
   border: 1px solid var(--line);
   box-shadow: var(--shadow);
 }
 
+.application-card-head {
+  display: grid;
+  gap: 10px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--line);
+}
+
+.application-card-head h3 {
+  margin: 6px 0 0;
+  font-size: 1.18rem;
+  letter-spacing: -0.03em;
+}
+
+.application-card-head p {
+  margin: 0;
+  max-width: 48ch;
+  color: var(--muted);
+}
+
+.application-card-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  width: fit-content;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: rgba(248, 250, 252, 0.94);
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
 .application-form-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
+  gap: 16px;
 }
 
 .application-field {
   display: grid;
-  gap: 8px;
+  gap: 9px;
 }
 
 .application-field-full {
@@ -629,19 +664,24 @@ input {
 .application-field input,
 .application-field textarea {
   width: 100%;
-  min-height: 46px;
-  border-radius: 14px;
+  min-height: 50px;
+  border-radius: 16px;
   border: 1px solid var(--line-strong);
-  background: #ffffff;
-  padding: 0 14px;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+  padding: 0 16px;
   color: var(--text);
   transition: border-color var(--transition), box-shadow var(--transition), transform var(--transition);
 }
 
 .application-field textarea {
-  min-height: 150px;
-  padding: 14px;
+  min-height: 160px;
+  padding: 16px;
   resize: vertical;
+}
+
+.application-field input::placeholder,
+.application-field textarea::placeholder {
+  color: #93a1b2;
 }
 
 .application-field input:focus,
@@ -652,8 +692,53 @@ input {
   transform: translateY(-1px);
 }
 
+.application-field small {
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.application-field input[type="file"] {
+  padding: 12px 14px;
+}
+
+.application-field input[type="file"]::file-selector-button {
+  margin-right: 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: #ffffff;
+  color: var(--text);
+  padding: 10px 14px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--transition), border-color var(--transition), transform var(--transition);
+}
+
+.application-field input[type="file"]::file-selector-button:hover {
+  background: var(--accent-soft);
+  border-color: var(--text);
+  transform: translateY(-1px);
+}
+
+.application-card-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+
+.application-card-foot p {
+  margin: 0;
+  max-width: 38ch;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
 .application-submit {
   justify-self: start;
+  min-width: 210px;
 }
 
 .landing-alert {
@@ -1125,6 +1210,11 @@ input {
 
   .application-form-grid {
     grid-template-columns: 1fr;
+  }
+
+  .application-card-foot {
+    flex-direction: column;
+    align-items: stretch;
   }
 
   .verify-command-row {

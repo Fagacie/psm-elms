@@ -12,8 +12,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin-dashboard.css" />
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/report-module.css" />
+    <jsp:include page="/WEB-INF/views/common/head-external-assets.jsp"/>
 </head>
-<body>
+<body class="admin-page">
 <jsp:include page="/WEB-INF/views/common/admin-header.jsp">
     <jsp:param name="pageTitle" value="Reports"/>
     <jsp:param name="pageSubtitle" value="Professional reporting workspace for platform-level insights"/>

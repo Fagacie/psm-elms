@@ -11,8 +11,12 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class UserManagementServlet extends HttpServlet {
+
+    private static final Logger LOGGER = Logger.getLogger(UserManagementServlet.class.getName());
     
     private final UserDAO userDAO = new UserDAOImpl();
     private final StudentDAO studentDAO = new StudentDAOImpl();
@@ -144,8 +148,8 @@ public class UserManagementServlet extends HttpServlet {
 
     private void createUser(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
-        System.out.println("\n>>> ENTERING createUser method");
+
+        LOGGER.fine("Entering createUser method");
         
         try {
             // Get common fields
@@ -154,11 +158,8 @@ public class UserManagementServlet extends HttpServlet {
             String phone = request.getParameter("phone");
             String password = request.getParameter("password");
             String role = request.getParameter("role");
-            
-            System.out.println(">>> Form data received:");
-            System.out.println("    Full Name: " + fullName);
-            System.out.println("    Email: " + email);
-            System.out.println("    Role: " + role);
+
+            LOGGER.log(Level.FINE, "Form data received for role: {0}", role);
             
             // Validate
             if (fullName == null || fullName.trim().isEmpty() || 
@@ -190,16 +191,16 @@ public class UserManagementServlet extends HttpServlet {
             user.setStatus("Active");
             
             User createdUser = userDAO.create(user);
-            
-            System.out.println(">>> User created in database: " + (createdUser != null ? "SUCCESS" : "FAILED"));
+
+            LOGGER.log(Level.INFO, "User creation result: {0}", createdUser != null ? "SUCCESS" : "FAILED");
             
             if (createdUser == null) {
                 request.getSession().setAttribute("error", "Failed to create user");
                 response.sendRedirect(request.getContextPath() + "/admin/users?action=create");
                 return;
             }
-            
-            System.out.println(">>> Created UserID: " + createdUser.getUserId());
+
+            LOGGER.log(Level.INFO, "Created UserID: {0}", createdUser.getUserId());
             
             // Create role-specific record and store regNumber for email
             boolean roleCreated = false;
@@ -261,7 +262,7 @@ public class UserManagementServlet extends HttpServlet {
                         regNumber
                     );
                 } catch (Exception emailEx) {
-                    System.err.println("Failed to send user creation email: " + emailEx.getMessage());
+                    LOGGER.log(Level.WARNING, "Failed to send user creation email", emailEx);
                 }
                 
                 request.getSession().setAttribute("success", "User created successfully. Check console for email status.");

@@ -96,6 +96,10 @@ select {
   min-height: 800px;
 }
 
+.auth-layout-recovery {
+  min-height: 680px;
+}
+
 /* ============== VISUAL SECTION (LEFT) ============== */
 .auth-visual {
   padding: var(--space-2xl) var(--space-xl);
@@ -500,6 +504,62 @@ select {
   animation: fadeInUp 0.7s var(--transition-smooth) 0.3s both;
 }
 
+.theme-toolbar-compact {
+  margin: -4px 0 20px;
+}
+
+.auth-help-card {
+  padding: var(--space-md);
+  border: 1px solid var(--border-light);
+  border-radius: 14px;
+  background: linear-gradient(180deg, #ffffff 0%, #fcfcfd 100%);
+  display: grid;
+  gap: 8px;
+}
+
+.auth-help-card strong {
+  font-size: 0.9rem;
+  color: var(--primary-text);
+}
+
+.auth-help-card p {
+  margin: 0;
+  color: var(--secondary-text);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.auth-checklist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.auth-checklist li {
+  position: relative;
+  padding-left: 18px;
+  color: var(--secondary-text);
+  font-size: 0.9rem;
+}
+
+.auth-checklist li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.52rem;
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--button-primary);
+}
+
+.auth-inline-error {
+  color: #b91c1c;
+  font-size: 0.82rem;
+}
+
 /* ============== BUTTONS ============== */
 .auth-btn {
   width: 100%;
@@ -526,6 +586,11 @@ select {
 .auth-btn:active {
   transform: translateY(0);
   box-shadow: 0 2px 8px rgba(15, 23, 42, 0.1);
+}
+
+.auth-btn-link {
+  text-decoration: none;
+  margin-top: 4px;
 }
 
 /* ============== LINKS ============== */

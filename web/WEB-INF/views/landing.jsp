@@ -15,6 +15,7 @@
     <script src="https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.js"></script>
         <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/landing.css">
+    <jsp:include page="/WEB-INF/views/common/head-external-assets.jsp"/>
 </head>
 <body class="landing-page">
 <header class="site-header" id="siteHeader">
@@ -41,6 +42,9 @@
         </nav>
 
         <div class="header-actions">
+            <button type="button" class="theme-toggle" data-theme-toggle aria-pressed="false">
+                <span class="theme-toggle-label">Dark mode</span>
+            </button>
             <a class="btn btn-ghost" href="${pageContext.request.contextPath}/login">Login</a>
             <a class="btn btn-solid" href="${pageContext.request.contextPath}/register">Get Started</a>
         </div>
@@ -200,7 +204,7 @@
                                 </div>
                                 <span class="course-mini-label">Approved course</span>
                                 <h3><c:out value="${course.courseName}"/></h3>
-                                <p><c:out value="${course.category}"/> · <fmt:formatNumber value="${course.courseFee}" type="number" minFractionDigits="2"/></p>
+                                <p><c:out value="${course.category}"/> &middot; <fmt:formatNumber value="${course.courseFee}" type="number" minFractionDigits="2"/></p>
                                 <a href="${pageContext.request.contextPath}/student/courses">View details</a>
                             </article>
                         </c:forEach>
@@ -228,22 +232,29 @@
                 </div>
             </div>
             <form class="application-card" method="post" action="${pageContext.request.contextPath}/apply-instructor" enctype="multipart/form-data">
+                <div class="application-card-head">
+                    <div>
+                        <span class="application-card-kicker">Application Form</span>
+                        <h3>Instructor profile details</h3>
+                    </div>
+                    <p>Share your experience, specialization, and CV so the admin team can review your fit quickly.</p>
+                </div>
                 <div class="application-form-grid">
                     <div class="application-field">
                         <label for="appFullName">Full name</label>
-                        <input id="appFullName" name="fullName" type="text" required>
+                        <input id="appFullName" name="fullName" type="text" placeholder="Enter your full name" required>
                     </div>
                     <div class="application-field">
                         <label for="appEmail">Email</label>
-                        <input id="appEmail" name="email" type="email" required>
+                        <input id="appEmail" name="email" type="email" placeholder="name@example.com" required>
                     </div>
                     <div class="application-field">
                         <label for="appPhone">Phone</label>
-                        <input id="appPhone" name="phone" type="tel" required>
+                        <input id="appPhone" name="phone" type="tel" placeholder="+255 700 000 000" required>
                     </div>
                     <div class="application-field">
                         <label for="appSpecialization">Specialization</label>
-                        <input id="appSpecialization" name="specialization" type="text" required>
+                        <input id="appSpecialization" name="specialization" type="text" placeholder="e.g. Project Management" required>
                     </div>
                     <div class="application-field">
                         <label for="appYearsOfExperience">Years of experience</label>
@@ -251,18 +262,22 @@
                     </div>
                     <div class="application-field">
                         <label for="appQualification">Qualification</label>
-                        <input id="appQualification" name="qualification" type="text" required>
+                        <input id="appQualification" name="qualification" type="text" placeholder="Highest qualification" required>
                     </div>
                     <div class="application-field application-field-full">
                         <label for="appCvFile">CV or supporting document</label>
                         <input id="appCvFile" name="cvFile" type="file" accept=".pdf,.doc,.docx" required>
+                        <small>Accepted formats: PDF, DOC, DOCX.</small>
                     </div>
                     <div class="application-field application-field-full">
                         <label for="appCoverMessage">Short cover message</label>
                         <textarea id="appCoverMessage" name="coverMessage" rows="5" placeholder="Tell the admin team why you want to teach here."></textarea>
                     </div>
                 </div>
-                <button class="btn btn-solid application-submit" type="submit">Submit application</button>
+                <div class="application-card-foot">
+                    <p>Applications are reviewed manually and responses are sent by email.</p>
+                    <button class="btn btn-solid application-submit" type="submit">Submit application</button>
+                </div>
             </form>
         </div>
     </section>

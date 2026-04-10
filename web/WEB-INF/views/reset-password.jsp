@@ -1,4 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,95 +8,114 @@
     <title>Reset Password - PSM E-Learning</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/auth-v2.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/auth-premium.css">
+    <jsp:include page="/WEB-INF/views/common/head-external-assets.jsp"/>
 </head>
-<body class="av2-page">
-    <main class="av2-shell">
-        <section class="av2-panel av2-brand" aria-hidden="true">
-            <p class="av2-kicker">Account Security</p>
-            <h1>Set New Password</h1>
-            <div class="av2-scene" role="presentation">
-                <span class="av2-obj av2-book" data-depth="16"></span>
-                <span class="av2-obj av2-pen" data-depth="24"></span>
-                <span class="av2-obj av2-cap" data-depth="12"></span>
-                <span class="av2-obj av2-paper" data-depth="20"></span>
-                <span class="av2-obj av2-ring" data-depth="28"></span>
+<body class="auth-page">
+<main class="auth-shell">
+    <section class="auth-layout auth-layout-recovery" aria-labelledby="reset-title">
+        <aside class="auth-visual" aria-hidden="true">
+            <p class="auth-kicker">Account Recovery</p>
+            <h2>Create a fresh password and get back in.</h2>
+            <p class="auth-visual-text">Use a strong password you have not used elsewhere. We will activate it for your account as soon as you submit it.</p>
+
+            <ul class="auth-visual-list">
+                <li>Secure token-based reset flow</li>
+                <li>Real-time password confirmation</li>
+                <li>Fast return to login after update</li>
+            </ul>
+
+            <div class="auth-scene" data-auth-scene>
+                <span class="auth-shape auth-shape-a" data-depth="10"></span>
+                <span class="auth-shape auth-shape-b" data-depth="18"></span>
+                <span class="auth-shape auth-shape-c" data-depth="14"></span>
+                <span class="auth-shape auth-shape-d" data-depth="12"></span>
             </div>
-            <a class="av2-link" href="${pageContext.request.contextPath}/login">Back to Login</a>
-        </section>
+        </aside>
 
-        <section class="av2-panel av2-form-panel">
-            <div class="av2-form-wrap">
-                <header class="av2-form-head">
-                    <h2>Reset Password</h2>
-                    <p>Choose a strong new password for your account.</p>
-                </header>
+        <section class="auth-card">
+            <header class="auth-head">
+                <h1 id="reset-title">Reset Password</h1>
+                <p>Choose a new password for your account and confirm it before submitting.</p>
+            </header>
 
-                <% if (request.getAttribute("success") != null) { %>
-                    <div class="av2-alert av2-alert-success"><%= request.getAttribute("success") %></div>
-                    <div class="av2-switch">
-                        <a href="${pageContext.request.contextPath}/login">Go to Login</a>
-                    </div>
-                <% } else { %>
+            <div class="theme-toolbar theme-toolbar-compact">
+                <button type="button" class="theme-toggle" data-theme-toggle aria-pressed="false">
+                    <span class="theme-toggle-label">Dark mode</span>
+                </button>
+            </div>
 
-                    <% if (request.getAttribute("error") != null) { %>
-                        <div class="av2-alert av2-alert-error"><%= request.getAttribute("error") %></div>
-                    <% } %>
+            <% if (request.getAttribute("success") != null) { %>
+                <div class="auth-alert auth-alert-success"><c:out value="${requestScope.success}" /></div>
+                <a href="${pageContext.request.contextPath}/login" class="auth-btn auth-btn-link">Go to Login</a>
+            <% } else { %>
 
-                    <% if (request.getAttribute("token") != null) { %>
-                        <form method="post" action="${pageContext.request.contextPath}/reset-password" id="resetForm" class="av2-form" novalidate>
-                            <input type="hidden" name="token" value="<%= request.getAttribute("token") %>">
-
-                            <div class="av2-group">
-                                <label for="newPassword">New Password</label>
-                                <input type="password" id="newPassword" name="newPassword" minlength="8" required>
-                                <small>Minimum 8 chars with uppercase, lowercase, number and special character.</small>
-                            </div>
-
-                            <div class="av2-group">
-                                <label for="confirmPassword">Confirm Password</label>
-                                <input type="password" id="confirmPassword" name="confirmPassword" minlength="8" required>
-                                <small id="matchError" style="display:none;color:#b0182a;">Passwords do not match.</small>
-                            </div>
-
-                            <button type="submit" class="av2-btn av2-btn-solid">Reset Password</button>
-                        </form>
-                    <% } %>
+                <% if (request.getAttribute("error") != null) { %>
+                    <div class="auth-alert auth-alert-error"><c:out value="${requestScope.error}" /></div>
                 <% } %>
 
-                <div class="av2-switch">
-                    <a href="${pageContext.request.contextPath}/login">Back to Login</a>
-                </div>
-            </div>
+                <% if (request.getAttribute("token") != null) { %>
+                    <form method="post" action="${pageContext.request.contextPath}/reset-password" id="resetForm" class="auth-form" novalidate>
+                        <input type="hidden" name="token" value="<c:out value='${requestScope.token}'/>">
+
+                        <div class="auth-field">
+                            <label for="newPassword">New Password</label>
+                            <input type="password" id="newPassword" name="newPassword" minlength="8" placeholder="Create a strong password" required>
+                        </div>
+
+                        <div class="auth-field">
+                            <label for="confirmPassword">Confirm Password</label>
+                            <input type="password" id="confirmPassword" name="confirmPassword" minlength="8" placeholder="Re-enter your password" required>
+                            <small id="matchError" class="auth-inline-error" hidden>Passwords do not match.</small>
+                        </div>
+
+                        <div class="auth-help-card">
+                            <strong>Password requirements</strong>
+                            <ul class="auth-checklist">
+                                <li>At least 8 characters</li>
+                                <li>Uppercase and lowercase letters</li>
+                                <li>At least one number and one special character</li>
+                            </ul>
+                        </div>
+
+                        <button type="submit" class="auth-btn">Reset Password</button>
+                    </form>
+                <% } %>
+            <% } %>
+
+            <p class="auth-switch">
+                Need to sign in instead?
+                <a href="${pageContext.request.contextPath}/login" class="auth-link">Back to Login</a>
+            </p>
         </section>
-    </main>
+    </section>
+</main>
 
-    <script>
-        (function () {
-            var form = document.getElementById('resetForm');
-            if (!form) return;
+<script>
+    (function () {
+        var form = document.getElementById('resetForm');
+        if (!form) return;
 
-            form.addEventListener('submit', function (e) {
-                var password = document.getElementById('newPassword').value;
-                var confirm = document.getElementById('confirmPassword').value;
-                var matchError = document.getElementById('matchError');
-                if (password !== confirm) {
-                    e.preventDefault();
-                    matchError.style.display = 'block';
-                }
-            });
-
-            var confirmField = document.getElementById('confirmPassword');
-            if (confirmField) {
-                confirmField.addEventListener('input', function () {
-                    var matchError = document.getElementById('matchError');
-                    matchError.style.display = 'none';
-                });
+        form.addEventListener('submit', function (e) {
+            var password = document.getElementById('newPassword').value;
+            var confirm = document.getElementById('confirmPassword').value;
+            var matchError = document.getElementById('matchError');
+            if (password !== confirm) {
+                e.preventDefault();
+                matchError.hidden = false;
             }
-        })();
-    </script>
-    <script src="${pageContext.request.contextPath}/js/auth-v2.js"></script></body>
+        });
+
+        var confirmField = document.getElementById('confirmPassword');
+        if (confirmField) {
+            confirmField.addEventListener('input', function () {
+                var matchError = document.getElementById('matchError');
+                matchError.hidden = true;
+            });
+        }
+    })();
+</script>
+<script src="${pageContext.request.contextPath}/js/auth-v2.js"></script>
+</body>
 </html>
-
-

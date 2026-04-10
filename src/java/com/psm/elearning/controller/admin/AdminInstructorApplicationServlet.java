@@ -36,7 +36,7 @@ public class AdminInstructorApplicationServlet extends HttpServlet {
             applications.removeIf(application -> !statusFilter.equalsIgnoreCase(application.getStatus()));
         }
 
-        Integer reviewedBy = (Integer) session.getAttribute("userId");
+        Integer reviewedBy = resolveUserId(session);
         if (reviewedBy != null && selectedApplicationId != null) {
             notificationDAO.markReadByRecipientUserIdAndEntity(reviewedBy, Notification.TYPE_INSTRUCTOR_APPLICATION, selectedApplicationId);
         }
@@ -93,7 +93,11 @@ public class AdminInstructorApplicationServlet extends HttpServlet {
             return;
         }
 
-        Integer reviewedBy = (Integer) session.getAttribute("userId");
+        Integer reviewedBy = resolveUserId(session);
+        if (reviewedBy == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
         String adminNotes = trim(request.getParameter("adminNotes"));
 
         if ("approve".equalsIgnoreCase(action)) {
@@ -229,5 +233,26 @@ public class AdminInstructorApplicationServlet extends HttpServlet {
         } catch (NumberFormatException ignored) {
             return null;
         }
+    }
+
+    private Integer resolveUserId(HttpSession session) {
+        if (session == null) return null;
+        Object userId = session.getAttribute("userId");
+        if (userId == null) return null;
+        
+        if (userId instanceof Integer) {
+            int id = (Integer) userId;
+            return id > 0 ? id : null;
+        }
+        
+        if (userId instanceof String) {
+            try {
+                int id = Integer.parseInt((String) userId);
+                return id > 0 ? id : null;
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        }
+        return null;
     }
 }

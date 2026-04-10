@@ -10,12 +10,16 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * AdminCourseServlet handles course management for administrators.
  * Actions: list, approve, reject
  */
 public class AdminCourseServlet extends HttpServlet {
+
+    private static final Logger LOGGER = Logger.getLogger(AdminCourseServlet.class.getName());
     
     private final CourseDAO courseDAO = new CourseDAOImpl();
 
@@ -106,8 +110,7 @@ public class AdminCourseServlet extends HttpServlet {
             request.getRequestDispatcher("/WEB-INF/views/admin/admin-courses.jsp").forward(request, response);
             
         } catch (Exception e) {
-            System.err.println("Error listing courses: " + e.getMessage());
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Error listing courses", e);
             
             request.setAttribute("errorMessage", "Failed to load courses: " + e.getMessage());
             request.setAttribute("courses", new java.util.ArrayList<>());
@@ -127,8 +130,12 @@ public class AdminCourseServlet extends HttpServlet {
             throws ServletException, IOException {
         
         try {
-            int courseId = Integer.parseInt(request.getParameter("id"));
-            Integer adminId = (Integer) session.getAttribute("userId");
+            Integer courseId = parsePositiveInt(request.getParameter("id"));
+            if (courseId == null) {
+                response.sendRedirect(request.getContextPath() + "/admin/courses?error=invalid");
+                return;
+            }
+            Integer adminId = resolveUserId(session);
             
             Course course = courseDAO.findById(courseId);
             if (course == null) {
@@ -153,7 +160,7 @@ public class AdminCourseServlet extends HttpServlet {
         } catch (NumberFormatException e) {
             response.sendRedirect(request.getContextPath() + "/admin/courses?error=invalid");
         } catch (Exception e) {
-            System.err.println("Error approving course: " + e.getMessage());
+            LOGGER.log(Level.SEVERE, "Error approving course", e);
             response.sendRedirect(request.getContextPath() + "/admin/courses?error=exception");
         }
     }
@@ -165,7 +172,11 @@ public class AdminCourseServlet extends HttpServlet {
             throws ServletException, IOException {
         
         try {
-            int courseId = Integer.parseInt(request.getParameter("id"));
+            Integer courseId = parsePositiveInt(request.getParameter("id"));
+            if (courseId == null) {
+                response.sendRedirect(request.getContextPath() + "/admin/courses?error=invalid");
+                return;
+            }
             
             Course course = courseDAO.findById(courseId);
             if (course == null) {
@@ -190,7 +201,7 @@ public class AdminCourseServlet extends HttpServlet {
         } catch (NumberFormatException e) {
             response.sendRedirect(request.getContextPath() + "/admin/courses?error=invalid");
         } catch (Exception e) {
-            System.err.println("Error rejecting course: " + e.getMessage());
+            LOGGER.log(Level.SEVERE, "Error rejecting course", e);
             response.sendRedirect(request.getContextPath() + "/admin/courses?error=exception");
         }
     }
@@ -202,7 +213,11 @@ public class AdminCourseServlet extends HttpServlet {
             throws ServletException, IOException {
         
         try {
-            int courseId = Integer.parseInt(request.getParameter("id"));
+            Integer courseId = parsePositiveInt(request.getParameter("id"));
+            if (courseId == null) {
+                response.sendRedirect(request.getContextPath() + "/admin/courses?error=invalid");
+                return;
+            }
             
             Course course = courseDAO.findById(courseId);
             if (course == null) {
@@ -221,7 +236,7 @@ public class AdminCourseServlet extends HttpServlet {
             boolean archived = courseDAO.update(course);
             
             if (archived) {
-                System.out.println("[ADMIN] Course " + courseId + " archived");
+                LOGGER.log(Level.INFO, "[ADMIN] Course {0} archived", courseId);
                 response.sendRedirect(request.getContextPath() + "/admin/courses?success=archived");
             } else {
                 response.sendRedirect(request.getContextPath() + "/admin/courses?error=archivefailed");
@@ -230,7 +245,7 @@ public class AdminCourseServlet extends HttpServlet {
         } catch (NumberFormatException e) {
             response.sendRedirect(request.getContextPath() + "/admin/courses?error=invalid");
         } catch (Exception e) {
-            System.err.println("Error archiving course: " + e.getMessage());
+            LOGGER.log(Level.SEVERE, "Error archiving course", e);
             response.sendRedirect(request.getContextPath() + "/admin/courses?error=exception");
         }
     }
@@ -242,7 +257,11 @@ public class AdminCourseServlet extends HttpServlet {
             throws ServletException, IOException {
         
         try {
-            int courseId = Integer.parseInt(request.getParameter("id"));
+            Integer courseId = parsePositiveInt(request.getParameter("id"));
+            if (courseId == null) {
+                response.sendRedirect(request.getContextPath() + "/admin/courses?error=invalid");
+                return;
+            }
             
             Course course = courseDAO.findById(courseId);
             if (course == null) {
@@ -261,7 +280,7 @@ public class AdminCourseServlet extends HttpServlet {
             boolean restored = courseDAO.update(course);
             
             if (restored) {
-                System.out.println("[ADMIN] Course " + courseId + " restored");
+                LOGGER.log(Level.INFO, "[ADMIN] Course {0} restored", courseId);
                 response.sendRedirect(request.getContextPath() + "/admin/courses?success=restored");
             } else {
                 response.sendRedirect(request.getContextPath() + "/admin/courses?error=restorefailed");
@@ -270,8 +289,54 @@ public class AdminCourseServlet extends HttpServlet {
         } catch (NumberFormatException e) {
             response.sendRedirect(request.getContextPath() + "/admin/courses?error=invalid");
         } catch (Exception e) {
-            System.err.println("Error restoring course: " + e.getMessage());
+            LOGGER.log(Level.SEVERE, "Error restoring course", e);
             response.sendRedirect(request.getContextPath() + "/admin/courses?error=exception");
         }
+    }
+
+    private Integer parsePositiveInt(String value) {
+        if (value == null) {
+            return null;
+        }
+        try {
+            int parsed = Integer.parseInt(value.trim());
+            return parsed > 0 ? parsed : null;
+        } catch (NumberFormatException ex) {
+            return null;
+        }
+    }
+
+    private Integer resolveUserId(HttpSession session) {
+        if (session == null) return null;
+        Object userId = session.getAttribute("userId");
+        if (userId == null) return null;
+        
+        if (userId instanceof Integer) {
+            int id = (Integer) userId;
+            return id > 0 ? id : null;
+        }
+        
+        if (userId instanceof String) {
+            try {
+                int id = Integer.parseInt((String) userId);
+                return id > 0 ? id : null;
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        }
+        return null;
+    }
+
+    private String resolveRole(HttpSession session) {
+        if (session == null) return null;
+        Object role = session.getAttribute("userRole");
+        if (role == null) role = session.getAttribute("role");
+        if (role == null) return null;
+        
+        String roleStr = role.toString().trim();
+        if ("Admin".equalsIgnoreCase(roleStr)) return "Admin";
+        if ("Student".equalsIgnoreCase(roleStr)) return "Student";
+        if ("Instructor".equalsIgnoreCase(roleStr)) return "Instructor";
+        return null;
     }
 }

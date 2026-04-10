@@ -9,7 +9,6 @@ import com.psm.elearning.dao.PaymentDAOImpl;
 import com.psm.elearning.model.Course;
 import com.psm.elearning.model.Enrollment;
 import com.psm.elearning.model.Payment;
-import com.psm.elearning.service.PaystackService;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -21,21 +20,19 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 /**
- * Servlet to process course enrollment (creates Pending enrollment and initializes Paystack transaction).
+ * Servlet to process course enrollment and route the student to payment (or auto-complete free enrollments).
  */
 public class ProcessEnrollmentServlet extends HttpServlet {
     
     private EnrollmentDAO enrollmentDAO;
     private CourseDAO courseDAO;
     private PaymentDAO paymentDAO;
-    private PaystackService paystackService;
     
     @Override
     public void init() {
         enrollmentDAO = new EnrollmentDAOImpl();
         courseDAO = new CourseDAOImpl();
         paymentDAO = new PaymentDAOImpl();
-        paystackService = new PaystackService();
     }
     
     @Override
@@ -43,35 +40,28 @@ public class ProcessEnrollmentServlet extends HttpServlet {
             throws ServletException, IOException {
         
         HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("userId") == null) {
+        Integer userId = resolveUserId(session);
+        if (session == null || userId == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
         
-        String role = (String) session.getAttribute("role");
-        if (role == null) {
-            role = (String) session.getAttribute("userRole");
-        }
+        String role = resolveRole(session);
         if (!"Student".equals(role)) {
             response.sendRedirect(request.getContextPath() + "/dashboard");
             return;
         }
         
         try {
-            Integer userId = (Integer) session.getAttribute("userId");
             String userEmail = (String) session.getAttribute("email");
-            Integer courseId = Integer.parseInt(request.getParameter("courseId"));
-            
-            System.out.println("=== ProcessEnrollmentServlet START ===");
-            System.out.println("User ID: " + userId);
-            System.out.println("User Email: " + userEmail);
-            System.out.println("Course ID: " + courseId);
-            System.out.println("Role: " + role);
-            
+            Integer courseId = parseCourseId(request.getParameter("courseId"));
+            if (courseId == null) {
+                response.sendRedirect(request.getContextPath() + "/student/courses?error=invalid");
+                return;
+            }
+
             if (userEmail == null || userEmail.isEmpty()) {
-                System.err.println("ERROR: User email is null or empty!");
-                request.setAttribute("errorMessage", "Session error: Email not found. Please login again.");
-                request.getRequestDispatcher("/WEB-INF/views/error.jsp").forward(request, response);
+                response.sendRedirect(request.getContextPath() + "/login?error=session");
                 return;
             }
             
@@ -90,21 +80,15 @@ public class ProcessEnrollmentServlet extends HttpServlet {
             // Get course details
             Course course = courseDAO.findById(courseId);
             if (course == null) {
-                System.err.println("ERROR: Course not found with ID: " + courseId);
                 response.sendRedirect(request.getContextPath() + "/student/courses?error=notfound");
                 return;
             }
-            
-            System.out.println("Course found: " + course.getCourseName());
-            System.out.println("Course fee: " + course.getCourseFee());
             
             // Create enrollment first; payment gating is resolved below.
             Enrollment enrollment = new Enrollment(userId, courseId, "Enrolled", "Pending");
             enrollment = enrollmentDAO.createEnrollment(enrollment);
 
             if (enrollment != null) {
-                System.out.println("ProcessEnrollmentServlet: Enrollment created with ID " + enrollment.getEnrollmentId());
-
                 boolean freeCourse = isFreeCourse(course.getCourseFee());
                 if (freeCourse) {
                     String freeReference = "FREE-" + enrollment.getEnrollmentId() + "-" + UUID.randomUUID().toString().substring(0, 8);
@@ -127,17 +111,68 @@ public class ProcessEnrollmentServlet extends HttpServlet {
 
                 response.sendRedirect(request.getContextPath() + "/student/payment?enrollmentId=" + enrollment.getEnrollmentId());
             } else {
-                System.err.println("ProcessEnrollmentServlet: Failed to create enrollment");
                 response.sendRedirect(request.getContextPath() + "/student/courses?error=failed");
             }
             
         } catch (NumberFormatException e) {
-            System.err.println("ProcessEnrollmentServlet: Invalid course ID");
             response.sendRedirect(request.getContextPath() + "/student/courses?error=invalid");
         } catch (Exception e) {
-            System.err.println("ProcessEnrollmentServlet: Error: " + e.getMessage());
-            e.printStackTrace();
             response.sendRedirect(request.getContextPath() + "/student/courses?error=exception");
+        }
+    }
+
+    private Integer resolveUserId(HttpSession session) {
+        if (session == null) {
+            return null;
+        }
+        Object raw = session.getAttribute("userId");
+        if (raw instanceof Integer) {
+            Integer parsed = (Integer) raw;
+            return parsed > 0 ? parsed : null;
+        }
+        if (raw instanceof String) {
+            try {
+                int parsed = Integer.parseInt(((String) raw).trim());
+                return parsed > 0 ? parsed : null;
+            } catch (NumberFormatException ignored) {
+                return null;
+            }
+        }
+        return null;
+    }
+
+    private String resolveRole(HttpSession session) {
+        if (session == null) {
+            return null;
+        }
+        Object role = session.getAttribute("role");
+        if (!(role instanceof String) || ((String) role).trim().isEmpty()) {
+            role = session.getAttribute("userRole");
+        }
+        if (!(role instanceof String)) {
+            return null;
+        }
+        String normalized = ((String) role).trim();
+        if ("Student".equalsIgnoreCase(normalized)) {
+            return "Student";
+        }
+        if ("Admin".equalsIgnoreCase(normalized)) {
+            return "Admin";
+        }
+        if ("Instructor".equalsIgnoreCase(normalized)) {
+            return "Instructor";
+        }
+        return null;
+    }
+
+    private Integer parseCourseId(String value) {
+        if (value == null) {
+            return null;
+        }
+        try {
+            return Integer.valueOf(value.trim());
+        } catch (NumberFormatException ex) {
+            return null;
         }
     }
 

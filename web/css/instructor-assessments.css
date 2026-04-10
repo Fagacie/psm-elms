@@ -34,7 +34,7 @@
 .grade-form-container textarea:focus {
     outline: none;
     border-color: var(--ins-accent);
-    box-shadow: 0 0 0 4px rgba(42, 167, 200, 0.12);
+    box-shadow: 0 0 0 4px rgba(20, 83, 45, 0.1);
 }
 
 .assessments-hero {
@@ -51,31 +51,32 @@
 
 .tab-btn,
 .sub-tab-btn {
-    background: rgba(255, 255, 255, 0.92);
-    border: 1px solid rgba(191, 209, 227, 0.88);
-    border-radius: 14px;
+    background: #ffffff;
+    border: 1px solid var(--ins-border);
+    border-radius: 12px;
     padding: 12px 16px;
     font-size: 0.82rem;
     font-weight: 700;
     color: var(--ins-muted);
     cursor: pointer;
-    box-shadow: var(--ins-shadow-sm);
-    transition: color 0.2s ease, background-color 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+    box-shadow: none;
+    transition: color 0.2s ease, background-color 0.2s ease, transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .tab-btn:hover,
 .sub-tab-btn:hover {
     color: var(--ins-primary);
     transform: translateY(-1px);
-    border-color: rgba(42, 167, 200, 0.4);
-    background: rgba(246, 250, 255, 0.96);
+    border-color: rgba(20, 83, 45, 0.24);
+    background: var(--ins-accent-soft);
 }
 
 .tab-btn.active,
 .sub-tab-btn.active {
     color: var(--ins-primary-strong);
-    border-color: rgba(42, 167, 200, 0.42);
-    background: linear-gradient(135deg, rgba(31, 78, 121, 0.12), rgba(42, 167, 200, 0.12));
+    border-color: rgba(20, 83, 45, 0.24);
+    background: var(--ins-accent-soft);
+    box-shadow: 0 10px 24px rgba(20, 83, 45, 0.08);
 }
 
 .tab-content,
@@ -93,10 +94,10 @@
 .questions-section,
 .submissions-section,
 .retake-requests-section {
-    background: rgba(255, 255, 255, 0.95);
-    border: 1px solid rgba(191, 209, 227, 0.88);
-    border-radius: 18px;
-    box-shadow: var(--ins-shadow-sm);
+    background: #ffffff;
+    border: 1px solid var(--ins-border);
+    border-radius: 12px;
+    box-shadow: none;
     padding: 24px;
     margin-bottom: 22px;
 }
@@ -162,9 +163,9 @@
 }
 
 .add-question-form {
-    background: rgba(244, 248, 253, 0.92);
-    border: 1px solid rgba(191, 209, 227, 0.82);
-    border-radius: 16px;
+    background: linear-gradient(180deg, #ffffff 0%, #fcfcfd 100%);
+    border: 1px solid var(--ins-border);
+    border-radius: 12px;
     padding: 18px;
     margin-bottom: 18px;
 }
@@ -176,18 +177,18 @@
 }
 
 .assessment-card {
-    border: 1px solid rgba(191, 209, 227, 0.88);
-    border-radius: 18px;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(246, 250, 255, 0.96));
-    box-shadow: var(--ins-shadow-sm);
+    border: 1px solid var(--ins-border);
+    border-radius: 12px;
+    background: linear-gradient(180deg, #ffffff 0%, #fcfcfd 100%);
+    box-shadow: none;
     padding: 20px;
     transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
 .assessment-card:hover {
     transform: translateY(-3px);
-    box-shadow: var(--ins-shadow-md);
-    border-color: rgba(42, 167, 200, 0.45);
+    box-shadow: 0 14px 30px rgba(20, 83, 45, 0.08);
+    border-color: rgba(20, 83, 45, 0.18);
 }
 
 .assessment-card-header {
@@ -218,21 +219,21 @@
 }
 
 .assessment-type-badge.type-Assignment {
-    color: #175cd3;
-    background: #eff8ff;
-    border-color: #b2ddff;
+    color: var(--ins-primary);
+    background: rgba(20, 83, 45, 0.08);
+    border-color: rgba(20, 83, 45, 0.18);
 }
 
 .assessment-type-badge.type-Quiz {
-    color: #027a48;
-    background: #ecfdf3;
-    border-color: #abefc6;
+    color: #92400e;
+    background: #fffaf0;
+    border-color: #fde68a;
 }
 
 .assessment-type-badge.type-Exam {
-    color: #b42318;
-    background: #fef3f2;
-    border-color: #fecdca;
+    color: #7f1d1d;
+    background: #fff7f7;
+    border-color: #fee2e2;
 }
 
 .assessment-meta-grid {
@@ -275,10 +276,10 @@
     justify-content: space-between;
     align-items: flex-start;
     gap: 12px;
-    border: 1px solid rgba(191, 209, 227, 0.88);
-    border-radius: 18px;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(245, 250, 255, 0.96));
-    box-shadow: var(--ins-shadow-sm);
+    border: 1px solid var(--ins-border);
+    border-radius: 12px;
+    background: linear-gradient(180deg, #ffffff 0%, #fcfcfd 100%);
+    box-shadow: none;
     padding: 20px;
     margin-bottom: 18px;
 }
@@ -312,9 +313,9 @@
 .question-item {
     display: flex;
     gap: 14px;
-    border: 1px solid rgba(191, 209, 227, 0.88);
-    border-radius: 16px;
-    background: rgba(255, 255, 255, 0.96);
+    border: 1px solid var(--ins-border);
+    border-radius: 12px;
+    background: linear-gradient(180deg, #ffffff 0%, #fcfcfd 100%);
     padding: 16px;
     transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
 }
@@ -322,8 +323,8 @@
 .assessment-modal {
     position: fixed;
     inset: 0;
-    background: rgba(10, 22, 39, 0.48);
-    backdrop-filter: blur(2px);
+    background: rgba(15, 23, 42, 0.42);
+    backdrop-filter: blur(6px);
     display: none;
     align-items: center;
     justify-content: center;
@@ -339,10 +340,18 @@
     width: min(900px, 100%);
     max-height: calc(100vh - 40px);
     overflow: auto;
-    background: #fff;
-    border-radius: 18px;
-    border: 1px solid rgba(191, 209, 227, 0.9);
-    box-shadow: 0 22px 60px rgba(15, 23, 42, 0.22);
+    background: linear-gradient(180deg, #ffffff 0%, #fcfcfd 100%);
+    border-radius: 16px;
+    border: 1px solid var(--ins-border);
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.18);
+    transform: translateY(8px);
+    opacity: 0;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.assessment-modal.open .assessment-modal-dialog {
+    transform: translateY(0);
+    opacity: 1;
 }
 
 .assessment-modal-header {
@@ -351,7 +360,7 @@
     justify-content: space-between;
     gap: 10px;
     padding: 16px 18px;
-    border-bottom: 1px solid rgba(191, 209, 227, 0.86);
+    border-bottom: 1px solid var(--ins-border);
 }
 
 .assessment-modal-header h3 {
@@ -365,16 +374,19 @@
     width: 34px;
     height: 34px;
     border-radius: 10px;
-    border: 1px solid rgba(191, 209, 227, 0.88);
+    border: 1px solid var(--ins-border);
     background: #fff;
     color: var(--ins-text);
     font-size: 1.25rem;
     line-height: 1;
     cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .assessment-modal-close:hover {
-    background: #f7fafc;
+    background: var(--ins-accent-soft);
+    border-color: var(--ins-primary);
+    color: var(--ins-primary);
 }
 
 .assessment-modal-body {
@@ -416,8 +428,8 @@
 
 .question-item:hover {
     transform: translateY(-2px);
-    box-shadow: var(--ins-shadow-sm);
-    border-color: rgba(42, 167, 200, 0.4);
+    box-shadow: 0 12px 28px rgba(20, 83, 45, 0.08);
+    border-color: rgba(20, 83, 45, 0.18);
 }
 
 .question-number {
@@ -426,9 +438,9 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid rgba(191, 209, 227, 0.88);
+    border: 1px solid var(--ins-border);
     border-radius: 12px;
-    background: rgba(239, 244, 251, 0.92);
+    background: var(--ins-accent-soft);
     color: var(--ins-primary);
     font-size: 12px;
     font-weight: 700;
@@ -465,15 +477,15 @@
     align-items: center;
     gap: 8px;
     padding: 8px;
-    border: 1px solid rgba(191, 209, 227, 0.82);
+    border: 1px solid var(--ins-border);
     border-radius: 12px;
     background: #f8fbff;
     font-size: 0.82rem;
 }
 
 .question-option.correct {
-    border-color: #abefc6;
-    background: #ecfdf3;
+    border-color: rgba(20, 83, 45, 0.18);
+    background: rgba(20, 83, 45, 0.08);
     font-weight: 600;
 }
 
@@ -483,7 +495,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid rgba(191, 209, 227, 0.82);
+    border: 1px solid var(--ins-border);
     border-radius: 999px;
     background: #fff;
     font-size: 11px;
@@ -550,17 +562,18 @@
 
 .data-table {
     width: 100%;
-    border-collapse: collapse;
-    border: 1px solid rgba(191, 209, 227, 0.88);
-    border-radius: 16px;
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 1px solid var(--ins-border);
+    border-radius: 12px;
     overflow: hidden;
     background: #fff;
 }
 
 .data-table th,
 .data-table td {
-    padding: 10px;
-    border-bottom: 1px solid rgba(191, 209, 227, 0.82);
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--ins-border);
     text-align: left;
     vertical-align: top;
     font-size: 0.82rem;
@@ -568,13 +581,16 @@
 }
 
 .data-table th {
-    background: #f6faff;
-    color: #49627d;
-    font-weight: 700;
+    background: #ffffff;
+    color: var(--ins-muted);
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-size: 0.72rem;
 }
 
 .data-table tbody tr:hover {
-    background: #f8fbff;
+    background: var(--ins-accent-soft);
 }
 
 .student-info {
@@ -651,9 +667,9 @@
 
 .grade-form-container {
     margin-top: 10px;
-    border: 1px solid rgba(191, 209, 227, 0.88);
-    border-radius: 16px;
-    background: #f8fbff;
+    border: 1px solid var(--ins-border);
+    border-radius: 12px;
+    background: linear-gradient(180deg, #ffffff 0%, #fcfcfd 100%);
     padding: 14px;
     min-width: 280px;
 }
@@ -702,22 +718,22 @@
     justify-content: space-between;
     align-items: flex-start;
     gap: 10px;
-    border: 1px solid rgba(191, 209, 227, 0.88);
-    border-radius: 16px;
-    background: rgba(255, 255, 255, 0.96);
+    border: 1px solid var(--ins-border);
+    border-radius: 12px;
+    background: linear-gradient(180deg, #ffffff 0%, #fcfcfd 100%);
     padding: 14px;
 }
 
 .retake-request-item.status-Pending {
-    background: #fffaf0;
+    background: #ffffff;
 }
 
 .retake-request-item.status-Approved {
-    background: #f5fcf7;
+    background: #ffffff;
 }
 
 .retake-request-item.status-Rejected {
-    background: #fff4f4;
+    background: #ffffff;
 }
 
 .retake-request-content {
@@ -752,15 +768,15 @@
 .empty-state-box {
     text-align: center;
     padding: 40px 20px;
-    border: 1px dashed rgba(191, 209, 227, 0.88);
-    border-radius: 18px;
-    background: #f8fbff;
+    border: 1px dashed var(--ins-border);
+    border-radius: 12px;
+    background: #ffffff;
     color: var(--ins-muted);
 }
 
 .empty-state-box i {
     font-size: 38px;
-    color: var(--ins-accent);
+    color: var(--ins-primary);
     margin-bottom: 10px;
 }
 

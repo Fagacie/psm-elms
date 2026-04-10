@@ -20,8 +20,12 @@ import java.math.BigDecimal;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Locale;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 @MultipartConfig(maxFileSize = 5 * 1024 * 1024) // 5MB
 public class InstructorCourseServlet extends HttpServlet {
+
+    private static final Logger LOGGER = Logger.getLogger(InstructorCourseServlet.class.getName());
     
     private final CourseDAO courseDAO = new CourseDAOImpl();
     private final EnrollmentDAO enrollmentDAO = new EnrollmentDAOImpl();
@@ -91,13 +95,18 @@ public class InstructorCourseServlet extends HttpServlet {
             throws ServletException, IOException {
         
         try {
-            Integer userId = (Integer) session.getAttribute("userId");
+            Integer userId = resolveUserId(session);
+            if (userId == null) {
+                request.setAttribute("errorMessage", "Session error: invalid user context.");
+                request.getRequestDispatcher("/WEB-INF/views/instructor/instructor-courses.jsp").forward(request, response);
+                return;
+            }
             List<Course> courses = courseDAO.findByInstructor(userId);
             
             request.setAttribute("courses", courses);
             request.getRequestDispatcher("/WEB-INF/views/instructor/instructor-courses.jsp").forward(request, response);
         } catch (Exception e) {
-            System.err.println("Error listing instructor courses: " + e.getMessage());
+            LOGGER.log(Level.SEVERE, "Error listing instructor courses", e);
             request.setAttribute("errorMessage", "Failed to load courses");
             request.getRequestDispatcher("/WEB-INF/views/instructor/instructor-courses.jsp").forward(request, response);
         }
@@ -120,7 +129,12 @@ public class InstructorCourseServlet extends HttpServlet {
             throws ServletException, IOException {
         
         try {
-            int courseId = Integer.parseInt(request.getParameter("id"));
+            Integer courseId = parsePositiveInt(request.getParameter("id"));
+            if (courseId == null) {
+                request.setAttribute("errorMessage", "Invalid course ID");
+                listCourses(request, response, request.getSession(false));
+                return;
+            }
             Course course = courseDAO.findById(courseId);
             
             if (course == null) {
@@ -178,14 +192,21 @@ public class InstructorCourseServlet extends HttpServlet {
             
             // Parse duration (stored internally as days)
             if (durationStr != null && !durationStr.trim().isEmpty()) {
-                int durationValue = Integer.parseInt(durationStr);
+                Integer durationValue = parsePositiveInt(durationStr);
+                if (durationValue == null) {
+                    throw new NumberFormatException("Invalid duration");
+                }
                 course.setDuration(toDays(durationValue, durationUnit));
             }
             
             // Parse fee
             course.setCourseFee(new BigDecimal(feeStr));
             course.setLevel(level != null ? level : Course.LEVEL_BEGINNER);
-            course.setCreatedBy((Integer) session.getAttribute("userId"));
+            Integer userId = resolveUserId(session);
+            if (userId == null) {
+                throw new IllegalStateException("Session error: invalid user context.");
+            }
+            course.setCreatedBy(userId);
             course.setStatus(Course.STATUS_PENDING);
             course.setCourseBanner(courseBannerUrl);
             
@@ -206,7 +227,7 @@ public class InstructorCourseServlet extends HttpServlet {
             request.setAttribute("mode", "create");
             request.getRequestDispatcher("/WEB-INF/views/instructor/instructor-course-form.jsp").forward(request, response);
         } catch (Exception e) {
-            System.err.println("Error creating course: " + e.getMessage());
+            LOGGER.log(Level.SEVERE, "Error creating course", e);
             request.setAttribute("errorMessage", "An error occurred while creating the course");
             request.setAttribute("mode", "create");
             request.getRequestDispatcher("/WEB-INF/views/instructor/instructor-course-form.jsp").forward(request, response);
@@ -220,7 +241,12 @@ public class InstructorCourseServlet extends HttpServlet {
             throws ServletException, IOException {
         
         try {
-            int courseId = Integer.parseInt(request.getParameter("courseId"));
+            Integer courseId = parsePositiveInt(request.getParameter("courseId"));
+            if (courseId == null) {
+                request.setAttribute("errorMessage", "Invalid course ID");
+                listCourses(request, response, session);
+                return;
+            }
             Course existingCourse = courseDAO.findById(courseId);
             
             if (existingCourse == null) {
@@ -230,8 +256,8 @@ public class InstructorCourseServlet extends HttpServlet {
             }
             
             // Verify ownership
-            Integer userId = (Integer) session.getAttribute("userId");
-            if (!existingCourse.getCreatedBy().equals(userId)) {
+            Integer userId = resolveUserId(session);
+            if (userId == null || !existingCourse.getCreatedBy().equals(userId)) {
                 request.setAttribute("errorMessage", "You don't have permission to edit this course");
                 listCourses(request, response, session);
                 return;
@@ -271,7 +297,10 @@ public class InstructorCourseServlet extends HttpServlet {
             
             // Parse duration (stored internally as days)
             if (durationStr != null && !durationStr.trim().isEmpty()) {
-                int durationValue = Integer.parseInt(durationStr);
+                Integer durationValue = parsePositiveInt(durationStr);
+                if (durationValue == null) {
+                    throw new NumberFormatException("Invalid duration");
+                }
                 existingCourse.setDuration(toDays(durationValue, durationUnit));
             }
             
@@ -304,7 +333,7 @@ public class InstructorCourseServlet extends HttpServlet {
             request.setAttribute("errorMessage", "Invalid number format");
             listCourses(request, response, session);
         } catch (Exception e) {
-            System.err.println("Error updating course: " + e.getMessage());
+            LOGGER.log(Level.SEVERE, "Error updating course", e);
             request.setAttribute("errorMessage", "An error occurred while updating the course");
             listCourses(request, response, session);
         }
@@ -317,7 +346,11 @@ public class InstructorCourseServlet extends HttpServlet {
             throws ServletException, IOException {
         
         try {
-            int courseId = Integer.parseInt(request.getParameter("id"));
+            Integer courseId = parsePositiveInt(request.getParameter("id"));
+            if (courseId == null) {
+                response.sendRedirect(request.getContextPath() + "/instructor/courses?error=invalid");
+                return;
+            }
             Course course = courseDAO.findById(courseId);
             
             if (course == null) {
@@ -326,8 +359,8 @@ public class InstructorCourseServlet extends HttpServlet {
             }
             
             // Verify ownership
-            Integer userId = (Integer) session.getAttribute("userId");
-            if (!course.getCreatedBy().equals(userId)) {
+            Integer userId = resolveUserId(session);
+            if (userId == null || !course.getCreatedBy().equals(userId)) {
                 response.sendRedirect(request.getContextPath() + "/instructor/courses?error=permission");
                 return;
             }
@@ -343,7 +376,7 @@ public class InstructorCourseServlet extends HttpServlet {
         } catch (NumberFormatException e) {
             response.sendRedirect(request.getContextPath() + "/instructor/courses?error=invalid");
         } catch (Exception e) {
-            System.err.println("Error deleting course: " + e.getMessage());
+            LOGGER.log(Level.SEVERE, "Error deleting course", e);
             response.sendRedirect(request.getContextPath() + "/instructor/courses?error=exception");
         }
     }
@@ -355,7 +388,11 @@ public class InstructorCourseServlet extends HttpServlet {
             throws ServletException, IOException {
         
         try {
-            Integer userId = (Integer) session.getAttribute("userId");
+            Integer userId = resolveUserId(session);
+            if (userId == null) {
+                response.sendRedirect(request.getContextPath() + "/login");
+                return;
+            }
             String courseIdStr = request.getParameter("courseId");
             
             if (courseIdStr == null || courseIdStr.trim().isEmpty()) {
@@ -363,7 +400,11 @@ public class InstructorCourseServlet extends HttpServlet {
                 return;
             }
             
-            int courseId = Integer.parseInt(courseIdStr);
+            Integer courseId = parsePositiveInt(courseIdStr);
+            if (courseId == null) {
+                response.sendRedirect(request.getContextPath() + "/instructor/courses?error=invalid");
+                return;
+            }
             Course course = courseDAO.findById(courseId);
             
             // Verify this course belongs to the instructor
@@ -383,8 +424,7 @@ public class InstructorCourseServlet extends HttpServlet {
         } catch (NumberFormatException e) {
             response.sendRedirect(request.getContextPath() + "/instructor/courses?error=invalid");
         } catch (Exception e) {
-            System.err.println("Error viewing course students: " + e.getMessage());
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Error viewing course students", e);
             response.sendRedirect(request.getContextPath() + "/instructor/courses?error=exception");
         }
     }
@@ -429,7 +469,7 @@ public class InstructorCourseServlet extends HttpServlet {
                 );
             }
         } catch (Exception e) {
-            System.err.println("Course banner upload failed: " + e.getMessage());
+            LOGGER.log(Level.WARNING, "Course banner upload failed", e);
             return null;
         }
     }
@@ -443,6 +483,52 @@ public class InstructorCourseServlet extends HttpServlet {
 
     private boolean isAllowedBannerExtension(String ext) {
         return "jpg".equals(ext) || "jpeg".equals(ext) || "png".equals(ext) || "webp".equals(ext);
+    }
+
+    private Integer parsePositiveInt(String value) {
+        if (value == null) {
+            return null;
+        }
+        try {
+            int parsed = Integer.parseInt(value.trim());
+            return parsed > 0 ? parsed : null;
+        } catch (NumberFormatException ex) {
+            return null;
+        }
+    }
+
+    private Integer resolveUserId(HttpSession session) {
+        if (session == null) return null;
+        Object userId = session.getAttribute("userId");
+        if (userId == null) return null;
+        
+        if (userId instanceof Integer) {
+            int id = (Integer) userId;
+            return id > 0 ? id : null;
+        }
+        
+        if (userId instanceof String) {
+            try {
+                int id = Integer.parseInt((String) userId);
+                return id > 0 ? id : null;
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        }
+        return null;
+    }
+
+    private String resolveRole(HttpSession session) {
+        if (session == null) return null;
+        Object role = session.getAttribute("userRole");
+        if (role == null) role = session.getAttribute("role");
+        if (role == null) return null;
+        
+        String roleStr = role.toString().trim();
+        if ("Admin".equalsIgnoreCase(roleStr)) return "Admin";
+        if ("Student".equalsIgnoreCase(roleStr)) return "Student";
+        if ("Instructor".equalsIgnoreCase(roleStr)) return "Instructor";
+        return null;
     }
 
     private int toDays(int durationValue, String durationUnit) {

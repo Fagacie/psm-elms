@@ -3,6 +3,7 @@ package com.psm.elearning.controller;
 import com.psm.elearning.dao.UserDAO;
 import com.psm.elearning.dao.UserDAOImpl;
 import com.psm.elearning.model.User;
+import com.psm.elearning.service.AppSettingsService;
 import com.psm.elearning.util.PasswordUtil;
 
 import javax.servlet.ServletException;
@@ -11,8 +12,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ChangePasswordServlet extends HttpServlet {
+
+    private static final Logger LOGGER = Logger.getLogger(ChangePasswordServlet.class.getName());
 
     private UserDAO userDAO;
 
@@ -57,9 +62,9 @@ public class ChangePasswordServlet extends HttpServlet {
             return;
         }
 
-        // Check new password length
-        if (newPassword.length() < 6) {
-            session.setAttribute("passwordError", "New password must be at least 6 characters long.");
+        int minPasswordLength = AppSettingsService.getInt(AppSettingsService.KEY_SECURITY_MIN_PASSWORD_LENGTH, 8, 6, 64);
+        if (newPassword.length() < minPasswordLength) {
+            session.setAttribute("passwordError", "New password must be at least " + minPasswordLength + " characters long.");
             response.sendRedirect(request.getContextPath() + "/profile?openPasswordModal=1");
             return;
         }
@@ -67,6 +72,12 @@ public class ChangePasswordServlet extends HttpServlet {
         // Check new password match
         if (!newPassword.equals(confirmPassword)) {
             session.setAttribute("passwordError", "New passwords do not match.");
+            response.sendRedirect(request.getContextPath() + "/profile?openPasswordModal=1");
+            return;
+        }
+
+        if (!PasswordUtil.isStrongPassword(newPassword)) {
+            session.setAttribute("passwordError", "New password must include uppercase, lowercase, number, and special character.");
             response.sendRedirect(request.getContextPath() + "/profile?openPasswordModal=1");
             return;
         }
@@ -99,7 +110,7 @@ public class ChangePasswordServlet extends HttpServlet {
                     user.getFullName()
                 );
             } catch (Exception emailEx) {
-                System.err.println("Failed to send password change confirmation: " + emailEx.getMessage());
+                LOGGER.log(Level.WARNING, "Failed to send password change confirmation", emailEx);
             }
             
             session.setAttribute("passwordSuccess", "Password changed successfully! A confirmation email has been sent.");

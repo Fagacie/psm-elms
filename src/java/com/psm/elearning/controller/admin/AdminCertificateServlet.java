@@ -63,7 +63,7 @@ public class AdminCertificateServlet extends HttpServlet {
 
     private void handleRevoke(HttpServletRequest request, HttpServletResponse response, HttpSession session)
             throws IOException {
-        Integer userId = (Integer) session.getAttribute("userId");
+        Integer userId = resolveUserId(session);
         Integer certificateId = parseInt(request.getParameter("certificateId"));
         if (certificateId == null) {
             response.sendRedirect(request.getContextPath() + "/admin/certificates?error=invalid");
@@ -111,5 +111,26 @@ public class AdminCertificateServlet extends HttpServlet {
         Object role = session.getAttribute("userRole");
         if (role == null) role = session.getAttribute("role");
         return "Admin".equals(role);
+    }
+
+    private Integer resolveUserId(HttpSession session) {
+        if (session == null) return null;
+        Object userId = session.getAttribute("userId");
+        if (userId == null) return null;
+        
+        if (userId instanceof Integer) {
+            int id = (Integer) userId;
+            return id > 0 ? id : null;
+        }
+        
+        if (userId instanceof String) {
+            try {
+                int id = Integer.parseInt((String) userId);
+                return id > 0 ? id : null;
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        }
+        return null;
     }
 }

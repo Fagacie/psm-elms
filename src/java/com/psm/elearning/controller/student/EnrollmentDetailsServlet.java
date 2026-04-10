@@ -20,6 +20,7 @@ import com.psm.elearning.model.Payment;
 import com.psm.elearning.model.Assessment;
 import com.psm.elearning.model.AssessmentSubmission;
 import com.psm.elearning.util.AssessmentPlacementUtil;
+import com.psm.elearning.service.AppSettingsService;
 import com.psm.elearning.service.EnrollmentStateSyncService;
 
 import javax.servlet.ServletException;
@@ -34,11 +35,15 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Servlet to display enrollment details.
  */
 public class EnrollmentDetailsServlet extends HttpServlet {
+
+    private static final Logger LOGGER = Logger.getLogger(EnrollmentDetailsServlet.class.getName());
     
     private EnrollmentDAO enrollmentDAO;
     private MaterialDAO materialDAO;
@@ -285,7 +290,8 @@ public class EnrollmentDetailsServlet extends HttpServlet {
             for (Assessment assessment : assessments) {
                 List<AssessmentSubmission> submissions = submissionDAO.findByAssessmentAndUser(assessment.getAssessmentId(), userId);
                 int used = submissions != null ? submissions.size() : 0;
-                int base = assessment.getMaxAttempts() != null && assessment.getMaxAttempts() > 0 ? assessment.getMaxAttempts() : 1;
+                int defaultMaxAttempts = AppSettingsService.getInt(AppSettingsService.KEY_ASSESSMENT_MAX_ATTEMPTS, 3, 1, 10);
+                int base = assessment.getMaxAttempts() != null && assessment.getMaxAttempts() > 0 ? assessment.getMaxAttempts() : defaultMaxAttempts;
                 int allowed = base + retakeRequestDAO.countApproved(assessment.getAssessmentId(), userId);
                 usedAttemptsByAssessment.put(assessment.getAssessmentId(), used);
                 allowedAttemptsByAssessment.put(assessment.getAssessmentId(), allowed);
@@ -331,7 +337,7 @@ public class EnrollmentDetailsServlet extends HttpServlet {
             List<Assessment> finalAssessments = new ArrayList<>();
 
             for (Assessment assessment : assessments) {
-                AssessmentPlacementUtil.Placement placement = AssessmentPlacementUtil.parsePlacement(assessment.getInstructions());
+                AssessmentPlacementUtil.Placement placement = resolvePlacement(assessment);
                 assessment.setInstructions(AssessmentPlacementUtil.stripPlacement(assessment.getInstructions()));
                 if ("afterMaterial".equals(placement.type)
                         && placement.materialId != null
@@ -378,13 +384,14 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                     primaryLabel = viewed ? "Reopen Link" : "Open Link";
                     primaryIcon = "fa-link";
                 }
+                String primaryAction = "Link".equalsIgnoreCase(material.getMaterialType()) ? "view" : "preview";
                 String primaryUrl = paidAccess
-                        ? request.getContextPath() + "/student/materials?action=view&id=" + material.getMaterialId()
-                        : null;
+                    ? request.getContextPath() + "/student/materials?action=" + primaryAction + "&id=" + material.getMaterialId() + "&enrollmentId=" + enrollment.getEnrollmentId()
+                    : null;
                 String secondaryLabel = !"Link".equalsIgnoreCase(material.getMaterialType()) ? "Download" : null;
                 String secondaryIcon = secondaryLabel != null ? "fa-download" : null;
                 String secondaryUrl = (paidAccess && secondaryLabel != null)
-                        ? request.getContextPath() + "/student/materials?action=download&id=" + material.getMaterialId()
+                    ? request.getContextPath() + "/student/materials?action=download&id=" + material.getMaterialId() + "&enrollmentId=" + enrollment.getEnrollmentId()
                         : null;
                 learningItems.add(new LearningItem(
                         orderIndex++,
@@ -651,8 +658,7 @@ public class EnrollmentDetailsServlet extends HttpServlet {
             try {
                 syncResult = enrollmentStateSyncService.syncEnrollmentState(enrollment);
             } catch (Exception syncException) {
-                System.err.println("EnrollmentDetailsServlet: sync failed: " + syncException.getMessage());
-                syncException.printStackTrace();
+                LOGGER.log(Level.WARNING, "EnrollmentDetailsServlet: sync failed", syncException);
                 syncResult = null;
             }
 
@@ -759,8 +765,7 @@ public class EnrollmentDetailsServlet extends HttpServlet {
         } catch (NumberFormatException e) {
             response.sendRedirect(request.getContextPath() + "/student/my-enrollments?error=invalid");
         } catch (Exception e) {
-            System.err.println("EnrollmentDetailsServlet: Error: " + e.getMessage());
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "EnrollmentDetailsServlet: Error loading enrollment details", e);
             try {
                 Integer userId = (Integer) session.getAttribute("userId");
                 Integer fallbackEnrollmentId = null;
@@ -808,8 +813,7 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                     return;
                 }
             } catch (Exception fallbackException) {
-                System.err.println("EnrollmentDetailsServlet: fallback render failed: " + fallbackException.getMessage());
-                fallbackException.printStackTrace();
+                LOGGER.log(Level.SEVERE, "EnrollmentDetailsServlet: fallback render failed", fallbackException);
             }
             response.sendRedirect(request.getContextPath() + "/student/my-enrollments?error=exception");
         }
@@ -852,8 +856,9 @@ public class EnrollmentDetailsServlet extends HttpServlet {
     }
 
     private double resolvePassThreshold(Integer totalMarks) {
-        if (totalMarks == null || totalMarks <= 0) return 50.0;
-        return totalMarks * 0.5;
+        int passMarkPercent = AppSettingsService.getInt(AppSettingsService.KEY_ASSESSMENT_PASS_MARK, 70, 1, 100);
+        if (totalMarks == null || totalMarks <= 0) return passMarkPercent;
+        return totalMarks * (passMarkPercent / 100.0);
     }
 
     private String resolveMaterialIcon(String materialType) {
@@ -882,6 +887,18 @@ public class EnrollmentDetailsServlet extends HttpServlet {
             default:
                 return "fa-clipboard-list";
         }
+    }
+
+    private AssessmentPlacementUtil.Placement resolvePlacement(Assessment assessment) {
+        String placementType = assessment.getPlacementType() == null ? "" : assessment.getPlacementType().trim();
+        if (!placementType.isEmpty()) {
+            Integer placementMaterialId = assessment.getPlacementMaterialId();
+            if ("afterMaterial".equals(placementType) && placementMaterialId == null) {
+                placementType = "final";
+            }
+            return new AssessmentPlacementUtil.Placement(placementType, placementMaterialId);
+        }
+        return AssessmentPlacementUtil.parsePlacement(assessment.getInstructions());
     }
 
     private boolean isPaymentComplete(String paymentStatus) {

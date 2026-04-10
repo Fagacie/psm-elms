@@ -23,6 +23,17 @@ public interface PaymentDAO {
      * @return true if updated successfully, false otherwise
      */
     boolean updatePaymentStatus(Integer paymentId, String status, String method, String paystackStatus);
+
+    /**
+     * Refresh an existing pending payment with a new gateway initialization payload.
+     */
+    boolean refreshPaymentInitialization(Integer paymentId,
+                                         Double amount,
+                                         String method,
+                                         String reference,
+                                         String accessCode,
+                                         String authorizationUrl,
+                                         String paystackStatus);
     
     
     // Admin helpers

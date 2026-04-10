@@ -141,7 +141,7 @@
         });
     }
 
-    document.querySelectorAll('.me-continue-link').forEach(function (button) {
+    document.querySelectorAll('button.me-continue-link[data-href]').forEach(function (button) {
         button.addEventListener('click', function () {
             var targetUrl = button.getAttribute('data-href');
             if (targetUrl) {

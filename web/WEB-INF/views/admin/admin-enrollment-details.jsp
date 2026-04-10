@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin-dashboard.css">
     <jsp:include page="/WEB-INF/views/common/head-external-assets.jsp"/>
 </head>
-<body>
+<body class="admin-page">
 <jsp:include page="/WEB-INF/views/common/admin-header.jsp">
     <jsp:param name="pageTitle" value="Enrollment Details"/>
     <jsp:param name="pageSubtitle" value="Inspect one enrollment record in detail"/>
@@ -84,6 +84,17 @@
                     <div class="metric-value">NGN <fmt:formatNumber value="${enrollment.coursePrice}" type="number" minFractionDigits="2" maxFractionDigits="2"/></div>
                 </div>
             </div>
+            <div class="admin-action-bar">
+                <div class="admin-action-bar-copy">
+                    <strong>Enrollment operations</strong>
+                    <span>Use these quick actions to move from this record into the related student account or course management workspace.</span>
+                </div>
+                <div class="admin-action-bar-actions">
+                    <a href="${pageContext.request.contextPath}/admin/enrollments" class="admin-btn secondary">Back to List</a>
+                    <a href="${pageContext.request.contextPath}/admin/users?action=edit&userId=${enrollment.userId}" class="admin-btn primary">Open Student</a>
+                    <a href="${pageContext.request.contextPath}/admin/courses" class="admin-btn secondary">Open Courses</a>
+                </div>
+            </div>
         </section>
 
         <section class="admin-grid-2">
@@ -140,12 +151,12 @@
 
         <section class="section-card">
             <div class="section-header">
-                <h2>Actions</h2>
+                <h2>Support Follow-up</h2>
+                <span class="section-caption">Reference actions</span>
             </div>
             <div class="section-actions-inset">
-                <a href="${pageContext.request.contextPath}/admin/enrollments" class="admin-btn secondary">Back to List</a>
-                <a href="${pageContext.request.contextPath}/admin/users?action=edit&userId=${enrollment.userId}" class="admin-btn primary">Open Student</a>
-                <a href="${pageContext.request.contextPath}/admin/courses" class="admin-btn secondary">Open Courses</a>
+                <a href="${pageContext.request.contextPath}/admin/settings" class="admin-btn secondary">Admin Settings</a>
+                <a href="${pageContext.request.contextPath}/admin/certificates" class="admin-btn secondary">Certificates</a>
             </div>
         </section>
     </div>

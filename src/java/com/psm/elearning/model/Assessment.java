@@ -36,6 +36,11 @@ public class Assessment {
     @Size(max = 5000, message = "Instructions must not exceed 5000 characters")
     private String instructions;
 
+    @Pattern(regexp = "^(final|afterMaterial)$", message = "Placement type must be final or afterMaterial")
+    private String placementType;
+
+    private Integer placementMaterialId;
+
     @Min(value = 1, message = "Max attempts must be at least 1")
     @Max(value = 10, message = "Max attempts must not exceed 10")
     private Integer maxAttempts;
@@ -94,6 +99,12 @@ public class Assessment {
     
     public String getInstructions() { return instructions; }
     public void setInstructions(String instructions) { this.instructions = instructions; }
+
+    public String getPlacementType() { return placementType; }
+    public void setPlacementType(String placementType) { this.placementType = placementType; }
+
+    public Integer getPlacementMaterialId() { return placementMaterialId; }
+    public void setPlacementMaterialId(Integer placementMaterialId) { this.placementMaterialId = placementMaterialId; }
 
     public Integer getMaxAttempts() { return maxAttempts; }
     public void setMaxAttempts(Integer maxAttempts) { this.maxAttempts = maxAttempts; }

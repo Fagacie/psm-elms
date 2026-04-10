@@ -14,7 +14,7 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin-dashboard.css">
     <jsp:include page="/WEB-INF/views/common/head-external-assets.jsp"/>
 </head>
-<body class="${embeddedMode ? 'admin-embedded' : ''}">
+<body class="admin-page ${embeddedMode ? 'admin-embedded' : ''}">
 <c:if test="${not embeddedMode}">
 <jsp:include page="/WEB-INF/views/common/admin-header.jsp">
     <jsp:param name="pageTitle" value="${empty user ? 'Create User' : 'Edit User'}"/>
@@ -87,7 +87,7 @@
                 </c:if>
             </div>
 
-            <div style="padding:14px 16px 16px;">
+            <div class="section-body section-body-form">
                 <form method="post" action="${pageContext.request.contextPath}/admin/users" class="admin-form-layout">
                     <c:choose>
                         <c:when test="${not empty requestScope.user}">

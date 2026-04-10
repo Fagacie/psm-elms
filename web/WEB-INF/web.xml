@@ -22,6 +22,15 @@
     </session-config>
 
     <filter>
+        <filter-name>TrailingSlashRedirectFilter</filter-name>
+        <filter-class>com.psm.elearning.filter.TrailingSlashRedirectFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>TrailingSlashRedirectFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <filter>
         <filter-name>RoleGuardFilter</filter-name>
         <filter-class>com.psm.elearning.filter.RoleGuardFilter</filter-class>
     </filter>
@@ -342,6 +351,10 @@
         <servlet-name>StudentCertificateServlet</servlet-name>
         <url-pattern>/student/certificate</url-pattern>
     </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>StudentCertificateServlet</servlet-name>
+        <url-pattern>/student/certificate/*</url-pattern>
+    </servlet-mapping>
 
     <servlet>
         <servlet-name>StudentCertificatesServlet</servlet-name>
@@ -350,6 +363,10 @@
     <servlet-mapping>
         <servlet-name>StudentCertificatesServlet</servlet-name>
         <url-pattern>/student/certificates</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>StudentCertificatesServlet</servlet-name>
+        <url-pattern>/student/certificates/*</url-pattern>
     </servlet-mapping>
 
     <servlet>
@@ -360,6 +377,10 @@
         <servlet-name>InstructorCertificateServlet</servlet-name>
         <url-pattern>/instructor/certificates</url-pattern>
     </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>InstructorCertificateServlet</servlet-name>
+        <url-pattern>/instructor/certificates/*</url-pattern>
+    </servlet-mapping>
 
     <servlet>
         <servlet-name>AdminCertificateServlet</servlet-name>
@@ -368,6 +389,10 @@
     <servlet-mapping>
         <servlet-name>AdminCertificateServlet</servlet-name>
         <url-pattern>/admin/certificates</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>AdminCertificateServlet</servlet-name>
+        <url-pattern>/admin/certificates/*</url-pattern>
     </servlet-mapping>
 
     <servlet>
@@ -378,6 +403,10 @@
         <servlet-name>CertificateTemplateServlet</servlet-name>
         <url-pattern>/certificate/template</url-pattern>
     </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>CertificateTemplateServlet</servlet-name>
+        <url-pattern>/certificate/template/*</url-pattern>
+    </servlet-mapping>
 
     <servlet>
         <servlet-name>CertificateVerifyServlet</servlet-name>
@@ -386,6 +415,10 @@
     <servlet-mapping>
         <servlet-name>CertificateVerifyServlet</servlet-name>
         <url-pattern>/certificate/verify</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>CertificateVerifyServlet</servlet-name>
+        <url-pattern>/certificate/verify/*</url-pattern>
     </servlet-mapping>
 
     <servlet>

@@ -1,4 +1,4 @@
-.cert-page {
+﻿.cert-page {
   --cert-accent: var(--sv-accent);
   --cert-accent-soft: var(--sv-accent-soft);
   --cert-accent-border: var(--sv-accent-border);
@@ -15,7 +15,7 @@
   padding: 8px 10px 8px 8px;
   border: 1px solid var(--sv-border);
   border-radius: 12px;
-  background: #ffffff;
+  background: var(--sv-surface);
 }
 
 .cert-user-icon {
@@ -26,7 +26,7 @@
   border: 1px solid var(--sv-border);
   border-radius: 10px;
   color: var(--sv-text);
-  background: #fcfcfd;
+  background: var(--sv-surface-soft);
 }
 
 .cert-avatar-img {
@@ -105,7 +105,7 @@
   height: 180px;
   border: 1px solid var(--sv-border);
   border-radius: 16px;
-  background: #fcfcfd;
+  background: var(--sv-surface-soft);
   overflow: hidden;
 }
 
@@ -117,7 +117,7 @@
   padding: 14px;
   border: 1px solid var(--sv-border);
   border-radius: 12px;
-  background: #ffffff;
+  background: var(--sv-surface);
   box-shadow: var(--sv-shadow-sm);
 }
 
@@ -203,7 +203,7 @@
   padding: 0 14px;
   border: 1px solid var(--sv-border);
   border-radius: 999px;
-  background: #ffffff;
+  background: var(--sv-surface);
   color: var(--sv-muted);
   font-size: 0.82rem;
   font-weight: 600;
@@ -297,7 +297,7 @@
   padding: 18px 20px;
   border: 1px solid var(--sv-border);
   border-radius: 12px;
-  background: #fcfcfd;
+  background: var(--sv-surface-soft);
 }
 
 .cert-section-intro strong {
@@ -456,3 +456,4 @@
     width: 100%;
   }
 }
+

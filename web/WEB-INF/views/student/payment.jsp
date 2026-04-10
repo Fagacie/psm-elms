@@ -49,6 +49,9 @@
             <c:if test="${paymentError == 'required'}">
                 <div class="alert alert-error">Payment is required before you can access this paid course. Complete payment to continue.</div>
             </c:if>
+            <c:if test="${paymentError == 'paystackconfig'}">
+                <div class="alert alert-error">Payment gateway is not configured with valid API keys. Set real Paystack keys and retry.</div>
+            </c:if>
 
             <h3>${enrollment.courseName}</h3>
             <p>${enrollment.courseDescription}</p>

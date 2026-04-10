@@ -18,6 +18,8 @@ import com.psm.elearning.model.AssessmentRetakeRequest;
 import com.psm.elearning.model.AssessmentSubmission;
 import com.psm.elearning.model.Course;
 import com.psm.elearning.model.Material;
+import com.psm.elearning.service.AppSettingsService;
+import com.psm.elearning.service.EnrollmentStateSyncService;
 import com.psm.elearning.util.AssessmentPlacementUtil;
 
 import javax.servlet.ServletException;
@@ -40,6 +42,7 @@ public class InstructorAssessmentServlet extends HttpServlet {
     private final AssessmentRetakeRequestDAO retakeRequestDAO = new AssessmentRetakeRequestDAOImpl();
     private final AssessmentSubmissionDAO submissionDAO = new AssessmentSubmissionDAOImpl();
     private final MaterialDAO materialDAO = new MaterialDAOImpl();
+    private final EnrollmentStateSyncService enrollmentStateSyncService = new EnrollmentStateSyncService();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -80,7 +83,11 @@ public class InstructorAssessmentServlet extends HttpServlet {
             return;
         }
 
-        Integer userId = (Integer) session.getAttribute("userId");
+        Integer userId = resolveUserId(session);
+        if (userId == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
         String action = normalize(request.getParameter("action"));
 
         if ("createAssessment".equals(action)) {
@@ -142,7 +149,7 @@ public class InstructorAssessmentServlet extends HttpServlet {
         Map<Integer, String> placementTypeByAssessmentId = new LinkedHashMap<>();
         Map<Integer, Integer> placementMaterialByAssessmentId = new LinkedHashMap<>();
         for (Assessment assessment : assessments) {
-            AssessmentPlacementUtil.Placement placement = AssessmentPlacementUtil.parsePlacement(assessment.getInstructions());
+            AssessmentPlacementUtil.Placement placement = resolvePlacement(assessment);
             assessment.setInstructions(AssessmentPlacementUtil.stripPlacement(assessment.getInstructions()));
             placementTypeByAssessmentId.put(assessment.getAssessmentId(), placement.type);
             placementMaterialByAssessmentId.put(assessment.getAssessmentId(), placement.materialId);
@@ -158,7 +165,7 @@ public class InstructorAssessmentServlet extends HttpServlet {
                 request.setAttribute("errorMessage", "Invalid assessment selected.");
                 selectedAssessment = null;
             } else {
-                AssessmentPlacementUtil.Placement placement = AssessmentPlacementUtil.parsePlacement(selectedAssessment.getInstructions());
+                AssessmentPlacementUtil.Placement placement = resolvePlacement(selectedAssessment);
                 selectedAssessment.setInstructions(AssessmentPlacementUtil.stripPlacement(selectedAssessment.getInstructions()));
                 placementTypeByAssessmentId.putIfAbsent(selectedAssessment.getAssessmentId(), placement.type);
                 placementMaterialByAssessmentId.putIfAbsent(selectedAssessment.getAssessmentId(), placement.materialId);
@@ -214,14 +221,27 @@ public class InstructorAssessmentServlet extends HttpServlet {
             return;
         }
 
+        if (!isSupportedAssessmentType(type)) {
+            response.sendRedirect(request.getContextPath() + "/instructor/assessments?courseId=" + courseId + "&error=type");
+            return;
+        }
+
         Assessment assessment = new Assessment();
         assessment.setCourseId(courseId);
         assessment.setTitle(title);
         assessment.setType(type);
         assessment.setDuration(duration);
         assessment.setTotalMarks(totalMarks);
-        assessment.setInstructions(AssessmentPlacementUtil.applyPlacement(instructions, placement));
-        assessment.setMaxAttempts(maxAttempts != null && maxAttempts > 0 ? maxAttempts : 1);
+        AssessmentPlacementUtil.Placement parsedPlacement = AssessmentPlacementUtil.parsePlacement(AssessmentPlacementUtil.applyPlacement("", placement));
+        if (!isValidPlacementForCourse(courseId, parsedPlacement)) {
+            response.sendRedirect(request.getContextPath() + "/instructor/assessments?courseId=" + courseId + "&error=placement");
+            return;
+        }
+        assessment.setInstructions(AssessmentPlacementUtil.stripPlacement(instructions));
+        assessment.setPlacementType(parsedPlacement.type);
+        assessment.setPlacementMaterialId(parsedPlacement.materialId);
+        int defaultMaxAttempts = AppSettingsService.getInt(AppSettingsService.KEY_ASSESSMENT_MAX_ATTEMPTS, 3, 1, 10);
+        assessment.setMaxAttempts(maxAttempts != null && maxAttempts > 0 ? maxAttempts : defaultMaxAttempts);
         assessment.setQuestionsPerPage(questionsPerPage != null && questionsPerPage > 0 ? questionsPerPage : 2);
         assessment.setCreatedBy(userId);
 
@@ -265,12 +285,25 @@ public class InstructorAssessmentServlet extends HttpServlet {
             return;
         }
 
+        if (!isSupportedAssessmentType(type)) {
+            response.sendRedirect(request.getContextPath() + "/instructor/assessments?courseId=" + courseId + "&assessmentId=" + assessmentId + "&error=type");
+            return;
+        }
+
         assessment.setTitle(title);
         assessment.setType(type);
         assessment.setDuration(duration);
         assessment.setTotalMarks(totalMarks);
-        assessment.setInstructions(AssessmentPlacementUtil.applyPlacement(instructions, placement));
-        assessment.setMaxAttempts(maxAttempts != null && maxAttempts > 0 ? maxAttempts : 1);
+        AssessmentPlacementUtil.Placement parsedPlacement = AssessmentPlacementUtil.parsePlacement(AssessmentPlacementUtil.applyPlacement("", placement));
+        if (!isValidPlacementForCourse(courseId, parsedPlacement)) {
+            response.sendRedirect(request.getContextPath() + "/instructor/assessments?courseId=" + courseId + "&assessmentId=" + assessmentId + "&error=placement");
+            return;
+        }
+        assessment.setInstructions(AssessmentPlacementUtil.stripPlacement(instructions));
+        assessment.setPlacementType(parsedPlacement.type);
+        assessment.setPlacementMaterialId(parsedPlacement.materialId);
+        int defaultMaxAttempts = AppSettingsService.getInt(AppSettingsService.KEY_ASSESSMENT_MAX_ATTEMPTS, 3, 1, 10);
+        assessment.setMaxAttempts(maxAttempts != null && maxAttempts > 0 ? maxAttempts : defaultMaxAttempts);
         assessment.setQuestionsPerPage(questionsPerPage != null && questionsPerPage > 0 ? questionsPerPage : 2);
 
         boolean updated = assessmentDAO.update(assessment);
@@ -332,10 +365,28 @@ public class InstructorAssessmentServlet extends HttpServlet {
         q.setCorrectOption(correctOption.isEmpty() ? null : correctOption);
         q.setMarks(parseDouble(request.getParameter("marks")));
 
-        if (Assessment.TYPE_QUIZ.equalsIgnoreCase(assessment.getType())
-                && (q.getOptionA().isEmpty() || q.getOptionB().isEmpty() || q.getCorrectOption() == null)) {
-            response.sendRedirect(request.getContextPath() + "/instructor/assessments?courseId=" + courseId + "&assessmentId=" + assessmentId + "&error=qoptions");
-            return;
+        String normalizedType = normalize(assessment.getType());
+        if (Assessment.TYPE_QUIZ.equalsIgnoreCase(normalizedType)) {
+            if (q.getOptionA().isEmpty() || q.getOptionB().isEmpty() || q.getCorrectOption() == null || !isValidCorrectOption(q.getCorrectOption())) {
+                response.sendRedirect(request.getContextPath() + "/instructor/assessments?courseId=" + courseId + "&assessmentId=" + assessmentId + "&error=qoptions");
+                return;
+            }
+        } else if (Assessment.TYPE_ASSIGNMENT.equalsIgnoreCase(normalizedType)) {
+            if (!q.getOptionA().isEmpty() || !q.getOptionB().isEmpty() || !q.getOptionC().isEmpty() || !q.getOptionD().isEmpty() || q.getCorrectOption() != null) {
+                response.sendRedirect(request.getContextPath() + "/instructor/assessments?courseId=" + courseId + "&assessmentId=" + assessmentId + "&error=assignmentschema");
+                return;
+            }
+        } else if (Assessment.TYPE_EXAM.equalsIgnoreCase(normalizedType)) {
+            boolean hasAnyOptions = !q.getOptionA().isEmpty() || !q.getOptionB().isEmpty() || !q.getOptionC().isEmpty() || !q.getOptionD().isEmpty();
+            if (hasAnyOptions) {
+                if (q.getOptionA().isEmpty() || q.getOptionB().isEmpty() || q.getCorrectOption() == null || !isValidCorrectOption(q.getCorrectOption())) {
+                    response.sendRedirect(request.getContextPath() + "/instructor/assessments?courseId=" + courseId + "&assessmentId=" + assessmentId + "&error=examschema");
+                    return;
+                }
+            } else if (q.getCorrectOption() != null) {
+                response.sendRedirect(request.getContextPath() + "/instructor/assessments?courseId=" + courseId + "&assessmentId=" + assessmentId + "&error=examschema");
+                return;
+            }
         }
 
         AssessmentQuestion created = questionDAO.addQuestion(q);
@@ -415,7 +466,30 @@ public class InstructorAssessmentServlet extends HttpServlet {
         }
 
         boolean ok = submissionDAO.gradeSubmission(submissionId, score, feedback);
+        if (ok && submission.getUserId() != null) {
+            com.psm.elearning.model.Enrollment enrollment = findEnrollmentForCourse(submission.getUserId(), courseId);
+            if (enrollment != null) {
+                enrollmentStateSyncService.syncEnrollmentState(enrollment);
+            }
+        }
         response.sendRedirect(request.getContextPath() + "/instructor/assessments?courseId=" + courseId + "&assessmentId=" + assessmentId + "&gradeFilter=" + gradeFilter + (ok ? "&success=graded" : "&error=grade"));
+    }
+
+    private com.psm.elearning.model.Enrollment findEnrollmentForCourse(Integer userId, Integer courseId) {
+        if (userId == null || courseId == null) {
+            return null;
+        }
+        com.psm.elearning.dao.EnrollmentDAO enrollmentDAO = new com.psm.elearning.dao.EnrollmentDAOImpl();
+        List<com.psm.elearning.model.Enrollment> enrollments = enrollmentDAO.getEnrollmentsByStudent(userId);
+        if (enrollments == null) {
+            return null;
+        }
+        for (com.psm.elearning.model.Enrollment enrollment : enrollments) {
+            if (enrollment != null && courseId.equals(enrollment.getCourseId())) {
+                return enrollment;
+            }
+        }
+        return null;
     }
 
     private void exportSubmissionsCsv(HttpServletRequest request, HttpServletResponse response, Integer userId)
@@ -508,6 +582,66 @@ public class InstructorAssessmentServlet extends HttpServlet {
 
     private String normalize(String value) {
         return value == null ? "" : value.trim();
+    }
+
+    private Integer resolveUserId(HttpSession session) {
+        if (session == null) return null;
+        Object userId = session.getAttribute("userId");
+        if (userId == null) return null;
+        
+        if (userId instanceof Integer) {
+            int id = (Integer) userId;
+            return id > 0 ? id : null;
+        }
+        
+        if (userId instanceof String) {
+            try {
+                int id = Integer.parseInt((String) userId);
+                return id > 0 ? id : null;
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        }
+        return null;
+    }
+
+    private boolean isSupportedAssessmentType(String type) {
+        return Assessment.TYPE_QUIZ.equalsIgnoreCase(type)
+                || Assessment.TYPE_EXAM.equalsIgnoreCase(type)
+                || Assessment.TYPE_ASSIGNMENT.equalsIgnoreCase(type);
+    }
+
+    private boolean isValidCorrectOption(String option) {
+        return "A".equalsIgnoreCase(option)
+                || "B".equalsIgnoreCase(option)
+                || "C".equalsIgnoreCase(option)
+                || "D".equalsIgnoreCase(option);
+    }
+
+    private AssessmentPlacementUtil.Placement resolvePlacement(Assessment assessment) {
+        String type = normalize(assessment.getPlacementType());
+        if (!type.isEmpty()) {
+            Integer materialId = assessment.getPlacementMaterialId();
+            if ("afterMaterial".equals(type) && materialId == null) {
+                type = "final";
+            }
+            return new AssessmentPlacementUtil.Placement(type, materialId);
+        }
+        return AssessmentPlacementUtil.parsePlacement(assessment.getInstructions());
+    }
+
+    private boolean isValidPlacementForCourse(Integer courseId, AssessmentPlacementUtil.Placement placement) {
+        if (placement == null) {
+            return false;
+        }
+        if (!"afterMaterial".equals(placement.type)) {
+            return true;
+        }
+        if (placement.materialId == null) {
+            return false;
+        }
+        Material material = materialDAO.findById(placement.materialId);
+        return material != null && courseId != null && courseId.equals(material.getCourseId());
     }
 
     private boolean isInstructor(HttpSession session) {

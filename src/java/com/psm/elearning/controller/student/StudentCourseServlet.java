@@ -17,12 +17,16 @@ import java.io.IOException;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * StudentCourseServlet handles course browsing for students.
  * Actions: browse (list approved courses), details, search, filter
  */
 public class StudentCourseServlet extends HttpServlet {
+
+    private static final Logger LOGGER = Logger.getLogger(StudentCourseServlet.class.getName());
     
     private final CourseDAO courseDAO = new CourseDAOImpl();
     private final UserDAO userDAO = new UserDAOImpl();
@@ -102,8 +106,7 @@ public class StudentCourseServlet extends HttpServlet {
             request.setAttribute("enrolledCourseIds", enrolledCourseIds);
             request.getRequestDispatcher("/WEB-INF/views/student/available-courses.jsp").forward(request, response);
         } catch (Exception e) {
-            System.err.println("Error browsing courses: " + e.getMessage());
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Error browsing courses", e);
             request.setAttribute("errorMessage", "Failed to load courses");
             request.getRequestDispatcher("/WEB-INF/views/student/available-courses.jsp").forward(request, response);
         }
@@ -119,7 +122,12 @@ public class StudentCourseServlet extends HttpServlet {
             HttpSession session = request.getSession(false);
             Integer userId = (Integer) session.getAttribute("userId");
 
-            int courseId = Integer.parseInt(request.getParameter("id"));
+            Integer courseId = parsePositiveInt(request.getParameter("id"));
+            if (courseId == null) {
+                request.setAttribute("errorMessage", "Invalid course ID");
+                browseCourses(request, response);
+                return;
+            }
             Course course = courseDAO.findById(courseId);
             
             if (course == null) {
@@ -141,7 +149,7 @@ public class StudentCourseServlet extends HttpServlet {
                         request.setAttribute("instructor", instructor);
                     }
                 } catch (Exception ex) {
-                    System.err.println("Failed to load instructor: " + ex.getMessage());
+                    LOGGER.log(Level.WARNING, "Failed to load instructor details", ex);
                 }
             }
 
@@ -151,7 +159,7 @@ public class StudentCourseServlet extends HttpServlet {
             request.setAttribute("errorMessage", "Invalid course ID");
             browseCourses(request, response);
         } catch (Exception e) {
-            System.err.println("Error viewing course details: " + e.getMessage());
+            LOGGER.log(Level.SEVERE, "Error viewing course details", e);
             request.setAttribute("errorMessage", "An error occurred");
             browseCourses(request, response);
         }
@@ -183,7 +191,7 @@ public class StudentCourseServlet extends HttpServlet {
             request.setAttribute("searchKeyword", keyword.trim());
             request.getRequestDispatcher("/WEB-INF/views/student/available-courses.jsp").forward(request, response);
         } catch (Exception e) {
-            System.err.println("Error searching courses: " + e.getMessage());
+            LOGGER.log(Level.SEVERE, "Error searching courses", e);
             request.setAttribute("errorMessage", "Search failed");
             browseCourses(request, response);
         }
@@ -229,7 +237,7 @@ public class StudentCourseServlet extends HttpServlet {
             request.setAttribute("errorMessage", "Invalid fee range");
             browseCourses(request, response);
         } catch (Exception e) {
-            System.err.println("Error filtering courses: " + e.getMessage());
+            LOGGER.log(Level.SEVERE, "Error filtering courses", e);
             request.setAttribute("errorMessage", "Filter failed");
             browseCourses(request, response);
         }
@@ -241,8 +249,41 @@ public class StudentCourseServlet extends HttpServlet {
             if (enrollments == null) return new ArrayList<>();
             return enrollments.stream().map(com.psm.elearning.model.Enrollment::getCourseId).collect(Collectors.toList());
         } catch (Exception e) {
-            System.err.println("Failed to load enrolled courses for user " + userId + ": " + e.getMessage());
+            LOGGER.log(Level.WARNING, "Failed to load enrolled courses for user " + userId, e);
             return new ArrayList<>();
         }
+    }
+
+    private Integer parsePositiveInt(String value) {
+        if (value == null) {
+            return null;
+        }
+        try {
+            int parsed = Integer.parseInt(value.trim());
+            return parsed > 0 ? parsed : null;
+        } catch (NumberFormatException ex) {
+            return null;
+        }
+    }
+
+    private Integer resolveUserId(HttpSession session) {
+        if (session == null) return null;
+        Object userId = session.getAttribute("userId");
+        if (userId == null) return null;
+        
+        if (userId instanceof Integer) {
+            int id = (Integer) userId;
+            return id > 0 ? id : null;
+        }
+        
+        if (userId instanceof String) {
+            try {
+                int id = Integer.parseInt((String) userId);
+                return id > 0 ? id : null;
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        }
+        return null;
     }
 }

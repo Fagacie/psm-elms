@@ -21,9 +21,6 @@
                 <a href="${pageContext.request.contextPath}/instructor/certificates" class="sv-nav-link ${activePage == 'certificates' ? 'active' : ''}">
                     <i class="fas fa-certificate"></i><span>Certificates</span>
                 </a>
-                <a href="${pageContext.request.contextPath}/reports" class="sv-nav-link ${activePage == 'reports' ? 'active' : ''}">
-                    <i class="fas fa-chart-column"></i><span>Reports</span>
-                </a>
             </c:when>
             <c:when test="${sessionScope.userRole == 'Admin'}">
                 <a href="${pageContext.request.contextPath}/admin/users" class="sv-nav-link ${activePage == 'users' ? 'active' : ''}">

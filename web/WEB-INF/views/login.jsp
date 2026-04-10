@@ -11,6 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/auth-premium.css">
+    <jsp:include page="/WEB-INF/views/common/head-external-assets.jsp"/>
 </head>
 <body class="auth-page">
 <main class="auth-shell">
@@ -43,6 +44,12 @@
                 <h1 id="login-title">Login</h1>
                 <p>Access your account using your registration number or email.</p>
             </header>
+
+            <div class="theme-toolbar theme-toolbar-compact">
+                <button type="button" class="theme-toggle" data-theme-toggle aria-pressed="false">
+                    <span class="theme-toggle-label">Dark mode</span>
+                </button>
+            </div>
 
             <c:if test="${not empty sessionScope.successMessage}">
                 <div class="auth-alert auth-alert-success">${sessionScope.successMessage}</div>
@@ -88,5 +95,4 @@
 <script src="${pageContext.request.contextPath}/js/auth-v2.js"></script>
 </body>
 </html>
-
 

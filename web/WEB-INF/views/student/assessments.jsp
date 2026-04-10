@@ -17,7 +17,7 @@
 <jsp:include page="/WEB-INF/views/common/student-topbar.jsp"/>
 
 <div class="sv-layout">
-    <c:set var="activePage" value="my-courses"/>
+    <c:set var="activePage" value="${fromHub ? 'my-courses' : 'assessments'}"/>
     <jsp:include page="/WEB-INF/views/common/student-sidebar.jsp"/>
 
     <main class="sv-main">

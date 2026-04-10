@@ -23,9 +23,31 @@ public class PaystackService {
     private String apiUrl;
     private String currency;
     private String callbackUrl;
+    private String paymentMode;
     
     public PaystackService() {
         loadConfiguration();
+    }
+
+    private String readConfig(Properties props, String key, String envKey, String defaultValue) {
+        String envValue = System.getenv(envKey);
+        if (envValue != null && !envValue.trim().isEmpty()) {
+            return envValue.trim();
+        }
+        String propValue = props.getProperty(key, defaultValue);
+        return propValue == null ? "" : propValue.trim();
+    }
+
+    private boolean isPlaceholderKey(String value) {
+        if (value == null) {
+            return true;
+        }
+        String normalized = value.trim().toLowerCase();
+        return normalized.isEmpty()
+                || normalized.contains("your_secret_key_here")
+                || normalized.contains("your_public_key_here")
+                || normalized.contains("replace_with")
+                || normalized.contains("changeme");
     }
     
     /**
@@ -56,11 +78,13 @@ public class PaystackService {
             }
 
             props.load(input);
-            this.secretKey = props.getProperty("paystack.secret.key", "").trim();
-            this.publicKey = props.getProperty("paystack.public.key", "").trim();
-            this.apiUrl = props.getProperty("paystack.api.url", "https://api.paystack.co").trim();
-            this.currency = props.getProperty("paystack.currency", "NGN").trim();
-            this.callbackUrl = props.getProperty("paystack.callback.url", "").trim();
+            this.secretKey = readConfig(props, "paystack.secret.key", "PAYSTACK_SECRET_KEY", "");
+            this.publicKey = readConfig(props, "paystack.public.key", "PAYSTACK_PUBLIC_KEY", "");
+            this.apiUrl = readConfig(props, "paystack.api.url", "PAYSTACK_API_URL", "https://api.paystack.co");
+            this.currency = readConfig(props, "paystack.currency", "PAYSTACK_CURRENCY", "NGN");
+            this.callbackUrl = readConfig(props, "paystack.callback.url", "PAYSTACK_CALLBACK_URL", "");
+            this.paymentMode = readConfig(props, "paystack.mode", "PAYSTACK_MODE", "LIVE");
+            applyAdminOverrides();
 
             LOGGER.info("Paystack configuration loaded successfully. API URL=" + this.apiUrl + ", currency=" + this.currency);
             
@@ -72,6 +96,50 @@ public class PaystackService {
             this.apiUrl = "https://api.paystack.co";
             this.currency = "NGN";
             this.callbackUrl = "http://localhost:8080/PSME/student/payment-callback";
+            this.paymentMode = "LIVE";
+            applyAdminOverrides();
+        }
+    }
+
+    private void applyAdminOverrides() {
+        try {
+            String configuredMode = AppSettingsService.getString(AppSettingsService.KEY_PAYMENT_MODE, this.paymentMode);
+            if ("LIVE".equalsIgnoreCase(configuredMode) || "TEST".equalsIgnoreCase(configuredMode)) {
+                this.paymentMode = configuredMode.toUpperCase();
+            }
+
+            String configuredCurrency = AppSettingsService.getString(AppSettingsService.KEY_PAYMENT_CURRENCY, this.currency);
+            if (!configuredCurrency.isEmpty()) {
+                this.currency = configuredCurrency;
+            }
+
+            String configuredPublicKey = AppSettingsService.getString(AppSettingsService.KEY_PAYMENT_PAYSTACK_PUBLIC, "");
+            if (!configuredPublicKey.isEmpty() && configuredPublicKey.startsWith("pk_")) {
+                this.publicKey = configuredPublicKey;
+            }
+
+            String configuredSecretKey = AppSettingsService.getString(AppSettingsService.KEY_PAYMENT_PAYSTACK_SECRET, "");
+            if (!configuredSecretKey.isEmpty() && configuredSecretKey.startsWith("sk_")) {
+                this.secretKey = configuredSecretKey;
+            }
+
+            String configuredCallbackUrl = AppSettingsService.getString(AppSettingsService.KEY_PAYMENT_CALLBACK_URL, this.callbackUrl);
+            if (!configuredCallbackUrl.isEmpty()) {
+                this.callbackUrl = configuredCallbackUrl;
+            }
+
+            if ("TEST".equals(this.paymentMode)
+                    && ((this.publicKey != null && this.publicKey.startsWith("pk_live_"))
+                    || (this.secretKey != null && this.secretKey.startsWith("sk_live_")))) {
+                LOGGER.warning("Payment mode is TEST but live Paystack keys are configured.");
+            }
+            if ("LIVE".equals(this.paymentMode)
+                    && ((this.publicKey != null && this.publicKey.startsWith("pk_test_"))
+                    || (this.secretKey != null && this.secretKey.startsWith("sk_test_")))) {
+                LOGGER.warning("Payment mode is LIVE but test Paystack keys are configured.");
+            }
+        } catch (Exception ignored) {
+            // Keep file/env settings if DB settings are unavailable.
         }
     }
     
@@ -232,6 +300,17 @@ public class PaystackService {
      * Initialize a transaction with externally supplied reference (align internal ref & Paystack ref)
      */
     public Payment initializeTransaction(String email, Double amount, int enrollmentId, String reference) {
+        return initializeTransaction(email, amount, enrollmentId, reference, null);
+    }
+
+    /**
+     * Initialize a transaction with externally supplied reference and optional callback URL override.
+     */
+    public Payment initializeTransaction(String email,
+                                         Double amount,
+                                         int enrollmentId,
+                                         String reference,
+                                         String callbackUrlOverride) {
         LOGGER.info("Initializing Paystack transaction (external reference) enrollmentId=" + enrollmentId + ", reference=" + reference);
         try {
             int amountInKobo = (int) (amount * 100);
@@ -239,7 +318,12 @@ public class PaystackService {
             payload.put("email", email);
             payload.put("amount", amountInKobo);
             payload.put("currency", this.currency);
-            payload.put("callback_url", this.callbackUrl);
+            String effectiveCallback = (callbackUrlOverride != null && !callbackUrlOverride.trim().isEmpty())
+                    ? callbackUrlOverride.trim()
+                    : this.callbackUrl;
+            if (effectiveCallback != null && !effectiveCallback.isEmpty()) {
+                payload.put("callback_url", effectiveCallback);
+            }
             payload.put("reference", reference);
             payload.put("metadata", new JSONObject().put("enrollment_id", enrollmentId));
             
@@ -292,5 +376,16 @@ public class PaystackService {
      */
     public String getCurrency() {
         return this.currency;
+    }
+
+    public String getPaymentMode() {
+        return this.paymentMode;
+    }
+
+    public boolean isConfiguredForPayments() {
+        return !isPlaceholderKey(secretKey)
+                && !isPlaceholderKey(publicKey)
+                && secretKey.startsWith("sk_")
+                && publicKey.startsWith("pk_");
     }
 }

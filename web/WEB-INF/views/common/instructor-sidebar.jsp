@@ -18,11 +18,6 @@
         <a href="${pageContext.request.contextPath}/instructor/certificates" class="nav-item ${activeInstructorPage == 'certificates' ? 'active' : ''}">
             <i class="fas fa-certificate"></i><span>Certificates</span>
         </a>
-        <c:if test="${showInstructorReports == true}">
-            <a href="${pageContext.request.contextPath}/reports" class="nav-item ${activeInstructorPage == 'reports' ? 'active' : ''}">
-                <i class="fas fa-chart-column"></i><span>Reports</span>
-            </a>
-        </c:if>
         <a href="${pageContext.request.contextPath}/profile" class="nav-item ${activeInstructorPage == 'profile' ? 'active' : ''}">
             <i class="fas fa-user"></i><span>Profile / Settings</span>
         </a>

@@ -79,7 +79,11 @@
         <c:if test="${param.success == 'rreviewed'}"><div class="alert alert-success"><i class="fas fa-check-circle"></i> Retake request reviewed successfully.</div></c:if>
         <c:if test="${param.success == 'graded'}"><div class="alert alert-success"><i class="fas fa-check-circle"></i> Submission graded successfully.</div></c:if>
         <c:if test="${param.error == 'qoptions'}"><div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> Quiz requires options A/B and a correct option.</div></c:if>
-        <c:if test="${param.error != null and param.error != 'qoptions'}"><div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> Action failed. Please retry.</div></c:if>
+        <c:if test="${param.error == 'type'}"><div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> Assessment type is invalid. Choose Quiz, Exam, or Assignment.</div></c:if>
+        <c:if test="${param.error == 'placement'}"><div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> Selected placement material is invalid for this course.</div></c:if>
+        <c:if test="${param.error == 'assignmentschema'}"><div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> Assignment questions must be descriptive only (no options/correct option).</div></c:if>
+        <c:if test="${param.error == 'examschema'}"><div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> Exam questions with options must include A/B and a valid correct option; descriptive exam questions should not set a correct option.</div></c:if>
+        <c:if test="${param.error != null and param.error != 'qoptions' and param.error != 'type' and param.error != 'placement' and param.error != 'assignmentschema' and param.error != 'examschema'}"><div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> Action failed. Please retry.</div></c:if>
 
         <c:if test="${not empty selectedCourse}">
             <section class="ins-hero-card assessments-hero">

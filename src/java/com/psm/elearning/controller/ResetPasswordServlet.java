@@ -6,6 +6,7 @@ import com.psm.elearning.dao.PasswordResetTokenDAO;
 import com.psm.elearning.dao.PasswordResetTokenDAOImpl;
 import com.psm.elearning.model.User;
 import com.psm.elearning.model.PasswordResetToken;
+import com.psm.elearning.service.AppSettingsService;
 import com.psm.elearning.util.PasswordUtil;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -75,6 +76,21 @@ public class ResetPasswordServlet extends HttpServlet {
         
         if (!newPassword.equals(confirmPassword)) {
             request.setAttribute("error", "Passwords do not match");
+            request.setAttribute("token", token);
+            request.getRequestDispatcher("/WEB-INF/views/reset-password.jsp").forward(request, response);
+            return;
+        }
+
+        int minPasswordLength = AppSettingsService.getInt(AppSettingsService.KEY_SECURITY_MIN_PASSWORD_LENGTH, 8, 6, 64);
+        if (newPassword.length() < minPasswordLength) {
+            request.setAttribute("error", "Password must be at least " + minPasswordLength + " characters long");
+            request.setAttribute("token", token);
+            request.getRequestDispatcher("/WEB-INF/views/reset-password.jsp").forward(request, response);
+            return;
+        }
+
+        if (!PasswordUtil.isStrongPassword(newPassword)) {
+            request.setAttribute("error", "Password must include uppercase, lowercase, number, and special character");
             request.setAttribute("token", token);
             request.getRequestDispatcher("/WEB-INF/views/reset-password.jsp").forward(request, response);
             return;

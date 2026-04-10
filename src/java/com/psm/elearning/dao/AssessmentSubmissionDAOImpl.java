@@ -146,12 +146,13 @@ public class AssessmentSubmissionDAOImpl implements AssessmentSubmissionDAO {
 
     @Override
     public boolean gradeSubmission(int submissionId, Double score, String feedback) {
-        String sql = "UPDATE AssessmentSubmission SET Score=?, Feedback=? WHERE SubmissionID=?";
+        String sql = "UPDATE AssessmentSubmission SET Score=?, Feedback=?, Status=? WHERE SubmissionID=?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             if (score != null) ps.setDouble(1, score); else ps.setNull(1, Types.DECIMAL);
             ps.setString(2, feedback);
-            ps.setInt(3, submissionId);
+            ps.setString(3, score != null ? "Graded" : "Submitted");
+            ps.setInt(4, submissionId);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             System.err.println("AssessmentSubmission grade failed: " + e.getMessage());

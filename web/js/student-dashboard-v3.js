@@ -140,6 +140,15 @@
         searchInput.addEventListener('input', applyRowFilters);
     }
 
+    document.querySelectorAll('.sd3-continue-link').forEach(function (button) {
+        button.addEventListener('click', function () {
+            var targetUrl = button.getAttribute('data-href');
+            if (targetUrl) {
+                window.location.href = targetUrl;
+            }
+        });
+    });
+
     animateCounters();
     animateProgress();
     applyRowFilters();

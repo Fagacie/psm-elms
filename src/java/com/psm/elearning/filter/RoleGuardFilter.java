@@ -35,8 +35,15 @@ public class RoleGuardFilter implements Filter {
 
         HttpSession session = httpRequest.getSession(false);
         String role = resolveRole(session);
+        boolean hasValidUserId = hasValidUserId(session);
 
-        if (isProtectedPath(path) && role == null) {
+        if (session != null && (role != null && !hasValidUserId)) {
+            session.invalidate();
+            httpResponse.sendRedirect(contextPath + "/login");
+            return;
+        }
+
+        if (isProtectedPath(path) && (role == null || !hasValidUserId)) {
             httpResponse.sendRedirect(contextPath + "/login");
             return;
         }
@@ -55,6 +62,9 @@ public class RoleGuardFilter implements Filter {
     }
 
     private boolean isProtectedPath(String path) {
+        if ("/student/payment-callback".equals(path)) {
+            return false;
+        }
         return path.startsWith("/admin/")
                 || path.startsWith("/student/")
                 || path.startsWith("/instructor/")
@@ -85,6 +95,32 @@ public class RoleGuardFilter implements Filter {
         if (role == null) {
             role = session.getAttribute("userRole");
         }
-        return role != null ? String.valueOf(role) : null;
+        if (role == null) {
+            return null;
+        }
+
+        String normalized = String.valueOf(role).trim();
+        if (normalized.isEmpty()) {
+            return null;
+        }
+
+        if (User.ROLE_ADMIN.equalsIgnoreCase(normalized)) {
+            return User.ROLE_ADMIN;
+        }
+        if (User.ROLE_STUDENT.equalsIgnoreCase(normalized)) {
+            return User.ROLE_STUDENT;
+        }
+        if (User.ROLE_INSTRUCTOR.equalsIgnoreCase(normalized)) {
+            return User.ROLE_INSTRUCTOR;
+        }
+        return null;
+    }
+
+    private boolean hasValidUserId(HttpSession session) {
+        if (session == null) {
+            return false;
+        }
+        Object userId = session.getAttribute("userId");
+        return userId instanceof Integer && ((Integer) userId) > 0;
     }
 }

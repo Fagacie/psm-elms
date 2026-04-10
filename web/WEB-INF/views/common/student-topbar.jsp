@@ -13,6 +13,10 @@
         <div class="sv-page-title"><h1>${topbarTitle}</h1><p>${topbarSubtitle}</p></div>
     </div>
     <div class="sv-top-right">
+        <button type="button" class="theme-toggle" data-theme-toggle aria-pressed="false">
+            <i class="fas fa-circle-half-stroke" aria-hidden="true"></i>
+            <span class="theme-toggle-label">Dark mode</span>
+        </button>
         <a href="${pageContext.request.contextPath}/profile" class="sv-profile-link">
             <c:choose>
                 <c:when test="${not empty topbarProfilePicture}">

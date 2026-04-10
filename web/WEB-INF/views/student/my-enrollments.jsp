@@ -167,7 +167,7 @@
                                             <span>${progress}% complete</span>
                                             <span>#${enrollment.enrollmentId}</span>
                                         </div>
-                                        <button type="button" class="sv-btn primary me-continue-link" data-href="${enrollmentPaid ? pageContext.request.contextPath.concat('/student/enrollment-details?id=').concat(enrollment.enrollmentId) : pageContext.request.contextPath.concat('/student/payment?enrollmentId=').concat(enrollment.enrollmentId).concat('&error=required')}">${enrollmentPaid ? 'Continue' : 'Pay Now'}</button>
+                                        <a class="sv-btn primary me-continue-link" href="${enrollmentPaid ? pageContext.request.contextPath.concat('/student/enrollment-details?id=').concat(enrollment.enrollmentId) : pageContext.request.contextPath.concat('/student/payment?enrollmentId=').concat(enrollment.enrollmentId).concat('&error=required')}">${enrollmentPaid ? 'Continue' : 'Pay Now'}</a>
                                     </div>
                                 </article>
                             </c:forEach>

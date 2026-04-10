@@ -57,6 +57,16 @@ a {
   gap: 16px;
 }
 
+.sv-top-left {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.sv-top-right {
+  flex: 0 0 auto;
+  margin-left: auto;
+}
+
 .sv-profile-link {
   display: inline-flex;
   align-items: center;
@@ -121,6 +131,8 @@ a {
 .sv-page-title {
   padding-left: 16px;
   border-left: 1px solid var(--sv-border);
+  min-width: 0;
+  max-width: min(46vw, 560px);
 }
 
 .sv-page-title h1 {
@@ -128,12 +140,18 @@ a {
   font-size: 1rem;
   font-weight: 700;
   letter-spacing: -0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .sv-page-title p {
   margin: 4px 0 0;
   color: var(--sv-muted);
   font-size: 0.84rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .sv-logout,
@@ -728,6 +746,14 @@ textarea:focus-visible {
 }
 
 @media (max-width: 1024px) {
+  .sv-page-title {
+    max-width: min(34vw, 320px);
+  }
+
+  .sv-profile-link span {
+    display: none;
+  }
+
   .sv-main {
     margin-left: 0;
     width: 100%;

@@ -2,6 +2,7 @@ package com.psm.elearning.controller;
 
 import com.psm.elearning.dao.*;
 import com.psm.elearning.model.*;
+import com.psm.elearning.service.EnrollmentStateSyncService;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -11,8 +12,12 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class DashboardServlet extends HttpServlet {
+
+    private static final Logger LOGGER = Logger.getLogger(DashboardServlet.class.getName());
 
     private EnrollmentDAO enrollmentDAO;
     private CourseDAO courseDAO;
@@ -21,6 +26,7 @@ public class DashboardServlet extends HttpServlet {
     private CertificateDAO certificateDAO;
     private InstructorApplicationDAO applicationDAO;
     private NotificationDAO notificationDAO;
+    private EnrollmentStateSyncService enrollmentStateSyncService;
 
     @Override
     public void init() throws ServletException {
@@ -32,6 +38,7 @@ public class DashboardServlet extends HttpServlet {
         certificateDAO = new CertificateDAOImpl();
         applicationDAO = new InstructorApplicationDAOImpl();
         notificationDAO = new NotificationDAOImpl();
+        enrollmentStateSyncService = new EnrollmentStateSyncService();
     }
 
     @Override
@@ -72,6 +79,7 @@ public class DashboardServlet extends HttpServlet {
 
                 if (enrolledCourses != null) {
                     for (Enrollment enrollment : enrolledCourses) {
+                        enrollmentStateSyncService.syncEnrollmentState(enrollment);
                         String completion = enrollment.getCompletionStatus();
                         String status = enrollment.getStatus();
                         String payment = enrollment.getPaymentStatus();
@@ -112,7 +120,7 @@ public class DashboardServlet extends HttpServlet {
                 request.setAttribute("dashboardDate", LocalDate.now());
                 
             } catch (Exception e) {
-                e.printStackTrace();
+                LOGGER.log(Level.WARNING, "Student dashboard data load failed", e);
                 // Continue to render page even if data fetch fails
             }
         }
@@ -193,12 +201,9 @@ public class DashboardServlet extends HttpServlet {
                 
                 request.setAttribute("systemMetrics", systemMetrics);
                 request.setAttribute("adminName", user.getFullName());
-                
-                System.out.println("[DEBUG] Admin Dashboard Metrics: " + systemMetrics);
-                
+
             } catch (Exception e) {
-                System.err.println("[ERROR] Failed to load admin dashboard metrics: " + e.getMessage());
-                e.printStackTrace();
+                LOGGER.log(Level.SEVERE, "Failed to load admin dashboard metrics", e);
             }
             
             request.getRequestDispatcher("/WEB-INF/views/admin/admin-dashboard.jsp").forward(request, response);
@@ -209,12 +214,9 @@ public class DashboardServlet extends HttpServlet {
         if ("Instructor".equals(role)) {
             try {
                 Integer userId = user.getUserId();
-                System.out.println("[DEBUG] Instructor Dashboard - UserID: " + userId);
-                System.out.println("[DEBUG] Instructor Dashboard - User: " + user.getFullName());
                 
                 // Populate courses created by this instructor
                 List courses = courseDAO.findByInstructor(userId);
-                System.out.println("[DEBUG] Retrieved " + (courses != null ? courses.size() : 0) + " courses for instructor");
                 request.setAttribute("courses", courses);
                 
                 // Gather instructor statistics
@@ -223,10 +225,7 @@ public class DashboardServlet extends HttpServlet {
                 Integer totalEnrollments = enrollmentDAO.countEnrollmentsByInstructor(userId);
                 Integer pendingEnrollments = enrollmentDAO.countPendingEnrollmentsByInstructor(userId);
                 Integer activeEnrollments = enrollmentDAO.countActiveEnrollmentsByInstructor(userId);
-                
-                System.out.println("[DEBUG] Instructor Stats - Courses: " + totalCourses + ", Students: " + totalStudents + 
-                                   ", Total Enrollments: " + totalEnrollments + ", Pending: " + pendingEnrollments);
-                
+
                 request.setAttribute("totalCourses", totalCourses);
                 request.setAttribute("totalStudents", totalStudents);
                 request.setAttribute("totalEnrollments", totalEnrollments);
@@ -234,8 +233,7 @@ public class DashboardServlet extends HttpServlet {
                 request.setAttribute("activeEnrollments", activeEnrollments);
             } catch (Exception e) {
                 // Log and continue; view will render empty state
-                System.err.println("[ERROR] Failed to load instructor dashboard: " + e.getMessage());
-                e.printStackTrace();
+                LOGGER.log(Level.WARNING, "Failed to load instructor dashboard", e);
             }
             request.getRequestDispatcher("/WEB-INF/views/instructor/instructor-dashboard.jsp").forward(request, response);
         } else {

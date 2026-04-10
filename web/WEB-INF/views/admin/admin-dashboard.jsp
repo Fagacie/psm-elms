@@ -14,7 +14,7 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin-dashboard.css">
     <jsp:include page="/WEB-INF/views/common/head-external-assets.jsp"/>
 </head>
-<body>
+<body class="admin-page">
 <jsp:include page="/WEB-INF/views/common/admin-header.jsp">
     <jsp:param name="pageTitle" value="Admin Dashboard"/>
     <jsp:param name="pageSubtitle" value="Manage platform operations from one structured workspace"/>

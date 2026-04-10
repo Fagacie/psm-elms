@@ -75,6 +75,40 @@ public class PaymentDAOImpl implements PaymentDAO {
         }
         return false;
     }
+
+    @Override
+    public boolean refreshPaymentInitialization(Integer paymentId,
+                                                Double amount,
+                                                String method,
+                                                String reference,
+                                                String accessCode,
+                                                String authorizationUrl,
+                                                String paystackStatus) {
+        String sql = "UPDATE Payment SET Amount = ?, PaymentMethod = ?, PaymentStatus = ?, Reference = ?, PaymentRef = ?, "
+                + "PaystackReference = ?, AccessCode = ?, AuthorizationUrl = ?, PaystackStatus = ? WHERE PaymentID = ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            if (amount != null) {
+                ps.setDouble(1, amount);
+            } else {
+                ps.setNull(1, Types.DECIMAL);
+            }
+            ps.setString(2, method);
+            ps.setString(3, "Pending");
+            ps.setString(4, reference);
+            ps.setString(5, reference);
+            ps.setString(6, reference);
+            ps.setString(7, accessCode);
+            ps.setString(8, authorizationUrl);
+            ps.setString(9, paystackStatus == null ? "pending" : paystackStatus);
+            ps.setInt(10, paymentId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error refreshing payment initialization paymentId=" + paymentId, e);
+            return false;
+        }
+    }
     
     @Override
     public Payment getPaymentByEnrollmentId(Integer enrollmentId) {

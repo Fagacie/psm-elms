@@ -404,6 +404,7 @@ textarea {
   border-radius: 12px;
   background: #ffffff;
   box-shadow: var(--admin-shadow);
+  overflow: hidden;
 }
 
 .section-header {
@@ -762,7 +763,7 @@ a:focus-visible {
   width: 100%;
   min-width: 760px;
   border-collapse: separate;
-  border-spacing: 0 10px;
+  border-spacing: 0 12px;
   font-size: 0.88rem;
 }
 
@@ -780,8 +781,9 @@ a:focus-visible {
   padding: 16px;
   border-top: 1px solid var(--admin-border);
   border-bottom: 1px solid var(--admin-border);
-  background: #ffffff;
+  background: linear-gradient(180deg, #ffffff 0%, #fcfcfd 100%);
   color: var(--admin-text);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .data-table td:first-child {
@@ -796,22 +798,23 @@ a:focus-visible {
 
 .data-table tbody tr:hover td {
   background: var(--admin-accent-soft);
+  border-color: rgba(20, 83, 45, 0.16);
 }
 
 .admin-form-layout {
   display: grid;
-  gap: 14px;
+  gap: 18px;
 }
 
 .admin-form-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 12px;
+  gap: 16px;
 }
 
 .admin-form-group {
   display: grid;
-  gap: 6px;
+  gap: 8px;
 }
 
 .admin-form-group label {
@@ -820,6 +823,100 @@ a:focus-visible {
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+.section-body {
+  padding: 18px 24px 24px;
+}
+
+.section-body-form {
+  padding-top: 12px;
+}
+
+.admin-form-group input,
+.admin-form-group select,
+.admin-form-group textarea,
+.form-input,
+.form-select,
+.form-textarea {
+  width: 100%;
+  min-height: 46px;
+  border: 1px solid var(--admin-border-strong);
+  border-radius: 10px;
+  background: linear-gradient(180deg, #ffffff 0%, #fcfcfd 100%);
+  color: var(--admin-text);
+  padding: 11px 13px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease, background-color 0.2s ease;
+}
+
+.admin-form-group textarea,
+.form-textarea {
+  min-height: 128px;
+  resize: vertical;
+  line-height: 1.6;
+}
+
+.admin-form-group input::placeholder,
+.admin-form-group textarea::placeholder,
+.form-input::placeholder,
+.form-textarea::placeholder {
+  color: #94a3b8;
+}
+
+.admin-form-group input:hover,
+.admin-form-group select:hover,
+.admin-form-group textarea:hover,
+.form-input:hover,
+.form-select:hover,
+.form-textarea:hover {
+  border-color: #cbd5e1;
+}
+
+.admin-form-group input:focus,
+.admin-form-group select:focus,
+.admin-form-group textarea:focus,
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: var(--admin-accent);
+  box-shadow: 0 0 0 4px var(--admin-accent-outline);
+  transform: translateY(-1px);
+}
+
+.admin-note {
+  color: var(--admin-muted);
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+
+.admin-required {
+  color: #b91c1c;
+}
+
+.admin-role-panel {
+  display: grid;
+  gap: 16px;
+  padding: 20px;
+  border: 1px solid var(--admin-border);
+  border-radius: 12px;
+  background: linear-gradient(180deg, #ffffff 0%, #fcfcfd 100%);
+}
+
+.admin-role-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--admin-border);
+}
+
+.admin-role-panel-head h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
 .admin-form-actions {
@@ -921,6 +1018,37 @@ a:focus-visible {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+}
+
+.admin-action-bar {
+  padding: 16px 24px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  border-top: 1px solid #eef2f7;
+}
+
+.admin-action-bar-copy {
+  display: grid;
+  gap: 4px;
+}
+
+.admin-action-bar-copy strong {
+  font-size: 0.96rem;
+  color: var(--admin-text);
+}
+
+.admin-action-bar-copy span {
+  color: var(--admin-muted);
+  font-size: 0.84rem;
+}
+
+.admin-action-bar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .empty-state-inset {
@@ -1123,6 +1251,16 @@ textarea:focus {
   background: #ffffff;
 }
 
+.empty-state strong {
+  color: var(--admin-text);
+  font-size: 0.98rem;
+}
+
+.empty-state p {
+  margin: 0;
+  max-width: 48ch;
+}
+
 body.admin-modal-open {
   overflow: hidden;
 }
@@ -1159,6 +1297,14 @@ body.admin-modal-open {
   display: grid;
   grid-template-rows: auto 1fr;
   overflow: hidden;
+  transform: translateY(8px);
+  opacity: 0;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.admin-modal.active .admin-modal-dialog {
+  transform: translateY(0);
+  opacity: 1;
 }
 
 .admin-modal-header {
@@ -1192,6 +1338,7 @@ body.admin-modal-open {
 .admin-modal-close:hover {
   border-color: var(--admin-accent);
   color: var(--admin-accent);
+  background: var(--admin-accent-soft);
 }
 
 .admin-modal-iframe {

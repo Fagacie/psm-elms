@@ -6,6 +6,7 @@ import com.psm.elearning.dao.UserDAO;
 import com.psm.elearning.dao.UserDAOImpl;
 import com.psm.elearning.model.Student;
 import com.psm.elearning.model.User;
+import com.psm.elearning.service.AppSettingsService;
 import com.psm.elearning.util.CloudinaryUtil;
 import com.psm.elearning.util.EmailUtil;
 import com.psm.elearning.util.PasswordUtil;
@@ -20,9 +21,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Paths;
 import java.util.Locale;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @MultipartConfig(maxFileSize = 5242880)
 public class RegisterServlet extends HttpServlet {
+
+    private static final Logger LOGGER = Logger.getLogger(RegisterServlet.class.getName());
 
     private UserDAO userDAO;
     private StudentDAO studentDAO;
@@ -93,8 +98,9 @@ public class RegisterServlet extends HttpServlet {
             return;
         }
 
-        if (!PasswordUtil.isStrongPassword(password)) {
-            request.setAttribute("error", "Password must be at least 8 characters with uppercase, lowercase, number, and special character.");
+        int minPasswordLength = AppSettingsService.getInt(AppSettingsService.KEY_SECURITY_MIN_PASSWORD_LENGTH, 8, 6, 64);
+        if (!PasswordUtil.isStrongPassword(password) || password.length() < minPasswordLength) {
+            request.setAttribute("error", "Password must be at least " + minPasswordLength + " characters with uppercase, lowercase, number, and special character.");
             request.getRequestDispatcher("/WEB-INF/views/register.jsp").forward(request, response);
             return;
         }
@@ -182,7 +188,7 @@ public class RegisterServlet extends HttpServlet {
             try {
                 student.setDob(java.time.LocalDate.parse(dob));
             } catch (Exception e) {
-                System.err.println("Failed to parse DOB: " + e.getMessage());
+                LOGGER.log(Level.WARNING, "Failed to parse DOB", e);
             }
         }
 
@@ -207,7 +213,7 @@ public class RegisterServlet extends HttpServlet {
             try {
                 EmailUtil.sendRegistrationEmail(emailCopy, nameCopy, regCopy);
             } catch (Exception e) {
-                System.err.println("Failed to send registration email: " + e.getMessage());
+                LOGGER.log(Level.WARNING, "Failed to send registration email", e);
             }
         }).start();
 

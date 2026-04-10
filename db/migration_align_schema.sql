@@ -159,6 +159,8 @@ ALTER TABLE `Assessment`
   ADD COLUMN IF NOT EXISTS `Duration` INT NULL,
   ADD COLUMN IF NOT EXISTS `TotalMarks` INT NULL,
   ADD COLUMN IF NOT EXISTS `Instructions` TEXT NULL,
+  ADD COLUMN IF NOT EXISTS `PlacementType` VARCHAR(20) NOT NULL DEFAULT 'final',
+  ADD COLUMN IF NOT EXISTS `PlacementMaterialID` INT NULL,
   ADD COLUMN IF NOT EXISTS `MaxAttempts` INT NOT NULL DEFAULT 1,
   ADD COLUMN IF NOT EXISTS `QuestionsPerPage` INT NOT NULL DEFAULT 2,
   ADD COLUMN IF NOT EXISTS `CreatedBy` INT NOT NULL DEFAULT 0;
@@ -171,9 +173,45 @@ UPDATE `Assessment`
    SET `Instructions` = COALESCE(`Instructions`, `Description`)
  WHERE `Description` IS NOT NULL;
 
+UPDATE `Assessment`
+   SET `PlacementType` = CASE
+         WHEN `Instructions` REGEXP '##PLACEMENT:afterMaterial:[0-9]+##' THEN 'afterMaterial'
+         ELSE 'final'
+       END
+ WHERE `PlacementType` IS NULL OR TRIM(`PlacementType`) = '';
+
+UPDATE `Assessment`
+   SET `PlacementMaterialID` = CASE
+         WHEN `Instructions` REGEXP '##PLACEMENT:afterMaterial:[0-9]+##'
+           THEN CAST(
+             REPLACE(
+               REPLACE(
+                 REGEXP_SUBSTR(`Instructions`, '##PLACEMENT:afterMaterial:[0-9]+##'),
+                 '##PLACEMENT:afterMaterial:',
+                 ''
+               ),
+               '##',
+               ''
+             ) AS UNSIGNED
+           )
+         ELSE NULL
+       END
+ WHERE `PlacementMaterialID` IS NULL;
+
+UPDATE `Assessment`
+   SET `Instructions` = TRIM(REPLACE(`Instructions`, REGEXP_SUBSTR(`Instructions`, '##PLACEMENT:[^#]+##'), ''))
+ WHERE `Instructions` REGEXP '##PLACEMENT:[^#]+##';
+
+ALTER TABLE `Assessment`
+  ADD INDEX IF NOT EXISTS `idx_assessment_placement_material` (`PlacementMaterialID`);
+
 ALTER TABLE `Assessment`
   ADD CONSTRAINT `fk_assessment_creator` FOREIGN KEY (`CreatedBy`) REFERENCES `User`(`UserID`)
   ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE `Assessment`
+  ADD CONSTRAINT `fk_assessment_placement_material` FOREIGN KEY (`PlacementMaterialID`) REFERENCES `Material`(`MaterialID`)
+  ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- -----------------------
 -- AssessmentQuestion

@@ -68,13 +68,6 @@
                 </div>
             </section>
 
-            <!-- Breadcrumb Navigation -->
-            <div class="breadcrumb">
-                <a href="${pageContext.request.contextPath}/instructor/courses">
-                    <i class="fas fa-arrow-left"></i> Back to Courses
-                </a>
-            </div>
-
             <!-- Error Messages -->
             <c:if test="${not empty errorMessage}">
                 <div class="alert alert-error">
@@ -128,7 +121,7 @@
                             </div>
                             <div class="form-group">
                                 <label for="duration">Duration</label>
-                                <div style="display:grid; grid-template-columns: 1fr auto; gap:10px;">
+                                <div class="duration-combo">
                                     <input type="number" id="duration" name="duration" class="form-input" min="1" value="${course != null ? course.durationValueForDisplay : ''}">
                                     <select id="durationUnit" name="durationUnit" class="form-select">
                                         <option value="days" ${course != null && course.durationUnitGuess == 'days' ? 'selected' : ''}>Days</option>
@@ -145,7 +138,7 @@
                             <small class="text-muted">Recommended size: 1280x720. Max: 5MB.</small>
                             <c:if test="${mode == 'edit' && not empty course.courseBanner}">
                                 <div style="margin-top:12px;">
-                                    <img src="${course.courseBanner}" alt="Current course banner" style="max-width:320px; width:100%; border:1px solid #ddd; border-radius:12px;">
+                                    <img src="${course.courseBanner}" alt="Current course banner" class="course-banner-preview">
                                 </div>
                             </c:if>
                         </div>

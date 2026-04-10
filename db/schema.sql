@@ -59,6 +59,29 @@ CREATE TABLE IF NOT EXISTS `Admin` (
   CONSTRAINT `fk_admin_user` FOREIGN KEY (`UserID`) REFERENCES `User`(`UserID`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- Application Settings
+CREATE TABLE IF NOT EXISTS `AppSetting` (
+  `SettingKey` VARCHAR(120) PRIMARY KEY,
+  `SettingValue` TEXT NULL,
+  `UpdatedBy` INT NULL,
+  `CreatedAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `UpdatedAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  CONSTRAINT `fk_app_setting_updated_by` FOREIGN KEY (`UpdatedBy`) REFERENCES `User`(`UserID`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `AppSettingAudit` (
+  `AuditID` INT AUTO_INCREMENT PRIMARY KEY,
+  `SettingKey` VARCHAR(120) NOT NULL,
+  `OldValue` TEXT NULL,
+  `NewValue` TEXT NULL,
+  `ChangedBy` INT NULL,
+  `ChangedAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  KEY `idx_app_setting_audit_key` (`SettingKey`),
+  KEY `idx_app_setting_audit_changed_at` (`ChangedAt`),
+  CONSTRAINT `fk_app_setting_audit_setting_key` FOREIGN KEY (`SettingKey`) REFERENCES `AppSetting`(`SettingKey`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_app_setting_audit_changed_by` FOREIGN KEY (`ChangedBy`) REFERENCES `User`(`UserID`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 -- Instructor Applications
 CREATE TABLE IF NOT EXISTS `InstructorApplication` (
   `ApplicationID` INT AUTO_INCREMENT PRIMARY KEY,
@@ -217,13 +240,17 @@ CREATE TABLE IF NOT EXISTS `Assessment` (
   `Duration` INT NULL,
   `TotalMarks` INT NULL,
   `Instructions` TEXT NULL,
+  `PlacementType` VARCHAR(20) NOT NULL DEFAULT 'final',
+  `PlacementMaterialID` INT NULL,
   `MaxAttempts` INT NOT NULL DEFAULT 1,
   `QuestionsPerPage` INT NOT NULL DEFAULT 2,
   `CreatedAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `CreatedBy` INT NOT NULL,
   KEY `idx_assessment_course` (`CourseID`),
+  KEY `idx_assessment_placement_material` (`PlacementMaterialID`),
   CONSTRAINT `fk_assessment_course` FOREIGN KEY (`CourseID`) REFERENCES `Course`(`CourseID`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `fk_assessment_creator` FOREIGN KEY (`CreatedBy`) REFERENCES `User`(`UserID`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `fk_assessment_creator` FOREIGN KEY (`CreatedBy`) REFERENCES `User`(`UserID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_assessment_placement_material` FOREIGN KEY (`PlacementMaterialID`) REFERENCES `Material`(`MaterialID`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Assessment Questions
