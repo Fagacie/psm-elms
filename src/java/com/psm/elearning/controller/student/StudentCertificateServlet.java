@@ -18,6 +18,7 @@ import com.psm.elearning.model.User;
 import com.psm.elearning.service.EnrollmentStateSyncService;
 import com.psm.elearning.util.CloudinaryUtil;
 import com.psm.elearning.util.QRUtil;
+import com.psm.elearning.util.SessionUtil;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -48,7 +49,7 @@ public class StudentCertificateServlet extends HttpServlet {
             return;
         }
 
-        Integer userId = (Integer) session.getAttribute("userId");
+        Integer userId = SessionUtil.resolveUserId(session);
         Integer enrollmentId = parseInt(request.getParameter("enrollmentId"));
         if (enrollmentId == null) {
             response.sendRedirect(request.getContextPath() + "/student/my-enrollments?error=invalid");
@@ -103,7 +104,7 @@ public class StudentCertificateServlet extends HttpServlet {
             return;
         }
 
-        Integer userId = (Integer) session.getAttribute("userId");
+        Integer userId = SessionUtil.resolveUserId(session);
         String redirectTo = request.getParameter("redirectTo");
         boolean backToCertificates = "certificates".equalsIgnoreCase(redirectTo);
         Integer enrollmentId = parseInt(request.getParameter("enrollmentId"));
@@ -237,10 +238,7 @@ public class StudentCertificateServlet extends HttpServlet {
     }
 
     private boolean isStudent(HttpSession session) {
-        if (session == null || session.getAttribute("userId") == null) return false;
-        Object role = session.getAttribute("userRole");
-        if (role == null) role = session.getAttribute("role");
-        return "Student".equals(role);
+        return SessionUtil.resolveUserId(session) != null && "Student".equals(SessionUtil.resolveRole(session));
     }
 }
 

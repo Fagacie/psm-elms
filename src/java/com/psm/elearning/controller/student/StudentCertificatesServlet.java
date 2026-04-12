@@ -8,6 +8,7 @@ import com.psm.elearning.model.Certificate;
 import com.psm.elearning.model.CertificateView;
 import com.psm.elearning.model.Enrollment;
 import com.psm.elearning.service.EnrollmentStateSyncService;
+import com.psm.elearning.util.SessionUtil;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -34,7 +35,7 @@ public class StudentCertificatesServlet extends HttpServlet {
             return;
         }
 
-        Integer userId = resolveUserId(session);
+        Integer userId = SessionUtil.resolveUserId(session);
         if (userId == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
@@ -87,30 +88,6 @@ public class StudentCertificatesServlet extends HttpServlet {
     }
 
     private boolean isStudent(HttpSession session) {
-        if (session == null || session.getAttribute("userId") == null) return false;
-        Object role = session.getAttribute("userRole");
-        if (role == null) role = session.getAttribute("role");
-        return "Student".equals(role);
-    }
-
-    private Integer resolveUserId(HttpSession session) {
-        if (session == null) return null;
-        Object userId = session.getAttribute("userId");
-        if (userId == null) return null;
-        
-        if (userId instanceof Integer) {
-            int id = (Integer) userId;
-            return id > 0 ? id : null;
-        }
-        
-        if (userId instanceof String) {
-            try {
-                int id = Integer.parseInt((String) userId);
-                return id > 0 ? id : null;
-            } catch (NumberFormatException e) {
-                return null;
-            }
-        }
-        return null;
+        return SessionUtil.resolveUserId(session) != null && "Student".equals(SessionUtil.resolveRole(session));
     }
 }

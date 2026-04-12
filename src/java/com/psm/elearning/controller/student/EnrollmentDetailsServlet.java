@@ -22,6 +22,7 @@ import com.psm.elearning.model.AssessmentSubmission;
 import com.psm.elearning.util.AssessmentPlacementUtil;
 import com.psm.elearning.service.AppSettingsService;
 import com.psm.elearning.service.EnrollmentStateSyncService;
+import com.psm.elearning.util.SessionUtil;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -189,20 +190,18 @@ public class EnrollmentDetailsServlet extends HttpServlet {
             throws ServletException, IOException {
         
         HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("userId") == null) {
+        if (SessionUtil.resolveUserId(session) == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
         
-        String role = (String) session.getAttribute("role");
-        if (role == null) role = (String) session.getAttribute("userRole");
-        if (!"Student".equals(role)) {
+        if (!"Student".equals(SessionUtil.resolveRole(session))) {
             response.sendRedirect(request.getContextPath() + "/dashboard");
             return;
         }
         
         try {
-            Integer userId = (Integer) session.getAttribute("userId");
+            Integer userId = SessionUtil.resolveUserId(session);
             Integer enrollmentId = Integer.parseInt(request.getParameter("id"));
             
             Enrollment enrollment = enrollmentDAO.getEnrollment(enrollmentId);
@@ -767,7 +766,7 @@ public class EnrollmentDetailsServlet extends HttpServlet {
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "EnrollmentDetailsServlet: Error loading enrollment details", e);
             try {
-                Integer userId = (Integer) session.getAttribute("userId");
+                Integer userId = SessionUtil.resolveUserId(session);
                 Integer fallbackEnrollmentId = null;
                 String fallbackId = request.getParameter("id");
                 if (fallbackId != null && !fallbackId.trim().isEmpty()) {

@@ -10,6 +10,7 @@ import com.psm.elearning.model.Assessment;
 import com.psm.elearning.model.Course;
 import com.psm.elearning.model.Material;
 import com.psm.elearning.util.AssessmentPlacementUtil;
+import com.psm.elearning.util.SessionUtil;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -40,7 +41,7 @@ public class InstructorContentOrganizerServlet extends HttpServlet {
             return;
         }
 
-        Integer userId = resolveUserId(session);
+        Integer userId = SessionUtil.resolveUserId(session);
         if (userId == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
@@ -113,7 +114,7 @@ public class InstructorContentOrganizerServlet extends HttpServlet {
             return;
         }
 
-        Integer userId = (Integer) session.getAttribute("userId");
+        Integer userId = SessionUtil.resolveUserId(session);
         String action = normalize(request.getParameter("action"));
         Integer courseId = parseInt(request.getParameter("courseId"));
 
@@ -223,7 +224,7 @@ public class InstructorContentOrganizerServlet extends HttpServlet {
     }
 
     private boolean isInstructor(HttpSession session) {
-        return session != null && "Instructor".equals(session.getAttribute("userRole"));
+        return SessionUtil.resolveUserId(session) != null && "Instructor".equals(SessionUtil.resolveRole(session));
     }
 
     private Integer parseInt(String value) {
@@ -233,27 +234,6 @@ public class InstructorContentOrganizerServlet extends HttpServlet {
         } catch (NumberFormatException e) {
             return null;
         }
-    }
-
-    private Integer resolveUserId(HttpSession session) {
-        if (session == null) return null;
-        Object userId = session.getAttribute("userId");
-        if (userId == null) return null;
-        
-        if (userId instanceof Integer) {
-            int id = (Integer) userId;
-            return id > 0 ? id : null;
-        }
-        
-        if (userId instanceof String) {
-            try {
-                int id = Integer.parseInt((String) userId);
-                return id > 0 ? id : null;
-            } catch (NumberFormatException e) {
-                return null;
-            }
-        }
-        return null;
     }
 
     private String normalize(String value) {

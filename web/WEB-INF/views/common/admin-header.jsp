@@ -2,6 +2,46 @@
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <c:set var="headerUser" value="${empty user ? sessionScope.user : user}"/>
 <c:set var="headerProfilePicture" value="${not empty headerUser ? headerUser.profilePicture : null}"/>
+<c:set var="currentPath" value="${pageContext.request.requestURI}"/>
+<c:set var="resolvedAdminTitle" value="Admin"/>
+<c:set var="resolvedAdminSubtitle" value="Manage platform operations and governance"/>
+
+<c:choose>
+    <c:when test="${not empty param.pageTitle}">
+        <c:set var="resolvedAdminTitle" value="${param.pageTitle}"/>
+    </c:when>
+    <c:when test="${fn:contains(currentPath, '/admin/users')}">
+        <c:set var="resolvedAdminTitle" value="Users"/>
+    </c:when>
+    <c:when test="${fn:contains(currentPath, '/admin/courses')}">
+        <c:set var="resolvedAdminTitle" value="Courses"/>
+    </c:when>
+    <c:when test="${fn:contains(currentPath, '/admin/payments')}">
+        <c:set var="resolvedAdminTitle" value="Payments"/>
+    </c:when>
+    <c:when test="${fn:contains(currentPath, '/admin/enrollments')}">
+        <c:set var="resolvedAdminTitle" value="Enrollments"/>
+    </c:when>
+    <c:when test="${fn:contains(currentPath, '/admin/certificates')}">
+        <c:set var="resolvedAdminTitle" value="Certificates"/>
+    </c:when>
+    <c:when test="${fn:contains(currentPath, '/admin/settings')}">
+        <c:set var="resolvedAdminTitle" value="Settings"/>
+    </c:when>
+    <c:when test="${fn:contains(currentPath, '/reports')}">
+        <c:set var="resolvedAdminTitle" value="Reports"/>
+    </c:when>
+    <c:when test="${fn:contains(currentPath, '/profile')}">
+        <c:set var="resolvedAdminTitle" value="Profile"/>
+    </c:when>
+</c:choose>
+
+<c:if test="${not empty param.pageSubtitle}">
+    <c:set var="resolvedAdminSubtitle" value="${param.pageSubtitle}"/>
+</c:if>
+
+<c:set var="adminContextCourse" value="${not empty selectedCourse ? selectedCourse.courseName : not empty course ? course.courseName : ''}"/>
+<c:set var="adminContextAssessment" value="${not empty selectedAssessment ? selectedAssessment.title : ''}"/>
 <header class="app-header">
     <div class="header-left">
         <a href="${pageContext.request.contextPath}/dashboard" class="dashboard-brand" aria-label="PSM E-Learning home">
@@ -9,22 +49,14 @@
             <span class="dashboard-brand-sub">E-Learning</span>
         </a>
         <div class="dashboard-title-copy">
-            <c:choose>
-                <c:when test="${not empty param.pageTitle}">
-                    <h1 class="page-title"><c:out value="${param.pageTitle}"/></h1>
-                </c:when>
-                <c:otherwise>
-                    <h1 class="page-title">Admin</h1>
-                </c:otherwise>
-            </c:choose>
-            <c:choose>
-                <c:when test="${not empty param.pageSubtitle}">
-                    <p><c:out value="${param.pageSubtitle}"/></p>
-                </c:when>
-                <c:otherwise>
-                    <p>Manage platform operations and governance</p>
-                </c:otherwise>
-            </c:choose>
+            <h1 class="page-title"><c:out value="${resolvedAdminTitle}"/></h1>
+            <p><c:out value="${resolvedAdminSubtitle}"/></p>
+            <c:if test="${not empty adminContextCourse or not empty adminContextAssessment}">
+                <div class="header-context-row">
+                    <c:if test="${not empty adminContextCourse}"><span class="header-context-chip"><i class="fas fa-book-open"></i><c:out value="${adminContextCourse}"/></span></c:if>
+                    <c:if test="${not empty adminContextAssessment}"><span class="header-context-chip"><i class="fas fa-clipboard-check"></i><c:out value="${adminContextAssessment}"/></span></c:if>
+                </div>
+            </c:if>
         </div>
     </div>
     <div class="header-right">

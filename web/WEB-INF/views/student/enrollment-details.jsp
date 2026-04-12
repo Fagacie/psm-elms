@@ -13,7 +13,7 @@
 </head>
 <body class="sv-page">
 <c:set var="topbarTitle" value="Learning Hub"/>
-<c:set var="topbarSubtitle" value="${enrollment.courseName}"/>
+<c:set var="topbarSubtitle" value="Track progress and continue learning"/>
 <jsp:include page="/WEB-INF/views/common/student-topbar.jsp"/>
 
 <div class="sv-layout">
@@ -26,7 +26,7 @@
             <span>/</span>
             <a href="${pageContext.request.contextPath}/student/my-enrollments">My Courses</a>
             <span>/</span>
-            <span>${enrollment.courseName}</span>
+            <span>Learning Hub</span>
         </div>
 
         <c:set var="isPaymentComplete" value="${enrollment.paymentStatus == 'Paid' || enrollment.paymentStatus == 'COMPLETED' || enrollment.paymentStatus == 'Completed' || enrollment.paymentStatus == 'SUCCESS' || enrollment.paymentStatus == 'success'}"/>
@@ -56,102 +56,10 @@
             </div>
         </section>
 
-        <section class="ed-flow-banner">
-            <div class="ed-flow-copy">
-                <span class="ed-flow-kicker">Enrollment Flow Status</span>
-                <h3>${certificatePrimaryActionLabel}</h3>
-                <p>${certificateReadinessHint}</p>
-            </div>
-            <div class="ed-flow-steps">
-                <div class="ed-flow-step ${certificatePaidReady ? 'is-done' : 'is-pending'}">
-                    <span>1. Payment</span>
-                    <strong>${certificatePaidReady ? 'Complete' : 'Pending'}</strong>
-                </div>
-                <div class="ed-flow-step ${certificateCompletedReady ? 'is-done' : 'is-pending'}">
-                    <span>2. Learning</span>
-                    <strong>
-                        <c:choose>
-                            <c:when test="${certificateCompletedReady}">Complete</c:when>
-                            <c:otherwise>${certificateRemainingMaterials} left</c:otherwise>
-                        </c:choose>
-                    </strong>
-                </div>
-                <div class="ed-flow-step ${certificateAssessmentsReady ? 'is-done' : 'is-pending'}">
-                    <span>3. Assessments</span>
-                    <strong>
-                        <c:choose>
-                            <c:when test="${certificateAssessmentsReady}">Complete</c:when>
-                            <c:otherwise>${certificateRemainingAssessments} left</c:otherwise>
-                        </c:choose>
-                    </strong>
-                </div>
-            </div>
-            <div class="ed-flow-actions">
-                <a class="sv-btn primary" href="${certificatePrimaryActionUrl}">
-                    <i class="fas ${certificatePrimaryActionIcon}"></i>&nbsp;${certificatePrimaryActionLabel}
-                </a>
-                <a class="sv-btn" href="${pageContext.request.contextPath}/student/certificates">
-                    <i class="fas fa-certificate"></i>&nbsp;Certificate Area
-                </a>
-            </div>
-        </section>
-
         <c:set var="materialsViewedSafe" value="${empty materialsViewedCount ? 0 : materialsViewedCount}"/>
         <c:set var="materialsTotalSafe" value="${empty materialCount ? 0 : materialCount}"/>
         <c:set var="assessmentsPassedSafe" value="${empty passedAssessmentsCount ? 0 : passedAssessmentsCount}"/>
         <c:set var="assessmentsTotalSafe" value="${empty totalAssessmentsCount ? 0 : totalAssessmentsCount}"/>
-
-        <section class="ed-hub-shell">
-            <div class="ed-hub-shell-top">
-                <div>
-                    <span class="ed-hub-kicker">Learning Workspace</span>
-                    <h3>Track progress and switch context without losing flow.</h3>
-                    <p>Use the sections below to move between overview, guided learning, materials, and assessments with live progress indicators.</p>
-                </div>
-                <div class="ed-hub-pill">
-                    <span>Course Progress</span>
-                    <strong>${progressPercent}%</strong>
-                </div>
-            </div>
-
-            <nav class="ed-hub-nav" aria-label="Learning hub sections">
-                <a class="ed-hub-tab ${activeTab == 'learning' ? 'active' : ''}" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=learning">
-                    <span class="ed-hub-tab-icon"><i class="fas fa-layer-group"></i></span>
-                    <span class="ed-hub-tab-copy">
-                        <small>Guided Path</small>
-                        <strong>Learning Hub</strong>
-                    </span>
-                    <span class="ed-hub-tab-metric">${progressPercent}%</span>
-                </a>
-
-                <a class="ed-hub-tab ${activeTab == 'overview' ? 'active' : ''}" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=overview">
-                    <span class="ed-hub-tab-icon"><i class="fas fa-info-circle"></i></span>
-                    <span class="ed-hub-tab-copy">
-                        <small>Course Insights</small>
-                        <strong>Overview</strong>
-                    </span>
-                    <span class="ed-hub-tab-metric">${enrollment.completionStatus}</span>
-                </a>
-
-                <a class="ed-hub-tab ${activeTab == 'materials' ? 'active' : ''}" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=materials">
-                    <span class="ed-hub-tab-icon"><i class="fas fa-folder-open"></i></span>
-                    <span class="ed-hub-tab-copy">
-                        <small>Learning Assets</small>
-                        <strong>Materials</strong>
-                    </span>
-                    <span class="ed-hub-tab-metric">${materialsViewedSafe}/${materialsTotalSafe}</span>
-                </a>
-
-                <a class="ed-hub-tab ${activeTab == 'assessments' ? 'active' : ''}" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=assessments">
-                    <span class="ed-hub-tab-icon"><i class="fas fa-clipboard-check"></i></span>
-                    <span class="ed-hub-tab-copy">
-                        <small>Evaluation</small>
-                        <strong>Assessments</strong>
-                    </span>
-                    <span class="ed-hub-tab-metric">${assessmentsPassedSafe}/${assessmentsTotalSafe}</span>
-                </a>
-            </nav>
-        </section>
 
         <c:choose>
             <c:when test="${activeTab == 'learning'}">

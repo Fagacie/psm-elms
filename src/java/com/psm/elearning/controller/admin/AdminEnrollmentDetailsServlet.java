@@ -6,6 +6,7 @@ import com.psm.elearning.dao.PaymentDAO;
 import com.psm.elearning.dao.PaymentDAOImpl;
 import com.psm.elearning.model.Payment;
 import com.psm.elearning.model.Enrollment;
+import com.psm.elearning.util.SessionUtil;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -33,12 +34,13 @@ public class AdminEnrollmentDetailsServlet extends HttpServlet {
             throws ServletException, IOException {
         
         HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("userId") == null) {
+        Integer userId = SessionUtil.resolveUserId(session);
+        if (userId == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
         
-        String role = (String) session.getAttribute("role");
+        String role = SessionUtil.resolveRole(session);
         if (!"Admin".equals(role)) {
             response.sendRedirect(request.getContextPath() + "/dashboard");
             return;
@@ -73,4 +75,5 @@ public class AdminEnrollmentDetailsServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/admin/enrollments?error=exception");
         }
     }
+
 }

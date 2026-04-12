@@ -1,7 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
-<c:set var="studentProfilePicture" value="${not empty sessionScope.student.passportPath ? sessionScope.student.passportPath : null}"/>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,11 +12,11 @@
 </head>
 <body class="sv-page">
 <c:set var="topbarTitle" value="Assessments"/>
-<c:set var="topbarSubtitle" value="Attempt flow, grading, and retakes"/>
+<c:set var="topbarSubtitle" value="Attempt, submit, and review your assessments"/>
 <jsp:include page="/WEB-INF/views/common/student-topbar.jsp"/>
 
 <div class="sv-layout">
-    <c:set var="activePage" value="${fromHub ? 'my-courses' : 'assessments'}"/>
+    <c:set var="activePage" value="assessments"/>
     <jsp:include page="/WEB-INF/views/common/student-sidebar.jsp"/>
 
     <main class="sv-main">
@@ -32,6 +31,42 @@
             <article class="sv-metric"><h3>${not empty assessments ? assessments.size() : 0}</h3><p>Assessments Loaded</p></article>
             <article class="sv-metric"><h3>${selectedEnrollmentSync != null ? selectedEnrollmentSync.passedAssessments : (not empty submissionHistory ? submissionHistory.size() : 0)}</h3><p>Passed Assessments</p></article>
             <article class="sv-metric"><h3>${modeAttempt ? 'Live' : 'Ready'}</h3><p>Attempt Status</p></article>
+        </section>
+
+        <c:set var="hasSelectedCourse" value="${not empty selectedCourseId}"/>
+        <c:set var="hasSelectedAssessment" value="${not empty selectedAssessment}"/>
+        <c:set var="canAttemptNow" value="${hasSelectedAssessment and (assessmentHasActiveAttempt or assessmentCanStart or modeAttempt)}"/>
+        <section class="sv-card ass-flow-strip" aria-label="Assessment flow steps">
+            <div class="sv-card-body">
+                <div class="ass-flow-item ${hasSelectedCourse ? 'is-done' : 'is-active'}">
+                    <span class="ass-flow-dot">1</span>
+                    <div>
+                        <strong>Select Course</strong>
+                        <small>Pick a paid course to load assessments.</small>
+                    </div>
+                </div>
+                <div class="ass-flow-item ${hasSelectedAssessment ? 'is-done' : (hasSelectedCourse ? 'is-active' : '')}">
+                    <span class="ass-flow-dot">2</span>
+                    <div>
+                        <strong>Choose Assessment</strong>
+                        <small>Open the assessment you want to attempt.</small>
+                    </div>
+                </div>
+                <div class="ass-flow-item ${modeAttempt ? 'is-active' : (canAttemptNow ? 'is-done' : '')}">
+                    <span class="ass-flow-dot">3</span>
+                    <div>
+                        <strong>Attempt</strong>
+                        <small>Start or continue, then submit answers.</small>
+                    </div>
+                </div>
+                <div class="ass-flow-item ${not empty submissionHistory ? 'is-done' : ''}">
+                    <span class="ass-flow-dot">4</span>
+                    <div>
+                        <strong>Review Result</strong>
+                        <small>See status, score, and feedback history.</small>
+                    </div>
+                </div>
+            </div>
         </section>
 
         <c:if test="${not fromHub}">
@@ -50,7 +85,9 @@
             <c:if test="${param.error == 'timeout'}"><div class="alert alert-error">Time is up. Your attempt was submitted automatically.</div></c:if>
             <c:if test="${param.error == 'retakepending'}"><div class="alert alert-error">You already have a pending retake request.</div></c:if>
             <c:if test="${param.error == 'retakereason'}"><div class="alert alert-error">Please add a reason before requesting another attempt.</div></c:if>
-            <c:if test="${param.error == 'assignmentfile'}"><div class="alert alert-error">Assignment requires a file upload.</div></c:if>
+            <c:if test="${param.error == 'assignmentfile'}"><div class="alert alert-error">This assignment requires a file upload.</div></c:if>
+            <c:if test="${param.error == 'assignmenttext'}"><div class="alert alert-error">This assignment requires a written answer.</div></c:if>
+            <c:if test="${param.error == 'assignmentfiletype'}"><div class="alert alert-error">Invalid assignment file. Allowed: PDF, DOC, DOCX, TXT, RTF, ODT, ZIP, PNG, JPG, JPEG (max 25MB).</div></c:if>
             <c:if test="${param.error == 'submitfailed'}"><div class="alert alert-error">We could not save your attempt. Please retry submission.</div></c:if>
             <c:if test="${param.error == 'permission'}"><div class="alert alert-error">You do not have access to that assessment.</div></c:if>
         </div>
@@ -156,22 +193,21 @@
                                             <c:set var="rowActiveAttempt" value="${activeAttemptByAssessment[a.assessmentId]}"/>
                                             <c:set var="rowPendingRetake" value="${hasPendingRetakeByAssessment[a.assessmentId]}"/>
                                             <tr>
-                                                <td>${a.title}</td>
-                                                <td><span class="assessment-type-badge assessment-type-${a.type}">${a.type}</span></td>
-                                                <td><c:out value="${a.duration}" default="30"/> min</td>
-                                                <td>
+                                                <td data-label="Title">${a.title}</td>
+                                                <td data-label="Type"><span class="assessment-type-badge assessment-type-${a.type}">${a.type}</span></td>
+                                                <td data-label="Duration"><c:out value="${a.duration}" default="30"/> min</td>
+                                                <td data-label="Attempts">
                                                     ${rowUsedAttempts}/${rowAllowedAttempts}
                                                 </td>
-                                                <td>
+                                                <td data-label="Latest Score">
                                                     <c:choose>
                                                         <c:when test="${not empty latestSubmissionByAssessment[a.assessmentId] and not empty latestSubmissionByAssessment[a.assessmentId].score}">${latestSubmissionByAssessment[a.assessmentId].score}</c:when>
                                                         <c:otherwise>-</c:otherwise>
                                                     </c:choose>
                                                 </td>
-                                                <td>
+                                                <td data-label="Action">
                                                     <c:choose>
                                                         <c:when test="${fromHub}">
-                                                            <a class="sv-btn" aria-label="View assessment ${a.title}" href="${pageContext.request.contextPath}/student/assessments?courseId=${selectedCourseId}&assessmentId=${a.assessmentId}&fromHub=1&enrollmentId=${fromHubEnrollmentId}">View</a>
                                                             <c:choose>
                                                                 <c:when test="${rowActiveAttempt}">
                                                                     <a class="sv-btn primary" aria-label="Continue assessment ${a.title}" href="${pageContext.request.contextPath}/student/assessments?courseId=${selectedCourseId}&assessmentId=${a.assessmentId}&mode=attempt&page=1&fromHub=1&enrollmentId=${fromHubEnrollmentId}">Continue</a>
@@ -183,9 +219,9 @@
                                                                     <span class="sv-btn disabled" aria-disabled="true">${rowPendingRetake ? 'Retake Pending' : 'No Attempts'}</span>
                                                                 </c:otherwise>
                                                             </c:choose>
+                                                            <a class="ass-inline-link" aria-label="Open details for ${a.title}" href="${pageContext.request.contextPath}/student/assessments?courseId=${selectedCourseId}&assessmentId=${a.assessmentId}&fromHub=1&enrollmentId=${fromHubEnrollmentId}">Details</a>
                                                         </c:when>
                                                         <c:otherwise>
-                                                            <a class="sv-btn" aria-label="View assessment ${a.title}" href="${pageContext.request.contextPath}/student/assessments?courseId=${selectedCourseId}&assessmentId=${a.assessmentId}">View</a>
                                                             <c:choose>
                                                                 <c:when test="${rowActiveAttempt}">
                                                                     <a class="sv-btn primary" aria-label="Continue assessment ${a.title}" href="${pageContext.request.contextPath}/student/assessments?courseId=${selectedCourseId}&assessmentId=${a.assessmentId}&mode=attempt&page=1">Continue</a>
@@ -197,6 +233,7 @@
                                                                     <span class="sv-btn disabled" aria-disabled="true">${rowPendingRetake ? 'Retake Pending' : 'No Attempts'}</span>
                                                                 </c:otherwise>
                                                             </c:choose>
+                                                            <a class="ass-inline-link" aria-label="Open details for ${a.title}" href="${pageContext.request.contextPath}/student/assessments?courseId=${selectedCourseId}&assessmentId=${a.assessmentId}">Details</a>
                                                         </c:otherwise>
                                                     </c:choose>
                                                 </td>
@@ -237,6 +274,7 @@
                             <c:if test="${not empty selectedAssessment.instructions}"><div class="alert alert-info">${selectedAssessment.instructions}</div></c:if>
 
                             <c:if test="${modeAttempt}">
+                                <c:set var="assignmentSubmissionMode" value="${not empty selectedAssessment.submissionMode ? selectedAssessment.submissionMode : 'both'}"/>
                                 <form method="post" action="${pageContext.request.contextPath}/student/assessments" id="attemptForm" enctype="multipart/form-data">
                                     <input type="hidden" name="courseId" value="${selectedCourseId}">
                                     <input type="hidden" name="assessmentId" value="${selectedAssessment.assessmentId}">
@@ -252,7 +290,7 @@
                                     </div>
 
                                     <c:forEach var="q" items="${pagedQuestions}" varStatus="loop">
-                                        <div class="question-card">
+                                        <div class="question-card" id="sv-question-${(currentPage - 1) * questionsPerPageActual + loop.index + 1}" data-question-index="${(currentPage - 1) * questionsPerPageActual + loop.index + 1}">
                                             <div class="question-title">Q${(currentPage - 1) * questionsPerPageActual + loop.index + 1}. ${q.questionText}</div>
                                             <c:choose>
                                                 <c:when test="${not empty fn:trim(q.optionA) or not empty fn:trim(q.optionB) or not empty fn:trim(q.optionC) or not empty fn:trim(q.optionD)}">
@@ -264,7 +302,14 @@
                                                     </div>
                                                 </c:when>
                                                 <c:otherwise>
-                                                    <textarea name="qa_${q.questionId}" rows="4" class="question-textarea" placeholder="Write your answer">${currentAnswers[q.questionId]}</textarea>
+                                                    <c:if test="${selectedAssessment.type != 'Assignment' or assignmentSubmissionMode == 'text' or assignmentSubmissionMode == 'both'}">
+                                                        <textarea name="qa_${q.questionId}" rows="4" class="question-textarea" placeholder="Write your answer">${currentAnswers[q.questionId]}</textarea>
+                                                    </c:if>
+                                                    <c:if test="${selectedAssessment.type == 'Assignment' and assignmentSubmissionMode == 'file'}">
+                                                        <div class="alert alert-info">
+                                                            <strong>Written response not required.</strong> Submit the requested file below.
+                                                        </div>
+                                                    </c:if>
                                                 </c:otherwise>
                                             </c:choose>
                                         </div>
@@ -272,17 +317,36 @@
 
                                     <c:if test="${selectedAssessment.type == 'Assignment'}">
                                         <div class="upload-panel">
-                                            <p><strong>Required file upload</strong></p>
-                                            <label for="answerFile" class="sv-visually-hidden">Upload assignment file</label>
-                                            <input id="answerFile" type="file" name="answerFile" accept=".pdf,.doc,.docx,.txt,.rtf,.odt,.zip,.png,.jpg,.jpeg" required>
-                                            <p class="sv-course-line sv-gap-top-6">Upload your assignment document. This is required.</p>
+                                            <c:choose>
+                                                <c:when test="${assignmentSubmissionMode == 'file'}"><p><strong>Required file upload</strong></p></c:when>
+                                                <c:when test="${assignmentSubmissionMode == 'text'}"><p><strong>Written answer only</strong></p></c:when>
+                                                <c:otherwise><p><strong>File upload and written answer</strong></p></c:otherwise>
+                                            </c:choose>
+                                            <c:if test="${assignmentSubmissionMode == 'file' or assignmentSubmissionMode == 'both'}">
+                                                <label for="answerFile" class="sv-visually-hidden">Upload assignment file</label>
+                                                <c:choose>
+                                                    <c:when test="${assignmentSubmissionMode == 'file'}">
+                                                        <input id="answerFile" type="file" name="answerFile" accept=".pdf,.doc,.docx,.txt,.rtf,.odt,.zip,.png,.jpg,.jpeg" required>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <input id="answerFile" type="file" name="answerFile" accept=".pdf,.doc,.docx,.txt,.rtf,.odt,.zip,.png,.jpg,.jpeg">
+                                                    </c:otherwise>
+                                                </c:choose>
+                                                <p class="sv-course-line sv-gap-top-6">Upload your assignment document. Max 25MB.</p>
+                                            </c:if>
+                                            <c:if test="${assignmentSubmissionMode == 'text'}">
+                                                <p class="sv-course-line sv-gap-top-6">Write your answer in the text area above. A file upload is not required.</p>
+                                            </c:if>
+                                            <c:if test="${assignmentSubmissionMode == 'both'}">
+                                                <p class="sv-course-line sv-gap-top-6">Provide both the written response and the upload file before submitting.</p>
+                                            </c:if>
                                         </div>
                                     </c:if>
 
                                     <div class="attempt-toolbar">
                                         <c:if test="${currentPage > 1}"><button type="submit" class="sv-btn" name="action" value="savePage" onclick="document.getElementById('navField').value='prev';">Previous</button></c:if>
                                         <c:if test="${currentPage < totalPages}"><button type="submit" class="sv-btn" name="action" value="savePage" onclick="document.getElementById('navField').value='next';">Next</button></c:if>
-                                        <button type="submit" class="sv-btn primary" name="action" value="submit">Submit Attempt</button>
+                                        <button type="submit" id="assessmentSubmitBtn" class="sv-btn primary" name="action" value="submit">Submit Attempt</button>
                                     </div>
                                     <input type="hidden" id="navField" name="nav" value="next">
                                 </form>
@@ -342,11 +406,25 @@
                                             <tbody>
                                             <c:forEach var="s" items="${submissionHistory}">
                                                 <tr>
-                                                    <td>${s.attemptNumber}</td>
-                                                    <td><c:out value="${s.status}" default="Submitted"/></td>
-                                                    <td><c:out value="${s.score}" default="Pending"/></td>
-                                                    <td><c:out value="${s.feedback}" default="-"/></td>
-                                                    <td><c:out value="${s.submitDate}" default="-"/></td>
+                                                    <td data-label="Attempt">${s.attemptNumber}</td>
+                                                    <td data-label="Status">
+                                                        <span class="ass-status-chip ass-status-${not empty s.status ? s.status : 'Submitted'}">
+                                                            <c:choose>
+                                                                <c:when test="${s.status == 'TimedOut'}">Timed Out</c:when>
+                                                                <c:when test="${s.status == 'AutoSubmitted'}">Auto Submitted</c:when>
+                                                                <c:when test="${s.status == 'Graded'}">Graded</c:when>
+                                                                <c:otherwise>Submitted</c:otherwise>
+                                                            </c:choose>
+                                                        </span>
+                                                    </td>
+                                                    <td data-label="Score"><c:out value="${s.score}" default="Pending"/></td>
+                                                    <td data-label="Feedback"><c:out value="${s.feedback}" default="-"/></td>
+                                                    <td data-label="Submitted">
+                                                        <c:choose>
+                                                            <c:when test="${not empty s.submitDate}">${fn:replace(s.submitDate, 'T', ' ')}</c:when>
+                                                            <c:otherwise>-</c:otherwise>
+                                                        </c:choose>
+                                                    </td>
                                                 </tr>
                                             </c:forEach>
                                             </tbody>

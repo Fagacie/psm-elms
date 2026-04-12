@@ -237,6 +237,8 @@ CREATE TABLE IF NOT EXISTS `Assessment` (
   `CourseID` INT NOT NULL,
   `Title` VARCHAR(200) NOT NULL,
   `Type` VARCHAR(50) NULL,
+  `GradingMode` VARCHAR(20) NOT NULL DEFAULT 'auto',
+  `SubmissionMode` VARCHAR(20) NOT NULL DEFAULT 'both',
   `Duration` INT NULL,
   `TotalMarks` INT NULL,
   `Instructions` TEXT NULL,
@@ -303,6 +305,27 @@ CREATE TABLE IF NOT EXISTS `AssessmentRetakeRequest` (
   CONSTRAINT `fk_retake_assessment` FOREIGN KEY (`AssessmentID`) REFERENCES `Assessment`(`AssessmentID`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_retake_user` FOREIGN KEY (`UserID`) REFERENCES `User`(`UserID`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_retake_reviewer` FOREIGN KEY (`ReviewedBy`) REFERENCES `User`(`UserID`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Assessment Grade Audit
+CREATE TABLE IF NOT EXISTS `AssessmentGradeAudit` (
+  `AuditID` INT AUTO_INCREMENT PRIMARY KEY,
+  `SubmissionID` INT NOT NULL,
+  `AssessmentID` INT NOT NULL,
+  `ActionType` VARCHAR(40) NOT NULL,
+  `OldScore` DECIMAL(5,2) NULL,
+  `NewScore` DECIMAL(5,2) NULL,
+  `OldFeedback` TEXT NULL,
+  `NewFeedback` TEXT NULL,
+  `GradedBy` INT NULL,
+  `GradedAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `Note` TEXT NULL,
+  KEY `idx_grade_audit_submission` (`SubmissionID`),
+  KEY `idx_grade_audit_assessment` (`AssessmentID`),
+  KEY `idx_grade_audit_graded_by` (`GradedBy`),
+  CONSTRAINT `fk_grade_audit_submission` FOREIGN KEY (`SubmissionID`) REFERENCES `AssessmentSubmission`(`SubmissionID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_grade_audit_assessment` FOREIGN KEY (`AssessmentID`) REFERENCES `Assessment`(`AssessmentID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_grade_audit_graded_by` FOREIGN KEY (`GradedBy`) REFERENCES `User`(`UserID`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Certificates

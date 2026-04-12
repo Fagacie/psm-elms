@@ -4,6 +4,37 @@
 
 <c:set var="headerUser" value="${empty user ? sessionScope.user : user}"/>
 <c:set var="headerProfilePicture" value="${not empty headerUser ? headerUser.profilePicture : null}"/>
+<c:set var="currentPath" value="${pageContext.request.requestURI}"/>
+<c:set var="resolvedInstructorTitle" value="Instructor"/>
+<c:set var="resolvedInstructorSubtitle" value="Manage your teaching workspace and course activity"/>
+
+<c:choose>
+    <c:when test="${not empty param.pageTitle}">
+        <c:set var="resolvedInstructorTitle" value="${param.pageTitle}"/>
+    </c:when>
+    <c:when test="${fn:contains(currentPath, '/instructor/courses')}">
+        <c:set var="resolvedInstructorTitle" value="My Courses"/>
+    </c:when>
+    <c:when test="${fn:contains(currentPath, '/instructor/materials')}">
+        <c:set var="resolvedInstructorTitle" value="Course Materials"/>
+    </c:when>
+    <c:when test="${fn:contains(currentPath, '/instructor/assessments')}">
+        <c:set var="resolvedInstructorTitle" value="Course Assessments"/>
+    </c:when>
+    <c:when test="${fn:contains(currentPath, '/instructor/certificates')}">
+        <c:set var="resolvedInstructorTitle" value="Certificates"/>
+    </c:when>
+    <c:when test="${fn:contains(currentPath, '/profile')}">
+        <c:set var="resolvedInstructorTitle" value="Profile"/>
+    </c:when>
+</c:choose>
+
+<c:if test="${not empty param.pageSubtitle}">
+    <c:set var="resolvedInstructorSubtitle" value="${param.pageSubtitle}"/>
+</c:if>
+
+<c:set var="instructorContextCourse" value="${not empty selectedCourse ? selectedCourse.courseName : not empty course ? course.courseName : ''}"/>
+<c:set var="instructorContextAssessment" value="${not empty selectedAssessment ? selectedAssessment.title : ''}"/>
 
 <header class="app-header">
     <div class="header-left">
@@ -12,22 +43,14 @@
             <span class="dashboard-brand-sub">E-Learning</span>
         </a>
         <div class="dashboard-title-copy">
-            <c:choose>
-                <c:when test="${not empty param.pageTitle}">
-                    <h1 class="page-title"><c:out value="${param.pageTitle}"/></h1>
-                </c:when>
-                <c:otherwise>
-                    <h1 class="page-title">Instructor</h1>
-                </c:otherwise>
-            </c:choose>
-            <c:choose>
-                <c:when test="${not empty param.pageSubtitle}">
-                    <p><c:out value="${param.pageSubtitle}"/></p>
-                </c:when>
-                <c:otherwise>
-                    <p>Manage your teaching workspace and course activity</p>
-                </c:otherwise>
-            </c:choose>
+            <h1 class="page-title"><c:out value="${resolvedInstructorTitle}"/></h1>
+            <p><c:out value="${resolvedInstructorSubtitle}"/></p>
+            <c:if test="${not empty instructorContextCourse or not empty instructorContextAssessment}">
+                <div class="header-context-row">
+                    <c:if test="${not empty instructorContextCourse}"><span class="header-context-chip"><i class="fas fa-book-open"></i><c:out value="${instructorContextCourse}"/></span></c:if>
+                    <c:if test="${not empty instructorContextAssessment}"><span class="header-context-chip"><i class="fas fa-clipboard-check"></i><c:out value="${instructorContextAssessment}"/></span></c:if>
+                </div>
+            </c:if>
         </div>
     </div>
     <div class="header-right">

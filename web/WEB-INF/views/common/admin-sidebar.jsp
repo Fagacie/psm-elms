@@ -19,7 +19,7 @@
         <a href="${pageContext.request.contextPath}/admin/users?role=Instructor" class="nav-item ${fn:contains(currentPath, 'admin/instructors') ? 'active' : ''}">
             <i class="fas fa-chalkboard-teacher"></i><span>Instructors</span>
         </a>
-        <a href="${pageContext.request.contextPath}/dashboard#analytics" class="nav-item">
+        <a href="${pageContext.request.contextPath}/dashboard#analytics" class="nav-item ${fn:contains(currentPath, '/dashboard') and fn:contains(pageContext.request.queryString, 'analytics') ? 'active' : ''}">
             <i class="fas fa-chart-bar"></i><span>Analytics</span>
         </a>
         <a href="${pageContext.request.contextPath}/admin/settings" class="nav-item ${fn:contains(currentPath, 'admin/settings') ? 'active' : ''}">

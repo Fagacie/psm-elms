@@ -9,6 +9,7 @@ import com.psm.elearning.dao.PaymentDAOImpl;
 import com.psm.elearning.model.Course;
 import com.psm.elearning.model.Enrollment;
 import com.psm.elearning.model.Payment;
+import com.psm.elearning.util.SessionUtil;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -40,20 +41,16 @@ public class EnrollmentSummaryServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("userId") == null) {
+        Integer userId = SessionUtil.resolveUserId(session);
+        if (userId == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
-        String role = (String) session.getAttribute("role");
-        if (role == null) {
-            role = (String) session.getAttribute("userRole");
-        }
-        if (!"Student".equals(role)) {
+        if (!"Student".equals(SessionUtil.resolveRole(session))) {
             response.sendRedirect(request.getContextPath() + "/dashboard");
             return;
         }
         try {
-            Integer userId = (Integer) session.getAttribute("userId");
             String courseIdParam = request.getParameter("courseId");
             Integer courseId = Integer.parseInt(courseIdParam);
             Course course = courseDAO.findById(courseId);

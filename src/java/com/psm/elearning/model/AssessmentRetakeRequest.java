@@ -6,6 +6,8 @@ public class AssessmentRetakeRequest {
     private Integer requestId;
     private Integer assessmentId;
     private Integer userId;
+    private String studentName;
+    private String studentEmail;
     private String reason;
     private String status;
     private LocalDateTime requestedAt;
@@ -20,6 +22,12 @@ public class AssessmentRetakeRequest {
 
     public Integer getUserId() { return userId; }
     public void setUserId(Integer userId) { this.userId = userId; }
+
+    public String getStudentName() { return studentName; }
+    public void setStudentName(String studentName) { this.studentName = studentName; }
+
+    public String getStudentEmail() { return studentEmail; }
+    public void setStudentEmail(String studentEmail) { this.studentEmail = studentEmail; }
 
     public String getReason() { return reason; }
     public void setReason(String reason) { this.reason = reason; }

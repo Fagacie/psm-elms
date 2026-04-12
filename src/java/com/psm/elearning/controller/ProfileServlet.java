@@ -9,6 +9,7 @@ import com.psm.elearning.dao.InstructorDAOImpl;
 import com.psm.elearning.model.Student;
 import com.psm.elearning.model.User;
 import com.psm.elearning.model.Instructor;
+import com.psm.elearning.util.SessionUtil;
 import java.io.IOException;
 import java.time.LocalDate;
 import javax.servlet.ServletException;
@@ -28,12 +29,11 @@ public class ProfileServlet extends HttpServlet {
             throws ServletException, IOException {
         
         HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("userId") == null) {
+        Integer userId = SessionUtil.resolveUserId(session);
+        if (userId == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
-
-        Integer userId = (Integer) session.getAttribute("userId");
         
         // Get fresh data from database
         User user = userDAO.findById(userId);
@@ -58,12 +58,11 @@ public class ProfileServlet extends HttpServlet {
             throws ServletException, IOException {
         
         HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("userId") == null) {
+        Integer userId = SessionUtil.resolveUserId(session);
+        if (userId == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
-
-        Integer userId = (Integer) session.getAttribute("userId");
         
         // Get form data
         String fullName = request.getParameter("fullName");
@@ -126,4 +125,5 @@ public class ProfileServlet extends HttpServlet {
         session.setAttribute("profileSuccess", "Profile updated successfully!");
         response.sendRedirect(request.getContextPath() + "/profile");
     }
+
 }

@@ -2,7 +2,6 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
-<c:set var="studentProfilePicture" value="${not empty sessionScope.student.passportPath ? sessionScope.student.passportPath : null}"/>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,7 +13,7 @@
 </head>
 <body class="sv-page">
 <c:set var="topbarTitle" value="Course Details"/>
-<c:set var="topbarSubtitle" value="Review and continue course flow"/>
+<c:set var="topbarSubtitle" value="Review details and choose your next step"/>
 <jsp:include page="/WEB-INF/views/common/student-topbar.jsp"/>
 
 <div class="sv-layout">

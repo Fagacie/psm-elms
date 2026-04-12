@@ -67,6 +67,39 @@
             </form>
         </div>
 
+        <c:if test="${not empty selectedCourse}">
+            <section class="section-card ins-flow-strip" aria-label="Instructor assessment flow">
+                <div class="ins-flow-item is-done">
+                    <span class="ins-flow-dot">1</span>
+                    <div>
+                        <strong>Select Course</strong>
+                        <small>Scope all assessment operations to one course.</small>
+                    </div>
+                </div>
+                <div class="ins-flow-item ${not empty assessments ? 'is-done' : 'is-active'}">
+                    <span class="ins-flow-dot">2</span>
+                    <div>
+                        <strong>Create or Manage</strong>
+                        <small>Define assessment settings and attempts.</small>
+                    </div>
+                </div>
+                <div class="ins-flow-item ${not empty selectedAssessment ? 'is-done' : ''}">
+                    <span class="ins-flow-dot">3</span>
+                    <div>
+                        <strong>Build Questions</strong>
+                        <small>Add and maintain question quality.</small>
+                    </div>
+                </div>
+                <div class="ins-flow-item ${not empty selectedAssessment ? 'is-active' : ''}">
+                    <span class="ins-flow-dot">4</span>
+                    <div>
+                        <strong>Grade and Retakes</strong>
+                        <small>Review submissions and decide retake requests.</small>
+                    </div>
+                </div>
+            </section>
+        </c:if>
+
         <!-- Messages -->
         <c:if test="${not empty errorMessage}">
             <div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> ${errorMessage}</div>
@@ -78,12 +111,17 @@
         <c:if test="${param.success == 'qdeleted'}"><div class="alert alert-success"><i class="fas fa-check-circle"></i> Question deleted successfully.</div></c:if>
         <c:if test="${param.success == 'rreviewed'}"><div class="alert alert-success"><i class="fas fa-check-circle"></i> Retake request reviewed successfully.</div></c:if>
         <c:if test="${param.success == 'graded'}"><div class="alert alert-success"><i class="fas fa-check-circle"></i> Submission graded successfully.</div></c:if>
+        <c:if test="${param.success == 'autoregraded'}"><div class="alert alert-success"><i class="fas fa-check-circle"></i> Submission auto-regraded successfully.</div></c:if>
+        <c:if test="${param.success == 'autoregradedall'}"><div class="alert alert-success"><i class="fas fa-check-circle"></i> Bulk auto-regrade completed. Updated submissions: <strong><c:out value="${param.regradedCount}" default="0"/></strong>.</div></c:if>
         <c:if test="${param.error == 'qoptions'}"><div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> Quiz requires options A/B and a correct option.</div></c:if>
         <c:if test="${param.error == 'type'}"><div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> Assessment type is invalid. Choose Quiz, Exam, or Assignment.</div></c:if>
         <c:if test="${param.error == 'placement'}"><div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> Selected placement material is invalid for this course.</div></c:if>
         <c:if test="${param.error == 'assignmentschema'}"><div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> Assignment questions must be descriptive only (no options/correct option).</div></c:if>
         <c:if test="${param.error == 'examschema'}"><div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> Exam questions with options must include A/B and a valid correct option; descriptive exam questions should not set a correct option.</div></c:if>
-        <c:if test="${param.error != null and param.error != 'qoptions' and param.error != 'type' and param.error != 'placement' and param.error != 'assignmentschema' and param.error != 'examschema'}"><div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> Action failed. Please retry.</div></c:if>
+        <c:if test="${param.error == 'graderange'}"><div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> Score must be between 0 and the assessment total marks.</div></c:if>
+        <c:if test="${param.error == 'regradeunsupported'}"><div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> Auto regrade is only available for quiz/exam submissions with saved objective answers.</div></c:if>
+        <c:if test="${param.error == 'retakestatus'}"><div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> This retake request was already reviewed and cannot be changed.</div></c:if>
+        <c:if test="${param.error != null and param.error != 'qoptions' and param.error != 'type' and param.error != 'placement' and param.error != 'assignmentschema' and param.error != 'examschema' and param.error != 'graderange' and param.error != 'retakestatus' and param.error != 'regradeunsupported'}"><div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> Action failed. Please retry.</div></c:if>
 
         <c:if test="${not empty selectedCourse}">
             <section class="ins-hero-card assessments-hero">
@@ -111,6 +149,20 @@
                         </div>
                     </div>
                 </div>
+                <c:if test="${not empty selectedAssessment}">
+                    <div class="assessment-flow-note">
+                        <span class="assessment-mode-chip mode-${not empty selectedAssessment.gradingMode ? selectedAssessment.gradingMode : (selectedAssessment.type == 'Assignment' ? 'manual' : 'auto')}">
+                            ${not empty selectedAssessment.gradingMode ? selectedAssessment.gradingMode : (selectedAssessment.type == 'Assignment' ? 'manual' : 'auto')} grading
+                        </span>
+                        <span>
+                            <c:choose>
+                                <c:when test="${selectedAssessment.type == 'Assignment'}">Assignment grading is always manual by instructor.</c:when>
+                                <c:when test="${not empty selectedAssessment.gradingMode and selectedAssessment.gradingMode == 'manual'}">Quiz/Exam score is entered by instructor after review.</c:when>
+                                <c:otherwise>Quiz/Exam is auto-graded by the system, and instructor can still override score.</c:otherwise>
+                            </c:choose>
+                        </span>
+                    </div>
+                </c:if>
             </section>
 
             <div class="tabs">
@@ -174,6 +226,25 @@
                                             <span>${a.maxAttempts} ${a.maxAttempts == 1 ? 'attempt' : 'attempts'}</span>
                                         </div>
                                         <div class="meta-item">
+                                            <i class="fas fa-scale-balanced"></i>
+                                            <span>${not empty a.gradingMode ? a.gradingMode : (a.type == 'Assignment' ? 'manual' : 'auto')} grading</span>
+                                        </div>
+                                        <div class="meta-item">
+                                            <i class="fas fa-file-alt"></i>
+                                            <span>
+                                                <c:choose>
+                                                    <c:when test="${a.type == 'Assignment'}">
+                                                        <c:choose>
+                                                            <c:when test="${not empty a.submissionMode and a.submissionMode == 'file'}">File upload only</c:when>
+                                                            <c:when test="${not empty a.submissionMode and a.submissionMode == 'text'}">Written answer only</c:when>
+                                                            <c:otherwise>File upload + written answer</c:otherwise>
+                                                        </c:choose>
+                                                    </c:when>
+                                                    <c:otherwise>MCQ response</c:otherwise>
+                                                </c:choose>
+                                            </span>
+                                        </div>
+                                        <div class="meta-item">
                                             <i class="fas fa-question-circle"></i>
                                             <span>Questions: Manage in details</span>
                                         </div>
@@ -205,11 +276,27 @@
                                                 </div>
                                                 <div class="field">
                                                     <label>Type</label>
-                                                    <select name="type" required>
+                                                    <select name="type" class="assessment-type-select" required>
                                                         <option value="Assignment" ${a.type == 'Assignment' ? 'selected' : ''}>Assignment</option>
                                                         <option value="Quiz" ${a.type == 'Quiz' ? 'selected' : ''}>Quiz</option>
                                                         <option value="Exam" ${a.type == 'Exam' ? 'selected' : ''}>Exam</option>
                                                     </select>
+                                                </div>
+                                                <div class="field">
+                                                    <label>Grading Mode</label>
+                                                    <select name="gradingMode">
+                                                        <option value="auto" ${(not empty a.gradingMode ? a.gradingMode : (a.type == 'Assignment' ? 'manual' : 'auto')) == 'auto' ? 'selected' : ''}>Auto (system computes score)</option>
+                                                        <option value="manual" ${(not empty a.gradingMode ? a.gradingMode : (a.type == 'Assignment' ? 'manual' : 'auto')) == 'manual' ? 'selected' : ''}>Manual (instructor grades)</option>
+                                                    </select>
+                                                </div>
+                                                <div class="field">
+                                                    <label>Submission Mode</label>
+                                                    <select name="submissionMode" class="submission-mode-select">
+                                                        <option value="file" ${(not empty a.submissionMode ? a.submissionMode : 'both') == 'file' ? 'selected' : ''}>File upload only</option>
+                                                        <option value="text" ${(not empty a.submissionMode ? a.submissionMode : 'both') == 'text' ? 'selected' : ''}>Written answer only</option>
+                                                        <option value="both" ${(not empty a.submissionMode ? a.submissionMode : 'both') == 'both' ? 'selected' : ''}>File upload and written answer</option>
+                                                    </select>
+                                                    <small class="helper-text">Assignments can require a file, text response, or both.</small>
                                                 </div>
                                                 <div class="field">
                                                     <label>Duration (mins)</label>
@@ -263,9 +350,11 @@
                             <h2 class="assessment-details-title"><i class="fas fa-clipboard-check"></i> ${selectedAssessment.title}</h2>
                             <div class="assessment-details-meta">
                                 <span class="assessment-type-badge type-${selectedAssessment.type}">${selectedAssessment.type}</span>
+                                <span><i class="fas fa-file-alt"></i> ${not empty selectedAssessment.submissionMode ? selectedAssessment.submissionMode : 'both'}</span>
                                 <span><i class="fas fa-clock"></i> ${selectedAssessment.duration != null ? selectedAssessment.duration : 'Unlimited'} mins</span>
                                 <span><i class="fas fa-star"></i> ${selectedAssessment.totalMarks != null ? selectedAssessment.totalMarks : 'N/A'} marks</span>
                                 <span><i class="fas fa-redo"></i> ${selectedAssessment.maxAttempts} attempt${selectedAssessment.maxAttempts > 1 ? 's' : ''}</span>
+                                <span><i class="fas fa-scale-balanced"></i> ${not empty selectedAssessment.gradingMode ? selectedAssessment.gradingMode : (selectedAssessment.type == 'Assignment' ? 'manual' : 'auto')} grading</span>
                             </div>
                         </div>
                         <a class="btn btn-secondary" href="${pageContext.request.contextPath}/instructor/assessments?courseId=${selectedCourse.courseId}">
@@ -414,9 +503,20 @@
                                         </select>
                                         <button type="submit" class="btn btn-secondary btn-sm"><i class="fas fa-filter"></i> Apply</button>
                                     </form>
+                                    <label for="submissionSearch" class="sv-visually-hidden">Search submissions</label>
+                                    <input id="submissionSearch" class="submissions-search-input" type="search" placeholder="Search student name or email..." autocomplete="off">
                                     <a class="btn btn-primary btn-sm" href="${pageContext.request.contextPath}/instructor/assessments?action=exportSubmissionsCsv&courseId=${selectedCourse.courseId}&assessmentId=${selectedAssessment.assessmentId}&gradeFilter=${gradeFilter}">
                                         <i class="fas fa-file-csv"></i> Export CSV
                                     </a>
+                                    <form method="post" action="${pageContext.request.contextPath}/instructor/assessments" class="submissions-filter-form">
+                                        <input type="hidden" name="action" value="autoRegradeAllObjective">
+                                        <input type="hidden" name="courseId" value="${selectedCourse.courseId}">
+                                        <input type="hidden" name="assessmentId" value="${selectedAssessment.assessmentId}">
+                                        <input type="hidden" name="gradeFilter" value="${gradeFilter}">
+                                        <button type="submit" class="btn btn-secondary btn-sm">
+                                            <i class="fas fa-rotate-right"></i> Auto Regrade Visible
+                                        </button>
+                                    </form>
                                 </div>
                             </div>
 
@@ -447,6 +547,8 @@
                                         </div>
                                     </div>
 
+                                    <div class="submission-workspace">
+                                    <div class="data-table-wrap">
                                     <table class="data-table">
                                         <thead>
                                         <tr>
@@ -460,25 +562,26 @@
                                         </thead>
                                         <tbody>
                                         <c:forEach var="s" items="${submissions}">
-                                            <tr class="submission-row ${empty s.score ? 'ungraded' : 'graded'}">
-                                                <td>
+                                            <tr class="submission-row ${empty s.score ? 'ungraded' : 'graded'} ${selectedSubmissionId == s.submissionId ? 'is-selected' : ''}">
+                                                <td data-label="Student">
                                                     <div class="student-info">
                                                         <div class="student-name"><i class="fas fa-user-circle"></i> <strong><c:out value="${s.studentName}" default="User ${s.userId}"/></strong></div>
                                                         <div class="student-email"><c:out value="${s.studentEmail}" default="-"/></div>
                                                     </div>
                                                 </td>
-                                                <td><span class="badge">${s.attemptNumber}</span></td>
-                                                <td>
+                                                <td data-label="Attempt"><span class="badge">${s.attemptNumber}</span></td>
+                                                <td data-label="Status">
                                                     <span class="status-badge status-${s.status}">
                                                         <c:choose>
                                                             <c:when test="${s.status == 'TimedOut'}">⏱️ Timed Out</c:when>
                                                             <c:when test="${s.status == 'AutoSubmitted'}">🤖 Auto-Submitted</c:when>
+                                                            <c:when test="${s.status == 'Graded'}">✅ Graded</c:when>
                                                             <c:otherwise>✓ Submitted</c:otherwise>
                                                         </c:choose>
                                                     </span>
                                                 </td>
-                                                <td><small>${s.submitDate != null ? s.submitDate : 'N/A'}</small></td>
-                                                <td>
+                                                <td data-label="Submitted At"><small>${s.submitDate != null ? s.submitDate : 'N/A'}</small></td>
+                                                <td data-label="Score">
                                                     <c:choose>
                                                         <c:when test="${empty s.score}">
                                                             <span class="score-pending">Pending</span>
@@ -488,7 +591,10 @@
                                                         </c:otherwise>
                                                     </c:choose>
                                                 </td>
-                                                <td>
+                                                <td data-label="Actions">
+                                                    <a class="btn btn-secondary btn-sm" href="${pageContext.request.contextPath}/instructor/assessments?courseId=${selectedCourse.courseId}&assessmentId=${selectedAssessment.assessmentId}&gradeFilter=${gradeFilter}&submissionId=${s.submissionId}#submissions-section">
+                                                        <i class="fas fa-eye"></i> Details
+                                                    </a>
                                                     <details class="grade-dropdown">
                                                         <summary class="btn btn-primary btn-sm">
                                                             <i class="fas fa-edit"></i> Grade
@@ -521,12 +627,27 @@
                                                                                 </a>
                                                                             </c:when>
                                                                             <c:otherwise>
-                                                                                <span class="file-link"><i class="fas fa-file-alt"></i> Text/summary answer submitted</span>
+                                                                                <div class="submitted-answer-panel">
+                                                                                    <span class="file-link"><i class="fas fa-file-alt"></i> Submitted answers</span>
+                                                                                    <div class="answer-chip-list">
+                                                                                        <c:forEach var="ans" items="${fn:split(s.answersFilePath, ';')}">
+                                                                                            <c:if test="${not empty fn:trim(ans)}">
+                                                                                                <span class="answer-chip">${fn:replace(ans, ':', ' -> ')}</span>
+                                                                                            </c:if>
+                                                                                        </c:forEach>
+                                                                                    </div>
+                                                                                </div>
                                                                             </c:otherwise>
                                                                         </c:choose>
                                                                     </div>
                                                                 </c:if>
                                                                 
+                                                                <c:if test="${(selectedAssessment.type == 'Quiz' or selectedAssessment.type == 'Exam') and not empty s.answersFilePath and not fn:startsWith(s.answersFilePath, 'http')}">
+                                                                    <button type="submit" class="btn btn-secondary btn-sm" formaction="${pageContext.request.contextPath}/instructor/assessments" name="action" value="autoRegradeSubmission">
+                                                                        <i class="fas fa-rotate-right"></i> Auto Regrade
+                                                                    </button>
+                                                                </c:if>
+
                                                                 <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Grade</button>
                                                             </form>
                                                         </div>
@@ -534,8 +655,95 @@
                                                 </td>
                                             </tr>
                                         </c:forEach>
+                                        <tr id="submissionNoRows" style="display:none;">
+                                            <td colspan="6"><span class="student-email">No submissions match your search/filter.</span></td>
+                                        </tr>
                                         </tbody>
                                     </table>
+                                    </div>
+                                    <aside class="submission-detail-panel">
+                                        <c:choose>
+                                            <c:when test="${not empty selectedSubmission}">
+                                                <div class="submission-detail-head">
+                                                    <div>
+                                                        <p class="detail-kicker">Submission Details</p>
+                                                        <h4><c:out value="${selectedSubmission.studentName}" default="Student #${selectedSubmission.userId}"/></h4>
+                                                        <div class="detail-subline">Attempt ${selectedSubmission.attemptNumber} · <c:out value="${selectedSubmission.status}" default="Submitted"/></div>
+                                                    </div>
+                                                    <span class="status-badge status-${selectedSubmission.status}"><c:out value="${selectedSubmission.status}" default="Submitted"/></span>
+                                                </div>
+
+                                                <div class="detail-metrics">
+                                                    <div class="detail-metric"><span>Score</span><strong><c:out value="${selectedSubmission.score}" default="Pending"/></strong></div>
+                                                    <div class="detail-metric"><span>Submitted</span><strong><c:out value="${selectedSubmission.submitDate}" default="N/A"/></strong></div>
+                                                    <div class="detail-metric"><span>Started</span><strong><c:out value="${selectedSubmission.startedAt}" default="N/A"/></strong></div>
+                                                </div>
+
+                                                <div class="detail-block">
+                                                    <h5>Student Answer</h5>
+                                                    <c:choose>
+                                                        <c:when test="${not empty selectedSubmission.answersFilePath and fn:startsWith(selectedSubmission.answersFilePath, 'http')}">
+                                                            <a href="${selectedSubmission.answersFilePath}" target="_blank" class="file-link"><i class="fas fa-file-download"></i> View uploaded answer</a>
+                                                        </c:when>
+                                                        <c:when test="${not empty selectedSubmission.answersFilePath}">
+                                                            <div class="answer-chip-list">
+                                                                <c:forEach var="ans" items="${fn:split(selectedSubmission.answersFilePath, ';')}">
+                                                                    <c:if test="${not empty fn:trim(ans)}">
+                                                                        <span class="answer-chip">${fn:replace(ans, ':', ' -> ')}</span>
+                                                                    </c:if>
+                                                                </c:forEach>
+                                                            </div>
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            <div class="empty-inline">No answer summary available.</div>
+                                                        </c:otherwise>
+                                                    </c:choose>
+                                                </div>
+
+                                                <div class="detail-block">
+                                                    <h5>Feedback</h5>
+                                                    <p class="detail-copy"><c:out value="${selectedSubmission.feedback}" default="No feedback yet."/></p>
+                                                </div>
+
+                                                <div class="detail-block">
+                                                    <h5>Audit Trail</h5>
+                                                    <c:choose>
+                                                        <c:when test="${empty selectedSubmissionAudits}">
+                                                            <div class="empty-inline">No grading audit yet.</div>
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            <div class="audit-timeline">
+                                                                <c:forEach var="audit" items="${selectedSubmissionAudits}">
+                                                                    <div class="audit-item">
+                                                                        <div class="audit-topline">
+                                                                            <strong>${audit.actionType}</strong>
+                                                                            <span><c:out value="${audit.gradedAt}" default="N/A"/></span>
+                                                                        </div>
+                                                                        <div class="audit-meta">
+                                                                            <span><c:out value="${audit.gradedByName}" default="System"/></span>
+                                                                            <span>Old: <c:out value="${audit.oldScore}" default="-"/></span>
+                                                                            <span>New: <c:out value="${audit.newScore}" default="-"/></span>
+                                                                        </div>
+                                                                        <c:if test="${not empty audit.note}">
+                                                                            <div class="audit-note"><c:out value="${audit.note}"/></div>
+                                                                        </c:if>
+                                                                    </div>
+                                                                </c:forEach>
+                                                            </div>
+                                                        </c:otherwise>
+                                                    </c:choose>
+                                                </div>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <div class="submission-detail-empty">
+                                                    <i class="fas fa-file-signature"></i>
+                                                    <h4>Select a submission</h4>
+                                                    <p>Open one row to review the answer, grading data, and audit history.</p>
+                                                </div>
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </aside>
+                                    </div>
                                 </c:otherwise>
                             </c:choose>
                         </div>
@@ -558,7 +766,9 @@
                                         <div class="retake-request-item status-${r.status}">
                                             <div class="retake-request-content">
                                                 <div class="retake-request-student">
-                                                    <i class="fas fa-user"></i> <strong>Student ID: ${r.userId}</strong>
+                                                    <i class="fas fa-user"></i>
+                                                    <strong><c:out value="${r.studentName}" default="Student #${r.userId}"/></strong>
+                                                    <span class="student-email"><c:out value="${r.studentEmail}" default="-"/></span>
                                                 </div>
                                                 <div class="retake-request-reason">
                                                     <strong>Reason:</strong> <c:out value="${r.reason}" default="No reason provided"/>
@@ -626,12 +836,29 @@
                         </div>
                         <div class="field">
                             <label>Type *</label>
-                            <select name="type" required>
+                            <select name="type" id="createAssessmentType" class="assessment-type-select" required>
                                 <option value="">-- Select Type --</option>
                                 <option value="Assignment">Assignment (Student uploads answer)</option>
                                 <option value="Quiz">Quiz (MCQ - auto-graded)</option>
                                 <option value="Exam">Exam (MCQ - auto-graded)</option>
                             </select>
+                        </div>
+                        <div class="field">
+                            <label>Grading Mode *</label>
+                            <select name="gradingMode" id="createGradingMode" required>
+                                <option value="auto" selected>Auto (system computes score)</option>
+                                <option value="manual">Manual (instructor grades)</option>
+                            </select>
+                            <small class="helper-text">Assignment will always be manual regardless of selected mode.</small>
+                        </div>
+                        <div class="field">
+                            <label>Submission Mode</label>
+                            <select name="submissionMode" id="createSubmissionMode" class="submission-mode-select">
+                                <option value="file">File upload only</option>
+                                <option value="text">Written answer only</option>
+                                <option value="both" selected>File upload and written answer</option>
+                            </select>
+                            <small class="helper-text">Only assignments use this setting.</small>
                         </div>
                         <div class="field">
                             <label>Duration (minutes)</label>
@@ -693,6 +920,22 @@
         modal.classList.remove('open');
         modal.setAttribute('aria-hidden', 'true');
         document.body.style.overflow = '';
+    }
+
+    function syncAssessmentModeFields(form) {
+        if (!form) return;
+        const typeSelect = form.querySelector('.assessment-type-select');
+        const submissionModeSelect = form.querySelector('.submission-mode-select');
+        if (!typeSelect || !submissionModeSelect) return;
+        if (typeSelect.value === 'Assignment') {
+            submissionModeSelect.disabled = false;
+            if (!submissionModeSelect.value) {
+                submissionModeSelect.value = 'both';
+            }
+        } else {
+            submissionModeSelect.value = 'both';
+            submissionModeSelect.disabled = true;
+        }
     }
 
     // Tab navigation
@@ -763,6 +1006,39 @@
         }
         syncQuestionForm();
 
+        const createTypeSelect = document.querySelector('#createAssessmentModal select[name="type"]');
+        const createModeSelect = document.getElementById('createGradingMode');
+        const createForm = document.querySelector('#createAssessmentModal form');
+        function syncCreateGradingMode() {
+            if (!createTypeSelect || !createModeSelect) return;
+            if (createTypeSelect.value === 'Assignment') {
+                createModeSelect.value = 'manual';
+                createModeSelect.setAttribute('disabled', 'disabled');
+            } else {
+                createModeSelect.removeAttribute('disabled');
+            }
+        }
+        if (createTypeSelect && createModeSelect) {
+            createTypeSelect.addEventListener('change', syncCreateGradingMode);
+            syncCreateGradingMode();
+        }
+        if (createTypeSelect && createForm) {
+            createTypeSelect.addEventListener('change', function() {
+                syncAssessmentModeFields(createForm);
+            });
+            syncAssessmentModeFields(createForm);
+        }
+
+        document.querySelectorAll('.edit-dropdown-content form').forEach(function(form) {
+            const typeSelect = form.querySelector('.assessment-type-select');
+            if (typeSelect) {
+                typeSelect.addEventListener('change', function() {
+                    syncAssessmentModeFields(form);
+                });
+            }
+            syncAssessmentModeFields(form);
+        });
+
         // Wire tab buttons reliably (fixes non-responsive buttons in some layouts)
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.addEventListener('click', function() {
@@ -787,38 +1063,61 @@
 
         const submissionsTable = document.querySelector('#submissions-section .data-table tbody');
         if (submissionsTable) {
-            const rows = submissionsTable.querySelectorAll('tr');
-            let gradedCount = 0;
-            let ungradedCount = 0;
-            let totalScore = 0;
-            let scoreCount = 0;
-            
-            rows.forEach(row => {
-                if (row.classList.contains('graded')) {
-                    gradedCount++;
-                    const scoreCell = row.querySelector('.score-value');
-                    if (scoreCell) {
-                        const scoreText = scoreCell.textContent.trim();
-                        const score = parseFloat(scoreText.split('/')[0]);
-                        if (!isNaN(score)) {
-                            totalScore += score;
-                            scoreCount++;
+            const rows = submissionsTable.querySelectorAll('tr.submission-row');
+            const searchInput = document.getElementById('submissionSearch');
+            const noRows = document.getElementById('submissionNoRows');
+
+            function refreshStats(visibleRows) {
+                let gradedCount = 0;
+                let ungradedCount = 0;
+                let totalScore = 0;
+                let scoreCount = 0;
+
+                visibleRows.forEach(row => {
+                    if (row.classList.contains('graded')) {
+                        gradedCount++;
+                        const scoreCell = row.querySelector('.score-value');
+                        if (scoreCell) {
+                            const scoreText = scoreCell.textContent.trim();
+                            const score = parseFloat(scoreText.split('/')[0]);
+                            if (!isNaN(score)) {
+                                totalScore += score;
+                                scoreCount++;
+                            }
                         }
+                    } else if (row.classList.contains('ungraded')) {
+                        ungradedCount++;
                     }
-                } else if (row.classList.contains('ungraded')) {
-                    ungradedCount++;
-                }
-            });
-            
-            document.getElementById('graded-count').textContent = gradedCount;
-            document.getElementById('ungraded-count').textContent = ungradedCount;
-            
-            if (scoreCount > 0) {
-                const avg = (totalScore / scoreCount).toFixed(1);
-                document.getElementById('avg-score').textContent = avg;
-            } else {
-                document.getElementById('avg-score').textContent = 'N/A';
+                });
+
+                document.getElementById('graded-count').textContent = gradedCount;
+                document.getElementById('ungraded-count').textContent = ungradedCount;
+                document.getElementById('avg-score').textContent = scoreCount > 0 ? (totalScore / scoreCount).toFixed(1) : 'N/A';
             }
+
+            function applySubmissionSearch() {
+                const q = searchInput ? searchInput.value.trim().toLowerCase() : '';
+                const visibleRows = [];
+
+                rows.forEach(row => {
+                    const text = row.textContent.toLowerCase();
+                    const show = !q || text.indexOf(q) !== -1;
+                    row.style.display = show ? '' : 'none';
+                    if (show) visibleRows.push(row);
+                });
+
+                if (noRows) {
+                    noRows.style.display = visibleRows.length === 0 ? '' : 'none';
+                }
+
+                refreshStats(visibleRows);
+            }
+
+            if (searchInput) {
+                searchInput.addEventListener('input', applySubmissionSearch);
+            }
+
+            applySubmissionSearch();
         }
 
         const createAssessmentModal = document.getElementById('createAssessmentModal');

@@ -33,7 +33,7 @@ public class AssessmentSubmission {
     @Max(value = 10, message = "Attempt number must not exceed 10")
     private Integer attemptNumber;
 
-    @Pattern(regexp = "^(Submitted|TimedOut|AutoSubmitted)$", message = "Invalid submission status")
+    @Pattern(regexp = "^(Submitted|TimedOut|AutoSubmitted|Graded)$", message = "Invalid submission status")
     private String status;
 
     private LocalDateTime startedAt;

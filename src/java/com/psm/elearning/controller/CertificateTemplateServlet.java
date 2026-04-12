@@ -3,6 +3,7 @@ package com.psm.elearning.controller;
 import com.psm.elearning.dao.CertificateDAO;
 import com.psm.elearning.dao.CertificateDAOImpl;
 import com.psm.elearning.model.CertificateView;
+import com.psm.elearning.util.SessionUtil;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -30,7 +31,7 @@ public class CertificateTemplateServlet extends HttpServlet {
             throws ServletException, IOException {
 
         HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("userId") == null) {
+        if (SessionUtil.resolveUserId(session) == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
@@ -81,40 +82,6 @@ public class CertificateTemplateServlet extends HttpServlet {
         }
     }
 
-    private Integer resolveUserId(HttpSession session) {
-        if (session == null) return null;
-        Object userId = session.getAttribute("userId");
-        if (userId == null) return null;
-        
-        if (userId instanceof Integer) {
-            int id = (Integer) userId;
-            return id > 0 ? id : null;
-        }
-        
-        if (userId instanceof String) {
-            try {
-                int id = Integer.parseInt((String) userId);
-                return id > 0 ? id : null;
-            } catch (NumberFormatException e) {
-                return null;
-            }
-        }
-        return null;
-    }
-
-    private String resolveRole(HttpSession session) {
-        if (session == null) return null;
-        Object role = session.getAttribute("userRole");
-        if (role == null) role = session.getAttribute("role");
-        if (role == null) return null;
-        
-        String roleStr = role.toString().trim();
-        if ("Admin".equalsIgnoreCase(roleStr)) return "Admin";
-        if ("Student".equalsIgnoreCase(roleStr)) return "Student";
-        if ("Instructor".equalsIgnoreCase(roleStr)) return "Instructor";
-        return null;
-    }
-
     private String sanitizeBackUrl(HttpServletRequest request, String rawBackUrl) {
         String defaultBack = request.getContextPath() + "/dashboard";
         if (rawBackUrl == null) {
@@ -142,9 +109,9 @@ public class CertificateTemplateServlet extends HttpServlet {
 
     private boolean canViewCertificate(HttpSession session, CertificateView certificate) {
         if (session == null) return false;
-        Integer userId = resolveUserId(session);
+        Integer userId = SessionUtil.resolveUserId(session);
         if (userId == null) return false;
-        String role = resolveRole(session);
+        String role = SessionUtil.resolveRole(session);
 
         if ("Admin".equals(role)) return true;
         if ("Instructor".equals(role)) {

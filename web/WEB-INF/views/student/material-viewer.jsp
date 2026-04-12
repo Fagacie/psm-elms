@@ -11,7 +11,7 @@
 </head>
 <body class="sv-page">
 <c:set var="topbarTitle" value="Material Preview"/>
-<c:set var="topbarSubtitle" value="In-course preview and quick access"/>
+<c:set var="topbarSubtitle" value="Preview materials and continue learning"/>
 <jsp:include page="/WEB-INF/views/common/student-topbar.jsp"/>
 
 <div class="sv-layout">
@@ -24,7 +24,7 @@
             <span>/</span>
             <a href="${backToHubUrl}">Learning Hub</a>
             <span>/</span>
-            <span>Preview</span>
+            <span>Material Preview</span>
         </div>
 
         <section class="sv-card mv-head-card">

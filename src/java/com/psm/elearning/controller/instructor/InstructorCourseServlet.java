@@ -7,6 +7,7 @@ import com.psm.elearning.dao.EnrollmentDAOImpl;
 import com.psm.elearning.model.Course;
 import com.psm.elearning.model.Enrollment;
 import com.psm.elearning.util.CloudinaryUtil;
+import com.psm.elearning.util.SessionUtil;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.http.HttpServlet;
@@ -36,7 +37,7 @@ public class InstructorCourseServlet extends HttpServlet {
         
         // Validate instructor session
         HttpSession session = request.getSession(false);
-        if (session == null || !"Instructor".equals(session.getAttribute("userRole"))) {
+        if (SessionUtil.resolveUserId(session) == null || !"Instructor".equals(SessionUtil.resolveRole(session))) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
@@ -72,7 +73,7 @@ public class InstructorCourseServlet extends HttpServlet {
         
         // Validate instructor session
         HttpSession session = request.getSession(false);
-        if (session == null || !"Instructor".equals(session.getAttribute("userRole"))) {
+        if (SessionUtil.resolveUserId(session) == null || !"Instructor".equals(SessionUtil.resolveRole(session))) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }

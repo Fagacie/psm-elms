@@ -7,6 +7,7 @@ import com.psm.elearning.dao.UserDAOImpl;
 import com.psm.elearning.model.Student;
 import com.psm.elearning.model.User;
 import com.psm.elearning.util.CloudinaryUtil;
+import com.psm.elearning.util.SessionUtil;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Paths;
@@ -30,17 +31,17 @@ public class ProfilePictureServlet extends HttpServlet {
             throws ServletException, IOException {
         
         HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("userId") == null) {
+        if (SessionUtil.resolveUserId(session) == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
 
-        Integer userId = resolveUserId(session);
+        Integer userId = SessionUtil.resolveUserId(session);
         if (userId == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
-        String userRole = (String) session.getAttribute("userRole");
+        String userRole = SessionUtil.resolveRole(session);
         
         Part filePart = request.getPart("passportPhoto");
         

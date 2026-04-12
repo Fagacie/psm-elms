@@ -1,7 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
-<c:set var="studentProfilePicture" value="${not empty sessionScope.student.passportPath ? sessionScope.student.passportPath : null}"/>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,12 +12,20 @@
 </head>
 <body class="sv-page">
 <c:set var="topbarTitle" value="Payment Failed"/>
-<c:set var="topbarSubtitle" value="Action required"/>
+<c:set var="topbarSubtitle" value="Resolve payment and retry checkout"/>
 <c:set var="topbarShowMenu" value="false"/>
 <jsp:include page="/WEB-INF/views/common/student-topbar.jsp"/>
 
 <div class="sv-layout ef-layout-flat">
     <main class="sv-main ef-main-centered">
+        <div class="sv-breadcrumb">
+            <a href="${pageContext.request.contextPath}/dashboard"><i class="fas fa-house"></i> Dashboard</a>
+            <span>/</span>
+            <a href="${pageContext.request.contextPath}/student/my-enrollments">My Courses</a>
+            <span>/</span>
+            <span>Payment Failed</span>
+        </div>
+
         <section class="ef-result">
             <div class="ef-result-top">
                 <div class="ef-icon fail"><i class="fas fa-times"></i></div>

@@ -14,6 +14,7 @@ import com.psm.elearning.model.Course;
 import com.psm.elearning.model.Enrollment;
 import com.psm.elearning.model.Material;
 import com.psm.elearning.model.Payment;
+import com.psm.elearning.util.SessionUtil;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -47,12 +48,11 @@ public class StudentMaterialServlet extends HttpServlet {
             throws ServletException, IOException {
 
         HttpSession session = request.getSession(false);
-        if (!isStudent(session)) {
+        Integer userId = SessionUtil.resolveUserId(session);
+        if (userId == null || !isStudent(session)) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
-
-        Integer userId = (Integer) session.getAttribute("userId");
         String action = request.getParameter("action");
         if ("preview".equalsIgnoreCase(action)) {
             showMaterialPreview(request, response, userId);
@@ -420,9 +420,6 @@ public class StudentMaterialServlet extends HttpServlet {
     }
 
     private boolean isStudent(HttpSession session) {
-        if (session == null || session.getAttribute("userId") == null) return false;
-        Object role = session.getAttribute("userRole");
-        if (role == null) role = session.getAttribute("role");
-        return "Student".equals(role);
+        return SessionUtil.resolveUserId(session) != null && "Student".equals(SessionUtil.resolveRole(session));
     }
 }

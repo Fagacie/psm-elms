@@ -14,6 +14,12 @@ public class AssessmentRetakeRequestDAOImpl implements AssessmentRetakeRequestDA
         r.setRequestId(rs.getInt("RequestID"));
         r.setAssessmentId(rs.getInt("AssessmentID"));
         r.setUserId(rs.getInt("UserID"));
+        if (hasColumn(rs, "StudentName")) {
+            r.setStudentName(rs.getString("StudentName"));
+        }
+        if (hasColumn(rs, "StudentEmail")) {
+            r.setStudentEmail(rs.getString("StudentEmail"));
+        }
         r.setReason(rs.getString("Reason"));
         r.setStatus(rs.getString("Status"));
 
@@ -25,6 +31,16 @@ public class AssessmentRetakeRequestDAOImpl implements AssessmentRetakeRequestDA
         int reviewedBy = rs.getInt("ReviewedBy");
         r.setReviewedBy(rs.wasNull() ? null : reviewedBy);
         return r;
+    }
+
+    private boolean hasColumn(ResultSet rs, String columnName) throws SQLException {
+        ResultSetMetaData meta = rs.getMetaData();
+        for (int i = 1; i <= meta.getColumnCount(); i++) {
+            if (columnName.equalsIgnoreCase(meta.getColumnLabel(i))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -49,9 +65,29 @@ public class AssessmentRetakeRequestDAOImpl implements AssessmentRetakeRequestDA
     }
 
     @Override
+    public AssessmentRetakeRequest findById(int requestId) {
+        String sql = "SELECT * FROM AssessmentRetakeRequest WHERE RequestID=?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, requestId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return mapRow(rs);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Retake request findById failed: " + e.getMessage());
+        }
+        return null;
+    }
+
+    @Override
     public List<AssessmentRetakeRequest> findByAssessment(int assessmentId) {
         List<AssessmentRetakeRequest> list = new ArrayList<>();
-        String sql = "SELECT * FROM AssessmentRetakeRequest WHERE AssessmentID=? ORDER BY RequestedAt DESC";
+        String sql = "SELECT r.*, u.FullName AS StudentName, u.Email AS StudentEmail " +
+                "FROM AssessmentRetakeRequest r " +
+                "JOIN User u ON u.UserID=r.UserID " +
+                "WHERE r.AssessmentID=? ORDER BY r.RequestedAt DESC";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, assessmentId);
@@ -67,7 +103,10 @@ public class AssessmentRetakeRequestDAOImpl implements AssessmentRetakeRequestDA
     @Override
     public List<AssessmentRetakeRequest> findByAssessmentAndUser(int assessmentId, int userId) {
         List<AssessmentRetakeRequest> list = new ArrayList<>();
-        String sql = "SELECT * FROM AssessmentRetakeRequest WHERE AssessmentID=? AND UserID=? ORDER BY RequestedAt DESC";
+        String sql = "SELECT r.*, u.FullName AS StudentName, u.Email AS StudentEmail " +
+            "FROM AssessmentRetakeRequest r " +
+            "JOIN User u ON u.UserID=r.UserID " +
+            "WHERE r.AssessmentID=? AND r.UserID=? ORDER BY r.RequestedAt DESC";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, assessmentId);

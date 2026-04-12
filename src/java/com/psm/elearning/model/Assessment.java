@@ -24,6 +24,12 @@ public class Assessment {
     @NotBlank(message = "Assessment type is required")
     @Pattern(regexp = "^(Quiz|Exam|Assignment)$", message = "Type must be Quiz, Exam, or Assignment")
     private String type;
+
+    @Pattern(regexp = "^(auto|manual)$", message = "Grading mode must be auto or manual")
+    private String gradingMode;
+
+    @Pattern(regexp = "^(file|text|both)$", message = "Submission mode must be file, text, or both")
+    private String submissionMode;
     
     @Min(value = 1, message = "Duration must be at least 1 minute")
     @Max(value = 480, message = "Duration must not exceed 480 minutes (8 hours)")
@@ -63,12 +69,16 @@ public class Assessment {
     public Assessment() {}
     
     public Assessment(Integer assessmentId, Integer courseId, String title, String type,
+                     String gradingMode,
+                     String submissionMode,
                      Integer duration, Integer totalMarks, String instructions, Integer maxAttempts,
                      Integer questionsPerPage, LocalDateTime createdAt, Integer createdBy) {
         this.assessmentId = assessmentId;
         this.courseId = courseId;
         this.title = title;
         this.type = type;
+        this.gradingMode = gradingMode;
+        this.submissionMode = submissionMode;
         this.duration = duration;
         this.totalMarks = totalMarks;
         this.instructions = instructions;
@@ -90,6 +100,12 @@ public class Assessment {
     
     public String getType() { return type; }
     public void setType(String type) { this.type = type; }
+
+    public String getGradingMode() { return gradingMode; }
+    public void setGradingMode(String gradingMode) { this.gradingMode = gradingMode; }
+
+    public String getSubmissionMode() { return submissionMode; }
+    public void setSubmissionMode(String submissionMode) { this.submissionMode = submissionMode; }
     
     public Integer getDuration() { return duration; }
     public void setDuration(Integer duration) { this.duration = duration; }

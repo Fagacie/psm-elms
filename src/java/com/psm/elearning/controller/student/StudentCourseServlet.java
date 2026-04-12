@@ -8,6 +8,7 @@ import com.psm.elearning.dao.EnrollmentDAO;
 import com.psm.elearning.dao.EnrollmentDAOImpl;
 import com.psm.elearning.model.Course;
 import com.psm.elearning.model.User;
+import com.psm.elearning.util.SessionUtil;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -38,7 +39,7 @@ public class StudentCourseServlet extends HttpServlet {
         
         // Validate student session
         HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("userId") == null || !"Student".equals(session.getAttribute("userRole"))) {
+        if (SessionUtil.resolveUserId(session) == null || !"Student".equals(SessionUtil.resolveRole(session))) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
@@ -72,7 +73,7 @@ public class StudentCourseServlet extends HttpServlet {
         
         // Validate student session
         HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("userId") == null || !"Student".equals(session.getAttribute("userRole"))) {
+        if (SessionUtil.resolveUserId(session) == null || !"Student".equals(SessionUtil.resolveRole(session))) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
@@ -97,7 +98,7 @@ public class StudentCourseServlet extends HttpServlet {
         
         try {
             HttpSession session = request.getSession(false);
-            Integer userId = (Integer) session.getAttribute("userId");
+            Integer userId = SessionUtil.resolveUserId(session);
 
             List<Integer> enrolledCourseIds = loadEnrolledCourseIds(userId);
             List<Course> courses = courseDAO.findByStatus("Approved");
@@ -120,7 +121,7 @@ public class StudentCourseServlet extends HttpServlet {
         
         try {
             HttpSession session = request.getSession(false);
-            Integer userId = (Integer) session.getAttribute("userId");
+            Integer userId = SessionUtil.resolveUserId(session);
 
             Integer courseId = parsePositiveInt(request.getParameter("id"));
             if (courseId == null) {
@@ -173,7 +174,7 @@ public class StudentCourseServlet extends HttpServlet {
         
         try {
             HttpSession session = request.getSession(false);
-            Integer userId = (Integer) session.getAttribute("userId");
+            Integer userId = SessionUtil.resolveUserId(session);
             request.setAttribute("user", session.getAttribute("user"));
             
             String keyword = request.getParameter("keyword");
@@ -205,7 +206,7 @@ public class StudentCourseServlet extends HttpServlet {
         
         try {
             HttpSession session = request.getSession(false);
-            Integer userId = (Integer) session.getAttribute("userId");
+            Integer userId = SessionUtil.resolveUserId(session);
             request.setAttribute("user", session.getAttribute("user"));
             
             String category = request.getParameter("category");
@@ -266,24 +267,4 @@ public class StudentCourseServlet extends HttpServlet {
         }
     }
 
-    private Integer resolveUserId(HttpSession session) {
-        if (session == null) return null;
-        Object userId = session.getAttribute("userId");
-        if (userId == null) return null;
-        
-        if (userId instanceof Integer) {
-            int id = (Integer) userId;
-            return id > 0 ? id : null;
-        }
-        
-        if (userId instanceof String) {
-            try {
-                int id = Integer.parseInt((String) userId);
-                return id > 0 ? id : null;
-            } catch (NumberFormatException e) {
-                return null;
-            }
-        }
-        return null;
-    }
 }

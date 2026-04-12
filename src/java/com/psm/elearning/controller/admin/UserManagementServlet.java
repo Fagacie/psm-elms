@@ -3,6 +3,7 @@ package com.psm.elearning.controller.admin;
 import com.psm.elearning.dao.*;
 import com.psm.elearning.model.*;
 import com.psm.elearning.util.PasswordUtil;
+import com.psm.elearning.util.SessionUtil;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -28,7 +29,7 @@ public class UserManagementServlet extends HttpServlet {
             throws ServletException, IOException {
         
         HttpSession session = request.getSession(false);
-        if (session == null || !"Admin".equals(session.getAttribute("userRole"))) {
+        if (SessionUtil.resolveUserId(session) == null || !"Admin".equals(SessionUtil.resolveRole(session))) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
@@ -62,7 +63,7 @@ public class UserManagementServlet extends HttpServlet {
             throws ServletException, IOException {
         
         HttpSession session = request.getSession(false);
-        if (session == null || !"Admin".equals(session.getAttribute("userRole"))) {
+        if (SessionUtil.resolveUserId(session) == null || !"Admin".equals(SessionUtil.resolveRole(session))) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }

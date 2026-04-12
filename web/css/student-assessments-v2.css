@@ -15,6 +15,71 @@
   margin-bottom: 24px;
 }
 
+.ass-flow-strip {
+  margin-bottom: 18px;
+}
+
+.ass-flow-strip .sv-card-body {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.ass-flow-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  border: 1px solid var(--sv-border);
+  border-radius: 12px;
+  padding: 10px;
+  background: #fff;
+}
+
+.ass-flow-item strong {
+  display: block;
+  font-size: 0.84rem;
+}
+
+.ass-flow-item small {
+  color: var(--sv-muted);
+  font-size: 0.73rem;
+}
+
+.ass-flow-dot {
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  border-radius: 50%;
+  border: 1px solid var(--sv-border);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--sv-muted);
+  background: #fff;
+}
+
+.ass-flow-item.is-active {
+  border-color: #93c5fd;
+  background: #eff6ff;
+}
+
+.ass-flow-item.is-active .ass-flow-dot {
+  border-color: #60a5fa;
+  color: #1d4ed8;
+}
+
+.ass-flow-item.is-done {
+  border-color: #86efac;
+  background: #ecfdf3;
+}
+
+.ass-flow-item.is-done .ass-flow-dot {
+  border-color: #16a34a;
+  color: #166534;
+}
+
 .ass-course-selector .sv-card-body,
 .ass-list-card .sv-card-body,
 .ass-detail-card .sv-card-body {
@@ -45,6 +110,20 @@
 .history-table td .sv-btn {
   margin-right: 8px;
   margin-bottom: 8px;
+}
+
+.ass-inline-link {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 4px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--sv-primary);
+  text-decoration: none;
+}
+
+.ass-inline-link:hover {
+  text-decoration: underline;
 }
 
 .attempt-header {
@@ -138,9 +217,40 @@
   line-height: 1.6;
 }
 
+.ass-status-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 0 9px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ass-status-Submitted,
+.ass-status-AutoSubmitted,
+.ass-status-Graded {
+  border-color: #abefc6;
+  color: #027a48;
+  background: #ecfdf3;
+}
+
+.ass-status-TimedOut {
+  border-color: #fedf89;
+  color: #b54708;
+  background: #fffaeb;
+}
+
 @media (max-width: 760px) {
   .ass-course-selector .sv-flow-form-inline {
     align-items: stretch;
+  }
+
+  .ass-flow-strip .sv-card-body {
+    grid-template-columns: 1fr;
   }
 
   .ass-course-selector label {
@@ -175,7 +285,62 @@
 
   .assessment-table td,
   .history-table td {
-    padding: 8px 0;
+    position: relative;
+    padding: 8px 0 8px 44%;
     border-bottom: none;
+    min-height: 30px;
+  }
+
+  .assessment-table td::before,
+  .history-table td::before {
+    content: attr(data-label);
+    position: absolute;
+    left: 0;
+    top: 8px;
+    width: 40%;
+    padding-right: 12px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--sv-muted);
+    line-height: 1.4;
+  }
+
+  .assessment-table td[data-label="Action"],
+  .history-table td[data-label="Action"] {
+    padding-left: 0;
+  }
+
+  .assessment-table td[data-label="Action"]::before,
+  .history-table td[data-label="Action"]::before {
+    position: static;
+    display: block;
+    width: 100%;
+    margin-bottom: 8px;
+    padding-right: 0;
+  }
+
+  .assessment-table td[data-label="Action"] .sv-btn,
+  .history-table td[data-label="Action"] .sv-btn {
+    width: 100%;
+    justify-content: center;
+    margin-right: 0;
+  }
+
+  .assessment-table td[data-label="Action"] .ass-inline-link {
+    display: inline-flex;
+    margin-top: 4px;
+    margin-left: 0;
+  }
+
+  .attempt-toolbar {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .attempt-toolbar .sv-btn {
+    width: 100%;
+    justify-content: center;
   }
 }

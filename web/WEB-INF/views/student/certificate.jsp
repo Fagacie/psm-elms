@@ -1,7 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
-<c:set var="studentProfilePicture" value="${not empty sessionScope.student.passportPath ? sessionScope.student.passportPath : null}"/>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -17,7 +16,7 @@
 </head>
 <body class="sv-page">
 <c:set var="topbarTitle" value="Certificate"/>
-<c:set var="topbarSubtitle" value="View and download your course credential"/>
+<c:set var="topbarSubtitle" value="View, download, and verify this credential"/>
 <jsp:include page="/WEB-INF/views/common/student-topbar.jsp"/>
 
 <div class="sv-layout">
@@ -28,7 +27,7 @@
         <div class="sv-breadcrumb">
             <a href="${pageContext.request.contextPath}/dashboard"><i class="fas fa-house"></i> Dashboard</a>
             <span>/</span>
-            <a href="${pageContext.request.contextPath}/student/my-enrollments">My Courses</a>
+            <a href="${pageContext.request.contextPath}/student/certificates">Certificates</a>
             <span>/</span>
             <span>Certificate</span>
         </div>
@@ -294,6 +293,17 @@
         }
 
         downloadBtn.addEventListener('click', exportPng);
+
+        if ('${param.download}' === 'png') {
+            var triggerAutoExport = function () {
+                window.setTimeout(exportPng, 220);
+            };
+            if (document.readyState === 'complete') {
+                triggerAutoExport();
+            } else {
+                window.addEventListener('load', triggerAutoExport, { once: true });
+            }
+        }
     })();
 </script>
 <script src="${pageContext.request.contextPath}/js/student-v2.js"></script>

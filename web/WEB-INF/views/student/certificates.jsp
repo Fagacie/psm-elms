@@ -1,7 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
-<c:set var="studentProfilePicture" value="${not empty sessionScope.student.passportPath ? sessionScope.student.passportPath : null}"/>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -21,7 +20,7 @@
 <c:set var="activeCount" value="${fn:length(issuedCertificates) - revokedCount}" />
 
 <c:set var="topbarTitle" value="Certificates"/>
-<c:set var="topbarSubtitle" value="Generate and share your learning credentials"/>
+<c:set var="topbarSubtitle" value="Generate, manage, and share credentials"/>
 <jsp:include page="/WEB-INF/views/common/student-topbar.jsp"/>
 
 <div class="sv-layout">
@@ -31,7 +30,7 @@
     <main class="sv-main cert-page">
         <div class="sv-breadcrumb">
             <a href="${pageContext.request.contextPath}/dashboard">Dashboard</a>
-            <i class="fas fa-angle-right"></i>
+            <span>/</span>
             <span>Certificates</span>
         </div>
 
@@ -272,7 +271,10 @@
                                 </thead>
                                 <tbody>
                                 <c:forEach var="cert" items="${issuedCertificates}">
-                                    <tr class="cert-row" data-status="${cert.status == 'Revoked' ? 'revoked' : 'active'}" data-course="${cert.courseName}" data-cert="${cert.certificateNo}">
+                                    <tr class="cert-row"
+                                        data-status="${cert.status == 'Revoked' ? 'revoked' : 'active'}"
+                                        data-course="${cert.courseName}"
+                                        data-cert="${cert.certificateNo}">
                                         <td><span class="cert-no">${cert.certificateNo}</span></td>
                                         <td><div class="cert-course-name">${cert.courseName}</div></td>
                                         <td>
@@ -291,11 +293,11 @@
                                         </td>
                                         <td>
                                             <div class="cert-actions">
-                                                <a class="sv-btn" href="${pageContext.request.contextPath}/student/certificate?enrollmentId=${cert.enrollmentId}">
-                                                    <i class="fas fa-award"></i>
-                                                    <span>Open</span>
-                                                </a>
-                                                <button type="button" class="sv-btn cert-copy-code-btn" data-cert-copy="${cert.certificateNo}">
+                                                <button type="button" class="sv-btn primary cert-table-btn" data-cert-download="${pageContext.request.contextPath}/student/certificate?enrollmentId=${cert.enrollmentId}&download=png">
+                                                    <i class="fas fa-image"></i>
+                                                    <span>Download PNG</span>
+                                                </button>
+                                                <button type="button" class="sv-btn cert-copy-code-btn cert-table-btn" data-cert-copy="${cert.certificateNo}">
                                                     <i class="fas fa-copy"></i>
                                                     <span>Copy Code</span>
                                                 </button>

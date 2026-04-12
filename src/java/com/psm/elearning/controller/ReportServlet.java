@@ -3,6 +3,7 @@ package com.psm.elearning.controller;
 import com.psm.elearning.dao.ReportDAO;
 import com.psm.elearning.dao.ReportDAOImpl;
 import com.psm.elearning.model.User;
+import com.psm.elearning.util.SessionUtil;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -38,10 +39,8 @@ public class ReportServlet extends HttpServlet {
         }
 
         User user = (User) session.getAttribute("user");
-        String role = (String) session.getAttribute("userRole");
-        if (role == null) {
-            role = user.getRole();
-        }
+        String role = SessionUtil.resolveRole(session);
+        if (role == null) role = user.getRole();
 
         String ip = request.getRemoteAddr();
         Integer userId = user.getUserId();

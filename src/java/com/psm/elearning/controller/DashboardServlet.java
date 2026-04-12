@@ -3,6 +3,7 @@ package com.psm.elearning.controller;
 import com.psm.elearning.dao.*;
 import com.psm.elearning.model.*;
 import com.psm.elearning.service.EnrollmentStateSyncService;
+import com.psm.elearning.util.SessionUtil;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -62,7 +63,7 @@ public class DashboardServlet extends HttpServlet {
             request.setAttribute("student", student);
         }
         
-        String role = (String) session.getAttribute("userRole");
+        String role = SessionUtil.resolveRole(session);
 
         // Fetch dashboard data for students
         if ("Student".equals(role)) {

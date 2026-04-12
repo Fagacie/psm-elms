@@ -7,6 +7,7 @@ import com.psm.elearning.dao.MaterialDAOImpl;
 import com.psm.elearning.model.Course;
 import com.psm.elearning.model.Material;
 import com.psm.elearning.util.CloudinaryUtil;
+import com.psm.elearning.util.SessionUtil;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
@@ -35,12 +36,11 @@ public class InstructorMaterialServlet extends HttpServlet {
             throws ServletException, IOException {
 
         HttpSession session = request.getSession(false);
-        if (!isInstructor(session)) {
+        Integer userId = SessionUtil.resolveUserId(session);
+        if (userId == null || !isInstructor(session)) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
-
-        Integer userId = (Integer) session.getAttribute("userId");
         String action = request.getParameter("action");
         if (action == null) action = "list";
 
@@ -61,12 +61,11 @@ public class InstructorMaterialServlet extends HttpServlet {
             throws ServletException, IOException {
 
         HttpSession session = request.getSession(false);
-        if (!isInstructor(session)) {
+        Integer userId = SessionUtil.resolveUserId(session);
+        if (userId == null || !isInstructor(session)) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
-
-        Integer userId = (Integer) session.getAttribute("userId");
         String action = request.getParameter("action");
 
         if ("update".equals(action)) {
@@ -360,10 +359,7 @@ public class InstructorMaterialServlet extends HttpServlet {
     }
 
     private boolean isInstructor(HttpSession session) {
-        if (session == null || session.getAttribute("userId") == null) return false;
-        Object role = session.getAttribute("userRole");
-        if (role == null) role = session.getAttribute("role");
-        return "Instructor".equals(role);
+        return SessionUtil.resolveUserId(session) != null && "Instructor".equals(SessionUtil.resolveRole(session));
     }
 
     private String valueOrEmpty(String s) {

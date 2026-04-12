@@ -3,6 +3,7 @@ package com.psm.elearning.controller.admin;
 import com.psm.elearning.dao.AppSettingDAO;
 import com.psm.elearning.dao.AppSettingDAOImpl;
 import com.psm.elearning.model.AppSettingAuditEntry;
+import com.psm.elearning.util.SessionUtil;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -174,7 +175,7 @@ public class AdminSettingsServlet extends HttpServlet {
 
     private HttpSession ensureAdminSession(HttpServletRequest request) {
         HttpSession session = request.getSession(false);
-        if (session == null || !"Admin".equals(session.getAttribute("userRole"))) {
+        if (SessionUtil.resolveUserId(session) == null || !"Admin".equals(SessionUtil.resolveRole(session))) {
             return null;
         }
         return session;

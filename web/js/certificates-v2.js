@@ -7,6 +7,7 @@
     var counters = document.querySelectorAll('.cert-count[data-counter]');
     var tiltEls = document.querySelectorAll('.cert-card, .cert-metric, .cert-actions .sv-btn');
     var copyButtons = document.querySelectorAll('[data-cert-copy]');
+    var downloadButtons = document.querySelectorAll('[data-cert-download]');
     var copyToast = document.getElementById('certCopyToast');
     var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -65,6 +66,38 @@
         copyButtons.forEach(function (btn) {
             btn.addEventListener('click', function () {
                 copyCertificateCode(btn.getAttribute('data-cert-copy'), btn);
+            });
+        });
+    }
+
+    function triggerBackgroundDownload(url) {
+        if (!url) return;
+        var iframe = document.getElementById('certPngDownloadFrame');
+        if (!iframe) {
+            iframe = document.createElement('iframe');
+            iframe.id = 'certPngDownloadFrame';
+            // Keep a real viewport for accurate html2canvas rendering in the certificate page.
+            iframe.style.position = 'fixed';
+            iframe.style.left = '-10000px';
+            iframe.style.top = '0';
+            iframe.style.width = '1600px';
+            iframe.style.height = '1200px';
+            iframe.style.border = '0';
+            iframe.style.opacity = '0';
+            iframe.style.pointerEvents = 'none';
+            document.body.appendChild(iframe);
+        }
+        var sep = url.indexOf('?') === -1 ? '?' : '&';
+        iframe.src = url + sep + '_ts=' + Date.now();
+    }
+
+    function wireDownloadButtons() {
+        if (!downloadButtons.length) return;
+        downloadButtons.forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var url = btn.getAttribute('data-cert-download');
+                triggerBackgroundDownload(url);
+                showCopyToast('Preparing certificate PNG download...');
             });
         });
     }
@@ -182,6 +215,8 @@
     }
 
     wireCopyButtons();
+    wireDownloadButtons();
+
     animateCounters();
     applyFilters();
 })();

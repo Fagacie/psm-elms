@@ -9,6 +9,8 @@ import java.util.List;
 public class AssessmentDAOImpl implements AssessmentDAO {
 
     private volatile Boolean placementColumnsAvailable;
+    private volatile Boolean gradingModeColumnAvailable;
+    private volatile Boolean submissionModeColumnAvailable;
 
     private boolean supportsPlacementColumns(Connection conn) {
         if (placementColumnsAvailable != null) {
@@ -44,12 +46,68 @@ public class AssessmentDAOImpl implements AssessmentDAO {
         return false;
     }
 
+    private boolean supportsGradingModeColumn(Connection conn) {
+        if (gradingModeColumnAvailable != null) {
+            return gradingModeColumnAvailable;
+        }
+        synchronized (this) {
+            if (gradingModeColumnAvailable != null) {
+                return gradingModeColumnAvailable;
+            }
+            String sql = "SELECT COUNT(*) AS cnt FROM information_schema.COLUMNS "
+                    + "WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'Assessment' "
+                    + "AND COLUMN_NAME = 'GradingMode'";
+            try (PreparedStatement ps = conn.prepareStatement(sql);
+                 ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    gradingModeColumnAvailable = rs.getInt("cnt") == 1;
+                } else {
+                    gradingModeColumnAvailable = false;
+                }
+            } catch (SQLException e) {
+                gradingModeColumnAvailable = false;
+            }
+            return gradingModeColumnAvailable;
+        }
+    }
+
+    private boolean supportsSubmissionModeColumn(Connection conn) {
+        if (submissionModeColumnAvailable != null) {
+            return submissionModeColumnAvailable;
+        }
+        synchronized (this) {
+            if (submissionModeColumnAvailable != null) {
+                return submissionModeColumnAvailable;
+            }
+            String sql = "SELECT COUNT(*) AS cnt FROM information_schema.COLUMNS "
+                    + "WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'Assessment' "
+                    + "AND COLUMN_NAME = 'SubmissionMode'";
+            try (PreparedStatement ps = conn.prepareStatement(sql);
+                 ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    submissionModeColumnAvailable = rs.getInt("cnt") == 1;
+                } else {
+                    submissionModeColumnAvailable = false;
+                }
+            } catch (SQLException e) {
+                submissionModeColumnAvailable = false;
+            }
+            return submissionModeColumnAvailable;
+        }
+    }
+
     private Assessment mapRow(ResultSet rs) throws SQLException {
         Assessment a = new Assessment();
         a.setAssessmentId(rs.getInt("AssessmentID"));
         a.setCourseId(rs.getInt("CourseID"));
         a.setTitle(rs.getString("Title"));
         a.setType(rs.getString("Type"));
+        if (hasColumn(rs, "GradingMode")) {
+            a.setGradingMode(rs.getString("GradingMode"));
+        }
+        if (hasColumn(rs, "SubmissionMode")) {
+            a.setSubmissionMode(rs.getString("SubmissionMode"));
+        }
         int duration = rs.getInt("Duration");
         a.setDuration(rs.wasNull() ? null : duration);
         int total = rs.getInt("TotalMarks");
@@ -76,31 +134,45 @@ public class AssessmentDAOImpl implements AssessmentDAO {
     public Assessment create(Assessment assessment) {
         try (Connection conn = DBConnection.getConnection()) {
             boolean supportsPlacement = supportsPlacementColumns(conn);
-            String sql = supportsPlacement
-                    ? "INSERT INTO Assessment (CourseID, Title, Type, Duration, TotalMarks, Instructions, PlacementType, PlacementMaterialID, MaxAttempts, QuestionsPerPage, CreatedBy) VALUES (?,?,?,?,?,?,?,?,?,?,?)"
-                    : "INSERT INTO Assessment (CourseID, Title, Type, Duration, TotalMarks, Instructions, MaxAttempts, QuestionsPerPage, CreatedBy) VALUES (?,?,?,?,?,?,?,?,?)";
-            try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            ps.setInt(1, assessment.getCourseId());
-            ps.setString(2, assessment.getTitle());
-            ps.setString(3, assessment.getType());
-            if (assessment.getDuration() != null) ps.setInt(4, assessment.getDuration()); else ps.setNull(4, Types.INTEGER);
-            if (assessment.getTotalMarks() != null) ps.setInt(5, assessment.getTotalMarks()); else ps.setNull(5, Types.INTEGER);
-            ps.setString(6, assessment.getInstructions());
-            if (supportsPlacement) {
-                ps.setString(7, assessment.getPlacementType());
-                if (assessment.getPlacementMaterialId() != null) {
-                    ps.setInt(8, assessment.getPlacementMaterialId());
-                } else {
-                    ps.setNull(8, Types.INTEGER);
-                }
-                ps.setInt(9, assessment.getMaxAttempts() != null ? assessment.getMaxAttempts() : 1);
-                ps.setInt(10, assessment.getQuestionsPerPage() != null ? assessment.getQuestionsPerPage() : 2);
-                ps.setInt(11, assessment.getCreatedBy());
+            boolean supportsGradingMode = supportsGradingModeColumn(conn);
+            boolean supportsSubmissionMode = supportsSubmissionModeColumn(conn);
+            String sql;
+            if (supportsPlacement && supportsGradingMode && supportsSubmissionMode) {
+                sql = "INSERT INTO Assessment (CourseID, Title, Type, GradingMode, SubmissionMode, Duration, TotalMarks, Instructions, PlacementType, PlacementMaterialID, MaxAttempts, QuestionsPerPage, CreatedBy) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
+            } else if (supportsPlacement && supportsGradingMode) {
+                sql = "INSERT INTO Assessment (CourseID, Title, Type, Duration, TotalMarks, Instructions, PlacementType, PlacementMaterialID, MaxAttempts, QuestionsPerPage, CreatedBy) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+            } else if (supportsGradingMode && supportsSubmissionMode) {
+                sql = "INSERT INTO Assessment (CourseID, Title, Type, GradingMode, SubmissionMode, Duration, TotalMarks, Instructions, MaxAttempts, QuestionsPerPage, CreatedBy) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+            } else if (supportsGradingMode) {
+                sql = "INSERT INTO Assessment (CourseID, Title, Type, GradingMode, Duration, TotalMarks, Instructions, MaxAttempts, QuestionsPerPage, CreatedBy) VALUES (?,?,?,?,?,?,?,?,?,?)";
             } else {
-                ps.setInt(7, assessment.getMaxAttempts() != null ? assessment.getMaxAttempts() : 1);
-                ps.setInt(8, assessment.getQuestionsPerPage() != null ? assessment.getQuestionsPerPage() : 2);
-                ps.setInt(9, assessment.getCreatedBy());
+                sql = "INSERT INTO Assessment (CourseID, Title, Type, Duration, TotalMarks, Instructions, MaxAttempts, QuestionsPerPage, CreatedBy) VALUES (?,?,?,?,?,?,?,?,?)";
             }
+            try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            int i = 1;
+            ps.setInt(i++, assessment.getCourseId());
+            ps.setString(i++, assessment.getTitle());
+            ps.setString(i++, assessment.getType());
+            if (supportsGradingMode) {
+                ps.setString(i++, assessment.getGradingMode() != null ? assessment.getGradingMode() : "auto");
+            }
+            if (supportsSubmissionMode) {
+                ps.setString(i++, assessment.getSubmissionMode() != null ? assessment.getSubmissionMode() : "both");
+            }
+            if (assessment.getDuration() != null) ps.setInt(i++, assessment.getDuration()); else ps.setNull(i++, Types.INTEGER);
+            if (assessment.getTotalMarks() != null) ps.setInt(i++, assessment.getTotalMarks()); else ps.setNull(i++, Types.INTEGER);
+            ps.setString(i++, assessment.getInstructions());
+            if (supportsPlacement) {
+                ps.setString(i++, assessment.getPlacementType());
+                if (assessment.getPlacementMaterialId() != null) {
+                    ps.setInt(i++, assessment.getPlacementMaterialId());
+                } else {
+                    ps.setNull(i++, Types.INTEGER);
+                }
+            }
+            ps.setInt(i++, assessment.getMaxAttempts() != null ? assessment.getMaxAttempts() : 1);
+            ps.setInt(i++, assessment.getQuestionsPerPage() != null ? assessment.getQuestionsPerPage() : 2);
+            ps.setInt(i, assessment.getCreatedBy());
             int affected = ps.executeUpdate();
             if (affected == 0) return null;
             try (ResultSet rs = ps.getGeneratedKeys()) {
@@ -149,30 +221,44 @@ public class AssessmentDAOImpl implements AssessmentDAO {
     public boolean update(Assessment assessment) {
         try (Connection conn = DBConnection.getConnection()) {
             boolean supportsPlacement = supportsPlacementColumns(conn);
-            String sql = supportsPlacement
-                    ? "UPDATE Assessment SET Title=?, Type=?, Duration=?, TotalMarks=?, Instructions=?, PlacementType=?, PlacementMaterialID=?, MaxAttempts=?, QuestionsPerPage=? WHERE AssessmentID=?"
-                    : "UPDATE Assessment SET Title=?, Type=?, Duration=?, TotalMarks=?, Instructions=?, MaxAttempts=?, QuestionsPerPage=? WHERE AssessmentID=?";
-            try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, assessment.getTitle());
-            ps.setString(2, assessment.getType());
-            if (assessment.getDuration() != null) ps.setInt(3, assessment.getDuration()); else ps.setNull(3, Types.INTEGER);
-            if (assessment.getTotalMarks() != null) ps.setInt(4, assessment.getTotalMarks()); else ps.setNull(4, Types.INTEGER);
-            ps.setString(5, assessment.getInstructions());
-            if (supportsPlacement) {
-                ps.setString(6, assessment.getPlacementType());
-                if (assessment.getPlacementMaterialId() != null) {
-                    ps.setInt(7, assessment.getPlacementMaterialId());
-                } else {
-                    ps.setNull(7, Types.INTEGER);
-                }
-                ps.setInt(8, assessment.getMaxAttempts() != null ? assessment.getMaxAttempts() : 1);
-                ps.setInt(9, assessment.getQuestionsPerPage() != null ? assessment.getQuestionsPerPage() : 2);
-                ps.setInt(10, assessment.getAssessmentId());
+            boolean supportsGradingMode = supportsGradingModeColumn(conn);
+            boolean supportsSubmissionMode = supportsSubmissionModeColumn(conn);
+            String sql;
+            if (supportsPlacement && supportsGradingMode && supportsSubmissionMode) {
+                sql = "UPDATE Assessment SET Title=?, Type=?, GradingMode=?, SubmissionMode=?, Duration=?, TotalMarks=?, Instructions=?, PlacementType=?, PlacementMaterialID=?, MaxAttempts=?, QuestionsPerPage=? WHERE AssessmentID=?";
+            } else if (supportsPlacement && supportsGradingMode) {
+                sql = "UPDATE Assessment SET Title=?, Type=?, Duration=?, TotalMarks=?, Instructions=?, PlacementType=?, PlacementMaterialID=?, MaxAttempts=?, QuestionsPerPage=? WHERE AssessmentID=?";
+            } else if (supportsGradingMode && supportsSubmissionMode) {
+                sql = "UPDATE Assessment SET Title=?, Type=?, GradingMode=?, SubmissionMode=?, Duration=?, TotalMarks=?, Instructions=?, MaxAttempts=?, QuestionsPerPage=? WHERE AssessmentID=?";
+            } else if (supportsGradingMode) {
+                sql = "UPDATE Assessment SET Title=?, Type=?, GradingMode=?, Duration=?, TotalMarks=?, Instructions=?, MaxAttempts=?, QuestionsPerPage=? WHERE AssessmentID=?";
             } else {
-                ps.setInt(6, assessment.getMaxAttempts() != null ? assessment.getMaxAttempts() : 1);
-                ps.setInt(7, assessment.getQuestionsPerPage() != null ? assessment.getQuestionsPerPage() : 2);
-                ps.setInt(8, assessment.getAssessmentId());
+                sql = "UPDATE Assessment SET Title=?, Type=?, Duration=?, TotalMarks=?, Instructions=?, MaxAttempts=?, QuestionsPerPage=? WHERE AssessmentID=?";
             }
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            int i = 1;
+            ps.setString(i++, assessment.getTitle());
+            ps.setString(i++, assessment.getType());
+            if (supportsGradingMode) {
+                ps.setString(i++, assessment.getGradingMode() != null ? assessment.getGradingMode() : "auto");
+            }
+            if (supportsSubmissionMode) {
+                ps.setString(i++, assessment.getSubmissionMode() != null ? assessment.getSubmissionMode() : "both");
+            }
+            if (assessment.getDuration() != null) ps.setInt(i++, assessment.getDuration()); else ps.setNull(i++, Types.INTEGER);
+            if (assessment.getTotalMarks() != null) ps.setInt(i++, assessment.getTotalMarks()); else ps.setNull(i++, Types.INTEGER);
+            ps.setString(i++, assessment.getInstructions());
+            if (supportsPlacement) {
+                ps.setString(i++, assessment.getPlacementType());
+                if (assessment.getPlacementMaterialId() != null) {
+                    ps.setInt(i++, assessment.getPlacementMaterialId());
+                } else {
+                    ps.setNull(i++, Types.INTEGER);
+                }
+            }
+            ps.setInt(i++, assessment.getMaxAttempts() != null ? assessment.getMaxAttempts() : 1);
+            ps.setInt(i++, assessment.getQuestionsPerPage() != null ? assessment.getQuestionsPerPage() : 2);
+            ps.setInt(i, assessment.getAssessmentId());
             return ps.executeUpdate() > 0;
             }
         } catch (SQLException e) {
