@@ -194,16 +194,6 @@ CREATE TABLE IF NOT EXISTS `MaterialProgress` (
   CONSTRAINT `fk_material_progress_course` FOREIGN KEY (`CourseID`) REFERENCES `Course`(`CourseID`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-ALTER TABLE `MaterialProgress`
-  ADD COLUMN IF NOT EXISTS `CourseID` INT NULL,
-  ADD COLUMN IF NOT EXISTS `Status` ENUM('in_progress','completed') NOT NULL DEFAULT 'in_progress',
-  ADD COLUMN IF NOT EXISTS `CompletedAt` TIMESTAMP NULL DEFAULT NULL,
-  ADD COLUMN IF NOT EXISTS `UpdatedAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
-
-ALTER TABLE `MaterialProgress`
-  ADD INDEX IF NOT EXISTS `idx_material_progress_course` (`CourseID`),
-  ADD INDEX IF NOT EXISTS `idx_material_progress_status` (`Status`);
-
 -- Enrollments
 CREATE TABLE IF NOT EXISTS `Enrollment` (
   `EnrollmentID` INT AUTO_INCREMENT PRIMARY KEY,
@@ -406,4 +396,3 @@ CREATE TABLE IF NOT EXISTS `PasswordResetToken` (
   KEY `idx_token_user` (`UserID`),
   CONSTRAINT `fk_token_user` FOREIGN KEY (`UserID`) REFERENCES `User`(`UserID`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-

@@ -2,9 +2,12 @@ package com.psm.elearning.controller.student;
 
 import com.psm.elearning.dao.EnrollmentDAO;
 import com.psm.elearning.dao.EnrollmentDAOImpl;
+import com.psm.elearning.dao.MaterialDAO;
+import com.psm.elearning.dao.MaterialDAOImpl;
 import com.psm.elearning.dao.MaterialProgressDAO;
 import com.psm.elearning.dao.MaterialProgressDAOImpl;
 import com.psm.elearning.model.Enrollment;
+import com.psm.elearning.model.Material;
 import com.psm.elearning.util.SessionUtil;
 
 import javax.servlet.ServletException;
@@ -26,12 +29,14 @@ public class MarkMaterialCompleteServlet extends HttpServlet {
 
     private MaterialProgressDAO materialProgressDAO;
     private EnrollmentDAO enrollmentDAO;
+    private MaterialDAO materialDAO;
 
     @Override
     public void init() throws ServletException {
         super.init();
         materialProgressDAO = new MaterialProgressDAOImpl();
         enrollmentDAO = new EnrollmentDAOImpl();
+        materialDAO = new MaterialDAOImpl();
     }
 
     @Override
@@ -74,8 +79,16 @@ public class MarkMaterialCompleteServlet extends HttpServlet {
                     return;
                 }
 
-                // Mark material as viewed
-                boolean success = materialProgressDAO.markViewed(userId, materialId);
+                Material material = materialDAO.findById(materialId);
+                if (material == null || material.getCourseId() == null
+                        || enrollment.getCourseId() == null
+                        || !enrollment.getCourseId().equals(material.getCourseId())) {
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    out.print("{\"success\": false, \"message\": \"Material does not belong to this enrollment\"}");
+                    return;
+                }
+
+                boolean success = materialProgressDAO.markCompleted(userId, materialId, material.getCourseId());
 
                 if (success) {
                     out.print("{\"success\": true, \"message\": \"Material marked as completed\"}");

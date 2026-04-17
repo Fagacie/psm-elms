@@ -267,12 +267,36 @@ public class StudentMaterialServlet extends HttpServlet {
             return;
         }
 
-        // Opening preview sets material to in-progress, not completed.
+        Enrollment previewEnrollment = resolvePreviewEnrollment(request, userId, material.getCourseId());
         progressDAO.markInProgress(userId, materialId, material.getCourseId());
 
         String filePath = normalize(material.getFilePath());
         String extension = extractFileExtension(filePath);
         String streamUrl = request.getContextPath() + "/student/materials?action=view&id=" + materialId;
+        List<Material> courseMaterials = materialDAO.findByCourse(material.getCourseId());
+        if (courseMaterials == null) {
+            courseMaterials = new ArrayList<>();
+        }
+        List<Material> orderedMaterials = sortMaterials(courseMaterials, "sequence");
+        Map<Integer, String> statusById = progressDAO.findMaterialStatusByCourse(userId, material.getCourseId());
+        Material previousMaterial = null;
+        Material nextMaterial = null;
+        int materialPosition = 0;
+
+        for (int i = 0; i < orderedMaterials.size(); i++) {
+            Material candidate = orderedMaterials.get(i);
+            if (candidate.getMaterialId() == null || !candidate.getMaterialId().equals(materialId)) {
+                continue;
+            }
+            materialPosition = i + 1;
+            if (i > 0) {
+                previousMaterial = orderedMaterials.get(i - 1);
+            }
+            if (i + 1 < orderedMaterials.size()) {
+                nextMaterial = orderedMaterials.get(i + 1);
+            }
+            break;
+        }
 
         boolean isLink = Material.TYPE_LINK.equalsIgnoreCase(material.getMaterialType());
         boolean isPdf = "pdf".equals(extension);
@@ -283,6 +307,19 @@ public class StudentMaterialServlet extends HttpServlet {
                 || Material.TYPE_VIDEO.equalsIgnoreCase(material.getMaterialType());
         boolean isAudio = "mp3".equals(extension);
         boolean canInlinePreview = isPdf || isVideo || isAudio;
+        String completionRule = resolveCompletionRule(material, extension, isPdf, isVideo, isAudio, isLink);
+        String materialStatus = normalize(statusById.get(materialId));
+        if (materialStatus.isEmpty()) {
+            materialStatus = "in_progress";
+        }
+        String statusLabel = "completed".equalsIgnoreCase(materialStatus)
+                ? "Completed"
+                : ("in_progress".equalsIgnoreCase(materialStatus) ? "In Progress" : "Ready");
+        String statusClass = "completed".equalsIgnoreCase(materialStatus) ? "status-Approved" : "status-Pending";
+        String backToHubUrl = previewEnrollment != null
+                ? request.getContextPath() + "/student/enrollment-details?id=" + previewEnrollment.getEnrollmentId() + "&tab=materials"
+                : request.getContextPath() + "/student/materials?courseId=" + material.getCourseId();
+        String backToHubLabel = previewEnrollment != null ? "Back to Materials" : "Back to My Materials";
 
         request.setAttribute("material", material);
         request.setAttribute("streamUrl", streamUrl);
@@ -291,6 +328,19 @@ public class StudentMaterialServlet extends HttpServlet {
         request.setAttribute("isVideoMaterial", isVideo);
         request.setAttribute("isAudioMaterial", isAudio);
         request.setAttribute("canInlinePreview", canInlinePreview);
+        request.setAttribute("completionRule", completionRule);
+        request.setAttribute("materialStatus", materialStatus);
+        request.setAttribute("materialStatusLabel", statusLabel);
+        request.setAttribute("materialStatusClass", statusClass);
+        request.setAttribute("isCompletedMaterial", "completed".equalsIgnoreCase(materialStatus));
+        request.setAttribute("previousMaterial", previousMaterial);
+        request.setAttribute("nextMaterial", nextMaterial);
+        request.setAttribute("materialPosition", materialPosition);
+        request.setAttribute("totalMaterialsInCourse", orderedMaterials.size());
+        request.setAttribute("backToHubUrl", backToHubUrl);
+        request.setAttribute("backToHubLabel", backToHubLabel);
+        request.setAttribute("previewEnrollment", previewEnrollment);
+        request.setAttribute("completeActionUrl", request.getContextPath() + "/student/mark-material-completed");
 
         request.getRequestDispatcher("/WEB-INF/views/student/material-viewer.jsp").forward(request, response);
     }
@@ -373,6 +423,62 @@ public class StudentMaterialServlet extends HttpServlet {
         if (lower.endsWith(".zip")) return "application/zip";
         if (lower.endsWith(".txt")) return "text/plain";
         return "application/octet-stream";
+    }
+
+    private Enrollment resolvePreviewEnrollment(HttpServletRequest request, Integer userId, Integer courseId) {
+        Integer enrollmentId = parseInt(request.getParameter("enrollmentId"));
+        if (enrollmentId != null) {
+            Enrollment enrollment = enrollmentDAO.getEnrollment(enrollmentId);
+            if (enrollment != null
+                    && enrollment.getUserId() != null
+                    && enrollment.getUserId().equals(userId)
+                    && enrollment.getCourseId() != null
+                    && enrollment.getCourseId().equals(courseId)) {
+                return enrollment;
+            }
+        }
+
+        List<Enrollment> enrollments = enrollmentDAO.getEnrollmentsByStudent(userId);
+        if (enrollments == null) {
+            return null;
+        }
+        for (Enrollment enrollment : enrollments) {
+            if (enrollment.getCourseId() == null || !enrollment.getCourseId().equals(courseId)) {
+                continue;
+            }
+            if (enrollment.getEnrollmentId() == null) {
+                continue;
+            }
+            Payment payment = paymentDAO.getPaymentByEnrollmentId(enrollment.getEnrollmentId());
+            if (payment != null && isPaymentComplete(payment.getStatus())) {
+                return enrollment;
+            }
+        }
+        return null;
+    }
+
+    private String resolveCompletionRule(Material material,
+                                         String extension,
+                                         boolean isPdf,
+                                         boolean isVideo,
+                                         boolean isAudio,
+                                         boolean isLink) {
+        if (isVideo) {
+            return "video";
+        }
+        if (isAudio) {
+            return "audio";
+        }
+        if (isPdf) {
+            return "document";
+        }
+        if (isLink) {
+            return "link";
+        }
+        if ("ppt".equals(extension) || "pptx".equals(extension) || Material.TYPE_SLIDES.equalsIgnoreCase(material.getMaterialType())) {
+            return "slides";
+        }
+        return "default";
     }
 
     private Integer parseInt(String value) {

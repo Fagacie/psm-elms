@@ -1,5 +1,6 @@
 package com.psm.elearning.init;
 
+import com.psm.elearning.util.MaterialProgressSchemaUtil;
 import com.psm.elearning.util.SchemaSqlRunner;
 
 import javax.servlet.ServletContextEvent;
@@ -18,6 +19,7 @@ public class AppInitializer implements ServletContextListener {
                     "/WEB-INF/classes/db/schema.sql",
                     "/WEB-INF/db/schema.sql");
         }
+        MaterialProgressSchemaUtil.ensureCompatibility();
         if (!schemaApplied) {
             System.out.println("AppInitializer: schema runner skipped because no packaged schema.sql was found.");
         }

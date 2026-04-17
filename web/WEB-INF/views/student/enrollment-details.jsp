@@ -51,8 +51,8 @@
                 <div class="ed-meta-item"><span>Instructor</span><strong>${enrollment.instructorName}</strong></div>
                 <div class="ed-meta-item"><span>Enrolled</span><strong><c:out value="${enrollment.enrollmentDate != null ? enrollment.enrollmentDate.toLocalDate() : '-'}"/></strong></div>
                 <div class="ed-meta-item"><span>Course Fee</span><strong><fmt:formatNumber value="${enrollment.coursePrice}" type="number" minFractionDigits="2" maxFractionDigits="2"/></strong></div>
-                <div class="ed-meta-item"><span>Progress</span><strong>${progressPercent}%</strong></div>
-                <div class="ed-meta-item"><span>Materials Viewed</span><strong>${materialsViewedCount} / ${materialCount}</strong></div>
+                <div class="ed-meta-item"><span>Progress</span><strong id="edProgressPercent">${progressPercent}%</strong></div>
+                <div class="ed-meta-item"><span>Materials Viewed</span><strong id="edMaterialsViewedCount" data-total-materials="${materialCount}">${materialsViewedCount} / ${materialCount}</strong></div>
             </div>
         </section>
 
@@ -288,7 +288,7 @@
                                                         </c:otherwise>
                                                     </c:choose>
                                                 </td>
-                                                <td><fmt:formatDate value="${m.uploadedAt}" pattern="dd MMM yyyy"/></td>
+                                                <td><c:out value="${not empty m.uploadDate ? m.uploadDate.toLocalDate() : '-'}"/></td>
                                                 <td>
                                                     <a class="sv-btn" href="${pageContext.request.contextPath}/student/materials?action=preview&id=${m.materialId}&enrollmentId=${enrollment.enrollmentId}">Open</a>
                                                     <c:if test="${fn:toLowerCase(m.materialType) != 'link'}">
@@ -298,13 +298,14 @@
                                                         <button type="button"
                                                                 class="sv-btn js-mark-material-completed"
                                                                 data-material-id="${m.materialId}"
-                                                                data-course-id="${enrollment.courseId}"
                                                                 data-enrollment-id="${enrollment.enrollmentId}"
                                                                 data-material-title="${fn:escapeXml(m.title)}"
-                                                                data-view-url="${pageContext.request.contextPath}/student/materials?action=view&id=${m.materialId}"
                                                                 <c:if test="${completionRule != 'default'}">disabled="disabled"</c:if>
-                                                                <c:if test="${completionRule != 'default'}">title="Open preview first to unlock completion"</c:if>>
-                                                            Mark as Completed
+                                                                <c:if test="${completionRule != 'default'}">title="Open the preview page to complete this material."</c:if>>
+                                                            <c:choose>
+                                                                <c:when test="${completionRule != 'default'}">Complete in Preview</c:when>
+                                                                <c:otherwise>Mark as Completed</c:otherwise>
+                                                            </c:choose>
                                                         </button>
                                                     </c:if>
                                                 </td>
@@ -387,18 +388,17 @@
 <script>
 (function () {
     var completionButtons = document.querySelectorAll('.js-mark-material-completed');
+    var progressPercentNode = document.getElementById('edProgressPercent');
+    var materialsViewedNode = document.getElementById('edMaterialsViewedCount');
+
     function updateProgressUI(progressPercent) {
         var progressBars = document.querySelectorAll('.sv-progress-bar');
         for (var i = 0; i < progressBars.length; i++) {
             progressBars[i].style.width = progressPercent + '%';
         }
 
-        var progressMeta = document.querySelectorAll('.ed-meta-item strong');
-        for (var j = 0; j < progressMeta.length; j++) {
-            if (progressMeta[j].textContent && progressMeta[j].textContent.trim().endsWith('%')) {
-                progressMeta[j].textContent = progressPercent + '%';
-                break;
-            }
+        if (progressPercentNode) {
+            progressPercentNode.textContent = progressPercent + '%';
         }
     }
 
@@ -423,40 +423,18 @@
         button.remove();
     }
 
-    function updateProgressUI(progressPercent) {
-        var progressBars = document.querySelectorAll('.sv-progress-bar');
-        for (var i = 0; i < progressBars.length; i++) {
-            progressBars[i].style.width = progressPercent + '%';
-        }
-
-        var progressMeta = document.querySelectorAll('.ed-meta-item strong');
-        for (var j = 0; j < progressMeta.length; j++) {
-            if (progressMeta[j].textContent && progressMeta[j].textContent.trim().endsWith('%')) {
-                progressMeta[j].textContent = progressPercent + '%';
-                break;
-            }
-        }
-    }
-
-    function updateContinueAction(label, url) {
-        var continueLink = document.getElementById('edContinueAction');
-        if (!continueLink || !label || !url) {
+    function updateMaterialsViewed(viewedMaterials, totalMaterials) {
+        if (!materialsViewedNode || typeof viewedMaterials !== 'number') {
             return;
         }
-        continueLink.setAttribute('href', url);
-        continueLink.innerHTML = '<i class="fas fa-play"></i>&nbsp;' + label;
-    }
-
-    function setRowCompleted(button) {
-        var row = button.closest('tr');
-        if (!row) {
-            return;
+        var total = typeof totalMaterials === 'number'
+            ? totalMaterials
+            : parseInt(materialsViewedNode.getAttribute('data-total-materials'), 10);
+        if (isNaN(total)) {
+            total = 0;
         }
-        var statusCell = row.children[3];
-        if (statusCell) {
-            statusCell.innerHTML = '<span class="status-badge status-Approved">Completed</span>';
-        }
-        button.remove();
+        materialsViewedNode.setAttribute('data-total-materials', total);
+        materialsViewedNode.textContent = viewedMaterials + ' / ' + total;
     }
 
     for (var i = 0; i < completionButtons.length; i++) {
@@ -499,6 +477,7 @@
                     if (typeof data.progressPercent === 'number') {
                         updateProgressUI(data.progressPercent);
                     }
+                    updateMaterialsViewed(data.viewedMaterials, data.totalMaterials);
                     updateContinueAction(data.continueLabel, data.continueUrl);
                 })
                 .catch(function (error) {

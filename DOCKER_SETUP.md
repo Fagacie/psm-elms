@@ -8,7 +8,6 @@ This setup runs:
 ## 1. Prerequisites
 
 - Docker Desktop
-- Apache Ant (for building `dist/PSME.war`)
 
 ## 2. Configure environment
 
@@ -28,6 +27,14 @@ Use `Terminal > Run Task`:
 - `PSME: Docker Down`
 
 `PSME: Docker Up` runs Ant first, then starts the containers.
+
+If you use plain Docker Compose instead, run:
+
+```powershell
+docker compose up --build -d
+```
+
+The app image now builds `PSME.war` from source during the Docker build, so a local Ant install is no longer required.
 
 ## 4. Access app
 
@@ -52,7 +59,7 @@ docker compose up -d
 
 ## 6. Why this works in containers
 
-`DBConnection` now supports env overrides:
+`DBConnection` supports env overrides:
 - `DB_DRIVER`
 - `DB_URL`
 - `DB_USERNAME`

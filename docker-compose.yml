@@ -18,7 +18,10 @@ services:
       retries: 10
 
   app:
-    image: tomcat:9.0-jdk17-temurin
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: psme-app:local
     container_name: psme-tomcat
     restart: unless-stopped
     depends_on:
@@ -36,8 +39,6 @@ services:
       PAYSTACK_CALLBACK_URL: ${PAYSTACK_CALLBACK_URL:-}
     ports:
       - "${APP_PORT:-8080}:8080"
-    volumes:
-      - ./dist/PSME.war:/usr/local/tomcat/webapps/PSME.war:ro
 
   phpmyadmin:
     image: phpmyadmin:latest

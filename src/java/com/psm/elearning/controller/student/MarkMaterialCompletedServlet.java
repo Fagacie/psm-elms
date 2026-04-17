@@ -87,7 +87,13 @@ public class MarkMaterialCompletedServlet extends HttpServlet {
                 return;
             }
 
-            int progressPercent = calculateProgress(userId, material.getCourseId());
+            EnrollmentStateSyncService.SyncResult syncResult = syncProgress(userId, material.getCourseId());
+            int progressPercent = syncResult != null
+                    ? syncResult.getProgressPercent()
+                    : calculateProgress(userId, material.getCourseId());
+            int viewedMaterials = syncResult != null ? syncResult.getViewedMaterials() : materialProgressDAO.countViewedByCourse(userId, material.getCourseId());
+            List<Material> courseMaterials = syncResult == null ? materialDAO.findByCourse(material.getCourseId()) : null;
+            int totalMaterials = syncResult != null ? syncResult.getTotalMaterials() : (courseMaterials != null ? courseMaterials.size() : 0);
             Material next = getNextMaterial(userId, material.getCourseId());
             String continueLabel;
             String continueUrl;
@@ -107,6 +113,9 @@ public class MarkMaterialCompletedServlet extends HttpServlet {
             }
 
             out.print("{\"success\":true,\"message\":\"Material marked completed\",\"progressPercent\":" + progressPercent +
+                    ",\"viewedMaterials\":" + viewedMaterials +
+                    ",\"totalMaterials\":" + totalMaterials +
+                    ",\"status\":\"completed\"" +
                     ",\"continueLabel\":\"" + escapeJson(continueLabel) + "\",\"continueUrl\":\"" + escapeJson(continueUrl) + "\"}");
 
         } catch (Exception ex) {
@@ -144,21 +153,9 @@ public class MarkMaterialCompletedServlet extends HttpServlet {
     }
 
     private int calculateProgress(Integer userId, Integer courseId) {
-        Enrollment enrollment = null;
-        List<Enrollment> enrollments = enrollmentDAO.getEnrollmentsByStudent(userId);
-        if (enrollments != null) {
-            for (Enrollment e : enrollments) {
-                if (e.getCourseId() != null && e.getCourseId().equals(courseId)) {
-                    enrollment = e;
-                    break;
-                }
-            }
-        }
-        if (enrollment != null) {
-            EnrollmentStateSyncService.SyncResult syncResult = enrollmentStateSyncService.syncEnrollmentState(enrollment);
-            if (syncResult != null) {
-                return syncResult.getProgressPercent();
-            }
+        EnrollmentStateSyncService.SyncResult syncResult = syncProgress(userId, courseId);
+        if (syncResult != null) {
+            return syncResult.getProgressPercent();
         }
 
         List<Material> materials = materialDAO.findByCourse(courseId);
@@ -168,6 +165,20 @@ public class MarkMaterialCompletedServlet extends HttpServlet {
         }
         int completed = materialProgressDAO.countViewedByCourse(userId, courseId);
         return (int) Math.round((completed * 100.0) / total);
+    }
+
+    private EnrollmentStateSyncService.SyncResult syncProgress(Integer userId, Integer courseId) {
+        Enrollment enrollment = null;
+        List<Enrollment> enrollments = enrollmentDAO.getEnrollmentsByStudent(userId);
+        if (enrollments != null) {
+            for (Enrollment candidate : enrollments) {
+                if (candidate.getCourseId() != null && candidate.getCourseId().equals(courseId)) {
+                    enrollment = candidate;
+                    break;
+                }
+            }
+        }
+        return enrollment != null ? enrollmentStateSyncService.syncEnrollmentState(enrollment) : null;
     }
 
     private Material getNextMaterial(Integer userId, Integer courseId) {

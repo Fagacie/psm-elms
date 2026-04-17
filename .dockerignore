@@ -1,0 +1,12 @@
+.git
+.gitignore
+.vscode
+.idea
+build
+dist
+node_modules
+cookies.txt
+admin_cookies.txt
+student_cookies.txt
+student_test_cookies.txt
+.env
