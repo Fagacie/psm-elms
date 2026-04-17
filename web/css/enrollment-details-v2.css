@@ -374,6 +374,74 @@
   margin-bottom: 8px;
 }
 
+.ed-inline-preview {
+  margin-top: 16px;
+  border: 1px solid #d8e2f0;
+  background: #f8fbff;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.ed-inline-preview.is-hidden {
+  display: none;
+}
+
+.ed-inline-preview__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid #e6edf7;
+  background: #eef5ff;
+}
+
+.ed-inline-preview__title-wrap h4 {
+  margin: 0;
+  font-size: 1rem;
+  color: #0f2f5b;
+}
+
+.ed-inline-preview__hint {
+  margin-top: 6px;
+  font-size: 0.86rem;
+  color: #3f5f84;
+}
+
+.ed-inline-preview__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ed-inline-preview__body {
+  padding: 12px;
+  background: #ffffff;
+}
+
+.ed-inline-media,
+.ed-inline-frame {
+  width: 100%;
+  min-height: 360px;
+  border: 1px solid #d7e2ef;
+  border-radius: 10px;
+  background: #000;
+}
+
+.ed-inline-frame {
+  background: #fff;
+}
+
+.ed-inline-link-note {
+  border: 1px dashed #b7c9de;
+  background: #f6faff;
+  border-radius: 10px;
+  padding: 14px;
+  color: #2b4f7a;
+  font-size: 0.93rem;
+}
+
 .ed-readiness-card .sv-card-head {
   align-items: flex-start;
 }
@@ -515,6 +583,20 @@
   .ed-table td {
     padding: 8px 0;
     border-bottom: none;
+  }
+
+  .ed-inline-preview__header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ed-inline-preview__actions {
+    justify-content: flex-start;
+  }
+
+  .ed-inline-media,
+  .ed-inline-frame {
+    min-height: 240px;
   }
 }
 

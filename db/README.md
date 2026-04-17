@@ -24,15 +24,34 @@ mysql -u root -p < "c:\Users\ACER\Desktop\FYP\elearning\PSME\db\schema.sql"
 ## Notes
 - The script uses `CREATE TABLE IF NOT EXISTS` and creates the unique index on `Student.RegNumber`.
 - Column names match the Java DAO code exactly (e.g., `UserID`, `RegNumber`, `RegistrationDate`).
-- If you already have data, the script won’t drop tables; it only creates missing ones and adds the `RegNumber` unique index.
+- If you already have data, the script won't drop tables; it only creates missing ones and adds the `RegNumber` unique index.
 - Ensure your app DB config (`db.properties`) points to `psm_elearning`.
+- During an Ant build, `db/schema.sql` is also packaged into the WAR so `AppInitializer` can apply it from the classpath at startup.
 
 ## Incremental migrations
 
-If your environment already has data and you only need selected updates, run the targeted migration scripts in `db/`.
+If your environment already has data, use this order:
 
-- `migration_align_schema.sql`: broad alignment migration for older installations.
-- `migration_assessment_placement.sql`: moves assessment placement metadata from `Instructions` to dedicated columns (`PlacementType`, `PlacementMaterialID`).
+1. Apply `db/schema.sql` first (safe baseline).
+2. Apply all incremental migrations using `db/migrations.sql`.
+3. If needed, run only specific migration files from `db/` for targeted updates.
+
+The bundled migration runner currently executes:
+
+- `migration_align_schema.sql`
+- `migration_admin_settings.sql`
+- `migration_instructor_application_storage.sql`
+- `migration_assessment_placement.sql`
+- `migration_assessment_grading_mode.sql`
+- `migration_assessment_submission_mode.sql`
+- `migration_assessment_grade_audit.sql`
+- `migration_paystack.sql`
+
+How to run the full migration set:
+
+```sql
+SOURCE db/migrations.sql;
+```
 
 ## Certificate eligibility test matrix
 

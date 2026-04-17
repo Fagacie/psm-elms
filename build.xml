@@ -69,6 +69,15 @@
             </fileset>
         </copy>
         <echo message="Copied .properties and logback.xml files to WEB-INF/classes"/>
+
+        <!-- Package the source-of-truth schema so AppInitializer can run it at startup -->
+        <mkdir dir="${build.web.dir}/WEB-INF/classes/db"/>
+        <copy todir="${build.web.dir}/WEB-INF/classes/db" overwrite="true" failonerror="false">
+            <fileset dir="${basedir}/db">
+                <include name="schema.sql"/>
+            </fileset>
+        </copy>
+        <echo message="Copied db/schema.sql to WEB-INF/classes/db for startup migrations"/>
     </target>
     <!--
 

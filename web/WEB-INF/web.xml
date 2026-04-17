@@ -467,6 +467,25 @@
         <url-pattern>/admin/payment</url-pattern>
     </servlet-mapping>
 
+    <!-- Material Progress Servlets -->
+    <servlet>
+        <servlet-name>MarkMaterialCompleteServlet</servlet-name>
+        <servlet-class>com.psm.elearning.controller.student.MarkMaterialCompleteServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>MarkMaterialCompleteServlet</servlet-name>
+        <url-pattern>/student/mark-material-complete</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>MarkMaterialCompletedServlet</servlet-name>
+        <servlet-class>com.psm.elearning.controller.student.MarkMaterialCompletedServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>MarkMaterialCompletedServlet</servlet-name>
+        <url-pattern>/student/mark-material-completed</url-pattern>
+    </servlet-mapping>
+
     <!-- Error Pages -->
     <error-page>
         <error-code>404</error-code>

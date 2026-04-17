@@ -668,6 +668,7 @@ public class EnrollmentDetailsServlet extends HttpServlet {
             int totalMaterialsCount = syncResult != null ? syncResult.getTotalMaterials() : materials.size();
             int passedAssessmentsCount = syncResult != null ? syncResult.getPassedAssessments() : 0;
             int totalAssessmentsCount = syncResult != null ? syncResult.getTotalAssessments() : assessments.size();
+                Map<Integer, String> materialStatusById = materialProgressDAO.findMaterialStatusByCourse(userId, enrollment.getCourseId());
             boolean freeCourse = enrollment.getCoursePrice() <= 0;
             boolean eligibleForCertificate = syncResult != null
                     ? syncResult.isEligibleForCertificate()
@@ -690,6 +691,7 @@ public class EnrollmentDetailsServlet extends HttpServlet {
             request.setAttribute("activeAttemptByAssessment", activeAttemptByAssessment);
             request.setAttribute("materialsViewedCount", materialsViewedCount);
             request.setAttribute("viewedMaterialIds", viewedMaterialIds);
+            request.setAttribute("materialStatusById", materialStatusById);
             request.setAttribute("learningItems", learningItems);
             request.setAttribute("recommendedItem", recommendedItem);
             request.setAttribute("focusMaterial", focusMaterial);

@@ -179,13 +179,30 @@ CREATE TABLE IF NOT EXISTS `MaterialProgress` (
   `ProgressID` INT AUTO_INCREMENT PRIMARY KEY,
   `UserID` INT NOT NULL,
   `MaterialID` INT NOT NULL,
+  `CourseID` INT NULL,
+  `Status` ENUM('in_progress','completed') NOT NULL DEFAULT 'in_progress',
+  `CompletedAt` TIMESTAMP NULL DEFAULT NULL,
+  `UpdatedAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `ViewedAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   UNIQUE KEY `uk_material_progress` (`UserID`, `MaterialID`),
   KEY `idx_material_progress_user` (`UserID`),
   KEY `idx_material_progress_material` (`MaterialID`),
+  KEY `idx_material_progress_course` (`CourseID`),
+  KEY `idx_material_progress_status` (`Status`),
   CONSTRAINT `fk_material_progress_user` FOREIGN KEY (`UserID`) REFERENCES `User`(`UserID`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `fk_material_progress_material` FOREIGN KEY (`MaterialID`) REFERENCES `Material`(`MaterialID`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `fk_material_progress_material` FOREIGN KEY (`MaterialID`) REFERENCES `Material`(`MaterialID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_material_progress_course` FOREIGN KEY (`CourseID`) REFERENCES `Course`(`CourseID`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+ALTER TABLE `MaterialProgress`
+  ADD COLUMN IF NOT EXISTS `CourseID` INT NULL,
+  ADD COLUMN IF NOT EXISTS `Status` ENUM('in_progress','completed') NOT NULL DEFAULT 'in_progress',
+  ADD COLUMN IF NOT EXISTS `CompletedAt` TIMESTAMP NULL DEFAULT NULL,
+  ADD COLUMN IF NOT EXISTS `UpdatedAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
+
+ALTER TABLE `MaterialProgress`
+  ADD INDEX IF NOT EXISTS `idx_material_progress_course` (`CourseID`),
+  ADD INDEX IF NOT EXISTS `idx_material_progress_status` (`Status`);
 
 -- Enrollments
 CREATE TABLE IF NOT EXISTS `Enrollment` (

@@ -59,7 +59,7 @@ public class StudentMaterialServlet extends HttpServlet {
             return;
         }
         if ("view".equalsIgnoreCase(action) || "download".equalsIgnoreCase(action)) {
-            boolean markViewed = "view".equalsIgnoreCase(action);
+            boolean markViewed = false;
             serveMaterialFile(request, response, userId, "download".equalsIgnoreCase(action), markViewed);
             return;
         }
@@ -195,7 +195,7 @@ public class StudentMaterialServlet extends HttpServlet {
         }
 
         if (markViewed) {
-            progressDAO.markViewed(userId, materialId);
+            progressDAO.markInProgress(userId, materialId, material.getCourseId());
         }
 
         if ("Link".equalsIgnoreCase(material.getMaterialType())) {
@@ -267,8 +267,8 @@ public class StudentMaterialServlet extends HttpServlet {
             return;
         }
 
-        // Preview entry marks this material as viewed in the learning flow.
-        progressDAO.markViewed(userId, materialId);
+        // Opening preview sets material to in-progress, not completed.
+        progressDAO.markInProgress(userId, materialId, material.getCourseId());
 
         String filePath = normalize(material.getFilePath());
         String extension = extractFileExtension(filePath);

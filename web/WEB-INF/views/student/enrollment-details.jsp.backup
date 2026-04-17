@@ -61,25 +61,6 @@
         <c:set var="assessmentsPassedSafe" value="${empty passedAssessmentsCount ? 0 : passedAssessmentsCount}"/>
         <c:set var="assessmentsTotalSafe" value="${empty totalAssessmentsCount ? 0 : totalAssessmentsCount}"/>
 
-        <div class="ed-tabs" role="tablist" aria-label="Learning hub sections">
-            <a class="ed-tab ${activeTab == 'learning' ? 'active' : ''}"
-               href="${pageContext.request.contextPath}/student/enrollment-details?enrollmentId=${enrollment.enrollmentId}&tab=learning">
-                <i class="fas fa-route"></i> Learning
-            </a>
-            <a class="ed-tab ${activeTab == 'overview' ? 'active' : ''}"
-               href="${pageContext.request.contextPath}/student/enrollment-details?enrollmentId=${enrollment.enrollmentId}&tab=overview">
-                <i class="fas fa-table-columns"></i> Overview
-            </a>
-            <a class="ed-tab ${activeTab == 'materials' ? 'active' : ''}"
-               href="${pageContext.request.contextPath}/student/enrollment-details?enrollmentId=${enrollment.enrollmentId}&tab=materials">
-                <i class="fas fa-book"></i> Materials
-            </a>
-            <a class="ed-tab ${activeTab == 'assessments' ? 'active' : ''}"
-               href="${pageContext.request.contextPath}/student/enrollment-details?enrollmentId=${enrollment.enrollmentId}&tab=assessments">
-                <i class="fas fa-clipboard-check"></i> Assessments
-            </a>
-        </div>
-
         <c:choose>
             <c:when test="${activeTab == 'learning'}">
                 <section class="sv-card">
@@ -112,12 +93,12 @@
                                 <div class="ed-next-actions">
                                     <span class="status-badge ${recommendedItem.statusClass}">${recommendedItem.statusLabel}</span>
                                     <c:if test="${not recommendedItem.locked and not empty recommendedItem.primaryActionUrl}">
-                                        <a id="edContinueAction" class="sv-btn primary" href="${recommendedItem.primaryActionUrl}">
+                                        <a class="sv-btn primary" href="${recommendedItem.primaryActionUrl}">
                                             <i class="fas ${recommendedItem.primaryActionIcon}"></i>&nbsp;${recommendedItem.primaryActionLabel}
                                         </a>
                                     </c:if>
                                     <c:if test="${not recommendedItem.locked and empty recommendedItem.primaryActionUrl and not empty recommendedItem.secondaryActionUrl}">
-                                        <a id="edContinueAction" class="sv-btn primary" href="${recommendedItem.secondaryActionUrl}">
+                                        <a class="sv-btn primary" href="${recommendedItem.secondaryActionUrl}">
                                             <i class="fas ${recommendedItem.secondaryActionIcon}"></i>&nbsp;${recommendedItem.secondaryActionLabel}
                                         </a>
                                     </c:if>
@@ -229,7 +210,6 @@
                         </c:if>
                         <c:if test="${paidAccess}">
                             <c:if test="${not empty focusMaterial}">
-                                <c:set var="focusRule" value="${fn:toLowerCase(focusMaterial.materialType) == 'video' ? 'video' : (fn:toLowerCase(focusMaterial.materialType) == 'pdf' ? 'pdf' : 'default')}"/>
                                 <div class="ed-material-nav">
                                     <div class="ed-material-nav-copy">
                                         <span class="ed-next-kicker">Continue Sequence</span>
@@ -248,7 +228,7 @@
                                             </a>
                                         </c:if>
                                         <a class="sv-btn primary" href="${pageContext.request.contextPath}/student/materials?action=preview&id=${focusMaterial.materialId}&enrollmentId=${enrollment.enrollmentId}">
-                                            <i class="fas fa-book-open"></i>&nbsp;Open
+                                            <i class="fas fa-book-open"></i>&nbsp;View
                                         </a>
                                         <c:if test="${not empty nextMaterial}">
                                             <a class="sv-btn" href="${pageContext.request.contextPath}/student/materials?action=preview&id=${nextMaterial.materialId}&enrollmentId=${enrollment.enrollmentId}">
@@ -258,16 +238,12 @@
                                     </div>
                                 </div>
                             </c:if>
-
                             <c:choose>
                                 <c:when test="${not empty materials}">
                                     <table class="ed-table">
                                         <thead><tr><th>Material</th><th>Chapter</th><th>Type</th><th>Status</th><th>Uploaded</th><th>Actions</th></tr></thead>
                                         <tbody>
                                         <c:forEach var="m" items="${materials}">
-                                            <c:set var="materialStatus" value="${materialStatusById[m.materialId]}"/>
-                                            <c:set var="materialTypeLower" value="${fn:toLowerCase(m.materialType)}"/>
-                                            <c:set var="completionRule" value="${materialTypeLower == 'video' ? 'video' : (materialTypeLower == 'pdf' ? 'pdf' : 'default')}"/>
                                             <tr>
                                                 <td>
                                                     <strong>${m.title}</strong>
@@ -277,36 +253,26 @@
                                                 <td><span class="assessment-type-badge assessment-type-Assignment">${m.materialType}</span></td>
                                                 <td>
                                                     <c:choose>
-                                                        <c:when test="${materialStatus == 'completed'}">
-                                                            <span class="status-badge status-Approved">Completed</span>
-                                                        </c:when>
-                                                        <c:when test="${materialStatus == 'in_progress'}">
-                                                            <span class="status-badge status-Pending">In Progress</span>
+                                                        <c:when test="${viewedMaterialIds.contains(m.materialId)}">
+                                                            <span class="status-badge status-Approved">Viewed</span>
                                                         </c:when>
                                                         <c:otherwise>
-                                                            <span class="status-badge status-Archived">Available</span>
+                                                            <span class="status-badge status-Archived">Pending</span>
                                                         </c:otherwise>
                                                     </c:choose>
                                                 </td>
-                                                <td><fmt:formatDate value="${m.uploadedAt}" pattern="dd MMM yyyy"/></td>
+                                                <td><c:out value="${not empty m.uploadDate ? m.uploadDate.toLocalDate() : '-'}"/></td>
                                                 <td>
-                                                    <a class="sv-btn" href="${pageContext.request.contextPath}/student/materials?action=preview&id=${m.materialId}&enrollmentId=${enrollment.enrollmentId}">Open</a>
-                                                    <c:if test="${fn:toLowerCase(m.materialType) != 'link'}">
-                                                        <a class="sv-btn" href="${pageContext.request.contextPath}/student/materials?action=download&id=${m.materialId}">Download</a>
-                                                    </c:if>
-                                                    <c:if test="${materialStatus != 'completed'}">
-                                                        <button type="button"
-                                                                class="sv-btn js-mark-material-completed"
-                                                                data-material-id="${m.materialId}"
-                                                                data-course-id="${enrollment.courseId}"
-                                                                data-enrollment-id="${enrollment.enrollmentId}"
-                                                                data-material-title="${fn:escapeXml(m.title)}"
-                                                                data-view-url="${pageContext.request.contextPath}/student/materials?action=view&id=${m.materialId}"
-                                                                <c:if test="${completionRule != 'default'}">disabled="disabled"</c:if>
-                                                                <c:if test="${completionRule != 'default'}">title="Open preview first to unlock completion"</c:if>>
-                                                            Mark as Completed
-                                                        </button>
-                                                    </c:if>
+                                                    <c:choose>
+                                                        <c:when test="${m.materialType == 'Link'}">
+                                                            <a class="sv-btn" target="_blank" href="${pageContext.request.contextPath}/student/materials?action=view&id=${m.materialId}">Open Link</a>
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            <a class="sv-btn primary" href="${pageContext.request.contextPath}/student/materials?action=preview&id=${m.materialId}&enrollmentId=${enrollment.enrollmentId}">View</a>
+                                                            <a class="sv-btn" target="_blank" href="${pageContext.request.contextPath}/student/materials?action=view&id=${m.materialId}">Open Tab</a>
+                                                            <a class="sv-btn" href="${pageContext.request.contextPath}/student/materials?action=download&id=${m.materialId}">Download</a>
+                                                        </c:otherwise>
+                                                    </c:choose>
                                                 </td>
                                             </tr>
                                         </c:forEach>
@@ -384,132 +350,6 @@
 </div>
 
 <div class="sv-overlay" id="svOverlay"></div>
-<script>
-(function () {
-    var completionButtons = document.querySelectorAll('.js-mark-material-completed');
-    function updateProgressUI(progressPercent) {
-        var progressBars = document.querySelectorAll('.sv-progress-bar');
-        for (var i = 0; i < progressBars.length; i++) {
-            progressBars[i].style.width = progressPercent + '%';
-        }
-
-        var progressMeta = document.querySelectorAll('.ed-meta-item strong');
-        for (var j = 0; j < progressMeta.length; j++) {
-            if (progressMeta[j].textContent && progressMeta[j].textContent.trim().endsWith('%')) {
-                progressMeta[j].textContent = progressPercent + '%';
-                break;
-            }
-        }
-    }
-
-    function updateContinueAction(label, url) {
-        var continueLink = document.getElementById('edContinueAction');
-        if (!continueLink || !label || !url) {
-            return;
-        }
-        continueLink.setAttribute('href', url);
-        continueLink.innerHTML = '<i class="fas fa-play"></i>&nbsp;' + label;
-    }
-
-    function setRowCompleted(button) {
-        var row = button.closest('tr');
-        if (!row) {
-            return;
-        }
-        var statusCell = row.children[3];
-        if (statusCell) {
-            statusCell.innerHTML = '<span class="status-badge status-Approved">Completed</span>';
-        }
-        button.remove();
-    }
-
-    function updateProgressUI(progressPercent) {
-        var progressBars = document.querySelectorAll('.sv-progress-bar');
-        for (var i = 0; i < progressBars.length; i++) {
-            progressBars[i].style.width = progressPercent + '%';
-        }
-
-        var progressMeta = document.querySelectorAll('.ed-meta-item strong');
-        for (var j = 0; j < progressMeta.length; j++) {
-            if (progressMeta[j].textContent && progressMeta[j].textContent.trim().endsWith('%')) {
-                progressMeta[j].textContent = progressPercent + '%';
-                break;
-            }
-        }
-    }
-
-    function updateContinueAction(label, url) {
-        var continueLink = document.getElementById('edContinueAction');
-        if (!continueLink || !label || !url) {
-            return;
-        }
-        continueLink.setAttribute('href', url);
-        continueLink.innerHTML = '<i class="fas fa-play"></i>&nbsp;' + label;
-    }
-
-    function setRowCompleted(button) {
-        var row = button.closest('tr');
-        if (!row) {
-            return;
-        }
-        var statusCell = row.children[3];
-        if (statusCell) {
-            statusCell.innerHTML = '<span class="status-badge status-Approved">Completed</span>';
-        }
-        button.remove();
-    }
-
-    for (var i = 0; i < completionButtons.length; i++) {
-        completionButtons[i].addEventListener('click', function () {
-            var button = this;
-            var materialId = button.getAttribute('data-material-id');
-            var enrollmentId = button.getAttribute('data-enrollment-id');
-            if (!materialId || !enrollmentId) {
-                return;
-            }
-
-            if (button.disabled) {
-                return;
-            }
-
-            button.disabled = true;
-            var oldText = button.textContent;
-            button.textContent = 'Saving...';
-
-            var payload = 'materialId=' + encodeURIComponent(materialId) + '&enrollmentId=' + encodeURIComponent(enrollmentId);
-
-            fetch('${pageContext.request.contextPath}/student/mark-material-completed', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
-                },
-                body: payload
-            })
-                .then(function (response) {
-                    if (!response.ok) {
-                        throw new Error('Failed to save completion');
-                    }
-                    return response.json();
-                })
-                .then(function (data) {
-                    if (!data.success) {
-                        throw new Error(data.message || 'Completion failed');
-                    }
-                    setRowCompleted(button);
-                    if (typeof data.progressPercent === 'number') {
-                        updateProgressUI(data.progressPercent);
-                    }
-                    updateContinueAction(data.continueLabel, data.continueUrl);
-                })
-                .catch(function (error) {
-                    button.disabled = false;
-                    button.textContent = oldText;
-                    alert(error.message || 'Unable to mark material as completed.');
-                });
-        });
-    }
-})();
-</script>
 <script src="${pageContext.request.contextPath}/js/student-v2.js"></script>
 </body>
 </html>

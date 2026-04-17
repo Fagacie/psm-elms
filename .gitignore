@@ -17,6 +17,7 @@ Thumbs.db
 *.log
 *.tmp
 *.swp
+*.class
 
 # Tool caches
 /.tools/
@@ -25,7 +26,17 @@ Thumbs.db
 /src/conf/*.properties
 /web/WEB-INF/classes/*.properties
 .env
+/cookies.txt
+/admin_cookies.txt
+/student_cookies.txt
+/student_test_cookies.txt
+/student_materials.html
 
 # Node/Vite (if used locally)
 node_modules/
 web/PSM E-Learning Platform UI/
+
+# Local/generated project artifacts
+/WEB-INF/
+/database/
+/src/java/temp_classes/
