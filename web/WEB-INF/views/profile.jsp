@@ -1,6 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <c:set var="isAdminProfile" value="${sessionScope.userRole == 'Admin'}"/>
+<c:set var="isStudentProfile" value="${sessionScope.userRole == 'Student'}"/>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -21,6 +22,12 @@
             <jsp:param name="pageSubtitle" value="Manage your account details and personal information"/>
         </jsp:include>
     </c:when>
+    <c:when test="${isStudentProfile}">
+        <c:set var="topbarTitle" value="Profile"/>
+        <c:set var="topbarSubtitle" value="Manage your account details and personal information"/>
+        <c:set var="topbarShowSearch" value="false"/>
+        <jsp:include page="/WEB-INF/views/common/student-topbar.jsp"/>
+    </c:when>
     <c:otherwise>
         <c:set var="topbarTitle" value="Profile"/>
         <c:set var="topbarSubtitle" value="Manage your account details and personal information"/>
@@ -32,6 +39,10 @@
     <c:choose>
         <c:when test="${isAdminProfile}">
             <jsp:include page="/WEB-INF/views/common/admin-sidebar.jsp"/>
+        </c:when>
+        <c:when test="${isStudentProfile}">
+            <c:set var="activePage" value="profile"/>
+            <jsp:include page="/WEB-INF/views/common/student-sidebar.jsp"/>
         </c:when>
         <c:otherwise>
             <c:set var="activePage" value="profile"/>

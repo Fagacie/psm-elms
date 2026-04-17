@@ -13,6 +13,11 @@
 <c:set var="topbarTitle" value="Material Preview"/>
 <c:set var="topbarSubtitle" value="Preview materials and continue learning"/>
 <c:set var="previewEnrollmentId" value="${not empty previewEnrollment ? previewEnrollment.enrollmentId : ''}"/>
+<c:set var="topbarShowSearch" value="false"/>
+<c:set var="navContext" value="${not empty previewEnrollmentId ? 'course' : 'default'}"/>
+<c:set var="navContextPage" value="materials"/>
+<c:set var="navCourseEnrollmentId" value="${previewEnrollmentId}"/>
+<c:set var="navCourseTitle" value="${not empty previewEnrollment.courseName ? previewEnrollment.courseName : material.title}"/>
 <jsp:include page="/WEB-INF/views/common/student-topbar.jsp"/>
 
 <div class="sv-layout">
@@ -27,23 +32,6 @@
             <span>/</span>
             <span>Material Preview</span>
         </div>
-
-        <c:if test="${not empty previewEnrollment}">
-            <nav class="mv-context-nav" aria-label="Course navigation">
-                <a class="mv-context-link" href="${pageContext.request.contextPath}/student/enrollment-details?id=${previewEnrollment.enrollmentId}&tab=overview">
-                    <i class="fas fa-table-columns"></i> Overview
-                </a>
-                <a class="mv-context-link active" href="${pageContext.request.contextPath}/student/enrollment-details?id=${previewEnrollment.enrollmentId}&tab=materials">
-                    <i class="fas fa-book"></i> Materials
-                </a>
-                <a class="mv-context-link" href="${pageContext.request.contextPath}/student/enrollment-details?id=${previewEnrollment.enrollmentId}&tab=assessments">
-                    <i class="fas fa-clipboard-check"></i> Assessments
-                </a>
-                <a class="mv-context-link" href="${pageContext.request.contextPath}/student/enrollment-details?id=${previewEnrollment.enrollmentId}&tab=learning">
-                    <i class="fas fa-route"></i> Progress
-                </a>
-            </nav>
-        </c:if>
 
         <section class="sv-card mv-head-card">
             <div class="sv-card-body mv-head-body">

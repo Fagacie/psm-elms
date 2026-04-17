@@ -80,10 +80,9 @@
                 </div>
                 <aside class="cd-side-panel">
                     <h3>Course Actions</h3>
-                    <p>Open supporting resources, review assessments, or continue your enrollment flow from one clear panel.</p>
+                    <p>Open supporting resources and continue your enrollment flow from one clear panel.</p>
                     <div class="cd-action-stack">
                         <a class="sv-btn" href="${pageContext.request.contextPath}/student/my-enrollments"><i class="fas fa-layer-group"></i>&nbsp;Open Learning Hub</a>
-                        <a class="sv-btn" href="${pageContext.request.contextPath}/student/assessments?courseId=${course.courseId}"><i class="fas fa-clipboard-list"></i>&nbsp;Assessments</a>
                         <c:if test="${not isEnrolled}">
                             <a class="sv-btn primary" href="${pageContext.request.contextPath}/student/enrollment-summary?courseId=${course.courseId}">Proceed to Enroll</a>
                         </c:if>

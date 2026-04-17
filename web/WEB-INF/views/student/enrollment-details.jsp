@@ -14,6 +14,11 @@
 <body class="sv-page">
 <c:set var="topbarTitle" value="Learning Hub"/>
 <c:set var="topbarSubtitle" value="Track progress and continue learning"/>
+<c:set var="topbarShowSearch" value="false"/>
+<c:set var="navContext" value="course"/>
+<c:set var="navContextPage" value="${activeTab == 'overview' ? 'overview' : (activeTab == 'materials' ? 'materials' : (activeTab == 'assessments' ? 'assessments' : 'progress'))}"/>
+<c:set var="navCourseEnrollmentId" value="${enrollment.enrollmentId}"/>
+<c:set var="navCourseTitle" value="${enrollment.courseName}"/>
 <jsp:include page="/WEB-INF/views/common/student-topbar.jsp"/>
 
 <div class="sv-layout">
