@@ -7,5 +7,7 @@ public interface AssessmentQuestionDAO {
     AssessmentQuestion addQuestion(AssessmentQuestion question);
     AssessmentQuestion findById(int questionId);
     List<AssessmentQuestion> findByAssessment(int assessmentId);
+    boolean updateQuestion(AssessmentQuestion question);
+    boolean swapQuestionContent(int firstQuestionId, int secondQuestionId);
     boolean delete(int questionId);
 }

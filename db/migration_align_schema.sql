@@ -150,9 +150,6 @@ UPDATE `Payment`
    SET `Reference` = COALESCE(`Reference`, `PaystackReference`, `PaymentRef`)
  WHERE `Reference` IS NULL;
 
--- -----------------------
--- Assessment
--- -----------------------
 
 ALTER TABLE `Assessment`
   ADD COLUMN IF NOT EXISTS `Type` VARCHAR(50) NULL,
@@ -164,6 +161,18 @@ ALTER TABLE `Assessment`
   ADD COLUMN IF NOT EXISTS `MaxAttempts` INT NOT NULL DEFAULT 1,
   ADD COLUMN IF NOT EXISTS `QuestionsPerPage` INT NOT NULL DEFAULT 2,
   ADD COLUMN IF NOT EXISTS `CreatedBy` INT NOT NULL DEFAULT 0;
+
+ALTER TABLE `Assessment`
+  ADD COLUMN IF NOT EXISTS `GradingMode` ENUM('auto','manual') NOT NULL DEFAULT 'auto',
+  ADD COLUMN IF NOT EXISTS `SubmissionMode` ENUM('file','text','both') NOT NULL DEFAULT 'both';
+
+UPDATE `Assessment`
+SET `GradingMode` = CASE WHEN `Type` IN ('Quiz','Exam') THEN 'auto' ELSE 'manual' END
+WHERE `GradingMode` IS NULL;
+
+ALTER TABLE `Assessment`
+  MODIFY COLUMN `GradingMode` ENUM('auto','manual') NOT NULL DEFAULT 'auto',
+  MODIFY COLUMN `SubmissionMode` ENUM('file','text','both') NOT NULL DEFAULT 'both';
 
 -- Optional mapping from legacy fields
 UPDATE `Assessment`
@@ -239,10 +248,13 @@ ALTER TABLE `AssessmentSubmission`
   ADD COLUMN IF NOT EXISTS `AnswersFilePath` VARCHAR(255) NULL,
   ADD COLUMN IF NOT EXISTS `Feedback` TEXT NULL,
   ADD COLUMN IF NOT EXISTS `AttemptNumber` INT NOT NULL DEFAULT 1,
-  ADD COLUMN IF NOT EXISTS `Status` ENUM('Submitted','TimedOut','AutoSubmitted') NOT NULL DEFAULT 'Submitted',
+  ADD COLUMN IF NOT EXISTS `Status` ENUM('Submitted','TimedOut','AutoSubmitted','Graded') NOT NULL DEFAULT 'Submitted',
   ADD COLUMN IF NOT EXISTS `StartedAt` DATETIME NULL,
   ADD COLUMN IF NOT EXISTS `EndedAt` DATETIME NULL,
   ADD COLUMN IF NOT EXISTS `SubmitDate` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP;
+
+ALTER TABLE `AssessmentSubmission`
+  MODIFY COLUMN `Status` ENUM('Submitted','TimedOut','AutoSubmitted','Graded') NOT NULL DEFAULT 'Submitted';
 
 -- Rename legacy columns if present (manual)
 -- ALTER TABLE `AssessmentSubmission` CHANGE COLUMN `StudentID` `UserID` INT NOT NULL;

@@ -35,7 +35,7 @@
             </div>
             <div class="sd3-user-copy">
                 <strong>${sessionScope.userName}</strong>
-                <span>Student workspace</span>
+                <span>Your learning hub</span>
             </div>
         </a>
         <a href="${pageContext.request.contextPath}/logout" class="sv-logout"><i class="fas fa-right-from-bracket"></i> Logout</a>

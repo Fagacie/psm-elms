@@ -37,7 +37,6 @@
                 <div>
                     <p class="ins-page-kicker">Course Editor</p>
                     <h2>${mode == 'create' ? 'Create a course students will want to open' : 'Refine the course workspace and presentation'}</h2>
-                    <p>${mode == 'create' ? 'Set the title, banner, pricing, level, and teaching context cleanly from one form. This page should feel like a proper publishing studio, not a raw admin form.' : 'Update the metadata, banner, and learning details while keeping the course approval flow clear.'}</p>
                 </div>
             </section>
 
@@ -45,12 +44,10 @@
                 <div class="ins-hero-grid">
                     <div>
                         <h3>${mode == 'create' ? 'Publishing checklist' : 'Editing checklist'}</h3>
-                        <p>Use a strong title, a clean banner, the correct level, and accurate pricing. Those four details shape how professional the student-facing catalog feels.</p>
                     </div>
                     <div class="ins-hero-metrics">
                         <div class="ins-metric">
                             <strong>${mode == 'create' ? 'Draft' : 'Live Edit'}</strong>
-                            <span>Current workflow state</span>
                         </div>
                         <div class="ins-metric">
                             <strong>Banner</strong>

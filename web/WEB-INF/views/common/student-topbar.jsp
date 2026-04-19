@@ -4,7 +4,7 @@
 
 <c:set var="topbarProfilePicture" value="${not empty sessionScope.student.passportPath ? sessionScope.student.passportPath : null}"/>
 <c:set var="currentPath" value="${pageContext.request.requestURI}"/>
-<c:set var="resolvedStudentTitle" value="${not empty topbarTitle ? topbarTitle : 'Student Workspace'}"/>
+<c:set var="resolvedStudentTitle" value="${not empty topbarTitle ? topbarTitle : 'Your Learning Hub'}"/>
 <c:set var="resolvedStudentSubtitle" value="${not empty topbarSubtitle ? topbarSubtitle : 'Navigate your learning flow'}"/>
 <c:set var="resolvedTopbarContext" value="${not empty navContext ? navContext : 'default'}"/>
 <c:set var="topbarSearchQuery" value="${not empty param.keyword ? param.keyword : not empty param.search ? param.search : ''}"/>

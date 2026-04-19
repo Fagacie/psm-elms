@@ -1,6 +1,7 @@
 .mv-main {
   display: grid;
-  gap: 18px;
+  gap: 20px;
+  align-content: flex-start;
 }
 
 .mv-context-nav {
@@ -37,6 +38,13 @@
 .mv-tracking-card,
 .mv-viewer-card {
   border-radius: 16px;
+}
+
+.mv-head-card {
+  border: 1px solid var(--sv-accent-border);
+  background:
+    radial-gradient(circle at top right, rgba(22, 101, 52, 0.12), transparent 44%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 251, 247, 0.98));
 }
 
 .mv-head-body,
@@ -122,6 +130,16 @@
   flex-wrap: wrap;
 }
 
+.mv-head-actions {
+  min-width: 240px;
+  justify-content: flex-end;
+}
+
+.mv-head-actions .sv-btn,
+.mv-tracking-actions .sv-btn {
+  min-height: 42px;
+}
+
 .mv-tracking-card {
   border: 1px solid var(--sv-accent-border);
   background: linear-gradient(180deg, var(--sv-accent-soft), rgba(255, 255, 255, 0.98));
@@ -140,6 +158,7 @@
   border-radius: 14px;
   background: #ffffff;
   overflow: hidden;
+  box-shadow: 0 24px 46px rgba(16, 38, 26, 0.08);
 }
 
 .mv-frame {
@@ -189,9 +208,23 @@
   max-width: 62ch;
 }
 
+.mv-viewer-card {
+  border: 1px solid var(--sv-border);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), #ffffff);
+}
+
+.mv-viewer-card .sv-card-body {
+  padding: clamp(16px, 2.4vw, 24px);
+}
+
 @media (max-width: 980px) {
   .mv-meta-grid {
     grid-template-columns: 1fr;
+  }
+
+  .mv-head-actions {
+    min-width: 0;
+    justify-content: flex-start;
   }
 }
 
@@ -214,6 +247,12 @@
   .mv-head-actions,
   .mv-tracking-actions {
     width: 100%;
+  }
+
+  .mv-head-actions .sv-btn,
+  .mv-tracking-actions .sv-btn {
+    flex: 1 1 210px;
+    justify-content: center;
   }
 
   .mv-context-link {

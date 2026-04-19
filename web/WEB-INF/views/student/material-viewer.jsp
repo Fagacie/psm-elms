@@ -14,10 +14,7 @@
 <c:set var="topbarSubtitle" value="Preview materials and continue learning"/>
 <c:set var="previewEnrollmentId" value="${not empty previewEnrollment ? previewEnrollment.enrollmentId : ''}"/>
 <c:set var="topbarShowSearch" value="false"/>
-<c:set var="navContext" value="${not empty previewEnrollmentId ? 'course' : 'default'}"/>
-<c:set var="navContextPage" value="materials"/>
-<c:set var="navCourseEnrollmentId" value="${previewEnrollmentId}"/>
-<c:set var="navCourseTitle" value="${not empty previewEnrollment.courseName ? previewEnrollment.courseName : material.title}"/>
+<c:set var="navContext" value="default"/>
 <jsp:include page="/WEB-INF/views/common/student-topbar.jsp"/>
 
 <div class="sv-layout">
@@ -25,14 +22,6 @@
     <jsp:include page="/WEB-INF/views/common/student-sidebar.jsp"/>
 
     <main class="sv-main mv-main">
-        <div class="sv-breadcrumb">
-            <a href="${pageContext.request.contextPath}/dashboard"><i class="fas fa-house"></i> Dashboard</a>
-            <span>/</span>
-            <a href="${backToHubUrl}">Learning Hub</a>
-            <span>/</span>
-            <span>Material Preview</span>
-        </div>
-
         <section class="sv-card mv-head-card">
             <div class="sv-card-body mv-head-body">
                 <div class="mv-head-copy">
@@ -76,16 +65,6 @@
                 </div>
                 <div class="mv-head-actions">
                     <a class="sv-btn" href="${backToHubUrl}">${backToHubLabel}</a>
-                    <c:if test="${not empty previousMaterial}">
-                        <a class="sv-btn" href="${pageContext.request.contextPath}/student/materials?action=preview&id=${previousMaterial.materialId}&enrollmentId=${previewEnrollmentId}">
-                            <i class="fas fa-arrow-left"></i>&nbsp;Previous
-                        </a>
-                    </c:if>
-                    <c:if test="${not empty nextMaterial}">
-                        <a class="sv-btn" href="${pageContext.request.contextPath}/student/materials?action=preview&id=${nextMaterial.materialId}&enrollmentId=${previewEnrollmentId}">
-                            Next&nbsp;<i class="fas fa-arrow-right"></i>
-                        </a>
-                    </c:if>
                     <a class="sv-btn" target="_blank" rel="noopener noreferrer" href="${pageContext.request.contextPath}/student/materials?action=view&id=${material.materialId}">Open in New Tab</a>
                     <c:if test="${material.materialType != 'Link'}">
                         <a class="sv-btn primary" href="${pageContext.request.contextPath}/student/materials?action=download&id=${material.materialId}">Download</a>

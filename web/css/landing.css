@@ -576,6 +576,14 @@ input {
   align-items: start;
 }
 
+.application-card-compact {
+  align-self: stretch;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
 .application-points {
   display: flex;
   flex-wrap: wrap;
@@ -636,6 +644,39 @@ input {
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
+}
+
+.application-compact-stack {
+  display: grid;
+  gap: 10px;
+}
+
+.application-compact-item {
+  display: grid;
+  gap: 4px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.application-compact-item strong {
+  font-size: 0.82rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #334155;
+}
+
+.application-compact-item span {
+  color: var(--text);
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.application-compact-note {
+  margin: 2px 0 0;
+  color: var(--muted);
+  font-size: 0.84rem;
 }
 
 .application-form-grid {
@@ -736,9 +777,155 @@ input {
   font-size: 0.9rem;
 }
 
+.application-card-compact .application-card-foot {
+  margin-top: 0;
+  border-top: 0;
+  padding-top: 0;
+  justify-content: center;
+}
+
+.application-card-compact .application-submit {
+  min-width: 220px;
+}
+
+.application-submit-unique {
+  position: relative;
+  min-height: 52px;
+  border-radius: 999px;
+  border: 1px solid rgba(15, 23, 42, 0.16);
+  background: linear-gradient(120deg, #0f172a, #1e293b);
+  color: #ffffff;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  padding: 0 20px;
+  box-shadow: 0 14px 28px rgba(15, 23, 42, 0.22);
+  transition: transform var(--transition), box-shadow var(--transition), filter var(--transition);
+}
+
+.application-submit-unique::after {
+  content: "\2192";
+  margin-left: 10px;
+  font-size: 0.95rem;
+}
+
+.application-submit-unique:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 18px 34px rgba(15, 23, 42, 0.28);
+  filter: brightness(1.04);
+}
+
+.application-submit-unique:focus-visible {
+  outline: 0;
+  box-shadow:
+    0 0 0 4px rgba(15, 23, 42, 0.16),
+    0 16px 30px rgba(15, 23, 42, 0.24);
+}
+
 .application-submit {
   justify-self: start;
   min-width: 210px;
+}
+
+.application-modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(15, 23, 42, 0.52);
+  backdrop-filter: blur(10px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition);
+  z-index: 2000;
+}
+
+.application-modal.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.application-modal-dialog {
+  width: min(780px, 100%);
+  max-height: min(88vh, 920px);
+  overflow: auto;
+  border-radius: 24px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.98));
+  border: 1px solid rgba(221, 228, 236, 0.9);
+  box-shadow: 0 28px 80px rgba(15, 23, 42, 0.28);
+  transform: translateY(16px) scale(0.98);
+  transition: transform var(--transition);
+}
+
+.application-modal.is-open .application-modal-dialog {
+  transform: translateY(0) scale(1);
+}
+
+.application-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 24px 24px 18px;
+  border-bottom: 1px solid var(--line);
+}
+
+.application-modal-header h2 {
+  margin: 0;
+  font-size: clamp(1.5rem, 2.4vw, 2rem);
+  letter-spacing: -0.04em;
+}
+
+.application-modal-header p {
+  margin: 10px 0 0;
+  max-width: 52ch;
+  color: var(--muted);
+}
+
+.application-modal-close {
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+
+.application-card-modal {
+  padding: 22px 24px 24px;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+.application-card-modal .application-form-grid {
+  gap: 14px 14px;
+}
+
+.application-card-modal .application-field input,
+.application-card-modal .application-field textarea {
+  min-height: 46px;
+}
+
+.application-card-modal .application-field textarea {
+  min-height: 140px;
+}
+
+.application-card-modal .application-card-foot {
+  padding-top: 14px;
+}
+
+.application-card-modal .application-submit {
+  min-width: 190px;
+}
+
+body.application-modal-open {
+  overflow: hidden;
 }
 
 .landing-alert {
@@ -1224,6 +1411,26 @@ input {
 
   .nav {
     margin-left: 0;
+  }
+
+  .application-modal {
+    padding: 14px;
+    align-items: flex-end;
+  }
+
+  .application-modal-dialog {
+    max-height: 92vh;
+    border-radius: 20px 20px 0 0;
+  }
+
+  .application-modal-header,
+  .application-card-modal {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .application-card-modal .application-form-grid {
+    grid-template-columns: 1fr;
   }
 }
 

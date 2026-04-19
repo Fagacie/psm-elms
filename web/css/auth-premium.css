@@ -100,6 +100,67 @@ select {
   min-height: 680px;
 }
 
+/* ============== LOGIN COMPACT TUNING ============== */
+.auth-layout-login {
+  width: min(900px, 92%);
+  min-height: 540px;
+  grid-template-columns: 55% 45%;
+}
+
+.auth-layout-login .auth-visual {
+  padding: 20px 20px;
+  gap: var(--space-sm);
+}
+
+.auth-layout-login .auth-visual-list {
+  margin-top: var(--space-md);
+  gap: var(--space-sm);
+}
+
+.auth-layout-login .auth-scene {
+  min-height: 170px;
+  margin-top: var(--space-sm);
+}
+
+.auth-layout-login .auth-lottie {
+  width: 62%;
+  max-width: 190px;
+  height: 128px;
+  min-height: 128px;
+}
+
+.auth-layout-login .auth-card {
+  padding: 24px 20px;
+}
+
+.auth-layout-login .auth-head {
+  margin-bottom: var(--space-md);
+}
+
+.auth-layout-login .auth-head h1 {
+  font-size: 1.6rem;
+  margin-bottom: 8px;
+}
+
+.auth-layout-login .auth-head p {
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.auth-layout-login .auth-form {
+  gap: 12px;
+}
+
+.auth-layout-login .auth-btn {
+  min-height: 42px;
+  padding: 10px 14px;
+}
+
+.auth-layout-login .auth-switch {
+  margin-top: 10px;
+  font-size: 0.88rem;
+}
+
 /* ============== VISUAL SECTION (LEFT) ============== */
 .auth-visual {
   padding: var(--space-2xl) var(--space-xl);
@@ -696,15 +757,15 @@ select {
 
 /* ============== WIDE FORM LAYOUT (REGISTRATION) ============== */
 .auth-layout-form {
-  width: min(1000px, 100%);
+  width: min(860px, 94%);
   background: var(--bg-white);
-  border-radius: 24px;
+  border-radius: 18px;
   box-shadow: var(--shadow-lg);
   animation: fadeInUp 0.6s var(--transition-slow);
 }
 
 .auth-card-wide {
-  padding: var(--space-2xl) var(--space-xl);
+  padding: 28px 22px;
   background: var(--bg-white);
   display: flex;
   flex-direction: column;
@@ -713,12 +774,12 @@ select {
 }
 
 .auth-card-wide .auth-head {
-  margin-bottom: var(--space-xl);
+  margin-bottom: var(--space-md);
   animation: fadeInUp 0.7s var(--transition-slow) 0.1s both;
 }
 
 .auth-card-wide .auth-head h1 {
-  font-size: 1.875rem;
+  font-size: 1.55rem;
   font-weight: 700;
   line-height: 1.2;
   letter-spacing: -0.015em;
@@ -727,17 +788,46 @@ select {
 }
 
 .auth-card-wide .auth-head p {
-  font-size: 0.9375rem;
+  font-size: 0.88rem;
   color: var(--secondary-text);
-  line-height: 1.6;
+  line-height: 1.5;
 }
 
 .auth-form-wide {
   display: grid;
-  grid-template-columns: 200px repeat(2, minmax(0, 1fr));
-  gap: var(--space-lg) var(--space-lg);
+  grid-template-columns: 152px repeat(2, minmax(0, 1fr));
+  gap: 12px 12px;
   align-items: start;
   animation: fadeInUp 0.7s var(--transition-slow) 0.15s both;
+}
+
+.auth-layout-form .auth-photo-card {
+  padding: 10px;
+  border-radius: 14px;
+}
+
+.auth-layout-form .auth-photo-preview {
+  border-radius: 14px;
+}
+
+.auth-layout-form .auth-photo-placeholder i {
+  font-size: 1.5rem;
+}
+
+.auth-layout-form .auth-field {
+  gap: 6px;
+}
+
+.auth-layout-form .auth-field label {
+  font-size: 0.74rem;
+  letter-spacing: 0.03em;
+}
+
+.auth-layout-form .auth-field input,
+.auth-layout-form .auth-field select {
+  min-height: 40px;
+  padding: 9px 12px;
+  font-size: 0.88rem;
 }
 
 .auth-form-wide > .auth-photo-card {
@@ -775,9 +865,9 @@ select {
   border-radius: 10px;
   background: var(--button-primary);
   color: var(--bg-white);
-  padding: var(--space-md);
-  min-height: 48px;
-  font-size: 0.95rem;
+  padding: 10px 12px;
+  min-height: 42px;
+  font-size: 0.9rem;
   font-weight: 600;
   letter-spacing: 0.01em;
   transition: all var(--transition-smooth);
@@ -802,7 +892,7 @@ select {
 
 .auth-card-wide .auth-switch {
   margin-top: 0;
-  font-size: 0.9375rem;
+  font-size: 0.88rem;
   color: var(--secondary-text);
   text-align: center;
   animation: fadeInUp 0.7s var(--transition-smooth) 0.3s both;
@@ -864,6 +954,11 @@ select {
     min-height: auto;
   }
 
+  .auth-layout-login {
+    width: min(760px, 100%);
+    min-height: auto;
+  }
+
   .auth-visual {
     border-right: 0;
     border-bottom: 1px solid var(--border-light);
@@ -879,11 +974,11 @@ select {
   }
 
   .auth-layout-form {
-    width: min(100%, 100%);
+    width: min(760px, 100%);
   }
 
   .auth-form-wide {
-    grid-template-columns: 180px repeat(2, minmax(0, 1fr));
+    grid-template-columns: 132px repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -895,6 +990,16 @@ select {
   .auth-layout {
     border-radius: 16px;
     min-height: auto;
+  }
+
+  .auth-layout-login .auth-scene {
+    min-height: 150px;
+  }
+
+  .auth-layout-login .auth-lottie {
+    max-width: 160px;
+    height: 110px;
+    min-height: 110px;
   }
 
   .auth-visual {
@@ -922,7 +1027,7 @@ select {
   }
 
   .auth-card-wide {
-    padding: var(--space-lg);
+    padding: 18px 16px;
   }
 
   .auth-form-wide {

@@ -7,7 +7,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="PSM E-Learning Management System - a clean, modern platform for course delivery, assessments, and certificate verification.">
+    <meta name="description" content="A simple place for learners to join courses, track progress, and verify certificates.">
     <title>PSM E-Learning</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -32,12 +32,9 @@
 
         <nav class="nav" id="siteNav" aria-label="Primary navigation">
             <a href="#home">Home</a>
-            <a href="#stats">Trust</a>
-            <a href="#verify">Verify</a>
-            <a href="#features">Features</a>
             <a href="#courses">Courses</a>
+            <a href="#verify">Verify</a>
             <a href="#apply">Apply</a>
-            <a href="#preview">Preview</a>
             <a href="#contact">Contact</a>
         </nav>
 
@@ -68,9 +65,8 @@
     <section class="hero section" id="home">
         <div class="container hero-grid">
             <div class="hero-copy reveal">
-                <p class="eyebrow">PSM E-Learning Platform</p>
-                <h1>Clear learning operations for courses, certificates, and verification.</h1>
-                <p class="hero-lead">A minimal e-learning system built to keep teaching, tracking, and public verification simple, fast, and easy to scan.</p>
+                <h1>Start learning with clear steps and real progress you can track.</h1>
+                <p class="hero-lead">Find a course, continue where you stopped, and verify your certificate easily when you finish.</p>
                 <div class="hero-actions">
                     <a class="btn btn-solid" href="${pageContext.request.contextPath}/register">Get Started</a>
                     <a class="btn btn-ghost" href="#apply">Become an Instructor</a>
@@ -95,9 +91,9 @@
     <section class="stats section" id="stats">
         <div class="container reveal">
             <div class="section-heading compact">
-                <p class="eyebrow">Trusted by the platform</p>
-                <h2>Small surface area. Clear signals.</h2>
-                <p>Simple metrics keep the experience focused on outcomes instead of noise.</p>
+                <p class="eyebrow">Quick facts</p>
+                <h2>A quick view of who is learning here.</h2>
+                <p>Simple numbers help students and instructors see progress at a glance.</p>
             </div>
             <div class="stats-grid">
                 <article class="stat-card">
@@ -139,8 +135,8 @@
         <div class="container">
             <div class="section-heading reveal">
                 <p class="eyebrow">Features</p>
-                <h2>Minimal by design, complete in function.</h2>
-                <p>Each part of the system is built to stay readable and direct.</p>
+                <h2>Built around what people need to do.</h2>
+                <p>Each part of the system helps people start, continue, and verify without confusion.</p>
             </div>
             <div class="feature-grid">
                 <article class="feature-card reveal">
@@ -175,8 +171,8 @@
         <div class="container">
             <div class="section-heading reveal">
                 <p class="eyebrow">Featured courses</p>
-                <h2>Approved courses that are ready to explore.</h2>
-                <p>A small selection keeps the landing page informative without turning it into a catalog.</p>
+                <h2>Choose a course and start learning.</h2>
+                <p>A short list makes it easier to find a course and continue quickly.</p>
             </div>
             <c:choose>
                 <c:when test="${not empty featuredCourses}">
@@ -223,22 +219,35 @@
         <div class="container application-grid reveal">
             <div class="section-heading compact">
                 <p class="eyebrow">Instructor applications</p>
-                <h2>Send your CV and teaching profile to the admin team for review.</h2>
-                <p>Use this form if you want to apply as an instructor. The admin team receives your application by email, reviews the CV, and responds with the result.</p>
+                <h2>Ready to apply as an instructor?</h2>
+                <p>Share your details, CV, and teaching background in a short form. The admin team will review it and reply with the result.</p>
                 <div class="application-points">
                     <span>CV upload</span>
                     <span>Specialization review</span>
                     <span>Email decision</span>
                 </div>
             </div>
-            <form class="application-card" method="post" action="${pageContext.request.contextPath}/apply-instructor" enctype="multipart/form-data">
-                <div class="application-card-head">
-                    <div>
-                        <span class="application-card-kicker">Application Form</span>
-                        <h3>Instructor profile details</h3>
-                    </div>
-                    <p>Share your experience, specialization, and CV so the admin team can review your fit quickly.</p>
+            <div class="application-card application-card-compact">
+                <div class="application-card-foot">
+                    <button class="btn application-submit application-submit-unique" type="button" data-application-modal-open>Apply to Teach</button>
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="application-modal" id="applicationModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="applicationModalTitle">
+        <div class="application-modal-backdrop" data-application-modal-close></div>
+        <div class="application-modal-dialog" role="document">
+            <div class="application-modal-header">
+                <div>
+                    <p class="eyebrow">Instructor applications</p>
+                    <h2 id="applicationModalTitle">Apply in a few steps</h2>
+                    <p>Keep it short and clear. The admin team will review your application and contact you by email.</p>
+                </div>
+                <button type="button" class="application-modal-close" aria-label="Close application form" data-application-modal-close>&times;</button>
+            </div>
+
+            <form class="application-card application-card-modal" method="post" action="${pageContext.request.contextPath}/apply-instructor" enctype="multipart/form-data">
                 <div class="application-form-grid">
                     <div class="application-field">
                         <label for="appFullName">Full name</label>
@@ -271,7 +280,7 @@
                     </div>
                     <div class="application-field application-field-full">
                         <label for="appCoverMessage">Short cover message</label>
-                        <textarea id="appCoverMessage" name="coverMessage" rows="5" placeholder="Tell the admin team why you want to teach here."></textarea>
+                        <textarea id="appCoverMessage" name="coverMessage" rows="4" placeholder="Tell the admin team why you want to teach here."></textarea>
                     </div>
                 </div>
                 <div class="application-card-foot">
@@ -280,14 +289,14 @@
                 </div>
             </form>
         </div>
-    </section>
+    </div>
 
     <section class="preview section" id="preview">
         <div class="container preview-grid">
             <div class="section-heading reveal">
-                <p class="eyebrow">Product preview</p>
-                <h2>Student learning journey, visualized.</h2>
-                <p>An overview of how learners progress through coursework, assessments, and credential verification in one streamlined flow.</p>
+                <p class="eyebrow">Preview</p>
+                <h2>See how learning flows from course to certificate.</h2>
+                <p>From enrollment to verification, the steps stay simple and clear for the learner.</p>
             </div>
             <div class="preview-card reveal">
                 <div class="preview-media">
@@ -301,7 +310,7 @@
         <div class="container cta-box reveal">
             <div>
                 <p class="eyebrow">Ready to begin</p>
-                <h2>Start with a platform that stays clear at every step.</h2>
+                <h2>Start learning without the clutter.</h2>
             </div>
             <div class="cta-actions">
                 <a class="btn btn-solid" href="${pageContext.request.contextPath}/register">Get Started</a>
@@ -319,8 +328,8 @@
                 <span class="brand-mark">PSM</span>
                 <span class="brand-text">E-Learning</span>
             </a>
-            <p>Simple learning tools with public verification and low-friction navigation.</p>
-            <p class="footer-note">Need help? Use the login page for support access or verify certificates publicly from the link below.</p>
+            <p>A simple place for students to learn, instructors to teach, and anyone to verify certificates.</p>
+            <p class="footer-note">Need help? Sign in for your account or verify a certificate publicly from the link below.</p>
         </div>
         <div>
             <span class="footer-title">Explore</span>

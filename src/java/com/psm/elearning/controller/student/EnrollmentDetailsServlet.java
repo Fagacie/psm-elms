@@ -202,7 +202,11 @@ public class EnrollmentDetailsServlet extends HttpServlet {
         
         try {
             Integer userId = SessionUtil.resolveUserId(session);
-            Integer enrollmentId = Integer.parseInt(request.getParameter("id"));
+            Integer enrollmentId = resolveEnrollmentId(request);
+            if (enrollmentId == null) {
+                response.sendRedirect(request.getContextPath() + "/student/my-enrollments?error=invalid");
+                return;
+            }
             
             Enrollment enrollment = enrollmentDAO.getEnrollment(enrollmentId);
             
@@ -771,6 +775,9 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                 Integer userId = SessionUtil.resolveUserId(session);
                 Integer fallbackEnrollmentId = null;
                 String fallbackId = request.getParameter("id");
+                if (fallbackId == null || fallbackId.trim().isEmpty()) {
+                    fallbackId = request.getParameter("enrollmentId");
+                }
                 if (fallbackId != null && !fallbackId.trim().isEmpty()) {
                     fallbackEnrollmentId = Integer.valueOf(fallbackId.trim());
                 }
@@ -817,6 +824,21 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                 LOGGER.log(Level.SEVERE, "EnrollmentDetailsServlet: fallback render failed", fallbackException);
             }
             response.sendRedirect(request.getContextPath() + "/student/my-enrollments?error=exception");
+        }
+    }
+
+    private Integer resolveEnrollmentId(HttpServletRequest request) {
+        String value = request.getParameter("id");
+        if (value == null || value.trim().isEmpty()) {
+            value = request.getParameter("enrollmentId");
+        }
+        if (value == null || value.trim().isEmpty()) {
+            return null;
+        }
+        try {
+            return Integer.valueOf(value.trim());
+        } catch (NumberFormatException ex) {
+            return null;
         }
     }
 

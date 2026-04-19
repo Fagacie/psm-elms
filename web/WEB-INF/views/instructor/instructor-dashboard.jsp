@@ -223,21 +223,18 @@
                                     <i class="fas fa-folder-open"></i>
                                     <span>
                                         <strong>Manage materials</strong>
-                                        <small>Upload, edit, and reorder learning assets.</small>
                                     </span>
                                 </a>
                                 <a class="action-link" href="${pageContext.request.contextPath}/instructor/assessments">
                                     <i class="fas fa-clipboard-list"></i>
                                     <span>
                                         <strong>Review assessments</strong>
-                                        <small>Build quizzes and inspect submission workflows.</small>
                                     </span>
                                 </a>
                                 <a class="action-link" href="${pageContext.request.contextPath}/instructor/certificates">
                                     <i class="fas fa-certificate"></i>
                                     <span>
                                         <strong>Verify certificates</strong>
-                                        <small>Track completion and certificate readiness.</small>
                                     </span>
                                 </a>
                             </div>

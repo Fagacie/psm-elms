@@ -2,9 +2,13 @@ document.addEventListener('DOMContentLoaded', function () {
     var header = document.getElementById('siteHeader');
     var menuToggle = document.getElementById('menuToggle');
     var nav = document.getElementById('siteNav');
+    var applicationModal = document.getElementById('applicationModal');
+    var applicationOpeners = document.querySelectorAll('[data-application-modal-open]');
+    var applicationClosers = document.querySelectorAll('[data-application-modal-close]');
     var links = nav ? nav.querySelectorAll('a[href^="#"]') : [];
     var reveals = document.querySelectorAll('.reveal');
     var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var lastModalTrigger = null;
 
     function setHeaderState() {
         if (!header) return;
@@ -17,12 +21,50 @@ document.addEventListener('DOMContentLoaded', function () {
         menuToggle.setAttribute('aria-expanded', 'false');
     }
 
+    function openApplicationModal(trigger) {
+        if (!applicationModal) return;
+
+        lastModalTrigger = trigger || document.activeElement;
+        applicationModal.classList.add('is-open');
+        applicationModal.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('application-modal-open');
+
+        var firstField = applicationModal.querySelector('input, textarea, select, button');
+        if (firstField && firstField.focus) {
+            firstField.focus();
+        }
+    }
+
+    function closeApplicationModal() {
+        if (!applicationModal) return;
+
+        applicationModal.classList.remove('is-open');
+        applicationModal.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('application-modal-open');
+
+        if (lastModalTrigger && lastModalTrigger.focus) {
+            lastModalTrigger.focus();
+        }
+    }
+
     if (menuToggle && nav) {
         menuToggle.addEventListener('click', function () {
             var isOpen = nav.classList.toggle('is-open');
             menuToggle.setAttribute('aria-expanded', String(isOpen));
         });
     }
+
+    applicationOpeners.forEach(function (button) {
+        button.addEventListener('click', function () {
+            openApplicationModal(button);
+        });
+    });
+
+    applicationClosers.forEach(function (button) {
+        button.addEventListener('click', function () {
+            closeApplicationModal();
+        });
+    });
 
     links.forEach(function (link) {
         link.addEventListener('click', function (event) {
@@ -79,6 +121,20 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!nav || !menuToggle) return;
         if (nav.contains(event.target) || menuToggle.contains(event.target)) return;
         closeMenu();
+    });
+
+    if (applicationModal) {
+        applicationModal.addEventListener('click', function (event) {
+            if (event.target === applicationModal) {
+                closeApplicationModal();
+            }
+        });
+    }
+
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape' && applicationModal && applicationModal.classList.contains('is-open')) {
+            closeApplicationModal();
+        }
     });
 
     // Counter animation for stats

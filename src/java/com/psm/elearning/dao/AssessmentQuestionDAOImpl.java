@@ -2,7 +2,6 @@ package com.psm.elearning.dao;
 
 import com.psm.elearning.model.AssessmentQuestion;
 import com.psm.elearning.util.DBConnection;
-
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -78,6 +77,71 @@ public class AssessmentQuestionDAOImpl implements AssessmentQuestionDAO {
             System.err.println("AssessmentQuestion findByAssessment failed: " + e.getMessage());
         }
         return list;
+    }
+
+    @Override
+    public boolean updateQuestion(AssessmentQuestion question) {
+        String sql = "UPDATE AssessmentQuestion SET QuestionText=?, OptionA=?, OptionB=?, OptionC=?, OptionD=?, CorrectOption=?, Marks=? WHERE QuestionID=?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, question.getQuestionText());
+            ps.setString(2, question.getOptionA());
+            ps.setString(3, question.getOptionB());
+            ps.setString(4, question.getOptionC());
+            ps.setString(5, question.getOptionD());
+            ps.setString(6, question.getCorrectOption());
+            if (question.getMarks() != null) {
+                ps.setDouble(7, question.getMarks());
+            } else {
+                ps.setNull(7, Types.DECIMAL);
+            }
+            ps.setInt(8, question.getQuestionId());
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("AssessmentQuestion update failed: " + e.getMessage());
+            return false;
+        }
+    }
+
+    @Override
+    public boolean swapQuestionContent(int firstQuestionId, int secondQuestionId) {
+        AssessmentQuestion first = findById(firstQuestionId);
+        AssessmentQuestion second = findById(secondQuestionId);
+        if (first == null || second == null) {
+            return false;
+        }
+
+        String sql = "UPDATE AssessmentQuestion SET QuestionText=?, OptionA=?, OptionB=?, OptionC=?, OptionD=?, CorrectOption=?, Marks=? WHERE QuestionID=?";
+        try (Connection conn = DBConnection.getConnection()) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                bindQuestionContent(ps, second, firstQuestionId);
+                ps.executeUpdate();
+
+                bindQuestionContent(ps, first, secondQuestionId);
+                ps.executeUpdate();
+            }
+            conn.commit();
+            return true;
+        } catch (SQLException e) {
+            System.err.println("AssessmentQuestion swap failed: " + e.getMessage());
+            return false;
+        }
+    }
+
+    private void bindQuestionContent(PreparedStatement ps, AssessmentQuestion source, int targetQuestionId) throws SQLException {
+        ps.setString(1, source.getQuestionText());
+        ps.setString(2, source.getOptionA());
+        ps.setString(3, source.getOptionB());
+        ps.setString(4, source.getOptionC());
+        ps.setString(5, source.getOptionD());
+        ps.setString(6, source.getCorrectOption());
+        if (source.getMarks() != null) {
+            ps.setDouble(7, source.getMarks());
+        } else {
+            ps.setNull(7, Types.DECIMAL);
+        }
+        ps.setInt(8, targetQuestionId);
     }
 
     @Override

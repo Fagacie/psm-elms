@@ -28,9 +28,9 @@
         <section class="sd3-hero sv-card">
             <div class="sv-card-body sd3-hero-body">
                 <div class="sd3-hero-copy">
-                    <p class="sd3-kicker">Student Workspace</p>
-                    <h2>Learn with clarity, track real progress, and keep moving.</h2>
-                    <p>Everything important is here: your active courses, current progress, and the next place to continue without distraction.</p>
+                    <p class="sd3-kicker">Your Learning Hub</p>
+                    <h2>See what to do next at a glance.</h2>
+                    <p>Your active courses, progress, and next lesson are grouped here so you can continue without searching.</p>
                     <div class="sd3-hero-actions">
                         <a href="${pageContext.request.contextPath}/student/my-enrollments" class="sv-btn primary">My Courses</a>
                         <a href="${pageContext.request.contextPath}/student/courses" class="sv-btn">Browse Courses</a>
@@ -90,7 +90,7 @@
                 <div class="sv-card-head">
                     <div>
                         <h2>Continue Learning</h2>
-                        <p class="sd3-head-copy">Your top courses, arranged as reusable product cards instead of a dense table.</p>
+                        <p class="sd3-head-copy">Your current courses are shown in a simple layout so you can jump back in quickly.</p>
                     </div>
                     <a href="${pageContext.request.contextPath}/student/my-enrollments" class="sv-btn">View All</a>
                 </div>

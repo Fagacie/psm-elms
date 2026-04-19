@@ -1324,3 +1324,444 @@
 .data-table tbody tr:hover {
     background: #fafafa;
 }
+
+.ia-workspace {
+    font-family: "Manrope", "Segoe UI", sans-serif;
+}
+
+.ia-topbar {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 22px;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    background: linear-gradient(120deg, #f8fafc, #eef4ff);
+    margin-bottom: 18px;
+}
+
+.ia-topbar h2 {
+    margin: 4px 0;
+    font-size: 1.55rem;
+    color: #0f172a;
+}
+
+.ia-kicker {
+    margin: 0;
+    text-transform: uppercase;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    color: #1d4ed8;
+    font-weight: 800;
+}
+
+.ia-topbar p {
+    margin: 0;
+    color: #475569;
+}
+
+.ia-course-filter {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    gap: 10px;
+    min-width: 280px;
+}
+
+.ia-course-filter label {
+    grid-column: 1 / span 2;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #334155;
+}
+
+.ia-course-filter select {
+    min-width: 180px;
+}
+
+.ia-view-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.ia-view-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    border-radius: 999px;
+    border: 1px solid #dbe3ef;
+    background: #fff;
+    color: #334155;
+    font-size: 0.88rem;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.ia-view-pill.active {
+    background: #0f172a;
+    border-color: #0f172a;
+    color: #fff;
+}
+
+.ia-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 16px;
+}
+
+.ia-card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.ia-card-head h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #0f172a;
+}
+
+.ia-card-head p {
+    margin: 4px 0 0;
+    color: #64748b;
+}
+
+.ia-grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.ia-form {
+    display: grid;
+    gap: 10px;
+}
+
+.ia-form label {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #334155;
+}
+
+.ia-form input,
+.ia-form select,
+.ia-form textarea,
+.ia-course-filter select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #d6deeb;
+    border-radius: 10px;
+    background: #fff;
+    color: #0f172a;
+    font-size: 0.92rem;
+}
+
+.ia-form-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.ia-subline {
+    color: #64748b;
+    font-size: 0.82rem;
+    margin-top: 2px;
+}
+
+.ia-actions-cell {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.ia-empty {
+    text-align: center;
+    padding: 36px 22px;
+}
+
+.ia-empty i {
+    font-size: 2rem;
+    color: #3b82f6;
+    margin-bottom: 10px;
+}
+
+.ia-empty h3 {
+    margin: 4px 0 8px;
+}
+
+.ia-empty-inline {
+    padding: 16px;
+    border: 1px dashed #cbd5e1;
+    border-radius: 10px;
+    color: #64748b;
+    background: #f8fafc;
+}
+
+.ia-options-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.ia-question-list {
+    display: grid;
+    gap: 10px;
+}
+
+.ia-question-item {
+    border: 1px solid #dbe3ef;
+    border-radius: 10px;
+    background: #fff;
+    padding: 12px;
+}
+
+.ia-question-item summary {
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    color: #0f172a;
+    font-size: 0.92rem;
+    font-weight: 700;
+}
+
+.ia-question-meta {
+    color: #475569;
+    font-size: 0.8rem;
+}
+
+.ia-question-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 10px 0;
+}
+
+.ia-question-actions form {
+    margin: 0;
+}
+
+.ia-question-edit {
+    margin-top: 10px;
+    border-top: 1px solid #e2e8f0;
+    padding-top: 10px;
+}
+
+.ia-inline-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.ia-filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.ia-filter-chip {
+    padding: 8px 12px;
+    border: 1px solid #d9e1ee;
+    border-radius: 999px;
+    color: #475569;
+    text-decoration: none;
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
+.ia-filter-chip.active {
+    color: #fff;
+    background: #0f172a;
+    border-color: #0f172a;
+}
+
+.ia-retake-list {
+    display: grid;
+    gap: 10px;
+}
+
+.ia-retake-item {
+    display: flex;
+    justify-content: space-between;
+    gap: 14px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 12px;
+}
+
+.ia-retake-item p,
+.ia-retake-item small {
+    margin: 3px 0;
+    color: #64748b;
+}
+
+.ia-meta-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.ia-meta-grid div {
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 10px;
+    display: grid;
+    gap: 4px;
+}
+
+.ia-meta-grid strong {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #64748b;
+}
+
+.ia-submission-block {
+    margin-top: 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 12px;
+    background: #f8fafc;
+}
+
+.ia-submission-block h4 {
+    margin: 0 0 8px;
+}
+
+.ia-submission-block p {
+    margin: 0;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.ia-audit-trail {
+    margin-top: 14px;
+    border-top: 1px solid #e2e8f0;
+    padding-top: 12px;
+}
+
+.ia-audit-trail ul {
+    margin: 0;
+    padding-left: 18px;
+    display: grid;
+    gap: 8px;
+}
+
+.ia-audit-trail li {
+    color: #334155;
+    font-size: 0.88rem;
+}
+
+.ia-audit-trail li span {
+    display: block;
+    color: #64748b;
+    font-size: 0.8rem;
+    margin-top: 2px;
+}
+
+.ia-muted {
+    color: #64748b;
+    margin: 0;
+}
+
+.ia-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.ia-stat {
+    border: 1px solid #dbe3ef;
+    border-radius: 10px;
+    padding: 14px;
+    background: #f8fafc;
+    display: grid;
+    gap: 6px;
+}
+
+.ia-stat span {
+    color: #64748b;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.ia-stat strong {
+    font-size: 1.25rem;
+    color: #0f172a;
+}
+
+.ia-progress-panel {
+    margin-top: 14px;
+    border: 1px solid #dbe3ef;
+    border-radius: 12px;
+    padding: 12px;
+    background: #f8fafc;
+}
+
+.ia-progress-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    color: #334155;
+    font-weight: 700;
+}
+
+.ia-progress-track {
+    height: 12px;
+    border-radius: 999px;
+    background: #e2e8f0;
+    overflow: hidden;
+}
+
+.ia-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #2563eb, #22c55e);
+}
+
+@media (max-width: 1100px) {
+    .ia-grid-2 {
+        grid-template-columns: 1fr;
+    }
+
+    .ia-stats-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 760px) {
+    .ia-topbar {
+        flex-direction: column;
+    }
+
+    .ia-course-filter {
+        grid-template-columns: 1fr;
+    }
+
+    .ia-course-filter label {
+        grid-column: auto;
+    }
+
+    .ia-form-row,
+    .ia-options-grid,
+    .ia-meta-grid,
+    .ia-stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .ia-retake-item {
+        flex-direction: column;
+    }
+}

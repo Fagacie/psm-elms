@@ -244,8 +244,6 @@ CREATE TABLE IF NOT EXISTS `Assessment` (
   `CourseID` INT NOT NULL,
   `Title` VARCHAR(200) NOT NULL,
   `Type` VARCHAR(50) NULL,
-  `GradingMode` VARCHAR(20) NOT NULL DEFAULT 'auto',
-  `SubmissionMode` VARCHAR(20) NOT NULL DEFAULT 'both',
   `Duration` INT NULL,
   `TotalMarks` INT NULL,
   `Instructions` TEXT NULL,
@@ -261,6 +259,10 @@ CREATE TABLE IF NOT EXISTS `Assessment` (
   CONSTRAINT `fk_assessment_creator` FOREIGN KEY (`CreatedBy`) REFERENCES `User`(`UserID`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_assessment_placement_material` FOREIGN KEY (`PlacementMaterialID`) REFERENCES `Material`(`MaterialID`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+ALTER TABLE `Assessment`
+  ADD COLUMN `GradingMode` ENUM('auto','manual') NOT NULL DEFAULT 'auto',
+  ADD COLUMN `SubmissionMode` ENUM('file','text','both') NOT NULL DEFAULT 'both';
 
 -- Assessment Questions
 CREATE TABLE IF NOT EXISTS `AssessmentQuestion` (
@@ -286,7 +288,7 @@ CREATE TABLE IF NOT EXISTS `AssessmentSubmission` (
   `Score` DECIMAL(5,2) NULL,
   `Feedback` TEXT NULL,
   `AttemptNumber` INT NOT NULL DEFAULT 1,
-  `Status` ENUM('Submitted','TimedOut','AutoSubmitted') NOT NULL DEFAULT 'Submitted',
+  `Status` ENUM('Submitted','TimedOut','AutoSubmitted','Graded') NOT NULL DEFAULT 'Submitted',
   `StartedAt` DATETIME NULL,
   `EndedAt` DATETIME NULL,
   `SubmitDate` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -295,6 +297,10 @@ CREATE TABLE IF NOT EXISTS `AssessmentSubmission` (
   CONSTRAINT `fk_submission_assessment` FOREIGN KEY (`AssessmentID`) REFERENCES `Assessment`(`AssessmentID`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_submission_user` FOREIGN KEY (`UserID`) REFERENCES `User`(`UserID`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Ensure existing databases also support instructor grading status.
+ALTER TABLE `AssessmentSubmission`
+  MODIFY COLUMN `Status` ENUM('Submitted','TimedOut','AutoSubmitted','Graded') NOT NULL DEFAULT 'Submitted';
 
 -- Assessment Retake Requests
 CREATE TABLE IF NOT EXISTS `AssessmentRetakeRequest` (

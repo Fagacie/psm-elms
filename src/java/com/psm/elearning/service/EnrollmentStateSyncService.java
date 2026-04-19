@@ -157,11 +157,9 @@ public class EnrollmentStateSyncService {
         if (passed) {
             return new AssessmentProgressState(true, true, 1.0);
         }
-        if (graded) {
-            return new AssessmentProgressState(true, false, 0.65);
-        }
-        if (submitted) {
-            return new AssessmentProgressState(true, false, 0.4);
+        if (graded || submitted) {
+            // Assessment progress credit is awarded only when pass threshold is met.
+            return new AssessmentProgressState(true, false, 0.0);
         }
         return new AssessmentProgressState(false, false, 0.0);
     }

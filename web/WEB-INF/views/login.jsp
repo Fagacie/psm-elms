@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/auth-premium.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/auth-premium.css?v=20260417-1">
     <jsp:include page="/WEB-INF/views/common/head-external-assets.jsp"/>
 </head>
 <body class="auth-page">
@@ -18,15 +18,7 @@
     <section class="auth-layout auth-layout-login" aria-labelledby="login-title">
         <aside class="auth-visual" aria-hidden="true">
             <p class="auth-kicker">PSM E-Learning</p>
-            <h2>Learn Smarter, Anywhere</h2>
-            <p class="auth-visual-text">Pick up where you left off. Your courses, progress, and certificates await.</p>
-            
-            <ul class="auth-visual-list">
-                <li>Access courses instantly</li>
-                <li>Track your progress in real-time</li>
-                <li>Earn recognized certificates</li>
-            </ul>
-            
+
             <div class="auth-scene">
                 <lottie-player
                         class="auth-lottie"

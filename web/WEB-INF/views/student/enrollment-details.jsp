@@ -80,7 +80,7 @@
                 <i class="fas fa-book"></i> Materials
             </a>
             <a class="ed-tab ${activeTab == 'assessments' ? 'active' : ''}"
-               href="${pageContext.request.contextPath}/student/enrollment-details?enrollmentId=${enrollment.enrollmentId}&tab=assessments">
+               href="${pageContext.request.contextPath}/student/assessments?view=dashboard&enrollmentId=${enrollment.enrollmentId}">
                 <i class="fas fa-clipboard-check"></i> Assessments
             </a>
         </div>
@@ -348,6 +348,7 @@
                                         <c:set var="allowedAttempts" value="${allowedAttemptsByAssessment[a.assessmentId]}"/>
                                         <c:set var="latest" value="${latestSubmissionByAssessment[a.assessmentId]}"/>
                                         <c:set var="hasActiveAttempt" value="${activeAttemptByAssessment[a.assessmentId]}"/>
+                                        <c:set var="objectiveType" value="${a.type == 'Quiz' || a.type == 'Exam'}"/>
                                         <tr>
                                             <td>${a.title}</td>
                                             <td><span class="assessment-type-badge assessment-type-${a.type}">${a.type}</span></td>
@@ -365,15 +366,20 @@
                                             <td>
                                                 <c:if test="${paidAccess}">
                                                     <c:choose>
-                                                        <c:when test="${hasActiveAttempt}">
-                                                            <a class="sv-btn primary" href="${pageContext.request.contextPath}/student/assessments?courseId=${enrollment.courseId}&assessmentId=${a.assessmentId}&mode=attempt&fromHub=1&enrollmentId=${enrollment.enrollmentId}">Continue</a>
+                                                        <c:when test="${objectiveType and hasActiveAttempt}">
+                                                            <a class="sv-btn primary" href="${pageContext.request.contextPath}/student/assessments?view=take&courseId=${enrollment.courseId}&assessmentId=${a.assessmentId}&mode=attempt&fromHub=1&enrollmentId=${enrollment.enrollmentId}">Continue</a>
                                                         </c:when>
-                                                        <c:when test="${usedAttempts < allowedAttempts}">
-                                                            <a class="sv-btn primary" href="${pageContext.request.contextPath}/student/assessments?action=start&courseId=${enrollment.courseId}&assessmentId=${a.assessmentId}&fromHub=1&enrollmentId=${enrollment.enrollmentId}">Start</a>
+                                                        <c:when test="${objectiveType and usedAttempts < allowedAttempts}">
+                                                            <a class="sv-btn primary" href="${pageContext.request.contextPath}/student/assessments?view=details&courseId=${enrollment.courseId}&assessmentId=${a.assessmentId}&fromHub=1&enrollmentId=${enrollment.enrollmentId}">Start</a>
                                                         </c:when>
                                                     </c:choose>
                                                 </c:if>
-                                                <a class="sv-btn" href="${pageContext.request.contextPath}/student/assessments?courseId=${enrollment.courseId}&assessmentId=${a.assessmentId}&fromHub=1&enrollmentId=${enrollment.enrollmentId}">Details</a>
+                                                <a class="sv-btn" href="${pageContext.request.contextPath}/student/assessments?view=details&courseId=${enrollment.courseId}&assessmentId=${a.assessmentId}&fromHub=1&enrollmentId=${enrollment.enrollmentId}">
+                                                    <c:choose>
+                                                        <c:when test="${objectiveType}">Details</c:when>
+                                                        <c:otherwise>Open Submission</c:otherwise>
+                                                    </c:choose>
+                                                </a>
                                             </td>
                                         </tr>
                                     </c:forEach>
