@@ -34,7 +34,6 @@
             <a href="#home">Home</a>
             <a href="#courses">Courses</a>
             <a href="#verify">Verify</a>
-            <a href="#apply">Apply</a>
             <a href="#contact">Contact</a>
         </nav>
 
@@ -69,7 +68,6 @@
                 <p class="hero-lead">Find a course, continue where you stopped, and verify your certificate easily when you finish.</p>
                 <div class="hero-actions">
                     <a class="btn btn-solid" href="${pageContext.request.contextPath}/register">Get Started</a>
-                    <a class="btn btn-ghost" href="#apply">Become an Instructor</a>
                     <a class="btn btn-ghost" href="#features">Learn More</a>
                 </div>
             </div>
@@ -215,82 +213,6 @@
         </div>
     </section>
 
-    <section class="application section" id="apply">
-        <div class="container application-grid reveal">
-            <div class="section-heading compact">
-                <p class="eyebrow">Instructor applications</p>
-                <h2>Ready to apply as an instructor?</h2>
-                <p>Share your details, CV, and teaching background in a short form. The admin team will review it and reply with the result.</p>
-                <div class="application-points">
-                    <span>CV upload</span>
-                    <span>Specialization review</span>
-                    <span>Email decision</span>
-                </div>
-            </div>
-            <div class="application-card application-card-compact">
-                <div class="application-card-foot">
-                    <button class="btn application-submit application-submit-unique" type="button" data-application-modal-open>Apply to Teach</button>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <div class="application-modal" id="applicationModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="applicationModalTitle">
-        <div class="application-modal-backdrop" data-application-modal-close></div>
-        <div class="application-modal-dialog" role="document">
-            <div class="application-modal-header">
-                <div>
-                    <p class="eyebrow">Instructor applications</p>
-                    <h2 id="applicationModalTitle">Apply in a few steps</h2>
-                    <p>Keep it short and clear. The admin team will review your application and contact you by email.</p>
-                </div>
-                <button type="button" class="application-modal-close" aria-label="Close application form" data-application-modal-close>&times;</button>
-            </div>
-
-            <form class="application-card application-card-modal" method="post" action="${pageContext.request.contextPath}/apply-instructor" enctype="multipart/form-data">
-                <div class="application-form-grid">
-                    <div class="application-field">
-                        <label for="appFullName">Full name</label>
-                        <input id="appFullName" name="fullName" type="text" placeholder="Enter your full name" required>
-                    </div>
-                    <div class="application-field">
-                        <label for="appEmail">Email</label>
-                        <input id="appEmail" name="email" type="email" placeholder="name@example.com" required>
-                    </div>
-                    <div class="application-field">
-                        <label for="appPhone">Phone</label>
-                        <input id="appPhone" name="phone" type="tel" placeholder="+255 700 000 000" required>
-                    </div>
-                    <div class="application-field">
-                        <label for="appSpecialization">Specialization</label>
-                        <input id="appSpecialization" name="specialization" type="text" placeholder="e.g. Project Management" required>
-                    </div>
-                    <div class="application-field">
-                        <label for="appYearsOfExperience">Years of experience</label>
-                        <input id="appYearsOfExperience" name="yearsOfExperience" type="number" min="0" step="1" placeholder="Optional">
-                    </div>
-                    <div class="application-field">
-                        <label for="appQualification">Qualification</label>
-                        <input id="appQualification" name="qualification" type="text" placeholder="Highest qualification" required>
-                    </div>
-                    <div class="application-field application-field-full">
-                        <label for="appCvFile">CV or supporting document</label>
-                        <input id="appCvFile" name="cvFile" type="file" accept=".pdf,.doc,.docx" required>
-                        <small>Accepted formats: PDF, DOC, DOCX.</small>
-                    </div>
-                    <div class="application-field application-field-full">
-                        <label for="appCoverMessage">Short cover message</label>
-                        <textarea id="appCoverMessage" name="coverMessage" rows="4" placeholder="Tell the admin team why you want to teach here."></textarea>
-                    </div>
-                </div>
-                <div class="application-card-foot">
-                    <p>Applications are reviewed manually and responses are sent by email.</p>
-                    <button class="btn btn-solid application-submit" type="submit">Submit application</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
     <section class="preview section" id="preview">
         <div class="container preview-grid">
             <div class="section-heading reveal">
@@ -314,7 +236,6 @@
             </div>
             <div class="cta-actions">
                 <a class="btn btn-solid" href="${pageContext.request.contextPath}/register">Get Started</a>
-                <a class="btn btn-ghost" href="#apply">Apply to Teach</a>
                 <a class="btn btn-ghost" href="${pageContext.request.contextPath}/login">Login</a>
             </div>
         </div>

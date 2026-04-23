@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Certificate Template</title>
+    <title>Certificate | PSM E-Learning</title>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -29,11 +29,14 @@
         * { box-sizing: border-box; }
         body { margin: 0; background: #f8fafc; font-family: 'Inter', sans-serif; color: var(--ink); }
         .wrap { max-width: 920px; margin: 24px auto; padding: 0 12px; }
-        .toolbar { display:flex; gap:10px; margin-bottom:14px; flex-wrap:wrap; }
+        .toolbar { display:flex; gap:10px; margin-bottom:14px; flex-wrap:wrap; align-items:center; }
         .btn { display:inline-flex; align-items:center; justify-content:center; min-height:42px; padding:0 15px; text-decoration:none; border:1px solid var(--line); color:var(--ink); background:#fff; border-radius:10px; font-weight:600; transition:transform .2s ease, box-shadow .2s ease; cursor:pointer; }
         .btn:hover { transform:translateY(-1px); box-shadow:0 10px 24px rgba(15,23,42,.06); }
         .btn.primary { background:var(--navy); color:#fff; border-color:var(--navy); }
         .badge { display:inline-flex; align-items:center; min-height:34px; padding:0 12px; border:1px solid rgba(16,42,114,.12); background:rgba(16,42,114,.06); color:var(--navy); border-radius:999px; font-size:.75rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; }
+        .badge.revoked { color:#7f1d1d; border-color:rgba(127,29,29,.16); background:rgba(254,242,242,.95); }
+        .toolbar-spacer { flex: 1 1 auto; }
+        .toolbar-link { color: var(--navy); text-decoration: none; font-weight: 600; }
 
         .certificate { position:relative; width:min(100%, calc(var(--cert-export-width) * var(--cert-screen-scale))); aspect-ratio:2000 / 1414; min-height:0; max-width:100%; margin:0 auto; border:1px solid var(--line); border-radius:8px; background:#fff; box-shadow:0 18px 40px rgba(15,23,42,.08); overflow:hidden; }
         .top-art, .body { position:relative; z-index:1; }
@@ -61,6 +64,10 @@
         .details { max-width:760px; margin:18px 0 0; color:#334155; font-size:.84rem; line-height:1.65; }
         .details strong { color:var(--navy); }
         .course-pill { max-width:620px; margin-top:14px; padding:10px 14px; border-left:3px solid var(--blue-strong); background:var(--soft); font-size:.88rem; font-weight:700; letter-spacing:-.02em; }
+        .detail-stack { margin-top: 14px; display: grid; gap: 10px; max-width: 720px; }
+        .detail-card { display: grid; gap: 4px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: linear-gradient(180deg, #fbfdff 0%, #f8fbff 100%); }
+        .detail-card span { font-size: .64rem; color: var(--muted); letter-spacing: .12em; text-transform: uppercase; font-weight: 700; }
+        .detail-card strong { font-size: .82rem; color: var(--ink); }
         .meta-inline { margin-top:14px; display:flex; flex-wrap:wrap; gap:8px 18px; color:var(--muted); font-size:.68rem; letter-spacing:.04em; }
         .meta-inline strong { color:var(--ink); }
         .footer { margin-top:28px; display:grid; grid-template-columns:1fr 1fr 1.15fr; gap:16px; align-items:end; }
@@ -81,7 +88,16 @@
         <a class="btn" href="${backUrl}">Back</a>
         <button id="downloadPngBtn" class="btn primary" type="button">Download PNG</button>
         <button class="btn" type="button" onclick="window.print()">Print</button>
+        <c:if test="${not empty certificate.verificationURL and previewMode != true}">
+            <a class="toolbar-link" href="${certificate.verificationURL}" target="_blank" rel="noopener">Open verification</a>
+        </c:if>
+        <div class="toolbar-spacer"></div>
         <c:if test="${previewMode == true}"><span class="badge">Preview Template</span></c:if>
+        <c:if test="${previewMode != true}">
+            <span class="badge ${certificate.status == 'Revoked' ? 'revoked' : ''}">
+                ${certificate.status == 'Revoked' ? 'Revoked' : 'Issued Credential'}
+            </span>
+        </c:if>
     </div>
 
     <section class="certificate">
@@ -98,6 +114,12 @@
                 <div class="name-wrap"><div class="name">${certificate.studentName}</div></div>
                 <div class="details">This certifies that registration number <strong><c:out value="${certificate.regNumber}" default="N/A"/></strong> has successfully completed the approved learning requirements for</div>
                 <div class="course-pill">${certificate.courseName}</div>
+                <div class="detail-stack">
+                    <div class="detail-card">
+                        <span>Learning Authority</span>
+                        <strong><c:out value="${certificate.instructorName}" default="PSM E-Learning Academic Team"/></strong>
+                    </div>
+                </div>
                 <div class="meta-inline">
                     <span><strong>Reg No:</strong> <c:out value="${certificate.regNumber}" default="N/A"/></span>
                     <span><strong>Issue Date:</strong> <c:choose><c:when test="${not empty certificate.issueDate}">${certificate.issueDate.toLocalDate()}</c:when><c:otherwise>-</c:otherwise></c:choose></span>
@@ -135,6 +157,17 @@
             finally { if (sandbox.parentNode) sandbox.parentNode.removeChild(sandbox); downloadBtn.disabled = false; downloadBtn.textContent = originalLabel; }
         }
         downloadBtn.addEventListener('click', function () { exportCertificateAsPng(); });
+
+        if ('${param.download}' === 'png') {
+            var autoExport = function () {
+                window.setTimeout(exportCertificateAsPng, 220);
+            };
+            if (document.readyState === 'complete') {
+                autoExport();
+            } else {
+                window.addEventListener('load', autoExport, { once: true });
+            }
+        }
     })();
 </script>
 </body>

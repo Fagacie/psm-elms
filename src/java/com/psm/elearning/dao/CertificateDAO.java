@@ -14,5 +14,6 @@ public interface CertificateDAO {
     List<CertificateView> findByInstructorDetailed(int instructorId);
     List<CertificateView> findAllDetailed();
     CertificateView findDetailedById(int certificateId);
+    CertificateView findDetailedByEnrollment(int enrollmentId);
     boolean revoke(int certificateId, Integer revokedBy);
 }

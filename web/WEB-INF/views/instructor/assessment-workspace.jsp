@@ -33,43 +33,52 @@
             <span>Assessments</span>
         </nav>
 
-        <section class="ia-topbar">
+        <section class="ia-topbar ia-topbar-split">
             <div>
-                <h2>Assessment Management Hub</h2>
+                <p class="ia-card-kicker">Assessments</p>
+                <h2>
+                    <c:choose>
+                        <c:when test="${not empty selectedCourse}">For <c:out value="${selectedCourse.courseName}"/></c:when>
+                        <c:otherwise>Workspace requires a course</c:otherwise>
+                    </c:choose>
+                </h2>
+                <c:choose>
+                    <c:when test="${not empty selectedCourse}">
+                        <p class="ia-topbar-subtitle">Design, publish, and grade assessments from a single course workspace.</p>
+                    </c:when>
+                    <c:otherwise>
+                        <p class="ia-topbar-subtitle">Choose a course from <a href="${pageContext.request.contextPath}/instructor/courses">My Courses</a> to continue.</p>
+                    </c:otherwise>
+                </c:choose>
             </div>
-            <form method="get" action="${pageContext.request.contextPath}/instructor/assessments" class="ia-course-filter">
-                <input type="hidden" name="view" value="${activeView}"/>
-                <label for="courseId">Course</label>
-                <select id="courseId" name="courseId" required>
-                    <option value="">Select Course</option>
-                    <c:forEach var="c" items="${courses}">
-                        <option value="${c.courseId}" <c:if test="${not empty selectedCourse and selectedCourse.courseId == c.courseId}">selected</c:if>>
-                            ${c.courseName}
-                        </option>
-                    </c:forEach>
-                </select>
-                <button class="btn btn-primary" type="submit"><i class="fas fa-filter"></i> Load</button>
-            </form>
+            <div class="ia-topbar-actions">
+                <c:if test="${not empty selectedCourse}">
+                    <a class="btn btn-primary" href="${pageContext.request.contextPath}/instructor/assessments?view=drafts&courseId=${selectedCourse.courseId}">
+                        <i class="fas fa-plus-circle"></i> New Assessment
+                    </a>
+                </c:if>
+            </div>
         </section>
 
         <c:if test="${not empty selectedCourse}">
+            <c:set var="assessmentListFilter" value="${empty param.status ? 'all' : fn:toLowerCase(param.status)}"/>
             <section class="ia-view-nav" aria-label="Assessment module views">
-                <a class="ia-view-pill ${activeView == 'dashboard' ? 'active' : ''}" href="${pageContext.request.contextPath}/instructor/assessments?view=dashboard&courseId=${selectedCourse.courseId}">
-                    <i class="fas fa-table-columns"></i> Dashboard
+                <a class="ia-view-pill ${activeView == 'dashboard' && assessmentListFilter == 'all' ? 'active' : ''}" href="${pageContext.request.contextPath}/instructor/assessments?view=dashboard&courseId=${selectedCourse.courseId}">
+                    <i class="fas fa-table-columns"></i> All
                 </a>
-                <a class="ia-view-pill ${activeView == 'editor' ? 'active' : ''}" href="${pageContext.request.contextPath}/instructor/assessments?view=editor&courseId=${selectedCourse.courseId}<c:if test='${not empty selectedAssessment}'>&assessmentId=${selectedAssessment.assessmentId}</c:if>">
-                    <i class="fas fa-pen-ruler"></i> Create / Edit
+                <a class="ia-view-pill ${activeView == 'dashboard' && assessmentListFilter == 'drafts' ? 'active' : ''}" href="${pageContext.request.contextPath}/instructor/assessments?view=dashboard&courseId=${selectedCourse.courseId}&status=drafts">
+                    <i class="fas fa-pen-ruler"></i> Drafts
                 </a>
-                <a class="ia-view-pill ${activeView == 'questions' ? 'active' : ''}" href="${pageContext.request.contextPath}/instructor/assessments?view=questions&courseId=${selectedCourse.courseId}<c:if test='${not empty selectedAssessment}'>&assessmentId=${selectedAssessment.assessmentId}</c:if>">
-                    <i class="fas fa-list-check"></i> Questions
+                <a class="ia-view-pill ${activeView == 'dashboard' && assessmentListFilter == 'active' ? 'active' : ''}" href="${pageContext.request.contextPath}/instructor/assessments?view=dashboard&courseId=${selectedCourse.courseId}&status=active">
+                    <i class="fas fa-bolt"></i> Active
                 </a>
-                <a class="ia-view-pill ${activeView == 'submissions' ? 'active' : ''}" href="${pageContext.request.contextPath}/instructor/assessments?view=submissions&courseId=${selectedCourse.courseId}<c:if test='${not empty selectedAssessment}'>&assessmentId=${selectedAssessment.assessmentId}</c:if>">
+                <a class="ia-view-pill ${activeView == 'submissions' ? 'active' : ''}" href="${pageContext.request.contextPath}/instructor/assessments?view=submissions&courseId=${selectedCourse.courseId}&assessmentId=${not empty selectedAssessment ? selectedAssessment.assessmentId : (not empty assessments ? assessments[0].assessmentId : '')}">
                     <i class="fas fa-inbox"></i> Submissions
                 </a>
-                <a class="ia-view-pill ${activeView == 'grade' ? 'active' : ''}" href="${pageContext.request.contextPath}/instructor/assessments?view=grade&courseId=${selectedCourse.courseId}<c:if test='${not empty selectedAssessment}'>&assessmentId=${selectedAssessment.assessmentId}</c:if><c:if test='${not empty selectedSubmissionId}'>&submissionId=${selectedSubmissionId}</c:if>">
-                    <i class="fas fa-marker"></i> Grade Submission
+                <a class="ia-view-pill ${activeView == 'grade' || activeView == 'pending-grading' ? 'active' : ''}" href="${pageContext.request.contextPath}/instructor/assessments?view=pending-grading&courseId=${selectedCourse.courseId}&assessmentId=${not empty selectedAssessment ? selectedAssessment.assessmentId : (not empty assessments ? assessments[0].assessmentId : '')}">
+                    <i class="fas fa-marker"></i> Pending Grading
                 </a>
-                <a class="ia-view-pill ${activeView == 'analytics' ? 'active' : ''}" href="${pageContext.request.contextPath}/instructor/assessments?view=analytics&courseId=${selectedCourse.courseId}<c:if test='${not empty selectedAssessment}'>&assessmentId=${selectedAssessment.assessmentId}</c:if>">
+                <a class="ia-view-pill ${activeView == 'analytics' ? 'active' : ''}" href="${pageContext.request.contextPath}/instructor/assessments?view=analytics&courseId=${selectedCourse.courseId}&assessmentId=${not empty selectedAssessment ? selectedAssessment.assessmentId : (not empty assessments ? assessments[0].assessmentId : '')}">
                     <i class="fas fa-chart-line"></i> Analytics
                 </a>
             </section>
@@ -85,11 +94,16 @@
         <c:if test="${param.success == 'qdeleted'}"><div class="alert alert-success"><i class="fas fa-check-circle"></i> Question deleted successfully.</div></c:if>
         <c:if test="${param.success == 'qupdated'}"><div class="alert alert-success"><i class="fas fa-check-circle"></i> Question updated successfully.</div></c:if>
         <c:if test="${param.success == 'qmoved'}"><div class="alert alert-success"><i class="fas fa-check-circle"></i> Question order updated.</div></c:if>
+        <c:if test="${param.success == 'published'}"><div class="alert alert-success"><i class="fas fa-check-circle"></i> Assessment published successfully.</div></c:if>
         <c:if test="${param.success == 'rreviewed'}"><div class="alert alert-success"><i class="fas fa-check-circle"></i> Retake request reviewed successfully.</div></c:if>
         <c:if test="${param.success == 'graded'}"><div class="alert alert-success"><i class="fas fa-check-circle"></i> Submission graded successfully.</div></c:if>
         <c:if test="${param.success == 'autoregraded'}"><div class="alert alert-success"><i class="fas fa-check-circle"></i> Submission auto-regraded successfully.</div></c:if>
         <c:if test="${param.success == 'autoregradedall'}"><div class="alert alert-success"><i class="fas fa-check-circle"></i> Bulk auto-regrade completed. Updated submissions: <strong><c:out value="${param.regradedCount}" default="0"/></strong>.</div></c:if>
         <c:if test="${param.error != null}"><div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> Action failed. Please verify input and retry.</div></c:if>
+
+        <c:if test="${activeView == 'editor' || activeView == 'drafts'}">
+            <jsp:include page="/WEB-INF/views/instructor/assessment-wizard.jsp"/>
+        </c:if>
 
         <c:choose>
             <c:when test="${empty selectedCourse}">
@@ -103,13 +117,12 @@
                 <section class="ia-card">
                     <div class="ia-card-head">
                         <div>
-                            <h3>${selectedCourse.courseName} Assessment Dashboard</h3>
+                            <h3>Assessment Library</h3>
+                            <p class="section-caption">All assessments for this course, with draft and active filters built into the workspace.</p>
                         </div>
-                        <a class="btn btn-primary" href="${pageContext.request.contextPath}/instructor/assessments?view=editor&courseId=${selectedCourse.courseId}">
-                            <i class="fas fa-plus"></i> New Assessment
-                        </a>
                     </div>
 
+                    <c:set var="visibleAssessmentCount" value="0"/>
                     <c:choose>
                         <c:when test="${empty assessments}">
                             <div class="ia-empty-inline">No assessments created for this course yet.</div>
@@ -119,51 +132,59 @@
                                 <table class="data-table ia-table">
                                     <thead>
                                     <tr>
-                                        <th>Assessment</th>
+                                        <th>Title</th>
                                         <th>Type</th>
-                                        <th>Status</th>
+                                        <th>Due Date</th>
+                                        <th>Attempts</th>
                                         <th>Submissions</th>
-                                        <th>Pending Review</th>
-                                        <th>Average Score</th>
+                                        <th>Status</th>
                                         <th>Actions</th>
                                     </tr>
                                     </thead>
                                     <tbody>
                                     <c:forEach var="a" items="${assessments}">
-                                        <tr>
-                                            <td data-label="Assessment">
-                                                <strong>${a.title}</strong>
-                                                <div class="ia-subline">${a.duration != null ? a.duration : 'No limit'} mins · ${a.totalMarks != null ? a.totalMarks : 'N/A'} marks</div>
-                                            </td>
-                                            <td data-label="Type"><span class="assessment-type-badge type-${a.type}">${a.type}</span></td>
-                                            <td data-label="Status"><span class="status-badge">${statusByAssessmentId[a.assessmentId]}</span></td>
-                                            <td data-label="Submissions">${submissionCountByAssessmentId[a.assessmentId]}</td>
-                                            <td data-label="Pending Review">${pendingCountByAssessmentId[a.assessmentId]}</td>
-                                            <td data-label="Average Score">
-                                                <c:choose>
-                                                    <c:when test="${not empty averageScoreByAssessmentId[a.assessmentId]}">
-                                                        <fmt:formatNumber value="${averageScoreByAssessmentId[a.assessmentId]}" maxFractionDigits="1"/>
-                                                    </c:when>
-                                                    <c:otherwise>--</c:otherwise>
-                                                </c:choose>
-                                            </td>
-                                            <td data-label="Actions" class="ia-actions-cell">
-                                                <a class="btn btn-secondary btn-sm" href="${pageContext.request.contextPath}/instructor/assessments?view=editor&courseId=${selectedCourse.courseId}&assessmentId=${a.assessmentId}">Edit</a>
-                                                <a class="btn btn-secondary btn-sm" href="${pageContext.request.contextPath}/instructor/assessments?view=questions&courseId=${selectedCourse.courseId}&assessmentId=${a.assessmentId}">Questions</a>
-                                                <a class="btn btn-secondary btn-sm" href="${pageContext.request.contextPath}/instructor/assessments?view=submissions&courseId=${selectedCourse.courseId}&assessmentId=${a.assessmentId}">Submissions</a>
-                                                <a class="btn btn-secondary btn-sm" href="${pageContext.request.contextPath}/instructor/assessments?view=analytics&courseId=${selectedCourse.courseId}&assessmentId=${a.assessmentId}">Analytics</a>
-                                            </td>
-                                        </tr>
+                                        <c:set var="rowStatus" value="${statusByAssessmentId[a.assessmentId]}"/>
+                                        <c:set var="matchesFilter" value="${assessmentListFilter == 'all' or (assessmentListFilter == 'drafts' and rowStatus == 'Draft') or (assessmentListFilter == 'active' and (rowStatus == 'Active' or rowStatus == 'Published'))}"/>
+                                        <c:if test="${matchesFilter}">
+                                            <c:set var="visibleAssessmentCount" value="${visibleAssessmentCount + 1}"/>
+                                            <tr>
+                                                <td data-label="Title">
+                                                    <strong>${a.title}</strong>
+                                                    <div class="ia-subline">${not empty a.totalMarks ? a.totalMarks : 'N/A'} marks</div>
+                                                </td>
+                                                <td data-label="Type"><span class="assessment-type-badge type-${fn:replace(a.type, ' ', '-')}">${a.type}</span></td>
+                                                <td data-label="Due Date">
+                                                    <c:choose>
+                                                        <c:when test="${not empty a.dueDateDisplay}">${a.dueDateDisplay}</c:when>
+                                                        <c:otherwise>—</c:otherwise>
+                                                    </c:choose>
+                                                </td>
+                                                <td data-label="Attempts">${not empty a.maxAttempts ? a.maxAttempts : 1}</td>
+                                                <td data-label="Submissions">${submissionCountByAssessmentId[a.assessmentId]}</td>
+                                                <td data-label="Status"><span class="status-badge">${rowStatus}</span></td>
+                                                <td data-label="Actions" class="ia-actions-cell">
+                                                    <a class="btn btn-secondary btn-sm" href="${pageContext.request.contextPath}/instructor/assessments?view=drafts&courseId=${selectedCourse.courseId}&assessmentId=${a.assessmentId}">Edit</a>
+                                                    <a class="btn btn-secondary btn-sm" href="${pageContext.request.contextPath}/instructor/assessments?view=submissions&courseId=${selectedCourse.courseId}&assessmentId=${a.assessmentId}">View Submissions</a>
+                                                    <a class="btn btn-secondary btn-sm" href="${pageContext.request.contextPath}/instructor/assessments?view=pending-grading&courseId=${selectedCourse.courseId}&assessmentId=${a.assessmentId}">Grade</a>
+                                                    <a class="btn btn-danger btn-sm" href="${pageContext.request.contextPath}/instructor/assessments?action=deleteAssessment&courseId=${selectedCourse.courseId}&id=${a.assessmentId}" onclick="return confirm('Deactivate this assessment?');">Deactivate</a>
+                                                    <a class="btn btn-secondary btn-sm" href="${pageContext.request.contextPath}/instructor/assessments?view=analytics&courseId=${selectedCourse.courseId}&assessmentId=${a.assessmentId}">Analytics</a>
+                                                </td>
+                                            </tr>
+                                        </c:if>
                                     </c:forEach>
                                     </tbody>
                                 </table>
                             </div>
+
+                            <c:if test="${visibleAssessmentCount == 0}">
+                                <div class="ia-empty-inline">No assessments match this filter.</div>
+                            </c:if>
                         </c:otherwise>
                     </c:choose>
                 </section>
             </c:when>
 
-            <c:when test="${activeView == 'editor'}">
+            <c:when test="${false}">
                 <section class="ia-grid-2">
                     <article class="ia-card">
                         <div class="ia-card-head">
@@ -212,6 +233,9 @@
                                 </div>
                             </div>
 
+                            <label for="dueDate">Due Date / Deadline</label>
+                            <input id="dueDate" name="dueDate" type="datetime-local"/>
+
                             <div class="ia-form-row">
                                 <div>
                                     <label for="maxAttempts">Max Attempts</label>
@@ -243,92 +267,24 @@
 
                     <article class="ia-card">
                         <div class="ia-card-head">
-                            <h3>Edit Assessment</h3>
-                            <c:if test="${not empty selectedAssessment}">
-                                <a class="btn btn-danger btn-sm" href="${pageContext.request.contextPath}/instructor/assessments?action=deleteAssessment&courseId=${selectedCourse.courseId}&id=${selectedAssessment.assessmentId}" onclick="return confirm('Delete this assessment?')">
-                                    <i class="fas fa-trash"></i> Delete
-                                </a>
-                            </c:if>
+                            <h3>Assessment Editing</h3>
                         </div>
 
                         <c:choose>
                             <c:when test="${empty selectedAssessment}">
-                                <div class="ia-empty-inline">Pick an assessment from Dashboard to edit.</div>
+                                <div class="ia-empty-inline">Pick an assessment from All Assessments to continue editing in the workspace.</div>
                             </c:when>
                             <c:otherwise>
-                                <form method="post" action="${pageContext.request.contextPath}/instructor/assessments" class="ia-form">
-                                    <input type="hidden" name="action" value="updateAssessment"/>
-                                    <input type="hidden" name="courseId" value="${selectedCourse.courseId}"/>
-                                    <input type="hidden" name="assessmentId" value="${selectedAssessment.assessmentId}"/>
-
-                                    <label for="edit-title">Title</label>
-                                    <input id="edit-title" name="title" type="text" value="${selectedAssessment.title}" required/>
-
-                                    <label for="edit-type">Type</label>
-                                    <select id="edit-type" name="type" onchange="syncAssessmentType(this, 'edit')" required>
-                                        <option value="Quiz" <c:if test="${selectedAssessment.type == 'Quiz'}">selected</c:if>>Quiz</option>
-                                        <option value="Exam" <c:if test="${selectedAssessment.type == 'Exam'}">selected</c:if>>Exam</option>
-                                        <option value="Assignment" <c:if test="${selectedAssessment.type == 'Assignment'}">selected</c:if>>Assignment</option>
-                                    </select>
-
-                                    <div class="ia-form-row">
-                                        <div>
-                                            <label for="gradingMode-edit">Grading</label>
-                                            <select id="gradingMode-edit" name="gradingMode">
-                                                <option value="auto" <c:if test="${selectedAssessment.gradingMode == 'auto'}">selected</c:if>>Auto</option>
-                                                <option value="manual" <c:if test="${selectedAssessment.gradingMode == 'manual'}">selected</c:if>>Manual</option>
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label for="submissionMode-edit">Submission</label>
-                                            <select id="submissionMode-edit" name="submissionMode">
-                                                <option value="both" <c:if test="${selectedAssessment.submissionMode == 'both'}">selected</c:if>>Text + File</option>
-                                                <option value="file" <c:if test="${selectedAssessment.submissionMode == 'file'}">selected</c:if>>File only</option>
-                                                <option value="text" <c:if test="${selectedAssessment.submissionMode == 'text'}">selected</c:if>>Text only</option>
-                                            </select>
-                                        </div>
+                                <div class="ia-empty-inline">
+                                    <p><strong>${selectedAssessment.title}</strong></p>
+                                    <p>Use Drafts for the full editor, or continue in Questions after opening the assessment.</p>
+                                    <div class="ia-inline-actions">
+                                        <a class="btn btn-primary btn-sm" href="${pageContext.request.contextPath}/instructor/assessments?view=drafts&courseId=${selectedCourse.courseId}&assessmentId=${selectedAssessment.assessmentId}"><i class="fas fa-pen"></i> Open Editor</a>
+                                        <a class="btn btn-danger btn-sm" href="${pageContext.request.contextPath}/instructor/assessments?action=deleteAssessment&courseId=${selectedCourse.courseId}&id=${selectedAssessment.assessmentId}" onclick="return confirm('Delete this assessment?')">
+                                            <i class="fas fa-trash"></i> Delete
+                                        </a>
                                     </div>
-
-                                    <div class="ia-form-row">
-                                        <div>
-                                            <label for="edit-duration">Duration (minutes)</label>
-                                            <input id="edit-duration" name="duration" type="number" min="0" value="${selectedAssessment.duration}"/>
-                                        </div>
-                                        <div>
-                                            <label for="edit-totalMarks">Total Marks</label>
-                                            <input id="edit-totalMarks" name="totalMarks" type="number" step="0.1" min="1" value="${selectedAssessment.totalMarks}"/>
-                                        </div>
-                                    </div>
-
-                                    <div class="ia-form-row">
-                                        <div>
-                                            <label for="edit-maxAttempts">Max Attempts</label>
-                                            <input id="edit-maxAttempts" name="maxAttempts" type="number" min="1" value="${selectedAssessment.maxAttempts}"/>
-                                        </div>
-                                        <div>
-                                            <label for="edit-questionsPerPage">Questions per Page</label>
-                                            <input id="edit-questionsPerPage" name="questionsPerPage" type="number" min="1" value="${selectedAssessment.questionsPerPage}"/>
-                                        </div>
-                                    </div>
-
-                                    <label for="edit-placement">Placement</label>
-                                    <select id="edit-placement" name="placement" required>
-                                        <option value="final" <c:if test="${assessmentPlacementTypeMap[selectedAssessment.assessmentId] == 'final'}">selected</c:if>>Course Completion</option>
-                                        <option value="afterEveryMaterial" <c:if test="${assessmentPlacementTypeMap[selectedAssessment.assessmentId] == 'afterEveryMaterial'}">selected</c:if>>After Every Material</option>
-                                        <optgroup label="After Specific Material">
-                                            <c:forEach var="m" items="${materials}">
-                                                <option value="afterMaterial:${m.materialId}" <c:if test="${assessmentPlacementTypeMap[selectedAssessment.assessmentId] == 'afterMaterial' and assessmentPlacementMaterialIdMap[selectedAssessment.assessmentId] == m.materialId}">selected</c:if>>
-                                                    ${m.title}
-                                                </option>
-                                            </c:forEach>
-                                        </optgroup>
-                                    </select>
-
-                                    <label for="edit-instructions">Instructions</label>
-                                    <textarea id="edit-instructions" name="instructions" rows="4">${selectedAssessment.instructions}</textarea>
-
-                                    <button class="btn btn-primary" type="submit"><i class="fas fa-save"></i> Update Assessment</button>
-                                </form>
+                                </div>
                             </c:otherwise>
                         </c:choose>
                     </article>
@@ -343,7 +299,7 @@
                         <article class="ia-card">
                             <div class="ia-card-head">
                                 <h3>Question Builder</h3>
-                                <span class="assessment-type-badge type-${selectedAssessment.type}">${selectedAssessment.type}</span>
+                                <span class="assessment-type-badge type-${fn:replace(selectedAssessment.type, ' ', '-')}">${selectedAssessment.type}</span>
                             </div>
                             <form method="post" action="${pageContext.request.contextPath}/instructor/assessments" class="ia-form" id="questionCreateForm">
                                 <input type="hidden" name="action" value="addQuestion"/>
@@ -598,7 +554,7 @@
                 </c:if>
             </c:when>
 
-            <c:when test="${activeView == 'grade'}">
+            <c:when test="${activeView == 'grade' || activeView == 'pending-grading'}">
                 <c:if test="${empty selectedAssessment}">
                 </c:if>
                 <c:if test="${not empty selectedAssessment}">
@@ -671,7 +627,7 @@
                                     <button class="btn btn-primary" type="submit"><i class="fas fa-floppy-disk"></i> Save Grade</button>
                                 </form>
 
-                                <c:if test="${selectedAssessment.type == 'Quiz' or selectedAssessment.type == 'Exam'}">
+                                <c:if test="${selectedAssessment.type == 'Quiz' or selectedAssessment.type == 'Practice Test' or selectedAssessment.type == 'Exam'}">
                                     <form method="post" action="${pageContext.request.contextPath}/instructor/assessments" class="ia-inline-form">
                                         <input type="hidden" name="action" value="autoRegradeSubmission"/>
                                         <input type="hidden" name="courseId" value="${selectedCourse.courseId}"/>

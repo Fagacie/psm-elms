@@ -66,9 +66,9 @@
                     <div class="metric-meta">Students <c:out value="${systemMetrics['studentsCount'] != null ? systemMetrics['studentsCount'] : 0}"/> and instructors <c:out value="${systemMetrics['instructorsCount'] != null ? systemMetrics['instructorsCount'] : 0}"/></div>
                 </div>
                 <div class="metric-card">
-                    <div class="metric-label">Applications</div>
-                    <div class="metric-value"><c:out value="${systemMetrics['pendingApplications'] != null ? systemMetrics['pendingApplications'] : 0}"/></div>
-                    <div class="metric-meta">Instructor submissions waiting for review</div>
+                    <div class="metric-label">Administrators</div>
+                    <div class="metric-value"><c:out value="${systemMetrics['adminsCount'] != null ? systemMetrics['adminsCount'] : 0}"/></div>
+                    <div class="metric-meta">Accounts with full governance privileges</div>
                 </div>
                 <div class="metric-card">
                     <div class="metric-label">Courses</div>
@@ -114,9 +114,9 @@
                                 <td><c:out value="${systemMetrics['pendingEnrollments'] != null ? systemMetrics['pendingEnrollments'] : 0}"/></td>
                             </tr>
                             <tr>
-                                <td>Instructor applications</td>
-                                <td><span class="status-badge">Review</span></td>
-                                <td><c:out value="${systemMetrics['pendingApplications'] != null ? systemMetrics['pendingApplications'] : 0}"/></td>
+                                <td>Instructor accounts</td>
+                                <td><span class="status-badge">Managed</span></td>
+                                <td><c:out value="${systemMetrics['instructorsCount'] != null ? systemMetrics['instructorsCount'] : 0}"/></td>
                             </tr>
                             <tr>
                                 <td>Approved courses</td>
@@ -172,11 +172,6 @@
                     <i class="fas fa-users"></i>
                     <strong>Users</strong>
                     <span>Open user management</span>
-                </a>
-                <a href="${pageContext.request.contextPath}/admin/instructor-applications" class="quick-link-card">
-                    <i class="fas fa-file-signature"></i>
-                    <strong>Applications</strong>
-                    <span>Review instructor requests</span>
                 </a>
                 <a href="${pageContext.request.contextPath}/admin/courses" class="quick-link-card">
                     <i class="fas fa-book"></i>

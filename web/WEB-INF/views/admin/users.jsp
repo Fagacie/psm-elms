@@ -218,12 +218,16 @@
                 </table>
             </div>
             <script>
-                $(function(){
-                    if ($('#usersTable').length && $('#usersTable tbody tr').length > 1) {
-                        $('#usersTable').DataTable({
-                            order: [[0,'desc']],
+                window.__initUsersTable = function () {
+                    if (!window.jQuery) {
+                        return;
+                    }
+                    var $table = window.jQuery('#usersTable');
+                    if ($table.length && window.jQuery('#usersTable tbody tr').length > 1) {
+                        $table.DataTable({
+                            order: [[0, 'desc']],
                             pageLength: 25,
-                            lengthMenu: [[10,25,50,100,-1],[10,25,50,100,'All']],
+                            lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'All']],
                             language: {
                                 search: 'Search users:',
                                 lengthMenu: 'Show _MENU_ entries',
@@ -232,15 +236,15 @@
                                 infoFiltered: '(filtered from _MAX_ total users)',
                                 zeroRecords: 'No matching users found',
                                 emptyTable: 'No users available',
-                                paginate: { first:'First', last:'Last', next:'Next', previous:'Previous' }
+                                paginate: { first: 'First', last: 'Last', next: 'Next', previous: 'Previous' }
                             },
                             columnDefs: [
-                                { orderable: true, targets: [0,1,2,3] },
-                                { orderable: false, targets: [4,5,6] }
+                                { orderable: true, targets: [0, 1, 2, 3] },
+                                { orderable: false, targets: [4, 5, 6] }
                             ]
                         });
                     }
-                });
+                };
             </script>
         </section>
     </div>
@@ -313,5 +317,10 @@
 </script>
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+<script>
+    if (typeof window.__initUsersTable === 'function') {
+        window.__initUsersTable();
+    }
+</script>
 </body>
 </html>

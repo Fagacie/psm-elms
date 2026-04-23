@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 
 public class Notification {
 
-    public static final String TYPE_INSTRUCTOR_APPLICATION = "InstructorApplication";
     public static final String CHANNEL_IN_APP = "InApp";
     public static final String CHANNEL_EMAIL = "Email";
 

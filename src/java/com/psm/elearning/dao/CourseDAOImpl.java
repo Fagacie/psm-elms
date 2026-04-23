@@ -296,4 +296,18 @@ public class CourseDAOImpl implements CourseDAO {
         }
         return list;
     }
+
+    @Override
+    public boolean assignInstructor(int courseId, int instructorId) {
+        String sql = "UPDATE Course SET InstructorID = ? WHERE CourseID = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, instructorId);
+            ps.setInt(2, courseId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("assignInstructor failed: " + e.getMessage());
+            return false;
+        }
+    }
 }

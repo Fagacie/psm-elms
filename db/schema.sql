@@ -246,6 +246,7 @@ CREATE TABLE IF NOT EXISTS `Assessment` (
   `Type` VARCHAR(50) NULL,
   `Duration` INT NULL,
   `TotalMarks` INT NULL,
+  `DueDate` DATETIME NULL,
   `Instructions` TEXT NULL,
   `PlacementType` VARCHAR(20) NOT NULL DEFAULT 'final',
   `PlacementMaterialID` INT NULL,
@@ -262,7 +263,8 @@ CREATE TABLE IF NOT EXISTS `Assessment` (
 
 ALTER TABLE `Assessment`
   ADD COLUMN `GradingMode` ENUM('auto','manual') NOT NULL DEFAULT 'auto',
-  ADD COLUMN `SubmissionMode` ENUM('file','text','both') NOT NULL DEFAULT 'both';
+  ADD COLUMN `SubmissionMode` ENUM('file','text','both') NOT NULL DEFAULT 'both',
+  ADD COLUMN `DueDate` DATETIME NULL;
 
 -- Assessment Questions
 CREATE TABLE IF NOT EXISTS `AssessmentQuestion` (

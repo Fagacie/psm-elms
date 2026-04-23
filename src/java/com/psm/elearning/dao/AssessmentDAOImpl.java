@@ -11,6 +11,7 @@ public class AssessmentDAOImpl implements AssessmentDAO {
     private volatile Boolean placementColumnsAvailable;
     private volatile Boolean gradingModeColumnAvailable;
     private volatile Boolean submissionModeColumnAvailable;
+    private volatile Boolean dueDateColumnAvailable;
 
     private boolean supportsPlacementColumns(Connection conn) {
         if (placementColumnsAvailable != null) {
@@ -96,6 +97,31 @@ public class AssessmentDAOImpl implements AssessmentDAO {
         }
     }
 
+    private boolean supportsDueDateColumn(Connection conn) {
+        if (dueDateColumnAvailable != null) {
+            return dueDateColumnAvailable;
+        }
+        synchronized (this) {
+            if (dueDateColumnAvailable != null) {
+                return dueDateColumnAvailable;
+            }
+            String sql = "SELECT COUNT(*) AS cnt FROM information_schema.COLUMNS "
+                    + "WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'Assessment' "
+                    + "AND COLUMN_NAME = 'DueDate'";
+            try (PreparedStatement ps = conn.prepareStatement(sql);
+                 ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    dueDateColumnAvailable = rs.getInt("cnt") == 1;
+                } else {
+                    dueDateColumnAvailable = false;
+                }
+            } catch (SQLException e) {
+                dueDateColumnAvailable = false;
+            }
+            return dueDateColumnAvailable;
+        }
+    }
+
     private Assessment mapRow(ResultSet rs) throws SQLException {
         Assessment a = new Assessment();
         a.setAssessmentId(rs.getInt("AssessmentID"));
@@ -112,6 +138,10 @@ public class AssessmentDAOImpl implements AssessmentDAO {
         a.setDuration(rs.wasNull() ? null : duration);
         int total = rs.getInt("TotalMarks");
         a.setTotalMarks(rs.wasNull() ? null : total);
+        if (hasColumn(rs, "DueDate")) {
+            Timestamp dueDate = rs.getTimestamp("DueDate");
+            a.setDueDate(dueDate != null ? dueDate.toLocalDateTime() : null);
+        }
         a.setInstructions(rs.getString("Instructions"));
         int maxAttempts = rs.getInt("MaxAttempts");
         a.setMaxAttempts(rs.wasNull() ? null : maxAttempts);
@@ -136,13 +166,22 @@ public class AssessmentDAOImpl implements AssessmentDAO {
             boolean supportsPlacement = supportsPlacementColumns(conn);
             boolean supportsGradingMode = supportsGradingModeColumn(conn);
             boolean supportsSubmissionMode = supportsSubmissionModeColumn(conn);
+            boolean supportsDueDate = supportsDueDateColumn(conn);
             String sql;
-            if (supportsPlacement && supportsGradingMode && supportsSubmissionMode) {
+            if (supportsPlacement && supportsGradingMode && supportsSubmissionMode && supportsDueDate) {
+                sql = "INSERT INTO Assessment (CourseID, Title, Type, GradingMode, SubmissionMode, Duration, TotalMarks, DueDate, Instructions, PlacementType, PlacementMaterialID, MaxAttempts, QuestionsPerPage, CreatedBy) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+            } else if (supportsPlacement && supportsGradingMode && supportsSubmissionMode) {
                 sql = "INSERT INTO Assessment (CourseID, Title, Type, GradingMode, SubmissionMode, Duration, TotalMarks, Instructions, PlacementType, PlacementMaterialID, MaxAttempts, QuestionsPerPage, CreatedBy) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
+            } else if (supportsPlacement && supportsGradingMode && supportsDueDate) {
+                sql = "INSERT INTO Assessment (CourseID, Title, Type, Duration, TotalMarks, DueDate, Instructions, PlacementType, PlacementMaterialID, MaxAttempts, QuestionsPerPage, CreatedBy) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
             } else if (supportsPlacement && supportsGradingMode) {
                 sql = "INSERT INTO Assessment (CourseID, Title, Type, Duration, TotalMarks, Instructions, PlacementType, PlacementMaterialID, MaxAttempts, QuestionsPerPage, CreatedBy) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+            } else if (supportsGradingMode && supportsSubmissionMode && supportsDueDate) {
+                sql = "INSERT INTO Assessment (CourseID, Title, Type, GradingMode, SubmissionMode, Duration, TotalMarks, DueDate, Instructions, MaxAttempts, QuestionsPerPage, CreatedBy) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
             } else if (supportsGradingMode && supportsSubmissionMode) {
                 sql = "INSERT INTO Assessment (CourseID, Title, Type, GradingMode, SubmissionMode, Duration, TotalMarks, Instructions, MaxAttempts, QuestionsPerPage, CreatedBy) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+            } else if (supportsGradingMode && supportsDueDate) {
+                sql = "INSERT INTO Assessment (CourseID, Title, Type, GradingMode, Duration, TotalMarks, DueDate, Instructions, MaxAttempts, QuestionsPerPage, CreatedBy) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
             } else if (supportsGradingMode) {
                 sql = "INSERT INTO Assessment (CourseID, Title, Type, GradingMode, Duration, TotalMarks, Instructions, MaxAttempts, QuestionsPerPage, CreatedBy) VALUES (?,?,?,?,?,?,?,?,?,?)";
             } else {
@@ -161,6 +200,13 @@ public class AssessmentDAOImpl implements AssessmentDAO {
             }
             if (assessment.getDuration() != null) ps.setInt(i++, assessment.getDuration()); else ps.setNull(i++, Types.INTEGER);
             if (assessment.getTotalMarks() != null) ps.setInt(i++, assessment.getTotalMarks()); else ps.setNull(i++, Types.INTEGER);
+            if (supportsDueDate) {
+                if (assessment.getDueDate() != null) {
+                    ps.setTimestamp(i++, Timestamp.valueOf(assessment.getDueDate()));
+                } else {
+                    ps.setNull(i++, Types.TIMESTAMP);
+                }
+            }
             ps.setString(i++, assessment.getInstructions());
             if (supportsPlacement) {
                 ps.setString(i++, assessment.getPlacementType());
@@ -223,13 +269,22 @@ public class AssessmentDAOImpl implements AssessmentDAO {
             boolean supportsPlacement = supportsPlacementColumns(conn);
             boolean supportsGradingMode = supportsGradingModeColumn(conn);
             boolean supportsSubmissionMode = supportsSubmissionModeColumn(conn);
+            boolean supportsDueDate = supportsDueDateColumn(conn);
             String sql;
-            if (supportsPlacement && supportsGradingMode && supportsSubmissionMode) {
+            if (supportsPlacement && supportsGradingMode && supportsSubmissionMode && supportsDueDate) {
+                sql = "UPDATE Assessment SET Title=?, Type=?, GradingMode=?, SubmissionMode=?, Duration=?, TotalMarks=?, DueDate=?, Instructions=?, PlacementType=?, PlacementMaterialID=?, MaxAttempts=?, QuestionsPerPage=? WHERE AssessmentID=?";
+            } else if (supportsPlacement && supportsGradingMode && supportsSubmissionMode) {
                 sql = "UPDATE Assessment SET Title=?, Type=?, GradingMode=?, SubmissionMode=?, Duration=?, TotalMarks=?, Instructions=?, PlacementType=?, PlacementMaterialID=?, MaxAttempts=?, QuestionsPerPage=? WHERE AssessmentID=?";
+            } else if (supportsPlacement && supportsGradingMode && supportsDueDate) {
+                sql = "UPDATE Assessment SET Title=?, Type=?, Duration=?, TotalMarks=?, DueDate=?, Instructions=?, PlacementType=?, PlacementMaterialID=?, MaxAttempts=?, QuestionsPerPage=? WHERE AssessmentID=?";
             } else if (supportsPlacement && supportsGradingMode) {
                 sql = "UPDATE Assessment SET Title=?, Type=?, Duration=?, TotalMarks=?, Instructions=?, PlacementType=?, PlacementMaterialID=?, MaxAttempts=?, QuestionsPerPage=? WHERE AssessmentID=?";
+            } else if (supportsGradingMode && supportsSubmissionMode && supportsDueDate) {
+                sql = "UPDATE Assessment SET Title=?, Type=?, GradingMode=?, SubmissionMode=?, Duration=?, TotalMarks=?, DueDate=?, Instructions=?, MaxAttempts=?, QuestionsPerPage=? WHERE AssessmentID=?";
             } else if (supportsGradingMode && supportsSubmissionMode) {
                 sql = "UPDATE Assessment SET Title=?, Type=?, GradingMode=?, SubmissionMode=?, Duration=?, TotalMarks=?, Instructions=?, MaxAttempts=?, QuestionsPerPage=? WHERE AssessmentID=?";
+            } else if (supportsGradingMode && supportsDueDate) {
+                sql = "UPDATE Assessment SET Title=?, Type=?, GradingMode=?, Duration=?, TotalMarks=?, DueDate=?, Instructions=?, MaxAttempts=?, QuestionsPerPage=? WHERE AssessmentID=?";
             } else if (supportsGradingMode) {
                 sql = "UPDATE Assessment SET Title=?, Type=?, GradingMode=?, Duration=?, TotalMarks=?, Instructions=?, MaxAttempts=?, QuestionsPerPage=? WHERE AssessmentID=?";
             } else {
@@ -247,6 +302,13 @@ public class AssessmentDAOImpl implements AssessmentDAO {
             }
             if (assessment.getDuration() != null) ps.setInt(i++, assessment.getDuration()); else ps.setNull(i++, Types.INTEGER);
             if (assessment.getTotalMarks() != null) ps.setInt(i++, assessment.getTotalMarks()); else ps.setNull(i++, Types.INTEGER);
+            if (supportsDueDate) {
+                if (assessment.getDueDate() != null) {
+                    ps.setTimestamp(i++, Timestamp.valueOf(assessment.getDueDate()));
+                } else {
+                    ps.setNull(i++, Types.TIMESTAMP);
+                }
+            }
             ps.setString(i++, assessment.getInstructions());
             if (supportsPlacement) {
                 ps.setString(i++, assessment.getPlacementType());

@@ -25,7 +25,9 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -209,16 +211,30 @@ public class StudentMaterialServlet extends HttpServlet {
             return;
         }
 
-        URL url = new URL(material.getFilePath());
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        if (isExternalHttpUrl(material.getFilePath())) {
+            response.sendRedirect(material.getFilePath());
+            return;
+        }
+
+        URL url;
+        try {
+            url = new URL(material.getFilePath());
+        } catch (MalformedURLException ex) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Material URL is invalid.");
+            return;
+        }
+
+        URLConnection connection = url.openConnection();
         connection.setConnectTimeout(15000);
         connection.setReadTimeout(30000);
-        connection.setInstanceFollowRedirects(true);
-
-        int status = connection.getResponseCode();
-        if (status >= 400) {
-            response.sendError(HttpServletResponse.SC_BAD_GATEWAY, "Unable to fetch material from storage.");
-            return;
+        if (connection instanceof HttpURLConnection) {
+            HttpURLConnection httpConnection = (HttpURLConnection) connection;
+            httpConnection.setInstanceFollowRedirects(true);
+            int status = httpConnection.getResponseCode();
+            if (status >= 400) {
+                response.sendError(HttpServletResponse.SC_BAD_GATEWAY, "Unable to fetch material from storage.");
+                return;
+            }
         }
 
         String contentType = connection.getContentType();
@@ -241,7 +257,9 @@ public class StudentMaterialServlet extends HttpServlet {
             }
             out.flush();
         } finally {
-            connection.disconnect();
+            if (connection instanceof HttpURLConnection) {
+                ((HttpURLConnection) connection).disconnect();
+            }
         }
     }
 
@@ -272,7 +290,9 @@ public class StudentMaterialServlet extends HttpServlet {
 
         String filePath = normalize(material.getFilePath());
         String extension = extractFileExtension(filePath);
-        String streamUrl = request.getContextPath() + "/student/materials?action=view&id=" + materialId;
+        String streamUrl = isExternalHttpUrl(filePath)
+            ? filePath
+            : request.getContextPath() + "/student/materials?action=view&id=" + materialId;
         List<Material> courseMaterials = materialDAO.findByCourse(material.getCourseId());
         if (courseMaterials == null) {
             courseMaterials = new ArrayList<>();
@@ -307,6 +327,7 @@ public class StudentMaterialServlet extends HttpServlet {
                 || Material.TYPE_VIDEO.equalsIgnoreCase(material.getMaterialType());
         boolean isAudio = "mp3".equals(extension);
         boolean canInlinePreview = isPdf || isVideo || isAudio;
+        boolean isExternalPdf = isPdf && isExternalHttpUrl(filePath);
         String completionRule = resolveCompletionRule(material, extension, isPdf, isVideo, isAudio, isLink);
         String materialStatus = normalize(statusById.get(materialId));
         if (materialStatus.isEmpty()) {
@@ -325,6 +346,7 @@ public class StudentMaterialServlet extends HttpServlet {
         request.setAttribute("streamUrl", streamUrl);
         request.setAttribute("isLinkMaterial", isLink);
         request.setAttribute("isPdfMaterial", isPdf);
+        request.setAttribute("isExternalPdfMaterial", isExternalPdf);
         request.setAttribute("isVideoMaterial", isVideo);
         request.setAttribute("isAudioMaterial", isAudio);
         request.setAttribute("canInlinePreview", canInlinePreview);
@@ -342,7 +364,12 @@ public class StudentMaterialServlet extends HttpServlet {
         request.setAttribute("previewEnrollment", previewEnrollment);
         request.setAttribute("completeActionUrl", request.getContextPath() + "/student/mark-material-completed");
 
-        request.getRequestDispatcher("/WEB-INF/views/student/material-viewer.jsp").forward(request, response);
+        boolean isFragment = "true".equalsIgnoreCase(request.getParameter("fragment"));
+        if (isFragment) {
+            request.getRequestDispatcher("/WEB-INF/views/student/fragments/material-viewer-fragment.jsp").forward(request, response);
+        } else {
+            request.getRequestDispatcher("/WEB-INF/views/student/material-viewer.jsp").forward(request, response);
+        }
     }
 
     private List<Material> filterMaterials(List<Material> materials, String keyword, String materialType) {
@@ -515,6 +542,11 @@ public class StudentMaterialServlet extends HttpServlet {
             return "";
         }
         return cleanPath.substring(dotIndex + 1).toLowerCase(Locale.ENGLISH);
+    }
+
+    private boolean isExternalHttpUrl(String value) {
+        String normalized = normalize(value).toLowerCase(Locale.ENGLISH);
+        return normalized.startsWith("http://") || normalized.startsWith("https://");
     }
 
     private boolean isPaymentComplete(String paymentStatus) {

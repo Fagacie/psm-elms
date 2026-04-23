@@ -18,4 +18,5 @@ public interface CourseDAO {
     int countByStatus(String status);
     List<Course> findFeaturedCourses(int limit);
     boolean updateStatus(int courseId, String status);
+    boolean assignInstructor(int courseId, int instructorId);
 }

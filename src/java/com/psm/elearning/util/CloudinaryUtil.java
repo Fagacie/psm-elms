@@ -222,7 +222,4 @@ public class CloudinaryUtil {
         return props.getProperty("cloudinary.folder_course_banners", "psm/course-banners");
     }
 
-    public static String getInstructorApplicationsFolder() {
-        return props.getProperty("cloudinary.folder_instructor_applications", "psm/instructor-applications");
-    }
 }

@@ -61,15 +61,6 @@
         <url-pattern>/landing</url-pattern>
     </servlet-mapping>
 
-    <servlet>
-        <servlet-name>InstructorApplicationServlet</servlet-name>
-        <servlet-class>com.psm.elearning.controller.InstructorApplicationServlet</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>InstructorApplicationServlet</servlet-name>
-        <url-pattern>/apply-instructor</url-pattern>
-    </servlet-mapping>
-
     <!-- Authentication Servlets -->
     <servlet>
         <servlet-name>LoginServlet</servlet-name>
@@ -177,15 +168,6 @@
     <servlet-mapping>
         <servlet-name>UserManagementServlet</servlet-name>
         <url-pattern>/admin/users</url-pattern>
-    </servlet-mapping>
-
-    <servlet>
-        <servlet-name>AdminInstructorApplicationServlet</servlet-name>
-        <servlet-class>com.psm.elearning.controller.admin.AdminInstructorApplicationServlet</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>AdminInstructorApplicationServlet</servlet-name>
-        <url-pattern>/admin/instructor-applications</url-pattern>
     </servlet-mapping>
 
     <!-- Course Management Servlets -->

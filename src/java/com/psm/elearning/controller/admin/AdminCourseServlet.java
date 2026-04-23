@@ -2,14 +2,28 @@ package com.psm.elearning.controller.admin;
 
 import com.psm.elearning.dao.CourseDAO;
 import com.psm.elearning.dao.CourseDAOImpl;
+import com.psm.elearning.dao.InstructorDAO;
+import com.psm.elearning.dao.InstructorDAOImpl;
+import com.psm.elearning.dao.UserDAO;
+import com.psm.elearning.dao.UserDAOImpl;
 import com.psm.elearning.model.Course;
+import com.psm.elearning.model.Instructor;
+import com.psm.elearning.model.User;
+import com.psm.elearning.util.CloudinaryUtil;
+import com.psm.elearning.util.EmailUtil;
 import com.psm.elearning.util.SessionUtil;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.servlet.http.Part;
+import java.io.InputStream;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -18,11 +32,14 @@ import java.util.logging.Logger;
  * AdminCourseServlet handles course management for administrators.
  * Actions: list, approve, reject
  */
+@MultipartConfig(maxFileSize = 5 * 1024 * 1024)
 public class AdminCourseServlet extends HttpServlet {
 
     private static final Logger LOGGER = Logger.getLogger(AdminCourseServlet.class.getName());
     
     private final CourseDAO courseDAO = new CourseDAOImpl();
+    private final InstructorDAO instructorDAO = new InstructorDAOImpl();
+    private final UserDAO userDAO = new UserDAOImpl();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -81,6 +98,10 @@ public class AdminCourseServlet extends HttpServlet {
             archiveCourse(request, response);
         } else if ("restore".equals(action)) {
             restoreCourse(request, response);
+        } else if ("create".equals(action)) {
+            createCourse(request, response);
+        } else if ("assign".equals(action)) {
+            assignInstructor(request, response);
         } else {
             listCourses(request, response);
         }
@@ -108,6 +129,7 @@ public class AdminCourseServlet extends HttpServlet {
             
             request.setAttribute("courses", courses);
             request.setAttribute("statusFilter", statusFilter);
+            request.setAttribute("instructors", resolveActiveInstructors());
             request.getRequestDispatcher("/WEB-INF/views/admin/admin-courses.jsp").forward(request, response);
             
         } catch (Exception e) {
@@ -115,6 +137,7 @@ public class AdminCourseServlet extends HttpServlet {
             
             request.setAttribute("errorMessage", "Failed to load courses: " + e.getMessage());
             request.setAttribute("courses", new java.util.ArrayList<>());
+            request.setAttribute("instructors", new java.util.ArrayList<>());
             
             try {
                 request.getRequestDispatcher("/WEB-INF/views/admin/admin-courses.jsp").forward(request, response);
@@ -293,6 +316,200 @@ public class AdminCourseServlet extends HttpServlet {
             LOGGER.log(Level.SEVERE, "Error restoring course", e);
             response.sendRedirect(request.getContextPath() + "/admin/courses?error=exception");
         }
+    }
+
+    private void createCourse(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        try {
+            String courseName = request.getParameter("courseName");
+            String feeStr = request.getParameter("courseFee");
+            Integer instructorId = parsePositiveInt(request.getParameter("instructorId"));
+            String courseBannerUrl = uploadCourseBannerIfProvided(request);
+
+            if (courseBannerUrl == null && isBannerProvided(request)) {
+                response.sendRedirect(request.getContextPath() + "/admin/courses?error=bannerupload");
+                return;
+            }
+
+            if (courseName == null || courseName.trim().isEmpty() || feeStr == null || feeStr.trim().isEmpty()) {
+                response.sendRedirect(request.getContextPath() + "/admin/courses?error=invalid");
+                return;
+            }
+
+            Course course = new Course();
+            course.setCourseName(courseName.trim());
+            course.setDescription(trimToEmpty(request.getParameter("description")));
+            course.setCategory(trimToEmpty(request.getParameter("category")));
+            course.setLevel(request.getParameter("level") != null ? request.getParameter("level") : Course.LEVEL_BEGINNER);
+            course.setDuration(parsePositiveInt(request.getParameter("duration")));
+            course.setCourseFee(new BigDecimal(feeStr));
+            course.setCreatedBy(instructorId);
+            course.setStatus(Course.STATUS_APPROVED);
+            course.setCourseBanner(courseBannerUrl);
+
+            Course created = courseDAO.create(course);
+            if (created == null) {
+                response.sendRedirect(request.getContextPath() + "/admin/courses?error=createfailed");
+                return;
+            }
+
+            if (instructorId != null) {
+                notifyInstructorOfCourseCreation(request, created, instructorId);
+            }
+
+            response.sendRedirect(request.getContextPath() + "/admin/courses?success=created");
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error creating course as admin", e);
+            response.sendRedirect(request.getContextPath() + "/admin/courses?error=createfailed");
+        }
+    }
+
+    private boolean isBannerProvided(HttpServletRequest request) {
+        try {
+            Part part = request.getPart("courseBanner");
+            return part != null && part.getSize() > 0;
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Unable to inspect uploaded course banner", e);
+            return false;
+        }
+    }
+
+    private String uploadCourseBannerIfProvided(HttpServletRequest request) {
+        try {
+            Part bannerPart = request.getPart("courseBanner");
+            if (bannerPart == null || bannerPart.getSize() == 0) {
+                return null;
+            }
+
+            String submittedFileName = bannerPart.getSubmittedFileName();
+            if (submittedFileName == null || submittedFileName.trim().isEmpty()) {
+                return null;
+            }
+
+            String ext = getFileExtension(submittedFileName);
+            if (!isAllowedBannerExtension(ext)) {
+                return null;
+            }
+
+            try (InputStream in = bannerPart.getInputStream()) {
+                return CloudinaryUtil.uploadFile(
+                        in.readAllBytes(),
+                        Paths.get(submittedFileName).getFileName().toString(),
+                        CloudinaryUtil.getCourseBannersFolder(),
+                        "image");
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Course banner upload failed", e);
+            return null;
+        }
+    }
+
+    private String getFileExtension(String fileName) {
+        if (fileName == null) {
+            return "";
+        }
+        int dot = fileName.lastIndexOf('.');
+        return dot >= 0 ? fileName.substring(dot + 1).toLowerCase() : "";
+    }
+
+    private boolean isAllowedBannerExtension(String ext) {
+        return "jpg".equals(ext) || "jpeg".equals(ext) || "png".equals(ext) || "webp".equals(ext);
+    }
+
+    private void assignInstructor(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        try {
+            Integer courseId = parsePositiveInt(request.getParameter("courseId"));
+            Integer instructorId = parsePositiveInt(request.getParameter("instructorId"));
+            if (courseId == null || instructorId == null) {
+                response.sendRedirect(request.getContextPath() + "/admin/courses?error=invalid");
+                return;
+            }
+
+            boolean assigned = courseDAO.assignInstructor(courseId, instructorId);
+            if (assigned) {
+                notifyInstructorOfAssignment(request, courseId, instructorId);
+                response.sendRedirect(request.getContextPath() + "/admin/courses?success=assigned");
+            } else {
+                response.sendRedirect(request.getContextPath() + "/admin/courses?error=assignfailed");
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error assigning instructor", e);
+            response.sendRedirect(request.getContextPath() + "/admin/courses?error=assignfailed");
+        }
+    }
+
+    private void notifyInstructorOfAssignment(HttpServletRequest request, int courseId, int instructorId) {
+        try {
+            Course course = courseDAO.findById(courseId);
+            User instructor = userDAO.findById(instructorId);
+
+            if (course == null || instructor == null) {
+                LOGGER.log(Level.WARNING, "Assignment email skipped because course or instructor could not be loaded. courseId={0}, instructorId={1}", new Object[]{courseId, instructorId});
+                return;
+            }
+
+            if (instructor.getEmail() == null || instructor.getEmail().trim().isEmpty()) {
+                LOGGER.log(Level.WARNING, "Assignment email skipped because instructor {0} has no email address", instructorId);
+                return;
+            }
+
+            boolean sent = EmailUtil.sendCourseAssignmentEmail(
+                    instructor.getEmail(),
+                    instructor.getFullName(),
+                    course.getCourseName(),
+                    course.getCategory(),
+                    course.getLevel(),
+                    buildCourseManagementUrl(request));
+
+            if (!sent) {
+                LOGGER.log(Level.WARNING, "Failed to send course assignment email to instructor {0} for course {1}", new Object[]{instructorId, courseId});
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Error while sending assignment notification email", e);
+        }
+    }
+
+    private void notifyInstructorOfCourseCreation(HttpServletRequest request, Course course, int instructorId) {
+        try {
+            User instructor = userDAO.findById(instructorId);
+            if (instructor == null || instructor.getEmail() == null || instructor.getEmail().trim().isEmpty()) {
+                return;
+            }
+
+            boolean sent = EmailUtil.sendCourseAssignmentEmail(
+                    instructor.getEmail(),
+                    instructor.getFullName(),
+                    course.getCourseName(),
+                    course.getCategory(),
+                    course.getLevel(),
+                    buildCourseManagementUrl(request));
+
+            if (!sent) {
+                LOGGER.log(Level.WARNING, "Failed to send course creation email to instructor {0} for course {1}", new Object[]{instructorId, course.getCourseId()});
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Error while sending course creation email", e);
+        }
+    }
+
+    private String buildCourseManagementUrl(HttpServletRequest request) {
+        return request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath() + "/admin/courses";
+    }
+
+    private List<User> resolveActiveInstructors() {
+        List<User> instructors = new ArrayList<>();
+        for (Instructor instructor : instructorDAO.findAll()) {
+            User user = userDAO.findById(instructor.getUserId());
+            if (user != null && "Instructor".equals(user.getRole()) && "Active".equals(user.getStatus())) {
+                instructors.add(user);
+            }
+        }
+        return instructors;
+    }
+
+    private String trimToEmpty(String value) {
+        return value == null ? "" : value.trim();
     }
 
     private Integer parsePositiveInt(String value) {

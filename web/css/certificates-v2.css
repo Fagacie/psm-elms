@@ -57,6 +57,30 @@
   color: var(--sv-muted);
 }
 
+.cert-management-grid,
+.cert-sections-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  align-items: start;
+}
+
+.cert-management-summary {
+  grid-column: 1 / -1;
+}
+
+.cert-management-aside {
+  align-self: start;
+}
+
+.cert-section-card {
+  min-width: 0;
+}
+
+.cert-section-wide {
+  grid-column: 1 / -1;
+}
+
 .cert-hero {
   overflow: hidden;
 }
@@ -333,6 +357,12 @@
   display: inline-flex;
 }
 
+.cert-secondary-btn {
+  border-color: #d2dfed;
+  background: #f8fbff;
+  color: #1f568a;
+}
+
 .cert-generate-btn {
   gap: 8px;
 }
@@ -346,6 +376,16 @@
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+}
+
+.cert-table td:last-child {
+  min-width: 260px;
+}
+
+.cert-table td:last-child .cert-inline-form,
+.cert-table td:last-child > .sv-btn {
+  margin-right: 8px;
+  margin-bottom: 8px;
 }
 
 .cert-actions .cert-table-btn {
@@ -442,6 +482,11 @@
     display: none;
   }
 
+  .cert-management-grid,
+  .cert-sections-grid {
+    grid-template-columns: 1fr;
+  }
+
   .cert-hero-body {
     grid-template-columns: 1fr;
   }
@@ -468,4 +513,3 @@
     width: 100%;
   }
 }
-

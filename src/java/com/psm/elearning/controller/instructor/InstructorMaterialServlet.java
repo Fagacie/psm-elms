@@ -72,6 +72,18 @@ public class InstructorMaterialServlet extends HttpServlet {
             updateMaterial(request, response, userId);
             return;
         }
+        if ("bulkArchive".equals(action)) {
+            bulkArchiveMaterials(request, response, userId);
+            return;
+        }
+        if ("bulkRestore".equals(action)) {
+            bulkRestoreMaterials(request, response, userId);
+            return;
+        }
+        if ("reorder".equals(action)) {
+            reorderMaterial(request, response, userId);
+            return;
+        }
 
         createMaterial(request, response, userId);
     }
@@ -86,18 +98,8 @@ public class InstructorMaterialServlet extends HttpServlet {
         if (courseIdStr != null && !courseIdStr.trim().isEmpty()) {
             try {
                 int courseId = Integer.parseInt(courseIdStr);
-                Course course = courseDAO.findById(courseId);
-                if (course == null || !userId.equals(course.getCreatedBy())) {
-                    request.setAttribute("errorMessage", "You are not allowed to manage materials for this course.");
-                    request.getRequestDispatcher("/WEB-INF/views/instructor/course-materials.jsp").forward(request, response);
-                    return;
-                }
-
-                List<Material> materials = materialDAO.findByCourse(courseId);
-                List<Material> deletedMaterials = materialDAO.findDeletedByCourse(courseId);
-                request.setAttribute("selectedCourse", course);
-                request.setAttribute("materials", materials != null ? materials : new ArrayList<>());
-                request.setAttribute("deletedMaterials", deletedMaterials != null ? deletedMaterials : new ArrayList<>());
+                response.sendRedirect(request.getContextPath() + "/instructor/courses?action=workspace&courseId=" + courseId + "#materials");
+                return;
             } catch (NumberFormatException e) {
                 request.setAttribute("errorMessage", "Invalid course ID.");
             }
@@ -189,13 +191,13 @@ public class InstructorMaterialServlet extends HttpServlet {
 
         Material created = materialDAO.create(material);
         if (created == null) {
-            response.sendRedirect(request.getContextPath() + "/instructor/materials?courseId=" + courseId + "&error=create");
+            response.sendRedirect(workspaceMaterialsRedirect(request, courseId, "error=create"));
             return;
         }
 
         resequenceCourseMaterials(courseId, created.getMaterialId(), displayOrder);
 
-        response.sendRedirect(request.getContextPath() + "/instructor/materials?courseId=" + courseId + "&success=created");
+        response.sendRedirect(workspaceMaterialsRedirect(request, courseId, "success=created"));
     }
 
     private void updateMaterial(HttpServletRequest request, HttpServletResponse response, Integer userId)
@@ -221,7 +223,7 @@ public class InstructorMaterialServlet extends HttpServlet {
         Course course = courseDAO.findById(courseId);
         Material existing = materialDAO.findById(materialId);
         if (course == null || existing == null || !userId.equals(course.getCreatedBy()) || existing.getCourseId() != courseId) {
-            response.sendRedirect(request.getContextPath() + "/instructor/materials?error=permission");
+            response.sendRedirect(workspaceMaterialsRedirect(request, courseId, "error=permission"));
             return;
         }
 
@@ -229,7 +231,7 @@ public class InstructorMaterialServlet extends HttpServlet {
         existing.setDescription(valueOrEmpty(request.getParameter("description")));
         String materialType = normalizeMaterialType(valueOrEmpty(request.getParameter("materialType")));
         if (materialType.isEmpty()) {
-            response.sendRedirect(request.getContextPath() + "/instructor/materials?courseId=" + courseId + "&error=missing");
+            response.sendRedirect(workspaceMaterialsRedirect(request, courseId, "error=missing"));
             return;
         }
 
@@ -247,7 +249,7 @@ public class InstructorMaterialServlet extends HttpServlet {
 
         if (Material.TYPE_LINK.equals(materialType)) {
             if (!isValidHttpUrl(externalUrl)) {
-                response.sendRedirect(request.getContextPath() + "/instructor/materials?courseId=" + courseId + "&error=link");
+                response.sendRedirect(workspaceMaterialsRedirect(request, courseId, "error=link"));
                 return;
             }
             existing.setFilePath(externalUrl);
@@ -256,13 +258,13 @@ public class InstructorMaterialServlet extends HttpServlet {
                 Part filePart = request.getPart("materialFile");
                 if (filePart != null && filePart.getSize() > 0) {
                     if (filePart.getSize() > MAX_FILE_SIZE) {
-                        response.sendRedirect(request.getContextPath() + "/instructor/materials?courseId=" + courseId + "&error=filesize");
+                        response.sendRedirect(workspaceMaterialsRedirect(request, courseId, "error=filesize"));
                         return;
                     }
                     String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
                     String extension = extractExtension(fileName);
                     if (!isAllowedExtension(extension) || !isMaterialTypeExtensionCompatible(materialType, extension)) {
-                        response.sendRedirect(request.getContextPath() + "/instructor/materials?courseId=" + courseId + "&error=filetype");
+                        response.sendRedirect(workspaceMaterialsRedirect(request, courseId, "error=filetype"));
                         return;
                     }
                     try (InputStream in = filePart.getInputStream()) {
@@ -271,14 +273,14 @@ public class InstructorMaterialServlet extends HttpServlet {
                             existing.setFilePath(uploadedUrl);
                         }
                     } catch (Exception e) {
-                        response.sendRedirect(request.getContextPath() + "/instructor/materials?courseId=" + courseId + "&error=upload");
+                        response.sendRedirect(workspaceMaterialsRedirect(request, courseId, "error=upload"));
                         return;
                     }
                 }
             }
             String currentExt = extractExtensionFromUrl(existing.getFilePath());
             if (!currentExt.isEmpty() && !isMaterialTypeExtensionCompatible(materialType, currentExt)) {
-                response.sendRedirect(request.getContextPath() + "/instructor/materials?courseId=" + courseId + "&error=filetype");
+                response.sendRedirect(workspaceMaterialsRedirect(request, courseId, "error=filetype"));
                 return;
             }
         }
@@ -287,7 +289,7 @@ public class InstructorMaterialServlet extends HttpServlet {
         if (updated) {
             resequenceCourseMaterials(courseId, existing.getMaterialId(), requestedDisplayOrder);
         }
-        response.sendRedirect(request.getContextPath() + "/instructor/materials?courseId=" + courseId + (updated ? "&success=updated" : "&error=update"));
+        response.sendRedirect(workspaceMaterialsRedirect(request, courseId, updated ? "success=updated" : "error=update"));
     }
 
     private void deleteMaterial(HttpServletRequest request, HttpServletResponse response, Integer userId)
@@ -313,7 +315,7 @@ public class InstructorMaterialServlet extends HttpServlet {
         Course course = courseDAO.findById(courseId);
         Material existing = materialDAO.findById(materialId);
         if (course == null || existing == null || !userId.equals(course.getCreatedBy()) || existing.getCourseId() != courseId) {
-            response.sendRedirect(request.getContextPath() + "/instructor/materials?error=permission");
+            response.sendRedirect(workspaceMaterialsRedirect(request, courseId, "error=permission"));
             return;
         }
 
@@ -321,7 +323,7 @@ public class InstructorMaterialServlet extends HttpServlet {
         if (deleted) {
             resequenceCourseMaterials(courseId, null, null);
         }
-        response.sendRedirect(request.getContextPath() + "/instructor/materials?courseId=" + courseId + (deleted ? "&success=deleted" : "&error=delete"));
+        response.sendRedirect(workspaceMaterialsRedirect(request, courseId, deleted ? "success=deleted" : "error=delete"));
     }
 
     private void restoreMaterial(HttpServletRequest request, HttpServletResponse response, Integer userId)
@@ -347,7 +349,7 @@ public class InstructorMaterialServlet extends HttpServlet {
         Course course = courseDAO.findById(courseId);
         Material anyMaterial = materialDAO.findAnyById(materialId);
         if (course == null || anyMaterial == null || !userId.equals(course.getCreatedBy()) || anyMaterial.getCourseId() != courseId) {
-            response.sendRedirect(request.getContextPath() + "/instructor/materials?error=permission");
+            response.sendRedirect(workspaceMaterialsRedirect(request, courseId, "error=permission"));
             return;
         }
 
@@ -355,7 +357,159 @@ public class InstructorMaterialServlet extends HttpServlet {
         if (restored) {
             resequenceCourseMaterials(courseId, materialId, anyMaterial.getDisplayOrder());
         }
-        response.sendRedirect(request.getContextPath() + "/instructor/materials?courseId=" + courseId + (restored ? "&success=restored" : "&error=restore"));
+        response.sendRedirect(workspaceMaterialsRedirect(request, courseId, restored ? "success=restored" : "error=restore"));
+    }
+
+    private void bulkArchiveMaterials(HttpServletRequest request, HttpServletResponse response, Integer userId)
+            throws IOException {
+
+        String courseIdStr = request.getParameter("courseId");
+        String[] materialIds = request.getParameterValues("materialIds");
+        if (courseIdStr == null || materialIds == null || materialIds.length == 0) {
+            response.sendRedirect(request.getContextPath() + "/instructor/materials?error=invalid");
+            return;
+        }
+
+        int courseId;
+        try {
+            courseId = Integer.parseInt(courseIdStr);
+        } catch (NumberFormatException e) {
+            response.sendRedirect(request.getContextPath() + "/instructor/materials?error=invalid");
+            return;
+        }
+
+        Course course = courseDAO.findById(courseId);
+        if (course == null || !userId.equals(course.getCreatedBy())) {
+            response.sendRedirect(request.getContextPath() + "/instructor/materials?error=permission");
+            return;
+        }
+
+        boolean changed = false;
+        for (String materialIdValue : materialIds) {
+            try {
+                int materialId = Integer.parseInt(materialIdValue);
+                Material existing = materialDAO.findById(materialId);
+                if (existing == null || existing.getCourseId() != courseId) {
+                    continue;
+                }
+                changed = materialDAO.softDelete(materialId, userId) || changed;
+            } catch (NumberFormatException ignored) {
+                // Skip invalid ids and continue with the remaining selection.
+            }
+        }
+
+        if (changed) {
+            resequenceCourseMaterials(courseId, null, null);
+        }
+        response.sendRedirect(workspaceMaterialsRedirect(request, courseId, changed ? "success=deleted" : "error=delete"));
+    }
+
+    private void bulkRestoreMaterials(HttpServletRequest request, HttpServletResponse response, Integer userId)
+            throws IOException {
+
+        String courseIdStr = request.getParameter("courseId");
+        String[] materialIds = request.getParameterValues("materialIds");
+        if (courseIdStr == null || materialIds == null || materialIds.length == 0) {
+            response.sendRedirect(request.getContextPath() + "/instructor/materials?error=invalid");
+            return;
+        }
+
+        int courseId;
+        try {
+            courseId = Integer.parseInt(courseIdStr);
+        } catch (NumberFormatException e) {
+            response.sendRedirect(request.getContextPath() + "/instructor/materials?error=invalid");
+            return;
+        }
+
+        Course course = courseDAO.findById(courseId);
+        if (course == null || !userId.equals(course.getCreatedBy())) {
+            response.sendRedirect(request.getContextPath() + "/instructor/materials?error=permission");
+            return;
+        }
+
+        boolean changed = false;
+        for (String materialIdValue : materialIds) {
+            try {
+                int materialId = Integer.parseInt(materialIdValue);
+                Material existing = materialDAO.findAnyById(materialId);
+                if (existing == null || existing.getCourseId() != courseId) {
+                    continue;
+                }
+                changed = materialDAO.restore(materialId) || changed;
+            } catch (NumberFormatException ignored) {
+                // Skip invalid ids and continue with the remaining selection.
+            }
+        }
+
+        if (changed) {
+            resequenceCourseMaterials(courseId, null, null);
+        }
+        response.sendRedirect(workspaceMaterialsRedirect(request, courseId, changed ? "success=restored" : "error=restore"));
+    }
+
+    private void reorderMaterial(HttpServletRequest request, HttpServletResponse response, Integer userId)
+            throws IOException {
+
+        String courseIdStr = request.getParameter("courseId");
+        String materialIdStr = request.getParameter("materialId");
+        String direction = valueOrEmpty(request.getParameter("direction"));
+        if (courseIdStr == null || materialIdStr == null || direction.isEmpty()) {
+            response.sendRedirect(request.getContextPath() + "/instructor/materials?error=invalid");
+            return;
+        }
+
+        int courseId;
+        int materialId;
+        try {
+            courseId = Integer.parseInt(courseIdStr);
+            materialId = Integer.parseInt(materialIdStr);
+        } catch (NumberFormatException e) {
+            response.sendRedirect(request.getContextPath() + "/instructor/materials?error=invalid");
+            return;
+        }
+
+        Course course = courseDAO.findById(courseId);
+        Material target = materialDAO.findById(materialId);
+        if (course == null || target == null || !userId.equals(course.getCreatedBy()) || target.getCourseId() != courseId) {
+            response.sendRedirect(workspaceMaterialsRedirect(request, courseId, "error=permission"));
+            return;
+        }
+
+        List<Material> materials = materialDAO.findByCourse(courseId);
+        if (materials == null || materials.isEmpty()) {
+            response.sendRedirect(workspaceMaterialsRedirect(request, courseId, "error=update"));
+            return;
+        }
+
+        int index = -1;
+        for (int i = 0; i < materials.size(); i++) {
+            Material material = materials.get(i);
+            if (material.getMaterialId() != null && material.getMaterialId().equals(materialId)) {
+                index = i;
+                break;
+            }
+        }
+        if (index < 0) {
+            response.sendRedirect(workspaceMaterialsRedirect(request, courseId, "error=update"));
+            return;
+        }
+
+        int swapIndex = "up".equalsIgnoreCase(direction) ? index - 1 : index + 1;
+        if (swapIndex < 0 || swapIndex >= materials.size()) {
+            response.sendRedirect(workspaceMaterialsRedirect(request, courseId, "success=updated"));
+            return;
+        }
+
+        Material swap = materials.get(swapIndex);
+        Integer targetOrder = target.getDisplayOrder();
+        target.setDisplayOrder(swap.getDisplayOrder());
+        swap.setDisplayOrder(targetOrder);
+        materialDAO.update(target);
+        materialDAO.update(swap);
+        resequenceCourseMaterials(courseId, null, null);
+
+        response.sendRedirect(workspaceMaterialsRedirect(request, courseId, "success=updated"));
     }
 
     private boolean isInstructor(HttpSession session) {
@@ -475,5 +629,16 @@ public class InstructorMaterialServlet extends HttpServlet {
             return "video";
         }
         return "raw";
+    }
+
+    private String workspaceMaterialsRedirect(HttpServletRequest request, int courseId, String query) {
+        StringBuilder builder = new StringBuilder(request.getContextPath())
+                .append("/instructor/courses?action=workspace&courseId=")
+                .append(courseId);
+        if (query != null && !query.trim().isEmpty()) {
+            builder.append('&').append(query.trim());
+        }
+        builder.append("#materials");
+        return builder.toString();
     }
 }

@@ -236,6 +236,21 @@ public class CertificateDAOImpl implements CertificateDAO {
     }
 
     @Override
+    public CertificateView findDetailedByEnrollment(int enrollmentId) {
+        String sql = CERTIFICATE_DETAIL_SELECT + "WHERE c.EnrollmentID=?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, enrollmentId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return mapDetailedRow(rs);
+            }
+        } catch (SQLException e) {
+            System.err.println("Certificate findDetailedByEnrollment failed: " + e.getMessage());
+        }
+        return null;
+    }
+
+    @Override
     public boolean revoke(int certificateId, Integer revokedBy) {
         String sql = "UPDATE Certificate SET Status='Revoked', RevokedAt=CURRENT_TIMESTAMP, RevokedBy=? " +
                 "WHERE CertificateID=? AND (Status IS NULL OR Status <> 'Revoked')";

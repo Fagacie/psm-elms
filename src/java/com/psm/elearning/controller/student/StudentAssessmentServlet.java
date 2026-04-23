@@ -236,7 +236,13 @@ public class StudentAssessmentServlet extends HttpServlet {
         request.setAttribute("timerDurationSeconds", assessment.getDuration() != null ? assessment.getDuration() * 60 : 30 * 60);
         request.setAttribute("assessmentSummary", buildAssessmentSummary(enrollment, assessment, submissions, session));
 
-        String targetView = "details".equals(view) ? "/WEB-INF/views/student/assessment-details.jsp" : "/WEB-INF/views/student/assessment-attempt.jsp";
+        boolean isFragment = "true".equalsIgnoreCase(request.getParameter("fragment"));
+        String targetView;
+        if (isFragment) {
+            targetView = "details".equals(view) ? "/WEB-INF/views/student/fragments/assessment-details-fragment.jsp" : "/WEB-INF/views/student/fragments/assessment-attempt-fragment.jsp";
+        } else {
+            targetView = "details".equals(view) ? "/WEB-INF/views/student/assessment-details.jsp" : "/WEB-INF/views/student/assessment-attempt.jsp";
+        }
         request.getRequestDispatcher(targetView).forward(request, response);
     }
 
@@ -424,7 +430,7 @@ public class StudentAssessmentServlet extends HttpServlet {
         }
 
         String successParam = timedOut ? "timed-out" : (exitSubmission ? "exited" : "submitted");
-        response.sendRedirect(request.getContextPath() + "/student/assessments?view=confirmation&enrollmentId=" + enrollmentId + "&assessmentId=" + assessmentId + "&submissionId=" + saved.getSubmissionId() + "&success=" + successParam);
+        response.sendRedirect(request.getContextPath() + "/student/enrollment-details?id=" + enrollmentId + "&tab=assessments&success=" + successParam + "&assessmentId=" + assessmentId);
     }
 
     private void redirectToLearningHub(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -597,7 +603,7 @@ public class StudentAssessmentServlet extends HttpServlet {
         }
         summary.setStatusLabel(statusLabel);
         summary.setStatusClass(statusClass);
-        summary.setDueDateLabel("Not set");
+        summary.setDueDateLabel(assessment.getDueDateDisplay() != null ? assessment.getDueDateDisplay() : "Not set");
         summary.setAssessmentTitle(assessment.getTitle());
         summary.setAssessmentType(assessment.getType());
         return summary;

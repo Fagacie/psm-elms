@@ -2,12 +2,22 @@ package com.psm.elearning.controller.instructor;
 
 import com.psm.elearning.dao.CourseDAO;
 import com.psm.elearning.dao.CourseDAOImpl;
+import com.psm.elearning.dao.AssessmentDAO;
+import com.psm.elearning.dao.AssessmentDAOImpl;
 import com.psm.elearning.dao.EnrollmentDAO;
 import com.psm.elearning.dao.EnrollmentDAOImpl;
+import com.psm.elearning.dao.AssessmentSubmissionDAO;
+import com.psm.elearning.dao.AssessmentSubmissionDAOImpl;
+import com.psm.elearning.dao.MaterialDAO;
+import com.psm.elearning.dao.MaterialDAOImpl;
 import com.psm.elearning.model.Course;
+import com.psm.elearning.model.Assessment;
+import com.psm.elearning.model.AssessmentSubmission;
 import com.psm.elearning.model.Enrollment;
+import com.psm.elearning.model.Material;
 import com.psm.elearning.util.CloudinaryUtil;
 import com.psm.elearning.util.SessionUtil;
+import com.psm.elearning.service.EnrollmentStateSyncService;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.http.HttpServlet;
@@ -30,6 +40,10 @@ public class InstructorCourseServlet extends HttpServlet {
     
     private final CourseDAO courseDAO = new CourseDAOImpl();
     private final EnrollmentDAO enrollmentDAO = new EnrollmentDAOImpl();
+    private final MaterialDAO materialDAO = new MaterialDAOImpl();
+    private final AssessmentDAO assessmentDAO = new AssessmentDAOImpl();
+    private final AssessmentSubmissionDAO submissionDAO = new AssessmentSubmissionDAOImpl();
+    private final EnrollmentStateSyncService enrollmentStateSyncService = new EnrollmentStateSyncService();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -49,17 +63,20 @@ public class InstructorCourseServlet extends HttpServlet {
             case "list":
                 listCourses(request, response, session);
                 break;
+            case "workspace":
+                showCourseWorkspace(request, response, session);
+                break;
             case "create":
-                showCreateForm(request, response);
+                response.sendRedirect(request.getContextPath() + "/instructor/courses?error=forbidden");
                 break;
             case "edit":
-                showEditForm(request, response);
+                response.sendRedirect(request.getContextPath() + "/instructor/courses?error=forbidden");
                 break;
             case "students":
-                viewCourseStudents(request, response, session);
+                redirectToWorkspaceStudents(request, response);
                 break;
             case "delete":
-                deleteCourse(request, response, session);
+                response.sendRedirect(request.getContextPath() + "/instructor/courses?error=forbidden");
                 break;
             default:
                 listCourses(request, response, session);
@@ -81,9 +98,9 @@ public class InstructorCourseServlet extends HttpServlet {
         String action = request.getParameter("action");
         
         if ("create".equals(action)) {
-            createCourse(request, response, session);
+            response.sendRedirect(request.getContextPath() + "/instructor/courses?error=forbidden");
         } else if ("update".equals(action)) {
-            updateCourse(request, response, session);
+            response.sendRedirect(request.getContextPath() + "/instructor/courses?error=forbidden");
         } else {
             listCourses(request, response, session);
         }
@@ -103,8 +120,15 @@ public class InstructorCourseServlet extends HttpServlet {
                 return;
             }
             List<Course> courses = courseDAO.findByInstructor(userId);
+
+            java.util.Map<Integer, Integer> courseStudentCounts = new java.util.HashMap<>();
+            for (Course course : courses) {
+                List<Enrollment> enrollments = enrollmentDAO.getEnrollmentsByCourse(course.getCourseId());
+                courseStudentCounts.put(course.getCourseId(), enrollments != null ? enrollments.size() : 0);
+            }
             
             request.setAttribute("courses", courses);
+            request.setAttribute("courseStudentCounts", courseStudentCounts);
             request.getRequestDispatcher("/WEB-INF/views/instructor/instructor-courses.jsp").forward(request, response);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error listing instructor courses", e);
@@ -113,321 +137,79 @@ public class InstructorCourseServlet extends HttpServlet {
         }
     }
 
-    /**
-     * Show course creation form
-     */
-    private void showCreateForm(HttpServletRequest request, HttpServletResponse response)
+    private void showCourseWorkspace(HttpServletRequest request, HttpServletResponse response, HttpSession session)
             throws ServletException, IOException {
-        
-        request.setAttribute("mode", "create");
-        request.getRequestDispatcher("/WEB-INF/views/instructor/instructor-course-form.jsp").forward(request, response);
-    }
-
-    /**
-     * Show course edit form with pre-populated data
-     */
-    private void showEditForm(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        
-        try {
-            Integer courseId = parsePositiveInt(request.getParameter("id"));
-            if (courseId == null) {
-                request.setAttribute("errorMessage", "Invalid course ID");
-                listCourses(request, response, request.getSession(false));
-                return;
-            }
-            Course course = courseDAO.findById(courseId);
-            
-            if (course == null) {
-                request.setAttribute("errorMessage", "Course not found");
-                listCourses(request, response, request.getSession(false));
-                return;
-            }
-            
-            request.setAttribute("course", course);
-            request.setAttribute("mode", "edit");
-            request.getRequestDispatcher("/WEB-INF/views/instructor/instructor-course-form.jsp").forward(request, response);
-        } catch (NumberFormatException e) {
-            request.setAttribute("errorMessage", "Invalid course ID");
-            listCourses(request, response, request.getSession(false));
-        }
-    }
-
-    /**
-     * Create a new course
-     */
-    private void createCourse(HttpServletRequest request, HttpServletResponse response, HttpSession session)
-            throws ServletException, IOException {
-        
-        try {
-            // Get form parameters
-            String courseName = request.getParameter("courseName");
-            String description = request.getParameter("description");
-            String category = request.getParameter("category");
-            String durationStr = request.getParameter("duration");
-            String durationUnit = request.getParameter("durationUnit");
-            String feeStr = request.getParameter("courseFee");
-            String level = request.getParameter("level");
-            String courseBannerUrl = uploadCourseBannerIfProvided(request);
-            if (courseBannerUrl == null && isBannerProvided(request)) {
-                request.setAttribute("errorMessage", "Course banner upload failed. Use JPG, PNG, WEBP up to 5MB.");
-                request.setAttribute("mode", "create");
-                request.getRequestDispatcher("/WEB-INF/views/instructor/instructor-course-form.jsp").forward(request, response);
-                return;
-            }
-            
-            // Validate required fields
-            if (courseName == null || courseName.trim().isEmpty() || 
-                feeStr == null || feeStr.trim().isEmpty()) {
-                request.setAttribute("errorMessage", "Course name and fee are required");
-                request.setAttribute("mode", "create");
-                request.getRequestDispatcher("/WEB-INF/views/instructor/instructor-course-form.jsp").forward(request, response);
-                return;
-            }
-            
-            // Create course object
-            Course course = new Course();
-            course.setCourseName(courseName.trim());
-            course.setDescription(description != null ? description.trim() : "");
-            course.setCategory(category != null ? category.trim() : "");
-            
-            // Parse duration (stored internally as days)
-            if (durationStr != null && !durationStr.trim().isEmpty()) {
-                Integer durationValue = parsePositiveInt(durationStr);
-                if (durationValue == null) {
-                    throw new NumberFormatException("Invalid duration");
-                }
-                course.setDuration(toDays(durationValue, durationUnit));
-            }
-            
-            // Parse fee
-            course.setCourseFee(new BigDecimal(feeStr));
-            course.setLevel(level != null ? level : Course.LEVEL_BEGINNER);
-            Integer userId = resolveUserId(session);
-            if (userId == null) {
-                throw new IllegalStateException("Session error: invalid user context.");
-            }
-            course.setCreatedBy(userId);
-            course.setStatus(Course.STATUS_PENDING);
-            course.setCourseBanner(courseBannerUrl);
-            
-            // Save course
-            Course created = courseDAO.create(course);
-            
-            if (created != null) {
-                request.setAttribute("successMessage", "Course created successfully. Pending admin approval.");
-                response.sendRedirect(request.getContextPath() + "/instructor/courses?success=created");
-            } else {
-                request.setAttribute("errorMessage", "Failed to create course");
-                request.setAttribute("mode", "create");
-                request.getRequestDispatcher("/WEB-INF/views/instructor/instructor-course-form.jsp").forward(request, response);
-            }
-            
-        } catch (NumberFormatException e) {
-            request.setAttribute("errorMessage", "Invalid number format for duration or fee");
-            request.setAttribute("mode", "create");
-            request.getRequestDispatcher("/WEB-INF/views/instructor/instructor-course-form.jsp").forward(request, response);
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error creating course", e);
-            request.setAttribute("errorMessage", "An error occurred while creating the course");
-            request.setAttribute("mode", "create");
-            request.getRequestDispatcher("/WEB-INF/views/instructor/instructor-course-form.jsp").forward(request, response);
-        }
-    }
-
-    /**
-     * Update an existing course
-     */
-    private void updateCourse(HttpServletRequest request, HttpServletResponse response, HttpSession session)
-            throws ServletException, IOException {
-        
-        try {
-            Integer courseId = parsePositiveInt(request.getParameter("courseId"));
-            if (courseId == null) {
-                request.setAttribute("errorMessage", "Invalid course ID");
-                listCourses(request, response, session);
-                return;
-            }
-            Course existingCourse = courseDAO.findById(courseId);
-            
-            if (existingCourse == null) {
-                request.setAttribute("errorMessage", "Course not found");
-                listCourses(request, response, session);
-                return;
-            }
-            
-            // Verify ownership
-            Integer userId = resolveUserId(session);
-            if (userId == null || !existingCourse.getCreatedBy().equals(userId)) {
-                request.setAttribute("errorMessage", "You don't have permission to edit this course");
-                listCourses(request, response, session);
-                return;
-            }
-            
-            // Get form parameters
-            String courseName = request.getParameter("courseName");
-            String description = request.getParameter("description");
-            String category = request.getParameter("category");
-            String durationStr = request.getParameter("duration");
-            String durationUnit = request.getParameter("durationUnit");
-            String feeStr = request.getParameter("courseFee");
-            String level = request.getParameter("level");
-            String courseBannerUrl = uploadCourseBannerIfProvided(request);
-            if (courseBannerUrl == null && isBannerProvided(request)) {
-                request.setAttribute("errorMessage", "Course banner upload failed. Use JPG, PNG, WEBP up to 5MB.");
-                request.setAttribute("course", existingCourse);
-                request.setAttribute("mode", "edit");
-                request.getRequestDispatcher("/WEB-INF/views/instructor/instructor-course-form.jsp").forward(request, response);
-                return;
-            }
-            
-            // Validate required fields
-            if (courseName == null || courseName.trim().isEmpty() || 
-                feeStr == null || feeStr.trim().isEmpty()) {
-                request.setAttribute("errorMessage", "Course name and fee are required");
-                request.setAttribute("course", existingCourse);
-                request.setAttribute("mode", "edit");
-                request.getRequestDispatcher("/WEB-INF/views/instructor/instructor-course-form.jsp").forward(request, response);
-                return;
-            }
-            
-            // Update course object
-            existingCourse.setCourseName(courseName.trim());
-            existingCourse.setDescription(description != null ? description.trim() : "");
-            existingCourse.setCategory(category != null ? category.trim() : "");
-            
-            // Parse duration (stored internally as days)
-            if (durationStr != null && !durationStr.trim().isEmpty()) {
-                Integer durationValue = parsePositiveInt(durationStr);
-                if (durationValue == null) {
-                    throw new NumberFormatException("Invalid duration");
-                }
-                existingCourse.setDuration(toDays(durationValue, durationUnit));
-            }
-            
-            // Parse fee
-            existingCourse.setCourseFee(new BigDecimal(feeStr));
-            existingCourse.setLevel(level != null ? level : Course.LEVEL_BEGINNER);
-            if (courseBannerUrl != null && !courseBannerUrl.trim().isEmpty()) {
-                existingCourse.setCourseBanner(courseBannerUrl);
-            }
-            
-            // If course was approved, set back to pending after edit
-            if (Course.STATUS_APPROVED.equals(existingCourse.getStatus())) {
-                existingCourse.setStatus(Course.STATUS_PENDING);
-                existingCourse.setApprovedBy(null);
-            }
-
-            // Update course
-            boolean updated = courseDAO.update(existingCourse);
-            
-            if (updated) {
-                response.sendRedirect(request.getContextPath() + "/instructor/courses?success=updated");
-            } else {
-                request.setAttribute("errorMessage", "Failed to update course");
-                request.setAttribute("course", existingCourse);
-                request.setAttribute("mode", "edit");
-                request.getRequestDispatcher("/WEB-INF/views/instructor/instructor-course-form.jsp").forward(request, response);
-            }
-            
-        } catch (NumberFormatException e) {
-            request.setAttribute("errorMessage", "Invalid number format");
-            listCourses(request, response, session);
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error updating course", e);
-            request.setAttribute("errorMessage", "An error occurred while updating the course");
-            listCourses(request, response, session);
-        }
-    }
-
-    /**
-     * Delete a course
-     */
-    private void deleteCourse(HttpServletRequest request, HttpServletResponse response, HttpSession session)
-            throws ServletException, IOException {
-        
-        try {
-            Integer courseId = parsePositiveInt(request.getParameter("id"));
-            if (courseId == null) {
-                response.sendRedirect(request.getContextPath() + "/instructor/courses?error=invalid");
-                return;
-            }
-            Course course = courseDAO.findById(courseId);
-            
-            if (course == null) {
-                response.sendRedirect(request.getContextPath() + "/instructor/courses?error=notfound");
-                return;
-            }
-            
-            // Verify ownership
-            Integer userId = resolveUserId(session);
-            if (userId == null || !course.getCreatedBy().equals(userId)) {
-                response.sendRedirect(request.getContextPath() + "/instructor/courses?error=permission");
-                return;
-            }
-            
-            boolean deleted = courseDAO.delete(courseId);
-            
-            if (deleted) {
-                response.sendRedirect(request.getContextPath() + "/instructor/courses?success=deleted");
-            } else {
-                response.sendRedirect(request.getContextPath() + "/instructor/courses?error=deletefailed");
-            }
-            
-        } catch (NumberFormatException e) {
-            response.sendRedirect(request.getContextPath() + "/instructor/courses?error=invalid");
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error deleting course", e);
-            response.sendRedirect(request.getContextPath() + "/instructor/courses?error=exception");
-        }
-    }
-
-    /**
-     * View students enrolled in a specific course
-     */
-    private void viewCourseStudents(HttpServletRequest request, HttpServletResponse response, HttpSession session)
-            throws ServletException, IOException {
-        
         try {
             Integer userId = resolveUserId(session);
             if (userId == null) {
                 response.sendRedirect(request.getContextPath() + "/login");
                 return;
             }
-            String courseIdStr = request.getParameter("courseId");
-            
-            if (courseIdStr == null || courseIdStr.trim().isEmpty()) {
+
+            Integer courseId = parsePositiveInt(request.getParameter("courseId"));
+            if (courseId == null) {
                 response.sendRedirect(request.getContextPath() + "/instructor/courses");
                 return;
             }
-            
-            Integer courseId = parsePositiveInt(courseIdStr);
-            if (courseId == null) {
-                response.sendRedirect(request.getContextPath() + "/instructor/courses?error=invalid");
-                return;
-            }
+
             Course course = courseDAO.findById(courseId);
-            
-            // Verify this course belongs to the instructor
-            if (course == null || !course.getCreatedBy().equals(userId)) {
+            if (course == null || !userId.equals(course.getCreatedBy())) {
                 response.sendRedirect(request.getContextPath() + "/instructor/courses?error=permission");
                 return;
             }
-            
-            // Get all enrollments for this course
+
+            List<Material> materials = materialDAO.findByCourse(courseId);
+            List<Assessment> assessments = assessmentDAO.findByCourse(courseId);
             List<Enrollment> enrollments = enrollmentDAO.getEnrollmentsByCourse(courseId);
-            
-            request.setAttribute("course", course);
+            if (materials == null) materials = java.util.Collections.emptyList();
+            if (assessments == null) assessments = java.util.Collections.emptyList();
+            if (enrollments == null) enrollments = java.util.Collections.emptyList();
+
+            int completedStudents = 0;
+            int progressSum = 0;
+            for (Enrollment enrollment : enrollments) {
+                enrollmentStateSyncService.syncEnrollmentState(enrollment);
+                if (enrollment.getProgress() != null) {
+                    progressSum += Math.max(0, Math.min(100, enrollment.getProgress()));
+                }
+                if (Enrollment.STATUS_COMPLETED.equalsIgnoreCase(enrollment.getStatus())
+                        || Enrollment.COMPLETION_COMPLETED.equalsIgnoreCase(enrollment.getCompletionStatus())) {
+                    completedStudents++;
+                }
+            }
+
+            int totalStudents = enrollments.size();
+            int completionRate = totalStudents > 0 ? Math.round((completedStudents * 100f) / totalStudents) : 0;
+            int averageProgress = totalStudents > 0 ? Math.round((float) progressSum / totalStudents) : 0;
+            int pendingGrading = countPendingGrading(assessments);
+
+            request.setAttribute("selectedCourse", course);
+            request.setAttribute("materials", materials);
+            request.setAttribute("assessments", assessments);
             request.setAttribute("enrollments", enrollments);
-            request.setAttribute("studentCount", enrollments != null ? enrollments.size() : 0);
-            request.getRequestDispatcher("/WEB-INF/views/instructor/course-students.jsp").forward(request, response);
-            
-        } catch (NumberFormatException e) {
-            response.sendRedirect(request.getContextPath() + "/instructor/courses?error=invalid");
+            request.setAttribute("totalStudents", totalStudents);
+            request.setAttribute("completedStudents", completedStudents);
+            request.setAttribute("completionRate", completionRate);
+            request.setAttribute("averageProgress", averageProgress);
+            request.setAttribute("pendingGrading", pendingGrading);
+            request.setAttribute("publishedMaterials", materials.size());
+            request.setAttribute("deletedMaterials", materialDAO.findDeletedByCourse(courseId));
+            request.setAttribute("assessmentCount", assessments.size());
+            request.getRequestDispatcher("/WEB-INF/views/instructor/course-workspace.jsp").forward(request, response);
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error viewing course students", e);
-            response.sendRedirect(request.getContextPath() + "/instructor/courses?error=exception");
+            LOGGER.log(Level.SEVERE, "Error loading course workspace", e);
+            request.setAttribute("errorMessage", "Failed to load course workspace");
+            listCourses(request, response, session);
         }
+    }
+
+    private void redirectToWorkspaceStudents(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        Integer courseId = parsePositiveInt(request.getParameter("courseId"));
+        if (courseId == null) {
+            response.sendRedirect(request.getContextPath() + "/instructor/courses");
+            return;
+        }
+        response.sendRedirect(request.getContextPath() + "/instructor/courses?action=workspace&courseId=" + courseId + "#students");
     }
 
     private boolean isBannerProvided(HttpServletRequest request) {
@@ -517,6 +299,29 @@ public class InstructorCourseServlet extends HttpServlet {
             }
         }
         return null;
+    }
+
+    private int countPendingGrading(List<Assessment> assessments) {
+        if (assessments == null || assessments.isEmpty()) {
+            return 0;
+        }
+
+        int pendingCount = 0;
+        for (Assessment assessment : assessments) {
+            List<AssessmentSubmission> submissions = submissionDAO.findByAssessment(assessment.getAssessmentId());
+            if (submissions == null || submissions.isEmpty()) {
+                continue;
+            }
+            for (AssessmentSubmission submission : submissions) {
+                if (submission == null) {
+                    continue;
+                }
+                if (submission.getScore() == null && (submission.getStatus() == null || !"TimedOut".equalsIgnoreCase(submission.getStatus()))) {
+                    pendingCount++;
+                }
+            }
+        }
+        return pendingCount;
     }
 
     private String resolveRole(HttpSession session) {

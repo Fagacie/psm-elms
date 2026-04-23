@@ -301,75 +301,6 @@ public class EmailUtil {
     }
 
     /**
-     * Sends a confirmation email to an instructor applicant after submission.
-     */
-    public static boolean sendInstructorApplicationReceivedEmail(String toEmail, String fullName) {
-        String subject = "Instructor Application Received - PSM E-Learning";
-        String htmlBody = "<!DOCTYPE html>" +
-                "<html><head><style>" +
-                "body { font-family: Arial, sans-serif; line-height: 1.6; }" +
-                ".container { max-width: 620px; margin: 0 auto; padding: 20px; }" +
-                ".header { background-color: #0f172a; color: white; padding: 20px; text-align: center; }" +
-                ".content { padding: 20px; background-color: #f8fafc; }" +
-                ".footer { padding: 20px; text-align: center; font-size: 12px; color: #666; }" +
-                ".card { background: white; border-radius: 12px; padding: 16px; margin: 16px 0; border: 1px solid #e2e8f0; }" +
-                "</style></head><body>" +
-                "<div class='container'>" +
-                "<div class='header'><h2>Application Submitted</h2></div>" +
-                "<div class='content'>" +
-                "<p>Dear " + fullName + ",</p>" +
-                "<p>Your instructor application has been received successfully. Our admin team will review your CV and profile details.</p>" +
-                "<div class='card'><strong>What happens next?</strong><br>We will verify your application and contact you by email once a decision has been made.</div>" +
-                "<p>If approved, you will receive login details for your instructor account.</p>" +
-                "</div>" +
-                "<div class='footer'><p>&copy; 2025 PSM E-Learning Platform. All rights reserved.</p></div>" +
-                "</div></body></html>";
-
-        return sendHtmlEmail(toEmail, subject, htmlBody);
-    }
-
-    /**
-     * Sends the decision email for an instructor application.
-     */
-    public static boolean sendInstructorApplicationDecisionEmail(String toEmail, String fullName, boolean approved, String loginEmail, String temporaryPassword, String notes) {
-        String subject = approved ? "Instructor Application Approved - PSM E-Learning" : "Instructor Application Update - PSM E-Learning";
-
-        StringBuilder htmlBody = new StringBuilder();
-        htmlBody.append("<!DOCTYPE html><html><head><style>");
-        htmlBody.append("body { font-family: Arial, sans-serif; line-height: 1.6; }");
-        htmlBody.append(".container { max-width: 640px; margin: 0 auto; padding: 20px; }");
-        htmlBody.append(".header { color: white; padding: 20px; text-align: center; }");
-        htmlBody.append(".content { padding: 20px; background-color: #f9f9f9; }");
-        htmlBody.append(".footer { padding: 20px; text-align: center; font-size: 12px; color: #666; }");
-        htmlBody.append(".card { background: white; border-radius: 12px; padding: 16px; margin: 16px 0; border: 1px solid #e2e8f0; }");
-        htmlBody.append(".success { background: #14532d; }");
-        htmlBody.append(".danger { background: #991b1b; }");
-        htmlBody.append(".password { font-size: 1.1rem; font-weight: 700; letter-spacing: 0.08em; }");
-        htmlBody.append("</style></head><body><div class='container'>");
-        htmlBody.append("<div class='header ").append(approved ? "success" : "danger").append("'><h2>").append(approved ? "Application Approved" : "Application Update").append("</h2></div>");
-        htmlBody.append("<div class='content'>");
-        htmlBody.append("<p>Dear ").append(fullName).append(",</p>");
-
-        if (approved) {
-            htmlBody.append("<p>Your instructor application has been approved. Your account has been created and you can now sign in to the instructor dashboard.</p>");
-            htmlBody.append("<div class='card'>");
-            htmlBody.append("<div><strong>Login Email:</strong> ").append(loginEmail).append("</div>");
-            htmlBody.append("<div><strong>Temporary Password:</strong> <span class='password'>").append(temporaryPassword).append("</span></div>");
-            htmlBody.append("</div>");
-            htmlBody.append("<p>Change your password immediately after your first login.</p>");
-        } else {
-            htmlBody.append("<p>Thank you for your interest in teaching on PSM E-Learning. After review, your application was not approved at this time.</p>");
-        }
-
-        if (notes != null && !notes.trim().isEmpty()) {
-            htmlBody.append("<div class='card'><strong>Review notes</strong><br>").append(notes).append("</div>");
-        }
-
-        htmlBody.append("</div><div class='footer'><p>&copy; 2025 PSM E-Learning Platform. All rights reserved.</p></div></div></body></html>");
-        return sendHtmlEmail(toEmail, subject, htmlBody.toString());
-    }
-    
-    /**
      * Sends enrollment confirmation email
      * 
      * @param toEmail Recipient email address
@@ -478,6 +409,32 @@ public class EmailUtil {
         body.append("PSM E-Learning Platform Team\n\n");
         body.append("© 2025 PSM E-Learning Platform. All rights reserved.\n");
         
+        return sendEmail(toEmail, subject, body.toString());
+    }
+
+    /**
+     * Sends a course assignment notification to an instructor.
+     *
+     * @param toEmail Recipient email address
+     * @param fullName Instructor name
+     * @param courseName Assigned course name
+     * @param category Course category
+     * @param level Course level
+     * @param dashboardUrl Link back to the admin course dashboard
+     * @return true if email sent successfully
+     */
+    public static boolean sendCourseAssignmentEmail(String toEmail, String fullName, String courseName, String category, String level, String dashboardUrl) {
+        String recipientName = fullName != null && !fullName.trim().isEmpty() ? fullName.trim() : "Instructor";
+        String title = courseName != null && !courseName.trim().isEmpty() ? courseName.trim() : "Course";
+        String subject = "You Have Been Assigned a New Course";
+
+        StringBuilder body = new StringBuilder();
+        body.append("Hello ").append(recipientName).append(",\n\n");
+        body.append("You have been assigned to teach:\n\n");
+        body.append(title).append("\n\n");
+        body.append("Please log in to upload materials, create assessments, and manage students.\n\n");
+        body.append("Regards,\nPSM E-Learning");
+
         return sendEmail(toEmail, subject, body.toString());
     }
     

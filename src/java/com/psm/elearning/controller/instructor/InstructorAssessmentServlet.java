@@ -33,6 +33,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -177,6 +179,10 @@ public class InstructorAssessmentServlet extends HttpServlet {
         Map<Integer, Integer> pendingCountByAssessmentId = new LinkedHashMap<>();
         Map<Integer, Double> averageScoreByAssessmentId = new LinkedHashMap<>();
         Map<Integer, String> statusByAssessmentId = new LinkedHashMap<>();
+        int draftAssessmentCount = 0;
+        int activeAssessmentCount = 0;
+        int closedAssessmentCount = 0;
+        int pendingGradingAssessmentCount = 0;
 
         if (selectedCourseId != null) {
             assessments = assessmentDAO.findByCourse(selectedCourseId);
@@ -213,7 +219,18 @@ public class InstructorAssessmentServlet extends HttpServlet {
                 gradedCountByAssessmentId.put(assessmentId, gradedCount);
                 pendingCountByAssessmentId.put(assessmentId, pendingCount);
                 averageScoreByAssessmentId.put(assessmentId, scoredCount > 0 ? earned / scoredCount : null);
-                statusByAssessmentId.put(assessmentId, resolveAssessmentWorkflowStatus(assessment, submissionCount, pendingCount));
+                String workflowStatus = resolveAssessmentWorkflowStatus(assessment, submissionCount, pendingCount);
+                statusByAssessmentId.put(assessmentId, workflowStatus);
+                if ("Draft".equalsIgnoreCase(workflowStatus)) {
+                    draftAssessmentCount++;
+                } else if ("Active".equalsIgnoreCase(workflowStatus) || "Published".equalsIgnoreCase(workflowStatus)) {
+                    activeAssessmentCount++;
+                } else {
+                    closedAssessmentCount++;
+                }
+                if (pendingCount > 0) {
+                    pendingGradingAssessmentCount++;
+                }
             }
         }
 
@@ -316,8 +333,85 @@ public class InstructorAssessmentServlet extends HttpServlet {
             }
         }
 
+        if (selectedAssessment == null && selectedCourseId != null && !assessments.isEmpty()
+                && (VIEW_SUBMISSIONS.equals(activeView) || VIEW_GRADE.equals(activeView)
+                || "pending-grading".equals(activeView) || VIEW_ANALYTICS.equals(activeView)
+                || VIEW_QUESTIONS.equals(activeView))) {
+            selectedAssessment = assessments.get(0);
+            selectedAssessmentId = selectedAssessment.getAssessmentId();
+            AssessmentPlacementUtil.Placement placement = resolvePlacement(selectedAssessment);
+            selectedAssessment.setInstructions(AssessmentPlacementUtil.stripPlacement(selectedAssessment.getInstructions()));
+            placementTypeByAssessmentId.putIfAbsent(selectedAssessment.getAssessmentId(), placement.type);
+            placementMaterialByAssessmentId.putIfAbsent(selectedAssessment.getAssessmentId(), placement.materialId);
+            questions = questionDAO.findByAssessment(selectedAssessmentId);
+            if (questions == null) questions = new ArrayList<>();
+            retakeRequests = retakeRequestDAO.findByAssessment(selectedAssessmentId);
+            if (retakeRequests == null) retakeRequests = new ArrayList<>();
+            submissionsUnfiltered = submissionDAO.findByAssessment(selectedAssessmentId);
+            if (submissionsUnfiltered == null) submissionsUnfiltered = new ArrayList<>();
+            submissions = filterSubmissions(submissionsUnfiltered, gradeFilter);
+            for (AssessmentSubmission submission : submissionsUnfiltered) {
+                if (submission == null || submission.getSubmissionId() == null) {
+                    continue;
+                }
+                submissionWorkflowStatus.put(submission.getSubmissionId(), resolveSubmissionWorkflowStatus(submission, selectedAssessment));
+            }
+            int totalCount = submissionsUnfiltered.size();
+            int gradedCount = 0;
+            int pendingCount = 0;
+            double scoreTotal = 0.0;
+            int scoredCount = 0;
+            Double topScore = null;
+            Double lowScore = null;
+            for (AssessmentSubmission submission : submissionsUnfiltered) {
+                if (submission == null) {
+                    continue;
+                }
+                if (submission.getScore() != null) {
+                    gradedCount++;
+                    scoreTotal += submission.getScore();
+                    scoredCount++;
+                    if (topScore == null || submission.getScore() > topScore) {
+                        topScore = submission.getScore();
+                    }
+                    if (lowScore == null || submission.getScore() < lowScore) {
+                        lowScore = submission.getScore();
+                    }
+                } else {
+                    pendingCount++;
+                }
+            }
+            analytics.put("totalSubmissions", totalCount);
+            analytics.put("gradedSubmissions", gradedCount);
+            analytics.put("pendingSubmissions", pendingCount);
+            analytics.put("averageScore", scoredCount > 0 ? scoreTotal / scoredCount : null);
+            analytics.put("topScore", topScore);
+            analytics.put("lowScore", lowScore);
+            analytics.put("completionRate", totalCount > 0 ? (gradedCount * 100.0) / totalCount : 0.0);
+            if (!submissions.isEmpty()) {
+                if (selectedSubmissionId == null) {
+                    selectedSubmissionId = submissions.get(0).getSubmissionId();
+                }
+                for (AssessmentSubmission submission : submissions) {
+                    if (submission != null && submission.getSubmissionId() != null && submission.getSubmissionId().equals(selectedSubmissionId)) {
+                        selectedSubmission = submission;
+                        break;
+                    }
+                }
+                if (selectedSubmission == null && selectedSubmissionId != null) {
+                    selectedSubmission = submissionDAO.findById(selectedSubmissionId);
+                }
+                if (selectedSubmission != null && selectedSubmission.getSubmissionId() != null) {
+                    selectedSubmissionAudits = gradeAuditDAO.findBySubmission(selectedSubmission.getSubmissionId());
+                    if (selectedSubmissionAudits == null) {
+                        selectedSubmissionAudits = new ArrayList<>();
+                    }
+                }
+            }
+        }
+
         if ((VIEW_QUESTIONS.equals(activeView) || VIEW_SUBMISSIONS.equals(activeView)
-                || VIEW_GRADE.equals(activeView) || VIEW_ANALYTICS.equals(activeView))
+            || VIEW_GRADE.equals(activeView) || "pending-grading".equals(activeView) || VIEW_ANALYTICS.equals(activeView))
                 && selectedAssessment == null) {
             activeView = VIEW_DASHBOARD;
         }
@@ -349,6 +443,10 @@ public class InstructorAssessmentServlet extends HttpServlet {
         request.setAttribute("gradeFilter", gradeFilter);
         request.setAttribute("assessmentPlacementTypeMap", placementTypeByAssessmentId);
         request.setAttribute("assessmentPlacementMaterialIdMap", placementMaterialByAssessmentId);
+        request.setAttribute("draftAssessmentCount", draftAssessmentCount);
+        request.setAttribute("activeAssessmentCount", activeAssessmentCount);
+        request.setAttribute("closedAssessmentCount", closedAssessmentCount);
+        request.setAttribute("pendingGradingAssessmentCount", pendingGradingAssessmentCount);
         request.getRequestDispatcher("/WEB-INF/views/instructor/assessment-workspace.jsp").forward(request, response);
     }
 
@@ -373,10 +471,12 @@ public class InstructorAssessmentServlet extends HttpServlet {
         String submissionMode = normalizeSubmissionMode(type, normalize(request.getParameter("submissionMode")));
         Integer duration = parseInt(request.getParameter("duration"));
         Integer totalMarks = parseInt(request.getParameter("totalMarks"));
+        LocalDateTime dueDate = parseDateTime(request.getParameter("dueDate"));
         Integer maxAttempts = parseInt(request.getParameter("maxAttempts"));
         Integer questionsPerPage = parseInt(request.getParameter("questionsPerPage"));
         String instructions = normalize(request.getParameter("instructions"));
         String placement = normalize(request.getParameter("placement"));
+        String workflowAction = normalize(request.getParameter("workflowAction"));
 
         if (title.isEmpty() || type.isEmpty()) {
             response.sendRedirect(request.getContextPath() + "/instructor/assessments?courseId=" + courseId + "&error=missing");
@@ -396,6 +496,7 @@ public class InstructorAssessmentServlet extends HttpServlet {
         assessment.setSubmissionMode(submissionMode);
         assessment.setDuration(duration);
         assessment.setTotalMarks(totalMarks);
+        assessment.setDueDate(dueDate);
         AssessmentPlacementUtil.Placement parsedPlacement = AssessmentPlacementUtil.parsePlacement(AssessmentPlacementUtil.applyPlacement("", placement));
         if (!isValidPlacementForCourse(courseId, parsedPlacement)) {
             response.sendRedirect(request.getContextPath() + "/instructor/assessments?courseId=" + courseId + "&error=placement");
@@ -404,7 +505,9 @@ public class InstructorAssessmentServlet extends HttpServlet {
         assessment.setInstructions(AssessmentPlacementUtil.stripPlacement(instructions));
         assessment.setPlacementType(parsedPlacement.type);
         assessment.setPlacementMaterialId(parsedPlacement.materialId);
-        int defaultMaxAttempts = AppSettingsService.getInt(AppSettingsService.KEY_ASSESSMENT_MAX_ATTEMPTS, 3, 1, 10);
+        int defaultMaxAttempts = Assessment.TYPE_PRACTICE_TEST.equalsIgnoreCase(type)
+            ? 10
+            : AppSettingsService.getInt(AppSettingsService.KEY_ASSESSMENT_MAX_ATTEMPTS, 3, 1, 10);
         assessment.setMaxAttempts(maxAttempts != null && maxAttempts > 0 ? maxAttempts : defaultMaxAttempts);
         assessment.setQuestionsPerPage(questionsPerPage != null && questionsPerPage > 0 ? questionsPerPage : 2);
         assessment.setCreatedBy(userId);
@@ -415,7 +518,22 @@ public class InstructorAssessmentServlet extends HttpServlet {
             return;
         }
 
-        response.sendRedirect(request.getContextPath() + "/instructor/assessments?view=questions&courseId=" + courseId + "&assessmentId=" + created.getAssessmentId() + "&success=created");
+        String redirectView = "questions";
+        String redirectStep = "questions";
+        String successKey = "created";
+        if ("draft".equalsIgnoreCase(workflowAction)) {
+            redirectView = "drafts";
+            redirectStep = "details";
+        } else if ("review".equalsIgnoreCase(workflowAction)) {
+            redirectView = "drafts";
+            redirectStep = "review";
+        } else if ("publish".equalsIgnoreCase(workflowAction)) {
+            redirectView = "drafts";
+            redirectStep = "review";
+            successKey = "published";
+        }
+
+        response.sendRedirect(request.getContextPath() + "/instructor/assessments?view=" + redirectView + "&courseId=" + courseId + "&assessmentId=" + created.getAssessmentId() + "&step=" + redirectStep + "&success=" + successKey);
     }
 
     private void updateAssessment(HttpServletRequest request, HttpServletResponse response, Integer userId)
@@ -441,10 +559,12 @@ public class InstructorAssessmentServlet extends HttpServlet {
         String submissionMode = normalizeSubmissionMode(type, normalize(request.getParameter("submissionMode")));
         Integer duration = parseInt(request.getParameter("duration"));
         Integer totalMarks = parseInt(request.getParameter("totalMarks"));
+        LocalDateTime dueDate = parseDateTime(request.getParameter("dueDate"));
         Integer maxAttempts = parseInt(request.getParameter("maxAttempts"));
         Integer questionsPerPage = parseInt(request.getParameter("questionsPerPage"));
         String instructions = normalize(request.getParameter("instructions"));
         String placement = normalize(request.getParameter("placement"));
+        String workflowAction = normalize(request.getParameter("workflowAction"));
 
         if (title.isEmpty() || type.isEmpty()) {
             response.sendRedirect(request.getContextPath() + "/instructor/assessments?courseId=" + courseId + "&assessmentId=" + assessmentId + "&error=missing");
@@ -462,6 +582,7 @@ public class InstructorAssessmentServlet extends HttpServlet {
         assessment.setSubmissionMode(submissionMode);
         assessment.setDuration(duration);
         assessment.setTotalMarks(totalMarks);
+        assessment.setDueDate(dueDate);
         AssessmentPlacementUtil.Placement parsedPlacement = AssessmentPlacementUtil.parsePlacement(AssessmentPlacementUtil.applyPlacement("", placement));
         if (!isValidPlacementForCourse(courseId, parsedPlacement)) {
             response.sendRedirect(request.getContextPath() + "/instructor/assessments?courseId=" + courseId + "&assessmentId=" + assessmentId + "&error=placement");
@@ -470,12 +591,28 @@ public class InstructorAssessmentServlet extends HttpServlet {
         assessment.setInstructions(AssessmentPlacementUtil.stripPlacement(instructions));
         assessment.setPlacementType(parsedPlacement.type);
         assessment.setPlacementMaterialId(parsedPlacement.materialId);
-        int defaultMaxAttempts = AppSettingsService.getInt(AppSettingsService.KEY_ASSESSMENT_MAX_ATTEMPTS, 3, 1, 10);
+        int defaultMaxAttempts = Assessment.TYPE_PRACTICE_TEST.equalsIgnoreCase(type)
+            ? 10
+            : AppSettingsService.getInt(AppSettingsService.KEY_ASSESSMENT_MAX_ATTEMPTS, 3, 1, 10);
         assessment.setMaxAttempts(maxAttempts != null && maxAttempts > 0 ? maxAttempts : defaultMaxAttempts);
         assessment.setQuestionsPerPage(questionsPerPage != null && questionsPerPage > 0 ? questionsPerPage : 2);
 
         boolean updated = assessmentDAO.update(assessment);
-        response.sendRedirect(request.getContextPath() + "/instructor/assessments?view=editor&courseId=" + courseId + "&assessmentId=" + assessmentId + (updated ? "&success=updated" : "&error=update"));
+        String redirectView = "questions";
+        String redirectStep = "questions";
+        String successKey = updated ? "updated" : "error=update";
+        if ("draft".equalsIgnoreCase(workflowAction)) {
+            redirectView = "drafts";
+            redirectStep = "details";
+        } else if ("review".equalsIgnoreCase(workflowAction)) {
+            redirectView = "drafts";
+            redirectStep = "review";
+        } else if ("publish".equalsIgnoreCase(workflowAction)) {
+            redirectView = "drafts";
+            redirectStep = "review";
+            successKey = "published";
+        }
+        response.sendRedirect(request.getContextPath() + "/instructor/assessments?view=" + redirectView + "&courseId=" + courseId + "&assessmentId=" + assessmentId + "&step=" + redirectStep + (updated ? "&success=" + successKey : "&error=update"));
     }
 
     private void deleteAssessment(HttpServletRequest request, HttpServletResponse response, Integer userId)
@@ -817,8 +954,7 @@ public class InstructorAssessmentServlet extends HttpServlet {
             return;
         }
 
-        boolean objectiveType = Assessment.TYPE_QUIZ.equalsIgnoreCase(assessment.getType())
-                || Assessment.TYPE_EXAM.equalsIgnoreCase(assessment.getType());
+        boolean objectiveType = isObjectiveAssessmentType(assessment.getType());
         String answersSummary = normalize(submission.getAnswersFilePath());
         if (!objectiveType || answersSummary.isEmpty() || answersSummary.startsWith("http")) {
             response.sendRedirect(request.getContextPath() + "/instructor/assessments?courseId=" + courseId + "&assessmentId=" + assessmentId + "&gradeFilter=" + gradeFilter + "&error=regradeunsupported");
@@ -864,8 +1000,7 @@ public class InstructorAssessmentServlet extends HttpServlet {
             return;
         }
 
-        boolean objectiveType = Assessment.TYPE_QUIZ.equalsIgnoreCase(assessment.getType())
-                || Assessment.TYPE_EXAM.equalsIgnoreCase(assessment.getType());
+        boolean objectiveType = isObjectiveAssessmentType(assessment.getType());
         if (!objectiveType) {
             response.sendRedirect(request.getContextPath() + "/instructor/assessments?courseId=" + courseId + "&assessmentId=" + assessmentId + "&gradeFilter=" + gradeFilter + "&error=regradeunsupported");
             return;
@@ -1075,6 +1210,18 @@ public class InstructorAssessmentServlet extends HttpServlet {
         }
     }
 
+    private LocalDateTime parseDateTime(String value) {
+        String normalized = normalize(value);
+        if (normalized.isEmpty()) {
+            return null;
+        }
+        try {
+            return LocalDateTime.parse(normalized, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm"));
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     private String normalize(String value) {
         return value == null ? "" : value.trim();
     }
@@ -1084,9 +1231,11 @@ public class InstructorAssessmentServlet extends HttpServlet {
         List<String> supportedViews = Arrays.asList(
                 VIEW_DASHBOARD,
                 VIEW_EDITOR,
+                "drafts",
                 VIEW_QUESTIONS,
                 VIEW_SUBMISSIONS,
                 VIEW_GRADE,
+                "pending-grading",
                 VIEW_ANALYTICS
         );
         return supportedViews.contains(normalized) ? normalized : VIEW_DASHBOARD;
@@ -1094,8 +1243,9 @@ public class InstructorAssessmentServlet extends HttpServlet {
 
     private boolean isSupportedAssessmentType(String type) {
         return Assessment.TYPE_QUIZ.equalsIgnoreCase(type)
-                || Assessment.TYPE_EXAM.equalsIgnoreCase(type)
-                || Assessment.TYPE_ASSIGNMENT.equalsIgnoreCase(type);
+            || Assessment.TYPE_EXAM.equalsIgnoreCase(type)
+            || Assessment.TYPE_ASSIGNMENT.equalsIgnoreCase(type)
+            || Assessment.TYPE_PRACTICE_TEST.equalsIgnoreCase(type);
     }
 
     private String normalizeGradingMode(String assessmentType, String inputMode) {
@@ -1132,7 +1282,7 @@ public class InstructorAssessmentServlet extends HttpServlet {
         if (assessment == null) {
             return "Draft";
         }
-        boolean objective = Assessment.TYPE_QUIZ.equalsIgnoreCase(assessment.getType()) || Assessment.TYPE_EXAM.equalsIgnoreCase(assessment.getType());
+        boolean objective = isObjectiveAssessmentType(assessment.getType());
         if (submissionsCount == 0) {
             return "Draft";
         }
@@ -1149,9 +1299,7 @@ public class InstructorAssessmentServlet extends HttpServlet {
         if ("TimedOut".equalsIgnoreCase(submission.getStatus())) {
             return "Late";
         }
-        boolean objective = assessment != null
-                && (Assessment.TYPE_QUIZ.equalsIgnoreCase(assessment.getType())
-                || Assessment.TYPE_EXAM.equalsIgnoreCase(assessment.getType()));
+        boolean objective = assessment != null && isObjectiveAssessmentType(assessment.getType());
         if (submission.getScore() == null) {
             return objective ? "Pending Review" : "Pending Review";
         }
@@ -1189,5 +1337,11 @@ public class InstructorAssessmentServlet extends HttpServlet {
 
     private boolean isInstructor(HttpSession session) {
         return SessionUtil.resolveUserId(session) != null && "Instructor".equals(SessionUtil.resolveRole(session));
+    }
+
+    private boolean isObjectiveAssessmentType(String type) {
+        return Assessment.TYPE_QUIZ.equalsIgnoreCase(type)
+                || Assessment.TYPE_EXAM.equalsIgnoreCase(type)
+                || Assessment.TYPE_PRACTICE_TEST.equalsIgnoreCase(type);
     }
 }

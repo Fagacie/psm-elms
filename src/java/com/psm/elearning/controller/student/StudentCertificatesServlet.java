@@ -45,9 +45,11 @@ public class StudentCertificatesServlet extends HttpServlet {
         if (enrollments == null) enrollments = new ArrayList<>();
         List<Enrollment> readyToGenerate = new ArrayList<>();
         List<ReadinessItem> blockedEnrollments = new ArrayList<>();
+        List<Enrollment> nonCertificateEnrollments = new ArrayList<>();
 
         for (Enrollment enrollment : enrollments) {
-            if (enrollment.getCoursePrice() == null || enrollment.getCoursePrice() <= 0) {
+            if (!issuesCertificate(enrollment)) {
+                nonCertificateEnrollments.add(enrollment);
                 continue;
             }
             EnrollmentStateSyncService.SyncResult syncResult = enrollmentStateSyncService.syncEnrollmentState(enrollment);
@@ -66,6 +68,7 @@ public class StudentCertificatesServlet extends HttpServlet {
         request.setAttribute("issuedCertificates", issuedCertificates);
         request.setAttribute("readyToGenerate", readyToGenerate);
         request.setAttribute("blockedEnrollments", blockedEnrollments);
+        request.setAttribute("nonCertificateEnrollments", nonCertificateEnrollments);
         request.getRequestDispatcher("/WEB-INF/views/student/certificates.jsp").forward(request, response);
     }
 
@@ -89,5 +92,11 @@ public class StudentCertificatesServlet extends HttpServlet {
 
     private boolean isStudent(HttpSession session) {
         return SessionUtil.resolveUserId(session) != null && "Student".equals(SessionUtil.resolveRole(session));
+    }
+
+    private boolean issuesCertificate(Enrollment enrollment) {
+        return enrollment != null
+                && enrollment.getCoursePrice() != null
+                && enrollment.getCoursePrice() > 0d;
     }
 }

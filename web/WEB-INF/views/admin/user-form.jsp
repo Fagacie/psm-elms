@@ -7,7 +7,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><c:out value="${empty user ? 'Create' : 'Edit'}"/> User - PSM E-Learning</title>
+    <title><c:out value="${empty requestScope.user ? 'Create' : 'Edit'}"/> User - PSM E-Learning</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -17,7 +17,7 @@
 <body class="admin-page ${embeddedMode ? 'admin-embedded' : ''}">
 <c:if test="${not embeddedMode}">
 <jsp:include page="/WEB-INF/views/common/admin-header.jsp">
-    <jsp:param name="pageTitle" value="${empty user ? 'Create User' : 'Edit User'}"/>
+    <jsp:param name="pageTitle" value="${empty requestScope.user ? 'Create User' : 'Edit User'}"/>
     <jsp:param name="pageSubtitle" value="Configure account records and role profile details"/>
 </jsp:include>
 
@@ -33,13 +33,13 @@
                 <span>&gt;</span>
                 <a href="${pageContext.request.contextPath}/admin/users">Users</a>
                 <span>&gt;</span>
-                <span><c:out value="${empty user ? 'Create User' : 'Edit User'}"/></span>
+                <span><c:out value="${empty requestScope.user ? 'Create User' : 'Edit User'}"/></span>
             </div>
 
             <div class="admin-hero">
                 <div class="admin-hero-copy">
                     <p class="admin-kicker">Identity Configuration</p>
-                    <h2><c:out value="${empty user ? 'Create a new user account with role-specific details' : 'Update the selected user account and role profile'}"/></h2>
+                    <h2><c:out value="${empty requestScope.user ? 'Create a new user account with role-specific details' : 'Update the selected user account and role profile'}"/></h2>
                     <p>Use this form to configure the root user record and attach the correct student, instructor, or admin profile information without leaving the admin workspace.</p>
                 </div>
                 <div class="admin-hero-scene" aria-hidden="true">
@@ -49,7 +49,7 @@
                     <span class="admin-shape admin-shape-b"></span>
                     <div class="admin-scene-panel admin-scene-panel-a">
                         <span>Mode</span>
-                        <strong><c:out value="${empty user ? 'Create' : 'Edit'}"/></strong>
+                        <strong><c:out value="${empty requestScope.user ? 'Create' : 'Edit'}"/></strong>
                     </div>
                     <div class="admin-scene-panel admin-scene-panel-b">
                         <span>Role</span>
@@ -81,7 +81,7 @@
 
         <section class="section-card">
             <div class="section-header">
-                <h2><c:out value="${empty user ? 'Create New User' : 'Edit User'}"/></h2>
+                <h2><c:out value="${empty requestScope.user ? 'Create New User' : 'Edit User'}"/></h2>
                 <c:if test="${not embeddedMode}">
                 <a href="${pageContext.request.contextPath}/admin/users" class="admin-btn secondary"><i class="fas fa-arrow-left"></i>&nbsp;Back to List</a>
                 </c:if>
@@ -234,7 +234,7 @@
                     </div>
 
                     <div class="admin-form-actions">
-                        <button type="submit" class="admin-btn primary"><i class="fas fa-save"></i>&nbsp;<c:out value="${empty user ? 'Create User' : 'Update User'}"/></button>
+                        <button type="submit" class="admin-btn primary"><i class="fas fa-save"></i>&nbsp;<c:out value="${empty requestScope.user ? 'Create User' : 'Update User'}"/></button>
                         <a href="${pageContext.request.contextPath}/admin/users" class="admin-btn secondary">Cancel</a>
                     </div>
                 </form>

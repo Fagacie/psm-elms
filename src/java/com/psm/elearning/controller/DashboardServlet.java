@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -25,8 +26,10 @@ public class DashboardServlet extends HttpServlet {
     private UserDAO userDAO;
     private PaymentDAO paymentDAO;
     private CertificateDAO certificateDAO;
-    private InstructorApplicationDAO applicationDAO;
     private NotificationDAO notificationDAO;
+    private MaterialDAO materialDAO;
+    private AssessmentDAO assessmentDAO;
+    private AssessmentSubmissionDAO assessmentSubmissionDAO;
     private EnrollmentStateSyncService enrollmentStateSyncService;
 
     @Override
@@ -37,8 +40,10 @@ public class DashboardServlet extends HttpServlet {
         userDAO = new UserDAOImpl();
         paymentDAO = new PaymentDAOImpl();
         certificateDAO = new CertificateDAOImpl();
-        applicationDAO = new InstructorApplicationDAOImpl();
         notificationDAO = new NotificationDAOImpl();
+        materialDAO = new MaterialDAOImpl();
+        assessmentDAO = new AssessmentDAOImpl();
+        assessmentSubmissionDAO = new AssessmentSubmissionDAOImpl();
         enrollmentStateSyncService = new EnrollmentStateSyncService();
     }
 
@@ -149,7 +154,6 @@ public class DashboardServlet extends HttpServlet {
                 systemMetrics.put("studentsCount", studentsCount);
                 systemMetrics.put("instructorsCount", instructorsCount);
                 systemMetrics.put("adminsCount", adminsCount);
-                systemMetrics.put("pendingApplications", applicationDAO.countByStatus(InstructorApplication.STATUS_PENDING));
                 request.setAttribute("notificationCount", notificationDAO.countUnreadByRecipientUserId(user.getUserId()));
                 
                 // Get all courses and count by status
@@ -217,21 +221,120 @@ public class DashboardServlet extends HttpServlet {
                 Integer userId = user.getUserId();
                 
                 // Populate courses created by this instructor
-                List courses = courseDAO.findByInstructor(userId);
+                List<Course> courses = courseDAO.findByInstructor(userId);
+                if (courses == null) {
+                    courses = new ArrayList<>();
+                }
                 request.setAttribute("courses", courses);
+                request.setAttribute("instructorName", user.getFullName());
                 
                 // Gather instructor statistics
-                Integer totalCourses = courses != null ? courses.size() : 0;
+                Integer totalCourses = courses.size();
                 Integer totalStudents = enrollmentDAO.countStudentsByInstructor(userId);
                 Integer totalEnrollments = enrollmentDAO.countEnrollmentsByInstructor(userId);
                 Integer pendingEnrollments = enrollmentDAO.countPendingEnrollmentsByInstructor(userId);
                 Integer activeEnrollments = enrollmentDAO.countActiveEnrollmentsByInstructor(userId);
+                int activeCourses = 0;
+                int publishedMaterialsCount = 0;
+                int pendingGradingCount = 0;
+                int missingMaterialsCourseCount = 0;
+                int dueSoonAssessmentCount = 0;
+                int activeLearnersCount = 0;
+                int progressSum = 0;
+                int progressCount = 0;
+
+                Map<Integer, Integer> courseEnrollmentCountById = new LinkedHashMap<>();
+                Map<Integer, Integer> courseMaterialCountById = new LinkedHashMap<>();
+                Map<Integer, Integer> courseAssessmentCountById = new LinkedHashMap<>();
+                Map<Integer, Integer> pendingSubmissionsByCourseId = new LinkedHashMap<>();
+                Map<Integer, String> courseStatusById = new LinkedHashMap<>();
+
+                LocalDateTime dueSoonCutoff = LocalDateTime.now().plusDays(7);
+                LocalDateTime now = LocalDateTime.now();
+
+                for (Course course : courses) {
+                    if (course == null || course.getCourseId() == null) {
+                        continue;
+                    }
+
+                    Integer courseId = course.getCourseId();
+                    courseStatusById.put(courseId, course.getStatus());
+                    if (Course.STATUS_APPROVED.equalsIgnoreCase(course.getStatus())) {
+                        activeCourses++;
+                    }
+
+                    List<Enrollment> courseEnrollments = enrollmentDAO.getEnrollmentsByCourse(courseId);
+                    if (courseEnrollments == null) {
+                        courseEnrollments = new ArrayList<>();
+                    }
+                    courseEnrollmentCountById.put(courseId, courseEnrollments.size());
+                    for (Enrollment enrollment : courseEnrollments) {
+                        if (enrollment == null) {
+                            continue;
+                        }
+                        enrollmentStateSyncService.syncEnrollmentState(enrollment);
+                        String enrollmentStatus = enrollment.getStatus();
+                        if (Enrollment.STATUS_ENROLLED.equalsIgnoreCase(enrollmentStatus)
+                                || Enrollment.STATUS_ACTIVE.equalsIgnoreCase(enrollmentStatus)) {
+                            activeLearnersCount++;
+                        }
+                        if (enrollment.getProgress() != null) {
+                            int clamped = Math.max(0, Math.min(100, enrollment.getProgress()));
+                            progressSum += clamped;
+                            progressCount++;
+                        }
+                    }
+
+                    List<Material> courseMaterials = materialDAO.findByCourse(courseId);
+                    if (courseMaterials == null) {
+                        courseMaterials = new ArrayList<>();
+                    }
+                    courseMaterialCountById.put(courseId, courseMaterials.size());
+                    publishedMaterialsCount += courseMaterials.size();
+                    if (courseMaterials.isEmpty()) {
+                        missingMaterialsCourseCount++;
+                    }
+
+                    List<Assessment> courseAssessments = assessmentDAO.findByCourse(courseId);
+                    if (courseAssessments == null) {
+                        courseAssessments = new ArrayList<>();
+                    }
+                    courseAssessmentCountById.put(courseId, courseAssessments.size());
+
+                    int coursePendingSubmissions = 0;
+                    for (Assessment assessment : courseAssessments) {
+                        if (assessment == null) {
+                            continue;
+                        }
+                        coursePendingSubmissions += countPendingGrading(assessment);
+                        LocalDateTime dueDate = assessment.getDueDate();
+                        if (dueDate != null && !dueDate.isBefore(now) && !dueDate.isAfter(dueSoonCutoff)) {
+                            dueSoonAssessmentCount++;
+                        }
+                    }
+                    pendingSubmissionsByCourseId.put(courseId, coursePendingSubmissions);
+                    pendingGradingCount += coursePendingSubmissions;
+                }
+
+                int averageProgress = progressCount > 0 ? Math.round((float) progressSum / progressCount) : 0;
 
                 request.setAttribute("totalCourses", totalCourses);
                 request.setAttribute("totalStudents", totalStudents);
                 request.setAttribute("totalEnrollments", totalEnrollments);
                 request.setAttribute("pendingEnrollments", pendingEnrollments);
                 request.setAttribute("activeEnrollments", activeEnrollments);
+                request.setAttribute("activeCourses", activeCourses);
+                request.setAttribute("publishedMaterialsCount", publishedMaterialsCount);
+                request.setAttribute("pendingGradingCount", pendingGradingCount);
+                request.setAttribute("missingMaterialsCourseCount", missingMaterialsCourseCount);
+                request.setAttribute("dueSoonAssessmentCount", dueSoonAssessmentCount);
+                request.setAttribute("activeLearnersCount", activeLearnersCount);
+                request.setAttribute("averageProgress", averageProgress);
+                request.setAttribute("courseEnrollmentCountById", courseEnrollmentCountById);
+                request.setAttribute("courseMaterialCountById", courseMaterialCountById);
+                request.setAttribute("courseAssessmentCountById", courseAssessmentCountById);
+                request.setAttribute("pendingSubmissionsByCourseId", pendingSubmissionsByCourseId);
+                request.setAttribute("courseStatusById", courseStatusById);
             } catch (Exception e) {
                 // Log and continue; view will render empty state
                 LOGGER.log(Level.WARNING, "Failed to load instructor dashboard", e);
@@ -246,5 +349,26 @@ public class DashboardServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         doGet(request, response);
+    }
+
+    private int countPendingGrading(Assessment assessment) {
+        if (assessment == null || assessment.getAssessmentId() == null) {
+            return 0;
+        }
+        List<AssessmentSubmission> submissions = assessmentSubmissionDAO.findByAssessment(assessment.getAssessmentId());
+        if (submissions == null || submissions.isEmpty()) {
+            return 0;
+        }
+
+        int pendingCount = 0;
+        for (AssessmentSubmission submission : submissions) {
+            if (submission == null) {
+                continue;
+            }
+            if (submission.getScore() == null && (submission.getStatus() == null || !"TimedOut".equalsIgnoreCase(submission.getStatus()))) {
+                pendingCount++;
+            }
+        }
+        return pendingCount;
     }
 }

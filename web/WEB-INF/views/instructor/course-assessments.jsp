@@ -44,6 +44,9 @@
                     <button type="button" class="btn btn-primary" onclick="openCreateAssessmentModal()">
                         <i class="fas fa-plus-circle"></i> New Assessment
                     </button>
+                    <a href="${pageContext.request.contextPath}/instructor/courses?action=workspace&courseId=${selectedCourse.courseId}" class="btn btn-secondary">
+                        <i class="fas fa-layer-group"></i> Open Workspace
+                    </a>
                 </c:if>
                 <a href="${pageContext.request.contextPath}/instructor/materials" class="btn btn-secondary">
                     <i class="fas fa-folder-open"></i> Open Materials
@@ -156,7 +159,8 @@
                         </span>
                         <span>
                             <c:choose>
-                                <c:when test="${selectedAssessment.type == 'Assignment'}">Assignment grading is always manual by instructor.</c:when>
+                                    <c:when test="${selectedAssessment.type == 'Assignment'}">Assignment grading is always manual by instructor.</c:when>
+                                    <c:when test="${selectedAssessment.type == 'Practice Test'}">Practice tests use auto grading with quiz-style questions.</c:when>
                                 <c:when test="${not empty selectedAssessment.gradingMode and selectedAssessment.gradingMode == 'manual'}">Quiz/Exam score is entered by instructor after review.</c:when>
                                 <c:otherwise>Quiz/Exam is auto-graded by the system, and instructor can still override score.</c:otherwise>
                             </c:choose>
@@ -290,15 +294,6 @@
                                                     </select>
                                                 </div>
                                                 <div class="field">
-                                                    <label>Submission Mode</label>
-                                                    <select name="submissionMode" class="submission-mode-select">
-                                                        <option value="file" ${(not empty a.submissionMode ? a.submissionMode : 'both') == 'file' ? 'selected' : ''}>File upload only</option>
-                                                        <option value="text" ${(not empty a.submissionMode ? a.submissionMode : 'both') == 'text' ? 'selected' : ''}>Written answer only</option>
-                                                        <option value="both" ${(not empty a.submissionMode ? a.submissionMode : 'both') == 'both' ? 'selected' : ''}>File upload and written answer</option>
-                                                    </select>
-                                                    <small class="helper-text">Assignments can require a file, text response, or both.</small>
-                                                </div>
-                                                <div class="field">
                                                     <label>Duration (mins)</label>
                                                     <input type="number" min="1" name="duration" value="${a.duration}">
                                                 </div>
@@ -349,8 +344,7 @@
                         <div>
                             <h2 class="assessment-details-title"><i class="fas fa-clipboard-check"></i> ${selectedAssessment.title}</h2>
                             <div class="assessment-details-meta">
-                                <span class="assessment-type-badge type-${selectedAssessment.type}">${selectedAssessment.type}</span>
-                                <span><i class="fas fa-file-alt"></i> ${not empty selectedAssessment.submissionMode ? selectedAssessment.submissionMode : 'both'}</span>
+                                <span class="assessment-type-badge type-${fn:replace(selectedAssessment.type, ' ', '-')}">${selectedAssessment.type}</span>
                                 <span><i class="fas fa-clock"></i> ${selectedAssessment.duration != null ? selectedAssessment.duration : 'Unlimited'} mins</span>
                                 <span><i class="fas fa-star"></i> ${selectedAssessment.totalMarks != null ? selectedAssessment.totalMarks : 'N/A'} marks</span>
                                 <span><i class="fas fa-redo"></i> ${selectedAssessment.maxAttempts} attempt${selectedAssessment.maxAttempts > 1 ? 's' : ''}</span>
@@ -642,7 +636,7 @@
                                                                     </div>
                                                                 </c:if>
                                                                 
-                                                                <c:if test="${(selectedAssessment.type == 'Quiz' or selectedAssessment.type == 'Exam') and not empty s.answersFilePath and not fn:startsWith(s.answersFilePath, 'http')}">
+                                                                <c:if test="${(selectedAssessment.type == 'Quiz' or selectedAssessment.type == 'Practice Test' or selectedAssessment.type == 'Exam') and not empty s.answersFilePath and not fn:startsWith(s.answersFilePath, 'http')}">
                                                                     <button type="submit" class="btn btn-secondary btn-sm" formaction="${pageContext.request.contextPath}/instructor/assessments" name="action" value="autoRegradeSubmission">
                                                                         <i class="fas fa-rotate-right"></i> Auto Regrade
                                                                     </button>
@@ -852,15 +846,6 @@
                             <small class="helper-text">Assignment will always be manual regardless of selected mode.</small>
                         </div>
                         <div class="field">
-                            <label>Submission Mode</label>
-                            <select name="submissionMode" id="createSubmissionMode" class="submission-mode-select">
-                                <option value="file">File upload only</option>
-                                <option value="text">Written answer only</option>
-                                <option value="both" selected>File upload and written answer</option>
-                            </select>
-                            <small class="helper-text">Only assignments use this setting.</small>
-                        </div>
-                        <div class="field">
                             <label>Duration (minutes)</label>
                             <input type="number" min="1" name="duration" placeholder="e.g., 60">
                             <small class="helper-text">Leave blank for no time limit</small>
@@ -925,17 +910,7 @@
     function syncAssessmentModeFields(form) {
         if (!form) return;
         const typeSelect = form.querySelector('.assessment-type-select');
-        const submissionModeSelect = form.querySelector('.submission-mode-select');
-        if (!typeSelect || !submissionModeSelect) return;
-        if (typeSelect.value === 'Assignment') {
-            submissionModeSelect.disabled = false;
-            if (!submissionModeSelect.value) {
-                submissionModeSelect.value = 'both';
-            }
-        } else {
-            submissionModeSelect.value = 'both';
-            submissionModeSelect.disabled = true;
-        }
+        if (!typeSelect) return;
     }
 
     // Tab navigation
@@ -1001,7 +976,7 @@
             if (note) {
                 note.innerHTML = '<strong>Note:</strong> ' + (isAssignment
                     ? 'Assignment questions are descriptive. No options required. Students will upload a file.'
-                    : 'Quiz/Exam questions require options A & B and a correct option.');
+                    : 'Quiz, Practice Test, and Exam questions require options A & B and a correct option.');
             }
         }
         syncQuestionForm();

@@ -11,6 +11,7 @@ import com.psm.elearning.dao.StudentDAOImpl;
 import com.psm.elearning.dao.UserDAO;
 import com.psm.elearning.dao.UserDAOImpl;
 import com.psm.elearning.model.Certificate;
+import com.psm.elearning.model.CertificateView;
 import com.psm.elearning.model.Course;
 import com.psm.elearning.model.Enrollment;
 import com.psm.elearning.model.Student;
@@ -69,6 +70,9 @@ public class StudentCertificateServlet extends HttpServlet {
         boolean freeCourse = course != null && course.getCourseFee() != null && course.getCourseFee().doubleValue() <= 0d;
 
         Certificate certificate = certificateDAO.findByEnrollment(enrollmentId);
+        CertificateView certificateView = certificate != null
+                ? certificateDAO.findDetailedByEnrollment(enrollmentId)
+                : null;
 
         request.setAttribute("eligible", !freeCourse && syncResult.isEligibleForCertificate());
         request.setAttribute("diagPaid", syncResult.isPaid());
@@ -90,6 +94,7 @@ public class StudentCertificateServlet extends HttpServlet {
         request.setAttribute("studentUser", studentUser);
         request.setAttribute("studentProfile", studentProfile);
         request.setAttribute("certificate", certificate);
+        request.setAttribute("certificateView", certificateView);
         request.setAttribute("canGenerate", !freeCourse && syncResult.isEligibleForCertificate() && certificate == null);
         request.getRequestDispatcher("/WEB-INF/views/student/certificate.jsp").forward(request, response);
     }
@@ -241,4 +246,3 @@ public class StudentCertificateServlet extends HttpServlet {
         return SessionUtil.resolveUserId(session) != null && "Student".equals(SessionUtil.resolveRole(session));
     }
 }
-

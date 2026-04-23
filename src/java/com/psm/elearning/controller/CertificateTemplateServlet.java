@@ -21,7 +21,9 @@ public class CertificateTemplateServlet extends HttpServlet {
     private static final Set<String> ALLOWED_BACK_PATHS = new HashSet<>(Arrays.asList(
             "/dashboard",
             "/admin/certificates",
-            "/instructor/certificates"
+            "/instructor/certificates",
+            "/student/certificates",
+            "/student/my-enrollments"
     ));
 
     private final CertificateDAO certificateDAO = new CertificateDAOImpl();
@@ -37,9 +39,20 @@ public class CertificateTemplateServlet extends HttpServlet {
         }
 
         Integer certificateId = parseInt(request.getParameter("certificateId"));
+        Integer enrollmentId = parseInt(request.getParameter("enrollmentId"));
         CertificateView certificateView;
         if (certificateId != null) {
             certificateView = certificateDAO.findDetailedById(certificateId);
+            if (certificateView == null) {
+                response.sendRedirect(request.getContextPath() + "/dashboard?error=certificate");
+                return;
+            }
+            if (!canViewCertificate(session, certificateView)) {
+                response.sendRedirect(request.getContextPath() + "/dashboard?error=permission");
+                return;
+            }
+        } else if (enrollmentId != null) {
+            certificateView = certificateDAO.findDetailedByEnrollment(enrollmentId);
             if (certificateView == null) {
                 response.sendRedirect(request.getContextPath() + "/dashboard?error=certificate");
                 return;
