@@ -14,6 +14,9 @@
 <c:set var="topbarInitialOne" value="${fn:length(topbarUserName) > 0 ? fn:substring(topbarUserName, 0, 1) : 'S'}"/>
 <c:set var="topbarInitialTwo" value="${fn:length(topbarUserName) > 1 ? fn:substring(topbarUserName, 1, 2) : ''}"/>
 <c:set var="topbarInitials" value="${fn:toUpperCase(topbarInitialOne)}"/>
+<c:set var="isDashboardPage" value="${fn:contains(currentPath, '/dashboard')}"/>
+<c:set var="isMyCoursesPage" value="${fn:contains(currentPath, '/student/my-enrollments') or fn:contains(currentPath, '/student/enrollment-details') or fn:contains(currentPath, '/student/materials')}"/>
+<c:set var="isExplorePage" value="${fn:contains(currentPath, '/student/courses')}"/>
 <c:if test="${not empty topbarInitialTwo}">
     <c:set var="topbarInitials" value="${topbarInitials}${fn:toUpperCase(topbarInitialTwo)}"/>
 </c:if>
@@ -61,6 +64,12 @@
             <span class="sv-brand-main">PSM</span>
             <span class="sv-brand-sub">E-Learning</span>
         </a>
+
+        <nav class="sv-top-links" aria-label="Primary destinations">
+            <a href="${pageContext.request.contextPath}/dashboard" class="sv-top-link ${isDashboardPage ? 'active' : ''}">Dashboard</a>
+            <a href="${pageContext.request.contextPath}/student/my-enrollments" class="sv-top-link ${isMyCoursesPage ? 'active' : ''}">My Courses</a>
+            <a href="${pageContext.request.contextPath}/student/courses" class="sv-top-link ${isExplorePage ? 'active' : ''}">Explore</a>
+        </nav>
 
         <div class="sv-page-title">
             <h1>${resolvedStudentTitle}</h1>

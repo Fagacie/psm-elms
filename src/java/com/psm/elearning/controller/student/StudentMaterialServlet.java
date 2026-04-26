@@ -338,9 +338,9 @@ public class StudentMaterialServlet extends HttpServlet {
                 : ("in_progress".equalsIgnoreCase(materialStatus) ? "In Progress" : "Ready");
         String statusClass = "completed".equalsIgnoreCase(materialStatus) ? "status-Approved" : "status-Pending";
         String backToHubUrl = previewEnrollment != null
-                ? request.getContextPath() + "/student/enrollment-details?id=" + previewEnrollment.getEnrollmentId() + "&tab=materials"
+                ? request.getContextPath() + "/student/enrollment-details?id=" + previewEnrollment.getEnrollmentId() + "&tab=learning&materialId=" + material.getMaterialId()
                 : request.getContextPath() + "/student/materials?courseId=" + material.getCourseId();
-        String backToHubLabel = previewEnrollment != null ? "Back to Materials" : "Back to My Materials";
+        String backToHubLabel = previewEnrollment != null ? "Back to Learning Hub" : "Back to My Materials";
 
         request.setAttribute("material", material);
         request.setAttribute("streamUrl", streamUrl);

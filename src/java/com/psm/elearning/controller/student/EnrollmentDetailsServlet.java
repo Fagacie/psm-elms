@@ -56,6 +56,10 @@ public class EnrollmentDetailsServlet extends HttpServlet {
     private EnrollmentStateSyncService enrollmentStateSyncService;
 
     public static class LearningItem {
+        private Integer itemId;
+        private String itemKind;
+        private String navigationUrl;
+        private boolean active;
         private final int order;
         private final String type;
         private final String iconClass;
@@ -171,6 +175,27 @@ public class EnrollmentDetailsServlet extends HttpServlet {
         public String getSecondaryActionLabel() { return secondaryActionLabel; }
         public String getSecondaryActionUrl() { return secondaryActionUrl; }
         public String getSecondaryActionIcon() { return secondaryActionIcon; }
+        public Integer getItemId() { return itemId; }
+        public void setItemId(Integer itemId) { this.itemId = itemId; }
+        public String getItemKind() { return itemKind; }
+        public void setItemKind(String itemKind) { this.itemKind = itemKind; }
+        public String getNavigationUrl() { return navigationUrl; }
+        public void setNavigationUrl(String navigationUrl) { this.navigationUrl = navigationUrl; }
+        public boolean isActive() { return active; }
+        public void setActive(boolean active) { this.active = active; }
+    }
+
+    public static class WorkspaceChip {
+        private final String iconClass;
+        private final String label;
+
+        public WorkspaceChip(String iconClass, String label) {
+            this.iconClass = iconClass;
+            this.label = label;
+        }
+
+        public String getIconClass() { return iconClass; }
+        public String getLabel() { return label; }
     }
     
     @Override
@@ -239,9 +264,35 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                 request.setAttribute("viewedMaterialIds", new HashSet<Integer>());
                 request.setAttribute("learningItems", new ArrayList<LearningItem>());
                 request.setAttribute("recommendedItem", null);
+                request.setAttribute("courseAccessGranted", isPaymentComplete(enrollment.getPaymentStatus()) || enrollment.getCoursePrice() == null || enrollment.getCoursePrice() <= 0);
                 request.setAttribute("focusMaterial", null);
                 request.setAttribute("previousMaterial", null);
                 request.setAttribute("nextMaterial", null);
+                request.setAttribute("selectedMode", "empty");
+                request.setAttribute("selectedMaterial", null);
+                request.setAttribute("selectedMaterialId", null);
+                request.setAttribute("selectedMaterialStatus", "");
+                request.setAttribute("selectedAssessment", null);
+                request.setAttribute("selectedAssessmentId", null);
+                request.setAttribute("selectedAssessmentUsedAttempts", 0);
+                request.setAttribute("selectedAssessmentAllowedAttempts", 0);
+                request.setAttribute("selectedAssessmentLatest", null);
+                request.setAttribute("selectedAssessmentHasActiveAttempt", false);
+                request.setAttribute("selectedAssessmentStatusLabel", "Not Started");
+                request.setAttribute("selectedAssessmentStatusClass", "status-Archived");
+                request.setAttribute("selectedAssessmentPrimaryLabel", "");
+                request.setAttribute("selectedAssessmentPrimaryUrl", "");
+                request.setAttribute("workspaceEyebrow", "Learning Item");
+                request.setAttribute("workspaceTitle", "Select an item from the course flow");
+                request.setAttribute("workspaceDescription", "Choose a material or assessment from the sidebar to continue your course sequence.");
+                request.setAttribute("workspaceStatusLabel", "Ready");
+                request.setAttribute("workspaceStatusClass", "status-Pending");
+                request.setAttribute("workspaceAccessLabel", "Workspace Ready");
+                request.setAttribute("workspaceAccessIcon", "shield-check");
+                request.setAttribute("workspaceChips", new ArrayList<WorkspaceChip>());
+                request.setAttribute("workspaceActionNote", "Select an item from the course flow to continue.");
+                request.setAttribute("workspacePrimaryActionIcon", "paper-plane");
+                request.setAttribute("materialCompletionButtonLabel", "Mark Complete");
                 request.setAttribute("certificateEligible", false);
                 request.setAttribute("certificatePaidReady", isPaymentComplete(enrollment.getPaymentStatus()));
                 request.setAttribute("certificateCompletedReady", false);
@@ -341,6 +392,8 @@ public class EnrollmentDetailsServlet extends HttpServlet {
 
             for (Assessment assessment : assessments) {
                 AssessmentPlacementUtil.Placement placement = resolvePlacement(assessment);
+                assessment.setPlacementType(placement.type);
+                assessment.setPlacementMaterialId(placement.materialId);
                 assessment.setInstructions(AssessmentPlacementUtil.stripPlacement(assessment.getInstructions()));
                 if ("afterMaterial".equals(placement.type)
                         && placement.materialId != null
@@ -421,6 +474,11 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                         secondaryIcon
                 ));
                 LearningItem currentItem = learningItems.get(learningItems.size() - 1);
+                currentItem.setItemId(material.getMaterialId());
+                currentItem.setItemKind("material");
+                currentItem.setNavigationUrl(request.getContextPath()
+                        + "/student/enrollment-details?id=" + enrollment.getEnrollmentId()
+                        + "&tab=learning&materialId=" + material.getMaterialId());
                 currentItem.setStartedForProgress(viewed);
                 currentItem.setCompletedForProgress(viewed);
 
@@ -498,6 +556,11 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                             secondaryIconAssessment
                     ));
                     LearningItem addedAssessmentItem = learningItems.get(learningItems.size() - 1);
+                    addedAssessmentItem.setItemId(assessment.getAssessmentId());
+                    addedAssessmentItem.setItemKind("assessment");
+                    addedAssessmentItem.setNavigationUrl(request.getContextPath()
+                            + "/student/enrollment-details?id=" + enrollment.getEnrollmentId()
+                            + "&tab=assessments&assessmentId=" + assessment.getAssessmentId());
                     addedAssessmentItem.setStartedForProgress(hasActiveAttempt || progressState.isAttempted());
                     addedAssessmentItem.setCompletedForProgress(progressState.isPassed());
                 }
@@ -576,6 +639,11 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                         secondaryIcon
                 ));
                 LearningItem addedFinalAssessmentItem = learningItems.get(learningItems.size() - 1);
+                addedFinalAssessmentItem.setItemId(assessment.getAssessmentId());
+                addedFinalAssessmentItem.setItemKind("assessment");
+                addedFinalAssessmentItem.setNavigationUrl(request.getContextPath()
+                        + "/student/enrollment-details?id=" + enrollment.getEnrollmentId()
+                        + "&tab=assessments&assessmentId=" + assessment.getAssessmentId());
                 addedFinalAssessmentItem.setStartedForProgress(hasActiveAttempt || progressState.isAttempted());
                 addedFinalAssessmentItem.setCompletedForProgress(progressState.isPassed());
             }
@@ -656,6 +724,186 @@ public class EnrollmentDetailsServlet extends HttpServlet {
 
             String tab = request.getParameter("tab");
             if (tab == null || tab.trim().isEmpty()) tab = "learning";
+            Map<Integer, String> materialStatusById = materialProgressDAO.findMaterialStatusByCourse(userId, enrollment.getCourseId());
+            boolean courseAccessGranted = paidAccess || !paymentRequired;
+
+            Integer currentAssessmentId = null;
+            for (Assessment assessment : assessments) {
+                int used = usedAttemptsByAssessment.getOrDefault(assessment.getAssessmentId(), 0);
+                int allowed = allowedAttemptsByAssessment.getOrDefault(assessment.getAssessmentId(), 0);
+                if (activeAttemptByAssessment.getOrDefault(assessment.getAssessmentId(), false) || used < allowed) {
+                    currentAssessmentId = assessment.getAssessmentId();
+                    break;
+                }
+            }
+            if (currentAssessmentId == null && !assessments.isEmpty()) {
+                currentAssessmentId = assessments.get(0).getAssessmentId();
+            }
+
+            Integer requestedAssessmentId = parseIntegerParameter(request.getParameter("assessmentId"));
+            Integer requestedMaterialId = parseIntegerParameter(request.getParameter("materialId"));
+            Assessment selectedAssessment = null;
+            Material selectedMaterial = null;
+
+            if ("assessments".equalsIgnoreCase(tab)) {
+                Integer effectiveAssessmentId = requestedAssessmentId != null ? requestedAssessmentId : currentAssessmentId;
+                selectedAssessment = findAssessmentById(assessments, effectiveAssessmentId);
+            } else {
+                Integer effectiveMaterialId = requestedMaterialId != null
+                        ? requestedMaterialId
+                        : (focusMaterial != null ? focusMaterial.getMaterialId() : null);
+                selectedMaterial = findMaterialById(orderedMaterials, effectiveMaterialId);
+            }
+
+            if (selectedAssessment == null && requestedAssessmentId != null) {
+                selectedAssessment = findAssessmentById(assessments, requestedAssessmentId);
+            }
+            if (selectedMaterial == null && requestedMaterialId != null) {
+                selectedMaterial = findMaterialById(orderedMaterials, requestedMaterialId);
+            }
+
+            if (selectedMaterial == null && selectedAssessment == null && focusMaterial != null) {
+                selectedMaterial = focusMaterial;
+            }
+            if (selectedMaterial == null && selectedAssessment == null && currentAssessmentId != null) {
+                selectedAssessment = findAssessmentById(assessments, currentAssessmentId);
+            }
+
+            String selectedMode = selectedAssessment != null ? "assessment" : (selectedMaterial != null ? "material" : "empty");
+            if ("assessment".equals(selectedMode)) {
+                tab = "assessments";
+            } else if ("material".equals(selectedMode)) {
+                tab = "learning";
+            }
+            Integer selectedMaterialId = selectedMaterial != null ? selectedMaterial.getMaterialId() : null;
+            Integer selectedAssessmentId = selectedAssessment != null ? selectedAssessment.getAssessmentId() : null;
+            String selectedMaterialStatus = selectedMaterialId != null ? materialStatusById.getOrDefault(selectedMaterialId, "") : "";
+            int selectedAssessmentUsedAttempts = selectedAssessment != null
+                    ? usedAttemptsByAssessment.getOrDefault(selectedAssessment.getAssessmentId(), 0)
+                    : 0;
+            int selectedAssessmentAllowedAttempts = selectedAssessment != null
+                    ? allowedAttemptsByAssessment.getOrDefault(selectedAssessment.getAssessmentId(), 0)
+                    : 0;
+            AssessmentSubmission selectedAssessmentLatest = selectedAssessment != null
+                    ? latestSubmissionByAssessment.get(selectedAssessment.getAssessmentId())
+                    : null;
+            boolean selectedAssessmentHasActiveAttempt = selectedAssessment != null
+                    && activeAttemptByAssessment.getOrDefault(selectedAssessment.getAssessmentId(), false);
+            String selectedAssessmentStatusLabel = "Not Started";
+            String selectedAssessmentStatusClass = "status-Archived";
+            String selectedAssessmentPrimaryLabel = "";
+            String selectedAssessmentPrimaryUrl = "";
+            String workspaceEyebrow = "Learning Item";
+            String workspaceTitle = "Select an item from the course flow";
+            String workspaceDescription = "Choose a material or assessment from the sidebar to continue your course sequence.";
+            String workspaceStatusLabel = "Ready";
+            String workspaceStatusClass = "status-Pending";
+            String workspaceAccessLabel = courseAccessGranted ? "Workspace Ready" : "Payment Required";
+            String workspaceAccessIcon = courseAccessGranted ? "shield-check" : "lock";
+            String workspaceActionNote = "Select an item from the course flow to continue.";
+            String workspacePrimaryActionIcon = "paper-plane";
+            String materialCompletionButtonLabel = "Mark Complete";
+            List<WorkspaceChip> workspaceChips = new ArrayList<>();
+
+            if (selectedAssessment != null) {
+                if (!courseAccessGranted) {
+                    selectedAssessmentStatusLabel = "Locked";
+                    selectedAssessmentStatusClass = "status-Pending";
+                } else if (selectedAssessmentHasActiveAttempt) {
+                    selectedAssessmentStatusLabel = "In Progress";
+                    selectedAssessmentStatusClass = "status-Pending";
+                } else if (selectedAssessmentLatest != null && selectedAssessmentLatest.getScore() != null) {
+                    selectedAssessmentStatusLabel = "Completed";
+                    selectedAssessmentStatusClass = "status-Approved";
+                } else if (selectedAssessmentLatest != null) {
+                    selectedAssessmentStatusLabel = "Awaiting Grade";
+                    selectedAssessmentStatusClass = "status-Pending";
+                }
+
+                if (courseAccessGranted && selectedAssessmentHasActiveAttempt) {
+                    selectedAssessmentPrimaryLabel = Assessment.TYPE_ASSIGNMENT.equals(selectedAssessment.getType())
+                            ? "Continue Submission"
+                            : "Continue Assessment";
+                    selectedAssessmentPrimaryUrl = request.getContextPath()
+                            + "/student/assessments?courseId=" + enrollment.getCourseId()
+                            + "&assessmentId=" + selectedAssessment.getAssessmentId()
+                            + "&mode=attempt&fromHub=1&enrollmentId=" + enrollment.getEnrollmentId();
+                } else if (courseAccessGranted && selectedAssessmentUsedAttempts < selectedAssessmentAllowedAttempts) {
+                    selectedAssessmentPrimaryLabel = Assessment.TYPE_ASSIGNMENT.equals(selectedAssessment.getType())
+                            ? "Open Assignment"
+                            : "Start Assessment";
+                    selectedAssessmentPrimaryUrl = request.getContextPath()
+                            + "/student/assessments?action=start&courseId=" + enrollment.getCourseId()
+                            + "&assessmentId=" + selectedAssessment.getAssessmentId()
+                            + "&fromHub=1&enrollmentId=" + enrollment.getEnrollmentId();
+                } else if (selectedAssessmentLatest != null && selectedAssessmentLatest.getSubmissionId() != null) {
+                    selectedAssessmentPrimaryLabel = "View Result";
+                    selectedAssessmentPrimaryUrl = request.getContextPath()
+                            + "/student/assessments?view=result&enrollmentId=" + enrollment.getEnrollmentId()
+                            + "&assessmentId=" + selectedAssessment.getAssessmentId()
+                            + "&submissionId=" + selectedAssessmentLatest.getSubmissionId();
+                }
+
+                workspaceEyebrow = selectedAssessment.getType();
+                workspaceTitle = selectedAssessment.getTitle();
+                workspaceDescription = selectedAssessment.getInstructions() != null && !selectedAssessment.getInstructions().trim().isEmpty()
+                        ? selectedAssessment.getInstructions()
+                        : "Review the assessment details below, then use the action bar to start or continue.";
+                workspaceStatusLabel = selectedAssessmentStatusLabel;
+                workspaceStatusClass = selectedAssessmentStatusClass;
+                if (!courseAccessGranted) {
+                    workspaceActionNote = "Assessment access will unlock after payment is completed.";
+                } else if (selectedAssessmentHasActiveAttempt) {
+                    workspaceActionNote = "Continue the active attempt when you are ready.";
+                } else if (Assessment.TYPE_ASSIGNMENT.equals(selectedAssessment.getType())) {
+                    workspaceActionNote = "Use the submit action to open the upload workspace and send your response.";
+                } else {
+                    workspaceActionNote = "Start the assessment from here when you are ready to proceed.";
+                }
+                workspacePrimaryActionIcon = selectedAssessmentHasActiveAttempt
+                        ? "play"
+                        : ("View Result".equals(selectedAssessmentPrimaryLabel) ? "eye" : "paper-plane");
+                workspaceChips.add(new WorkspaceChip("fa-layer-group", selectedAssessment.getType()));
+                workspaceChips.add(new WorkspaceChip("fa-clock", (selectedAssessment.getDuration() != null ? selectedAssessment.getDuration() : 30) + " min"));
+                workspaceChips.add(new WorkspaceChip("fa-repeat", selectedAssessmentUsedAttempts + " / " + selectedAssessmentAllowedAttempts + " attempts"));
+                workspaceChips.add(new WorkspaceChip("fa-upload", resolveSubmissionModeLabel(selectedAssessment.getSubmissionMode())));
+                if (selectedAssessment.getDueDateDisplay() != null && !selectedAssessment.getDueDateDisplay().trim().isEmpty()) {
+                    workspaceChips.add(new WorkspaceChip("fa-calendar", selectedAssessment.getDueDateDisplay()));
+                }
+            } else if (selectedMaterial != null) {
+                workspaceEyebrow = selectedMaterial.getMaterialType();
+                workspaceTitle = selectedMaterial.getTitle();
+                workspaceDescription = selectedMaterial.getDescription() != null && !selectedMaterial.getDescription().trim().isEmpty()
+                        ? selectedMaterial.getDescription()
+                        : "Choose a material or assessment from the sidebar to continue your course sequence.";
+                workspaceStatusLabel = "completed".equalsIgnoreCase(selectedMaterialStatus) ? "Completed" : "In Progress";
+                workspaceStatusClass = "completed".equalsIgnoreCase(selectedMaterialStatus) ? "status-Approved" : "status-Pending";
+                if ("completed".equalsIgnoreCase(selectedMaterialStatus)) {
+                    workspaceActionNote = "This material is already counted in your progress.";
+                    materialCompletionButtonLabel = "Completed";
+                } else if (Material.TYPE_VIDEO.equalsIgnoreCase(selectedMaterial.getMaterialType())
+                        || "Audio".equalsIgnoreCase(selectedMaterial.getMaterialType())) {
+                    workspaceActionNote = "Playback unlocks completion once you reach the required threshold.";
+                } else if (Material.TYPE_LINK.equalsIgnoreCase(selectedMaterial.getMaterialType())) {
+                    workspaceActionNote = "Open the external resource in the viewer, then mark it complete here.";
+                } else {
+                    workspaceActionNote = "Review the current material, then mark it complete from the action bar.";
+                }
+                workspacePrimaryActionIcon = "check-circle";
+                workspaceChips.add(new WorkspaceChip("fa-tag", selectedMaterial.getMaterialType()));
+                if (selectedMaterial.getDisplayOrder() != null) {
+                    workspaceChips.add(new WorkspaceChip("fa-list-ol", "Section " + selectedMaterial.getDisplayOrder()));
+                }
+                workspaceChips.add(new WorkspaceChip("fa-eye", viewedMaterialIds.size() + " / " + materials.size() + " completed"));
+                workspaceChips.add(new WorkspaceChip("fa-circle-check", "completed".equalsIgnoreCase(selectedMaterialStatus) ? "Completed" : "Ready to review"));
+            }
+
+            for (LearningItem item : learningItems) {
+                boolean active = "material".equals(item.getItemKind())
+                        ? selectedMaterialId != null && selectedMaterialId.equals(item.getItemId())
+                        : (selectedAssessmentId != null && selectedAssessmentId.equals(item.getItemId()));
+                item.setActive(active);
+            }
 
             EnrollmentStateSyncService.SyncResult syncResult;
             try {
@@ -672,7 +920,6 @@ public class EnrollmentDetailsServlet extends HttpServlet {
             int totalMaterialsCount = syncResult != null ? syncResult.getTotalMaterials() : materials.size();
             int passedAssessmentsCount = syncResult != null ? syncResult.getPassedAssessments() : 0;
             int totalAssessmentsCount = syncResult != null ? syncResult.getTotalAssessments() : assessments.size();
-                Map<Integer, String> materialStatusById = materialProgressDAO.findMaterialStatusByCourse(userId, enrollment.getCourseId());
             boolean freeCourse = enrollment.getCoursePrice() <= 0;
             boolean eligibleForCertificate = syncResult != null
                     ? syncResult.isEligibleForCertificate()
@@ -698,9 +945,35 @@ public class EnrollmentDetailsServlet extends HttpServlet {
             request.setAttribute("materialStatusById", materialStatusById);
             request.setAttribute("learningItems", learningItems);
             request.setAttribute("recommendedItem", recommendedItem);
+            request.setAttribute("courseAccessGranted", courseAccessGranted);
             request.setAttribute("focusMaterial", focusMaterial);
             request.setAttribute("previousMaterial", previousMaterial);
             request.setAttribute("nextMaterial", nextMaterial);
+            request.setAttribute("selectedMode", selectedMode);
+            request.setAttribute("selectedMaterial", selectedMaterial);
+            request.setAttribute("selectedMaterialId", selectedMaterialId);
+            request.setAttribute("selectedMaterialStatus", selectedMaterialStatus);
+            request.setAttribute("selectedAssessment", selectedAssessment);
+            request.setAttribute("selectedAssessmentId", selectedAssessmentId);
+            request.setAttribute("selectedAssessmentUsedAttempts", selectedAssessmentUsedAttempts);
+            request.setAttribute("selectedAssessmentAllowedAttempts", selectedAssessmentAllowedAttempts);
+            request.setAttribute("selectedAssessmentLatest", selectedAssessmentLatest);
+            request.setAttribute("selectedAssessmentHasActiveAttempt", selectedAssessmentHasActiveAttempt);
+            request.setAttribute("selectedAssessmentStatusLabel", selectedAssessmentStatusLabel);
+            request.setAttribute("selectedAssessmentStatusClass", selectedAssessmentStatusClass);
+            request.setAttribute("selectedAssessmentPrimaryLabel", selectedAssessmentPrimaryLabel);
+            request.setAttribute("selectedAssessmentPrimaryUrl", selectedAssessmentPrimaryUrl);
+            request.setAttribute("workspaceEyebrow", workspaceEyebrow);
+            request.setAttribute("workspaceTitle", workspaceTitle);
+            request.setAttribute("workspaceDescription", workspaceDescription);
+            request.setAttribute("workspaceStatusLabel", workspaceStatusLabel);
+            request.setAttribute("workspaceStatusClass", workspaceStatusClass);
+            request.setAttribute("workspaceAccessLabel", workspaceAccessLabel);
+            request.setAttribute("workspaceAccessIcon", workspaceAccessIcon);
+            request.setAttribute("workspaceChips", workspaceChips);
+            request.setAttribute("workspaceActionNote", workspaceActionNote);
+            request.setAttribute("workspacePrimaryActionIcon", workspacePrimaryActionIcon);
+            request.setAttribute("materialCompletionButtonLabel", materialCompletionButtonLabel);
             int remainingMaterials = Math.max(0, totalMaterialsCount - materialsViewedCount);
             int remainingAssessments = Math.max(0, totalAssessmentsCount - passedAssessmentsCount);
             int readinessStepsComplete = 0;
@@ -799,9 +1072,35 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                     request.setAttribute("viewedMaterialIds", new HashSet<Integer>());
                     request.setAttribute("learningItems", new ArrayList<LearningItem>());
                     request.setAttribute("recommendedItem", null);
+                    request.setAttribute("courseAccessGranted", false);
                     request.setAttribute("focusMaterial", null);
                     request.setAttribute("previousMaterial", null);
                     request.setAttribute("nextMaterial", null);
+                    request.setAttribute("selectedMode", "empty");
+                    request.setAttribute("selectedMaterial", null);
+                    request.setAttribute("selectedMaterialId", null);
+                    request.setAttribute("selectedMaterialStatus", "");
+                    request.setAttribute("selectedAssessment", null);
+                    request.setAttribute("selectedAssessmentId", null);
+                    request.setAttribute("selectedAssessmentUsedAttempts", 0);
+                    request.setAttribute("selectedAssessmentAllowedAttempts", 0);
+                    request.setAttribute("selectedAssessmentLatest", null);
+                    request.setAttribute("selectedAssessmentHasActiveAttempt", false);
+                    request.setAttribute("selectedAssessmentStatusLabel", "Not Started");
+                    request.setAttribute("selectedAssessmentStatusClass", "status-Archived");
+                    request.setAttribute("selectedAssessmentPrimaryLabel", "");
+                    request.setAttribute("selectedAssessmentPrimaryUrl", "");
+                    request.setAttribute("workspaceEyebrow", "Learning Item");
+                    request.setAttribute("workspaceTitle", "Select an item from the course flow");
+                    request.setAttribute("workspaceDescription", "Choose a material or assessment from the sidebar to continue your course sequence.");
+                    request.setAttribute("workspaceStatusLabel", "Ready");
+                    request.setAttribute("workspaceStatusClass", "status-Pending");
+                    request.setAttribute("workspaceAccessLabel", "Payment Required");
+                    request.setAttribute("workspaceAccessIcon", "lock");
+                    request.setAttribute("workspaceChips", new ArrayList<WorkspaceChip>());
+                    request.setAttribute("workspaceActionNote", "Select an item from the course flow to continue.");
+                    request.setAttribute("workspacePrimaryActionIcon", "paper-plane");
+                    request.setAttribute("materialCompletionButtonLabel", "Mark Complete");
                     request.setAttribute("certificateEligible", false);
                     request.setAttribute("certificatePaidReady", false);
                     request.setAttribute("certificateCompletedReady", false);
@@ -840,6 +1139,41 @@ public class EnrollmentDetailsServlet extends HttpServlet {
         } catch (NumberFormatException ex) {
             return null;
         }
+    }
+
+    private Integer parseIntegerParameter(String value) {
+        if (value == null || value.trim().isEmpty()) {
+            return null;
+        }
+        try {
+            return Integer.valueOf(value.trim());
+        } catch (NumberFormatException ex) {
+            return null;
+        }
+    }
+
+    private Material findMaterialById(List<Material> materials, Integer materialId) {
+        if (materials == null || materialId == null) {
+            return null;
+        }
+        for (Material material : materials) {
+            if (material.getMaterialId() != null && material.getMaterialId().equals(materialId)) {
+                return material;
+            }
+        }
+        return null;
+    }
+
+    private Assessment findAssessmentById(List<Assessment> assessments, Integer assessmentId) {
+        if (assessments == null || assessmentId == null) {
+            return null;
+        }
+        for (Assessment assessment : assessments) {
+            if (assessment.getAssessmentId() != null && assessment.getAssessmentId().equals(assessmentId)) {
+                return assessment;
+            }
+        }
+        return null;
     }
 
     private int resolveProgressPercent(Enrollment enrollment, List<Material> materials, List<Assessment> assessments, Integer userId) {
@@ -909,6 +1243,22 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                 return "fa-file-alt";
             default:
                 return "fa-clipboard-list";
+        }
+    }
+
+    private String resolveSubmissionModeLabel(String submissionMode) {
+        if (submissionMode == null) {
+            return "Objective";
+        }
+        switch (submissionMode.trim().toLowerCase()) {
+            case "file":
+                return "File Upload";
+            case "text":
+                return "Written Response";
+            case "both":
+                return "Text + File";
+            default:
+                return "Objective";
         }
     }
 

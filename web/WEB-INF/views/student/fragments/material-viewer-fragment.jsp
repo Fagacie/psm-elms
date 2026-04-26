@@ -1,35 +1,24 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
-<div class="cp-fragment material-fragment">
-    <c:set var="resolvedEnrollmentId" value=""/>
-    <c:choose>
-        <c:when test="${not empty previewEnrollment and not empty previewEnrollment.enrollmentId}">
-            <c:set var="resolvedEnrollmentId" value="${previewEnrollment.enrollmentId}"/>
-        </c:when>
-        <c:when test="${not empty param.enrollmentId}">
-            <c:set var="resolvedEnrollmentId" value="${param.enrollmentId}"/>
-        </c:when>
-    </c:choose>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="${pageContext.request.contextPath}/css/course-player.css">
 
-    <div class="mv-head-copy cp-header">
-        <div class="mv-head-top">
-            <span class="status-badge ${materialStatusClass}" id="mvStatusBadge">${materialStatusLabel}</span>
-            <span class="cp-type-badge">${material.materialType}</span>
-        </div>
-        <h2>${material.title}</h2>
-        <c:if test="${not empty material.description}">
-            <p class="mv-description">${material.description}</p>
-        </c:if>
-    </div>
-
+<div class="cp-fragment lh-fragment-viewer">
     <div class="cp-viewer-container">
         <c:choose>
             <c:when test="${isLinkMaterial}">
                 <div class="mv-link-state">
                     <i class="fas fa-link"></i>
                     <h3>External Resource</h3>
-                    <a id="mvOpenResource" class="sv-btn primary" target="_blank" rel="noopener noreferrer" href="${pageContext.request.contextPath}/student/materials?action=view&id=${material.materialId}">Open Resource</a>
+                    <p>This resource opens in a new tab. Review it there, then return to the Learning Hub and mark the item complete.</p>
+                    <a id="mvOpenResource"
+                       class="cp-inline-link"
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       href="${pageContext.request.contextPath}/student/materials?action=view&id=${material.materialId}">
+                        Open Resource
+                    </a>
                 </div>
             </c:when>
             <c:when test="${isVideoMaterial}">
@@ -53,199 +42,99 @@
                     <iframe class="mv-frame" src="${streamUrl}" title="PDF preview"></iframe>
                 </div>
             </c:when>
-
             <c:when test="${canInlinePreview}">
                 <div class="mv-frame-wrap">
-                    <iframe class="mv-frame" src="${streamUrl}" title="Material preview" style="border:none; width:100%; height:100%;"></iframe>
+                    <iframe class="mv-frame" src="${streamUrl}" title="Material preview"></iframe>
                 </div>
             </c:when>
             <c:otherwise>
                 <div class="mv-link-state">
                     <i class="fas fa-file-arrow-down"></i>
                     <h3>Preview Not Available</h3>
-                    <a class="sv-btn primary" href="${pageContext.request.contextPath}/student/materials?action=download&id=${material.materialId}">Download File</a>
+                    <p>This file cannot be embedded reliably in the browser. Download it, review it, then return to the Learning Hub and mark it complete.</p>
+                    <a class="cp-inline-link" href="${pageContext.request.contextPath}/student/materials?action=download&id=${material.materialId}">
+                        Download File
+                    </a>
                 </div>
             </c:otherwise>
         </c:choose>
-    </div>
-
-    <div class="cp-tracking-bar">
-        <div class="cp-tracking-info">
-            <h4 id="mvCompletionHeading">
-                <c:choose>
-                    <c:when test="${isCompletedMaterial}">Completed</c:when>
-                    <c:otherwise>Mark as Complete</c:otherwise>
-                </c:choose>
-            </h4>
-            <p id="mvCompletionHint">
-                <c:choose>
-                    <c:when test="${isCompletedMaterial}">You've completed this material.</c:when>
-                    <c:when test="${completionRule == 'video' || completionRule == 'audio'}">Watch through to enable completion.</c:when>
-                    <c:otherwise>Review the content, then mark complete.</c:otherwise>
-                </c:choose>
-            </p>
-        </div>
-        
-        <button
-                type="button"
-                id="mvMarkCompleted"
-                class="sv-btn cp-complete-btn"
-                data-material-id="${material.materialId}"
-                data-enrollment-id="${previewEnrollmentId}"
-                data-completion-rule="${completionRule}"
-                data-completed="${isCompletedMaterial}"
-                data-complete-url="${completeActionUrl}"
-                <c:if test="${isCompletedMaterial}">disabled="disabled"</c:if>>
-            <c:choose>
-                <c:when test="${isCompletedMaterial}"><i class="fas fa-check"></i> Completed</c:when>
-                <c:otherwise><i class="fas fa-check-circle"></i> Complete &amp; Continue</c:otherwise>
-            </c:choose>
-        </button>
     </div>
 </div>
 
 <script>
 (function () {
-    var completeButton = document.getElementById('mvMarkCompleted');
-    var completionHint = document.getElementById('mvCompletionHint');
-    var completionHeading = document.getElementById('mvCompletionHeading');
-    var statusBadge = document.getElementById('mvStatusBadge');
     var playbackMedia = document.getElementById('mvPlaybackMedia');
     var openResourceLink = document.getElementById('mvOpenResource');
-    var unlockTimer = null;
-    var completionRequested = false;
+    var completionRule = '${completionRule}';
+    var alreadyCompleted = '${isCompletedMaterial}' === 'true';
 
-    if (!completeButton) return;
-
-    var completionRule = completeButton.getAttribute('data-completion-rule') || 'default';
-    var completeUrl = completeButton.getAttribute('data-complete-url');
-    var materialId = completeButton.getAttribute('data-material-id');
-    var enrollmentId = completeButton.getAttribute('data-enrollment-id');
-    var alreadyCompleted = completeButton.getAttribute('data-completed') === 'true';
-
-    completeButton.addEventListener('click', function () {
-        if (completeButton.disabled) return;
-        markCompleted();
-    });
-
-    function setHint(message) {
-        if (completionHint) completionHint.textContent = message;
-    }
-
-    function setButtonState(disabled, label) {
-        completeButton.disabled = !!disabled;
-        if (label) completeButton.textContent = label;
-    }
-
-    function unlockCompletion(message) {
-        if (alreadyCompleted) return;
-        if (unlockTimer) {
-            window.clearInterval(unlockTimer);
-            unlockTimer = null;
+    function postToParent(type, note) {
+        if (!window.parent || window.parent === window) {
+            return;
         }
-        setButtonState(false, 'Complete & Continue');
-        setHint(message || 'You can confirm this material as completed now.');
+
+        window.parent.postMessage({
+            type: type,
+            completionRule: completionRule,
+            completed: alreadyCompleted,
+            note: note || ''
+        }, window.location.origin);
     }
 
-    function applyCompletedState(message) {
-        alreadyCompleted = true;
-        setButtonState(true, 'Completed');
-        completeButton.setAttribute('data-completed', 'true');
-        if (statusBadge) {
-            statusBadge.className = 'status-badge status-Approved';
-            statusBadge.textContent = 'Completed';
+    function initialNote() {
+        if (alreadyCompleted) {
+            return 'This material is already part of your course progress.';
         }
-        if (completionHeading) completionHeading.textContent = 'Material Completed';
-        setHint(message || 'Your course progress has been updated for this material.');
+        if (completionRule === 'video' || completionRule === 'audio') {
+            return 'Playback unlocks completion once you reach the required threshold.';
+        }
+        if (completionRule === 'link') {
+            return 'Open the external resource in the viewer, then mark it complete from the Learning Hub.';
+        }
+        return 'Review the current material, then mark it complete from the Learning Hub.';
     }
 
-    function markCompleted() {
-        if (alreadyCompleted || completionRequested || !completeUrl || !materialId) return;
-
-        completionRequested = true;
-        setButtonState(true, 'Saving...');
-        var payload = 'materialId=' + encodeURIComponent(materialId);
-        if (enrollmentId) payload += '&enrollmentId=' + encodeURIComponent(enrollmentId);
-
-        fetch(completeUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
-            body: payload
-        })
-        .then(function (response) {
-            if (!response.ok) throw new Error('Unable to save completion.');
-            return response.json();
-        })
-        .then(function (data) {
-            if (!data.success) throw new Error(data.message || 'Unable to save completion.');
-            applyCompletedState('Marked complete.');
-            
-            // Trigger custom event for the parent Course Player to navigate to next item
-            var event = new CustomEvent('CoursePlayerItemCompleted', {
-                detail: { materialId: materialId, nextUrl: data.continueUrl }
-            });
-            document.dispatchEvent(event);
-        })
-        .catch(function (error) {
-            completionRequested = false;
-            setButtonState(false, 'Complete & Continue');
-            setHint(error.message || 'Unable to save completion right now.');
-        });
-    }
+    postToParent('lhViewerState', initialNote());
 
     if (alreadyCompleted) {
-        applyCompletedState('Your course progress already includes this material.');
         return;
     }
 
     if (completionRule === 'video' || completionRule === 'audio') {
-        setButtonState(true, 'Complete After Playback');
         if (!playbackMedia) {
-            unlockCompletion('Playback could not be detected, confirm completion manually.');
+            postToParent('lhViewerUnlock', 'Playback could not be detected. You can mark this material complete manually.');
             return;
         }
 
         playbackMedia.addEventListener('timeupdate', function () {
-            if (!playbackMedia.duration || alreadyCompleted) return;
+            if (!playbackMedia.duration) {
+                return;
+            }
             var progress = playbackMedia.currentTime / playbackMedia.duration;
             if (progress >= 0.85) {
-                unlockCompletion('Playback threshold reached. You can complete this material.');
+                postToParent('lhViewerUnlock', 'Playback threshold reached. You can mark this material complete now.');
             }
         });
 
         playbackMedia.addEventListener('ended', function () {
-            unlockCompletion('Playback finished. Completing this material now.');
-            markCompleted();
+            postToParent('lhViewerUnlock', 'Playback finished. You can mark this material complete now.');
         });
         return;
     }
 
     if (completionRule === 'link') {
-        setButtonState(true, 'Open Resource First');
         if (openResourceLink) {
             openResourceLink.addEventListener('click', function () {
                 window.setTimeout(function () {
-                    unlockCompletion('After reviewing the external resource, click Complete & Continue.');
+                    postToParent('lhViewerUnlock', 'After reviewing the external resource, mark this item complete from the action bar.');
                 }, 1200);
             });
-        } else {
-            unlockCompletion('Confirm completion after reviewing the external resource.');
         }
         return;
     }
 
-    var waitSeconds = completionRule === 'document' || completionRule === 'slides' ? 5 : 3;
-    setButtonState(true, 'Review In Progress');
-    setHint('Completion unlocks in ' + waitSeconds + ' seconds.');
-
-    unlockTimer = window.setInterval(function () {
-        waitSeconds -= 1;
-        if (waitSeconds <= 0) {
-            unlockCompletion('Review complete. You can complete this material now.');
-            return;
-        }
-        setHint('Completion unlocks in ' + waitSeconds + ' seconds.');
-    }, 1000);
-
+    window.setTimeout(function () {
+        postToParent('lhViewerUnlock', 'Review complete. You can mark this material complete now.');
+    }, completionRule === 'document' || completionRule === 'slides' ? 5000 : 3000);
 })();
 </script>

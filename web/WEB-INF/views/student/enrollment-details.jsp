@@ -1,7 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,23 +7,75 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${enrollment.courseName} - Learning Hub</title>
     <jsp:include page="/WEB-INF/views/common/student-head-assets.jsp"/>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/enrollment-details-v2.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/learning-hub.css">
 </head>
-<body class="sv-page">
+<body class="sv-page lh-shell-page">
 <c:set var="topbarTitle" value="Learning Hub"/>
-<c:set var="topbarSubtitle" value="Track progress and continue learning"/>
-<c:set var="topbarShowSearch" value="false"/>
-<c:set var="navContext" value="course"/>
-<c:set var="navContextPage" value="${activeTab == 'overview' ? 'overview' : (activeTab == 'materials' ? 'materials' : (activeTab == 'assessments' ? 'assessments' : 'progress'))}"/>
-<c:set var="navCourseEnrollmentId" value="${enrollment.enrollmentId}"/>
-<c:set var="navCourseTitle" value="${enrollment.courseName}"/>
+<c:set var="topbarSubtitle" value="Continue your course flow with a focused workspace"/>
 <jsp:include page="/WEB-INF/views/common/student-topbar.jsp"/>
 
 <div class="sv-layout">
-    <c:set var="activePage" value="my-courses"/>
-    <jsp:include page="/WEB-INF/views/common/student-sidebar.jsp"/>
+    <aside class="sv-sidebar lh-course-sidebar" id="svSidebar" aria-label="Course flow navigation">
+        <div class="lh-course-sidebar__header">
+            <span class="lh-course-sidebar__eyebrow">Course Flow</span>
+            <h2 class="lh-course-sidebar__title">${enrollment.courseName}</h2>
+            <p class="lh-course-sidebar__summary">
+                ${materialsViewedCount} of ${materialCount} materials completed
+                <span aria-hidden="true">&middot;</span>
+                ${passedAssessmentsCount} of ${totalAssessmentsCount} assessments passed
+            </p>
+            <div class="lh-sidebar-progress">
+                <div class="lh-sidebar-progress__row">
+                    <span>Progress</span>
+                    <strong id="edProgressPercent">${progressPercent}%</strong>
+                </div>
+                <div class="sv-progress lh-sidebar-progress__bar">
+                    <div class="sv-progress-bar" id="lhSidebarProgressBar" style="width:${progressPercent}%;"></div>
+                </div>
+            </div>
+            <span class="lh-course-sidebar__badge ${courseAccessGranted ? 'is-ready' : 'is-locked'}">
+                <i class="fas fa-${courseAccessGranted ? (enrollment.coursePrice <= 0 ? 'gift' : 'check-circle') : 'lock'}"></i>
+                <c:choose>
+                    <c:when test="${enrollment.coursePrice <= 0}">Free Access</c:when>
+                    <c:when test="${courseAccessGranted}">Paid Access</c:when>
+                    <c:otherwise>Payment Pending</c:otherwise>
+                </c:choose>
+            </span>
+        </div>
 
-    <main class="sv-main">
+        <div class="lh-course-sidebar__scroll">
+            <nav class="lh-course-flow" id="lhCourseFlow">
+                <c:forEach var="item" items="${learningItems}">
+                    <a href="${item.navigationUrl}"
+                       class="lh-flow-link ${item.active ? 'is-active' : ''} ${item.completedForProgress ? 'is-completed' : ''} ${item.locked ? 'is-locked' : ''}"
+                       data-flow-kind="${item.itemKind}">
+                        <span class="lh-flow-icon">
+                            <i class="fas ${item.iconClass}"></i>
+                        </span>
+                        <span class="lh-flow-copy">
+                            <span class="lh-flow-kicker">${item.badgeText}</span>
+                            <strong class="lh-flow-title">${item.title}</strong>
+                            <span class="lh-flow-meta">
+                                <span>${item.type}</span>
+                                <c:if test="${not empty item.metaPrimary}">
+                                    <span>${item.metaPrimary}</span>
+                                </c:if>
+                                <c:if test="${not empty item.metaSecondary}">
+                                    <span>${item.metaSecondary}</span>
+                                </c:if>
+                            </span>
+                        </span>
+                        <span class="lh-flow-state ${item.completedForProgress ? 'is-done' : (item.locked ? 'is-locked' : 'is-open')}">
+                            <i class="fas fa-${item.completedForProgress ? 'check' : (item.locked ? 'lock' : ('In Progress' == item.statusLabel ? 'pen' : 'arrow-right'))}"></i>
+                            <span class="lh-flow-state-text">${item.statusLabel}</span>
+                        </span>
+                    </a>
+                </c:forEach>
+            </nav>
+        </div>
+    </aside>
+
+    <main class="sv-main lh-main">
         <div class="sv-breadcrumb">
             <a href="${pageContext.request.contextPath}/dashboard"><i class="fas fa-house"></i> Dashboard</a>
             <span>/</span>
@@ -34,473 +84,436 @@
             <span>Learning Hub</span>
         </div>
 
-        <c:set var="isPaymentComplete" value="${enrollment.paymentStatus == 'Paid' || enrollment.paymentStatus == 'COMPLETED' || enrollment.paymentStatus == 'Completed' || enrollment.paymentStatus == 'SUCCESS' || enrollment.paymentStatus == 'success'}"/>
-
-        <section class="ed-hero">
-            <div class="ed-hero-top">
-                <div>
-                    <h2>${enrollment.courseName}</h2>
-                    <p class="ed-sub">${enrollment.courseDescription}</p>
+        <section class="lh-course-summary">
+            <div class="lh-course-summary__copy">
+                <span class="lh-course-summary__eyebrow">Student Learning Hub</span>
+                <h1>${enrollment.courseName}</h1>
+                <p>${not empty enrollment.courseDescription ? enrollment.courseDescription : 'Continue through your learning sequence with one focused workspace.'}</p>
+            </div>
+            <div class="lh-course-summary__stats">
+                <div class="lh-summary-stat">
+                    <span>Course Progress</span>
+                    <strong id="edProgressPercentSummary">${progressPercent}%</strong>
                 </div>
-                <span class="status-badge ${isPaymentComplete ? 'status-Approved' : 'status-Pending'}">
-                    <i class="fas fa-${isPaymentComplete ? 'check-circle' : 'clock'}"></i>
-                    ${isPaymentComplete ? 'Paid' : 'Payment Pending'}
-                </span>
+                <div class="lh-summary-stat">
+                    <span>Materials Completed</span>
+                    <strong id="edMaterialsViewedCount">${materialsViewedCount} / ${materialCount}</strong>
+                </div>
+                <div class="lh-summary-stat">
+                    <span>Assessments Passed</span>
+                    <strong>${passedAssessmentsCount} / ${totalAssessmentsCount}</strong>
+                </div>
+                <div class="lh-summary-stat">
+                    <span>Access</span>
+                    <strong>
+                        <c:choose>
+                            <c:when test="${enrollment.coursePrice <= 0}">Free</c:when>
+                            <c:when test="${courseAccessGranted}">Unlocked</c:when>
+                            <c:otherwise>Pending</c:otherwise>
+                        </c:choose>
+                    </strong>
+                </div>
             </div>
-
-            <div class="ed-progress-wrap">
-                <div class="sv-progress"><div class="sv-progress-bar" style="width:${progressPercent}%;"></div></div>
-            </div>
-
-            <div class="ed-meta">
-                <div class="ed-meta-item"><span>Instructor</span><strong>${enrollment.instructorName}</strong></div>
-                <div class="ed-meta-item"><span>Enrolled</span><strong><c:out value="${enrollment.enrollmentDate != null ? enrollment.enrollmentDate.toLocalDate() : '-'}"/></strong></div>
-                <div class="ed-meta-item"><span>Course Fee</span><strong><fmt:formatNumber value="${enrollment.coursePrice}" type="number" minFractionDigits="2" maxFractionDigits="2"/></strong></div>
-                <div class="ed-meta-item"><span>Progress</span><strong id="edProgressPercent">${progressPercent}%</strong></div>
-                <div class="ed-meta-item"><span>Materials Viewed</span><strong id="edMaterialsViewedCount" data-total-materials="${materialCount}">${materialsViewedCount} / ${materialCount}</strong></div>
+            <div class="lh-course-summary__progress">
+                <div class="sv-progress">
+                    <div class="sv-progress-bar" id="lhSummaryProgressBar" style="width:${progressPercent}%;"></div>
+                </div>
             </div>
         </section>
 
-        <c:set var="materialsViewedSafe" value="${empty materialsViewedCount ? 0 : materialsViewedCount}"/>
-        <c:set var="materialsTotalSafe" value="${empty materialCount ? 0 : materialCount}"/>
-        <c:set var="assessmentsPassedSafe" value="${empty passedAssessmentsCount ? 0 : passedAssessmentsCount}"/>
-        <c:set var="assessmentsTotalSafe" value="${empty totalAssessmentsCount ? 0 : totalAssessmentsCount}"/>
+        <section class="lh-workspace">
+            <header class="lh-stage-head">
+                <div class="lh-stage-head__copy">
+                    <span class="lh-stage-eyebrow">${workspaceEyebrow}</span>
+                    <h2>${workspaceTitle}</h2>
+                    <p>${workspaceDescription}</p>
+                </div>
+                <div class="lh-stage-head__status">
+                    <span class="status-badge ${workspaceStatusClass}" id="lhItemStatusBadge">${workspaceStatusLabel}</span>
+                    <span class="lh-stage-access ${courseAccessGranted ? 'is-ready' : 'is-locked'}" id="lhAccessStatusBadge">
+                        <i class="fas fa-${workspaceAccessIcon}"></i>
+                        ${workspaceAccessLabel}
+                    </span>
+                </div>
+            </header>
 
-        <div class="ed-tabs" role="tablist" aria-label="Learning hub sections">
-            <a class="ed-tab ${activeTab == 'learning' ? 'active' : ''}"
-               href="${pageContext.request.contextPath}/student/enrollment-details?enrollmentId=${enrollment.enrollmentId}&tab=learning">
-                <i class="fas fa-route"></i> Learning
-            </a>
-            <a class="ed-tab ${activeTab == 'overview' ? 'active' : ''}"
-               href="${pageContext.request.contextPath}/student/enrollment-details?enrollmentId=${enrollment.enrollmentId}&tab=overview">
-                <i class="fas fa-table-columns"></i> Overview
-            </a>
-            <a class="ed-tab ${activeTab == 'materials' ? 'active' : ''}"
-               href="${pageContext.request.contextPath}/student/enrollment-details?enrollmentId=${enrollment.enrollmentId}&tab=materials">
-                <i class="fas fa-book"></i> Materials
-            </a>
-            <a class="ed-tab ${activeTab == 'assessments' ? 'active' : ''}"
-               href="${pageContext.request.contextPath}/student/assessments?view=dashboard&enrollmentId=${enrollment.enrollmentId}">
-                <i class="fas fa-clipboard-check"></i> Assessments
-            </a>
-        </div>
+            <div class="lh-stage-meta">
+                <c:forEach var="chip" items="${workspaceChips}">
+                    <span class="lh-stage-chip"><i class="fas ${chip.iconClass}"></i> ${chip.label}</span>
+                </c:forEach>
+            </div>
 
-        <c:choose>
-            <c:when test="${activeTab == 'learning'}">
-                <section class="sv-card">
-                    <div class="sv-card-head"><h3>Learning Sequence</h3></div>
-                    <div class="sv-card-body">
-                        <c:if test="${not paidAccess}">
-                            <div class="alert alert-error">
-                                Payment is required to open materials and take assessments.
-                                <a class="sv-btn primary" href="${pageContext.request.contextPath}/student/payment?enrollmentId=${enrollment.enrollmentId}">
-                                    <i class="fas fa-credit-card"></i>&nbsp;Complete Payment
-                                </a>
+            <div class="lh-stage-body">
+                <c:choose>
+                    <c:when test="${selectedMode == 'assessment' and not empty selectedAssessment}">
+                        <section class="lh-assessment-card">
+                            <div class="lh-assessment-card__grid">
+                                <div class="lh-assessment-block">
+                                    <span>Assessment Type</span>
+                                    <strong>${selectedAssessment.type}</strong>
+                                </div>
+                                <div class="lh-assessment-block">
+                                    <span>Duration</span>
+                                    <strong>${selectedAssessment.duration != null ? selectedAssessment.duration : 30} minutes</strong>
+                                </div>
+                                <div class="lh-assessment-block">
+                                    <span>Attempts</span>
+                                    <strong>${selectedAssessmentUsedAttempts} used / ${selectedAssessmentAllowedAttempts} allowed</strong>
+                                </div>
+                                <div class="lh-assessment-block">
+                                    <span>Submission</span>
+                                    <strong>${selectedAssessment.submissionMode == 'file' ? 'File Upload' : (selectedAssessment.submissionMode == 'text' ? 'Written Response' : (selectedAssessment.submissionMode == 'both' ? 'Text + File' : 'Objective Responses'))}</strong>
+                                </div>
                             </div>
-                        </c:if>
-                        <c:if test="${not empty recommendedItem}">
-                            <div class="ed-next-step">
-                                <div class="ed-next-copy">
-                                    <span class="ed-next-kicker">Recommended Next Step</span>
-                                    <h4>${recommendedItem.title}</h4>
+
+                            <div class="lh-assessment-card__content">
+                                <div class="lh-assessment-block is-wide">
+                                    <span>Instructions</span>
+                                    <p>${not empty selectedAssessment.instructions ? selectedAssessment.instructions : 'Open the assessment from the action bar when you are ready to continue.'}</p>
+                                </div>
+
+                                <div class="lh-assessment-block is-wide">
+                                    <span>Current Status</span>
                                     <p>
-                                        <c:choose>
-                                            <c:when test="${not empty recommendedItem.description}">${recommendedItem.description}</c:when>
-                                            <c:otherwise>Continue your course in sequence and keep your progress moving toward completion.</c:otherwise>
-                                        </c:choose>
+                                        <strong>${selectedAssessmentStatusLabel}</strong>
+                                        <c:if test="${not empty selectedAssessmentLatest}">
+                                            <span class="lh-inline-separator">&middot;</span>
+                                            Latest attempt #${selectedAssessmentLatest.attemptNumber}
+                                            <c:if test="${not empty selectedAssessmentLatest.score}">
+                                                <span class="lh-inline-separator">&middot;</span>
+                                                Score ${selectedAssessmentLatest.score}
+                                            </c:if>
+                                        </c:if>
                                     </p>
-                                    <div class="ed-learning-meta">
-                                        <c:if test="${not empty recommendedItem.metaPrimary}"><span><i class="fas fa-clock"></i> ${recommendedItem.metaPrimary}</span></c:if>
-                                        <c:if test="${not empty recommendedItem.metaSecondary}"><span><i class="fas fa-list-check"></i> ${recommendedItem.metaSecondary}</span></c:if>
-                                    </div>
                                 </div>
-                                <div class="ed-next-actions">
-                                    <span class="status-badge ${recommendedItem.statusClass}">${recommendedItem.statusLabel}</span>
-                                    <c:if test="${not recommendedItem.locked and not empty recommendedItem.primaryActionUrl}">
-                                        <a id="edContinueAction" class="sv-btn primary" href="${recommendedItem.primaryActionUrl}">
-                                            <i class="fas ${recommendedItem.primaryActionIcon}"></i>&nbsp;${recommendedItem.primaryActionLabel}
-                                        </a>
-                                    </c:if>
-                                    <c:if test="${not recommendedItem.locked and empty recommendedItem.primaryActionUrl and not empty recommendedItem.secondaryActionUrl}">
-                                        <a id="edContinueAction" class="sv-btn primary" href="${recommendedItem.secondaryActionUrl}">
-                                            <i class="fas ${recommendedItem.secondaryActionIcon}"></i>&nbsp;${recommendedItem.secondaryActionLabel}
-                                        </a>
-                                    </c:if>
-                                </div>
-                            </div>
-                        </c:if>
-                        <c:choose>
-                            <c:when test="${not empty learningItems}">
-                                <div class="ed-learning-list">
-                                    <c:set var="currentGroup" value="" />
-                                    <c:forEach var="item" items="${learningItems}">
-                                        <c:if test="${currentGroup != item.groupLabel}">
-                                            <div class="ed-group-header">
-                                                <div class="ed-group-header-copy">
-                                                    <span class="ed-group-kicker">Sequence Block</span>
-                                                    <h4>${item.groupLabel}</h4>
-                                                    <p>${item.groupHint}</p>
-                                                </div>
-                                                <div class="ed-group-summary">
-                                                    <span class="status-badge ${item.groupStatusClass}">${item.groupStatusLabel}</span>
-                                                    <strong>${item.groupCompletedItems} / ${item.groupTotalItems}</strong>
-                                                    <span>${item.groupCompletionPercent}% complete</span>
-                                                </div>
-                                            </div>
-                                            <c:set var="currentGroup" value="${item.groupLabel}" />
-                                        </c:if>
-                                        <article class="ed-learning-item">
-                                            <div class="ed-learning-main">
-                                                <div class="ed-learning-icon"><i class="fas ${item.iconClass}"></i></div>
-                                                <div>
-                                                    <span class="ed-learning-type">${item.type}</span>
-                                                    <h4 class="ed-learning-title">${item.title}</h4>
-                                                    <c:if test="${not empty item.description}"><p class="ed-learning-desc">${item.description}</p></c:if>
-                                                    <div class="ed-learning-meta">
-                                                        <c:if test="${not empty item.metaPrimary}"><span><i class="fas fa-clock"></i> ${item.metaPrimary}</span></c:if>
-                                                        <c:if test="${not empty item.metaSecondary}"><span><i class="fas fa-chart-bar"></i> ${item.metaSecondary}</span></c:if>
-                                                        <c:if test="${not empty item.metaTertiary}"><span><i class="fas fa-award"></i> ${item.metaTertiary}</span></c:if>
-                                                    </div>
-                                                    <c:if test="${item.locked}"><div class="ed-learning-lock"><i class="fas fa-lock"></i> ${item.lockReason}</div></c:if>
-                                                </div>
-                                                <span class="status-badge ${item.statusClass}">${item.statusLabel}</span>
-                                            </div>
-                                            <div class="ed-learning-actions">
-                                                <c:if test="${not item.locked and not empty item.primaryActionUrl}"><a class="sv-btn primary" href="${item.primaryActionUrl}"><i class="fas ${item.primaryActionIcon}"></i>&nbsp;${item.primaryActionLabel}</a></c:if>
-                                                <c:if test="${not item.locked and not empty item.secondaryActionUrl}"><a class="sv-btn" href="${item.secondaryActionUrl}"><i class="fas ${item.secondaryActionIcon}"></i>&nbsp;${item.secondaryActionLabel}</a></c:if>
-                                                <c:if test="${item.locked and not paidAccess}">
-                                                    <a class="sv-btn primary" href="${pageContext.request.contextPath}/student/payment?enrollmentId=${enrollment.enrollmentId}">
-                                                        <i class="fas fa-credit-card"></i>&nbsp;Unlock with Payment
-                                                    </a>
-                                                </c:if>
-                                            </div>
-                                        </article>
-                                    </c:forEach>
-                                </div>
-                            </c:when>
-                            <c:otherwise>
-                                <div class="empty-state-box"><i class="fas fa-layer-group"></i><p>No learning items available yet.</p></div>
-                            </c:otherwise>
-                        </c:choose>
-                    </div>
-                </section>
-            </c:when>
 
-            <c:when test="${activeTab == 'overview'}">
-                <section class="ed-grid">
-                    <article class="sv-card">
-                        <div class="sv-card-head"><h3>Course Summary</h3></div>
-                        <div class="sv-card-body">
-                            <div class="ed-stat-block"><strong>Enrollment Status:</strong> ${enrollment.status}</div>
-                            <div class="ed-stat-block"><strong>Completion Status:</strong> ${enrollment.completionStatus}</div>
-                            <div class="ed-stat-block"><strong>Materials:</strong> ${materialCount}</div>
-                            <div class="ed-stat-block"><strong>Assessments:</strong> ${assessmentCount}</div>
-                            <c:if test="${not empty enrollment.instructorEmail}"><div class="ed-stat-block"><strong>Instructor Email:</strong> ${enrollment.instructorEmail}</div></c:if>
-                            <c:if test="${not empty enrollment.paymentRef}"><div class="ed-stat-block"><strong>Payment Reference:</strong> ${enrollment.paymentRef}</div></c:if>
-                        </div>
-                    </article>
-                    <article class="sv-card">
-                        <div class="sv-card-head"><h3>Announcements</h3></div>
-                        <div class="sv-card-body">
-                            <c:choose>
-                                <c:when test="${not empty announcements}">
-                                    <c:forEach var="ann" items="${announcements}">
-                                        <div class="ed-ann">
-                                            <h4>${ann.title}</h4>
-                                            <p>${ann.content}</p>
+                                <c:if test="${not courseAccessGranted}">
+                                    <div class="lh-stage-notice is-warning">
+                                        <i class="fas fa-lock"></i>
+                                        <div>
+                                            <strong>Assessment access is locked.</strong>
+                                            <p>Complete payment first to continue through the assessment flow.</p>
                                         </div>
-                                    </c:forEach>
-                                </c:when>
-                                <c:otherwise>
-                                    <div class="empty-state-box"><i class="fas fa-bell-slash"></i><p>No announcements yet.</p></div>
-                                </c:otherwise>
-                            </c:choose>
+                                    </div>
+                                </c:if>
+                            </div>
+                        </section>
+                    </c:when>
+
+                    <c:when test="${not empty selectedMaterial}">
+                        <section class="lh-material-stage">
+                            <iframe
+                                class="lh-workspace-frame"
+                                id="lhMaterialFrame"
+                                title="Learning material viewer"
+                                src="${pageContext.request.contextPath}/student/materials?action=preview&id=${selectedMaterial.materialId}&enrollmentId=${enrollment.enrollmentId}&fragment=true"></iframe>
+                        </section>
+                    </c:when>
+
+                    <c:otherwise>
+                        <div class="lh-stage-empty">
+                            <i class="fas fa-book-open-reader"></i>
+                            <h3>No learning item selected</h3>
+                            <p>Choose a material or assessment from the course flow to begin.</p>
                         </div>
-                    </article>
-                </section>
-            </c:when>
+                    </c:otherwise>
+                </c:choose>
+            </div>
 
-            <c:when test="${activeTab == 'materials'}">
-                <section class="sv-card">
-                    <div class="sv-card-head"><h3>Course Materials</h3></div>
-                    <div class="sv-card-body">
-                        <c:if test="${not paidAccess}">
-                            <div class="alert alert-error">
-                                Payment is required to view and download materials.
-                                <a class="sv-btn primary" href="${pageContext.request.contextPath}/student/payment?enrollmentId=${enrollment.enrollmentId}">
-                                    <i class="fas fa-credit-card"></i>&nbsp;Complete Payment
-                                </a>
-                            </div>
-                        </c:if>
-                        <c:if test="${paidAccess}">
-                            <c:if test="${not empty focusMaterial}">
-                                <c:set var="focusRule" value="${fn:toLowerCase(focusMaterial.materialType) == 'video' ? 'video' : (fn:toLowerCase(focusMaterial.materialType) == 'pdf' ? 'pdf' : 'default')}"/>
-                                <div class="ed-material-nav">
-                                    <div class="ed-material-nav-copy">
-                                        <span class="ed-next-kicker">Continue Sequence</span>
-                                        <h4>${focusMaterial.title}</h4>
-                                        <p>
-                                            <c:choose>
-                                                <c:when test="${viewedMaterialIds.contains(focusMaterial.materialId)}">You have reached the current end of your viewed materials. Revisit this chapter or continue to the next one.</c:when>
-                                                <c:otherwise>This is the next chapter the system recommends based on your learning sequence.</c:otherwise>
-                                            </c:choose>
-                                        </p>
-                                    </div>
-                                    <div class="ed-material-nav-actions">
-                                        <c:if test="${not empty previousMaterial}">
-                                            <a class="sv-btn" href="${pageContext.request.contextPath}/student/materials?action=preview&id=${previousMaterial.materialId}&enrollmentId=${enrollment.enrollmentId}">
-                                                <i class="fas fa-arrow-left"></i>&nbsp;Previous
-                                            </a>
-                                        </c:if>
-                                        <a class="sv-btn primary" href="${pageContext.request.contextPath}/student/materials?action=preview&id=${focusMaterial.materialId}&enrollmentId=${enrollment.enrollmentId}">
-                                            <i class="fas fa-book-open"></i>&nbsp;Open
-                                        </a>
-                                        <c:if test="${not empty nextMaterial}">
-                                            <a class="sv-btn" href="${pageContext.request.contextPath}/student/materials?action=preview&id=${nextMaterial.materialId}&enrollmentId=${enrollment.enrollmentId}">
-                                                Next&nbsp;<i class="fas fa-arrow-right"></i>
-                                            </a>
-                                        </c:if>
-                                    </div>
-                                </div>
-                            </c:if>
+            <footer class="lh-action-bar">
+                <div class="lh-action-bar__copy">
+                    <strong>Workspace Actions</strong>
+                    <p id="lhActionNote">${workspaceActionNote}</p>
+                </div>
 
-                            <c:choose>
-                                <c:when test="${not empty materials}">
-                                    <table class="ed-table">
-                                        <thead><tr><th>Material</th><th>Chapter</th><th>Type</th><th>Status</th><th>Uploaded</th><th>Actions</th></tr></thead>
-                                        <tbody>
-                                        <c:forEach var="m" items="${materials}">
-                                            <c:set var="materialStatus" value="${materialStatusById[m.materialId]}"/>
-                                            <c:set var="materialTypeLower" value="${fn:toLowerCase(m.materialType)}"/>
-                                            <c:set var="completionRule" value="${materialTypeLower == 'video' ? 'video' : (materialTypeLower == 'pdf' ? 'pdf' : 'default')}"/>
-                                            <tr>
-                                                <td>
-                                                    <strong>${m.title}</strong>
-                                                    <c:if test="${not empty m.description}"><div class="sv-course-line">${m.description}</div></c:if>
-                                                </td>
-                                                <td><c:out value="${not empty m.displayOrder ? m.displayOrder : '-'}"/></td>
-                                                <td><span class="assessment-type-badge assessment-type-Assignment">${m.materialType}</span></td>
-                                                <td>
-                                                    <c:choose>
-                                                        <c:when test="${materialStatus == 'completed'}">
-                                                            <span class="status-badge status-Approved">Completed</span>
-                                                        </c:when>
-                                                        <c:when test="${materialStatus == 'in_progress'}">
-                                                            <span class="status-badge status-Pending">In Progress</span>
-                                                        </c:when>
-                                                        <c:otherwise>
-                                                            <span class="status-badge status-Archived">Available</span>
-                                                        </c:otherwise>
-                                                    </c:choose>
-                                                </td>
-                                                <td><c:out value="${not empty m.uploadDate ? m.uploadDate.toLocalDate() : '-'}"/></td>
-                                                <td>
-                                                    <a class="sv-btn" href="${pageContext.request.contextPath}/student/materials?action=preview&id=${m.materialId}&enrollmentId=${enrollment.enrollmentId}">Open</a>
-                                                    <c:if test="${fn:toLowerCase(m.materialType) != 'link'}">
-                                                        <a class="sv-btn" href="${pageContext.request.contextPath}/student/materials?action=download&id=${m.materialId}">Download</a>
-                                                    </c:if>
-                                                    <c:if test="${materialStatus != 'completed'}">
-                                                        <button type="button"
-                                                                class="sv-btn js-mark-material-completed"
-                                                                data-material-id="${m.materialId}"
-                                                                data-enrollment-id="${enrollment.enrollmentId}"
-                                                                data-material-title="${fn:escapeXml(m.title)}"
-                                                                <c:if test="${completionRule != 'default'}">disabled="disabled"</c:if>
-                                                                <c:if test="${completionRule != 'default'}">title="Open the preview page to complete this material."</c:if>>
-                                                            <c:choose>
-                                                                <c:when test="${completionRule != 'default'}">Complete in Preview</c:when>
-                                                                <c:otherwise>Mark as Completed</c:otherwise>
-                                                            </c:choose>
-                                                        </button>
-                                                    </c:if>
-                                                </td>
-                                            </tr>
-                                        </c:forEach>
-                                        </tbody>
-                                    </table>
-                                </c:when>
-                                <c:otherwise><div class="empty-state-box"><i class="fas fa-folder-open"></i><p>No materials available yet.</p></div></c:otherwise>
-                            </c:choose>
-                        </c:if>
-                    </div>
-                </section>
-            </c:when>
+                <div class="lh-action-bar__actions">
+                    <a class="sv-btn lh-nav-action is-hidden" id="lhPrevAction" href="#">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>Previous</span>
+                    </a>
 
-            <c:when test="${activeTab == 'assessments'}">
-                <section class="sv-card">
-                    <div class="sv-card-head"><h3>Course Assessments</h3></div>
-                    <div class="sv-card-body">
-                        <c:if test="${not paidAccess}">
-                            <div class="alert alert-error">
-                                Payment is required before taking assessments.
-                                <a class="sv-btn primary" href="${pageContext.request.contextPath}/student/payment?enrollmentId=${enrollment.enrollmentId}">
-                                    <i class="fas fa-credit-card"></i>&nbsp;Complete Payment
-                                </a>
-                            </div>
-                        </c:if>
-                        <c:choose>
-                            <c:when test="${not empty assessments}">
-                                <table class="ed-table">
-                                    <thead><tr><th>Assessment</th><th>Type</th><th>Duration</th><th>Attempts</th><th>Latest</th><th>Actions</th></tr></thead>
-                                    <tbody>
-                                    <c:forEach var="a" items="${assessments}">
-                                        <c:set var="usedAttempts" value="${usedAttemptsByAssessment[a.assessmentId]}"/>
-                                        <c:set var="allowedAttempts" value="${allowedAttemptsByAssessment[a.assessmentId]}"/>
-                                        <c:set var="latest" value="${latestSubmissionByAssessment[a.assessmentId]}"/>
-                                        <c:set var="hasActiveAttempt" value="${activeAttemptByAssessment[a.assessmentId]}"/>
-                                        <c:set var="objectiveType" value="${a.type == 'Quiz' || a.type == 'Exam'}"/>
-                                        <tr>
-                                            <td>${a.title}</td>
-                                            <td><span class="assessment-type-badge assessment-type-${a.type}">${a.type}</span></td>
-                                            <td>${a.duration} min</td>
-                                            <td>${usedAttempts} / ${allowedAttempts}</td>
-                                            <td>
-                                                <c:choose>
-                                                    <c:when test="${not empty latest}">
-                                                        <div><c:out value="${empty latest.status ? 'Submitted' : latest.status}"/></div>
-                                                        <c:if test="${latest.score != null}"><div class="sv-course-line">${latest.score}</div></c:if>
-                                                    </c:when>
-                                                    <c:otherwise>-</c:otherwise>
-                                                </c:choose>
-                                            </td>
-                                            <td>
-                                                <c:if test="${paidAccess}">
-                                                    <c:choose>
-                                                        <c:when test="${objectiveType and hasActiveAttempt}">
-                                                            <a class="sv-btn primary" href="${pageContext.request.contextPath}/student/assessments?view=take&courseId=${enrollment.courseId}&assessmentId=${a.assessmentId}&mode=attempt&fromHub=1&enrollmentId=${enrollment.enrollmentId}">Continue</a>
-                                                        </c:when>
-                                                        <c:when test="${objectiveType and usedAttempts < allowedAttempts}">
-                                                            <a class="sv-btn primary" href="${pageContext.request.contextPath}/student/assessments?view=details&courseId=${enrollment.courseId}&assessmentId=${a.assessmentId}&fromHub=1&enrollmentId=${enrollment.enrollmentId}">Start</a>
-                                                        </c:when>
-                                                    </c:choose>
-                                                </c:if>
-                                                <a class="sv-btn" href="${pageContext.request.contextPath}/student/assessments?view=details&courseId=${enrollment.courseId}&assessmentId=${a.assessmentId}&fromHub=1&enrollmentId=${enrollment.enrollmentId}">
-                                                    <c:choose>
-                                                        <c:when test="${objectiveType}">Details</c:when>
-                                                        <c:otherwise>Open Submission</c:otherwise>
-                                                    </c:choose>
-                                                </a>
-                                            </td>
-                                        </tr>
-                                    </c:forEach>
-                                    </tbody>
-                                </table>
-                            </c:when>
-                            <c:otherwise><div class="empty-state-box"><i class="fas fa-clipboard-list"></i><p>No assessments published yet.</p></div></c:otherwise>
-                        </c:choose>
-                    </div>
-                </section>
-            </c:when>
-        </c:choose>
+                    <a class="sv-btn lh-nav-action is-hidden" id="lhNextAction" href="#">
+                        <span>Next</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+
+                    <c:choose>
+                        <c:when test="${selectedMode == 'assessment' and not empty selectedAssessment and not empty selectedAssessmentPrimaryUrl}">
+                            <a class="sv-btn primary" id="lhSubmitAction" href="${selectedAssessmentPrimaryUrl}">
+                                <i class="fas fa-${workspacePrimaryActionIcon}"></i>
+                                <span>${selectedAssessmentPrimaryLabel}</span>
+                            </a>
+                        </c:when>
+                        <c:when test="${not empty selectedMaterial}">
+                            <button
+                                id="edMarkCompleted"
+                                type="button"
+                                class="sv-btn primary"
+                                data-material-id="${selectedMaterial.materialId}"
+                                data-enrollment-id="${enrollment.enrollmentId}"
+                                data-completed="${selectedMaterialStatus == 'completed'}"
+                                <c:if test="${selectedMaterialStatus == 'completed'}">disabled="disabled"</c:if>>
+                                <i class="fas fa-check-circle"></i>
+                                <span>${materialCompletionButtonLabel}</span>
+                            </button>
+                        </c:when>
+                    </c:choose>
+                </div>
+            </footer>
+        </section>
     </main>
 </div>
 
 <div class="sv-overlay" id="svOverlay"></div>
 <script>
 (function () {
-    var completionButtons = document.querySelectorAll('.js-mark-material-completed');
-    var progressPercentNode = document.getElementById('edProgressPercent');
+    var body = document.body;
+    var flowLinks = Array.prototype.slice.call(document.querySelectorAll('.lh-flow-link'));
+    var prevAction = document.getElementById('lhPrevAction');
+    var nextAction = document.getElementById('lhNextAction');
+    var completeButton = document.getElementById('edMarkCompleted');
+    var actionNote = document.getElementById('lhActionNote');
+    var itemStatusBadge = document.getElementById('lhItemStatusBadge');
+    var progressPercentNodes = [
+        document.getElementById('edProgressPercent'),
+        document.getElementById('edProgressPercentSummary')
+    ];
+    var progressBars = [
+        document.getElementById('lhSidebarProgressBar'),
+        document.getElementById('lhSummaryProgressBar')
+    ];
     var materialsViewedNode = document.getElementById('edMaterialsViewedCount');
+    var currentMaterialType = '${not empty selectedMaterial ? selectedMaterial.materialType : ""}';
+    var currentSelectionMode = '${selectedMode}';
+    var viewerState = {
+        completionRule: '',
+        unlocked: '${selectedMaterialStatus == "completed"}' === 'true',
+        completed: '${selectedMaterialStatus == "completed"}' === 'true'
+    };
 
-    function updateProgressUI(progressPercent) {
-        var progressBars = document.querySelectorAll('.sv-progress-bar');
-        for (var i = 0; i < progressBars.length; i++) {
-            progressBars[i].style.width = progressPercent + '%';
+    function findActiveLink() {
+        for (var i = 0; i < flowLinks.length; i++) {
+            if (flowLinks[i].classList.contains('is-active')) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    function updatePager() {
+        var activeIndex = findActiveLink();
+        var previousLink = activeIndex > 0 ? flowLinks[activeIndex - 1] : null;
+        var nextLink = activeIndex >= 0 && activeIndex < flowLinks.length - 1 ? flowLinks[activeIndex + 1] : null;
+
+        if (prevAction) {
+            if (previousLink) {
+                prevAction.href = previousLink.href;
+                prevAction.classList.remove('is-hidden');
+            } else {
+                prevAction.classList.add('is-hidden');
+            }
         }
 
-        if (progressPercentNode) {
-            progressPercentNode.textContent = progressPercent + '%';
+        if (nextAction) {
+            if (nextLink) {
+                nextAction.href = nextLink.href;
+                nextAction.classList.remove('is-hidden');
+            } else {
+                nextAction.classList.add('is-hidden');
+            }
         }
     }
 
-    function updateContinueAction(label, url) {
-        var continueLink = document.getElementById('edContinueAction');
-        if (!continueLink || !label || !url) {
+    function setProgress(progressPercent) {
+        if (typeof progressPercent !== 'number' || isNaN(progressPercent)) {
             return;
         }
-        continueLink.setAttribute('href', url);
-        continueLink.innerHTML = '<i class="fas fa-play"></i>&nbsp;' + label;
+        for (var i = 0; i < progressPercentNodes.length; i++) {
+            if (progressPercentNodes[i]) {
+                progressPercentNodes[i].textContent = progressPercent + '%';
+            }
+        }
+        for (var j = 0; j < progressBars.length; j++) {
+            if (progressBars[j]) {
+                progressBars[j].style.width = progressPercent + '%';
+            }
+        }
     }
 
-    function setRowCompleted(button) {
-        var row = button.closest('tr');
-        if (!row) {
+    function setMaterialsViewed(viewed, total) {
+        if (!materialsViewedNode || typeof viewed !== 'number') {
             return;
         }
-        var statusCell = row.children[3];
-        if (statusCell) {
-            statusCell.innerHTML = '<span class="status-badge status-Approved">Completed</span>';
-        }
-        button.remove();
+        var totalValue = typeof total === 'number' ? total : ${materialCount};
+        materialsViewedNode.textContent = viewed + ' / ' + totalValue;
     }
 
-    function updateMaterialsViewed(viewedMaterials, totalMaterials) {
-        if (!materialsViewedNode || typeof viewedMaterials !== 'number') {
+    function setCompletionButton(disabled, label) {
+        if (!completeButton) {
             return;
         }
-        var total = typeof totalMaterials === 'number'
-            ? totalMaterials
-            : parseInt(materialsViewedNode.getAttribute('data-total-materials'), 10);
-        if (isNaN(total)) {
-            total = 0;
+        completeButton.disabled = !!disabled;
+        if (label) {
+            completeButton.innerHTML = '<i class="fas fa-check-circle"></i><span>' + label + '</span>';
         }
-        materialsViewedNode.setAttribute('data-total-materials', total);
-        materialsViewedNode.textContent = viewedMaterials + ' / ' + total;
     }
 
-    for (var i = 0; i < completionButtons.length; i++) {
-        completionButtons[i].addEventListener('click', function () {
-            var button = this;
-            var materialId = button.getAttribute('data-material-id');
-            var enrollmentId = button.getAttribute('data-enrollment-id');
+    function updateCompletionSidebarState() {
+        var activeIndex = findActiveLink();
+        if (activeIndex < 0) {
+            return;
+        }
+        var activeLink = flowLinks[activeIndex];
+        activeLink.classList.add('is-completed');
+        activeLink.classList.remove('is-locked');
+        var state = activeLink.querySelector('.lh-flow-state');
+        var stateText = activeLink.querySelector('.lh-flow-state-text');
+        var stateIcon = state ? state.querySelector('i') : null;
+        if (state) {
+            state.classList.remove('is-open', 'is-locked');
+            state.classList.add('is-done');
+        }
+        if (stateText) {
+            stateText.textContent = 'Completed';
+        }
+        if (stateIcon) {
+            stateIcon.className = 'fas fa-check';
+        }
+    }
+
+    function applyCompletedState(note) {
+        viewerState.completed = true;
+        viewerState.unlocked = true;
+        if (itemStatusBadge) {
+            itemStatusBadge.className = 'status-badge status-Approved';
+            itemStatusBadge.textContent = 'Completed';
+        }
+        setCompletionButton(true, 'Completed');
+        updateCompletionSidebarState();
+        if (actionNote && note) {
+            actionNote.textContent = note;
+        }
+    }
+
+    function setWaitingState() {
+        if (!completeButton || viewerState.completed || currentSelectionMode !== 'material') {
+            return;
+        }
+
+        var label = 'Mark Complete';
+        var note = 'Review the current material, then mark it complete from the action bar.';
+
+        if (currentMaterialType === 'Video' || currentMaterialType === 'Audio') {
+            label = 'Complete After Playback';
+            note = 'Playback unlocks completion once you reach the required threshold.';
+        } else if (currentMaterialType === 'Link') {
+            label = 'Open Resource First';
+            note = 'Open the external resource in the viewer, then mark it complete here.';
+        } else {
+            label = 'Review In Progress';
+            note = 'Review the current material, then mark it complete from the action bar.';
+        }
+
+        setCompletionButton(true, label);
+        if (actionNote) {
+            actionNote.textContent = note;
+        }
+    }
+
+    function unlockCompletion(note) {
+        if (!completeButton || viewerState.completed || currentSelectionMode !== 'material') {
+            return;
+        }
+        viewerState.unlocked = true;
+        setCompletionButton(false, 'Mark Complete');
+        if (actionNote && note) {
+            actionNote.textContent = note;
+        }
+    }
+
+    updatePager();
+
+    if (completeButton) {
+        if (viewerState.completed) {
+            setCompletionButton(true, 'Completed');
+        } else {
+            setWaitingState();
+            if (currentMaterialType !== 'Video' && currentMaterialType !== 'Audio' && currentMaterialType !== 'Link') {
+                window.setTimeout(function () {
+                    if (!viewerState.unlocked && !viewerState.completed) {
+                        unlockCompletion('Review complete. You can mark this material complete now.');
+                    }
+                }, 5500);
+            }
+        }
+
+        completeButton.addEventListener('click', function () {
+            if (completeButton.disabled || viewerState.completed) {
+                return;
+            }
+
+            var materialId = completeButton.getAttribute('data-material-id');
+            var enrollmentId = completeButton.getAttribute('data-enrollment-id');
             if (!materialId || !enrollmentId) {
                 return;
             }
 
-            if (button.disabled) {
-                return;
-            }
-
-            button.disabled = true;
-            var oldText = button.textContent;
-            button.textContent = 'Saving...';
-
+            setCompletionButton(true, 'Saving...');
             var payload = 'materialId=' + encodeURIComponent(materialId) + '&enrollmentId=' + encodeURIComponent(enrollmentId);
 
             fetch('${pageContext.request.contextPath}/student/mark-material-completed', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
-                },
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
                 body: payload
             })
-                .then(function (response) {
-                    if (!response.ok) {
-                        throw new Error('Failed to save completion');
-                    }
-                    return response.json();
-                })
-                .then(function (data) {
-                    if (!data.success) {
-                        throw new Error(data.message || 'Completion failed');
-                    }
-                    setRowCompleted(button);
-                    if (typeof data.progressPercent === 'number') {
-                        updateProgressUI(data.progressPercent);
-                    }
-                    updateMaterialsViewed(data.viewedMaterials, data.totalMaterials);
-                    updateContinueAction(data.continueLabel, data.continueUrl);
-                })
-                .catch(function (error) {
-                    button.disabled = false;
-                    button.textContent = oldText;
-                    alert(error.message || 'Unable to mark material as completed.');
-                });
+            .then(function (response) {
+                if (!response.ok) {
+                    throw new Error('Unable to save completion.');
+                }
+                return response.json();
+            })
+            .then(function (data) {
+                if (!data.success) {
+                    throw new Error(data.message || 'Unable to save completion.');
+                }
+                applyCompletedState('This material is now part of your course progress.');
+                if (typeof data.progressPercent === 'number') {
+                    setProgress(data.progressPercent);
+                }
+                if (typeof data.viewedMaterials === 'number') {
+                    setMaterialsViewed(data.viewedMaterials, data.totalMaterials);
+                }
+            })
+            .catch(function (error) {
+                viewerState.unlocked = false;
+                setWaitingState();
+                unlockCompletion(error.message || 'Unable to save completion right now.');
+            });
         });
     }
+
+    window.addEventListener('message', function (event) {
+        if (event.origin !== window.location.origin || !event.data || currentSelectionMode !== 'material') {
+            return;
+        }
+
+        if (event.data.type === 'lhViewerState') {
+            viewerState.completionRule = event.data.completionRule || '';
+            if (event.data.completed) {
+                applyCompletedState('This material is already part of your course progress.');
+                return;
+            }
+            if (event.data.note && actionNote) {
+                actionNote.textContent = event.data.note;
+            }
+        }
+
+        if (event.data.type === 'lhViewerUnlock') {
+            unlockCompletion(event.data.note || 'You can mark this material complete now.');
+        }
+    });
 })();
 </script>
 <script src="${pageContext.request.contextPath}/js/student-v2.js"></script>
 </body>
 </html>
-

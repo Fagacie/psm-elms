@@ -260,3 +260,57 @@
     justify-content: center;
   }
 }
+
+/* ============================================
+   Standalone Viewer Cleanup
+   ============================================ */
+
+.mv-main {
+  display: grid;
+  gap: 20px;
+  align-content: flex-start;
+}
+
+.mv-shell {
+  overflow: hidden;
+}
+
+.mv-stage-panel {
+  border: 1px solid rgba(16, 38, 26, 0.08);
+  border-radius: 22px;
+  overflow: hidden;
+  background: #ffffff;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.28);
+}
+
+.mv-fragment-frame {
+  width: 100%;
+  height: clamp(620px, 78vh, 980px);
+  border: 0;
+  display: block;
+  background: #ffffff;
+}
+
+.mv-action-cluster {
+  gap: 10px;
+}
+
+.mv-action-cluster .sv-btn {
+  min-height: 44px;
+}
+
+.mv-hidden {
+  display: none;
+}
+
+@media (max-width: 860px) {
+  .mv-action-cluster .sv-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 760px) {
+  .mv-fragment-frame {
+    height: 72vh;
+  }
+}
