@@ -121,6 +121,60 @@
             </div>
         </section>
 
+        <c:if test="${not empty param.error or not empty param.success}">
+            <section class="lh-feedback ${not empty param.error ? 'is-error' : 'is-success'}" aria-live="polite">
+                <div class="lh-feedback__icon">
+                    <i class="fas fa-${not empty param.error ? 'circle-exclamation' : 'circle-check'}"></i>
+                </div>
+                <div class="lh-feedback__copy">
+                    <strong>
+                        <c:choose>
+                            <c:when test="${not empty param.error}">
+                                Action needed
+                            </c:when>
+                            <c:otherwise>
+                                Update saved
+                            </c:otherwise>
+                        </c:choose>
+                    </strong>
+                    <p>
+                        <c:choose>
+                            <c:when test="${param.error == 'paymentRequired'}">
+                                This course item is locked until course access is confirmed.
+                            </c:when>
+                            <c:when test="${param.error == 'blocked'}">
+                                ${not empty param.reason ? param.reason : 'Complete the required learning step before starting this assessment.'}
+                            </c:when>
+                            <c:when test="${param.error == 'maxAttempts'}">
+                                You have already used all allowed attempts for this assessment.
+                            </c:when>
+                            <c:when test="${param.error == 'noQuestions'}">
+                                This assessment is not available yet because no questions have been published.
+                            </c:when>
+                            <c:when test="${param.error == 'invalidAssessment'}">
+                                The selected assessment does not belong to this enrollment.
+                            </c:when>
+                            <c:when test="${param.error == 'submitFailed'}">
+                                We could not save the submission. Please try again.
+                            </c:when>
+                            <c:when test="${param.success == 'submitted'}">
+                                Your assessment was submitted successfully.
+                            </c:when>
+                            <c:when test="${param.success == 'timed-out'}">
+                                Time expired and your assessment attempt was submitted automatically.
+                            </c:when>
+                            <c:when test="${param.success == 'exited'}">
+                                Your assessment was saved and closed.
+                            </c:when>
+                            <c:otherwise>
+                                Your learning workspace has been updated.
+                            </c:otherwise>
+                        </c:choose>
+                    </p>
+                </div>
+            </section>
+        </c:if>
+
         <section class="lh-workspace">
             <header class="lh-stage-head">
                 <div class="lh-stage-head__copy">

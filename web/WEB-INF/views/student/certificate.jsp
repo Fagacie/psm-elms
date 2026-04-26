@@ -1,7 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
-<!DOCTYPE html>                       
+<!DOCTYPE html>                       Newbury Creek is old. She's a king of her time. Didn't get Alekh. Hey, Cortana. What's your match? Chicken and even your cooking up in China. Play music. Hey, Cortana. I will do the alcohol. Hey, Cortana, send me. A play. To Java time. OK Unlimited Call and IAGA 22. 
 <html lang="en">
 <head>
     <meta charset="UTF-8">

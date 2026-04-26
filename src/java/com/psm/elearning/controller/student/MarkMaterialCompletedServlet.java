@@ -76,7 +76,7 @@ public class MarkMaterialCompletedServlet extends HttpServlet {
             Enrollment enrollment = checkEnrollment(userId, material.getCourseId());
             if (enrollment == null) {
                 response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                out.print("{\"success\":false,\"message\":\"No enrollment or payment access\"}");
+                out.print("{\"success\":false,\"message\":\"No enrollment or course access\"}");
                 return;
             }
 
@@ -134,18 +134,37 @@ public class MarkMaterialCompletedServlet extends HttpServlet {
             return null;
         }
         for (Enrollment enrollment : enrollments) {
-            if (enrollment.getCourseId() == null || !enrollment.getCourseId().equals(courseId)) {
-                continue;
-            }
-            if (enrollment.getEnrollmentId() == null) {
-                continue;
-            }
-            Payment payment = paymentDAO.getPaymentByEnrollmentId(enrollment.getEnrollmentId());
-            if (payment != null && isPaymentComplete(payment.getStatus())) {
+            if (hasEnrollmentAccess(enrollment, courseId)) {
                 return enrollment;
             }
         }
         return null;
+    }
+
+    private boolean hasEnrollmentAccess(Enrollment enrollment, Integer courseId) {
+        if (enrollment == null || courseId == null) {
+            return false;
+        }
+        if (enrollment.getCourseId() == null || !enrollment.getCourseId().equals(courseId)) {
+            return false;
+        }
+        if (isFreeEnrollment(enrollment)) {
+            return true;
+        }
+        if (enrollment.getEnrollmentId() == null) {
+            return false;
+        }
+        Payment payment = paymentDAO.getPaymentByEnrollmentId(enrollment.getEnrollmentId());
+        if (payment != null && isPaymentComplete(payment.getStatus())) {
+            return true;
+        }
+        return isPaymentComplete(enrollment.getPaymentStatus());
+    }
+
+    private boolean isFreeEnrollment(Enrollment enrollment) {
+        return enrollment != null
+                && enrollment.getCoursePrice() != null
+                && enrollment.getCoursePrice() <= 0.0;
     }
 
     private boolean markCompleted(Integer userId, Integer materialId, Integer courseId) {

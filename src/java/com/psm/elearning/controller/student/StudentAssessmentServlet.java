@@ -16,12 +16,15 @@ import com.psm.elearning.dao.MaterialDAO;
 import com.psm.elearning.dao.MaterialDAOImpl;
 import com.psm.elearning.dao.MaterialProgressDAO;
 import com.psm.elearning.dao.MaterialProgressDAOImpl;
+import com.psm.elearning.dao.PaymentDAO;
+import com.psm.elearning.dao.PaymentDAOImpl;
 import com.psm.elearning.model.Assessment;
 import com.psm.elearning.model.AssessmentGradeAudit;
 import com.psm.elearning.model.AssessmentQuestion;
 import com.psm.elearning.model.AssessmentSubmission;
 import com.psm.elearning.model.Enrollment;
 import com.psm.elearning.model.Material;
+import com.psm.elearning.model.Payment;
 import com.psm.elearning.service.AppSettingsService;
 import com.psm.elearning.util.AssessmentPlacementUtil;
 import com.psm.elearning.util.CloudinaryUtil;
@@ -58,6 +61,7 @@ public class StudentAssessmentServlet extends HttpServlet {
     private AssessmentRetakeRequestDAO retakeRequestDAO;
     private MaterialDAO materialDAO;
     private MaterialProgressDAO materialProgressDAO;
+    private PaymentDAO paymentDAO;
 
     @Override
     public void init() {
@@ -69,6 +73,7 @@ public class StudentAssessmentServlet extends HttpServlet {
         retakeRequestDAO = new AssessmentRetakeRequestDAOImpl();
         materialDAO = new MaterialDAOImpl();
         materialProgressDAO = new MaterialProgressDAOImpl();
+        paymentDAO = new PaymentDAOImpl();
     }
 
     @Override
@@ -97,6 +102,10 @@ public class StudentAssessmentServlet extends HttpServlet {
                 response.sendRedirect(request.getContextPath() + "/student/my-enrollments?error=unauthorized");
                 return;
             }
+            if (!hasCourseAccess(enrollment)) {
+                response.sendRedirect(request.getContextPath() + "/student/enrollment-details?id=" + enrollmentId + "&tab=learning&error=paymentRequired");
+                return;
+            }
             if ("dashboard".equals(view)) {
                 renderDashboard(request, response, session, userId, enrollment);
             } else {
@@ -115,6 +124,10 @@ public class StudentAssessmentServlet extends HttpServlet {
                 response.sendRedirect(request.getContextPath() + "/student/my-enrollments?error=unauthorized");
                 return;
             }
+            if (!hasCourseAccess(enrollment)) {
+                response.sendRedirect(request.getContextPath() + "/student/enrollment-details?id=" + enrollmentId + "&tab=learning&error=paymentRequired");
+                return;
+            }
             renderConfirmation(request, response, userId, enrollment, assessmentId, submissionId);
             return;
         }
@@ -129,6 +142,10 @@ public class StudentAssessmentServlet extends HttpServlet {
                 response.sendRedirect(request.getContextPath() + "/student/my-enrollments?error=unauthorized");
                 return;
             }
+            if (!hasCourseAccess(enrollment)) {
+                response.sendRedirect(request.getContextPath() + "/student/enrollment-details?id=" + enrollmentId + "&tab=learning&error=paymentRequired");
+                return;
+            }
             renderResult(request, response, session, userId, enrollment, assessmentId, submissionId);
             return;
         }
@@ -141,6 +158,10 @@ public class StudentAssessmentServlet extends HttpServlet {
         Enrollment enrollment = enrollmentDAO.getEnrollment(enrollmentId);
         if (enrollment == null || enrollment.getUserId() == null || !enrollment.getUserId().equals(userId)) {
             response.sendRedirect(request.getContextPath() + "/student/my-enrollments?error=unauthorized");
+            return;
+        }
+        if (!hasCourseAccess(enrollment)) {
+            response.sendRedirect(request.getContextPath() + "/student/enrollment-details?id=" + enrollmentId + "&tab=learning&error=paymentRequired");
             return;
         }
 
@@ -276,6 +297,10 @@ public class StudentAssessmentServlet extends HttpServlet {
                 || assessment.getCourseId() == null
                 || !assessment.getCourseId().equals(enrollment.getCourseId())) {
             response.sendRedirect(request.getContextPath() + "/student/my-enrollments?error=unauthorized");
+            return;
+        }
+        if (!hasCourseAccess(enrollment)) {
+            response.sendRedirect(request.getContextPath() + "/student/enrollment-details?id=" + enrollmentId + "&tab=learning&error=paymentRequired");
             return;
         }
 
@@ -613,6 +638,39 @@ public class StudentAssessmentServlet extends HttpServlet {
         return summary != null && summary.getAttemptsRemaining() != null && summary.getAttemptsRemaining() > 0;
     }
 
+    private boolean hasCourseAccess(Enrollment enrollment) {
+        if (enrollment == null) {
+            return false;
+        }
+        if (isFreeEnrollment(enrollment)) {
+            return true;
+        }
+        if (enrollment.getEnrollmentId() == null) {
+            return false;
+        }
+        Payment payment = paymentDAO.getPaymentByEnrollmentId(enrollment.getEnrollmentId());
+        if (payment != null && isPaymentComplete(payment.getStatus())) {
+            return true;
+        }
+        return isPaymentComplete(enrollment.getPaymentStatus());
+    }
+
+    private boolean isFreeEnrollment(Enrollment enrollment) {
+        return enrollment != null
+                && enrollment.getCoursePrice() != null
+                && enrollment.getCoursePrice() <= 0.0;
+    }
+
+    private boolean isPaymentComplete(String paymentStatus) {
+        if (paymentStatus == null || paymentStatus.trim().isEmpty()) {
+            return false;
+        }
+        String normalized = paymentStatus.trim();
+        return "Paid".equalsIgnoreCase(normalized)
+                || "Completed".equalsIgnoreCase(normalized)
+                || "Success".equalsIgnoreCase(normalized);
+    }
+
     private Map<Integer, String> parseObjectiveAnswers(String answerPayload) {
         Map<Integer, String> answerMap = new LinkedHashMap<>();
         if (answerPayload == null || answerPayload.trim().isEmpty()) {
@@ -659,7 +717,7 @@ public class StudentAssessmentServlet extends HttpServlet {
 
         request.setAttribute("enrollment", enrollment);
         request.setAttribute("assessmentSummaries", summaries);
-        request.setAttribute("paidAccess", enrollment.getPaymentStatus() != null && ("Paid".equalsIgnoreCase(enrollment.getPaymentStatus()) || "Completed".equalsIgnoreCase(enrollment.getPaymentStatus()) || "SUCCESS".equalsIgnoreCase(enrollment.getPaymentStatus())));
+        request.setAttribute("paidAccess", hasCourseAccess(enrollment));
         request.setAttribute("upcomingCount", availableCount);
         request.setAttribute("pendingReviewCount", pendingCount);
         request.setAttribute("completedCount", completedCount);

@@ -75,14 +75,14 @@ public class StudentMaterialServlet extends HttpServlet {
         List<Enrollment> enrollments = enrollmentDAO.getEnrollmentsByStudent(userId);
         if (enrollments == null) enrollments = new ArrayList<>();
 
-        List<Enrollment> paidEnrollments = filterPaidEnrollments(enrollments);
-        request.setAttribute("paidEnrollments", paidEnrollments);
-        request.setAttribute("visibleCourseCount", paidEnrollments.size());
+        List<Enrollment> accessibleEnrollments = filterAccessibleEnrollments(enrollments);
+        request.setAttribute("paidEnrollments", accessibleEnrollments);
+        request.setAttribute("visibleCourseCount", accessibleEnrollments.size());
         request.setAttribute("searchKeyword", keyword);
         request.setAttribute("selectedMaterialType", materialType);
         request.setAttribute("selectedSort", sort);
 
-        if (paidEnrollments.isEmpty()) {
+        if (accessibleEnrollments.isEmpty()) {
             request.getRequestDispatcher("/WEB-INF/views/student/materials.jsp").forward(request, response);
             return;
         }
@@ -98,22 +98,22 @@ public class StudentMaterialServlet extends HttpServlet {
 
         if (selectedCourseId != null) {
             final Integer requestedCourseId = selectedCourseId;
-            Enrollment selectedEnrollment = paidEnrollments.stream()
+            Enrollment selectedEnrollment = accessibleEnrollments.stream()
                     .filter(e -> e.getCourseId() != null && e.getCourseId().equals(requestedCourseId))
                     .findFirst()
                     .orElse(null);
 
             if (selectedEnrollment == null) {
-                request.setAttribute("errorMessage", "You do not have paid access to this course materials.");
+                request.setAttribute("errorMessage", "You do not have access to this course materials.");
                 selectedCourseId = null;
             }
         }
 
         List<Enrollment> displayEnrollments = new ArrayList<>();
         if (selectedCourseId == null) {
-            displayEnrollments.addAll(paidEnrollments);
+            displayEnrollments.addAll(accessibleEnrollments);
         } else {
-            for (Enrollment enrollment : paidEnrollments) {
+            for (Enrollment enrollment : accessibleEnrollments) {
                 if (enrollment.getCourseId() != null && enrollment.getCourseId().equals(selectedCourseId)) {
                     displayEnrollments.add(enrollment);
                     break;
@@ -191,7 +191,7 @@ public class StudentMaterialServlet extends HttpServlet {
             return;
         }
 
-        if (!hasPaidAccess(userId, material.getCourseId())) {
+        if (!hasCourseAccess(userId, material.getCourseId())) {
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "You are not authorized to access this file.");
             return;
         }
@@ -280,7 +280,7 @@ public class StudentMaterialServlet extends HttpServlet {
             return;
         }
 
-        if (!hasPaidAccess(userId, material.getCourseId())) {
+        if (!hasCourseAccess(userId, material.getCourseId())) {
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "You are not authorized to preview this material.");
             return;
         }
@@ -405,16 +405,13 @@ public class StudentMaterialServlet extends HttpServlet {
         return materials.stream().sorted(comparator).collect(Collectors.toList());
     }
 
-    private boolean hasPaidAccess(Integer userId, Integer courseId) {
+    private boolean hasCourseAccess(Integer userId, Integer courseId) {
         if (userId == null || courseId == null) return false;
         List<Enrollment> enrollments = enrollmentDAO.getEnrollmentsByStudent(userId);
         if (enrollments == null) return false;
 
         for (Enrollment enrollment : enrollments) {
-            if (enrollment.getCourseId() == null || !enrollment.getCourseId().equals(courseId)) continue;
-            if (enrollment.getEnrollmentId() == null) continue;
-            Payment payment = paymentDAO.getPaymentByEnrollmentId(enrollment.getEnrollmentId());
-            if (payment != null && isPaymentComplete(payment.getStatus())) {
+            if (hasEnrollmentAccess(enrollment, courseId)) {
                 return true;
             }
         }
@@ -470,14 +467,7 @@ public class StudentMaterialServlet extends HttpServlet {
             return null;
         }
         for (Enrollment enrollment : enrollments) {
-            if (enrollment.getCourseId() == null || !enrollment.getCourseId().equals(courseId)) {
-                continue;
-            }
-            if (enrollment.getEnrollmentId() == null) {
-                continue;
-            }
-            Payment payment = paymentDAO.getPaymentByEnrollmentId(enrollment.getEnrollmentId());
-            if (payment != null && isPaymentComplete(payment.getStatus())) {
+            if (hasEnrollmentAccess(enrollment, courseId)) {
                 return enrollment;
             }
         }
@@ -517,14 +507,40 @@ public class StudentMaterialServlet extends HttpServlet {
         }
     }
 
-    private List<Enrollment> filterPaidEnrollments(List<Enrollment> enrollments) {
+    private List<Enrollment> filterAccessibleEnrollments(List<Enrollment> enrollments) {
         return enrollments.stream()
-                .filter(e -> e.getEnrollmentId() != null)
-                .filter(e -> {
-                    Payment payment = paymentDAO.getPaymentByEnrollmentId(e.getEnrollmentId());
-                    return payment != null && isPaymentComplete(payment.getStatus());
-                })
+                .filter(this::hasEnrollmentAccess)
                 .collect(Collectors.toList());
+    }
+
+    private boolean hasEnrollmentAccess(Enrollment enrollment) {
+        return enrollment != null && hasEnrollmentAccess(enrollment, enrollment.getCourseId());
+    }
+
+    private boolean hasEnrollmentAccess(Enrollment enrollment, Integer courseId) {
+        if (enrollment == null || courseId == null) {
+            return false;
+        }
+        if (enrollment.getCourseId() == null || !enrollment.getCourseId().equals(courseId)) {
+            return false;
+        }
+        if (isFreeEnrollment(enrollment)) {
+            return true;
+        }
+        if (enrollment.getEnrollmentId() == null) {
+            return false;
+        }
+        Payment payment = paymentDAO.getPaymentByEnrollmentId(enrollment.getEnrollmentId());
+        if (payment != null && isPaymentComplete(payment.getStatus())) {
+            return true;
+        }
+        return isPaymentComplete(enrollment.getPaymentStatus());
+    }
+
+    private boolean isFreeEnrollment(Enrollment enrollment) {
+        return enrollment != null
+                && enrollment.getCoursePrice() != null
+                && enrollment.getCoursePrice() <= 0.0;
     }
 
     private String normalize(String value) {
