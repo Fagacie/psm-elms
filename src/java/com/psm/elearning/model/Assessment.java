@@ -2,7 +2,6 @@ package com.psm.elearning.model;
 
 import jakarta.validation.constraints.*;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 /**
  * Assessment entity representing assessments linked to courses.
@@ -23,7 +22,7 @@ public class Assessment {
     private String title;
     
     @NotBlank(message = "Assessment type is required")
-    @Pattern(regexp = "^(Quiz|Exam|Assignment|Practice Test)$", message = "Type must be Quiz, Exam, Assignment, or Practice Test")
+    @Pattern(regexp = "^(Quiz|Exam|Assignment)$", message = "Type must be Quiz, Exam, or Assignment")
     private String type;
 
     @Pattern(regexp = "^(auto|manual)$", message = "Grading mode must be auto or manual")
@@ -39,8 +38,6 @@ public class Assessment {
     @Min(value = 1, message = "Total marks must be at least 1")
     @Max(value = 1000, message = "Total marks must not exceed 1000")
     private Integer totalMarks;
-
-    private LocalDateTime dueDate;
     
     @Size(max = 5000, message = "Instructions must not exceed 5000 characters")
     private String instructions;
@@ -54,10 +51,6 @@ public class Assessment {
     @Max(value = 10, message = "Max attempts must not exceed 10")
     private Integer maxAttempts;
 
-    @Min(value = 1, message = "Questions per page must be at least 1")
-    @Max(value = 20, message = "Questions per page must not exceed 20")
-    private Integer questionsPerPage;
-    
     private LocalDateTime createdAt;
     
     @NotNull(message = "CreatedBy user ID is required")
@@ -67,7 +60,6 @@ public class Assessment {
     public static final String TYPE_QUIZ = "Quiz";
     public static final String TYPE_EXAM = "Exam";
     public static final String TYPE_ASSIGNMENT = "Assignment";
-    public static final String TYPE_PRACTICE_TEST = "Practice Test";
     
     // Constructors
     public Assessment() {}
@@ -75,8 +67,8 @@ public class Assessment {
     public Assessment(Integer assessmentId, Integer courseId, String title, String type,
                      String gradingMode,
                      String submissionMode,
-                     Integer duration, Integer totalMarks, LocalDateTime dueDate, String instructions, Integer maxAttempts,
-                     Integer questionsPerPage, LocalDateTime createdAt, Integer createdBy) {
+                     Integer duration, Integer totalMarks, String instructions, Integer maxAttempts,
+                     LocalDateTime createdAt, Integer createdBy) {
         this.assessmentId = assessmentId;
         this.courseId = courseId;
         this.title = title;
@@ -85,10 +77,8 @@ public class Assessment {
         this.submissionMode = submissionMode;
         this.duration = duration;
         this.totalMarks = totalMarks;
-        this.dueDate = dueDate;
         this.instructions = instructions;
         this.maxAttempts = maxAttempts;
-        this.questionsPerPage = questionsPerPage;
         this.createdAt = createdAt;
         this.createdBy = createdBy;
     }
@@ -117,16 +107,6 @@ public class Assessment {
     
     public Integer getTotalMarks() { return totalMarks; }
     public void setTotalMarks(Integer totalMarks) { this.totalMarks = totalMarks; }
-
-    public LocalDateTime getDueDate() { return dueDate; }
-    public void setDueDate(LocalDateTime dueDate) { this.dueDate = dueDate; }
-
-    public String getDueDateDisplay() {
-        if (dueDate == null) {
-            return null;
-        }
-        return dueDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
-    }
     
     public String getInstructions() { return instructions; }
     public void setInstructions(String instructions) { this.instructions = instructions; }
@@ -139,9 +119,6 @@ public class Assessment {
 
     public Integer getMaxAttempts() { return maxAttempts; }
     public void setMaxAttempts(Integer maxAttempts) { this.maxAttempts = maxAttempts; }
-
-    public Integer getQuestionsPerPage() { return questionsPerPage; }
-    public void setQuestionsPerPage(Integer questionsPerPage) { this.questionsPerPage = questionsPerPage; }
     
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

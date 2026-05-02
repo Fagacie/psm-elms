@@ -5,7 +5,6 @@
 <c:set var="topbarProfilePicture" value="${not empty sessionScope.student.passportPath ? sessionScope.student.passportPath : null}"/>
 <c:set var="currentPath" value="${pageContext.request.requestURI}"/>
 <c:set var="resolvedStudentTitle" value="${not empty topbarTitle ? topbarTitle : 'Your Learning Hub'}"/>
-<c:set var="resolvedStudentSubtitle" value="${not empty topbarSubtitle ? topbarSubtitle : 'Navigate your learning flow'}"/>
 <c:set var="resolvedTopbarContext" value="${not empty navContext ? navContext : 'default'}"/>
 <c:set var="topbarSearchQuery" value="${not empty param.keyword ? param.keyword : not empty param.search ? param.search : ''}"/>
 <c:set var="topbarNotificationCount" value="${not empty sessionScope.unreadNotifications ? sessionScope.unreadNotifications : 0}"/>
@@ -14,9 +13,6 @@
 <c:set var="topbarInitialOne" value="${fn:length(topbarUserName) > 0 ? fn:substring(topbarUserName, 0, 1) : 'S'}"/>
 <c:set var="topbarInitialTwo" value="${fn:length(topbarUserName) > 1 ? fn:substring(topbarUserName, 1, 2) : ''}"/>
 <c:set var="topbarInitials" value="${fn:toUpperCase(topbarInitialOne)}"/>
-<c:set var="isDashboardPage" value="${fn:contains(currentPath, '/dashboard')}"/>
-<c:set var="isMyCoursesPage" value="${fn:contains(currentPath, '/student/my-enrollments') or fn:contains(currentPath, '/student/enrollment-details') or fn:contains(currentPath, '/student/materials')}"/>
-<c:set var="isExplorePage" value="${fn:contains(currentPath, '/student/courses')}"/>
 <c:if test="${not empty topbarInitialTwo}">
     <c:set var="topbarInitials" value="${topbarInitials}${fn:toUpperCase(topbarInitialTwo)}"/>
 </c:if>
@@ -36,22 +32,6 @@
     </c:choose>
 </c:if>
 
-<c:if test="${empty topbarSubtitle}">
-    <c:choose>
-        <c:when test="${fn:contains(currentPath, '/student/my-enrollments')}"><c:set var="resolvedStudentSubtitle" value="Track active courses and resume what matters next."/></c:when>
-        <c:when test="${fn:contains(currentPath, '/student/enrollment-details')}"><c:set var="resolvedStudentSubtitle" value="Move through the course with clear progress and learning context."/></c:when>
-        <c:when test="${fn:contains(currentPath, '/student/materials')}"><c:set var="resolvedStudentSubtitle" value="Stay focused on the current material and mark completion without leaving the flow."/></c:when>
-        <c:when test="${fn:contains(currentPath, '/student/enrollment-summary')}"><c:set var="resolvedStudentSubtitle" value="Review course details before checkout."/></c:when>
-        <c:when test="${fn:contains(currentPath, '/student/payment-success')}"><c:set var="resolvedStudentSubtitle" value="Enrollment confirmed and ready for learning."/></c:when>
-        <c:when test="${fn:contains(currentPath, '/student/payment-failed')}"><c:set var="resolvedStudentSubtitle" value="Resolve payment and continue securely."/></c:when>
-        <c:when test="${fn:contains(currentPath, '/student/payment')}"><c:set var="resolvedStudentSubtitle" value="Complete secure checkout to continue."/></c:when>
-        <c:when test="${fn:contains(currentPath, '/student/courses')}"><c:set var="resolvedStudentSubtitle" value="Find the next course that fits your goals."/></c:when>
-        <c:when test="${fn:contains(currentPath, '/student/assessments')}"><c:set var="resolvedStudentSubtitle" value="Manage attempts, track outcomes, and finish strong."/></c:when>
-        <c:when test="${fn:contains(currentPath, '/student/certificates') or fn:contains(currentPath, '/student/certificate')}"><c:set var="resolvedStudentSubtitle" value="Access and verify your earned credentials."/></c:when>
-        <c:when test="${fn:contains(currentPath, '/profile')}"><c:set var="resolvedStudentSubtitle" value="Manage your account details and preferences."/></c:when>
-    </c:choose>
-</c:if>
-
 <header class="sv-topbar">
     <div class="sv-top-left">
         <c:if test="${topbarShowMenu != false}">
@@ -64,12 +44,6 @@
             <span class="sv-brand-main">PSM</span>
             <span class="sv-brand-sub">E-Learning</span>
         </a>
-
-        <nav class="sv-top-links" aria-label="Primary destinations">
-            <a href="${pageContext.request.contextPath}/dashboard" class="sv-top-link ${isDashboardPage ? 'active' : ''}">Dashboard</a>
-            <a href="${pageContext.request.contextPath}/student/my-enrollments" class="sv-top-link ${isMyCoursesPage ? 'active' : ''}">My Courses</a>
-            <a href="${pageContext.request.contextPath}/student/courses" class="sv-top-link ${isExplorePage ? 'active' : ''}">Explore</a>
-        </nav>
 
         <div class="sv-page-title">
             <h1>${resolvedStudentTitle}</h1>

@@ -6,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Course Assessments - Instructor</title>
+    <title>Course Assessment Hub - Instructor</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -16,8 +16,8 @@
 </head>
 <body class="instructor-ui">
 <jsp:include page="/WEB-INF/views/common/instructor-header.jsp">
-    <jsp:param name="pageTitle" value="Course Assessments"/>
-    <jsp:param name="pageSubtitle" value="Create, grade, and review assessment workflows"/>
+    <jsp:param name="pageTitle" value="Course Assessment Hub"/>
+    <jsp:param name="pageSubtitle" value="Create, grade, and review course assessment flows"/>
 </jsp:include>
 
 <c:set var="activeInstructorPage" value="assessments"/>
@@ -30,22 +30,22 @@
             <span>&gt;</span>
             <a href="${pageContext.request.contextPath}/instructor/courses">Courses</a>
             <span>&gt;</span>
-            <span>Assessments</span>
+            <span>Assessment Hub</span>
         </nav>
 
         <section class="ins-page-head">
             <div>
-                <p class="ins-page-kicker">Assessment Workspace</p>
-                <h2>Design, review, and grade assessments with clearer structure</h2>
-                <p>This page now aligns with the instructor workspace so assessment creation, question handling, grading, and retake decisions feel connected instead of scattered.</p>
+                <p class="ins-page-kicker">Course Assessment Hub</p>
+                <h2>Design, review, and grade assessments in one structured place</h2>
+                <p>This page is a course-level hub for the assessment library, builder, question bank, submissions, grading, and archive actions.</p>
             </div>
             <div class="ins-hero-actions">
                 <c:if test="${not empty selectedCourse}">
                     <button type="button" class="btn btn-primary" onclick="openCreateAssessmentModal()">
-                        <i class="fas fa-plus-circle"></i> New Assessment
+                        <i class="fas fa-plus-circle"></i> Create Assessment
                     </button>
                     <a href="${pageContext.request.contextPath}/instructor/courses?action=workspace&courseId=${selectedCourse.courseId}" class="btn btn-secondary">
-                        <i class="fas fa-layer-group"></i> Open Workspace
+                        <i class="fas fa-layer-group"></i> Open Course Workspace
                     </a>
                 </c:if>
                 <a href="${pageContext.request.contextPath}/instructor/materials" class="btn btn-secondary">
@@ -71,33 +71,33 @@
         </div>
 
         <c:if test="${not empty selectedCourse}">
-            <section class="section-card ins-flow-strip" aria-label="Instructor assessment flow">
+            <section class="section-card ins-flow-strip" aria-label="Course assessment flow">
                 <div class="ins-flow-item is-done">
                     <span class="ins-flow-dot">1</span>
                     <div>
                         <strong>Select Course</strong>
-                        <small>Scope all assessment operations to one course.</small>
+                        <small>Scope all assessment actions to one course.</small>
                     </div>
                 </div>
                 <div class="ins-flow-item ${not empty assessments ? 'is-done' : 'is-active'}">
                     <span class="ins-flow-dot">2</span>
                     <div>
                         <strong>Create or Manage</strong>
-                        <small>Define assessment settings and attempts.</small>
+                        <small>Set assessment details and attempt rules.</small>
                     </div>
                 </div>
                 <div class="ins-flow-item ${not empty selectedAssessment ? 'is-done' : ''}">
                     <span class="ins-flow-dot">3</span>
                     <div>
                         <strong>Build Questions</strong>
-                        <small>Add and maintain question quality.</small>
+                        <small>Add and maintain the question bank.</small>
                     </div>
                 </div>
                 <div class="ins-flow-item ${not empty selectedAssessment ? 'is-active' : ''}">
                     <span class="ins-flow-dot">4</span>
                     <div>
                         <strong>Grade and Retakes</strong>
-                        <small>Review submissions and decide retake requests.</small>
+                        <small>Review submissions and handle retake requests.</small>
                     </div>
                 </div>
             </section>
@@ -116,7 +116,7 @@
         <c:if test="${param.success == 'graded'}"><div class="alert alert-success"><i class="fas fa-check-circle"></i> Submission graded successfully.</div></c:if>
         <c:if test="${param.success == 'autoregraded'}"><div class="alert alert-success"><i class="fas fa-check-circle"></i> Submission auto-regraded successfully.</div></c:if>
         <c:if test="${param.success == 'autoregradedall'}"><div class="alert alert-success"><i class="fas fa-check-circle"></i> Bulk auto-regrade completed. Updated submissions: <strong><c:out value="${param.regradedCount}" default="0"/></strong>.</div></c:if>
-        <c:if test="${param.error == 'qoptions'}"><div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> Quiz requires options A/B and a correct option.</div></c:if>
+        <c:if test="${param.error == 'qoptions'}"><div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> Quiz and exam questions require options A/B and a correct option.</div></c:if>
         <c:if test="${param.error == 'type'}"><div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> Assessment type is invalid. Choose Quiz, Exam, or Assignment.</div></c:if>
         <c:if test="${param.error == 'placement'}"><div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> Selected placement material is invalid for this course.</div></c:if>
         <c:if test="${param.error == 'assignmentschema'}"><div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> Assignment questions must be descriptive only (no options/correct option).</div></c:if>
@@ -160,16 +160,15 @@
                         <span>
                             <c:choose>
                                     <c:when test="${selectedAssessment.type == 'Assignment'}">Assignment grading is always manual by instructor.</c:when>
-                                    <c:when test="${selectedAssessment.type == 'Practice Test'}">Practice tests use auto grading with quiz-style questions.</c:when>
-                                <c:when test="${not empty selectedAssessment.gradingMode and selectedAssessment.gradingMode == 'manual'}">Quiz/Exam score is entered by instructor after review.</c:when>
-                                <c:otherwise>Quiz/Exam is auto-graded by the system, and instructor can still override score.</c:otherwise>
+                                <c:when test="${not empty selectedAssessment.gradingMode and selectedAssessment.gradingMode == 'manual'}">Assignment scores are entered by the instructor after review.</c:when>
+                                <c:otherwise>Quiz and exam scores are auto-graded by the system, and the instructor can still override them.</c:otherwise>
                             </c:choose>
                         </span>
                     </div>
                 </c:if>
             </section>
 
-            <div class="tabs">
+            <div class="tabs assessment-rail">
                 <button type="button" class="tab-btn ${defaultTab == 'create' ? 'active' : ''}" data-tab-target="create-tab">
                     <i class="fas fa-plus-circle"></i> Create Assessment
                 </button>
@@ -183,18 +182,18 @@
                 </c:if>
             </div>
 
-            <!-- Create Assessment Tab -->
+            <!-- Create Assessment Section -->
             <div id="create-tab" class="tab-content ${defaultTab == 'create' ? 'active' : ''}">
                 <div class="assessment-form-section">
                     <h3><i class="fas fa-plus-circle"></i> Create New Assessment for: ${selectedCourse.courseName}</h3>
-                    <p class="section-caption">Assessment setup now opens in a focused modal to keep this workspace cleaner.</p>
+                    <p class="section-caption">Use the modal to keep the page clean and the flow focused.</p>
                     <button type="button" class="btn btn-primary" onclick="openCreateAssessmentModal()">
                         <i class="fas fa-plus"></i> Open Create Assessment Modal
                     </button>
                 </div>
             </div>
 
-            <!-- Manage Assessments Tab -->
+            <!-- Manage Assessments Section -->
             <div id="list-tab" class="tab-content ${defaultTab == 'list' ? 'active' : ''}">
                 <div class="assessments-list-section">
                     <h3><i class="fas fa-list"></i> Assessments for: ${selectedCourse.courseName}</h3>
@@ -255,7 +254,7 @@
                                     </div>
                                     <div class="assessment-actions">
                                         <a class="btn btn-primary btn-sm" href="${pageContext.request.contextPath}/instructor/assessments?courseId=${selectedCourse.courseId}&assessmentId=${a.assessmentId}">
-                                            <i class="fas fa-clipboard-check"></i> Manage / View Results
+                                            <i class="fas fa-clipboard-check"></i> Manage / Results
                                         </a>
                                         <button class="btn btn-secondary btn-sm" onclick="toggleEditAssessment(${a.assessmentId})">
                                             <i class="fas fa-pen"></i> Edit
@@ -305,10 +304,6 @@
                                                     <label>Max Attempts</label>
                                                     <input type="number" min="1" max="10" name="maxAttempts" value="${a.maxAttempts}" required>
                                                 </div>
-                                                <div class="field">
-                                                    <label>Questions Per Page</label>
-                                                    <input type="number" min="1" max="20" name="questionsPerPage" value="${a.questionsPerPage}" required>
-                                                </div>
                                                 <div class="field full">
                                                     <label>Placement</label>
                                                     <select name="placement">
@@ -337,7 +332,7 @@
                 </div>
             </div>
 
-            <!-- Assessment Details Tab -->
+            <!-- Assessment Details Section -->
             <c:if test="${not empty selectedAssessment}">
                 <div id="details-tab" class="tab-content ${defaultTab == 'details' ? 'active' : ''}">
                     <div class="assessment-details-header">
@@ -352,12 +347,12 @@
                             </div>
                         </div>
                         <a class="btn btn-secondary" href="${pageContext.request.contextPath}/instructor/assessments?courseId=${selectedCourse.courseId}">
-                            <i class="fas fa-arrow-left"></i> Back to List
+                            <i class="fas fa-arrow-left"></i> Back to Library
                         </a>
                     </div>
 
-                    <!-- Sub-tabs for Questions vs Submissions -->
-                    <div class="sub-tabs">
+                    <!-- Question, submission, and retake sections -->
+                    <div class="sub-tabs assessment-subrail">
                         <button type="button" class="sub-tab-btn active" data-subtab-target="questions-section">
                             <i class="fas fa-question-circle"></i> Questions (${questions.size()})
                         </button>
@@ -377,10 +372,10 @@
                                 <strong>Note:</strong>
                                 <c:choose>
                                     <c:when test="${selectedAssessment.type == 'Assignment'}">
-                                        Assignment questions are descriptive. No options required. Students will upload a file.
+                                        Assignment questions are descriptive only. Students submit a written response or file.
                                     </c:when>
                                     <c:otherwise>
-                                        Quiz/Exam questions require options A & B and a correct option.
+                                        Quiz and exam questions require options A and B plus one correct option.
                                     </c:otherwise>
                                 </c:choose>
                             </p>
@@ -636,7 +631,7 @@
                                                                     </div>
                                                                 </c:if>
                                                                 
-                                                                <c:if test="${(selectedAssessment.type == 'Quiz' or selectedAssessment.type == 'Practice Test' or selectedAssessment.type == 'Exam') and not empty s.answersFilePath and not fn:startsWith(s.answersFilePath, 'http')}">
+                                                                <c:if test="${(selectedAssessment.type == 'Quiz' or selectedAssessment.type == 'Exam') and not empty s.answersFilePath and not fn:startsWith(s.answersFilePath, 'http')}">
                                                                     <button type="submit" class="btn btn-secondary btn-sm" formaction="${pageContext.request.contextPath}/instructor/assessments" name="action" value="autoRegradeSubmission">
                                                                         <i class="fas fa-rotate-right"></i> Auto Regrade
                                                                     </button>
@@ -860,11 +855,6 @@
                             <input type="number" min="1" max="10" name="maxAttempts" value="1" required>
                             <small class="helper-text">Number of times students can attempt</small>
                         </div>
-                        <div class="field">
-                            <label>Questions Per Page *</label>
-                            <input type="number" min="1" max="20" name="questionsPerPage" value="2" required>
-                            <small class="helper-text">For pagination during assessment</small>
-                        </div>
                         <div class="field full">
                             <label>Placement in Course Flow</label>
                             <select name="placement">
@@ -913,7 +903,7 @@
         if (!typeSelect) return;
     }
 
-    // Tab navigation
+    // Section navigation
     function showTab(tabId, trigger) {
         document.querySelectorAll('.tab-content').forEach(tab => {
             tab.style.display = 'none';
@@ -932,7 +922,7 @@
         }
     }
 
-    // Sub-tab navigation
+    // Section navigation for detail views
     function showSubTab(subTabId, trigger) {
         document.querySelectorAll('.sub-tab-content').forEach(tab => {
             tab.style.display = 'none';
@@ -975,8 +965,8 @@
             if (correctField) correctField.style.display = isAssignment ? 'none' : 'block';
             if (note) {
                 note.innerHTML = '<strong>Note:</strong> ' + (isAssignment
-                    ? 'Assignment questions are descriptive. No options required. Students will upload a file.'
-                    : 'Quiz, Practice Test, and Exam questions require options A & B and a correct option.');
+                    ? 'Assignment questions are descriptive only.'
+                    : 'Quiz and exam questions require options A and B plus a correct option.');
             }
         }
         syncQuestionForm();
@@ -1014,7 +1004,7 @@
             syncAssessmentModeFields(form);
         });
 
-        // Wire tab buttons reliably (fixes non-responsive buttons in some layouts)
+        // Wire section cards reliably (fixes non-responsive buttons in some layouts)
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.addEventListener('click', function() {
                 const target = btn.getAttribute('data-tab-target');
@@ -1028,7 +1018,7 @@
             });
         });
 
-        // Ensure default active tabs are visible on load
+        // Ensure default active sections are visible on load
         const activeTabBtn = document.querySelector('.tab-btn.active');
         const activeTabId = activeTabBtn ? activeTabBtn.getAttribute('data-tab-target') : null;
         if (activeTabId) showTab(activeTabId, activeTabBtn);

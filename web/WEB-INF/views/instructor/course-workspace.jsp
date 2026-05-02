@@ -110,15 +110,38 @@
             <div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> <c:out value="${errorMessage}"/></div>
         </c:if>
 
-        <section class="workspace-tabs" aria-label="Course workspace tabs">
-            <button type="button" class="workspace-tab is-active" data-workspace-tab="overview">Overview</button>
-            <button type="button" class="workspace-tab" data-workspace-tab="materials">Materials</button>
-            <button type="button" class="workspace-tab" data-workspace-tab="assessments">Assessments</button>
-            <button type="button" class="workspace-tab" data-workspace-tab="students">Students</button>
-            <button type="button" class="workspace-tab" data-workspace-tab="analytics">Analytics</button>
+        <c:url var="assessmentWorkspaceBaseUrl" value="/instructor/assessments">
+            <c:param name="courseId" value="${selectedCourse.courseId}"/>
+        </c:url>
+        <c:set var="assessmentWorkspaceUrl" value="${assessmentWorkspaceBaseUrl}&amp;view=editor"/>
+        <c:if test="${not empty param.assessmentId}">
+            <c:set var="assessmentWorkspaceUrl" value="${assessmentWorkspaceUrl}&amp;assessmentId=${param.assessmentId}"/>
+        </c:if>
+
+        <section class="workspace-jump-grid" aria-label="Course workspace sections">
+            <a class="workspace-jump-card" href="#overview">
+                <strong>Overview</strong>
+                <span>Fast decisions and the current course status.</span>
+            </a>
+            <a class="workspace-jump-card" href="#materials">
+                <strong>Materials</strong>
+                <span>Publish, reorder, archive, and restore course assets.</span>
+            </a>
+            <a class="workspace-jump-card" href="#assessments">
+                <strong>Assessments</strong>
+                <span>Published assessments, grading mode, submissions, and archive.</span>
+            </a>
+            <a class="workspace-jump-card" href="#students">
+                <strong>Students</strong>
+                <span>Enrollment, status, and progress in one place.</span>
+            </a>
+            <a class="workspace-jump-card" href="#analytics">
+                <strong>Analytics</strong>
+                <span>Completion and engagement trends at a glance.</span>
+            </a>
         </section>
 
-        <section class="workspace-panel is-active" data-workspace-panel="overview">
+        <section class="workspace-panel is-active" data-workspace-panel="overview" id="overview">
             <div class="workspace-overview-grid">
                 <article class="workspace-panel-card workspace-metrics-card">
                     <div class="section-header">
@@ -160,7 +183,7 @@
                             <strong>Add Material</strong>
                             <span>Upload learning content and keep the sequence organized.</span>
                         </a>
-                        <a class="workspace-action-card" href="${pageContext.request.contextPath}/instructor/assessments?view=drafts&courseId=${selectedCourse.courseId}">
+                        <a class="workspace-action-card" href="#assessments">
                             <i class="fas fa-clipboard-list"></i>
                             <strong>New Assessment</strong>
                             <span>Create a quiz, exam, or assignment for this course.</span>
@@ -307,7 +330,6 @@
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td><span class="table-pill table-pill-muted"><c:out value="${material.versionNumber}" default="N/A"/></span></td>
                                             <td>
                                                 <span class="table-muted">
                                                     <c:choose>
@@ -325,7 +347,6 @@
                                                             data-material-id="${material.materialId}"
                                                             data-title="<c:out value='${material.title}'/>"
                                                             data-type="<c:out value='${material.materialType}'/>"
-                                                            data-version="<c:out value='${material.versionNumber}'/>"
                                                             data-order="<c:out value='${material.displayOrder}'/>"
                                                             data-description="<c:out value='${material.description}'/>"
                                                             data-external-url="${material.materialType == 'Link' ? material.filePath : ''}">
@@ -335,7 +356,6 @@
                                                             data-material-id="${material.materialId}"
                                                             data-title="<c:out value='${material.title}'/>"
                                                             data-type="<c:out value='${material.materialType}'/>"
-                                                            data-version="<c:out value='${material.versionNumber}'/>"
                                                             data-order="<c:out value='${material.displayOrder}'/>"
                                                             data-description="<c:out value='${material.description}'/>"
                                                             data-external-url="${material.materialType == 'Link' ? material.filePath : ''}">
@@ -386,7 +406,6 @@
                                             <th>Material</th>
                                             <th>Type</th>
                                             <th>Order</th>
-                                            <th>Version</th>
                                             <th>Actions</th>
                                         </tr>
                                         </thead>
@@ -404,7 +423,6 @@
                                                 </td>
                                                 <td><span class="type-badge type-${material.materialType}"><c:out value="${material.materialType}"/></span></td>
                                                 <td><span class="table-pill"><c:out value="${material.displayOrder}" default="N/A"/></span></td>
-                                                <td><span class="table-pill table-pill-muted"><c:out value="${material.versionNumber}" default="N/A"/></span></td>
                                                 <td>
                                                     <div class="row-actions">
                                                         <a href="${pageContext.request.contextPath}/instructor/materials?action=restore&id=${material.materialId}&courseId=${selectedCourse.courseId}" class="btn btn-secondary btn-sm">
@@ -426,17 +444,65 @@
             </div>
         </section>
 
-        <section class="workspace-panel" data-workspace-panel="assessments">
+        <section class="workspace-panel" data-workspace-panel="assessments" id="assessments">
             <div class="workspace-panel-card">
                 <div class="section-header">
                     <div>
                         <h3 class="section-title">Assessments</h3>
-                        <p class="section-caption">Assessment coverage and grading status for this course.</p>
+                        <p class="section-caption">Published assessments, archive recovery, and grading entry points stay inside this workspace.</p>
                     </div>
-                    <a class="btn btn-primary btn-sm" href="${pageContext.request.contextPath}/instructor/assessments?view=drafts&courseId=${selectedCourse.courseId}">
-                        <i class="fas fa-pen-ruler"></i> Open Assessments
+                    <a class="btn btn-primary btn-sm" href="#assessment-module-shell">
+                        <i class="fas fa-pen-ruler"></i> Open Module
                     </a>
                 </div>
+
+                <div class="workspace-assessment-summary-grid">
+                    <div class="workspace-assessment-summary-card">
+                        <span>Published</span>
+                        <strong>${assessments.size()}</strong>
+                    </div>
+                    <div class="workspace-assessment-summary-card">
+                        <span>Archived</span>
+                        <strong>${empty archivedAssessments ? 0 : archivedAssessments.size()}</strong>
+                    </div>
+                    <div class="workspace-assessment-summary-card">
+                        <span>Pending Grading</span>
+                        <strong>${pendingGrading}</strong>
+                    </div>
+                    <div class="workspace-assessment-summary-card">
+                        <span>Students in Scope</span>
+                        <strong>${totalStudents}</strong>
+                    </div>
+                </div>
+
+                <div class="workspace-assessment-shell" id="assessment-module-shell">
+                    <div class="workspace-assessment-shell__head">
+                        <div>
+                            <h4>Embedded Assessment Module</h4>
+                            <p>Use the embedded module below to create assessments, manage questions, review submissions, grade manually or automatically, and restore archived items without leaving this course workspace.</p>
+                        </div>
+                        <div class="workspace-assessment-shell__note">
+                            <i class="fas fa-circle-info"></i>
+                            <span>All assessment flows are now kept inside the course workspace.</span>
+                        </div>
+                    </div>
+                    <div class="workspace-assessment-frame-shell">
+                        <iframe
+                            class="workspace-assessment-frame"
+                            src="${assessmentWorkspaceUrl}"
+                            title="Embedded assessment module"></iframe>
+                    </div>
+                </div>
+
+                <div class="workspace-assessment-divider"></div>
+
+                <div class="workspace-assessment-list-head">
+                    <div>
+                        <h4>Published Assessments</h4>
+                        <p>Open the relevant view inside the embedded module. Grading, submissions, and analytics remain in one workspace.</p>
+                    </div>
+                </div>
+
                 <c:choose>
                     <c:when test="${empty assessments}">
                         <div class="empty-state-box workspace-empty-box">
@@ -445,9 +511,9 @@
                         </div>
                     </c:when>
                     <c:otherwise>
-                        <div class="workspace-list-grid">
+                        <div class="workspace-assessment-grid">
                             <c:forEach var="assessment" items="${assessments}">
-                                <article class="workspace-list-card">
+                                <article class="workspace-list-card workspace-assessment-card">
                                     <div class="workspace-list-head">
                                         <div>
                                             <strong><c:out value="${assessment.title}"/></strong>
@@ -460,8 +526,55 @@
                                         <c:out value="${not empty assessment.duration ? assessment.duration : 'Unlimited'}"/> mins ·
                                         <c:out value="${not empty assessment.gradingMode ? assessment.gradingMode : (assessment.type == 'Assignment' ? 'manual' : 'auto')}"/> grading
                                     </p>
-                                    <div class="workspace-list-actions">
-                                        <a class="btn btn-secondary btn-sm" href="${pageContext.request.contextPath}/instructor/assessments?courseId=${selectedCourse.courseId}&assessmentId=${assessment.assessmentId}">Manage</a>
+                                    <div class="workspace-assessment-meta">
+                                        <span><i class="fas fa-inbox"></i> ${submissionCountByAssessmentId[assessment.assessmentId]} submissions</span>
+                                        <span><i class="fas fa-chart-bar"></i> ${not empty pendingCountByAssessmentId[assessment.assessmentId] ? pendingCountByAssessmentId[assessment.assessmentId] : 0} pending</span>
+                                    </div>
+                                    <div class="workspace-list-actions workspace-assessment-actions">
+                                        <button type="button" class="btn btn-secondary btn-sm" onclick="openAssessmentModule('editor', ${assessment.assessmentId})">Builder</button>
+                                        <button type="button" class="btn btn-secondary btn-sm" onclick="openAssessmentModule('questions', ${assessment.assessmentId})">Questions</button>
+                                        <button type="button" class="btn btn-secondary btn-sm" onclick="openAssessmentModule('submissions', ${assessment.assessmentId})">Submissions</button>
+                                        <button type="button" class="btn btn-secondary btn-sm" onclick="openAssessmentModule('grade', ${assessment.assessmentId})">Grade</button>
+                                        <button type="button" class="btn btn-secondary btn-sm" onclick="openAssessmentModule('analytics', ${assessment.assessmentId})">Analytics</button>
+                                    </div>
+                                </article>
+                            </c:forEach>
+                        </div>
+                    </c:otherwise>
+                </c:choose>
+
+                <div class="workspace-assessment-list-head workspace-assessment-list-head--spaced">
+                    <div>
+                        <h4>Archived Assessments</h4>
+                        <p>Restore or review archived assessments from the embedded archive view when needed.</p>
+                    </div>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="openAssessmentModule('archive')">Open Archive</button>
+                </div>
+
+                <c:choose>
+                    <c:when test="${empty archivedAssessments}">
+                        <div class="empty-state-box workspace-empty-box">
+                            <i class="fas fa-box-archive"></i>
+                            <p>No archived assessments for this course yet.</p>
+                        </div>
+                    </c:when>
+                    <c:otherwise>
+                        <div class="workspace-assessment-grid workspace-assessment-grid--compact">
+                            <c:forEach var="assessment" items="${archivedAssessments}">
+                                <article class="workspace-list-card workspace-assessment-card workspace-assessment-card--archived">
+                                    <div class="workspace-list-head">
+                                        <div>
+                                            <strong><c:out value="${assessment.title}"/></strong>
+                                            <span><c:out value="${assessment.type}"/></span>
+                                        </div>
+                                        <span class="assessment-type-badge type-${assessment.type}">${assessment.type}</span>
+                                    </div>
+                                    <p>
+                                        <c:out value="${not empty assessment.totalMarks ? assessment.totalMarks : 'N/A'}"/> marks ·
+                                        <c:out value="${not empty assessment.duration ? assessment.duration : 'Unlimited'}"/> mins
+                                    </p>
+                                    <div class="workspace-list-actions workspace-assessment-actions">
+                                        <button type="button" class="btn btn-secondary btn-sm" onclick="openAssessmentModule('archive')">Restore via Archive</button>
                                     </div>
                                 </article>
                             </c:forEach>
@@ -514,7 +627,7 @@
             </div>
         </section>
 
-        <section class="workspace-panel" data-workspace-panel="analytics">
+        <section class="workspace-panel" data-workspace-panel="analytics" id="analytics">
             <div class="workspace-panel-card">
                 <div class="section-header">
                     <div>
@@ -579,10 +692,6 @@
                         <small id="uploadTypeHint" class="field-hint">Select a type to see allowed file formats.</small>
                     </div>
                     <div class="field">
-                        <label>Version</label>
-                        <input type="text" name="versionNumber" placeholder="e.g. v1.0">
-                    </div>
-                    <div class="field">
                         <label>Chapter / Order</label>
                         <input type="number" name="displayOrder" min="1" placeholder="e.g. 1">
                     </div>
@@ -640,10 +749,6 @@
                         <small id="editTypeHint" class="field-hint">Update type carefully to avoid format mismatch.</small>
                     </div>
                     <div class="field">
-                        <label>Version</label>
-                        <input id="editVersion" type="text" name="versionNumber">
-                    </div>
-                    <div class="field">
                         <label>Chapter / Order</label>
                         <input id="editOrder" type="number" name="displayOrder" min="1">
                     </div>
@@ -671,35 +776,22 @@
 </div>
 
 <script>
-    (function () {
-        const tabs = Array.from(document.querySelectorAll('[data-workspace-tab]'));
-        const panels = Array.from(document.querySelectorAll('[data-workspace-panel]'));
-
-        function activate(tabName) {
-            tabs.forEach(function (tab) {
-                const active = tab.getAttribute('data-workspace-tab') === tabName;
-                tab.classList.toggle('is-active', active);
-                tab.setAttribute('aria-selected', active ? 'true' : 'false');
-            });
-            panels.forEach(function (panel) {
-                panel.classList.toggle('is-active', panel.getAttribute('data-workspace-panel') === tabName);
-            });
+    function openAssessmentModule(view, assessmentId) {
+        const moduleShell = document.getElementById('assessment-module-shell');
+        const moduleFrame = document.querySelector('.workspace-assessment-frame');
+        if (!moduleShell || !moduleFrame) {
+            return;
         }
 
-        tabs.forEach(function (tab) {
-            tab.addEventListener('click', function () {
-                activate(tab.getAttribute('data-workspace-tab'));
-            });
-        });
-
-        const initialTab = window.location.hash ? window.location.hash.replace('#', '') : 'overview';
-        activate(initialTab);
-
-        window.addEventListener('hashchange', function () {
-            const nextTab = window.location.hash ? window.location.hash.replace('#', '') : 'overview';
-            activate(nextTab);
-        });
-    })();
+        const baseUrl = '${assessmentWorkspaceBaseUrl}';
+        const resolvedView = view || 'editor';
+        let nextUrl = baseUrl + '&view=' + encodeURIComponent(resolvedView);
+        if (assessmentId) {
+            nextUrl += '&assessmentId=' + encodeURIComponent(assessmentId);
+        }
+        moduleFrame.src = nextUrl;
+        moduleShell.scrollIntoView({behavior: 'smooth', block: 'start'});
+    }
 
     function openUploadModal() {
         const modal = document.getElementById('uploadModal');
@@ -721,7 +813,6 @@
         document.getElementById('editMaterialId').value = button.dataset.materialId || '';
         document.getElementById('editTitle').value = button.dataset.title || '';
         document.getElementById('editType').value = button.dataset.type || 'PDF';
-        document.getElementById('editVersion').value = button.dataset.version || '';
         document.getElementById('editOrder').value = button.dataset.order || '';
         document.getElementById('editDescription').value = button.dataset.description || '';
         document.getElementById('editExternalUrl').value = button.dataset.externalUrl || '';

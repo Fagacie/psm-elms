@@ -26,7 +26,7 @@
         <a href="${pageContext.request.contextPath}/instructor/materials" class="nav-item ${resolvedInstructorPage == 'materials' ? 'active' : ''}">
             <i class="fas fa-folder-open"></i><span>Materials</span>
         </a>
-        <a href="${pageContext.request.contextPath}/instructor/assessments" class="nav-item ${resolvedInstructorPage == 'assessments' ? 'active' : ''}">
+        <a href="${pageContext.request.contextPath}/instructor/courses" class="nav-item ${resolvedInstructorPage == 'assessments' ? 'active' : ''}">
             <i class="fas fa-clipboard-list"></i><span>Assessments</span>
         </a>
         <a href="${pageContext.request.contextPath}/instructor/certificates" class="nav-item ${resolvedInstructorPage == 'certificates' ? 'active' : ''}">

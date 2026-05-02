@@ -180,11 +180,11 @@
                     <div class="action-grid">
                         <c:choose>
                             <c:when test="${not empty firstCourseId}">
-                                <a class="action-card" href="${pageContext.request.contextPath}/instructor/assessments?view=submissions&courseId=${firstCourseId}">
-                                    <i class="fas fa-inbox"></i>
+                                <a class="action-card" href="${pageContext.request.contextPath}/instructor/courses?action=workspace&amp;courseId=${firstCourseId}#assessments">
+                                    <i class="fas fa-clipboard-list"></i>
                                     <span>
-                                        <strong>Review Submissions</strong>
-                                        <small>Open the grading queue</small>
+                                        <strong>Create Assessment</strong>
+                                        <small>Open the assessment builder</small>
                                     </span>
                                 </a>
                                 <a class="action-card" href="${pageContext.request.contextPath}/instructor/courses?action=workspace&courseId=${firstCourseId}#materials">
@@ -194,7 +194,7 @@
                                         <small>Go to the course workspace</small>
                                     </span>
                                 </a>
-                                <a class="action-card" href="${pageContext.request.contextPath}/instructor/assessments?view=drafts&courseId=${firstCourseId}">
+                                <a class="action-card" href="${pageContext.request.contextPath}/instructor/courses?action=workspace&amp;courseId=${firstCourseId}#assessments">
                                     <i class="fas fa-clipboard-list"></i>
                                     <span>
                                         <strong>Create Assessment</strong>

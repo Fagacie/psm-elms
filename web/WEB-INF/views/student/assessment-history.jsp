@@ -41,7 +41,6 @@
                 <div class="sa-hero-top">
                     <div>
                         <h2>${enrollment.courseName}</h2>
-                        <p>Every attempt, score, and result in one place.</p>
                     </div>
                     <div class="sa-badges">
                         <span class="sa-chip"><i class="fas fa-clock-rotate-left"></i> Attempt history</span>
@@ -53,7 +52,6 @@
                 <div class="sa-panel-head">
                     <div>
                         <h3>Assessment history</h3>
-                        <p>Use this page to track completed work and re-open results.</p>
                     </div>
                     <a class="sv-btn primary" href="${pageContext.request.contextPath}/student/assessments?view=dashboard&enrollmentId=${enrollment.enrollmentId}"><i class="fas fa-table-columns"></i> Back to Dashboard</a>
                 </div>

@@ -12,7 +12,7 @@
 </head>
 <body class="sv-page">
 <c:set var="topbarTitle" value="Material Preview"/>
-<c:set var="topbarSubtitle" value="Review the current material in one focused workspace"/>
+<c:set var="topbarSubtitle" value="Review the current material."/>
 <c:set var="previewEnrollmentId" value="${not empty previewEnrollment ? previewEnrollment.enrollmentId : ''}"/>
 <c:set var="courseProgressPercent" value="${not empty previewEnrollment and not empty previewEnrollment.progress ? previewEnrollment.progress : 0}"/>
 <c:set var="topbarShowSearch" value="false"/>
@@ -43,7 +43,7 @@
                     <p>
                         <c:choose>
                             <c:when test="${not empty material.description}">${material.description}</c:when>
-                            <c:otherwise>Review the material in place, then continue through the course flow.</c:otherwise>
+                            <c:otherwise>Review the material here, then continue.</c:otherwise>
                         </c:choose>
                     </p>
                 </div>
@@ -82,8 +82,8 @@
                         <c:choose>
                             <c:when test="${isCompletedMaterial}">This material is already part of your course progress.</c:when>
                             <c:when test="${completionRule == 'video' || completionRule == 'audio'}">Playback unlocks completion once you reach the required threshold.</c:when>
-                            <c:when test="${completionRule == 'link'}">Open the external resource, then mark the item complete from here.</c:when>
-                            <c:otherwise>Review the material, then mark it complete when you are ready.</c:otherwise>
+                            <c:when test="${completionRule == 'link'}">Open the external resource, then complete it here.</c:when>
+                            <c:otherwise>Review the material, then complete it when ready.</c:otherwise>
                         </c:choose>
                     </p>
                 </div>

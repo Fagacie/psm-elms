@@ -867,9 +867,6 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                 workspaceChips.add(new WorkspaceChip("fa-clock", (selectedAssessment.getDuration() != null ? selectedAssessment.getDuration() : 30) + " min"));
                 workspaceChips.add(new WorkspaceChip("fa-repeat", selectedAssessmentUsedAttempts + " / " + selectedAssessmentAllowedAttempts + " attempts"));
                 workspaceChips.add(new WorkspaceChip("fa-upload", resolveSubmissionModeLabel(selectedAssessment.getSubmissionMode())));
-                if (selectedAssessment.getDueDateDisplay() != null && !selectedAssessment.getDueDateDisplay().trim().isEmpty()) {
-                    workspaceChips.add(new WorkspaceChip("fa-calendar", selectedAssessment.getDueDateDisplay()));
-                }
             } else if (selectedMaterial != null) {
                 workspaceEyebrow = selectedMaterial.getMaterialType();
                 workspaceTitle = selectedMaterial.getTitle();

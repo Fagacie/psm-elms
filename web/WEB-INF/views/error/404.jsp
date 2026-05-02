@@ -93,7 +93,7 @@
         }
 
         html[data-theme='dark'] .error-copy {
-            color: #94a3b8;
+            color: #667181;
         }
 
         html[data-theme='dark'] .error-link.primary {

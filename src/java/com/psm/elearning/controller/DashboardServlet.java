@@ -307,10 +307,6 @@ public class DashboardServlet extends HttpServlet {
                             continue;
                         }
                         coursePendingSubmissions += countPendingGrading(assessment);
-                        LocalDateTime dueDate = assessment.getDueDate();
-                        if (dueDate != null && !dueDate.isBefore(now) && !dueDate.isAfter(dueSoonCutoff)) {
-                            dueSoonAssessmentCount++;
-                        }
                     }
                     pendingSubmissionsByCourseId.put(courseId, coursePendingSubmissions);
                     pendingGradingCount += coursePendingSubmissions;

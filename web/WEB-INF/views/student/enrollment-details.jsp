@@ -17,13 +17,7 @@
 <div class="sv-layout">
     <aside class="sv-sidebar lh-course-sidebar" id="svSidebar" aria-label="Course flow navigation">
         <div class="lh-course-sidebar__header">
-            <span class="lh-course-sidebar__eyebrow">Course Flow</span>
             <h2 class="lh-course-sidebar__title">${enrollment.courseName}</h2>
-            <p class="lh-course-sidebar__summary">
-                ${materialsViewedCount} of ${materialCount} materials completed
-                <span aria-hidden="true">&middot;</span>
-                ${passedAssessmentsCount} of ${totalAssessmentsCount} assessments passed
-            </p>
             <div class="lh-sidebar-progress">
                 <div class="lh-sidebar-progress__row">
                     <span>Progress</span>
@@ -33,14 +27,6 @@
                     <div class="sv-progress-bar" id="lhSidebarProgressBar" style="width:${progressPercent}%;"></div>
                 </div>
             </div>
-            <span class="lh-course-sidebar__badge ${courseAccessGranted ? 'is-ready' : 'is-locked'}">
-                <i class="fas fa-${courseAccessGranted ? (enrollment.coursePrice <= 0 ? 'gift' : 'check-circle') : 'lock'}"></i>
-                <c:choose>
-                    <c:when test="${enrollment.coursePrice <= 0}">Free Access</c:when>
-                    <c:when test="${courseAccessGranted}">Paid Access</c:when>
-                    <c:otherwise>Payment Pending</c:otherwise>
-                </c:choose>
-            </span>
         </div>
 
         <div class="lh-course-sidebar__scroll">
@@ -53,21 +39,7 @@
                             <i class="fas ${item.iconClass}"></i>
                         </span>
                         <span class="lh-flow-copy">
-                            <span class="lh-flow-kicker">${item.badgeText}</span>
                             <strong class="lh-flow-title">${item.title}</strong>
-                            <span class="lh-flow-meta">
-                                <span>${item.type}</span>
-                                <c:if test="${not empty item.metaPrimary}">
-                                    <span>${item.metaPrimary}</span>
-                                </c:if>
-                                <c:if test="${not empty item.metaSecondary}">
-                                    <span>${item.metaSecondary}</span>
-                                </c:if>
-                            </span>
-                        </span>
-                        <span class="lh-flow-state ${item.completedForProgress ? 'is-done' : (item.locked ? 'is-locked' : 'is-open')}">
-                            <i class="fas fa-${item.completedForProgress ? 'check' : (item.locked ? 'lock' : ('In Progress' == item.statusLabel ? 'pen' : 'arrow-right'))}"></i>
-                            <span class="lh-flow-state-text">${item.statusLabel}</span>
                         </span>
                     </a>
                 </c:forEach>
@@ -84,42 +56,7 @@
             <span>Learning Hub</span>
         </div>
 
-        <section class="lh-course-summary">
-            <div class="lh-course-summary__copy">
-                <span class="lh-course-summary__eyebrow">Student Learning Hub</span>
-                <h1>${enrollment.courseName}</h1>
-                <p>${not empty enrollment.courseDescription ? enrollment.courseDescription : 'Continue through your learning sequence with one focused workspace.'}</p>
-            </div>
-            <div class="lh-course-summary__stats">
-                <div class="lh-summary-stat">
-                    <span>Course Progress</span>
-                    <strong id="edProgressPercentSummary">${progressPercent}%</strong>
-                </div>
-                <div class="lh-summary-stat">
-                    <span>Materials Completed</span>
-                    <strong id="edMaterialsViewedCount">${materialsViewedCount} / ${materialCount}</strong>
-                </div>
-                <div class="lh-summary-stat">
-                    <span>Assessments Passed</span>
-                    <strong>${passedAssessmentsCount} / ${totalAssessmentsCount}</strong>
-                </div>
-                <div class="lh-summary-stat">
-                    <span>Access</span>
-                    <strong>
-                        <c:choose>
-                            <c:when test="${enrollment.coursePrice <= 0}">Free</c:when>
-                            <c:when test="${courseAccessGranted}">Unlocked</c:when>
-                            <c:otherwise>Pending</c:otherwise>
-                        </c:choose>
-                    </strong>
-                </div>
-            </div>
-            <div class="lh-course-summary__progress">
-                <div class="sv-progress">
-                    <div class="sv-progress-bar" id="lhSummaryProgressBar" style="width:${progressPercent}%;"></div>
-                </div>
-            </div>
-        </section>
+
 
         <c:if test="${not empty param.error or not empty param.success}">
             <section class="lh-feedback ${not empty param.error ? 'is-error' : 'is-success'}" aria-live="polite">
@@ -127,20 +64,10 @@
                     <i class="fas fa-${not empty param.error ? 'circle-exclamation' : 'circle-check'}"></i>
                 </div>
                 <div class="lh-feedback__copy">
-                    <strong>
-                        <c:choose>
-                            <c:when test="${not empty param.error}">
-                                Action needed
-                            </c:when>
-                            <c:otherwise>
-                                Update saved
-                            </c:otherwise>
-                        </c:choose>
-                    </strong>
                     <p>
                         <c:choose>
                             <c:when test="${param.error == 'paymentRequired'}">
-                                This course item is locked until course access is confirmed.
+                                Access is still locked for this course item.
                             </c:when>
                             <c:when test="${param.error == 'blocked'}">
                                 ${not empty param.reason ? param.reason : 'Complete the required learning step before starting this assessment.'}
@@ -155,19 +82,19 @@
                                 The selected assessment does not belong to this enrollment.
                             </c:when>
                             <c:when test="${param.error == 'submitFailed'}">
-                                We could not save the submission. Please try again.
+                                Submission could not be saved. Please try again.
                             </c:when>
                             <c:when test="${param.success == 'submitted'}">
-                                Your assessment was submitted successfully.
+                                Assessment submitted successfully.
                             </c:when>
                             <c:when test="${param.success == 'timed-out'}">
-                                Time expired and your assessment attempt was submitted automatically.
+                                Time expired and the attempt was submitted automatically.
                             </c:when>
                             <c:when test="${param.success == 'exited'}">
-                                Your assessment was saved and closed.
+                                Assessment saved and closed.
                             </c:when>
                             <c:otherwise>
-                                Your learning workspace has been updated.
+                                Learning workspace updated.
                             </c:otherwise>
                         </c:choose>
                     </p>
@@ -223,7 +150,7 @@
                             <div class="lh-assessment-card__content">
                                 <div class="lh-assessment-block is-wide">
                                     <span>Instructions</span>
-                                    <p>${not empty selectedAssessment.instructions ? selectedAssessment.instructions : 'Open the assessment from the action bar when you are ready to continue.'}</p>
+                                    <p>${not empty selectedAssessment.instructions ? selectedAssessment.instructions : 'Open the assessment when you are ready.'}</p>
                                 </div>
 
                                 <div class="lh-assessment-block is-wide">
@@ -231,10 +158,10 @@
                                     <p>
                                         <strong>${selectedAssessmentStatusLabel}</strong>
                                         <c:if test="${not empty selectedAssessmentLatest}">
-                                            <span class="lh-inline-separator">&middot;</span>
+                                            <span aria-hidden="true">&middot;</span>
                                             Latest attempt #${selectedAssessmentLatest.attemptNumber}
                                             <c:if test="${not empty selectedAssessmentLatest.score}">
-                                                <span class="lh-inline-separator">&middot;</span>
+                                                <span aria-hidden="true">&middot;</span>
                                                 Score ${selectedAssessmentLatest.score}
                                             </c:if>
                                         </c:if>
@@ -250,6 +177,13 @@
                                         </div>
                                     </div>
                                 </c:if>
+
+                                <section class="lh-material-stage lh-assessment-embed-shell" id="lhAssessmentEmbedStage" hidden>
+                                    <iframe
+                                        class="lh-workspace-frame"
+                                        id="lhAssessmentFrame"
+                                        title="Assessment attempt workspace"></iframe>
+                                </section>
                             </div>
                         </section>
                     </c:when>
@@ -268,7 +202,7 @@
                         <div class="lh-stage-empty">
                             <i class="fas fa-book-open-reader"></i>
                             <h3>No learning item selected</h3>
-                            <p>Choose a material or assessment from the course flow to begin.</p>
+                            <p>Select a material or assessment from the course flow.</p>
                         </div>
                     </c:otherwise>
                 </c:choose>
@@ -293,10 +227,10 @@
 
                     <c:choose>
                         <c:when test="${selectedMode == 'assessment' and not empty selectedAssessment and not empty selectedAssessmentPrimaryUrl}">
-                            <a class="sv-btn primary" id="lhSubmitAction" href="${selectedAssessmentPrimaryUrl}">
+                            <button class="sv-btn primary" id="lhSubmitAction" type="button" data-attempt-url="${selectedAssessmentPrimaryUrl}">
                                 <i class="fas fa-${workspacePrimaryActionIcon}"></i>
                                 <span>${selectedAssessmentPrimaryLabel}</span>
-                            </a>
+                            </button>
                         </c:when>
                         <c:when test="${not empty selectedMaterial}">
                             <button
@@ -328,14 +262,11 @@
     var completeButton = document.getElementById('edMarkCompleted');
     var actionNote = document.getElementById('lhActionNote');
     var itemStatusBadge = document.getElementById('lhItemStatusBadge');
-    var progressPercentNodes = [
-        document.getElementById('edProgressPercent'),
-        document.getElementById('edProgressPercentSummary')
-    ];
-    var progressBars = [
-        document.getElementById('lhSidebarProgressBar'),
-        document.getElementById('lhSummaryProgressBar')
-    ];
+    var progressPercentNode = document.getElementById('edProgressPercent');
+    var progressBar = document.getElementById('lhSidebarProgressBar');
+    var assessmentLaunchButton = document.getElementById('lhSubmitAction');
+    var assessmentEmbedStage = document.getElementById('lhAssessmentEmbedStage');
+    var assessmentFrame = document.getElementById('lhAssessmentFrame');
     var materialsViewedNode = document.getElementById('edMaterialsViewedCount');
     var currentMaterialType = '${not empty selectedMaterial ? selectedMaterial.materialType : ""}';
     var currentSelectionMode = '${selectedMode}';
@@ -382,15 +313,11 @@
         if (typeof progressPercent !== 'number' || isNaN(progressPercent)) {
             return;
         }
-        for (var i = 0; i < progressPercentNodes.length; i++) {
-            if (progressPercentNodes[i]) {
-                progressPercentNodes[i].textContent = progressPercent + '%';
-            }
+        if (progressPercentNode) {
+            progressPercentNode.textContent = progressPercent + '%';
         }
-        for (var j = 0; j < progressBars.length; j++) {
-            if (progressBars[j]) {
-                progressBars[j].style.width = progressPercent + '%';
-            }
+        if (progressBar) {
+            progressBar.style.width = progressPercent + '%';
         }
     }
 
@@ -420,19 +347,6 @@
         var activeLink = flowLinks[activeIndex];
         activeLink.classList.add('is-completed');
         activeLink.classList.remove('is-locked');
-        var state = activeLink.querySelector('.lh-flow-state');
-        var stateText = activeLink.querySelector('.lh-flow-state-text');
-        var stateIcon = state ? state.querySelector('i') : null;
-        if (state) {
-            state.classList.remove('is-open', 'is-locked');
-            state.classList.add('is-done');
-        }
-        if (stateText) {
-            stateText.textContent = 'Completed';
-        }
-        if (stateIcon) {
-            stateIcon.className = 'fas fa-check';
-        }
     }
 
     function applyCompletedState(note) {
@@ -448,6 +362,29 @@
             actionNote.textContent = note;
         }
     }
+
+    function openAssessmentInline(url) {
+        if (!url || !assessmentEmbedStage || !assessmentFrame) {
+            return;
+        }
+        assessmentFrame.src = url;
+        assessmentEmbedStage.hidden = false;
+        assessmentEmbedStage.scrollIntoView({behavior: 'smooth', block: 'start'});
+        if (actionNote) {
+            actionNote.textContent = 'Assessment loaded inside the learning hub.';
+        }
+    }
+
+    if (assessmentLaunchButton) {
+        assessmentLaunchButton.addEventListener('click', function () {
+            openAssessmentInline(this.getAttribute('data-attempt-url'));
+        });
+    }
+
+    document.addEventListener('CP_StartAssessment', function (event) {
+        var url = event && event.detail ? event.detail.attemptUrl : null;
+        openAssessmentInline(url);
+    });
 
     function setWaitingState() {
         if (!completeButton || viewerState.completed || currentSelectionMode !== 'material') {

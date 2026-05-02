@@ -67,10 +67,6 @@
                             <p><c:choose><c:when test="${not empty displayInstructions}">${displayInstructions}</c:when><c:otherwise>No instructions provided.</c:otherwise></c:choose></p>
                         </div>
                         <div class="sa-detail-item">
-                            <span>Deadline</span>
-                            <strong>${assessmentSummary.dueDateLabel}</strong>
-                        </div>
-                        <div class="sa-detail-item">
                             <span>Attempts</span>
                             <strong>${usedAttempts} used of ${allowedAttempts} allowed</strong>
                         </div>

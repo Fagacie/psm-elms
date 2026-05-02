@@ -41,7 +41,6 @@
                 <div class="sa-panel-head">
                     <div>
                         <h3>Submitted successfully</h3>
-                        <p>Your submission was recorded and is now ready for review or grading.</p>
                     </div>
                     <span class="sa-status ${statusClass}">${submissionStatusLabel}</span>
                 </div>

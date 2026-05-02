@@ -140,7 +140,7 @@
                                             <div class="organizer-item-meta">Assessment (${assessment.type}) • Placed after this material</div>
                                         </div>
                                         <div class="organizer-item-actions">
-                                            <a href="${pageContext.request.contextPath}/instructor/assessments?courseId=${course.courseId}&assessmentId=${assessment.assessmentId}" class="btn btn-secondary btn-sm" title="Edit Assessment">
+                                            <a href="${pageContext.request.contextPath}/instructor/courses?action=workspace&amp;courseId=${course.courseId}&amp;assessmentId=${assessment.assessmentId}#assessments" class="btn btn-secondary btn-sm" title="Edit Assessment">
                                                 <i class="fas fa-edit"></i>
                                             </a>
                                         </div>
@@ -167,7 +167,7 @@
                                             <div class="organizer-item-meta">Assessment (${assessment.type}) • Appears after all materials</div>
                                         </div>
                                         <div class="organizer-item-actions">
-                                            <a href="${pageContext.request.contextPath}/instructor/assessments?courseId=${course.courseId}&assessmentId=${assessment.assessmentId}" class="btn btn-secondary btn-sm" title="Edit Assessment">
+                                            <a href="${pageContext.request.contextPath}/instructor/courses?action=workspace&amp;courseId=${course.courseId}&amp;assessmentId=${assessment.assessmentId}#assessments" class="btn btn-secondary btn-sm" title="Edit Assessment">
                                                 <i class="fas fa-edit"></i>
                                             </a>
                                         </div>

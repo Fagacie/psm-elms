@@ -160,9 +160,11 @@ public class InstructorCourseServlet extends HttpServlet {
 
             List<Material> materials = materialDAO.findByCourse(courseId);
             List<Assessment> assessments = assessmentDAO.findByCourse(courseId);
+            List<Assessment> archivedAssessments = assessmentDAO.findDeletedByCourse(courseId);
             List<Enrollment> enrollments = enrollmentDAO.getEnrollmentsByCourse(courseId);
             if (materials == null) materials = java.util.Collections.emptyList();
             if (assessments == null) assessments = java.util.Collections.emptyList();
+            if (archivedAssessments == null) archivedAssessments = java.util.Collections.emptyList();
             if (enrollments == null) enrollments = java.util.Collections.emptyList();
 
             int completedStudents = 0;
@@ -186,6 +188,7 @@ public class InstructorCourseServlet extends HttpServlet {
             request.setAttribute("selectedCourse", course);
             request.setAttribute("materials", materials);
             request.setAttribute("assessments", assessments);
+            request.setAttribute("archivedAssessments", archivedAssessments);
             request.setAttribute("enrollments", enrollments);
             request.setAttribute("totalStudents", totalStudents);
             request.setAttribute("completedStudents", completedStudents);

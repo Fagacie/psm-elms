@@ -11,7 +11,7 @@
                 <div class="mv-link-state">
                     <i class="fas fa-link"></i>
                     <h3>External Resource</h3>
-                    <p>This resource opens in a new tab. Review it there, then return to the Learning Hub and mark the item complete.</p>
+                    <p>This resource opens in a new tab.</p>
                     <a id="mvOpenResource"
                        class="cp-inline-link"
                        target="_blank"
@@ -51,7 +51,7 @@
                 <div class="mv-link-state">
                     <i class="fas fa-file-arrow-down"></i>
                     <h3>Preview Not Available</h3>
-                    <p>This file cannot be embedded reliably in the browser. Download it, review it, then return to the Learning Hub and mark it complete.</p>
+                    <p>This file cannot be embedded reliably in the browser.</p>
                     <a class="cp-inline-link" href="${pageContext.request.contextPath}/student/materials?action=download&id=${material.materialId}">
                         Download File
                     </a>
@@ -89,9 +89,9 @@
             return 'Playback unlocks completion once you reach the required threshold.';
         }
         if (completionRule === 'link') {
-            return 'Open the external resource in the viewer, then mark it complete from the Learning Hub.';
+            return 'Open the external resource in the viewer.';
         }
-        return 'Review the current material, then mark it complete from the Learning Hub.';
+        return 'Review the current material.';
     }
 
     postToParent('lhViewerState', initialNote());
@@ -126,7 +126,7 @@
         if (openResourceLink) {
             openResourceLink.addEventListener('click', function () {
                 window.setTimeout(function () {
-                    postToParent('lhViewerUnlock', 'After reviewing the external resource, mark this item complete from the action bar.');
+                    postToParent('lhViewerUnlock', 'After reviewing the external resource, you can mark this item complete.');
                 }, 1200);
             });
         }

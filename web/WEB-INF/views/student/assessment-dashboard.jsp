@@ -39,7 +39,6 @@
                 <div class="sa-hero-top">
                     <div>
                         <h2>${enrollment.courseName}</h2>
-                        <p>${enrollment.courseDescription}</p>
                     </div>
                     <div class="sa-badges">
                         <span class="sa-chip"><i class="fas fa-clipboard-list"></i> ${assessmentSummaries.size()} assessments</span>
@@ -71,7 +70,6 @@
                 <div class="sa-panel-head">
                     <div>
                         <h3>Assessment list</h3>
-                        <p>View what is available, continue open attempts, or open details before you start.</p>
                     </div>
                     <div class="sa-search-row">
                         <input id="assSearch" type="search" placeholder="Search by title or course" autocomplete="off">
@@ -101,7 +99,6 @@
                                         <th>Assessment</th>
                                         <th>Course</th>
                                         <th>Type</th>
-                                        <th>Due Date</th>
                                         <th>Duration</th>
                                         <th>Total Marks</th>
                                         <th>Attempts Left</th>
@@ -114,18 +111,13 @@
                                     <tr data-search="${fn:toLowerCase(item.assessmentTitle)} ${fn:toLowerCase(item.courseName)}" data-status="${item.statusLabel}">
                                         <td data-label="Assessment">
                                             <strong>${item.assessmentTitle}</strong>
-                                            <div class="sa-subtle">${item.questionCount} question(s)</div>
                                         </td>
                                         <td data-label="Course">${item.courseName}</td>
                                         <td data-label="Type"><span class="sa-chip">${item.assessmentType}</span></td>
-                                        <td data-label="Due Date">${item.dueDateLabel}</td>
                                         <td data-label="Duration">${item.assessment.duration != null ? item.assessment.duration : '--'}${item.assessment.duration != null ? ' min' : ''}</td>
                                         <td data-label="Total Marks">${item.assessment.totalMarks != null ? item.assessment.totalMarks : '--'}</td>
                                         <td data-label="Attempts Left">
                                             ${item.attemptsRemaining}
-                                            <c:if test="${item.attemptsRemaining <= 0 and not item.activeAttempt}">
-                                                <div class="sa-subtle">No attempts left</div>
-                                            </c:if>
                                         </td>
                                         <td data-label="Status"><span class="sa-status sa-status-${fn:toLowerCase(fn:replace(item.statusLabel, ' ', ''))}">${item.statusLabel}</span></td>
                                         <td data-label="Action">

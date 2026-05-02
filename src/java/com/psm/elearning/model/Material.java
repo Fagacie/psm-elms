@@ -37,9 +37,6 @@ public class Material {
     
     private LocalDateTime uploadDate;
     
-    @Size(max = 20, message = "Version number must not exceed 20 characters")
-    private String versionNumber;
-
     @Min(value = 1, message = "Display order must be at least 1")
     private Integer displayOrder;
 
@@ -57,8 +54,7 @@ public class Material {
     public Material() {}
     
     public Material(Integer materialId, Integer courseId, String title, String description,
-                   String materialType, String filePath, Integer uploadedBy, LocalDateTime uploadDate,
-                   String versionNumber) {
+                   String materialType, String filePath, Integer uploadedBy, LocalDateTime uploadDate) {
         this.materialId = materialId;
         this.courseId = courseId;
         this.title = title;
@@ -67,7 +63,6 @@ public class Material {
         this.filePath = filePath;
         this.uploadedBy = uploadedBy;
         this.uploadDate = uploadDate;
-        this.versionNumber = versionNumber;
         this.isDeleted = false;
     }
     
@@ -95,9 +90,6 @@ public class Material {
     
     public LocalDateTime getUploadDate() { return uploadDate; }
     public void setUploadDate(LocalDateTime uploadDate) { this.uploadDate = uploadDate; }
-    
-    public String getVersionNumber() { return versionNumber; }
-    public void setVersionNumber(String versionNumber) { this.versionNumber = versionNumber; }
 
     public Integer getDisplayOrder() { return displayOrder; }
     public void setDisplayOrder(Integer displayOrder) { this.displayOrder = displayOrder; }

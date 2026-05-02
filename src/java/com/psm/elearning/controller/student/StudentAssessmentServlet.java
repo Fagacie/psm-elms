@@ -628,7 +628,6 @@ public class StudentAssessmentServlet extends HttpServlet {
         }
         summary.setStatusLabel(statusLabel);
         summary.setStatusClass(statusClass);
-        summary.setDueDateLabel(assessment.getDueDateDisplay() != null ? assessment.getDueDateDisplay() : "Not set");
         summary.setAssessmentTitle(assessment.getTitle());
         summary.setAssessmentType(assessment.getType());
         return summary;
@@ -841,7 +840,6 @@ public class StudentAssessmentServlet extends HttpServlet {
         private boolean activeAttempt;
         private String statusLabel;
         private String statusClass;
-        private String dueDateLabel;
 
         public Enrollment getEnrollment() { return enrollment; }
         public void setEnrollment(Enrollment enrollment) { this.enrollment = enrollment; }
@@ -873,8 +871,6 @@ public class StudentAssessmentServlet extends HttpServlet {
         public void setStatusLabel(String statusLabel) { this.statusLabel = statusLabel; }
         public String getStatusClass() { return statusClass; }
         public void setStatusClass(String statusClass) { this.statusClass = statusClass; }
-        public String getDueDateLabel() { return dueDateLabel; }
-        public void setDueDateLabel(String dueDateLabel) { this.dueDateLabel = dueDateLabel; }
     }
 
     private String resolveCloudinaryResourceType(String fileName) {
@@ -897,3 +893,4 @@ public class StudentAssessmentServlet extends HttpServlet {
         return "raw";
     }
 }
+

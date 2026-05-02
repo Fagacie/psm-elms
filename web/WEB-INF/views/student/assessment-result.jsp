@@ -93,7 +93,6 @@
                 <div class="sa-panel-head">
                     <div>
                         <h3>Performance breakdown</h3>
-                        <p>Optional question-by-question view for objective assessments.</p>
                     </div>
                 </div>
 
@@ -122,7 +121,6 @@
                 <div class="sa-panel-head">
                     <div>
                         <h3>Submission details</h3>
-                        <p>Review the raw submission and any grading audit entries.</p>
                     </div>
                 </div>
 

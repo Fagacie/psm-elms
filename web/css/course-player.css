@@ -513,8 +513,7 @@
   padding: 24px;
   background: var(--sv-surface, #fff);
   border: 1px solid var(--sv-border);
-  border-radius: 12px;
-  box-shadow: 0 20px 42px rgba(16, 38, 26, 0.08);
+  border-radius: 6px;
 }
 
 .mv-audio-wrap audio { width: 100%; }
@@ -529,7 +528,7 @@
   padding: 52px 28px;
   background: var(--sv-surface, #fff);
   border: 1px solid var(--sv-border);
-  border-radius: 12px;
+  border-radius: 6px;
   text-align: center;
 }
 

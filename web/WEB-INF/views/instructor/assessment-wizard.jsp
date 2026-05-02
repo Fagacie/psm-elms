@@ -18,21 +18,15 @@
             <strong>Questions</strong>
             <small>Build content</small>
         </button>
-        <button type="button" class="ia-step-chip ${wizardStep == 'review' ? 'active' : ''} ${empty selectedAssessment ? 'is-disabled' : ''}" data-step-target="review" ${empty selectedAssessment ? 'disabled' : ''}>
-            <span>3</span>
-            <strong>Review</strong>
-            <small>Publish ready</small>
-        </button>
     </div>
 
     <article class="ia-card ia-step-panel ${wizardStep == 'details' ? 'is-active' : ''}" data-step-panel="details">
         <div class="ia-card-head ia-wizard-head">
             <div>
                 <p class="ia-card-kicker">Step 1</p>
-                <h3>${not empty selectedAssessment ? 'Assessment Details' : 'Create Assessment Draft'}</h3>
+                <h3>${not empty selectedAssessment ? 'Assessment Details' : 'Create Assessment'}</h3>
                 <p class="section-caption">Keep the form focused. Type-specific fields appear automatically so the page stays readable.</p>
             </div>
-            <span class="ia-status-chip">Draft</span>
         </div>
 
         <div class="ia-step-layout">
@@ -56,7 +50,6 @@
                             <select id="assessmentType" name="type" data-question-preset-control required>
                                 <option value="">Select type</option>
                                 <option value="Quiz" ${not empty selectedAssessment and selectedAssessment.type == 'Quiz' ? 'selected' : ''}>Quiz</option>
-                                <option value="Practice Test" ${not empty selectedAssessment and selectedAssessment.type == 'Practice Test' ? 'selected' : ''}>Practice Test</option>
                                 <option value="Exam" ${not empty selectedAssessment and selectedAssessment.type == 'Exam' ? 'selected' : ''}>Exam</option>
                                 <option value="Assignment" ${not empty selectedAssessment and selectedAssessment.type == 'Assignment' ? 'selected' : ''}>Assignment</option>
                             </select>
@@ -65,11 +58,6 @@
                         <div class="ia-field-span-2">
                             <label for="assessmentInstructions">Description</label>
                             <textarea id="assessmentInstructions" name="instructions" rows="4" placeholder="Short guidance for students and grading context.">${not empty selectedAssessment ? selectedAssessment.instructions : ''}</textarea>
-                        </div>
-
-                        <div>
-                            <label for="assessmentDueDate">Deadline</label>
-                            <input id="assessmentDueDate" name="dueDate" type="datetime-local" value="" />
                         </div>
 
                         <div data-type-visible="objective">
@@ -85,11 +73,6 @@
                         <div>
                             <label for="assessmentTotalMarks">Total Marks</label>
                             <input id="assessmentTotalMarks" name="totalMarks" type="number" min="1" step="1" value="${not empty selectedAssessment and not empty selectedAssessment.totalMarks ? selectedAssessment.totalMarks : ''}" placeholder="Auto from questions" />
-                        </div>
-
-                        <div data-type-visible="objective">
-                            <label for="questionsPerPage">Questions per Page</label>
-                            <input id="questionsPerPage" name="questionsPerPage" type="number" min="1" value="${not empty selectedAssessment and not empty selectedAssessment.questionsPerPage ? selectedAssessment.questionsPerPage : 2}" />
                         </div>
 
                         <div data-type-visible="assignment" class="ia-field-span-2">
@@ -116,7 +99,7 @@
                     </div>
 
                     <div class="ia-form-actions">
-                        <button class="btn btn-secondary" type="submit" data-workflow-action="draft"><i class="fas fa-floppy-disk"></i> Save Draft</button>
+                        <button class="btn btn-secondary" type="submit" data-workflow-action="questions"><i class="fas fa-floppy-disk"></i> Save and Continue</button>
                         <button class="btn btn-primary" type="submit" data-workflow-action="questions"><i class="fas fa-arrow-right"></i> Continue to Questions</button>
                     </div>
                 </form>
@@ -128,7 +111,6 @@
                     <h4>${selectedCourse.courseName}</h4>
                     <div class="ia-summary-list">
                         <div><span>Type</span><strong><c:out value="${not empty selectedAssessment ? selectedAssessment.type : 'Not set'}" default="Not set" /></strong></div>
-                        <div><span>Deadline</span><strong><c:out value="${not empty selectedAssessment and not empty selectedAssessment.dueDateDisplay ? selectedAssessment.dueDateDisplay : 'Not set'}" default="Not set" /></strong></div>
                         <div><span>Duration</span><strong><c:out value="${not empty selectedAssessment and not empty selectedAssessment.duration ? selectedAssessment.duration : 'Open-ended'}" default="Open-ended" /></strong></div>
                         <div><span>Attempts</span><strong><c:out value="${not empty selectedAssessment and not empty selectedAssessment.maxAttempts ? selectedAssessment.maxAttempts : 3}" default="3" /></strong></div>
                     </div>
@@ -147,7 +129,7 @@
                 </div>
                 <div class="ia-inline-actions">
                     <button type="button" class="btn btn-secondary btn-sm" data-step-target="details"><i class="fas fa-arrow-left"></i> Back</button>
-                    <button type="button" class="btn btn-primary btn-sm" data-step-target="review"><i class="fas fa-eye"></i> Continue to Review</button>
+                    <button type="submit" class="btn btn-primary btn-sm" form="assessmentDetailsForm" data-workflow-action="publish"><i class="fas fa-paper-plane"></i> Publish</button>
                 </div>
             </div>
 
@@ -285,41 +267,6 @@
             </div>
         </article>
 
-        <article class="ia-card ia-step-panel ${wizardStep == 'review' ? 'is-active' : ''}" data-step-panel="review">
-            <div class="ia-card-head ia-wizard-head">
-                <div>
-                    <p class="ia-card-kicker">Step 3</p>
-                    <h3>Review and Publish</h3>
-                    <p class="section-caption">Check the summary before moving the assessment out of draft mode.</p>
-                </div>
-                <div class="ia-inline-actions">
-                    <button type="button" class="btn btn-secondary btn-sm" data-step-target="questions"><i class="fas fa-arrow-left"></i> Back</button>
-                </div>
-            </div>
-
-            <div class="ia-review-grid">
-                <div class="ia-review-card">
-                    <p class="ia-card-kicker">Summary</p>
-                    <h4>${not empty selectedAssessment ? selectedAssessment.title : 'Untitled assessment'}</h4>
-                    <ul class="ia-review-list">
-                        <li><span>Type</span><strong>${not empty selectedAssessment ? selectedAssessment.type : '—'}</strong></li>
-                        <li><span>Questions</span><strong>${questionTotalCount}</strong></li>
-                        <li><span>Attempts</span><strong><c:out value="${not empty selectedAssessment and not empty selectedAssessment.maxAttempts ? selectedAssessment.maxAttempts : 3}" default="3" /></strong></li>
-                        <li><span>Marks</span><strong><c:out value="${not empty selectedAssessment and not empty selectedAssessment.totalMarks ? selectedAssessment.totalMarks : 'Auto'}" default="Auto" /></strong></li>
-                    </ul>
-                </div>
-
-                <div class="ia-review-card">
-                    <p class="ia-card-kicker">Actions</p>
-                    <h4>Ready to continue?</h4>
-                    <p class="section-caption">Save the details if you are still iterating, or submit the wizard with publish flow to keep the assessment available in the workspace.</p>
-                    <div class="ia-form-actions">
-                        <button type="button" class="btn btn-secondary" data-step-target="details"><i class="fas fa-pen"></i> Edit Details</button>
-                        <button type="submit" class="btn btn-primary" form="assessmentDetailsForm" data-workflow-action="publish"><i class="fas fa-paper-plane"></i> Publish</button>
-                    </div>
-                </div>
-            </div>
-        </article>
     </c:if>
 </section>
 
@@ -345,7 +292,7 @@
         stepButtons.forEach((button) => button.classList.toggle('active', button.getAttribute('data-step-target') === step));
         wizard.setAttribute('data-active-step', step);
         if (workflowAction) {
-            workflowAction.value = step === 'review' ? 'review' : step;
+            workflowAction.value = step;
         }
     }
 
@@ -354,6 +301,9 @@
             return;
         }
         presetInput.value = preset;
+        questionPresetButtons.forEach((item) => {
+            item.classList.toggle('active', item.getAttribute('data-question-preset') === preset);
+        });
 
         const optionsBlock = wizard.querySelector('[data-question-options]');
         const answerBlock = wizard.querySelector('[data-question-answer]');
@@ -398,6 +348,43 @@
         }
     }
 
+    function syncQuestionBuilder(type) {
+        const isAssignment = type === 'Assignment';
+        const isObjective = type === 'Quiz' || type === 'Exam';
+        const objectiveFields = wizard.querySelectorAll('[data-type-visible="objective"]');
+        const assignmentFields = wizard.querySelectorAll('[data-type-visible="assignment"]');
+        const presetRow = wizard.querySelector('.ia-preset-row');
+        const submissionMode = wizard.querySelector('#submissionMode');
+        const maxAttempts = wizard.querySelector('#assessmentMaxAttempts');
+
+        objectiveFields.forEach((node) => {
+            node.style.display = isObjective ? '' : 'none';
+        });
+        assignmentFields.forEach((node) => {
+            node.style.display = isAssignment ? '' : 'none';
+        });
+
+        if (presetRow) {
+            presetRow.style.display = isAssignment ? 'none' : '';
+        }
+
+        if (submissionMode) {
+            submissionMode.disabled = !isAssignment;
+        }
+        if (maxAttempts) {
+            if (!isObjective) {
+                maxAttempts.value = '1';
+            }
+            maxAttempts.disabled = isAssignment;
+        }
+
+        if (isAssignment) {
+            setQuestionPreset('short');
+        } else {
+            setQuestionPreset('mcq');
+        }
+    }
+
     stepButtons.forEach((button) => {
         button.addEventListener('click', () => {
             const step = button.getAttribute('data-step-target');
@@ -439,34 +426,14 @@
     }
 
     if (typeSelect) {
-        const syncType = () => {
-            const type = typeSelect.value;
-            const objective = type === 'Quiz' || type === 'Practice Test' || type === 'Exam';
-            wizard.querySelectorAll('[data-type-visible="objective"]').forEach((node) => {
-                node.style.display = objective ? '' : 'none';
-            });
-            wizard.querySelectorAll('[data-type-visible="assignment"]').forEach((node) => {
-                node.style.display = type === 'Assignment' ? '' : 'none';
-            });
-            const submissionMode = wizard.querySelector('#submissionMode');
-            if (submissionMode) {
-                submissionMode.disabled = type !== 'Assignment';
-            }
-            const maxAttempts = wizard.querySelector('#assessmentMaxAttempts');
-            if (maxAttempts) {
-                if (!objective) {
-                    maxAttempts.value = '1';
-                } else if (type === 'Practice Test' && (!maxAttempts.value || maxAttempts.value === '1')) {
-                    maxAttempts.value = '10';
-                }
-            }
-        };
-
-        typeSelect.addEventListener('change', syncType);
-        syncType();
+        typeSelect.addEventListener('change', () => {
+            syncQuestionBuilder(typeSelect.value);
+        });
+        syncQuestionBuilder(typeSelect.value);
+    } else {
+        setQuestionPreset('mcq');
     }
 
-    setQuestionPreset('mcq');
     const activeStep = wizard.getAttribute('data-active-step') || 'details';
     showStep(activeStep);
 })();

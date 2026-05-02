@@ -161,7 +161,6 @@ CREATE TABLE IF NOT EXISTS `Material` (
   `FilePath` VARCHAR(255) NULL,
   `UploadedBy` INT NULL,
   `UploadDate` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `VersionNumber` VARCHAR(50) NULL,
   `DisplayOrder` INT NULL,
   `IsDeleted` TINYINT(1) NOT NULL DEFAULT 0,
   `DeletedAt` TIMESTAMP NULL DEFAULT NULL,
@@ -246,25 +245,27 @@ CREATE TABLE IF NOT EXISTS `Assessment` (
   `Type` VARCHAR(50) NULL,
   `Duration` INT NULL,
   `TotalMarks` INT NULL,
-  `DueDate` DATETIME NULL,
   `Instructions` TEXT NULL,
   `PlacementType` VARCHAR(20) NOT NULL DEFAULT 'final',
   `PlacementMaterialID` INT NULL,
   `MaxAttempts` INT NOT NULL DEFAULT 1,
-  `QuestionsPerPage` INT NOT NULL DEFAULT 2,
+  `IsDeleted` TINYINT(1) NOT NULL DEFAULT 0,
+  `DeletedAt` TIMESTAMP NULL DEFAULT NULL,
+  `DeletedBy` INT NULL,
   `CreatedAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `CreatedBy` INT NOT NULL,
   KEY `idx_assessment_course` (`CourseID`),
   KEY `idx_assessment_placement_material` (`PlacementMaterialID`),
+  KEY `idx_assessment_deleted` (`IsDeleted`),
   CONSTRAINT `fk_assessment_course` FOREIGN KEY (`CourseID`) REFERENCES `Course`(`CourseID`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_assessment_creator` FOREIGN KEY (`CreatedBy`) REFERENCES `User`(`UserID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_assessment_deleted_by` FOREIGN KEY (`DeletedBy`) REFERENCES `User`(`UserID`) ON DELETE SET NULL ON UPDATE CASCADE,
   CONSTRAINT `fk_assessment_placement_material` FOREIGN KEY (`PlacementMaterialID`) REFERENCES `Material`(`MaterialID`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 ALTER TABLE `Assessment`
   ADD COLUMN `GradingMode` ENUM('auto','manual') NOT NULL DEFAULT 'auto',
-  ADD COLUMN `SubmissionMode` ENUM('file','text','both') NOT NULL DEFAULT 'both',
-  ADD COLUMN `DueDate` DATETIME NULL;
+  ADD COLUMN `SubmissionMode` ENUM('file','text','both') NOT NULL DEFAULT 'both';
 
 -- Assessment Questions
 CREATE TABLE IF NOT EXISTS `AssessmentQuestion` (

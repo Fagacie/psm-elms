@@ -32,10 +32,6 @@
 
             <div class="sa-info-grid">
                 <div class="sa-info-row">
-                    <span class="sa-info-label">Deadline</span>
-                    <span class="sa-info-value">${assessmentSummary.dueDateLabel}</span>
-                </div>
-                <div class="sa-info-row">
                     <span class="sa-info-label">Attempts Used</span>
                     <span class="sa-info-value">${usedAttempts} / ${allowedAttempts}</span>
                 </div>

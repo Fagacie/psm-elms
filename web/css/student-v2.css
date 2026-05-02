@@ -66,13 +66,13 @@ a {
 .sv-topbar {
   position: fixed;
   inset: 0 0 auto 0;
-  height: var(--sv-topbar-height);
+  height: 68px;
   z-index: 120;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 14px;
-  padding: 0 20px 0 16px;
+  gap: 12px;
+  padding: 0 16px 0 12px;
   background: rgba(243, 245, 242, 0.86);
   backdrop-filter: blur(18px);
   border-bottom: 1px solid rgba(16, 38, 26, 0.08);
@@ -82,7 +82,7 @@ a {
 .sv-top-right {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .sv-top-left {
@@ -97,12 +97,12 @@ a {
 
 .sv-shell-toggle,
 .sv-menu-btn {
-  width: 44px;
-  height: 44px;
+  width: 38px;
+  height: 38px;
   display: inline-grid;
   place-items: center;
   border: 1px solid var(--sv-border);
-  border-radius: 15px;
+  border-radius: 10px;
   background: rgba(255, 255, 255, 0.9);
   color: var(--sv-heading);
   box-shadow: var(--sv-shadow-sm);
@@ -122,13 +122,13 @@ a {
 .sv-brand {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   min-width: 0;
   color: var(--sv-heading);
 }
 
 .sv-brand-main {
-  font-size: 1.18rem;
+  font-size: 1.02rem;
   font-weight: 800;
   line-height: 1;
   letter-spacing: -0.03em;
@@ -136,43 +136,9 @@ a {
 
 .sv-brand-sub {
   color: var(--sv-muted);
-  font-size: 0.84rem;
+  font-size: 0.78rem;
   font-weight: 700;
   line-height: 1;
-}
-
-.sv-top-links {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
-}
-
-.sv-top-link {
-  min-height: 38px;
-  padding: 0 12px;
-  border: 1px solid transparent;
-  border-radius: 12px;
-  color: var(--sv-muted-strong);
-  font-size: 0.86rem;
-  font-weight: 800;
-  letter-spacing: 0.01em;
-  display: inline-flex;
-  align-items: center;
-  transition: transform 0.2s ease, border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
-}
-
-.sv-top-link:hover {
-  transform: translateY(-1px);
-  color: var(--sv-heading);
-  border-color: rgba(16, 38, 26, 0.08);
-  background: rgba(255, 255, 255, 0.72);
-}
-
-.sv-top-link.active {
-  color: var(--sv-accent-strong);
-  border-color: var(--sv-accent-border);
-  background: var(--sv-accent-soft);
 }
 
 .sv-page-title,
@@ -187,22 +153,13 @@ a {
   letter-spacing: -0.03em;
 }
 
-.sv-page-title p,
-.sv-profile-role {
-  color: var(--sv-muted);
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
 .sv-page-title {
   padding-left: 14px;
   border-left: 1px solid rgba(16, 38, 26, 0.08);
 }
 
 .sv-page-title h1 {
-  font-size: 1.2rem;
+  font-size: 1rem;
   font-weight: 800;
   white-space: nowrap;
   overflow: hidden;
@@ -1110,10 +1067,6 @@ textarea:focus-visible {
   .sv-page-title {
     max-width: 280px;
   }
-
-  .sv-top-links {
-    display: none;
-  }
 }
 
 @media (max-width: 1100px) {
@@ -1179,7 +1132,6 @@ textarea:focus-visible {
     gap: 10px;
   }
 
-  .sv-profile-copy,
   .theme-toggle,
   .sv-notification-wrap {
     display: none;
@@ -1188,15 +1140,11 @@ textarea:focus-visible {
   .sv-page-title {
     padding-left: 10px;
   }
-
-  .sv-nav-link::after {
-    display: none;
-  }
 }
 
 @media (max-width: 760px) {
   :root {
-    --sv-topbar-height: 72px;
+    --sv-topbar-height: 68px;
   }
 
   .sv-topbar {
@@ -1208,7 +1156,7 @@ textarea:focus-visible {
   }
 
   .sv-page-title h1 {
-    font-size: 1rem;
+    font-size: 0.95rem;
   }
 
   .sv-main {

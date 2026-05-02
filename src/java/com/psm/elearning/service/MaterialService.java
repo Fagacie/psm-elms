@@ -93,10 +93,6 @@ public class MaterialService {
             throw new ValidationException(errors);
         }
 
-        if (material.getVersionNumber() == null || material.getVersionNumber().trim().isEmpty()) {
-            material.setVersionNumber("v1.0");
-        }
-
         Material normalized = new Material();
         normalized.setMaterialId(material.getMaterialId());
         normalized.setCourseId(material.getCourseId());
@@ -105,7 +101,6 @@ public class MaterialService {
         normalized.setMaterialType(material.getMaterialType());
         normalized.setFilePath(material.getFilePath());
         normalized.setUploadedBy(material.getUploadedBy());
-        normalized.setVersionNumber(material.getVersionNumber());
         normalized.setDisplayOrder(material.getDisplayOrder());
 
         if (Material.TYPE_LINK.equalsIgnoreCase(normalized.getMaterialType())) {

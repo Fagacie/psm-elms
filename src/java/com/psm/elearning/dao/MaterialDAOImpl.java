@@ -43,7 +43,6 @@ public class MaterialDAOImpl implements MaterialDAO {
         m.setUploadedBy(rs.wasNull() ? null : uploader);
         Timestamp up = rs.getTimestamp("UploadDate");
         m.setUploadDate(up != null ? up.toLocalDateTime() : null);
-        m.setVersionNumber(rs.getString("VersionNumber"));
         if (hasColumn(rs, "DisplayOrder")) {
             int order = rs.getInt("DisplayOrder");
             m.setDisplayOrder(rs.wasNull() ? null : order);
@@ -67,8 +66,8 @@ public class MaterialDAOImpl implements MaterialDAO {
         try (Connection conn = DBConnection.getConnection()) {
             boolean hasDisplayOrder = hasDisplayOrderColumn(conn);
             String sql = hasDisplayOrder
-                    ? "INSERT INTO Material (CourseID, Title, Description, MaterialType, FilePath, UploadedBy, VersionNumber, DisplayOrder) VALUES (?,?,?,?,?,?,?,?)"
-                    : "INSERT INTO Material (CourseID, Title, Description, MaterialType, FilePath, UploadedBy, VersionNumber) VALUES (?,?,?,?,?,?,?)";
+                    ? "INSERT INTO Material (CourseID, Title, Description, MaterialType, FilePath, UploadedBy, DisplayOrder) VALUES (?,?,?,?,?,?,?)"
+                    : "INSERT INTO Material (CourseID, Title, Description, MaterialType, FilePath, UploadedBy) VALUES (?,?,?,?,?,?)";
             try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
                 ps.setInt(1, material.getCourseId());
                 ps.setString(2, material.getTitle());
@@ -76,9 +75,8 @@ public class MaterialDAOImpl implements MaterialDAO {
                 ps.setString(4, material.getMaterialType());
                 ps.setString(5, material.getFilePath());
                 if (material.getUploadedBy() != null) ps.setInt(6, material.getUploadedBy()); else ps.setNull(6, Types.INTEGER);
-                ps.setString(7, material.getVersionNumber());
                 if (hasDisplayOrder) {
-                    if (material.getDisplayOrder() != null) ps.setInt(8, material.getDisplayOrder()); else ps.setNull(8, Types.INTEGER);
+                    if (material.getDisplayOrder() != null) ps.setInt(7, material.getDisplayOrder()); else ps.setNull(7, Types.INTEGER);
                 }
                 int affected = ps.executeUpdate();
                 if (affected == 0) return null;
@@ -170,21 +168,20 @@ public class MaterialDAOImpl implements MaterialDAO {
         try (Connection conn = DBConnection.getConnection()) {
             boolean hasDisplayOrder = hasDisplayOrderColumn(conn);
             String sql = hasDisplayOrder
-                    ? "UPDATE Material SET Title=?, Description=?, MaterialType=?, FilePath=?, VersionNumber=?, DisplayOrder=? " +
+                    ? "UPDATE Material SET Title=?, Description=?, MaterialType=?, FilePath=?, DisplayOrder=? " +
                     "WHERE MaterialID=? AND (IsDeleted=0 OR IsDeleted IS NULL)"
-                    : "UPDATE Material SET Title=?, Description=?, MaterialType=?, FilePath=?, VersionNumber=? " +
+                    : "UPDATE Material SET Title=?, Description=?, MaterialType=?, FilePath=? " +
                     "WHERE MaterialID=? AND (IsDeleted=0 OR IsDeleted IS NULL)";
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
                 ps.setString(1, material.getTitle());
                 ps.setString(2, material.getDescription());
                 ps.setString(3, material.getMaterialType());
                 ps.setString(4, material.getFilePath());
-                ps.setString(5, material.getVersionNumber());
                 if (hasDisplayOrder) {
-                    if (material.getDisplayOrder() != null) ps.setInt(6, material.getDisplayOrder()); else ps.setNull(6, Types.INTEGER);
-                    ps.setInt(7, material.getMaterialId());
-                } else {
+                    if (material.getDisplayOrder() != null) ps.setInt(5, material.getDisplayOrder()); else ps.setNull(5, Types.INTEGER);
                     ps.setInt(6, material.getMaterialId());
+                } else {
+                    ps.setInt(5, material.getMaterialId());
                 }
                 return ps.executeUpdate() > 0;
             }

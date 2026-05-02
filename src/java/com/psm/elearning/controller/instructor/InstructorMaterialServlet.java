@@ -115,7 +115,6 @@ public class InstructorMaterialServlet extends HttpServlet {
         String title = valueOrEmpty(request.getParameter("title"));
         String description = valueOrEmpty(request.getParameter("description"));
         String materialType = normalizeMaterialType(valueOrEmpty(request.getParameter("materialType")));
-        String versionNumber = valueOrEmpty(request.getParameter("versionNumber"));
         String externalUrl = valueOrEmpty(request.getParameter("externalUrl"));
         Integer displayOrder = parsePositiveInt(request.getParameter("displayOrder"));
 
@@ -184,7 +183,6 @@ public class InstructorMaterialServlet extends HttpServlet {
         material.setMaterialType(materialType);
         material.setFilePath(uploadedUrl);
         material.setUploadedBy(userId);
-        material.setVersionNumber(versionNumber.isEmpty() ? "v1.0" : versionNumber);
 
         int insertOrder = materialDAO.getMaxDisplayOrder(courseId) + 1;
         material.setDisplayOrder(insertOrder);
@@ -236,7 +234,6 @@ public class InstructorMaterialServlet extends HttpServlet {
         }
 
         existing.setMaterialType(materialType);
-        existing.setVersionNumber(valueOrEmpty(request.getParameter("versionNumber")));
 
         Integer requestedDisplayOrder = parsePositiveInt(request.getParameter("displayOrder"));
         if (existing.getDisplayOrder() == null) {
