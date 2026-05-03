@@ -48,14 +48,15 @@
     </aside>
 
     <main class="sv-main lh-main">
-        <div class="sv-breadcrumb">
-            <a href="${pageContext.request.contextPath}/dashboard"><i class="fas fa-house"></i> Dashboard</a>
-            <span>/</span>
-            <a href="${pageContext.request.contextPath}/student/my-enrollments">My Courses</a>
-            <span>/</span>
-            <span>Learning Hub</span>
+        <div class="lh-progress-strip">
+            <h3 class="lh-progress-strip__title">${enrollment.courseName}</h3>
+            <div class="lh-progress-strip__bar">
+                <div class="sv-progress">
+                    <div class="sv-progress-bar" style="width:${progressPercent}%;"></div>
+                </div>
+                <span class="lh-progress-strip__pct" id="edProgressPercent">${progressPercent}%</span>
+            </div>
         </div>
-
 
 
         <c:if test="${not empty param.error or not empty param.success}">
@@ -209,20 +210,10 @@
             </div>
 
             <footer class="lh-action-bar">
-                <div class="lh-action-bar__copy">
-                    <strong>Workspace Actions</strong>
-                    <p id="lhActionNote">${workspaceActionNote}</p>
-                </div>
-
                 <div class="lh-action-bar__actions">
                     <a class="sv-btn lh-nav-action is-hidden" id="lhPrevAction" href="#">
                         <i class="fas fa-arrow-left"></i>
                         <span>Previous</span>
-                    </a>
-
-                    <a class="sv-btn lh-nav-action is-hidden" id="lhNextAction" href="#">
-                        <span>Next</span>
-                        <i class="fas fa-arrow-right"></i>
                     </a>
 
                     <c:choose>
@@ -246,6 +237,11 @@
                             </button>
                         </c:when>
                     </c:choose>
+
+                    <a class="sv-btn lh-nav-action is-hidden" id="lhNextAction" href="#">
+                        <span>Next</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
                 </div>
             </footer>
         </section>
@@ -260,10 +256,10 @@
     var prevAction = document.getElementById('lhPrevAction');
     var nextAction = document.getElementById('lhNextAction');
     var completeButton = document.getElementById('edMarkCompleted');
-    var actionNote = document.getElementById('lhActionNote');
+    var actionNote = null; /* removed from DOM; kept as null so guarded checks are safe */
     var itemStatusBadge = document.getElementById('lhItemStatusBadge');
     var progressPercentNode = document.getElementById('edProgressPercent');
-    var progressBar = document.getElementById('lhSidebarProgressBar');
+    var progressBar = document.querySelector('.lh-progress-strip .sv-progress-bar');
     var assessmentLaunchButton = document.getElementById('lhSubmitAction');
     var assessmentEmbedStage = document.getElementById('lhAssessmentEmbedStage');
     var assessmentFrame = document.getElementById('lhAssessmentFrame');

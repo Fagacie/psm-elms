@@ -28,9 +28,8 @@
         <section class="sd3-hero sv-card">
             <div class="sv-card-body sd3-hero-body">
                 <div class="sd3-hero-copy">
-                    <p class="sd3-kicker">Your Learning Hub</p>
-                    <h2>See what to do next at a glance.</h2>
-                    <p>Your active courses, progress, and next lesson are grouped here so you can continue without searching.</p>
+                    <h2>Welcome back, ${sessionScope.userName} 👋</h2>
+                    <p>Pick up where you left off or explore something new.</p>
                     <div class="sd3-hero-actions">
                         <a href="${pageContext.request.contextPath}/student/my-enrollments" class="sv-btn primary">My Courses</a>
                         <a href="${pageContext.request.contextPath}/student/courses" class="sv-btn">Browse Courses</a>
@@ -172,31 +171,7 @@
                 </div>
             </article>
 
-            <article class="sv-card">
-                <div class="sv-card-head">
-                    <h2>Quick Actions</h2>
-                </div>
-                <div class="sv-card-body">
-                    <div class="sd3-actions">
-                        <a href="${pageContext.request.contextPath}/student/my-enrollments" class="sd3-action-item">
-                            <strong>My Courses</strong>
-                            <p>Return to your enrolled courses and continue learning.</p>
-                        </a>
-                        <a href="${pageContext.request.contextPath}/student/courses" class="sd3-action-item">
-                            <strong>Browse Courses</strong>
-                            <p>Discover new courses and expand your path.</p>
-                        </a>
-                        <a href="${pageContext.request.contextPath}/student/certificates" class="sd3-action-item">
-                            <strong>Certificates</strong>
-                            <p>Review issued certificates and readiness status.</p>
-                        </a>
-                        <a href="${pageContext.request.contextPath}/profile" class="sd3-action-item">
-                            <strong>Settings</strong>
-                            <p>Update your profile and manage account details.</p>
-                        </a>
-                    </div>
-                </div>
-            </article>
+
         </section>
     </main>
 </div>

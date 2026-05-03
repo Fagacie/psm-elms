@@ -6,9 +6,7 @@
 <c:set var="currentPath" value="${pageContext.request.requestURI}"/>
 <c:set var="resolvedStudentTitle" value="${not empty topbarTitle ? topbarTitle : 'Your Learning Hub'}"/>
 <c:set var="resolvedTopbarContext" value="${not empty navContext ? navContext : 'default'}"/>
-<c:set var="topbarSearchQuery" value="${not empty param.keyword ? param.keyword : not empty param.search ? param.search : ''}"/>
 <c:set var="topbarNotificationCount" value="${not empty sessionScope.unreadNotifications ? sessionScope.unreadNotifications : 0}"/>
-<c:set var="topbarShowSearchResolved" value="${topbarShowSearch != false and resolvedTopbarContext != 'assessment'}"/>
 <c:set var="topbarUserName" value="${not empty sessionScope.userName ? sessionScope.userName : 'Student'}"/>
 <c:set var="topbarInitialOne" value="${fn:length(topbarUserName) > 0 ? fn:substring(topbarUserName, 0, 1) : 'S'}"/>
 <c:set var="topbarInitialTwo" value="${fn:length(topbarUserName) > 1 ? fn:substring(topbarUserName, 1, 2) : ''}"/>
@@ -51,19 +49,7 @@
     </div>
 
     <div class="sv-top-right">
-        <c:if test="${topbarShowSearchResolved}">
-            <form class="sv-search-form" action="${pageContext.request.contextPath}/student/courses" method="get" role="search" aria-label="Search courses">
-                <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
-                <label for="svTopSearchInput" class="sv-visually-hidden">Search courses</label>
-                <input id="svTopSearchInput"
-                       class="sv-search-input"
-                       type="search"
-                       name="keyword"
-                       value="${topbarSearchQuery}"
-                       placeholder="Search courses"
-                       autocomplete="off">
-            </form>
-        </c:if>
+
 
         <div class="sv-popover sv-notification-wrap" id="svNotificationWrap">
             <button type="button" class="sv-top-icon-btn" id="svNotificationBtn" aria-haspopup="true" aria-expanded="false" aria-label="Notifications">

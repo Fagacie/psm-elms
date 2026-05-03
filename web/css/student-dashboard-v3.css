@@ -1,4 +1,4 @@
-﻿.sd3-main {
+.sd3-main {
   --sd3-accent: #14532d;
   --sd3-accent-soft: rgba(20, 83, 45, 0.08);
   --sd3-accent-border: rgba(20, 83, 45, 0.18);
@@ -293,11 +293,7 @@
   background: var(--sd3-accent);
 }
 
-.sv-sidebar .sv-nav-link.active {
-  color: var(--sd3-accent);
-  border-color: var(--sd3-accent-border);
-  background: var(--sd3-accent-soft);
-}
+
 
 .sd3-main .sv-metric {
   position: relative;

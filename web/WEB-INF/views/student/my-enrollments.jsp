@@ -51,12 +51,10 @@
         <section class="me-hero sv-card">
             <div class="sv-card-body me-hero-body">
                 <div class="me-hero-copy">
-                    <p class="me-kicker">Course Library</p>
-                    <h2>Your enrolled courses, arranged clearly and professionally.</h2>
-                    <p>Track progress, review payment status, and return to the right course without clutter or unnecessary visual noise.</p>
+                    <h2>My Courses</h2>
+                    <p>Track progress and continue learning.</p>
                     <div class="me-hero-actions">
                         <a href="${pageContext.request.contextPath}/student/courses" class="sv-btn">Browse New Courses</a>
-                        <a href="${pageContext.request.contextPath}/student/certificates" class="sv-btn primary">Certificates</a>
                     </div>
                 </div>
                 <div class="me-hero-summary">

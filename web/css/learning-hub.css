@@ -16,6 +16,53 @@ body.lh-shell-page .lh-main {
 }
 
 /* ============================================
+   PROGRESS STRIP (replaces breadcrumb)
+   ============================================ */
+
+.lh-progress-strip {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 16px 20px;
+  background: var(--sv-surface);
+  border: 1px solid var(--sv-border);
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.lh-progress-strip__title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--sv-heading);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  flex: 0 1 auto;
+  max-width: 50%;
+}
+
+.lh-progress-strip__bar {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.lh-progress-strip__bar .sv-progress {
+  flex: 1;
+}
+
+.lh-progress-strip__pct {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--sv-accent);
+  white-space: nowrap;
+}
+
+/* ============================================
    SIDEBAR & COURSE NAVIGATION
    ============================================ */
 
@@ -451,30 +498,19 @@ body.lh-shell-page .lh-main {
    ============================================ */
 
 .lh-action-bar {
-  padding: 20px 24px;
+  padding: 16px 24px;
   border-top: 1px solid var(--sv-border);
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   background: var(--sv-surface);
   border-radius: 0 0 8px 8px;
 }
 
-.lh-action-bar__copy strong {
-  display: block;
-  font-size: 0.9rem;
-  color: var(--sv-heading);
-}
-
-.lh-action-bar__copy p {
-  margin: 4px 0 0;
-  font-size: 0.85rem;
-  color: var(--sv-muted);
-}
-
 .lh-action-bar__actions {
   display: flex;
   gap: 12px;
+  align-items: center;
 }
 
 .lh-nav-action.is-hidden {

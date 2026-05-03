@@ -15,7 +15,7 @@
 <c:set var="topbarSubtitle" value="Review the current material."/>
 <c:set var="previewEnrollmentId" value="${not empty previewEnrollment ? previewEnrollment.enrollmentId : ''}"/>
 <c:set var="courseProgressPercent" value="${not empty previewEnrollment and not empty previewEnrollment.progress ? previewEnrollment.progress : 0}"/>
-<c:set var="topbarShowSearch" value="false"/>
+
 <c:set var="navContext" value="${not empty previewEnrollmentId ? 'course' : 'default'}"/>
 <c:set var="navContextPage" value="materials"/>
 <c:set var="navCourseEnrollmentId" value="${previewEnrollmentId}"/>
@@ -27,13 +27,6 @@
     <jsp:include page="/WEB-INF/views/common/student-sidebar.jsp"/>
 
     <main class="sv-main mv-main">
-        <div class="sv-breadcrumb">
-            <a href="${pageContext.request.contextPath}/dashboard"><i class="fas fa-house"></i> Dashboard</a>
-            <span>/</span>
-            <a href="${backToHubUrl}">${backToHubLabel}</a>
-            <span>/</span>
-            <span>Material Preview</span>
-        </div>
 
         <section class="lh-workspace mv-shell">
             <header class="lh-stage-head">
@@ -76,45 +69,11 @@
             </div>
 
             <footer class="lh-action-bar">
-                <div class="lh-action-bar__copy">
-                    <strong>Viewer Actions</strong>
-                    <p id="mvActionNote">
-                        <c:choose>
-                            <c:when test="${isCompletedMaterial}">This material is already part of your course progress.</c:when>
-                            <c:when test="${completionRule == 'video' || completionRule == 'audio'}">Playback unlocks completion once you reach the required threshold.</c:when>
-                            <c:when test="${completionRule == 'link'}">Open the external resource, then complete it here.</c:when>
-                            <c:otherwise>Review the material, then complete it when ready.</c:otherwise>
-                        </c:choose>
-                    </p>
-                </div>
-
-                <div class="lh-action-bar__actions mv-action-cluster">
-                    <a class="sv-btn" href="${backToHubUrl}">
-                        <i class="fas fa-arrow-left"></i>
-                        <span>${backToHubLabel}</span>
-                    </a>
-
+                <div class="lh-action-bar__actions">
                     <c:if test="${not empty previousMaterial}">
                         <a class="sv-btn" href="${pageContext.request.contextPath}/student/materials?action=preview&id=${previousMaterial.materialId}&enrollmentId=${previewEnrollmentId}">
                             <i class="fas fa-arrow-left"></i>
                             <span>Previous</span>
-                        </a>
-                    </c:if>
-
-                    <a class="sv-btn ${empty nextMaterial ? 'mv-hidden' : ''}" id="mvNextAction" href="${not empty nextMaterial ? pageContext.request.contextPath.concat('/student/materials?action=preview&id=').concat(nextMaterial.materialId).concat('&enrollmentId=').concat(previewEnrollmentId) : backToHubUrl}">
-                        <span>Next</span>
-                        <i class="fas fa-arrow-right"></i>
-                    </a>
-
-                    <a class="sv-btn" target="_blank" rel="noopener noreferrer" href="${pageContext.request.contextPath}/student/materials?action=view&id=${material.materialId}">
-                        <i class="fas fa-up-right-from-square"></i>
-                        <span>Open Source</span>
-                    </a>
-
-                    <c:if test="${material.materialType != 'Link' and not isVideoMaterial}">
-                        <a class="sv-btn" href="${pageContext.request.contextPath}/student/materials?action=download&id=${material.materialId}">
-                            <i class="fas fa-download"></i>
-                            <span>Download</span>
                         </a>
                     </c:if>
 
@@ -130,6 +89,11 @@
                         <i class="fas fa-check-circle"></i>
                         <span>${isCompletedMaterial ? 'Completed' : 'Mark Complete'}</span>
                     </button>
+
+                    <a class="sv-btn ${empty nextMaterial ? 'mv-hidden' : ''}" id="mvNextAction" href="${not empty nextMaterial ? pageContext.request.contextPath.concat('/student/materials?action=preview&id=').concat(nextMaterial.materialId).concat('&enrollmentId=').concat(previewEnrollmentId) : backToHubUrl}">
+                        <span>Next</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
                 </div>
             </footer>
         </section>
@@ -140,7 +104,7 @@
 <script>
 (function () {
     var completeButton = document.getElementById('mvMarkCompleted');
-    var actionNote = document.getElementById('mvActionNote');
+    var actionNote = null; /* removed from DOM */
     var statusBadge = document.getElementById('mvStatusBadge');
     var statusChip = document.getElementById('mvStatusChip');
     var courseProgressBadge = document.getElementById('mvCourseProgressPercent');
