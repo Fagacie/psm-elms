@@ -18,7 +18,6 @@
 <body class="instructor-ui">
     <jsp:include page="/WEB-INF/views/common/instructor-header.jsp">
         <jsp:param name="pageTitle" value="My Courses"/>
-        <jsp:param name="pageSubtitle" value="Manage assigned courses, content, and enrollments from one workspace"/>
     </jsp:include>
 
     <c:set var="activeInstructorPage" value="courses"/>
@@ -26,23 +25,9 @@
 
     <main class="app-main">
         <div class="content-wrapper">
-            <nav class="breadcrumb" aria-label="Breadcrumb">
-                <a href="${pageContext.request.contextPath}/instructor/dashboard">Dashboard</a>
-                <span>&gt;</span>
-                <a href="${pageContext.request.contextPath}/instructor/courses">Courses</a>
-                <span>&gt;</span>
-                <span>My Courses</span>
-            </nav>
-
-            <section class="ins-page-head">
-                <div>
-                    <p class="ins-page-kicker">Course Management</p>
-                    <h2>Open each assigned course from a clean professional workspace</h2>
-                    <p>Every card now acts as an entry point into a dedicated course workspace, so instructors can jump into materials, assessments, students, and analytics without reselecting the course.</p>
-                </div>
-                <div class="ins-hero-actions">
-                    <span class="courses-count">${courses != null ? courses.size() : 0} courses</span>
-                </div>
+            <section class="ins-section-head" style="margin-bottom:28px;">
+                <h2 style="margin:0;">My Courses</h2>
+                <span class="courses-count">${courses != null ? courses.size() : 0} courses</span>
             </section>
 
             <c:if test="${param.success == 'updated'}">
@@ -66,54 +51,38 @@
                     <div class="empty-state-box course-empty-state">
                         <i class="fas fa-layer-group"></i>
                         <p>You do not have any courses assigned yet.</p>
-                        <span>Once an admin assigns a course, it will appear here as a workspace card.</span>
+                        <span>Once an admin assigns a course, it will appear here.</span>
                     </div>
                 </c:when>
                 <c:otherwise>
-                    <section class="course-catalog-grid" aria-label="Assigned courses">
+                    <section class="ins-course-grid" aria-label="Assigned courses">
                         <c:forEach var="course" items="${courses}">
-                            <article class="course-card">
-                                <div class="course-card-media">
-                                    <c:choose>
-                                        <c:when test="${not empty course.courseBanner}">
-                                            <img class="course-card-image" src="${course.courseBanner}" alt="${course.courseName} banner">
-                                        </c:when>
-                                        <c:otherwise>
-                                            <div class="course-card-image course-card-placeholder">
-                                                <i class="fas fa-layer-group"></i>
-                                            </div>
-                                        </c:otherwise>
-                                    </c:choose>
-                                    <span class="status-badge status-${course.status}"><c:out value="${course.status}"/></span>
+                            <article class="ins-course-card">
+                                <c:if test="${not empty course.courseBanner}">
+                                    <div style="width: 100%; height: 120px; border-radius: 8px; margin-bottom: 12px; overflow: hidden;">
+                                        <img src="${course.courseBanner}" alt="Banner" style="width: 100%; height: 100%; object-fit: cover;">
+                                    </div>
+                                </c:if>
+                                <div class="ins-course-card__top">
+                                    <h4><c:out value="${course.courseName}"/></h4>
+                                    <span class="status-badge status-${fn:toLowerCase(course.status)}"><c:out value="${course.status}"/></span>
                                 </div>
-
-                                <div class="course-card-body">
-                                    <div class="course-card-topline">
-                                        <div>
-                                            <h3 class="course-card-title"><c:out value="${course.courseName}"/></h3>
-                                            <p class="course-card-subtitle">
-                                                <c:out value="${empty course.category ? 'General' : course.category}"/> · <c:out value="${course.level}"/>
-                                            </p>
-                                        </div>
+                                <p class="ins-course-card__meta">
+                                    <c:out value="${empty course.category ? 'General' : course.category}"/> · <c:out value="${course.level}"/>
+                                </p>
+                                <div class="ins-course-card__stats">
+                                    <div>
+                                        <strong><c:out value="${courseStudentCounts[course.courseId] != null ? courseStudentCounts[course.courseId] : 0}"/></strong>
+                                        <span>Students</span>
                                     </div>
-
-                                    <div class="course-card-stats">
-                                        <div class="course-card-stat">
-                                            <strong><c:out value="${courseStudentCounts[course.courseId] != null ? courseStudentCounts[course.courseId] : 0}"/></strong>
-                                            <span>Students</span>
-                                        </div>
-                                        <div class="course-card-stat">
-                                            <strong><c:out value="${not empty course.updatedAt ? course.updatedAt.toLocalDate() : (not empty course.createdAt ? course.createdAt.toLocalDate() : '-') }"/></strong>
-                                            <span>Updated</span>
-                                        </div>
-                                    </div>
-
-                                    <div class="course-card-footer">
-                                        <a href="${pageContext.request.contextPath}/instructor/courses?action=workspace&courseId=${course.courseId}" class="btn btn-primary">
-                                            <i class="fas fa-arrow-right"></i> Open Workspace
-                                        </a>
+                                    <div>
+                                        <strong><c:out value="${not empty course.updatedAt ? course.updatedAt.toLocalDate() : '-'}"/></strong>
+                                        <span>Updated</span>
                                     </div>
                                 </div>
+                                <a href="${pageContext.request.contextPath}/instructor/courses?action=workspace&courseId=${course.courseId}" class="btn btn-primary btn-sm ins-course-card__cta">
+                                    <i class="fas fa-arrow-right"></i> Open Workspace
+                                </a>
                             </article>
                         </c:forEach>
                     </section>
@@ -121,23 +90,12 @@
             </c:choose>
         </div>
     </main>
-
-    <script>
-        (function () {
-            const cardDescriptionLimit = 118;
-
-            function updateCardDescriptions() {
-                const descriptions = document.querySelectorAll('.course-card-description');
-                descriptions.forEach(function (description) {
-                    const text = (description.textContent || '').trim();
-                    if (text.length > cardDescriptionLimit) {
-                        description.textContent = text.slice(0, cardDescriptionLimit) + '...';
-                    }
-                });
-            }
-
-            updateCardDescriptions();
-        })();
-    </script>
+<script src="${pageContext.request.contextPath}/js/theme-toggle.js"></script>
+<script>
+(function(){
+    var btn = document.getElementById('insMenuBtn');
+    if(btn){ btn.addEventListener('click', function(){ document.body.classList.toggle('ins-shell-collapsed'); }); }
+})();
+</script>
 </body>
 </html>

@@ -6,7 +6,6 @@
 <c:set var="headerProfilePicture" value="${not empty headerUser ? headerUser.profilePicture : null}"/>
 <c:set var="currentPath" value="${pageContext.request.requestURI}"/>
 <c:set var="resolvedInstructorTitle" value="Instructor"/>
-<c:set var="resolvedInstructorSubtitle" value="Manage your teaching workspace and course activity"/>
 
 <c:choose>
     <c:when test="${not empty param.pageTitle}">
@@ -29,37 +28,18 @@
     </c:when>
 </c:choose>
 
-<c:if test="${not empty param.pageSubtitle}">
-    <c:set var="resolvedInstructorSubtitle" value="${param.pageSubtitle}"/>
-</c:if>
-
-<c:set var="instructorContextCourse" value="${not empty selectedCourse ? selectedCourse.courseName : not empty course ? course.courseName : ''}"/>
-<c:set var="instructorContextAssessment" value="${not empty selectedAssessment ? selectedAssessment.title : ''}"/>
-
 <header class="app-header">
     <div class="header-left">
+        <button type="button" class="ins-menu-btn" id="insMenuBtn" aria-label="Toggle sidebar">
+            <i class="fas fa-bars"></i>
+        </button>
         <a href="${pageContext.request.contextPath}/dashboard" class="dashboard-brand" aria-label="PSM E-Learning home">
             <span class="dashboard-brand-main">PSM</span>
             <span class="dashboard-brand-sub">E-Learning</span>
         </a>
-        <div class="dashboard-title-copy">
-            <h1 class="page-title"><c:out value="${resolvedInstructorTitle}"/></h1>
-            <p><c:out value="${resolvedInstructorSubtitle}"/></p>
-            <c:if test="${not empty instructorContextCourse or not empty instructorContextAssessment}">
-                <div class="header-context-row">
-                    <c:if test="${not empty instructorContextCourse}"><span class="header-context-chip"><i class="fas fa-book-open"></i><c:out value="${instructorContextCourse}"/></span></c:if>
-                    <c:if test="${not empty instructorContextAssessment}"><span class="header-context-chip"><i class="fas fa-clipboard-check"></i><c:out value="${instructorContextAssessment}"/></span></c:if>
-                </div>
-            </c:if>
-        </div>
+        <h1 class="page-title"><c:out value="${resolvedInstructorTitle}"/></h1>
     </div>
     <div class="header-right">
-        <c:if test="${param.showNotifications == 'true' and not empty notificationCount and notificationCount > 0}">
-            <div class="notifications" aria-label="Notifications">
-                <i class="fas fa-bell"></i>
-                <span class="badge"><c:out value="${notificationCount}"/></span>
-            </div>
-        </c:if>
         <button type="button" class="theme-toggle" data-theme-toggle aria-pressed="false">
             <span class="theme-toggle-label">Dark mode</span>
         </button>

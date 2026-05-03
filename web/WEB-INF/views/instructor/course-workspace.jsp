@@ -19,7 +19,6 @@
 <body class="instructor-ui">
 <jsp:include page="/WEB-INF/views/common/instructor-header.jsp">
     <jsp:param name="pageTitle" value="Course Workspace"/>
-    <jsp:param name="pageSubtitle" value="Manage the full course flow from one professional workspace"/>
 </jsp:include>
 
 <c:set var="activeInstructorPage" value="courses"/>
@@ -27,82 +26,19 @@
 
 <main class="app-main">
     <div class="content-wrapper course-workspace-page">
-        <nav class="breadcrumb" aria-label="Breadcrumb">
-            <a href="${pageContext.request.contextPath}/instructor/dashboard">Dashboard</a>
-            <span>&gt;</span>
-            <a href="${pageContext.request.contextPath}/instructor/courses">Courses</a>
-            <span>&gt;</span>
-            <span>Workspace</span>
-        </nav>
-
-        <section class="ins-page-head">
-            <div>
-                <p class="ins-page-kicker">Course Workspace</p>
-                <h2><c:out value="${selectedCourse.courseName}"/></h2>
-                <p>One workspace for the course lifecycle. Use the overview for quick decisions, then jump into materials, assessments, students, or analytics without selecting the course again.</p>
-            </div>
-            <div class="ins-hero-actions">
-                <a href="${pageContext.request.contextPath}/instructor/courses" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left"></i> Back to My Courses
+        <section class="ins-section-head" style="margin-bottom: 24px;">
+            <div style="display: flex; gap: 16px; align-items: center;">
+                <a href="${pageContext.request.contextPath}/instructor/courses" class="btn btn-secondary btn-sm">
+                    <i class="fas fa-arrow-left"></i> Back
                 </a>
+                <h2 style="margin: 0;"><c:out value="${selectedCourse.courseName}"/></h2>
+                <span class="status-badge status-${selectedCourse.status}"><c:out value="${selectedCourse.status}"/></span>
             </div>
-        </section>
-
-        <section class="workspace-hero-card">
-            <div class="workspace-hero-top">
-                <div class="workspace-hero-media">
-                    <c:choose>
-                        <c:when test="${not empty selectedCourse.courseBanner}">
-                            <img src="${selectedCourse.courseBanner}" alt="${selectedCourse.courseName} banner">
-                        </c:when>
-                        <c:otherwise>
-                            <div class="workspace-hero-placeholder">
-                                <i class="fas fa-layer-group"></i>
-                            </div>
-                        </c:otherwise>
-                    </c:choose>
-                </div>
-                <div class="workspace-hero-copy">
-                    <div class="workspace-title-row">
-                        <h3><c:out value="${selectedCourse.courseName}"/></h3>
-                        <span class="status-badge status-${selectedCourse.status}"><c:out value="${selectedCourse.status}"/></span>
-                    </div>
-                    <p class="workspace-description">
-                        <c:choose>
-                            <c:when test="${not empty selectedCourse.description}">
-                                <c:out value="${selectedCourse.description}"/>
-                            </c:when>
-                            <c:otherwise>
-                                This course has no description yet.
-                            </c:otherwise>
-                        </c:choose>
-                    </p>
-                    <div class="workspace-meta-row">
-                        <span><i class="fas fa-tag"></i> <c:out value="${empty selectedCourse.category ? 'General' : selectedCourse.category}"/></span>
-                        <span><i class="fas fa-signal"></i> <c:out value="${selectedCourse.level}"/></span>
-                        <span><i class="fas fa-clock"></i> <c:out value="${selectedCourse.displayDuration}"/></span>
-                        <span><i class="fas fa-calendar-alt"></i> <c:out value="${not empty selectedCourse.updatedAt ? selectedCourse.updatedAt.toLocalDate() : (not empty selectedCourse.createdAt ? selectedCourse.createdAt.toLocalDate() : '-') }"/></span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="workspace-kpi-grid">
-                <div class="workspace-kpi-card">
-                    <strong>${totalStudents}</strong>
-                    <span>Students enrolled</span>
-                </div>
-                <div class="workspace-kpi-card">
-                    <strong>${publishedMaterials}</strong>
-                    <span>Materials count</span>
-                </div>
-                <div class="workspace-kpi-card">
-                    <strong>${assessmentCount}</strong>
-                    <span>Assessments count</span>
-                </div>
-                <div class="workspace-kpi-card">
-                    <strong><fmt:formatNumber value="${completionRate}" maxFractionDigits="0"/>%</strong>
-                    <span>Completion rate</span>
-                </div>
+            <div class="workspace-meta-row" style="margin-top: 12px; display: flex; gap: 16px; color: var(--ins-muted); font-size: 0.9rem;">
+                <span><i class="fas fa-tag"></i> <c:out value="${empty selectedCourse.category ? 'General' : selectedCourse.category}"/></span>
+                <span><i class="fas fa-signal"></i> <c:out value="${selectedCourse.level}"/></span>
+                <span><i class="fas fa-clock"></i> <c:out value="${selectedCourse.displayDuration}"/></span>
+                <span><i class="fas fa-calendar-alt"></i> Updated: <c:out value="${not empty selectedCourse.updatedAt ? selectedCourse.updatedAt.toLocalDate() : (not empty selectedCourse.createdAt ? selectedCourse.createdAt.toLocalDate() : '-') }"/></span>
             </div>
         </section>
 
@@ -113,142 +49,50 @@
         <c:url var="assessmentWorkspaceBaseUrl" value="/instructor/assessments">
             <c:param name="courseId" value="${selectedCourse.courseId}"/>
         </c:url>
-        <c:set var="assessmentWorkspaceUrl" value="${assessmentWorkspaceBaseUrl}&amp;view=editor"/>
-        <c:if test="${not empty param.assessmentId}">
-            <c:set var="assessmentWorkspaceUrl" value="${assessmentWorkspaceUrl}&amp;assessmentId=${param.assessmentId}"/>
-        </c:if>
 
-        <section class="workspace-jump-grid" aria-label="Course workspace sections">
-            <a class="workspace-jump-card" href="#overview">
-                <strong>Overview</strong>
-                <span>Fast decisions and the current course status.</span>
-            </a>
-            <a class="workspace-jump-card" href="#materials">
-                <strong>Materials</strong>
-                <span>Publish, reorder, archive, and restore course assets.</span>
-            </a>
-            <a class="workspace-jump-card" href="#assessments">
-                <strong>Assessments</strong>
-                <span>Published assessments, grading mode, submissions, and archive.</span>
-            </a>
-            <a class="workspace-jump-card" href="#students">
-                <strong>Students</strong>
-                <span>Enrollment, status, and progress in one place.</span>
-            </a>
-            <a class="workspace-jump-card" href="#analytics">
-                <strong>Analytics</strong>
-                <span>Completion and engagement trends at a glance.</span>
-            </a>
-        </section>
-
-        <section class="workspace-panel is-active" data-workspace-panel="overview" id="overview">
-            <div class="workspace-overview-grid">
-                <article class="workspace-panel-card workspace-metrics-card">
-                    <div class="section-header">
-                        <div>
-                            <h3 class="section-title">Overview</h3>
-                            <p class="section-caption">Quick stats and fast actions for day-to-day course operations.</p>
-                        </div>
-                    </div>
-                    <div class="workspace-overview-metrics">
-                        <div class="overview-metric">
-                            <span>Total Students</span>
-                            <strong>${totalStudents}</strong>
-                        </div>
-                        <div class="overview-metric">
-                            <span>Completion Rate</span>
-                            <strong><fmt:formatNumber value="${completionRate}" maxFractionDigits="0"/>%</strong>
-                        </div>
-                        <div class="overview-metric">
-                            <span>Published Materials</span>
-                            <strong>${publishedMaterials}</strong>
-                        </div>
-                        <div class="overview-metric">
-                            <span>Pending Grading</span>
-                            <strong>${pendingGrading}</strong>
-                        </div>
-                    </div>
-                </article>
-
-                <article class="workspace-panel-card">
-                    <div class="section-header">
-                        <div>
-                            <h3 class="section-title">Quick Actions</h3>
-                            <p class="section-caption">Jump straight into the next task for this course.</p>
-                        </div>
-                    </div>
-                    <div class="workspace-action-grid">
-                        <a class="workspace-action-card" href="#materials">
-                            <i class="fas fa-plus-circle"></i>
-                            <strong>Add Material</strong>
-                            <span>Upload learning content and keep the sequence organized.</span>
-                        </a>
-                        <a class="workspace-action-card" href="#assessments">
-                            <i class="fas fa-clipboard-list"></i>
-                            <strong>New Assessment</strong>
-                            <span>Create a quiz, exam, or assignment for this course.</span>
-                        </a>
-                        <a class="workspace-action-card" href="#students">
-                            <i class="fas fa-users"></i>
-                            <strong>View Students</strong>
-                            <span>Check enrollment and learner status in one place.</span>
-                        </a>
-                    </div>
-                </article>
+        <%-- HEADER KPI GRID --%>
+        <section class="workspace-kpi-grid" style="margin-bottom: 24px;">
+            <div class="workspace-kpi-card">
+                <strong>${totalStudents}</strong>
+                <span>Students enrolled</span>
+            </div>
+            <div class="workspace-kpi-card">
+                <strong>${publishedMaterials}</strong>
+                <span>Materials count</span>
+            </div>
+            <div class="workspace-kpi-card">
+                <strong>${assessmentCount}</strong>
+                <span>Assessments count</span>
+            </div>
+            <div class="workspace-kpi-card">
+                <strong><fmt:formatNumber value="${completionRate}" maxFractionDigits="0"/>%</strong>
+                <span>Completion rate</span>
             </div>
         </section>
 
-        <section class="workspace-panel" data-workspace-panel="materials" id="materials">
-            <div class="workspace-panel-card">
+        <%-- ACTION BAR --%>
+        <section class="ws-action-bar section-card" style="margin-bottom: 32px; padding: 16px 24px; display: flex; gap: 12px; align-items: center; background: var(--ins-surface);">
+            <button type="button" class="btn btn-primary" onclick="openUploadModal()">
+                <i class="fas fa-plus"></i> Add Material
+            </button>
+            <a href="${assessmentWorkspaceBaseUrl}&view=editor" class="btn btn-secondary">
+                <i class="fas fa-clipboard-list"></i> Add Assessment
+            </a>
+            <button type="button" class="btn btn-secondary" onclick="document.getElementById('students').scrollIntoView({behavior: 'smooth'})">
+                <i class="fas fa-users"></i> View Students
+            </button>
+        </section>
+
+        <%-- SECTION 1: MATERIALS --%>
+        <section class="ins-section" id="materials" style="margin-bottom: 32px;">
+            <div class="section-card">
                 <div class="section-header">
                     <div>
-                        <h3 class="section-title">Materials</h3>
-                        <p class="section-caption">Manage published and archived learning assets directly inside the workspace.</p>
+                        <h3 class="section-title">Course Materials</h3>
                     </div>
                     <div class="workspace-header-actions">
-                        <button type="button" class="btn btn-primary btn-sm" onclick="openUploadModal()">
-                            <i class="fas fa-plus"></i> Add Material
-                        </button>
-                        <button type="button" class="btn btn-secondary btn-sm" onclick="scrollToMaterialsOrder()">
-                            <i class="fas fa-sort"></i> Manage Order
-                        </button>
-                        <button type="button" class="btn btn-secondary btn-sm" onclick="scrollToBulkActions()">
-                            <i class="fas fa-layer-group"></i> Bulk Actions
-                        </button>
-                    </div>
-                </div>
-                <div class="workspace-materials-summary">
-                    <div class="workspace-summary-item">
-                        <strong>${publishedMaterials}</strong>
-                        <span>Active materials</span>
-                    </div>
-                    <div class="workspace-summary-item">
-                        <strong>${empty deletedMaterials ? 0 : deletedMaterials.size()}</strong>
-                        <span>Archived materials</span>
-                    </div>
-                </div>
-
-                <div class="workspace-materials-toolbar" id="materials-order-anchor">
-                    <div>
-                        <h4>Order and publish controls</h4>
-                        <p>Use the order arrows to keep the sequence stable. Archive hides items from students, restore makes them visible again.</p>
-                    </div>
-                    <div class="workspace-toolbar-note">
-                        <i class="fas fa-circle-info"></i>
-                        <span>Replace file and type changes still happen in the edit dialog.</span>
-                    </div>
-                </div>
-
-                <div class="workspace-bulk-actions" id="bulk-actions-anchor">
-                    <div>
-                        <h4>Bulk actions</h4>
-                        <p>Select multiple materials from the active or archived tables and apply one action.</p>
-                    </div>
-                    <div class="workspace-bulk-actions-grid">
-                        <button type="button" class="btn btn-secondary btn-sm" onclick="selectAllMaterials('activeMaterialIds', true)">Select Active</button>
-                        <button type="button" class="btn btn-secondary btn-sm" onclick="selectAllMaterials('activeMaterialIds', false)">Clear Active</button>
-                        <button type="button" class="btn btn-secondary btn-sm" onclick="selectAllMaterials('archivedMaterialIds', true)">Select Archived</button>
-                        <button type="button" class="btn btn-secondary btn-sm" onclick="selectAllMaterials('archivedMaterialIds', false)">Clear Archived</button>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="selectAllMaterials('activeMaterialIds', true)">Select All</button>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="selectAllMaterials('activeMaterialIds', false)">Clear</button>
                     </div>
                 </div>
 
@@ -260,182 +104,150 @@
                         </div>
                     </c:when>
                     <c:otherwise>
-                        <form id="activeBulkForm" method="post" action="${pageContext.request.contextPath}/instructor/materials" class="workspace-bulk-form">
+                        <form id="activeBulkForm" method="post" action="${pageContext.request.contextPath}/instructor/materials" class="workspace-bulk-form" style="margin-bottom: 16px;">
                             <input type="hidden" name="action" value="bulkArchive">
                             <input type="hidden" name="courseId" value="${selectedCourse.courseId}">
-                            <div class="workspace-bulk-submit-row">
-                                <span class="workspace-bulk-help">Archive selected items to hide them from students.</span>
+                            <div style="display: flex; gap: 12px; align-items: center;">
                                 <button type="submit" class="btn btn-secondary btn-sm"><i class="fas fa-archive"></i> Archive Selected</button>
                             </div>
                         </form>
 
-                        <div class="materials-table-wrap workspace-materials-table-wrap">
-                            <table class="materials-table workspace-materials-table">
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                <tr>
+                                    <th style="width: 40px;"></th>
+                                    <th>Material</th>
+                                    <th>Type</th>
+                                    <th>Order</th>
+                                    <th>Uploaded</th>
+                                    <th>Actions</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <c:forEach var="material" items="${materials}">
+                                    <tr>
+                                        <td>
+                                            <input type="checkbox" name="materialIds" value="${material.materialId}" form="activeBulkForm" class="activeMaterialIds">
+                                        </td>
+                                        <td>
+                                            <strong><c:out value="${material.title}"/></strong><br>
+                                            <span style="color: var(--ins-muted); font-size: 0.85rem;"><c:out value="${material.description}" default="Course asset"/></span>
+                                        </td>
+                                        <td><span class="type-badge type-${material.materialType}"><c:out value="${material.materialType}"/></span></td>
+                                        <td>
+                                            <div style="display: flex; align-items: center; gap: 8px;">
+                                                <span class="table-pill"><c:out value="${material.displayOrder}" default="N/A"/></span>
+                                                <div style="display: flex; flex-direction: column; gap: 2px;">
+                                                    <form method="post" action="${pageContext.request.contextPath}/instructor/materials" style="margin: 0;">
+                                                        <input type="hidden" name="action" value="reorder">
+                                                        <input type="hidden" name="courseId" value="${selectedCourse.courseId}">
+                                                        <input type="hidden" name="materialId" value="${material.materialId}">
+                                                        <input type="hidden" name="direction" value="up">
+                                                        <button type="submit" class="icon-btn" style="padding: 2px 4px; background: transparent; border: none; cursor: pointer; color: var(--ins-muted);"><i class="fas fa-chevron-up"></i></button>
+                                                    </form>
+                                                    <form method="post" action="${pageContext.request.contextPath}/instructor/materials" style="margin: 0;">
+                                                        <input type="hidden" name="action" value="reorder">
+                                                        <input type="hidden" name="courseId" value="${selectedCourse.courseId}">
+                                                        <input type="hidden" name="materialId" value="${material.materialId}">
+                                                        <input type="hidden" name="direction" value="down">
+                                                        <button type="submit" class="icon-btn" style="padding: 2px 4px; background: transparent; border: none; cursor: pointer; color: var(--ins-muted);"><i class="fas fa-chevron-down"></i></button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span style="color: var(--ins-muted);">
+                                                <c:choose>
+                                                    <c:when test="${not empty material.uploadDate}">${material.uploadDate.toLocalDate()}</c:when>
+                                                    <c:otherwise>-</c:otherwise>
+                                                </c:choose>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div style="display: flex; gap: 8px;">
+                                                <a href="${material.filePath}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm"><i class="fas fa-eye"></i></a>
+                                                <button type="button" class="btn btn-secondary btn-sm" onclick="openEditMaterialModal(this, false)"
+                                                        data-material-id="${material.materialId}"
+                                                        data-title="<c:out value='${material.title}'/>"
+                                                        data-type="<c:out value='${material.materialType}'/>"
+                                                        data-order="<c:out value='${material.displayOrder}'/>"
+                                                        data-description="<c:out value='${material.description}'/>"
+                                                        data-external-url="${material.materialType == 'Link' ? material.filePath : ''}">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-secondary btn-sm" onclick="openEditMaterialModal(this, true)"
+                                                        data-material-id="${material.materialId}"
+                                                        data-title="<c:out value='${material.title}'/>"
+                                                        data-type="<c:out value='${material.materialType}'/>"
+                                                        data-order="<c:out value='${material.displayOrder}'/>"
+                                                        data-description="<c:out value='${material.description}'/>"
+                                                        data-external-url="${material.materialType == 'Link' ? material.filePath : ''}">
+                                                    <i class="fas fa-file-arrow-up"></i>
+                                                </button>
+                                                <a href="${pageContext.request.contextPath}/instructor/materials?action=delete&id=${material.materialId}&courseId=${selectedCourse.courseId}" class="btn btn-danger btn-sm" onclick="return confirm('Archive this material?');">
+                                                    <i class="fas fa-eye-slash"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </c:forEach>
+                                </tbody>
+                            </table>
+                        </div>
+                    </c:otherwise>
+                </c:choose>
+
+                <%-- Archived Materials --%>
+                <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--ins-border);">
+                    <h4 style="margin: 0 0 16px; color: var(--ins-muted);">Archived Materials</h4>
+                    <c:choose>
+                        <c:when test="${empty deletedMaterials}">
+                            <p style="color: var(--ins-muted); font-size: 0.9rem;">No archived materials.</p>
+                        </c:when>
+                        <c:otherwise>
+                            <form id="archivedBulkForm" method="post" action="${pageContext.request.contextPath}/instructor/materials" class="workspace-bulk-form" style="margin-bottom: 16px;">
+                                <input type="hidden" name="action" value="bulkRestore">
+                                <input type="hidden" name="courseId" value="${selectedCourse.courseId}">
+                                <div style="display: flex; gap: 12px; align-items: center;">
+                                    <button type="button" class="btn btn-secondary btn-sm" onclick="selectAllMaterials('archivedMaterialIds', true)">Select All</button>
+                                    <button type="button" class="btn btn-secondary btn-sm" onclick="selectAllMaterials('archivedMaterialIds', false)">Clear</button>
+                                    <button type="submit" class="btn btn-secondary btn-sm"><i class="fas fa-undo"></i> Restore Selected</button>
+                                </div>
+                            </form>
+                            <div class="table-container">
+                                <table class="data-table">
                                     <thead>
                                     <tr>
-                                        <th class="material-select-head">
-                                            <input type="checkbox" aria-label="Select all active materials" onclick="selectAllMaterials('activeMaterialIds', this.checked)">
-                                        </th>
+                                        <th style="width: 40px;"></th>
                                         <th>Material</th>
                                         <th>Type</th>
-                                        <th>Order</th>
-                                        <th>Version</th>
-                                        <th>Uploaded</th>
                                         <th>Actions</th>
                                     </tr>
                                     </thead>
                                     <tbody>
-                                    <c:forEach var="material" items="${materials}">
+                                    <c:forEach var="material" items="${deletedMaterials}">
                                         <tr>
-                                            <td class="material-select-cell">
-                                                <input type="checkbox" name="materialIds" value="${material.materialId}" form="activeBulkForm" class="material-select-input activeMaterialIds">
+                                            <td>
+                                                <input type="checkbox" name="materialIds" value="${material.materialId}" form="archivedBulkForm" class="archivedMaterialIds">
                                             </td>
                                             <td>
-                                                <div class="material-cell">
-                                                    <div class="material-cell-title"><c:out value="${material.title}"/></div>
-                                                    <div class="material-cell-subtitle">
-                                                        <c:choose>
-                                                            <c:when test="${not empty material.description && material.description.length() > 90}">
-                                                                <c:out value="${material.description.substring(0, 90)}"/>...
-                                                            </c:when>
-                                                            <c:when test="${not empty material.description}">
-                                                                <c:out value="${material.description}"/>
-                                                            </c:when>
-                                                            <c:otherwise>
-                                                                Course asset for this workspace.
-                                                            </c:otherwise>
-                                                        </c:choose>
-                                                    </div>
-                                                </div>
+                                                <strong><c:out value="${material.title}"/></strong>
                                             </td>
                                             <td><span class="type-badge type-${material.materialType}"><c:out value="${material.materialType}"/></span></td>
                                             <td>
-                                                <div class="workspace-order-cell">
-                                                    <span class="table-pill"><c:out value="${material.displayOrder}" default="N/A"/></span>
-                                                    <div class="workspace-order-buttons">
-                                                        <form method="post" action="${pageContext.request.contextPath}/instructor/materials">
-                                                            <input type="hidden" name="action" value="reorder">
-                                                            <input type="hidden" name="courseId" value="${selectedCourse.courseId}">
-                                                            <input type="hidden" name="materialId" value="${material.materialId}">
-                                                            <input type="hidden" name="direction" value="up">
-                                                            <button type="submit" class="icon-btn" aria-label="Move material up"><i class="fas fa-chevron-up"></i></button>
-                                                        </form>
-                                                        <form method="post" action="${pageContext.request.contextPath}/instructor/materials">
-                                                            <input type="hidden" name="action" value="reorder">
-                                                            <input type="hidden" name="courseId" value="${selectedCourse.courseId}">
-                                                            <input type="hidden" name="materialId" value="${material.materialId}">
-                                                            <input type="hidden" name="direction" value="down">
-                                                            <button type="submit" class="icon-btn" aria-label="Move material down"><i class="fas fa-chevron-down"></i></button>
-                                                        </form>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <span class="table-muted">
-                                                    <c:choose>
-                                                        <c:when test="${not empty material.uploadDate}">
-                                                            ${material.uploadDate.toLocalDate()}
-                                                        </c:when>
-                                                        <c:otherwise>-</c:otherwise>
-                                                    </c:choose>
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <div class="row-actions">
-                                                    <a href="${material.filePath}" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm"><i class="fas fa-eye"></i> View</a>
-                                                    <button type="button" class="btn btn-secondary btn-sm" onclick="openEditMaterialModal(this, false)"
-                                                            data-material-id="${material.materialId}"
-                                                            data-title="<c:out value='${material.title}'/>"
-                                                            data-type="<c:out value='${material.materialType}'/>"
-                                                            data-order="<c:out value='${material.displayOrder}'/>"
-                                                            data-description="<c:out value='${material.description}'/>"
-                                                            data-external-url="${material.materialType == 'Link' ? material.filePath : ''}">
-                                                        <i class="fas fa-edit"></i> Edit
-                                                    </button>
-                                                    <button type="button" class="btn btn-secondary btn-sm" onclick="openEditMaterialModal(this, true)"
-                                                            data-material-id="${material.materialId}"
-                                                            data-title="<c:out value='${material.title}'/>"
-                                                            data-type="<c:out value='${material.materialType}'/>"
-                                                            data-order="<c:out value='${material.displayOrder}'/>"
-                                                            data-description="<c:out value='${material.description}'/>"
-                                                            data-external-url="${material.materialType == 'Link' ? material.filePath : ''}">
-                                                        <i class="fas fa-file-arrow-up"></i> Replace File
-                                                    </button>
-                                                    <a href="${pageContext.request.contextPath}/instructor/materials?action=delete&id=${material.materialId}&courseId=${selectedCourse.courseId}" class="btn btn-secondary btn-sm workspace-danger-link" onclick="return confirm('Archive this material?');">
-                                                        <i class="fas fa-eye-slash"></i> Unpublish
+                                                <div style="display: flex; gap: 8px;">
+                                                    <a href="${pageContext.request.contextPath}/instructor/materials?action=restore&id=${material.materialId}&courseId=${selectedCourse.courseId}" class="btn btn-secondary btn-sm">
+                                                        <i class="fas fa-undo"></i> Publish
+                                                    </a>
+                                                    <a href="${material.filePath}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm">
+                                                        <i class="fas fa-up-right-from-square"></i> View
                                                     </a>
                                                 </div>
                                             </td>
                                         </tr>
                                     </c:forEach>
                                     </tbody>
-                            </table>
-                        </div>
-                    </c:otherwise>
-                </c:choose>
-
-                <div class="archived-block">
-                    <div class="section-header archived-section-header">
-                        <div>
-                            <h4 class="archived-title">Archived Materials</h4>
-                            <p class="section-caption">Published state is controlled by archive and restore actions.</p>
-                        </div>
-                    </div>
-
-                    <c:choose>
-                        <c:when test="${empty deletedMaterials}">
-                            <p class="archived-empty">No archived materials.</p>
-                        </c:when>
-                        <c:otherwise>
-                            <form id="archivedBulkForm" method="post" action="${pageContext.request.contextPath}/instructor/materials" class="workspace-bulk-form">
-                                <input type="hidden" name="action" value="bulkRestore">
-                                <input type="hidden" name="courseId" value="${selectedCourse.courseId}">
-                                <div class="workspace-bulk-submit-row">
-                                    <span class="workspace-bulk-help">Restore selected items to publish them again.</span>
-                                    <button type="submit" class="btn btn-secondary btn-sm"><i class="fas fa-undo"></i> Restore Selected</button>
-                                </div>
-                            </form>
-
-                            <div class="archived-table-wrap">
-                                <table class="archived-table workspace-archived-table">
-                                        <thead>
-                                        <tr>
-                                            <th class="material-select-head">
-                                                <input type="checkbox" aria-label="Select all archived materials" onclick="selectAllMaterials('archivedMaterialIds', this.checked)">
-                                            </th>
-                                            <th>Material</th>
-                                            <th>Type</th>
-                                            <th>Order</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                        <c:forEach var="material" items="${deletedMaterials}">
-                                            <tr>
-                                                <td class="material-select-cell">
-                                                    <input type="checkbox" name="materialIds" value="${material.materialId}" form="archivedBulkForm" class="material-select-input archivedMaterialIds">
-                                                </td>
-                                                <td>
-                                                    <div class="material-cell">
-                                                        <div class="material-cell-title"><c:out value="${material.title}"/></div>
-                                                        <div class="material-cell-subtitle">Archived from this course</div>
-                                                    </div>
-                                                </td>
-                                                <td><span class="type-badge type-${material.materialType}"><c:out value="${material.materialType}"/></span></td>
-                                                <td><span class="table-pill"><c:out value="${material.displayOrder}" default="N/A"/></span></td>
-                                                <td>
-                                                    <div class="row-actions">
-                                                        <a href="${pageContext.request.contextPath}/instructor/materials?action=restore&id=${material.materialId}&courseId=${selectedCourse.courseId}" class="btn btn-secondary btn-sm">
-                                                            <i class="fas fa-eye"></i> Publish
-                                                        </a>
-                                                        <a href="${material.filePath}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm">
-                                                            <i class="fas fa-up-right-from-square"></i> View
-                                                        </a>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        </c:forEach>
-                                        </tbody>
                                 </table>
                             </div>
                         </c:otherwise>
@@ -444,63 +256,13 @@
             </div>
         </section>
 
-        <section class="workspace-panel" data-workspace-panel="assessments" id="assessments">
-            <div class="workspace-panel-card">
-                <div class="section-header">
-                    <div>
-                        <h3 class="section-title">Assessments</h3>
-                        <p class="section-caption">Published assessments, archive recovery, and grading entry points stay inside this workspace.</p>
-                    </div>
-                    <a class="btn btn-primary btn-sm" href="#assessment-module-shell">
-                        <i class="fas fa-pen-ruler"></i> Open Module
-                    </a>
-                </div>
 
-                <div class="workspace-assessment-summary-grid">
-                    <div class="workspace-assessment-summary-card">
-                        <span>Published</span>
-                        <strong>${assessments.size()}</strong>
-                    </div>
-                    <div class="workspace-assessment-summary-card">
-                        <span>Archived</span>
-                        <strong>${empty archivedAssessments ? 0 : archivedAssessments.size()}</strong>
-                    </div>
-                    <div class="workspace-assessment-summary-card">
-                        <span>Pending Grading</span>
-                        <strong>${pendingGrading}</strong>
-                    </div>
-                    <div class="workspace-assessment-summary-card">
-                        <span>Students in Scope</span>
-                        <strong>${totalStudents}</strong>
-                    </div>
-                </div>
-
-                <div class="workspace-assessment-shell" id="assessment-module-shell">
-                    <div class="workspace-assessment-shell__head">
-                        <div>
-                            <h4>Embedded Assessment Module</h4>
-                            <p>Use the embedded module below to create assessments, manage questions, review submissions, grade manually or automatically, and restore archived items without leaving this course workspace.</p>
-                        </div>
-                        <div class="workspace-assessment-shell__note">
-                            <i class="fas fa-circle-info"></i>
-                            <span>All assessment flows are now kept inside the course workspace.</span>
-                        </div>
-                    </div>
-                    <div class="workspace-assessment-frame-shell">
-                        <iframe
-                            class="workspace-assessment-frame"
-                            src="${assessmentWorkspaceUrl}"
-                            title="Embedded assessment module"></iframe>
-                    </div>
-                </div>
-
-                <div class="workspace-assessment-divider"></div>
-
-                <div class="workspace-assessment-list-head">
-                    <div>
-                        <h4>Published Assessments</h4>
-                        <p>Open the relevant view inside the embedded module. Grading, submissions, and analytics remain in one workspace.</p>
-                    </div>
+        <%-- SECTION 2: ASSESSMENTS --%>
+        <section class="ins-section" id="assessments" style="margin-bottom: 32px;">
+            <div class="section-card">
+                <div class="section-header" style="margin-bottom: 24px;">
+                    <h3 class="section-title">Course Assessments</h3>
+                    <a href="${assessmentWorkspaceBaseUrl}" class="btn btn-secondary btn-sm">View Hub</a>
                 </div>
 
                 <c:choose>
@@ -508,34 +270,31 @@
                         <div class="empty-state-box workspace-empty-box">
                             <i class="fas fa-clipboard-list"></i>
                             <p>No assessments created for this course yet.</p>
+                            <a href="${assessmentWorkspaceBaseUrl}&view=editor" class="btn btn-primary btn-sm">Create First</a>
                         </div>
                     </c:when>
                     <c:otherwise>
-                        <div class="workspace-assessment-grid">
+                        <div class="workspace-assessment-grid" style="display: grid; gap: 20px; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));">
                             <c:forEach var="assessment" items="${assessments}">
-                                <article class="workspace-list-card workspace-assessment-card">
-                                    <div class="workspace-list-head">
+                                <article class="ia-assessment-card" style="padding: 20px; border: 1px solid var(--ins-border); border-radius: 12px; background: #fff; position: relative; transition: all 0.2s ease;">
+                                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
                                         <div>
-                                            <strong><c:out value="${assessment.title}"/></strong>
-                                            <span><c:out value="${assessment.type}"/></span>
+                                            <span style="font-size: 0.65rem; font-weight: 800; text-transform: uppercase; color: var(--ins-primary); letter-spacing: 0.05em; display: block; margin-bottom: 4px;">${assessment.type}</span>
+                                            <strong style="display: block; font-size: 1.1rem; color: var(--ins-text);"><c:out value="${assessment.title}"/></strong>
                                         </div>
-                                        <span class="assessment-type-badge type-${assessment.type}">${assessment.type}</span>
+                                        <div style="width: 32px; height: 32px; border-radius: 8px; background: var(--ins-accent-soft); color: var(--ins-primary); display: flex; align-items: center; justify-content: center;">
+                                            <i class="fas ${assessment.type == 'Assignment' ? 'fa-file-signature' : 'fa-stopwatch'}"></i>
+                                        </div>
                                     </div>
-                                    <p>
-                                        <c:out value="${not empty assessment.totalMarks ? assessment.totalMarks : 'N/A'}"/> marks ·
-                                        <c:out value="${not empty assessment.duration ? assessment.duration : 'Unlimited'}"/> mins ·
-                                        <c:out value="${not empty assessment.gradingMode ? assessment.gradingMode : (assessment.type == 'Assignment' ? 'manual' : 'auto')}"/> grading
-                                    </p>
-                                    <div class="workspace-assessment-meta">
-                                        <span><i class="fas fa-inbox"></i> ${submissionCountByAssessmentId[assessment.assessmentId]} submissions</span>
-                                        <span><i class="fas fa-chart-bar"></i> ${not empty pendingCountByAssessmentId[assessment.assessmentId] ? pendingCountByAssessmentId[assessment.assessmentId] : 0} pending</span>
+                                    
+                                    <div style="display: flex; gap: 12px; margin-bottom: 20px; font-size: 0.8rem; color: var(--ins-muted);">
+                                        <span><i class="fas fa-users" style="margin-right: 4px;"></i> ${submissionCountByAssessmentId[assessment.assessmentId]}</span>
+                                        <span style="color: #ea580c; font-weight: 600;"><i class="fas fa-clock-rotate-left" style="margin-right: 4px;"></i> ${not empty pendingCountByAssessmentId[assessment.assessmentId] ? pendingCountByAssessmentId[assessment.assessmentId] : 0} pending</span>
                                     </div>
-                                    <div class="workspace-list-actions workspace-assessment-actions">
-                                        <button type="button" class="btn btn-secondary btn-sm" onclick="openAssessmentModule('editor', ${assessment.assessmentId})">Builder</button>
-                                        <button type="button" class="btn btn-secondary btn-sm" onclick="openAssessmentModule('questions', ${assessment.assessmentId})">Questions</button>
-                                        <button type="button" class="btn btn-secondary btn-sm" onclick="openAssessmentModule('submissions', ${assessment.assessmentId})">Submissions</button>
-                                        <button type="button" class="btn btn-secondary btn-sm" onclick="openAssessmentModule('grade', ${assessment.assessmentId})">Grade</button>
-                                        <button type="button" class="btn btn-secondary btn-sm" onclick="openAssessmentModule('analytics', ${assessment.assessmentId})">Analytics</button>
+
+                                    <div style="display: flex; gap: 8px; border-top: 1px solid var(--ins-border); padding-top: 16px;">
+                                        <button type="button" class="btn btn-secondary btn-sm" onclick="openAssessmentPage('submissions', ${assessment.assessmentId})" style="flex: 1; justify-content: center;">Review</button>
+                                        <button type="button" class="btn btn-secondary btn-sm" onclick="openAssessmentPage('editor', ${assessment.assessmentId})" style="width: 40px; justify-content: center;"><i class="fas fa-cog"></i></button>
                                     </div>
                                 </article>
                             </c:forEach>
@@ -543,53 +302,23 @@
                     </c:otherwise>
                 </c:choose>
 
-                <div class="workspace-assessment-list-head workspace-assessment-list-head--spaced">
-                    <div>
-                        <h4>Archived Assessments</h4>
-                        <p>Restore or review archived assessments from the embedded archive view when needed.</p>
+                <%-- Archived Assessments --%>
+                <c:if test="${not empty archivedAssessments}">
+                    <div style="margin-top: 24px; padding: 16px; background: #f8fafc; border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-size: 0.85rem; color: var(--ins-muted);">You have <strong>${fn:length(archivedAssessments)}</strong> archived assessments.</span>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="openAssessmentPage('archive')">Manage Archive</button>
                     </div>
-                    <button type="button" class="btn btn-secondary btn-sm" onclick="openAssessmentModule('archive')">Open Archive</button>
-                </div>
-
-                <c:choose>
-                    <c:when test="${empty archivedAssessments}">
-                        <div class="empty-state-box workspace-empty-box">
-                            <i class="fas fa-box-archive"></i>
-                            <p>No archived assessments for this course yet.</p>
-                        </div>
-                    </c:when>
-                    <c:otherwise>
-                        <div class="workspace-assessment-grid workspace-assessment-grid--compact">
-                            <c:forEach var="assessment" items="${archivedAssessments}">
-                                <article class="workspace-list-card workspace-assessment-card workspace-assessment-card--archived">
-                                    <div class="workspace-list-head">
-                                        <div>
-                                            <strong><c:out value="${assessment.title}"/></strong>
-                                            <span><c:out value="${assessment.type}"/></span>
-                                        </div>
-                                        <span class="assessment-type-badge type-${assessment.type}">${assessment.type}</span>
-                                    </div>
-                                    <p>
-                                        <c:out value="${not empty assessment.totalMarks ? assessment.totalMarks : 'N/A'}"/> marks ·
-                                        <c:out value="${not empty assessment.duration ? assessment.duration : 'Unlimited'}"/> mins
-                                    </p>
-                                    <div class="workspace-list-actions workspace-assessment-actions">
-                                        <button type="button" class="btn btn-secondary btn-sm" onclick="openAssessmentModule('archive')">Restore via Archive</button>
-                                    </div>
-                                </article>
-                            </c:forEach>
-                        </div>
-                    </c:otherwise>
-                </c:choose>
+                </c:if>
             </div>
         </section>
 
-        <section class="workspace-panel" data-workspace-panel="students" id="students">
-            <div class="workspace-panel-card">
+
+        <%-- SECTION 3: STUDENTS --%>
+        <section class="ins-section" id="students" style="margin-bottom: 32px;">
+            <div class="section-card">
                 <div class="section-header">
                     <div>
                         <h3 class="section-title">Students</h3>
-                        <p class="section-caption">Enrolled learners and their current learning progress.</p>
                     </div>
                 </div>
                 <c:choose>
@@ -601,7 +330,7 @@
                     </c:when>
                     <c:otherwise>
                         <div class="table-container">
-                            <table class="data-table workspace-table">
+                            <table class="data-table">
                                 <thead>
                                 <tr>
                                     <th>Student</th>
@@ -613,9 +342,13 @@
                                 <tbody>
                                 <c:forEach var="enrollment" items="${enrollments}">
                                     <tr>
-                                        <td><strong><c:out value="${enrollment.studentName}"/></strong><br><span class="table-muted"><c:out value="${enrollment.studentEmail}"/></span></td>
+                                        <td><strong><c:out value="${enrollment.studentName}"/></strong><br><span style="color: var(--ins-muted); font-size: 0.85rem;"><c:out value="${enrollment.studentEmail}"/></span></td>
                                         <td><span class="status-badge status-${fn:toLowerCase(enrollment.status)}"><c:out value="${enrollment.status}"/></span></td>
-                                        <td><c:out value="${not empty enrollment.progress ? enrollment.progress : 0}"/>%</td>
+                                        <td>
+                                            <div style="display: flex; align-items: center; gap: 12px;">
+                                                <span style="font-weight: 600; min-width: 32px;"><c:out value="${not empty enrollment.progress ? enrollment.progress : 0}"/>%</span>
+                                            </div>
+                                        </td>
                                         <td><c:out value="${not empty enrollment.enrollmentDate ? enrollment.enrollmentDate : '-'}"/></td>
                                     </tr>
                                 </c:forEach>
@@ -627,37 +360,35 @@
             </div>
         </section>
 
-        <section class="workspace-panel" data-workspace-panel="analytics" id="analytics">
-            <div class="workspace-panel-card">
+        <%-- SECTION 4: ANALYTICS --%>
+        <section class="ins-section" id="analytics" style="margin-bottom: 32px;">
+            <div class="section-card">
                 <div class="section-header">
                     <div>
-                        <h3 class="section-title">Analytics</h3>
-                        <p class="section-caption">A compact snapshot of course engagement and completion.</p>
+                        <h3 class="section-title">Analytics Snapshot</h3>
                     </div>
                 </div>
-                <div class="workspace-analytics-grid">
-                    <div class="workspace-analytics-card">
-                        <span>Completed Students</span>
-                        <strong>${completedStudents}</strong>
+                <div class="workspace-analytics-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+                    <div style="padding: 20px; border: 1px solid var(--ins-border); border-radius: 12px; background: #fafafa;">
+                        <span style="display: block; color: var(--ins-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">Completed Students</span>
+                        <strong style="font-size: 1.8rem; color: var(--ins-text);">${completedStudents}</strong>
                     </div>
-                    <div class="workspace-analytics-card">
-                        <span>Active Students</span>
-                        <strong>${totalStudents - completedStudents}</strong>
+                    <div style="padding: 20px; border: 1px solid var(--ins-border); border-radius: 12px; background: #fafafa;">
+                        <span style="display: block; color: var(--ins-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">Active Students</span>
+                        <strong style="font-size: 1.8rem; color: var(--ins-text);">${totalStudents - completedStudents}</strong>
                     </div>
-                    <div class="workspace-analytics-card">
-                        <span>Average Progress</span>
-                        <strong><fmt:formatNumber value="${averageProgress}" maxFractionDigits="0"/>%</strong>
+                    <div style="padding: 20px; border: 1px solid var(--ins-border); border-radius: 12px; background: #fafafa;">
+                        <span style="display: block; color: var(--ins-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">Average Progress</span>
+                        <strong style="font-size: 1.8rem; color: var(--ins-text);"><fmt:formatNumber value="${averageProgress}" maxFractionDigits="0"/>%</strong>
                     </div>
-                    <div class="workspace-analytics-card">
-                        <span>Pending Grading</span>
-                        <strong>${pendingGrading}</strong>
+                    <div style="padding: 20px; border: 1px solid var(--ins-border); border-radius: 12px; background: #fafafa;">
+                        <span style="display: block; color: var(--ins-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">Pending Grading</span>
+                        <strong style="font-size: 1.8rem; color: var(--ins-text);">${pendingGrading}</strong>
                     </div>
-                </div>
-                <div class="workspace-analytics-note">
-                    Completion rate is based on enrolled students whose state has been synchronized into the existing enrollment progress model.
                 </div>
             </div>
         </section>
+
     </div>
 </main>
 
@@ -666,19 +397,16 @@
     <div class="modal-content">
         <div class="modal-header">
             <h3>Upload New Material</h3>
-            <button class="modal-close" onclick="closeUploadModal()">
-                <i class="fas fa-times"></i>
-            </button>
+            <button class="modal-close" onclick="closeUploadModal()"><i class="fas fa-times"></i></button>
         </div>
         <div class="modal-body">
             <p class="modal-subtitle">Course: <strong><c:out value="${selectedCourse.courseName}"/></strong></p>
-            <p class="modal-subtitle modal-subtitle-spaced">Set chapter/order number to control learning flow. Leave empty to append at the end.</p>
             <form id="uploadForm" method="post" action="${pageContext.request.contextPath}/instructor/materials" enctype="multipart/form-data">
                 <input type="hidden" name="courseId" value="${selectedCourse.courseId}">
                 <div class="upload-form-grid">
                     <div class="field">
                         <label>Title *</label>
-                        <input type="text" name="title" placeholder="Material title" required>
+                        <input type="text" name="title" required>
                     </div>
                     <div class="field">
                         <label>Type *</label>
@@ -689,30 +417,27 @@
                             <option value="Slides">Slides</option>
                             <option value="Link">Link</option>
                         </select>
-                        <small id="uploadTypeHint" class="field-hint">Select a type to see allowed file formats.</small>
                     </div>
                     <div class="field">
                         <label>Chapter / Order</label>
-                        <input type="number" name="displayOrder" min="1" placeholder="e.g. 1">
+                        <input type="number" name="displayOrder" min="1">
                     </div>
                     <div class="field">
                         <label>File</label>
                         <input type="file" name="materialFile" id="materialFile" accept=".pdf,.doc,.docx,.txt,.ppt,.pptx,.zip,.mp4,.webm,.mov,.m4v,.mp3">
-                        <small id="uploadFileHint" class="field-hint">Allowed: PDF, DOC/DOCX, TXT, PPT/PPTX, ZIP, MP4/WEBM/MOV/M4V, MP3 (max 50MB).</small>
                     </div>
                     <div class="field">
                         <label>External URL (for Link type)</label>
-                        <input type="url" name="externalUrl" id="externalUrl" placeholder="https://example.com/resource">
-                        <small class="field-hint">Use only full HTTP/HTTPS links.</small>
+                        <input type="url" name="externalUrl" id="externalUrl">
                     </div>
                     <div class="field full">
                         <label>Description</label>
-                        <textarea name="description" placeholder="Optional description" rows="3"></textarea>
+                        <textarea name="description" rows="3"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" onclick="closeUploadModal()">Cancel</button>
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-upload"></i> Publish Material</button>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-upload"></i> Publish</button>
                 </div>
             </form>
         </div>
@@ -723,9 +448,7 @@
     <div class="modal-content">
         <div class="modal-header">
             <h3>Edit Material</h3>
-            <button class="modal-close" onclick="closeEditMaterialModal()">
-                <i class="fas fa-times"></i>
-            </button>
+            <button class="modal-close" onclick="closeEditMaterialModal()"><i class="fas fa-times"></i></button>
         </div>
         <div class="modal-body">
             <p class="modal-subtitle">Course: <strong><c:out value="${selectedCourse.courseName}"/></strong></p>
@@ -746,7 +469,6 @@
                             <option value="Slides">Slides</option>
                             <option value="Link">Link</option>
                         </select>
-                        <small id="editTypeHint" class="field-hint">Update type carefully to avoid format mismatch.</small>
                     </div>
                     <div class="field">
                         <label>Chapter / Order</label>
@@ -755,11 +477,10 @@
                     <div class="field">
                         <label>Replace File</label>
                         <input id="editFile" type="file" name="materialFile" accept=".pdf,.doc,.docx,.txt,.ppt,.pptx,.zip,.mp4,.webm,.mov,.m4v,.mp3">
-                        <small id="editFileHint" class="field-hint">Upload a replacement only if needed. Current file remains otherwise.</small>
                     </div>
                     <div class="field">
                         <label>External URL (for Link type)</label>
-                        <input id="editExternalUrl" type="url" name="externalUrl" placeholder="https://example.com/resource">
+                        <input id="editExternalUrl" type="url" name="externalUrl">
                     </div>
                     <div class="field full">
                         <label>Description</label>
@@ -768,45 +489,40 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" onclick="closeEditMaterialModal()">Cancel</button>
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Changes</button>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
+<script src="${pageContext.request.contextPath}/js/theme-toggle.js"></script>
 <script>
-    function openAssessmentModule(view, assessmentId) {
-        const moduleShell = document.getElementById('assessment-module-shell');
-        const moduleFrame = document.querySelector('.workspace-assessment-frame');
-        if (!moduleShell || !moduleFrame) {
-            return;
-        }
+    (function(){
+        var btn = document.getElementById('insMenuBtn');
+        if(btn) btn.addEventListener('click', function(){ document.body.classList.toggle('ins-shell-collapsed'); });
+    })();
 
+    // Changed from iframe setting to window.location navigation
+    function openAssessmentPage(view, assessmentId) {
         const baseUrl = '${assessmentWorkspaceBaseUrl}';
         const resolvedView = view || 'editor';
         let nextUrl = baseUrl + '&view=' + encodeURIComponent(resolvedView);
         if (assessmentId) {
             nextUrl += '&assessmentId=' + encodeURIComponent(assessmentId);
         }
-        moduleFrame.src = nextUrl;
-        moduleShell.scrollIntoView({behavior: 'smooth', block: 'start'});
+        window.location.href = nextUrl;
     }
 
     function openUploadModal() {
-        const modal = document.getElementById('uploadModal');
-        if (!modal) return;
-        modal.classList.add('show');
+        document.getElementById('uploadModal').classList.add('show');
         document.body.style.overflow = 'hidden';
     }
 
     function closeUploadModal() {
-        const modal = document.getElementById('uploadModal');
-        if (!modal) return;
-        modal.classList.remove('show');
+        document.getElementById('uploadModal').classList.remove('show');
         document.body.style.overflow = 'auto';
-        const form = document.getElementById('uploadForm');
-        if (form) form.reset();
+        document.getElementById('uploadForm').reset();
     }
 
     function openEditMaterialModal(button, focusFile) {
@@ -818,8 +534,7 @@
         document.getElementById('editExternalUrl').value = button.dataset.externalUrl || '';
         document.getElementById('editFile').value = '';
 
-        const modal = document.getElementById('editMaterialModal');
-        modal.classList.add('show');
+        document.getElementById('editMaterialModal').classList.add('show');
         document.body.style.overflow = 'hidden';
 
         if (focusFile) {
@@ -831,9 +546,7 @@
     }
 
     function closeEditMaterialModal() {
-        const modal = document.getElementById('editMaterialModal');
-        if (!modal) return;
-        modal.classList.remove('show');
+        document.getElementById('editMaterialModal').classList.remove('show');
         document.body.style.overflow = 'auto';
         const fileInput = document.getElementById('editFile');
         if (fileInput) fileInput.value = '';
@@ -845,109 +558,43 @@
         });
     }
 
-    function scrollToMaterialsOrder() {
-        const anchor = document.getElementById('materials-order-anchor');
-        if (anchor) anchor.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-
-    function scrollToBulkActions() {
-        const anchor = document.getElementById('bulk-actions-anchor');
-        if (anchor) anchor.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-
     window.addEventListener('click', function (event) {
         const uploadModal = document.getElementById('uploadModal');
         const editModal = document.getElementById('editMaterialModal');
-        if (uploadModal && event.target === uploadModal) {
-            closeUploadModal();
-        }
-        if (editModal && event.target === editModal) {
-            closeEditMaterialModal();
-        }
+        if (uploadModal && event.target === uploadModal) closeUploadModal();
+        if (editModal && event.target === editModal) closeEditMaterialModal();
     });
 
     window.addEventListener('keydown', function (event) {
         if (event.key !== 'Escape') return;
-        const uploadModal = document.getElementById('uploadModal');
-        const editModal = document.getElementById('editMaterialModal');
-        if (uploadModal && uploadModal.classList.contains('show')) {
-            closeUploadModal();
-        }
-        if (editModal && editModal.classList.contains('show')) {
-            closeEditMaterialModal();
-        }
+        closeUploadModal();
+        closeEditMaterialModal();
     });
 
     (function () {
         const type = document.getElementById('materialType');
         const file = document.getElementById('materialFile');
         const url = document.getElementById('externalUrl');
-        const typeHint = document.getElementById('uploadTypeHint');
-        const fileHint = document.getElementById('uploadFileHint');
         const editType = document.getElementById('editType');
         const editFile = document.getElementById('editFile');
         const editUrl = document.getElementById('editExternalUrl');
-        const editTypeHint = document.getElementById('editTypeHint');
-        const editFileHint = document.getElementById('editFileHint');
 
-        const typeMeta = {
-            PDF: {
-                accept: '.pdf,.doc,.docx,.txt',
-                fileHint: 'Allowed: PDF, DOC, DOCX, TXT (max 50MB).',
-                typeHint: 'Best for notes, handouts, and reading packs.'
-            },
-            Video: {
-                accept: '.mp4,.webm,.mov,.m4v,.mp3',
-                fileHint: 'Allowed: MP4, WEBM, MOV, M4V, MP3 (max 50MB).',
-                typeHint: 'Best for lectures, demonstrations, and audio explainers.'
-            },
-            Slides: {
-                accept: '.ppt,.pptx,.pdf,.zip',
-                fileHint: 'Allowed: PPT, PPTX, PDF, ZIP (max 50MB).',
-                typeHint: 'Best for presentation decks and session slide packs.'
-            },
-            Link: {
-                accept: '',
-                fileHint: 'No file needed for links. Provide a valid URL.',
-                typeHint: 'Best for YouTube, docs, external labs, and reference pages.'
-            }
-        };
-
-        const applyTypeRules = function (selectedType, fileInput, urlInput, typeHintNode, fileHintNode) {
-            const meta = typeMeta[selectedType] || null;
+        const applyTypeRules = function (selectedType, fileInput, urlInput) {
             const isLink = selectedType === 'Link';
-
             if (fileInput) {
                 fileInput.required = !!selectedType && !isLink;
                 fileInput.disabled = !!selectedType && isLink;
-                fileInput.accept = meta ? meta.accept : '.pdf,.doc,.docx,.txt,.ppt,.pptx,.zip,.mp4,.webm,.mov,.m4v,.mp3';
             }
             if (urlInput) {
                 urlInput.required = !!selectedType && isLink;
                 urlInput.disabled = !!selectedType && !isLink;
             }
-            if (typeHintNode) {
-                typeHintNode.textContent = meta ? meta.typeHint : 'Select a type to see allowed file formats.';
-            }
-            if (fileHintNode) {
-                fileHintNode.textContent = meta ? meta.fileHint : 'Allowed: PDF, DOC/DOCX, TXT, PPT/PPTX, ZIP, MP4/WEBM/MOV/M4V, MP3 (max 50MB).';
-            }
         };
 
-        const syncRequired = function () {
-            const selected = type ? type.value : '';
-            applyTypeRules(selected, file, url, typeHint, fileHint);
-        };
-
-        const syncEditRequired = function () {
-            const selected = editType ? editType.value : '';
-            applyTypeRules(selected, editFile, editUrl, editTypeHint, editFileHint);
-        };
-
-        if (type) type.addEventListener('change', syncRequired);
-        if (editType) editType.addEventListener('change', syncEditRequired);
-        syncRequired();
-        syncEditRequired();
+        if (type) type.addEventListener('change', () => applyTypeRules(type.value, file, url));
+        if (editType) editType.addEventListener('change', () => applyTypeRules(editType.value, editFile, editUrl));
+        if (type) applyTypeRules(type.value, file, url);
+        if (editType) applyTypeRules(editType.value, editFile, editUrl);
     })();
 </script>
 </body>

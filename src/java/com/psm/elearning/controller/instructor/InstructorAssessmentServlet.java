@@ -424,36 +424,37 @@ public class InstructorAssessmentServlet extends HttpServlet {
                     }
                 }
 
-                Map<Integer, Integer> submissionCountByUserId = new LinkedHashMap<>();
-                Map<Integer, AssessmentSubmission> latestSubmissionByUserId = new LinkedHashMap<>();
-                for (AssessmentSubmission submission : submissionsUnfiltered) {
-                    if (submission == null || submission.getUserId() == null) {
-                        continue;
-                    }
-                    submissionCountByUserId.put(submission.getUserId(), submissionCountByUserId.getOrDefault(submission.getUserId(), 0) + 1);
-                    AssessmentSubmission currentLatest = latestSubmissionByUserId.get(submission.getUserId());
-                    if (currentLatest == null || (submission.getSubmissionId() != null && currentLatest.getSubmissionId() != null && submission.getSubmissionId() > currentLatest.getSubmissionId())) {
-                        latestSubmissionByUserId.put(submission.getUserId(), submission);
-                    }
-                }
+            }
+        }
 
-                for (Enrollment enrollment : courseEnrollments) {
-                    if (enrollment == null || enrollment.getUserId() == null) {
-                        continue;
-                    }
-                    int submissionCount = submissionCountByUserId.getOrDefault(enrollment.getUserId(), 0);
-                    AssessmentSubmission latestSubmission = latestSubmissionByUserId.get(enrollment.getUserId());
-                    String statusLabel = submissionCount == 0 ? "Not started" : (latestSubmission != null && latestSubmission.getScore() != null ? "Graded" : "Attempted");
-                    String statusClass = submissionCount == 0 ? "is-muted" : (latestSubmission != null && latestSubmission.getScore() != null ? "is-success" : "is-warn");
-                    Map<String, Object> row = new LinkedHashMap<>();
-                    row.put("studentName", enrollment.getStudentName());
-                    row.put("studentEmail", enrollment.getStudentEmail());
-                    row.put("studentStatusLabel", statusLabel);
-                    row.put("studentStatusClass", statusClass);
-                    row.put("submissionCount", submissionCount);
-                    row.put("latestSubmission", latestSubmission);
-                    assessmentRosterRows.add(row);
+        // Always populate roster rows if we have a selected assessment and are in submissions view
+        if (selectedAssessment != null && (VIEW_SUBMISSIONS.equals(activeView) || VIEW_GRADE.equals(activeView))) {
+            Map<Integer, Integer> submissionCountByUserId = new LinkedHashMap<>();
+            Map<Integer, AssessmentSubmission> latestSubmissionByUserId = new LinkedHashMap<>();
+            for (AssessmentSubmission s : submissionsUnfiltered) {
+                if (s == null || s.getUserId() == null) continue;
+                submissionCountByUserId.put(s.getUserId(), submissionCountByUserId.getOrDefault(s.getUserId(), 0) + 1);
+                AssessmentSubmission currentLatest = latestSubmissionByUserId.get(s.getUserId());
+                if (currentLatest == null || (s.getSubmissionId() != null && currentLatest.getSubmissionId() != null && s.getSubmissionId() > currentLatest.getSubmissionId())) {
+                    latestSubmissionByUserId.put(s.getUserId(), s);
                 }
+            }
+
+            assessmentRosterRows = new ArrayList<>();
+            for (Enrollment enrollment : courseEnrollments) {
+                if (enrollment == null || enrollment.getUserId() == null) continue;
+                int submissionCount = submissionCountByUserId.getOrDefault(enrollment.getUserId(), 0);
+                AssessmentSubmission latestSubmission = latestSubmissionByUserId.get(enrollment.getUserId());
+                String statusLabel = submissionCount == 0 ? "Not started" : (latestSubmission != null && latestSubmission.getScore() != null ? "Graded" : "Attempted");
+                String statusClass = submissionCount == 0 ? "is-muted" : (latestSubmission != null && latestSubmission.getScore() != null ? "is-success" : "is-warn");
+                Map<String, Object> row = new LinkedHashMap<>();
+                row.put("studentName", enrollment.getStudentName());
+                row.put("studentEmail", enrollment.getStudentEmail());
+                row.put("studentStatusLabel", statusLabel);
+                row.put("studentStatusClass", statusClass);
+                row.put("submissionCount", submissionCount);
+                row.put("latestSubmission", latestSubmission);
+                assessmentRosterRows.add(row);
             }
         }
 
@@ -463,7 +464,8 @@ public class InstructorAssessmentServlet extends HttpServlet {
             activeView = VIEW_DASHBOARD;
         }
 
-        if (!VIEW_DASHBOARD.equals(activeView) && !VIEW_EDITOR.equals(activeView) && !VIEW_QUESTIONS.equals(activeView)) {
+        if (!VIEW_DASHBOARD.equals(activeView) && !VIEW_EDITOR.equals(activeView) && !VIEW_QUESTIONS.equals(activeView)
+                && !VIEW_SUBMISSIONS.equals(activeView) && !VIEW_GRADE.equals(activeView) && !VIEW_ANALYTICS.equals(activeView)) {
             activeView = VIEW_DASHBOARD;
         }
 
@@ -501,7 +503,16 @@ public class InstructorAssessmentServlet extends HttpServlet {
         request.setAttribute("activeAssessmentCount", activeAssessmentCount);
         request.setAttribute("closedAssessmentCount", closedAssessmentCount);
         request.setAttribute("pendingGradingAssessmentCount", pendingGradingAssessmentCount);
-        request.getRequestDispatcher("/WEB-INF/views/instructor/assessment-workspace.jsp").forward(request, response);
+        String jspFile = "/WEB-INF/views/instructor/course-assessments.jsp";
+        if (VIEW_EDITOR.equals(activeView)) {
+            jspFile = "/WEB-INF/views/instructor/assessment-builder.jsp";
+        } else if (VIEW_QUESTIONS.equals(activeView)) {
+            jspFile = "/WEB-INF/views/instructor/assessment-questions.jsp";
+        } else if (VIEW_SUBMISSIONS.equals(activeView) || VIEW_GRADE.equals(activeView)) {
+            jspFile = "/WEB-INF/views/instructor/assessment-submissions.jsp";
+        }
+        
+        request.getRequestDispatcher(jspFile).forward(request, response);
     }
 
     private void createAssessment(HttpServletRequest request, HttpServletResponse response, Integer userId)

@@ -7,33 +7,24 @@
 <c:if test="${empty resolvedInstructorPage}">
     <c:choose>
         <c:when test="${fn:contains(currentPath, '/instructor/courses')}"><c:set var="resolvedInstructorPage" value="courses"/></c:when>
-        <c:when test="${fn:contains(currentPath, '/instructor/materials')}"><c:set var="resolvedInstructorPage" value="materials"/></c:when>
-        <c:when test="${fn:contains(currentPath, '/instructor/assessments')}"><c:set var="resolvedInstructorPage" value="assessments"/></c:when>
-        <c:when test="${fn:contains(currentPath, '/instructor/certificates')}"><c:set var="resolvedInstructorPage" value="certificates"/></c:when>
         <c:when test="${fn:contains(currentPath, '/profile')}"><c:set var="resolvedInstructorPage" value="profile"/></c:when>
         <c:otherwise><c:set var="resolvedInstructorPage" value="dashboard"/></c:otherwise>
     </c:choose>
 </c:if>
 
-<aside class="app-sidebar">
+<aside class="app-sidebar" id="insSidebar">
     <nav class="sidebar-nav">
-        <a href="${pageContext.request.contextPath}/dashboard" class="nav-item ${resolvedInstructorPage == 'dashboard' ? 'active' : ''}">
-            <i class="fas fa-home"></i><span>Dashboard</span>
+        <a href="${pageContext.request.contextPath}/dashboard" class="nav-item ${resolvedInstructorPage == 'dashboard' ? 'active' : ''}" title="Dashboard">
+            <i class="fas fa-table-columns"></i><span>Dashboard</span>
         </a>
-        <a href="${pageContext.request.contextPath}/instructor/courses" class="nav-item ${resolvedInstructorPage == 'courses' ? 'active' : ''}">
+        <a href="${pageContext.request.contextPath}/instructor/courses" class="nav-item ${resolvedInstructorPage == 'courses' ? 'active' : ''}" title="Courses">
             <i class="fas fa-book"></i><span>Courses</span>
         </a>
-        <a href="${pageContext.request.contextPath}/instructor/materials" class="nav-item ${resolvedInstructorPage == 'materials' ? 'active' : ''}">
-            <i class="fas fa-folder-open"></i><span>Materials</span>
+        <a href="${pageContext.request.contextPath}/profile" class="nav-item ${resolvedInstructorPage == 'profile' ? 'active' : ''}" title="Profile / Settings">
+            <i class="fas fa-user-gear"></i><span>Profile / Settings</span>
         </a>
-        <a href="${pageContext.request.contextPath}/instructor/courses" class="nav-item ${resolvedInstructorPage == 'assessments' ? 'active' : ''}">
-            <i class="fas fa-clipboard-list"></i><span>Assessments</span>
-        </a>
-        <a href="${pageContext.request.contextPath}/instructor/certificates" class="nav-item ${resolvedInstructorPage == 'certificates' ? 'active' : ''}">
-            <i class="fas fa-certificate"></i><span>Certificates</span>
-        </a>
-        <a href="${pageContext.request.contextPath}/profile" class="nav-item ${resolvedInstructorPage == 'profile' ? 'active' : ''}">
-            <i class="fas fa-user"></i><span>Profile / Settings</span>
+        <a href="${pageContext.request.contextPath}/logout" class="nav-item nav-item-danger" title="Logout">
+            <i class="fas fa-right-from-bracket"></i><span>Logout</span>
         </a>
     </nav>
 </aside>

@@ -169,6 +169,25 @@ body.instructor-ui {
     justify-content: flex-end;
 }
 
+.ins-menu-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border: 1px solid var(--ins-border);
+    border-radius: 12px;
+    background: #ffffff;
+    color: var(--ins-text);
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.ins-menu-btn:hover {
+    background: var(--ins-accent-soft);
+    border-color: #cbd5e1;
+}
+
 .instructor-ui .user-menu {
     gap: 12px;
     padding: 8px 10px 8px 14px;
@@ -269,6 +288,7 @@ body.instructor-ui {
     border-right: 1px solid var(--ins-border);
     padding: 18px 16px 22px;
     box-sizing: border-box;
+    transition: width 0.3s ease, padding 0.3s ease, opacity 0.3s ease;
 }
 
 .instructor-ui .sidebar-nav {
@@ -311,6 +331,20 @@ body.instructor-ui {
     margin-top: 74px;
     min-height: calc(100vh - 74px);
     background: transparent;
+    transition: margin-left 0.3s ease;
+}
+
+body.ins-shell-collapsed .app-sidebar {
+    width: 0;
+    padding-left: 0;
+    padding-right: 0;
+    opacity: 0;
+    overflow: hidden;
+    border-right: none;
+}
+
+body.ins-shell-collapsed .app-main {
+    margin-left: 0;
 }
 
 .instructor-ui .content-wrapper {

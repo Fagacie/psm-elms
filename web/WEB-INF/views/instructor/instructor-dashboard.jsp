@@ -17,9 +17,7 @@
 </head>
 <body class="instructor-ui">
 <jsp:include page="/WEB-INF/views/common/instructor-header.jsp">
-    <jsp:param name="pageTitle" value="Instructor Dashboard"/>
-    <jsp:param name="pageSubtitle" value="Command center for courses, grading, and student activity"/>
-    <jsp:param name="showNotifications" value="true"/>
+    <jsp:param name="pageTitle" value="Dashboard"/>
 </jsp:include>
 
 <c:set var="activeInstructorPage" value="dashboard"/>
@@ -29,241 +27,102 @@
     <div class="content-wrapper dashboard-shell">
         <c:set var="courseCount" value="${not empty totalCourses ? totalCourses : 0}" />
         <c:set var="studentCount" value="${not empty totalStudents ? totalStudents : 0}" />
-        <c:set var="totalEnrollmentCount" value="${not empty totalEnrollments ? totalEnrollments : 0}" />
-        <c:set var="pendingEnrollmentCount" value="${not empty pendingEnrollments ? pendingEnrollments : 0}" />
-        <c:set var="activeEnrollmentCount" value="${not empty activeEnrollments ? activeEnrollments : 0}" />
-        <c:set var="activeCoursesCount" value="${not empty activeCourses ? activeCourses : 0}" />
         <c:set var="pendingGradingCount" value="${not empty pendingGradingCount ? pendingGradingCount : 0}" />
-        <c:set var="publishedMaterialsCount" value="${not empty publishedMaterialsCount ? publishedMaterialsCount : 0}" />
         <c:set var="missingMaterialsCourseCount" value="${not empty missingMaterialsCourseCount ? missingMaterialsCourseCount : 0}" />
         <c:set var="dueSoonAssessmentCount" value="${not empty dueSoonAssessmentCount ? dueSoonAssessmentCount : 0}" />
-        <c:set var="activeLearnersCount" value="${not empty activeLearnersCount ? activeLearnersCount : 0}" />
-        <c:set var="averageProgressValue" value="${not empty averageProgress ? averageProgress : 0}" />
-        <c:set var="firstCourseId" value="${not empty courses ? courses[0].courseId : ''}" />
 
-        <nav class="breadcrumb" aria-label="Breadcrumb">
-            <a href="${pageContext.request.contextPath}/instructor/dashboard">Dashboard</a>
-            <span>&gt;</span>
-            <span>Overview</span>
-        </nav>
-
-        <section class="dashboard-hero-card">
-            <div class="dashboard-hero-copy">
-                <p class="dashboard-kicker">Instructor Command Center</p>
-                <h2>Welcome back, <c:out value="${not empty instructorName ? instructorName : user.fullName}"/></h2>
-                <p class="dashboard-subtitle">Your courses, grading queue, and student activity are organized below.</p>
-            </div>
-
-            <div class="dashboard-hero-panel">
-                <div class="dashboard-chip-row">
-                    <div class="dashboard-chip">
-                        <span>Active Courses</span>
-                        <strong><c:out value="${activeCoursesCount}" default="0"/></strong>
-                    </div>
-                    <div class="dashboard-chip">
-                        <span>Pending Grading</span>
-                        <strong><c:out value="${pendingGradingCount}" default="0"/></strong>
-                    </div>
-                    <div class="dashboard-chip">
-                        <span>Total Students</span>
-                        <strong><c:out value="${studentCount}" default="0"/></strong>
-                    </div>
-                </div>
-
-                <div class="dashboard-activity-card">
-                    <div class="dashboard-activity-head">
-                        <span>Student Activity</span>
-                        <strong><c:out value="${activeLearnersCount}" default="0"/> active learners</strong>
-                    </div>
-                    <div class="dashboard-activity-grid">
-                        <div>
-                            <span>Average Progress</span>
-                            <strong><c:out value="${averageProgressValue}" default="0"/>%</strong>
-                        </div>
-                        <div>
-                            <span>Completion Rate</span>
-                            <strong>${totalEnrollmentCount > 0 ? (activeEnrollmentCount * 100) / totalEnrollmentCount : 0}%</strong>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <%-- SECTION 1: Welcome --%>
+        <section class="ins-welcome">
+            <h2>Welcome back, <c:out value="${not empty instructorName ? instructorName : user.fullName}"/> 👋</h2>
+            <p>Manage your courses, grading, and student activity.</p>
         </section>
 
-        <section class="dashboard-kpis">
-            <article class="dashboard-kpi-card kpi-accent">
-                <p class="dashboard-kpi-label">Active Courses</p>
-                <p class="dashboard-kpi-value"><c:out value="${activeCoursesCount}" default="0"/></p>
-                <p class="dashboard-kpi-note">Approved courses currently available to learners.</p>
-            </article>
-            <article class="dashboard-kpi-card">
-                <p class="dashboard-kpi-label">Students Enrolled</p>
-                <p class="dashboard-kpi-value"><c:out value="${studentCount}" default="0"/></p>
-                <p class="dashboard-kpi-note">Unique learners across your course portfolio.</p>
-            </article>
-            <article class="dashboard-kpi-card">
-                <p class="dashboard-kpi-label">Pending Grading</p>
-                <p class="dashboard-kpi-value"><c:out value="${pendingGradingCount}" default="0"/></p>
-                <p class="dashboard-kpi-note">Submissions awaiting review and feedback.</p>
-            </article>
-            <article class="dashboard-kpi-card">
-                <p class="dashboard-kpi-label">Published Materials</p>
-                <p class="dashboard-kpi-value"><c:out value="${publishedMaterialsCount}" default="0"/></p>
-                <p class="dashboard-kpi-note">Visible course materials across all live courses.</p>
-            </article>
+        <%-- SECTION 2: Course Cards --%>
+        <section class="ins-section">
+            <div class="ins-section-head">
+                <h3>My Courses</h3>
+                <a class="btn btn-secondary btn-sm" href="${pageContext.request.contextPath}/instructor/courses">View All</a>
+            </div>
+
+            <c:choose>
+                <c:when test="${empty courses}">
+                    <div class="empty-state-box">
+                        <i class="fas fa-layer-group"></i>
+                        <p>No courses are assigned to your account yet.</p>
+                    </div>
+                </c:when>
+                <c:otherwise>
+                    <div class="ins-course-grid">
+                        <c:forEach var="course" items="${courses}">
+                            <article class="ins-course-card">
+                                <c:if test="${not empty course.courseBanner}">
+                                    <div style="width: 100%; height: 120px; border-radius: 8px; margin-bottom: 12px; overflow: hidden;">
+                                        <img src="${course.courseBanner}" alt="Banner" style="width: 100%; height: 100%; object-fit: cover;">
+                                    </div>
+                                </c:if>
+                                <div class="ins-course-card__top">
+                                    <h4><c:out value="${course.courseName}"/></h4>
+                                    <span class="status-badge status-${fn:toLowerCase(course.status)}"><c:out value="${course.status}"/></span>
+                                </div>
+                                <p class="ins-course-card__meta">
+                                    <c:out value="${empty course.category ? 'General' : course.category}"/> · <c:out value="${course.level}"/>
+                                </p>
+                                <div class="ins-course-card__stats">
+                                    <div>
+                                        <strong><c:out value="${courseEnrollmentCountById[course.courseId]}" default="0"/></strong>
+                                        <span>Students</span>
+                                    </div>
+                                    <div>
+                                        <strong><c:out value="${pendingSubmissionsByCourseId[course.courseId]}" default="0"/></strong>
+                                        <span>Pending</span>
+                                    </div>
+                                </div>
+                                <a href="${pageContext.request.contextPath}/instructor/courses?action=workspace&courseId=${course.courseId}" class="btn btn-primary btn-sm ins-course-card__cta">
+                                    <i class="fas fa-arrow-right"></i> Open Workspace
+                                </a>
+                            </article>
+                        </c:forEach>
+                    </div>
+                </c:otherwise>
+            </c:choose>
         </section>
 
-        <section class="dashboard-grid">
-            <article class="section-card section-card-wide">
-                <div class="section-header section-header-tight">
-                    <div>
-                        <p class="section-eyebrow">My Courses Snapshot</p>
-                        <h3 class="section-title">Course workload at a glance</h3>
-                    </div>
-                    <a class="link-action" href="${pageContext.request.contextPath}/instructor/courses">View all courses</a>
-                </div>
-
-                <c:choose>
-                    <c:when test="${empty courses}">
-                        <div class="empty-state empty-state-hero">
-                            <i class="fas fa-layer-group"></i>
-                            <p>No courses are assigned to your account yet.</p>
-                        </div>
-                    </c:when>
-                    <c:otherwise>
-                        <div class="table-responsive">
-                            <table class="dashboard-table">
-                                <thead>
-                                <tr>
-                                    <th>Course</th>
-                                    <th>Enrolled</th>
-                                    <th>Materials</th>
-                                    <th>Pending Submissions</th>
-                                    <th>Status</th>
-                                    <th></th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <c:forEach var="course" items="${courses}">
-                                    <tr>
-                                        <td data-label="Course">
-                                            <div class="course-name-block">
-                                                <strong><c:out value="${course.courseName}"/></strong>
-                                                <span><c:out value="${course.level}"/> · <c:out value="${course.category}"/></span>
-                                            </div>
-                                        </td>
-                                        <td data-label="Enrolled"><c:out value="${courseEnrollmentCountById[course.courseId]}" default="0"/></td>
-                                        <td data-label="Materials"><c:out value="${courseMaterialCountById[course.courseId]}" default="0"/></td>
-                                        <td data-label="Pending Submissions"><c:out value="${pendingSubmissionsByCourseId[course.courseId]}" default="0"/></td>
-                                        <td data-label="Status">
-                                            <span class="course-status-badge status-${fn:toLowerCase(course.status)}"><c:out value="${course.status}"/></span>
-                                        </td>
-                                        <td data-label="Actions" class="course-open-cell">
-                                            <a class="btn btn-secondary btn-sm" href="${pageContext.request.contextPath}/instructor/courses?action=workspace&courseId=${course.courseId}">Open Workspace</a>
-                                        </td>
-                                    </tr>
-                                </c:forEach>
-                                </tbody>
-                            </table>
-                        </div>
-                    </c:otherwise>
-                </c:choose>
-            </article>
-
-            <aside class="dashboard-side-stack">
-                <section class="section-card">
-                    <div class="section-header section-header-tight">
-                        <div>
-                            <p class="section-eyebrow">Action Center</p>
-                            <h3 class="section-title">Fast follow-up</h3>
-                        </div>
-                    </div>
-                    <div class="action-grid">
-                        <c:choose>
-                            <c:when test="${not empty firstCourseId}">
-                                <a class="action-card" href="${pageContext.request.contextPath}/instructor/courses?action=workspace&amp;courseId=${firstCourseId}#assessments">
-                                    <i class="fas fa-clipboard-list"></i>
-                                    <span>
-                                        <strong>Create Assessment</strong>
-                                        <small>Open the assessment builder</small>
-                                    </span>
-                                </a>
-                                <a class="action-card" href="${pageContext.request.contextPath}/instructor/courses?action=workspace&courseId=${firstCourseId}#materials">
-                                    <i class="fas fa-folder-open"></i>
-                                    <span>
-                                        <strong>Add Material</strong>
-                                        <small>Go to the course workspace</small>
-                                    </span>
-                                </a>
-                                <a class="action-card" href="${pageContext.request.contextPath}/instructor/courses?action=workspace&amp;courseId=${firstCourseId}#assessments">
-                                    <i class="fas fa-clipboard-list"></i>
-                                    <span>
-                                        <strong>Create Assessment</strong>
-                                        <small>Start a draft assessment</small>
-                                    </span>
-                                </a>
-                            </c:when>
-                            <c:otherwise>
-                                <a class="action-card" href="${pageContext.request.contextPath}/instructor/assessments">
-                                    <i class="fas fa-inbox"></i>
-                                    <span>
-                                        <strong>Review Submissions</strong>
-                                        <small>Open the grading queue</small>
-                                    </span>
-                                </a>
-                                <a class="action-card" href="${pageContext.request.contextPath}/instructor/courses">
-                                    <i class="fas fa-folder-open"></i>
-                                    <span>
-                                        <strong>Add Material</strong>
-                                        <small>Select a course first</small>
-                                    </span>
-                                </a>
-                                <a class="action-card" href="${pageContext.request.contextPath}/instructor/assessments">
-                                    <i class="fas fa-clipboard-list"></i>
-                                    <span>
-                                        <strong>Create Assessment</strong>
-                                        <small>Select a course first</small>
-                                    </span>
-                                </a>
-                            </c:otherwise>
-                        </c:choose>
-                        <a class="action-card" href="${pageContext.request.contextPath}/instructor/certificates">
-                            <i class="fas fa-certificate"></i>
-                            <span>
-                                <strong>View Certificates</strong>
-                                <small>Check issued credentials</small>
-                            </span>
-                        </a>
-                    </div>
-                </section>
-
-                <section class="section-card">
-                    <div class="section-header section-header-tight">
-                        <div>
-                            <p class="section-eyebrow">Attention Panel</p>
-                            <h3 class="section-title">Needs your attention</h3>
-                        </div>
-                    </div>
-                    <div class="attention-grid">
-                        <article class="attention-card attention-warn">
-                            <span class="attention-label">Grading</span>
-                            <strong><c:out value="${pendingGradingCount}" default="0"/></strong>
-                            <small>submissions awaiting grading</small>
-                        </article>
-                        <article class="attention-card attention-neutral">
-                            <span class="attention-label">Materials</span>
-                            <strong><c:out value="${missingMaterialsCourseCount}" default="0"/></strong>
-                            <small>course(s) missing materials</small>
-                        </article>
-                        <article class="attention-card attention-good">
-                            <span class="attention-label">Assessments</span>
-                            <strong><c:out value="${dueSoonAssessmentCount}" default="0"/></strong>
-                            <small>due within 7 days</small>
-                        </article>
-                    </div>
-                </section>
-            </aside>
+        <%-- SECTION 3: Pending Actions --%>
+        <section class="ins-section">
+            <div class="ins-section-head">
+                <h3>Pending Actions</h3>
+            </div>
+            <div class="ins-attention-grid">
+                <article class="ins-attention-card ins-attention-warn">
+                    <span class="ins-attention-label">Grading</span>
+                    <strong><c:out value="${pendingGradingCount}" default="0"/></strong>
+                    <small>submissions awaiting grading</small>
+                </article>
+                <article class="ins-attention-card ins-attention-neutral">
+                    <span class="ins-attention-label">Materials</span>
+                    <strong><c:out value="${missingMaterialsCourseCount}" default="0"/></strong>
+                    <small>course(s) missing materials</small>
+                </article>
+                <article class="ins-attention-card ins-attention-good">
+                    <span class="ins-attention-label">Assessments</span>
+                    <strong><c:out value="${dueSoonAssessmentCount}" default="0"/></strong>
+                    <small>due within 7 days</small>
+                </article>
+            </div>
         </section>
     </div>
 </main>
+<script src="${pageContext.request.contextPath}/js/theme-toggle.js"></script>
+<script>
+(function(){
+    var btn = document.getElementById('insMenuBtn');
+    var sidebar = document.getElementById('insSidebar');
+    if(btn && sidebar){
+        btn.addEventListener('click', function(){
+            document.body.classList.toggle('ins-shell-collapsed');
+        });
+    }
+})();
+</script>
 </body>
 </html>
