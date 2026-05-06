@@ -29,6 +29,10 @@ body.instructor-ui {
     line-height: 1.5;
 }
 
+body.instructor-ui.ins-mobile-nav-open {
+    overflow: hidden;
+}
+
 .instructor-ui * {
     box-sizing: border-box;
 }
@@ -802,6 +806,10 @@ body.ins-shell-collapsed .app-main {
     overflow-x: auto;
 }
 
+.ins-shell-overlay {
+    display: none;
+}
+
 .instructor-ui .status-badge {
     display: inline-flex;
     align-items: center;
@@ -834,6 +842,94 @@ body.ins-shell-collapsed .app-main {
     gap: 22px;
 }
 
+/* Dashboard & Course Grid */
+.ins-course-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 24px;
+}
+
+.ins-course-card {
+    border: 1px solid var(--ins-border);
+    border-radius: 16px;
+    background: #ffffff;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    box-shadow: var(--ins-card-shadow, 0 1px 2px rgba(15, 23, 42, 0.04));
+}
+
+.ins-course-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--ins-card-shadow-hover, 0 10px 24px rgba(15, 23, 42, 0.08));
+    border-color: var(--ins-primary-light, #93c5fd);
+}
+
+.ins-course-card__top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.ins-course-card__top h4 {
+    margin: 0;
+    font-size: 1.15rem;
+    color: var(--ins-text);
+    line-height: 1.3;
+    font-weight: 700;
+}
+
+.ins-course-card__meta {
+    margin: 0;
+    color: var(--ins-muted);
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ins-course-card__meta i {
+    font-size: 0.8rem;
+    color: var(--ins-primary);
+}
+
+.ins-course-card__stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    background: #f8fafc;
+    padding: 16px;
+    border-radius: 12px;
+    margin-top: auto;
+}
+
+.ins-course-card__stats div {
+    display: flex;
+    flex-direction: column;
+}
+
+.ins-course-card__stats strong {
+    font-size: 1.25rem;
+    color: var(--ins-text);
+    font-weight: 800;
+}
+
+.ins-course-card__stats span {
+    font-size: 0.75rem;
+    color: var(--ins-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+}
+
+.ins-course-card__cta {
+    margin-top: 8px;
+    justify-content: center;
+}
+
 .ins-stack {
     display: grid;
     gap: 20px;
@@ -856,32 +952,58 @@ body.ins-shell-collapsed .app-main {
 
 @media (max-width: 860px) {
     .instructor-ui .app-header {
-        position: static;
-        height: auto;
+        position: fixed;
+        height: 68px;
         padding: 16px;
-        flex-wrap: wrap;
     }
 
     .instructor-ui .app-sidebar {
-        position: static;
-        width: auto;
-        height: auto;
-        padding: 14px;
-        border-right: none;
-        border-bottom: 1px solid rgba(191, 209, 227, 0.85);
+        position: fixed;
+        top: 68px;
+        left: 0;
+        width: min(320px, 86vw);
+        height: calc(100vh - 68px);
+        padding: 18px 16px 22px;
+        border-right: 1px solid var(--ins-border);
+        border-bottom: none;
+        transform: translateX(-104%);
+        box-shadow: none;
+        transition: transform 0.28s ease, box-shadow 0.28s ease;
+    }
+
+    .instructor-ui .app-sidebar.open,
+    body.instructor-ui.ins-mobile-nav-open .app-sidebar {
+        transform: translateX(0);
+        box-shadow: 0 24px 80px rgba(15, 23, 42, 0.18);
     }
 
     .instructor-ui .sidebar-nav {
-        flex-direction: row;
-        flex-wrap: wrap;
+        flex-direction: column;
+        flex-wrap: nowrap;
     }
 
     .instructor-ui .nav-item {
-        flex: 1 1 200px;
+        flex: 0 0 auto;
     }
 
     .instructor-ui .app-main {
-        margin: 0;
+        margin: 68px 0 0;
+    }
+
+    body.ins-shell-collapsed .app-sidebar {
+        width: min(320px, 86vw);
+        padding: 18px 16px 22px;
+        opacity: 1;
+        border-right: 1px solid var(--ins-border);
+    }
+
+    .ins-shell-overlay.show {
+        display: block;
+        position: fixed;
+        inset: 68px 0 0;
+        z-index: 999;
+        background: rgba(15, 23, 42, 0.34);
+        backdrop-filter: blur(3px);
     }
 
     .instructor-ui .content-wrapper {
@@ -901,8 +1023,7 @@ body.ins-shell-collapsed .app-main {
 @media (max-width: 640px) {
     .instructor-ui .header-left,
     .instructor-ui .header-right {
-        width: 100%;
-        flex-wrap: wrap;
+        min-width: 0;
     }
 
     .instructor-ui .logo-section {
@@ -910,13 +1031,19 @@ body.ins-shell-collapsed .app-main {
     }
 
     .instructor-ui .page-title {
-        border-left: none;
-        padding-left: 0;
+        max-width: 42vw;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     .instructor-ui .user-menu {
-        width: 100%;
-        justify-content: space-between;
+        padding: 7px;
+    }
+
+    .instructor-ui .user-info,
+    .instructor-ui .theme-toggle .theme-toggle-label {
+        display: none;
     }
 
     .instructor-ui .btn,
@@ -928,4 +1055,138 @@ body.ins-shell-collapsed .app-main {
     .ins-hero-metrics {
         grid-template-columns: 1fr;
     }
+}
+/* 
+=============================================
+   INSTRUCTOR UX JS STYLES (Toasts, Modals)
+============================================= 
+*/
+
+/* Toasts */
+.ins-toast-container {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    pointer-events: none;
+}
+
+.ins-toast {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #ffffff;
+    padding: 16px 20px;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(15, 23, 42, 0.12), 0 1px 3px rgba(15, 23, 42, 0.05);
+    border-left: 4px solid var(--ins-primary);
+    transform: translateX(120%) scale(0.9);
+    opacity: 0;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+    pointer-events: auto;
+    min-width: 300px;
+    max-width: 400px;
+}
+
+.ins-toast.show {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+}
+
+.ins-toast-icon {
+    font-size: 1.25rem;
+}
+
+.ins-toast-success { border-left-color: #10b981; }
+.ins-toast-success .ins-toast-icon { color: #10b981; }
+
+.ins-toast-error { border-left-color: #ef4444; }
+.ins-toast-error .ins-toast-icon { color: #ef4444; }
+
+.ins-toast-warning { border-left-color: #f59e0b; }
+.ins-toast-warning .ins-toast-icon { color: #f59e0b; }
+
+.ins-toast-msg {
+    flex: 1;
+    color: var(--ins-text);
+    font-size: 0.9375rem;
+    font-weight: 500;
+}
+
+.ins-toast-close {
+    background: transparent;
+    border: none;
+    color: var(--ins-muted);
+    font-size: 1.25rem;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+    opacity: 0.7;
+}
+
+.ins-toast-close:hover {
+    opacity: 1;
+    color: var(--ins-text);
+}
+
+/* Modals / Dialog */
+.ins-dialog {
+    padding: 0;
+    border: none;
+    border-radius: 20px;
+    background: #ffffff;
+    box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25);
+    max-width: 480px;
+    width: 90%;
+    margin: auto;
+    opacity: 0;
+    transform: scale(0.95) translateY(20px);
+    transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.ins-dialog[open] {
+    display: block;
+}
+
+.ins-dialog.show {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+}
+
+.ins-dialog::backdrop {
+    background: rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(4px);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.ins-dialog.show::backdrop {
+    opacity: 1;
+}
+
+.ins-dialog-content {
+    padding: 32px;
+}
+
+.ins-dialog-title {
+    font-size: 1.25rem;
+    color: var(--ins-text);
+    margin: 0 0 12px 0;
+    font-weight: 700;
+}
+
+.ins-dialog-msg {
+    color: var(--ins-text-light);
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    margin: 0 0 24px 0;
+}
+
+.ins-dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
 }

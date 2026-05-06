@@ -36,6 +36,9 @@
             </div>
             <div class="ins-hero-actions">
                 <c:if test="${not empty selectedCourse}">
+                    <a href="${pageContext.request.contextPath}/instructor/assessments?view=archive&courseId=${selectedCourse.courseId}" class="btn btn-secondary">
+                        <i class="fas fa-box-archive"></i> Archive
+                    </a>
                     <a href="${pageContext.request.contextPath}/instructor/assessments?view=editor&courseId=${selectedCourse.courseId}" class="btn btn-primary">
                         <i class="fas fa-plus-circle"></i> Add Assessment
                     </a>
@@ -80,6 +83,59 @@
                     <h3>Get Started</h3>
                 </div>
             </c:when>
+                    <c:when test="${activeView == 'archive'}">
+                        <div class="ia-archive-header">
+                            <h3>Archived Assessments</h3>
+                            <c:if test="${not empty archivedAssessments}">
+                                <form method="post" action="${pageContext.request.contextPath}/instructor/assessments" style="display:inline;">
+                                    <input type="hidden" name="action" value="bulkRestoreAssessments">
+                                    <input type="hidden" name="courseId" value="${selectedCourse.courseId}">
+                                    <c:forEach var="aa" items="${archivedAssessments}">
+                                        <input type="hidden" name="assessmentIds" value="${aa.assessmentId}">
+                                    </c:forEach>
+                                    <button type="submit" class="btn btn-secondary btn-sm" onclick="return confirm('Restore all archived assessments?');">
+                                        <i class="fas fa-trash-arrow-up"></i> Restore All
+                                    </button>
+                                </form>
+                            </c:if>
+                        </div>
+                        <c:choose>
+                            <c:when test="${empty archivedAssessments}">
+                                <div class="ia-empty-state">
+                                    <div class="ia-empty-icon"><i class="fas fa-box-open"></i></div>
+                                    <h3>Archive is Empty</h3>
+                                    <p>No archived assessments found for this course.</p>
+                                    <a href="${pageContext.request.contextPath}/instructor/assessments?courseId=${selectedCourse.courseId}" class="btn btn-primary">
+                                        <i class="fas fa-arrow-left"></i> Back to Assessments
+                                    </a>
+                                </div>
+                            </c:when>
+                            <c:otherwise>
+                                <div class="ia-assessment-grid">
+                                    <c:forEach var="a" items="${archivedAssessments}">
+                                        <article class="ia-assessment-card type-${fn:toLowerCase(a.type)}">
+                                            <div class="ia-card-header">
+                                                <div class="ia-card-title-area">
+                                                    <h3>${a.title}</h3>
+                                                    <div class="ia-card-subtitle">Archived</div>
+                                                </div>
+                                            </div>
+                                            <div class="ia-card-footer">
+                                                <form method="get" action="${pageContext.request.contextPath}/instructor/assessments">
+                                                    <input type="hidden" name="action" value="restoreAssessment">
+                                                    <input type="hidden" name="courseId" value="${selectedCourse.courseId}">
+                                                    <input type="hidden" name="id" value="${a.assessmentId}">
+                                                    <button type="submit" class="btn btn-primary btn-sm">
+                                                        <i class="fas fa-trash-arrow-up"></i> Restore
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </article>
+                                    </c:forEach>
+                                </div>
+                            </c:otherwise>
+                        </c:choose>
+                    </c:when>
                     <c:when test="${empty assessments}">
                         <div class="ia-empty-state">
                             <div class="ia-empty-icon"><i class="fas fa-clipboard-list"></i></div>
@@ -160,15 +216,5 @@
 
 
 
-<script>
-    document.addEventListener("DOMContentLoaded", () => {
-        const toggleBtn = document.getElementById("instructorMenuToggle");
-        if (toggleBtn) {
-            toggleBtn.addEventListener("click", () => {
-                document.body.classList.toggle("ins-shell-collapsed");
-            });
-        }
-    });
-</script>
 </body>
 </html>

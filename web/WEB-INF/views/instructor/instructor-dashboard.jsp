@@ -31,13 +31,48 @@
         <c:set var="missingMaterialsCourseCount" value="${not empty missingMaterialsCourseCount ? missingMaterialsCourseCount : 0}" />
         <c:set var="dueSoonAssessmentCount" value="${not empty dueSoonAssessmentCount ? dueSoonAssessmentCount : 0}" />
 
-        <%-- SECTION 1: Welcome --%>
-        <section class="ins-welcome">
-            <h2>Welcome back, <c:out value="${not empty instructorName ? instructorName : user.fullName}"/> 👋</h2>
-            <p>Manage your courses, grading, and student activity.</p>
+        <%-- SECTION 1: Premium Hero --%>
+        <section class="ins-hero-section">
+            <div class="ins-hero-content">
+                <h2>Welcome back, <c:out value="${not empty instructorName ? instructorName : user.fullName}"/> 👋</h2>
+                <p>Here’s what’s happening in your courses today. Manage your materials, grade pending submissions, and track student activity from your central hub.</p>
+            </div>
         </section>
 
-        <%-- SECTION 2: Course Cards --%>
+        <%-- SECTION 2: Pending Actions / KPI Grid --%>
+        <section class="ins-section">
+            <div class="ins-section-head">
+                <h3>At a Glance</h3>
+            </div>
+            <div class="ins-attention-grid">
+                <article class="ins-attention-card ins-attention-warn">
+                    <div class="ins-attention-icon"><i class="fas fa-list-check"></i></div>
+                    <div class="ins-attention-content">
+                        <span class="ins-attention-label">Action Required</span>
+                        <strong><c:out value="${pendingGradingCount}" default="0"/></strong>
+                        <small>Submissions awaiting grading</small>
+                    </div>
+                </article>
+                <article class="ins-attention-card ins-attention-neutral">
+                    <div class="ins-attention-icon"><i class="fas fa-folder-open"></i></div>
+                    <div class="ins-attention-content">
+                        <span class="ins-attention-label">Course Health</span>
+                        <strong><c:out value="${missingMaterialsCourseCount}" default="0"/></strong>
+                        <small>Course(s) missing materials</small>
+                    </div>
+                </article>
+                <article class="ins-attention-card ins-attention-good">
+                    <div class="ins-attention-icon"><i class="fas fa-calendar-check"></i></div>
+                    <div class="ins-attention-content">
+                        <span class="ins-attention-label">Upcoming</span>
+                        <strong><c:out value="${dueSoonAssessmentCount}" default="0"/></strong>
+                        <small>Assessments due within 7 days</small>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <%-- SECTION 3: Course Cards --%>
         <section class="ins-section">
             <div class="ins-section-head">
                 <h3>My Courses</h3>
@@ -56,7 +91,7 @@
                         <c:forEach var="course" items="${courses}">
                             <article class="ins-course-card">
                                 <c:if test="${not empty course.courseBanner}">
-                                    <div style="width: 100%; height: 120px; border-radius: 8px; margin-bottom: 12px; overflow: hidden;">
+                                    <div style="width: 100%; height: 140px; border-radius: 12px; margin-bottom: 4px; overflow: hidden;">
                                         <img src="${course.courseBanner}" alt="Banner" style="width: 100%; height: 100%; object-fit: cover;">
                                     </div>
                                 </c:if>
@@ -65,7 +100,7 @@
                                     <span class="status-badge status-${fn:toLowerCase(course.status)}"><c:out value="${course.status}"/></span>
                                 </div>
                                 <p class="ins-course-card__meta">
-                                    <c:out value="${empty course.category ? 'General' : course.category}"/> · <c:out value="${course.level}"/>
+                                    <i class="fas fa-tag"></i> <c:out value="${empty course.category ? 'General' : course.category}"/> &nbsp;&bull;&nbsp; <c:out value="${course.level}"/>
                                 </p>
                                 <div class="ins-course-card__stats">
                                     <div>
@@ -77,8 +112,8 @@
                                         <span>Pending</span>
                                     </div>
                                 </div>
-                                <a href="${pageContext.request.contextPath}/instructor/courses?action=workspace&courseId=${course.courseId}" class="btn btn-primary btn-sm ins-course-card__cta">
-                                    <i class="fas fa-arrow-right"></i> Open Workspace
+                                <a href="${pageContext.request.contextPath}/instructor/courses?action=workspace&courseId=${course.courseId}" class="btn btn-primary ins-course-card__cta">
+                                    Open Workspace <i class="fas fa-arrow-right" style="margin-left: 8px;"></i>
                                 </a>
                             </article>
                         </c:forEach>
@@ -86,43 +121,7 @@
                 </c:otherwise>
             </c:choose>
         </section>
-
-        <%-- SECTION 3: Pending Actions --%>
-        <section class="ins-section">
-            <div class="ins-section-head">
-                <h3>Pending Actions</h3>
-            </div>
-            <div class="ins-attention-grid">
-                <article class="ins-attention-card ins-attention-warn">
-                    <span class="ins-attention-label">Grading</span>
-                    <strong><c:out value="${pendingGradingCount}" default="0"/></strong>
-                    <small>submissions awaiting grading</small>
-                </article>
-                <article class="ins-attention-card ins-attention-neutral">
-                    <span class="ins-attention-label">Materials</span>
-                    <strong><c:out value="${missingMaterialsCourseCount}" default="0"/></strong>
-                    <small>course(s) missing materials</small>
-                </article>
-                <article class="ins-attention-card ins-attention-good">
-                    <span class="ins-attention-label">Assessments</span>
-                    <strong><c:out value="${dueSoonAssessmentCount}" default="0"/></strong>
-                    <small>due within 7 days</small>
-                </article>
-            </div>
-        </section>
     </div>
 </main>
-<script src="${pageContext.request.contextPath}/js/theme-toggle.js"></script>
-<script>
-(function(){
-    var btn = document.getElementById('insMenuBtn');
-    var sidebar = document.getElementById('insSidebar');
-    if(btn && sidebar){
-        btn.addEventListener('click', function(){
-            document.body.classList.toggle('ins-shell-collapsed');
-        });
-    }
-})();
-</script>
 </body>
 </html>

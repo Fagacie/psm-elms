@@ -103,7 +103,7 @@
                 </div>
                 <div class="me-search-wrap">
                     <label for="meCourseSearch" class="me-sr-only">Search courses</label>
-                    <input id="meCourseSearch" type="text" placeholder="Search by course or instructor..." autocomplete="off">
+                    <input id="meCourseSearch" type="text" placeholder="Search by course or instructor..." autocomplete="off" data-search-target="#meGrid" data-search-item=".me-card">
                 </div>
             </div>
 
@@ -122,6 +122,7 @@
                                 <c:set var="lifecycleStatus" value="${not empty enrollment.completionStatus ? enrollment.completionStatus : (enrollment.status == 'Completed' ? 'Completed' : (enrollment.status == 'Active' || enrollment.status == 'Enrolled' ? 'In Progress' : 'Not Started'))}"/>
                                 <c:set var="progress" value="${not empty enrollment.progress ? enrollment.progress : (lifecycleStatus == 'Completed' ? 100 : (lifecycleStatus == 'In Progress' ? 65 : 0))}"/>
                                 <c:set var="enrollmentPaid" value="${enrollment.paymentStatus == 'Paid' || enrollment.paymentStatus == 'Completed' || enrollment.paymentStatus == 'COMPLETED' || enrollment.paymentStatus == 'Success' || enrollment.paymentStatus == 'SUCCESS'}"/>
+                                <c:set var="courseAccessGranted" value="${enrollmentPaid || enrollment.coursePrice == null || enrollment.coursePrice <= 0}"/>
                                 <article class="sv-course-card me-card" data-status="${lifecycleStatus == 'Completed' ? 'done' : (lifecycleStatus == 'In Progress' ? 'live' : 'hold')}" data-course="${enrollment.courseName}" data-instructor="${enrollment.instructorName}">
                                     <div class="sv-course-media">
                                         <c:choose>
@@ -144,11 +145,11 @@
                                     </div>
                                     <div class="me-card-top">
                                         <span class="sv-chip ${lifecycleStatus == 'Completed' ? 'done' : 'status-Pending'}">${lifecycleStatus}</span>
-                                        <span class="sv-chip ${enrollmentPaid ? 'done' : 'status-Pending'}">${empty enrollment.paymentStatus ? 'Pending' : enrollment.paymentStatus}</span>
+                                        <span class="sv-chip ${courseAccessGranted ? 'done' : 'status-Pending'}">${courseAccessGranted && !enrollmentPaid ? 'Free Course' : (empty enrollment.paymentStatus ? 'Pending' : enrollment.paymentStatus)}</span>
                                     </div>
                                     <div class="sv-course-copy">
-                                        <h3 class="sv-course-title">${enrollment.courseName}</h3>
-                                        <p class="sv-course-line">Instructor: ${enrollment.instructorName}</p>
+                                        <h3 class="sv-course-title" data-search-text>${enrollment.courseName}</h3>
+                                        <p class="sv-course-line" data-search-text>Instructor: ${enrollment.instructorName}</p>
                                     </div>
 
                                     <div class="sv-course-progress-block">
@@ -164,7 +165,7 @@
                                             <span>${progress}% complete</span>
                                             <span>#${enrollment.enrollmentId}</span>
                                         </div>
-                                        <a class="sv-btn primary me-continue-link" href="${enrollmentPaid ? pageContext.request.contextPath.concat('/student/enrollment-details?id=').concat(enrollment.enrollmentId) : pageContext.request.contextPath.concat('/student/payment?enrollmentId=').concat(enrollment.enrollmentId).concat('&error=required')}">${enrollmentPaid ? 'Continue' : 'Pay Now'}</a>
+                                        <a class="sv-btn primary me-continue-link" href="${courseAccessGranted ? pageContext.request.contextPath.concat('/student/enrollment-details?id=').concat(enrollment.enrollmentId) : pageContext.request.contextPath.concat('/student/payment?enrollmentId=').concat(enrollment.enrollmentId).concat('&error=required')}">${courseAccessGranted ? 'Continue' : 'Pay Now'}</a>
                                     </div>
                                 </article>
                             </c:forEach>

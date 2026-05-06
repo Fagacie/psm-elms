@@ -101,11 +101,11 @@ public class InstructorMaterialServlet extends HttpServlet {
                 response.sendRedirect(request.getContextPath() + "/instructor/courses?action=workspace&courseId=" + courseId + "#materials");
                 return;
             } catch (NumberFormatException e) {
-                request.setAttribute("errorMessage", "Invalid course ID.");
+                // Ignore and fall through to redirect
             }
         }
 
-        request.getRequestDispatcher("/WEB-INF/views/instructor/course-materials.jsp").forward(request, response);
+        response.sendRedirect(request.getContextPath() + "/instructor/courses");
     }
 
     private void createMaterial(HttpServletRequest request, HttpServletResponse response, Integer userId)

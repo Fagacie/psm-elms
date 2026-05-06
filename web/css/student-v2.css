@@ -1171,3 +1171,136 @@ textarea:focus-visible {
     height: 136px;
   }
 }
+
+/* =============================================
+   STUDENT UX JS STYLES (Toasts, Modals)
+============================================= */
+
+/* Toasts */
+.sv-toast-container {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    pointer-events: none;
+}
+
+.sv-toast {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #ffffff;
+    padding: 16px 20px;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(16, 38, 26, 0.12), 0 1px 3px rgba(16, 38, 26, 0.05);
+    border-left: 4px solid var(--sv-accent);
+    transform: translateX(120%) scale(0.9);
+    opacity: 0;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+    pointer-events: auto;
+    min-width: 300px;
+    max-width: 400px;
+}
+
+.sv-toast.show {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+}
+
+.sv-toast-icon {
+    font-size: 1.25rem;
+}
+
+.sv-toast-success { border-left-color: #10b981; }
+.sv-toast-success .sv-toast-icon { color: #10b981; }
+
+.sv-toast-error { border-left-color: #ef4444; }
+.sv-toast-error .sv-toast-icon { color: #ef4444; }
+
+.sv-toast-warning { border-left-color: #f59e0b; }
+.sv-toast-warning .sv-toast-icon { color: #f59e0b; }
+
+.sv-toast-msg {
+    flex: 1;
+    color: var(--sv-text);
+    font-size: 0.9375rem;
+    font-weight: 500;
+}
+
+.sv-toast-close {
+    background: transparent;
+    border: none;
+    color: var(--sv-muted);
+    font-size: 1.25rem;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+    opacity: 0.7;
+}
+
+.sv-toast-close:hover {
+    opacity: 1;
+    color: var(--sv-text);
+}
+
+/* Modals / Dialog */
+.sv-dialog {
+    padding: 0;
+    border: none;
+    border-radius: 20px;
+    background: #ffffff;
+    box-shadow: 0 25px 50px -12px rgba(16, 38, 26, 0.25);
+    max-width: 480px;
+    width: 90%;
+    margin: auto;
+    opacity: 0;
+    transform: scale(0.95) translateY(20px);
+    transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.sv-dialog[open] {
+    display: block;
+}
+
+.sv-dialog.show {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+}
+
+.sv-dialog::backdrop {
+    background: rgba(16, 38, 26, 0.4);
+    backdrop-filter: blur(4px);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.sv-dialog.show::backdrop {
+    opacity: 1;
+}
+
+.sv-dialog-content {
+    padding: 32px;
+}
+
+.sv-dialog-title {
+    font-size: 1.25rem;
+    color: var(--sv-heading);
+    margin: 0 0 12px 0;
+    font-weight: 700;
+}
+
+.sv-dialog-msg {
+    color: var(--sv-muted);
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    margin: 0 0 24px 0;
+}
+
+.sv-dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}

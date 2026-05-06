@@ -42,6 +42,9 @@ public class Assessment {
     @Size(max = 5000, message = "Instructions must not exceed 5000 characters")
     private String instructions;
 
+    @Pattern(regexp = "^(Draft|Ready|Published|Closed|Archived)$", message = "Status must be Draft, Ready, Published, Closed, or Archived")
+    private String status;
+
     @Pattern(regexp = "^(final|afterMaterial)$", message = "Placement type must be final or afterMaterial")
     private String placementType;
 
@@ -60,6 +63,13 @@ public class Assessment {
     public static final String TYPE_QUIZ = "Quiz";
     public static final String TYPE_EXAM = "Exam";
     public static final String TYPE_ASSIGNMENT = "Assignment";
+
+    // Status constants
+    public static final String STATUS_DRAFT = "Draft";
+    public static final String STATUS_READY = "Ready";
+    public static final String STATUS_PUBLISHED = "Published";
+    public static final String STATUS_CLOSED = "Closed";
+    public static final String STATUS_ARCHIVED = "Archived";
     
     // Constructors
     public Assessment() {}
@@ -67,7 +77,7 @@ public class Assessment {
     public Assessment(Integer assessmentId, Integer courseId, String title, String type,
                      String gradingMode,
                      String submissionMode,
-                     Integer duration, Integer totalMarks, String instructions, Integer maxAttempts,
+                     Integer duration, Integer totalMarks, String instructions, String status, Integer maxAttempts,
                      LocalDateTime createdAt, Integer createdBy) {
         this.assessmentId = assessmentId;
         this.courseId = courseId;
@@ -78,6 +88,7 @@ public class Assessment {
         this.duration = duration;
         this.totalMarks = totalMarks;
         this.instructions = instructions;
+        this.status = status;
         this.maxAttempts = maxAttempts;
         this.createdAt = createdAt;
         this.createdBy = createdBy;
@@ -110,6 +121,9 @@ public class Assessment {
     
     public String getInstructions() { return instructions; }
     public void setInstructions(String instructions) { this.instructions = instructions; }
+
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 
     public String getPlacementType() { return placementType; }
     public void setPlacementType(String placementType) { this.placementType = placementType; }

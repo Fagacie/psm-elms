@@ -26,6 +26,7 @@ import com.psm.elearning.model.Enrollment;
 import com.psm.elearning.model.Material;
 import com.psm.elearning.service.AppSettingsService;
 import com.psm.elearning.service.EnrollmentStateSyncService;
+import com.psm.elearning.service.AssessmentAnalyticsService;
 import com.psm.elearning.util.AssessmentPlacementUtil;
 import com.psm.elearning.util.CloudinaryUtil;
 import com.psm.elearning.util.SessionUtil;
@@ -71,6 +72,7 @@ public class InstructorAssessmentServlet extends HttpServlet {
     private final MaterialDAO materialDAO = new MaterialDAOImpl();
     private final EnrollmentDAO enrollmentDAO = new EnrollmentDAOImpl();
     private final EnrollmentStateSyncService enrollmentStateSyncService = new EnrollmentStateSyncService();
+    private final AssessmentAnalyticsService analyticsService = new AssessmentAnalyticsService(assessmentDAO, submissionDAO, questionDAO, enrollmentDAO);
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -83,6 +85,9 @@ public class InstructorAssessmentServlet extends HttpServlet {
         }
 
         Integer userId = SessionUtil.resolveUserId(session);
+        
+        resolveRouteContext(request);
+        
         String action = normalize(request.getParameter("action"));
 
         if ("exportSubmissionsCsv".equals(action)) {
@@ -120,6 +125,9 @@ public class InstructorAssessmentServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
+        
+        resolveRouteContext(request);
+        
         String action = normalize(request.getParameter("action"));
 
         if ("createAssessment".equals(action)) {
@@ -174,9 +182,21 @@ public class InstructorAssessmentServlet extends HttpServlet {
             throws ServletException, IOException {
 
         Integer selectedCourseId = parseInt(request.getParameter("courseId"));
+        if (selectedCourseId == null && request.getAttribute("pathCourseId") != null) {
+            selectedCourseId = parseInt((String) request.getAttribute("pathCourseId"));
+        }
         Integer selectedAssessmentId = parseInt(request.getParameter("assessmentId"));
+        if (selectedAssessmentId == null && request.getAttribute("pathAssessmentId") != null) {
+            selectedAssessmentId = parseInt((String) request.getAttribute("pathAssessmentId"));
+        }
         Integer selectedSubmissionId = parseInt(request.getParameter("submissionId"));
-        String activeView = normalizeView(request.getParameter("view"));
+        
+        String viewParam = request.getParameter("view");
+        if (viewParam == null && request.getAttribute("pathView") != null) {
+            viewParam = (String) request.getAttribute("pathView");
+        }
+        String activeView = normalizeView(viewParam);
+        
         String gradeFilter = normalize(request.getParameter("gradeFilter"));
         if (gradeFilter.isEmpty()) gradeFilter = "all";
 
@@ -220,51 +240,17 @@ public class InstructorAssessmentServlet extends HttpServlet {
             courseEnrollments = enrollmentDAO.getEnrollmentsByCourse(selectedCourseId);
             if (courseEnrollments == null) courseEnrollments = new ArrayList<>();
 
-            for (Assessment assessment : assessments) {
-                Integer assessmentId = assessment.getAssessmentId();
-                List<AssessmentQuestion> assessmentQuestions = questionDAO.findByAssessment(assessmentId);
-                int questionCount = assessmentQuestions == null ? 0 : assessmentQuestions.size();
-                List<AssessmentSubmission> allSubmissions = submissionDAO.findByAssessment(assessmentId);
-                if (allSubmissions == null) {
-                    allSubmissions = new ArrayList<>();
-                }
-                int submissionCount = allSubmissions.size();
-                int gradedCount = 0;
-                int pendingCount = 0;
-                double earned = 0.0;
-                int scoredCount = 0;
-
-                for (AssessmentSubmission submission : allSubmissions) {
-                    if (submission == null) {
-                        continue;
-                    }
-                    if (submission.getScore() != null) {
-                        gradedCount++;
-                        earned += submission.getScore();
-                        scoredCount++;
-                    } else {
-                        pendingCount++;
-                    }
-                }
-
-                submissionCountByAssessmentId.put(assessmentId, submissionCount);
-                questionCountByAssessmentId.put(assessmentId, questionCount);
-                gradedCountByAssessmentId.put(assessmentId, gradedCount);
-                pendingCountByAssessmentId.put(assessmentId, pendingCount);
-                averageScoreByAssessmentId.put(assessmentId, scoredCount > 0 ? earned / scoredCount : null);
-                String workflowStatus = resolveAssessmentWorkflowStatus(assessment, questionCount, submissionCount, pendingCount);
-                statusByAssessmentId.put(assessmentId, workflowStatus);
-                if ("Draft".equalsIgnoreCase(workflowStatus)) {
-                    draftAssessmentCount++;
-                } else if ("Active".equalsIgnoreCase(workflowStatus) || "Published".equalsIgnoreCase(workflowStatus)) {
-                    activeAssessmentCount++;
-                } else {
-                    closedAssessmentCount++;
-                }
-                if (pendingCount > 0) {
-                    pendingGradingAssessmentCount++;
-                }
-            }
+            AssessmentAnalyticsService.CourseAssessmentMetrics metrics = analyticsService.calculateMetricsForCourseAssessments(assessments);
+            submissionCountByAssessmentId = metrics.submissionCountByAssessmentId;
+            questionCountByAssessmentId = metrics.questionCountByAssessmentId;
+            gradedCountByAssessmentId = metrics.gradedCountByAssessmentId;
+            pendingCountByAssessmentId = metrics.pendingCountByAssessmentId;
+            averageScoreByAssessmentId = metrics.averageScoreByAssessmentId;
+            statusByAssessmentId = metrics.statusByAssessmentId;
+            draftAssessmentCount = metrics.draftAssessmentCount;
+            activeAssessmentCount = metrics.activeAssessmentCount;
+            closedAssessmentCount = metrics.closedAssessmentCount;
+            pendingGradingAssessmentCount = metrics.pendingGradingAssessmentCount;
         }
 
         Map<Integer, String> placementTypeByAssessmentId = new LinkedHashMap<>();
@@ -286,8 +272,18 @@ public class InstructorAssessmentServlet extends HttpServlet {
         Map<Integer, String> submissionWorkflowStatus = new LinkedHashMap<>();
         List<Map<String, Object>> assessmentRosterRows = new ArrayList<>();
         Map<String, Object> analytics = new LinkedHashMap<>();
-        if (selectedAssessmentId != null) {
-            selectedAssessment = assessmentDAO.findById(selectedAssessmentId);
+        if (selectedAssessmentId != null || (selectedCourseId != null && !assessments.isEmpty()
+                && (VIEW_SUBMISSIONS.equals(activeView) || VIEW_GRADE.equals(activeView)
+                || "pending-grading".equals(activeView) || VIEW_ANALYTICS.equals(activeView)
+                || VIEW_QUESTIONS.equals(activeView)))) {
+            
+            if (selectedAssessmentId == null) {
+                selectedAssessment = assessments.get(0);
+                selectedAssessmentId = selectedAssessment.getAssessmentId();
+            } else {
+                selectedAssessment = assessmentDAO.findById(selectedAssessmentId);
+            }
+            
             if (selectedAssessment == null || selectedCourseId == null || !selectedAssessment.getCourseId().equals(selectedCourseId)) {
                 request.setAttribute("errorMessage", "Invalid assessment selected.");
                 selectedAssessment = null;
@@ -296,6 +292,7 @@ public class InstructorAssessmentServlet extends HttpServlet {
                 selectedAssessment.setInstructions(AssessmentPlacementUtil.stripPlacement(selectedAssessment.getInstructions()));
                 placementTypeByAssessmentId.putIfAbsent(selectedAssessment.getAssessmentId(), placement.type);
                 placementMaterialByAssessmentId.putIfAbsent(selectedAssessment.getAssessmentId(), placement.materialId);
+                
                 questions = questionDAO.findByAssessment(selectedAssessmentId);
                 if (questions == null) questions = new ArrayList<>();
                 retakeRequests = retakeRequestDAO.findByAssessment(selectedAssessmentId);
@@ -304,45 +301,18 @@ public class InstructorAssessmentServlet extends HttpServlet {
                 if (submissionsUnfiltered == null) submissionsUnfiltered = new ArrayList<>();
                 submissions = filterSubmissions(submissionsUnfiltered, gradeFilter);
 
-                for (AssessmentSubmission submission : submissionsUnfiltered) {
-                    if (submission == null || submission.getSubmissionId() == null) {
-                        continue;
-                    }
-                    submissionWorkflowStatus.put(submission.getSubmissionId(), resolveSubmissionWorkflowStatus(submission, selectedAssessment));
-                }
-
-                int totalCount = submissionsUnfiltered.size();
-                int gradedCount = 0;
-                int pendingCount = 0;
-                double scoreTotal = 0.0;
-                int scoredCount = 0;
-                Double topScore = null;
-                Double lowScore = null;
-                for (AssessmentSubmission submission : submissionsUnfiltered) {
-                    if (submission == null) {
-                        continue;
-                    }
-                    if (submission.getScore() != null) {
-                        gradedCount++;
-                        scoreTotal += submission.getScore();
-                        scoredCount++;
-                        if (topScore == null || submission.getScore() > topScore) {
-                            topScore = submission.getScore();
-                        }
-                        if (lowScore == null || submission.getScore() < lowScore) {
-                            lowScore = submission.getScore();
-                        }
-                    } else {
-                        pendingCount++;
-                    }
-                }
-                analytics.put("totalSubmissions", totalCount);
-                analytics.put("gradedSubmissions", gradedCount);
-                analytics.put("pendingSubmissions", pendingCount);
-                analytics.put("averageScore", scoredCount > 0 ? scoreTotal / scoredCount : null);
-                analytics.put("topScore", topScore);
-                analytics.put("lowScore", lowScore);
-                analytics.put("completionRate", totalCount > 0 ? (gradedCount * 100.0) / totalCount : 0.0);
+                AssessmentAnalyticsService.AssessmentDetailedAnalytics detailedAnalytics = analyticsService.calculateDetailedAnalytics(selectedAssessment, submissionsUnfiltered, courseEnrollments);
+                
+                submissionWorkflowStatus = detailedAnalytics.submissionWorkflowStatus;
+                assessmentRosterRows = detailedAnalytics.rosterRows;
+                
+                analytics.put("totalSubmissions", detailedAnalytics.totalSubmissions);
+                analytics.put("gradedSubmissions", detailedAnalytics.gradedSubmissions);
+                analytics.put("pendingSubmissions", detailedAnalytics.pendingSubmissions);
+                analytics.put("averageScore", detailedAnalytics.averageScore);
+                analytics.put("topScore", detailedAnalytics.topScore);
+                analytics.put("lowScore", detailedAnalytics.lowScore);
+                analytics.put("completionRate", detailedAnalytics.completionRate);
 
                 if (!submissions.isEmpty()) {
                     if (selectedSubmissionId == null) {
@@ -364,115 +334,6 @@ public class InstructorAssessmentServlet extends HttpServlet {
                         }
                     }
                 }
-            }
-        }
-
-        if (selectedAssessment == null && selectedCourseId != null && !assessments.isEmpty()
-                && (VIEW_SUBMISSIONS.equals(activeView) || VIEW_GRADE.equals(activeView)
-                || "pending-grading".equals(activeView) || VIEW_ANALYTICS.equals(activeView)
-                || VIEW_QUESTIONS.equals(activeView))) {
-            selectedAssessment = assessments.get(0);
-            selectedAssessmentId = selectedAssessment.getAssessmentId();
-            AssessmentPlacementUtil.Placement placement = resolvePlacement(selectedAssessment);
-            selectedAssessment.setInstructions(AssessmentPlacementUtil.stripPlacement(selectedAssessment.getInstructions()));
-            placementTypeByAssessmentId.putIfAbsent(selectedAssessment.getAssessmentId(), placement.type);
-            placementMaterialByAssessmentId.putIfAbsent(selectedAssessment.getAssessmentId(), placement.materialId);
-            questions = questionDAO.findByAssessment(selectedAssessmentId);
-            if (questions == null) questions = new ArrayList<>();
-            retakeRequests = retakeRequestDAO.findByAssessment(selectedAssessmentId);
-            if (retakeRequests == null) retakeRequests = new ArrayList<>();
-            submissionsUnfiltered = submissionDAO.findByAssessment(selectedAssessmentId);
-            if (submissionsUnfiltered == null) submissionsUnfiltered = new ArrayList<>();
-            submissions = filterSubmissions(submissionsUnfiltered, gradeFilter);
-            for (AssessmentSubmission submission : submissionsUnfiltered) {
-                if (submission == null || submission.getSubmissionId() == null) {
-                    continue;
-                }
-                submissionWorkflowStatus.put(submission.getSubmissionId(), resolveSubmissionWorkflowStatus(submission, selectedAssessment));
-            }
-            int totalCount = submissionsUnfiltered.size();
-            int gradedCount = 0;
-            int pendingCount = 0;
-            double scoreTotal = 0.0;
-            int scoredCount = 0;
-            Double topScore = null;
-            Double lowScore = null;
-            for (AssessmentSubmission submission : submissionsUnfiltered) {
-                if (submission == null) {
-                    continue;
-                }
-                if (submission.getScore() != null) {
-                    gradedCount++;
-                    scoreTotal += submission.getScore();
-                    scoredCount++;
-                    if (topScore == null || submission.getScore() > topScore) {
-                        topScore = submission.getScore();
-                    }
-                    if (lowScore == null || submission.getScore() < lowScore) {
-                        lowScore = submission.getScore();
-                    }
-                } else {
-                    pendingCount++;
-                }
-            }
-            analytics.put("totalSubmissions", totalCount);
-            analytics.put("gradedSubmissions", gradedCount);
-            analytics.put("pendingSubmissions", pendingCount);
-            analytics.put("averageScore", scoredCount > 0 ? scoreTotal / scoredCount : null);
-            analytics.put("topScore", topScore);
-            analytics.put("lowScore", lowScore);
-            analytics.put("completionRate", totalCount > 0 ? (gradedCount * 100.0) / totalCount : 0.0);
-            if (!submissions.isEmpty()) {
-                if (selectedSubmissionId == null) {
-                    selectedSubmissionId = submissions.get(0).getSubmissionId();
-                }
-                for (AssessmentSubmission submission : submissions) {
-                    if (submission != null && submission.getSubmissionId() != null && submission.getSubmissionId().equals(selectedSubmissionId)) {
-                        selectedSubmission = submission;
-                        break;
-                    }
-                }
-                if (selectedSubmission == null && selectedSubmissionId != null) {
-                    selectedSubmission = submissionDAO.findById(selectedSubmissionId);
-                }
-                if (selectedSubmission != null && selectedSubmission.getSubmissionId() != null) {
-                    selectedSubmissionAudits = gradeAuditDAO.findBySubmission(selectedSubmission.getSubmissionId());
-                    if (selectedSubmissionAudits == null) {
-                        selectedSubmissionAudits = new ArrayList<>();
-                    }
-                }
-
-            }
-        }
-
-        // Always populate roster rows if we have a selected assessment and are in submissions view
-        if (selectedAssessment != null && (VIEW_SUBMISSIONS.equals(activeView) || VIEW_GRADE.equals(activeView))) {
-            Map<Integer, Integer> submissionCountByUserId = new LinkedHashMap<>();
-            Map<Integer, AssessmentSubmission> latestSubmissionByUserId = new LinkedHashMap<>();
-            for (AssessmentSubmission s : submissionsUnfiltered) {
-                if (s == null || s.getUserId() == null) continue;
-                submissionCountByUserId.put(s.getUserId(), submissionCountByUserId.getOrDefault(s.getUserId(), 0) + 1);
-                AssessmentSubmission currentLatest = latestSubmissionByUserId.get(s.getUserId());
-                if (currentLatest == null || (s.getSubmissionId() != null && currentLatest.getSubmissionId() != null && s.getSubmissionId() > currentLatest.getSubmissionId())) {
-                    latestSubmissionByUserId.put(s.getUserId(), s);
-                }
-            }
-
-            assessmentRosterRows = new ArrayList<>();
-            for (Enrollment enrollment : courseEnrollments) {
-                if (enrollment == null || enrollment.getUserId() == null) continue;
-                int submissionCount = submissionCountByUserId.getOrDefault(enrollment.getUserId(), 0);
-                AssessmentSubmission latestSubmission = latestSubmissionByUserId.get(enrollment.getUserId());
-                String statusLabel = submissionCount == 0 ? "Not started" : (latestSubmission != null && latestSubmission.getScore() != null ? "Graded" : "Attempted");
-                String statusClass = submissionCount == 0 ? "is-muted" : (latestSubmission != null && latestSubmission.getScore() != null ? "is-success" : "is-warn");
-                Map<String, Object> row = new LinkedHashMap<>();
-                row.put("studentName", enrollment.getStudentName());
-                row.put("studentEmail", enrollment.getStudentEmail());
-                row.put("studentStatusLabel", statusLabel);
-                row.put("studentStatusClass", statusClass);
-                row.put("submissionCount", submissionCount);
-                row.put("latestSubmission", latestSubmission);
-                assessmentRosterRows.add(row);
             }
         }
 
@@ -536,9 +397,62 @@ public class InstructorAssessmentServlet extends HttpServlet {
             jspFile = "/WEB-INF/views/instructor/assessment-questions.jsp";
         } else if (VIEW_SUBMISSIONS.equals(activeView) || VIEW_GRADE.equals(activeView)) {
             jspFile = "/WEB-INF/views/instructor/assessment-submissions.jsp";
+        } else if (VIEW_ARCHIVE.equals(activeView)) {
+            jspFile = "/WEB-INF/views/instructor/course-assessments.jsp"; // Archive is usually handled in the same hub JSP
         }
         
         request.getRequestDispatcher(jspFile).forward(request, response);
+    }
+
+    private void resolveRouteContext(HttpServletRequest request) {
+        String pathInfo = request.getPathInfo();
+        if (pathInfo == null || pathInfo.isEmpty() || "/".equals(pathInfo)) {
+            return;
+        }
+        
+        // Example: /1/assessments/2/grade
+        // parts = ["", "1", "assessments", "2", "grade"]
+        String[] parts = pathInfo.split("/");
+        
+        if (parts.length >= 2) {
+            String courseIdStr = parts[1];
+            try {
+                Integer.parseInt(courseIdStr);
+                // Simulate parameters if not already present
+                if (request.getParameter("courseId") == null) {
+                    request.setAttribute("pathCourseId", courseIdStr);
+                }
+            } catch (NumberFormatException e) {
+                // Not a course ID
+            }
+        }
+        
+        if (parts.length >= 4 && "assessments".equals(parts[2])) {
+            String assessmentIdStr = parts[3];
+            try {
+                Integer.parseInt(assessmentIdStr);
+                if (request.getParameter("assessmentId") == null) {
+                    request.setAttribute("pathAssessmentId", assessmentIdStr);
+                }
+            } catch (NumberFormatException e) {
+                // Not an assessment ID, maybe it's "create" or "archive"
+                if ("create".equals(assessmentIdStr)) {
+                    request.setAttribute("pathView", VIEW_EDITOR);
+                } else if ("archive".equals(assessmentIdStr)) {
+                    request.setAttribute("pathView", VIEW_ARCHIVE);
+                }
+            }
+        }
+        
+        if (parts.length >= 5 && "assessments".equals(parts[2])) {
+            String viewStr = parts[4];
+            if (request.getParameter("view") == null) {
+                request.setAttribute("pathView", viewStr);
+            }
+            if ("grade".equals(viewStr)) {
+                request.setAttribute("pathView", VIEW_SUBMISSIONS);
+            }
+        }
     }
 
     private void createAssessment(HttpServletRequest request, HttpServletResponse response, Integer userId)
@@ -690,6 +604,9 @@ public class InstructorAssessmentServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/instructor/assessments?view=questions&courseId=" + courseId + "&assessmentId=" + assessmentId + "&error=publish_no_questions");
             return;
         }
+
+        assessment.setStatus(Assessment.STATUS_PUBLISHED);
+        assessmentDAO.update(assessment);
 
         response.sendRedirect(request.getContextPath() + "/instructor/assessments?view=dashboard&courseId=" + courseId + "&assessmentId=" + assessmentId + "&success=published");
     }
@@ -1421,7 +1338,8 @@ public class InstructorAssessmentServlet extends HttpServlet {
                 VIEW_SUBMISSIONS,
                 VIEW_GRADE,
                 "pending-grading",
-                VIEW_ANALYTICS
+                VIEW_ANALYTICS,
+                VIEW_ARCHIVE
         );
         return supportedViews.contains(normalized) ? normalized : VIEW_DASHBOARD;
     }
@@ -1461,15 +1379,13 @@ public class InstructorAssessmentServlet extends HttpServlet {
 
     private String resolveAssessmentWorkflowStatus(Assessment assessment, int questionCount, int submissionsCount, int pendingCount) {
         if (assessment == null) {
-            return "Draft";
+            return Assessment.STATUS_DRAFT;
         }
-        if (questionCount <= 0) {
-            return "Draft";
+        String status = assessment.getStatus();
+        if (status != null && !status.isEmpty()) {
+            return status;
         }
-        if (submissionsCount == 0) {
-            return "Published";
-        }
-        return pendingCount > 0 ? "Active" : "Closed";
+        return Assessment.STATUS_DRAFT;
     }
 
     private String resolveSubmissionWorkflowStatus(AssessmentSubmission submission, Assessment assessment) {

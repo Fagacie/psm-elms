@@ -42,6 +42,15 @@
                 </div>
             </div>
 
+            <!-- Automated Redirection Countdown -->
+            <div class="ef-redirect-banner" id="redirectBanner" style="display:flex; align-items:center; gap:12px; margin-bottom: 20px; padding:12px 16px; background:rgba(var(--sv-accent-rgb, 99, 102, 241), 0.1); border:1px solid var(--sv-accent); border-radius:6px; color:var(--sv-accent); font-size:0.9rem;">
+                <i class="fas fa-circle-notch fa-spin"></i>
+                <div>
+                    <strong style="display:block; font-weight:700;">Launching Learning Hub Workspace...</strong>
+                    <span>Automatically redirected in <span id="countdown" style="font-weight:700;">5</span> seconds. <a href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=learning" style="color:var(--sv-accent); text-decoration:underline; font-weight:600;">Click here to bypass.</a></span>
+                </div>
+            </div>
+
             <div class="ef-grid ef-grid-tight">
                 <div class="ef-meta"><span>Course</span><strong>${enrollment.courseName}</strong></div>
                 <div class="ef-meta"><span>Enrollment ID</span><strong>#${enrollment.enrollmentId}</strong></div>
@@ -66,6 +75,25 @@
         </section>
     </main>
 </div>
+
+<script>
+    (function() {
+        var count = 5;
+        var countdownEl = document.getElementById('countdown');
+        var targetUrl = "${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=learning";
+        
+        var timer = setInterval(function() {
+            count--;
+            if (countdownEl) {
+                countdownEl.textContent = count;
+            }
+            if (count <= 0) {
+                clearInterval(timer);
+                window.location.href = targetUrl;
+            }
+        }, 1000);
+    })();
+</script>
 </body>
 </html>
 

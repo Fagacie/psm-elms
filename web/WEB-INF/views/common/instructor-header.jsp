@@ -71,3 +71,6 @@
         </a>
     </div>
 </header>
+
+<!-- Global Instructor UX JS -->
+<script src="${pageContext.request.contextPath}/js/instructor-ux.js" defer></script>

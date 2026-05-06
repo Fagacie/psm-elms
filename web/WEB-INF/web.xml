@@ -197,6 +197,10 @@
         <servlet-name>InstructorAssessmentServlet</servlet-name>
         <url-pattern>/instructor/assessments</url-pattern>
     </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>InstructorAssessmentServlet</servlet-name>
+        <url-pattern>/instructor/courses/*</url-pattern>
+    </servlet-mapping>
 
     <servlet>
         <servlet-name>InstructorContentOrganizerServlet</servlet-name>

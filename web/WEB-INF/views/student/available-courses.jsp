@@ -99,7 +99,7 @@
                 </div>
                 <div class="bc-search-wrap">
                     <label for="bcQuickSearch" class="bc-sr-only">Quick search courses</label>
-                    <input id="bcQuickSearch" type="text" placeholder="Quick search courses..." autocomplete="off">
+                    <input id="bcQuickSearch" type="text" placeholder="Quick search courses..." autocomplete="off" data-search-target="#bcGrid" data-search-item=".bc-card">
                 </div>
             </div>
         </section>
@@ -147,7 +147,7 @@
                                         </c:otherwise>
                                     </c:choose>
                                 </div>
-                                <h3>${course.courseName}</h3>
+                                <h3 data-search-text>${course.courseName}</h3>
                                 <p>
                                     <c:choose>
                                         <c:when test="${not empty course.description && course.description.length() > 150}">${course.description.substring(0, 150)}...</c:when>

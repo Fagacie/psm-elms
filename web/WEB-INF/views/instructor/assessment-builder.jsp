@@ -69,6 +69,18 @@
             <div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> ${errorMessage}</div>
         </c:if>
 
+        <div class="ia-stepper">
+            <div class="ia-step active">
+                <div class="ia-step-circle">1</div>
+                <div class="ia-step-label">Assessment Settings</div>
+            </div>
+            <div class="ia-step-line"></div>
+            <div class="ia-step ${not empty selectedAssessment ? '' : 'disabled'}">
+                <div class="ia-step-circle">2</div>
+                <div class="ia-step-label">Question Bank</div>
+            </div>
+        </div>
+
         <div class="ia-flow-grid-single">
             <!-- Main Form Column -->
             <div class="section-card">

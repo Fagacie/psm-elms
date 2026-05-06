@@ -41,7 +41,17 @@
                             <a href="${pageContext.request.contextPath}/student/my-enrollments" class="sv-btn">My Courses</a>
                         </c:when>
                         <c:otherwise>
-                            <a href="${pageContext.request.contextPath}/student/enrollment-summary?courseId=${course.courseId}" class="sv-btn primary">Enroll Now</a>
+                            <c:choose>
+                                <c:when test="${course.courseFee == 0}">
+                                    <form method="post" action="${pageContext.request.contextPath}/student/enroll" style="display:inline;">
+                                        <input type="hidden" name="courseId" value="${course.courseId}">
+                                        <button type="submit" class="sv-btn primary">Enroll for Free</button>
+                                    </form>
+                                </c:when>
+                                <c:otherwise>
+                                    <a href="${pageContext.request.contextPath}/student/enrollment-summary?courseId=${course.courseId}" class="sv-btn primary">Enroll Now</a>
+                                </c:otherwise>
+                            </c:choose>
                         </c:otherwise>
                     </c:choose>
                     <a href="${pageContext.request.contextPath}/student/courses" class="sv-btn">Back</a>
@@ -84,7 +94,17 @@
                     <div class="cd-action-stack">
                         <a class="sv-btn" href="${pageContext.request.contextPath}/student/my-enrollments"><i class="fas fa-layer-group"></i>&nbsp;Open Learning Hub</a>
                         <c:if test="${not isEnrolled}">
-                            <a class="sv-btn primary" href="${pageContext.request.contextPath}/student/enrollment-summary?courseId=${course.courseId}">Proceed to Enroll</a>
+                            <c:choose>
+                                <c:when test="${course.courseFee == 0}">
+                                    <form method="post" action="${pageContext.request.contextPath}/student/enroll" style="display:block; width:100%;">
+                                        <input type="hidden" name="courseId" value="${course.courseId}">
+                                        <button type="submit" class="sv-btn primary" style="width:100%;">Enroll for Free</button>
+                                    </form>
+                                </c:when>
+                                <c:otherwise>
+                                    <a class="sv-btn primary" href="${pageContext.request.contextPath}/student/enrollment-summary?courseId=${course.courseId}">Proceed to Enroll</a>
+                                </c:otherwise>
+                            </c:choose>
                         </c:if>
                     </div>
                 </aside>

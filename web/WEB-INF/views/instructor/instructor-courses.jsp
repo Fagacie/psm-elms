@@ -25,9 +25,23 @@
 
     <main class="app-main">
         <div class="content-wrapper">
-            <section class="ins-section-head" style="margin-bottom:28px;">
-                <h2 style="margin:0;">My Courses</h2>
-                <span class="courses-count">${courses != null ? courses.size() : 0} courses</span>
+            <nav class="breadcrumb" aria-label="Breadcrumb">
+                <a href="${pageContext.request.contextPath}/instructor/dashboard">Dashboard</a>
+                <span>&gt;</span>
+                <span>My Courses</span>
+            </nav>
+
+            <section class="ins-page-head">
+                <div>
+                    <p class="ins-page-kicker">Course Portfolio</p>
+                    <h2>Manage your courses and student workspaces</h2>
+                    <p>Access workspaces to grade assessments, arrange materials, and track student progress. You have ${courses != null ? courses.size() : 0} courses assigned.</p>
+                </div>
+                <div class="ins-hero-actions">
+                    <a href="${pageContext.request.contextPath}/instructor/courses?action=create" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Create Course
+                    </a>
+                </div>
             </section>
 
             <c:if test="${param.success == 'updated'}">
@@ -55,7 +69,16 @@
                     </div>
                 </c:when>
                 <c:otherwise>
-                    <section class="ins-course-grid" aria-label="Assigned courses">
+                    <div style="margin-bottom: 24px;">
+                        <div style="position: relative; max-width: 400px;">
+                            <i class="fas fa-search" style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--ins-muted);"></i>
+                            <input type="text" placeholder="Search courses by name or status..." 
+                                   data-search-target="#course-list-container" 
+                                   data-search-item=".ins-course-card"
+                                   style="width: 100%; padding: 12px 16px 12px 42px; border: 1px solid var(--ins-border); border-radius: 8px; font-family: inherit;">
+                        </div>
+                    </div>
+                    <section class="ins-course-grid" id="course-list-container" aria-label="Assigned courses">
                         <c:forEach var="course" items="${courses}">
                             <article class="ins-course-card">
                                 <c:if test="${not empty course.courseBanner}">
@@ -64,8 +87,8 @@
                                     </div>
                                 </c:if>
                                 <div class="ins-course-card__top">
-                                    <h4><c:out value="${course.courseName}"/></h4>
-                                    <span class="status-badge status-${fn:toLowerCase(course.status)}"><c:out value="${course.status}"/></span>
+                                    <h4 data-search-text><c:out value="${course.courseName}"/></h4>
+                                    <span class="status-badge status-${fn:toLowerCase(course.status)}" data-search-text><c:out value="${course.status}"/></span>
                                 </div>
                                 <p class="ins-course-card__meta">
                                     <c:out value="${empty course.category ? 'General' : course.category}"/> · <c:out value="${course.level}"/>
@@ -80,8 +103,8 @@
                                         <span>Updated</span>
                                     </div>
                                 </div>
-                                <a href="${pageContext.request.contextPath}/instructor/courses?action=workspace&courseId=${course.courseId}" class="btn btn-primary btn-sm ins-course-card__cta">
-                                    <i class="fas fa-arrow-right"></i> Open Workspace
+                                <a href="${pageContext.request.contextPath}/instructor/courses?action=workspace&courseId=${course.courseId}" class="btn btn-primary ins-course-card__cta">
+                                    Open Workspace <i class="fas fa-arrow-right" style="margin-left: 8px;"></i>
                                 </a>
                             </article>
                         </c:forEach>
@@ -90,12 +113,5 @@
             </c:choose>
         </div>
     </main>
-<script src="${pageContext.request.contextPath}/js/theme-toggle.js"></script>
-<script>
-(function(){
-    var btn = document.getElementById('insMenuBtn');
-    if(btn){ btn.addEventListener('click', function(){ document.body.classList.toggle('ins-shell-collapsed'); }); }
-})();
-</script>
 </body>
 </html>

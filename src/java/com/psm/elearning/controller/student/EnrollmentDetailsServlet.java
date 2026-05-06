@@ -325,6 +325,7 @@ public class EnrollmentDetailsServlet extends HttpServlet {
 
             boolean paidAccess = isPaymentComplete(enrollment.getPaymentStatus());
             boolean paymentRequired = enrollment.getCoursePrice() != null && enrollment.getCoursePrice() > 0;
+            boolean courseAccessGranted = paidAccess || !paymentRequired;
             if (paymentRequired && !paidAccess) {
                 response.sendRedirect(request.getContextPath() + "/student/payment?enrollmentId=" + enrollment.getEnrollmentId() + "&error=required");
                 return;
@@ -436,9 +437,9 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                 String metaPrimary = material.getDisplayOrder() != null ? "Chapter " + material.getDisplayOrder() : "Material";
                 String metaSecondary = material.getUploadDate() != null ? material.getUploadDate().toLocalDate().toString() : "";
                 String metaTertiary = viewed ? "Viewed" : "Not yet viewed";
-                String statusLabel = !paidAccess ? "Locked" : (viewed ? "Completed" : "Ready");
-                String statusClass = !paidAccess ? "status-Pending" : (viewed ? "status-Approved" : "status-Archived");
-                String lockReason = paidAccess ? "" : "Payment required to access this material";
+                String statusLabel = !courseAccessGranted ? "Locked" : (viewed ? "Completed" : "Ready");
+                String statusClass = !courseAccessGranted ? "status-Pending" : (viewed ? "status-Approved" : "status-Archived");
+                String lockReason = courseAccessGranted ? "" : "Payment required to access this material";
                 String primaryLabel = viewed ? "Review" : "Open";
                 String primaryIcon = "fa-eye";
                 if ("Link".equalsIgnoreCase(material.getMaterialType())) {
@@ -446,12 +447,12 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                     primaryIcon = "fa-link";
                 }
                 String primaryAction = "Link".equalsIgnoreCase(material.getMaterialType()) ? "view" : "preview";
-                String primaryUrl = paidAccess
+                String primaryUrl = courseAccessGranted
                     ? request.getContextPath() + "/student/materials?action=" + primaryAction + "&id=" + material.getMaterialId() + "&enrollmentId=" + enrollment.getEnrollmentId()
                     : null;
                 String secondaryLabel = !"Link".equalsIgnoreCase(material.getMaterialType()) ? "Download" : null;
                 String secondaryIcon = secondaryLabel != null ? "fa-download" : null;
-                String secondaryUrl = (paidAccess && secondaryLabel != null)
+                String secondaryUrl = (courseAccessGranted && secondaryLabel != null)
                     ? request.getContextPath() + "/student/materials?action=download&id=" + material.getMaterialId() + "&enrollmentId=" + enrollment.getEnrollmentId()
                         : null;
                 learningItems.add(new LearningItem(
@@ -469,7 +470,7 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                         chapterHint,
                         statusLabel,
                         statusClass,
-                        !paidAccess,
+                        !courseAccessGranted,
                         lockReason,
                         primaryLabel,
                         primaryUrl,
@@ -498,7 +499,7 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                             EnrollmentStateSyncService.resolveAssessmentProgress(assessment, submissions);
                     String assessmentStatusLabel;
                     String assessmentStatusClass;
-                    if (!paidAccess) {
+                    if (!courseAccessGranted) {
                         assessmentStatusLabel = "Locked";
                         assessmentStatusClass = "status-Pending";
                     } else if (hasActiveAttempt) {
@@ -520,15 +521,15 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                     String metaPrimaryAssessment = (assessment.getDuration() != null ? assessment.getDuration() : 30) + " min";
                     String metaSecondaryAssessment = "Attempts: " + used + " / " + Math.max(allowed, 1);
                     String metaTertiaryAssessment = latest != null && latest.getScore() != null ? "Score: " + latest.getScore() : "";
-                    String lockReasonAssessment = paidAccess ? "" : "Payment required to take assessments";
+                    String lockReasonAssessment = courseAccessGranted ? "" : "Payment required to take assessments";
                     String primaryLabelAssessment = null;
                     String primaryUrlAssessment = null;
                     String primaryIconAssessment = null;
-                    if (paidAccess && hasActiveAttempt) {
+                    if (courseAccessGranted && hasActiveAttempt) {
                         primaryLabelAssessment = "Continue";
                         primaryUrlAssessment = request.getContextPath() + "/student/assessments?courseId=" + enrollment.getCourseId() + "&assessmentId=" + assessment.getAssessmentId() + "&mode=attempt&fromHub=1&enrollmentId=" + enrollment.getEnrollmentId();
                         primaryIconAssessment = "fa-play";
-                    } else if (paidAccess && used < Math.max(allowed, 1)) {
+                    } else if (courseAccessGranted && used < Math.max(allowed, 1)) {
                         primaryLabelAssessment = "Start";
                         primaryUrlAssessment = request.getContextPath() + "/student/assessments?action=start&courseId=" + enrollment.getCourseId() + "&assessmentId=" + assessment.getAssessmentId() + "&fromHub=1&enrollmentId=" + enrollment.getEnrollmentId();
                         primaryIconAssessment = "fa-play";
@@ -551,7 +552,7 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                             groupHint,
                             assessmentStatusLabel,
                             assessmentStatusClass,
-                            !paidAccess,
+                            !courseAccessGranted,
                             lockReasonAssessment,
                             primaryLabelAssessment,
                             primaryUrlAssessment,
@@ -581,7 +582,7 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                         EnrollmentStateSyncService.resolveAssessmentProgress(assessment, submissions);
                 String statusLabel;
                 String statusClass;
-                if (!paidAccess) {
+                if (!courseAccessGranted) {
                     statusLabel = "Locked";
                     statusClass = "status-Pending";
                 } else if (hasActiveAttempt) {
@@ -603,15 +604,15 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                 String metaPrimary = (assessment.getDuration() != null ? assessment.getDuration() : 30) + " min";
                 String metaSecondary = "Attempts: " + used + " / " + Math.max(allowed, 1);
                 String metaTertiary = latest != null && latest.getScore() != null ? "Score: " + latest.getScore() : "";
-                String lockReason = paidAccess ? "" : "Payment required to take assessments";
+                String lockReason = courseAccessGranted ? "" : "Payment required to take assessments";
                 String primaryLabel = null;
                 String primaryUrl = null;
                 String primaryIcon = null;
-                if (paidAccess && hasActiveAttempt) {
+                if (courseAccessGranted && hasActiveAttempt) {
                     primaryLabel = "Continue";
                     primaryUrl = request.getContextPath() + "/student/assessments?courseId=" + enrollment.getCourseId() + "&assessmentId=" + assessment.getAssessmentId() + "&mode=attempt&fromHub=1&enrollmentId=" + enrollment.getEnrollmentId();
                     primaryIcon = "fa-play";
-                } else if (paidAccess && used < Math.max(allowed, 1)) {
+                } else if (courseAccessGranted && used < Math.max(allowed, 1)) {
                     primaryLabel = "Start";
                     primaryUrl = request.getContextPath() + "/student/assessments?action=start&courseId=" + enrollment.getCourseId() + "&assessmentId=" + assessment.getAssessmentId() + "&fromHub=1&enrollmentId=" + enrollment.getEnrollmentId();
                     primaryIcon = "fa-play";
@@ -634,7 +635,7 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                         groupHint,
                         statusLabel,
                         statusClass,
-                        !paidAccess,
+                        !courseAccessGranted,
                         lockReason,
                         primaryLabel,
                         primaryUrl,
@@ -734,7 +735,6 @@ public class EnrollmentDetailsServlet extends HttpServlet {
             String tab = request.getParameter("tab");
             if (tab == null || tab.trim().isEmpty()) tab = "learning";
             Map<Integer, String> materialStatusById = materialProgressDAO.findMaterialStatusByCourse(userId, enrollment.getCourseId());
-            boolean courseAccessGranted = paidAccess || !paymentRequired;
 
             Integer currentAssessmentId = null;
             for (Assessment assessment : assessments) {
@@ -898,7 +898,8 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                 } else if (selectedAssessmentLatest != null && selectedAssessmentLatest.getSubmissionId() != null) {
                     selectedAssessmentPrimaryLabel = "View Result";
                     selectedAssessmentPrimaryUrl = request.getContextPath()
-                            + "/student/assessments?view=result&enrollmentId=" + enrollment.getEnrollmentId()
+                            + "/student/enrollment-details?id=" + enrollment.getEnrollmentId()
+                            + "&tab=assessments&view=result"
                             + "&assessmentId=" + selectedAssessment.getAssessmentId()
                             + "&submissionId=" + selectedAssessmentLatest.getSubmissionId();
                 }

@@ -808,3 +808,73 @@ body.ia-fullview-active .table-responsive {
 
 .ia-modal-content .ia-grading-detail { margin: 0; }
 .ia-modal-content .ia-detail-section { margin-bottom: 16px; }
+
+/* --- STEPPER UI --- */
+.ia-stepper {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 32px;
+    padding: 16px 24px;
+    background: #ffffff;
+    border: 1px solid var(--ins-border);
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03);
+}
+
+.ia-step {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.ia-step-circle {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.9rem;
+    background: #f1f5f9;
+    color: var(--ins-muted);
+    border: 2px solid transparent;
+}
+
+.ia-step-label {
+    font-weight: 600;
+    color: var(--ins-muted);
+    font-size: 0.95rem;
+}
+
+.ia-step.active .ia-step-circle {
+    background: var(--ins-accent-soft);
+    color: var(--ins-primary);
+    border-color: var(--ins-primary);
+}
+
+.ia-step.active .ia-step-label {
+    color: var(--ins-text);
+}
+
+.ia-step.completed .ia-step-circle {
+    background: var(--ins-primary);
+    color: #ffffff;
+}
+
+.ia-step.completed .ia-step-label {
+    color: var(--ins-text);
+}
+
+.ia-step-line {
+    flex: 1;
+    height: 2px;
+    background: #e2e8f0;
+    min-width: 40px;
+}
+
+.ia-step.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+}

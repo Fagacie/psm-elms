@@ -26,15 +26,15 @@
 
 <main class="app-main">
     <div class="content-wrapper course-workspace-page">
-        <section class="ins-section-head" style="margin-bottom: 24px;">
-            <div style="display: flex; gap: 16px; align-items: center;">
+        <section class="ins-section-head ws-page-head">
+            <div class="ws-head-title">
                 <a href="${pageContext.request.contextPath}/instructor/courses" class="btn btn-secondary btn-sm">
                     <i class="fas fa-arrow-left"></i> Back
                 </a>
-                <h2 style="margin: 0;"><c:out value="${selectedCourse.courseName}"/></h2>
+                <h2><c:out value="${selectedCourse.courseName}"/></h2>
                 <span class="status-badge status-${selectedCourse.status}"><c:out value="${selectedCourse.status}"/></span>
             </div>
-            <div class="workspace-meta-row" style="margin-top: 12px; display: flex; gap: 16px; color: var(--ins-muted); font-size: 0.9rem;">
+            <div class="workspace-meta-row">
                 <span><i class="fas fa-tag"></i> <c:out value="${empty selectedCourse.category ? 'General' : selectedCourse.category}"/></span>
                 <span><i class="fas fa-signal"></i> <c:out value="${selectedCourse.level}"/></span>
                 <span><i class="fas fa-clock"></i> <c:out value="${selectedCourse.displayDuration}"/></span>
@@ -71,7 +71,8 @@
         </section>
 
         <%-- ACTION BAR --%>
-        <section class="ws-action-bar section-card" style="margin-bottom: 32px; padding: 16px 24px; display: flex; gap: 12px; align-items: center; background: var(--ins-surface);">
+        <%-- ACTION BAR --%>
+        <section class="ws-action-bar section-card">
             <a href="${pageContext.request.contextPath}/instructor/materials?courseId=${selectedCourse.courseId}" class="btn btn-primary">
                 <i class="fas fa-folder-open"></i> Material Hub
             </a>
@@ -83,186 +84,52 @@
             </button>
         </section>
 
-        <%-- SECTION 1: MATERIALS --%>
-        <section class="ins-section" id="materials" style="margin-bottom: 32px;">
+        <%-- SECTION 1: MATERIALS (Summary) --%>
+        <section class="ins-section ws-section" id="materials">
             <div class="section-card">
                 <div class="section-header">
-                    <div>
-                        <h3 class="section-title">Course Materials</h3>
-                    </div>
-                    <div class="workspace-header-actions">
-                        <button type="button" class="btn btn-secondary btn-sm" onclick="selectAllMaterials('activeMaterialIds', true)">Select All</button>
-                        <button type="button" class="btn btn-secondary btn-sm" onclick="selectAllMaterials('activeMaterialIds', false)">Clear</button>
-                    </div>
+                    <h3 class="section-title">Recent Course Materials</h3>
+                    <a href="${pageContext.request.contextPath}/instructor/materials?courseId=${selectedCourse.courseId}" class="btn btn-secondary btn-sm">Manage Hub</a>
                 </div>
-
                 <c:choose>
                     <c:when test="${empty materials}">
                         <div class="empty-state-box workspace-empty-box">
                             <i class="fas fa-folder-open"></i>
                             <p>No active materials uploaded for this course yet.</p>
+                            <button class="btn btn-primary btn-sm" onclick="openUploadModal()">Upload Material</button>
                         </div>
                     </c:when>
                     <c:otherwise>
-                        <form id="activeBulkForm" method="post" action="${pageContext.request.contextPath}/instructor/materials" class="workspace-bulk-form" style="margin-bottom: 16px;">
-                            <input type="hidden" name="action" value="bulkArchive">
-                            <input type="hidden" name="courseId" value="${selectedCourse.courseId}">
-                            <div style="display: flex; gap: 12px; align-items: center;">
-                                <button type="submit" class="btn btn-secondary btn-sm"><i class="fas fa-archive"></i> Archive Selected</button>
-                            </div>
-                        </form>
-
-                        <div class="table-container">
-                            <table class="data-table">
-                                <thead>
-                                <tr>
-                                    <th style="width: 40px;"></th>
-                                    <th>Material</th>
-                                    <th>Type</th>
-                                    <th>Order</th>
-                                    <th>Uploaded</th>
-                                    <th>Actions</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <c:forEach var="material" items="${materials}">
-                                    <tr>
-                                        <td>
-                                            <input type="checkbox" name="materialIds" value="${material.materialId}" form="activeBulkForm" class="activeMaterialIds">
-                                        </td>
-                                        <td>
-                                            <strong><c:out value="${material.title}"/></strong><br>
-                                            <span style="color: var(--ins-muted); font-size: 0.85rem;"><c:out value="${material.description}" default="Course asset"/></span>
-                                        </td>
-                                        <td><span class="type-badge type-${material.materialType}"><c:out value="${material.materialType}"/></span></td>
-                                        <td>
-                                            <div style="display: flex; align-items: center; gap: 8px;">
-                                                <span class="table-pill"><c:out value="${material.displayOrder}" default="N/A"/></span>
-                                                <div style="display: flex; flex-direction: column; gap: 2px;">
-                                                    <form method="post" action="${pageContext.request.contextPath}/instructor/materials" style="margin: 0;">
-                                                        <input type="hidden" name="action" value="reorder">
-                                                        <input type="hidden" name="courseId" value="${selectedCourse.courseId}">
-                                                        <input type="hidden" name="materialId" value="${material.materialId}">
-                                                        <input type="hidden" name="direction" value="up">
-                                                        <button type="submit" class="icon-btn" style="padding: 2px 4px; background: transparent; border: none; cursor: pointer; color: var(--ins-muted);"><i class="fas fa-chevron-up"></i></button>
-                                                    </form>
-                                                    <form method="post" action="${pageContext.request.contextPath}/instructor/materials" style="margin: 0;">
-                                                        <input type="hidden" name="action" value="reorder">
-                                                        <input type="hidden" name="courseId" value="${selectedCourse.courseId}">
-                                                        <input type="hidden" name="materialId" value="${material.materialId}">
-                                                        <input type="hidden" name="direction" value="down">
-                                                        <button type="submit" class="icon-btn" style="padding: 2px 4px; background: transparent; border: none; cursor: pointer; color: var(--ins-muted);"><i class="fas fa-chevron-down"></i></button>
-                                                    </form>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <span style="color: var(--ins-muted);">
-                                                <c:choose>
-                                                    <c:when test="${not empty material.uploadDate}">${material.uploadDate.toLocalDate()}</c:when>
-                                                    <c:otherwise>-</c:otherwise>
-                                                </c:choose>
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <div style="display: flex; gap: 8px;">
-                                                <a href="${material.filePath}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm"><i class="fas fa-eye"></i></a>
-                                                <button type="button" class="btn btn-secondary btn-sm" onclick="openEditMaterialModal(this, false)"
-                                                        data-material-id="${material.materialId}"
-                                                        data-title="<c:out value='${material.title}'/>"
-                                                        data-type="<c:out value='${material.materialType}'/>"
-                                                        data-order="<c:out value='${material.displayOrder}'/>"
-                                                        data-description="<c:out value='${material.description}'/>"
-                                                        data-external-url="${material.materialType == 'Link' ? material.filePath : ''}">
-                                                    <i class="fas fa-edit"></i>
-                                                </button>
-                                                <button type="button" class="btn btn-secondary btn-sm" onclick="openEditMaterialModal(this, true)"
-                                                        data-material-id="${material.materialId}"
-                                                        data-title="<c:out value='${material.title}'/>"
-                                                        data-type="<c:out value='${material.materialType}'/>"
-                                                        data-order="<c:out value='${material.displayOrder}'/>"
-                                                        data-description="<c:out value='${material.description}'/>"
-                                                        data-external-url="${material.materialType == 'Link' ? material.filePath : ''}">
-                                                    <i class="fas fa-file-arrow-up"></i>
-                                                </button>
-                                                <a href="${pageContext.request.contextPath}/instructor/materials?action=delete&id=${material.materialId}&courseId=${selectedCourse.courseId}" class="btn btn-danger btn-sm" onclick="return confirm('Archive this material?');">
-                                                    <i class="fas fa-eye-slash"></i>
-                                                </a>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </c:forEach>
-                                </tbody>
-                            </table>
+                        <div class="ws-summary-grid">
+                            <c:forEach var="material" items="${materials}" end="3">
+                                <article class="ws-summary-card">
+                                    <div class="ws-summary-icon">
+                                        <i class="fas fa-file-alt"></i>
+                                    </div>
+                                    <div class="ws-summary-content">
+                                        <strong><c:out value="${material.title}"/></strong>
+                                        <span><c:out value="${material.materialType}"/></span>
+                                    </div>
+                                </article>
+                            </c:forEach>
                         </div>
+                        <c:if test="${fn:length(materials) > 4}">
+                            <div class="ws-view-more">
+                                <a href="${pageContext.request.contextPath}/instructor/materials?courseId=${selectedCourse.courseId}">View all ${fn:length(materials)} materials &rarr;</a>
+                            </div>
+                        </c:if>
                     </c:otherwise>
                 </c:choose>
-
-                <%-- Archived Materials --%>
-                <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--ins-border);">
-                    <h4 style="margin: 0 0 16px; color: var(--ins-muted);">Archived Materials</h4>
-                    <c:choose>
-                        <c:when test="${empty deletedMaterials}">
-                            <p style="color: var(--ins-muted); font-size: 0.9rem;">No archived materials.</p>
-                        </c:when>
-                        <c:otherwise>
-                            <form id="archivedBulkForm" method="post" action="${pageContext.request.contextPath}/instructor/materials" class="workspace-bulk-form" style="margin-bottom: 16px;">
-                                <input type="hidden" name="action" value="bulkRestore">
-                                <input type="hidden" name="courseId" value="${selectedCourse.courseId}">
-                                <div style="display: flex; gap: 12px; align-items: center;">
-                                    <button type="button" class="btn btn-secondary btn-sm" onclick="selectAllMaterials('archivedMaterialIds', true)">Select All</button>
-                                    <button type="button" class="btn btn-secondary btn-sm" onclick="selectAllMaterials('archivedMaterialIds', false)">Clear</button>
-                                    <button type="submit" class="btn btn-secondary btn-sm"><i class="fas fa-undo"></i> Restore Selected</button>
-                                </div>
-                            </form>
-                            <div class="table-container">
-                                <table class="data-table">
-                                    <thead>
-                                    <tr>
-                                        <th style="width: 40px;"></th>
-                                        <th>Material</th>
-                                        <th>Type</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    <c:forEach var="material" items="${deletedMaterials}">
-                                        <tr>
-                                            <td>
-                                                <input type="checkbox" name="materialIds" value="${material.materialId}" form="archivedBulkForm" class="archivedMaterialIds">
-                                            </td>
-                                            <td>
-                                                <strong><c:out value="${material.title}"/></strong>
-                                            </td>
-                                            <td><span class="type-badge type-${material.materialType}"><c:out value="${material.materialType}"/></span></td>
-                                            <td>
-                                                <div style="display: flex; gap: 8px;">
-                                                    <a href="${pageContext.request.contextPath}/instructor/materials?action=restore&id=${material.materialId}&courseId=${selectedCourse.courseId}" class="btn btn-secondary btn-sm">
-                                                        <i class="fas fa-undo"></i> Publish
-                                                    </a>
-                                                    <a href="${material.filePath}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm">
-                                                        <i class="fas fa-up-right-from-square"></i> View
-                                                    </a>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    </c:forEach>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </c:otherwise>
-                    </c:choose>
-                </div>
             </div>
         </section>
 
 
-        <%-- SECTION 2: ASSESSMENTS --%>
-        <section class="ins-section" id="assessments" style="margin-bottom: 32px;">
+        <%-- SECTION 2: ASSESSMENTS (Summary) --%>
+        <section class="ins-section ws-section" id="assessments">
             <div class="section-card">
-                <div class="section-header" style="margin-bottom: 24px;">
-                    <h3 class="section-title">Course Assessments</h3>
-                    <a href="${assessmentWorkspaceBaseUrl}" class="btn btn-secondary btn-sm">View Hub</a>
+                <div class="section-header">
+                    <h3 class="section-title">Recent Assessments</h3>
+                    <a href="${assessmentWorkspaceBaseUrl}" class="btn btn-secondary btn-sm">Manage Hub</a>
                 </div>
 
                 <c:choose>
@@ -274,59 +141,41 @@
                         </div>
                     </c:when>
                     <c:otherwise>
-                        <div class="workspace-assessment-grid" style="display: grid; gap: 20px; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));">
-                            <c:forEach var="assessment" items="${assessments}">
-                                <article class="ia-assessment-card" style="padding: 20px; border: 1px solid var(--ins-border); border-radius: 12px; background: #fff; position: relative; transition: all 0.2s ease;">
-                                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
-                                        <div>
-                                            <span style="font-size: 0.65rem; font-weight: 800; text-transform: uppercase; color: var(--ins-primary); letter-spacing: 0.05em; display: block; margin-bottom: 4px;">${assessment.type}</span>
-                                            <strong style="display: block; font-size: 1.1rem; color: var(--ins-text);"><c:out value="${assessment.title}"/></strong>
-                                        </div>
-                                        <div style="width: 32px; height: 32px; border-radius: 8px; background: var(--ins-accent-soft); color: var(--ins-primary); display: flex; align-items: center; justify-content: center;">
-                                            <i class="fas ${assessment.type == 'Assignment' ? 'fa-file-signature' : 'fa-stopwatch'}"></i>
-                                        </div>
+                        <div class="ws-summary-grid">
+                            <c:forEach var="assessment" items="${assessments}" end="3">
+                                <article class="ws-summary-card">
+                                    <div class="ws-summary-icon">
+                                        <i class="fas ${assessment.type == 'Assignment' ? 'fa-file-signature' : 'fa-stopwatch'}"></i>
                                     </div>
-                                    
-                                    <div style="display: flex; gap: 12px; margin-bottom: 20px; font-size: 0.8rem; color: var(--ins-muted);">
-                                        <span><i class="fas fa-users" style="margin-right: 4px;"></i> ${submissionCountByAssessmentId[assessment.assessmentId]}</span>
-                                        <span style="color: #ea580c; font-weight: 600;"><i class="fas fa-clock-rotate-left" style="margin-right: 4px;"></i> ${not empty pendingCountByAssessmentId[assessment.assessmentId] ? pendingCountByAssessmentId[assessment.assessmentId] : 0} pending</span>
-                                    </div>
-
-                                    <div style="display: flex; gap: 8px; border-top: 1px solid var(--ins-border); padding-top: 16px;">
-                                        <button type="button" class="btn btn-secondary btn-sm" onclick="openAssessmentPage('submissions', ${assessment.assessmentId})" style="flex: 1; justify-content: center;">
-                                            <c:choose>
-                                                <c:when test="${assessment.type == 'Assignment'}">Review Files</c:when>
-                                                <c:otherwise>View Results</c:otherwise>
-                                            </c:choose>
-                                        </button>
-                                        <button type="button" class="btn btn-secondary btn-sm" onclick="openAssessmentPage('${assessment.type == 'Assignment' ? 'editor' : 'questions'}', ${assessment.assessmentId})" style="width: 40px; justify-content: center;" title="${assessment.type == 'Assignment' ? 'Assignment Settings' : 'Question Bank'}">
-                                            <i class="fas ${assessment.type == 'Assignment' ? 'fa-cog' : 'fa-list-check'}"></i>
-                                        </button>
-                                        <a href="${pageContext.request.contextPath}/instructor/assessments?action=archiveAssessment&courseId=${selectedCourse.courseId}&id=${assessment.assessmentId}" class="btn btn-danger btn-sm" style="width: 40px; justify-content: center;" onclick="return confirm('Archive this assessment?')" title="Archive Assessment"><i class="fas fa-box-archive"></i></a>
+                                    <div class="ws-summary-content">
+                                        <strong><c:out value="${assessment.title}"/></strong>
+                                        <span>${assessment.type} &bull; ${submissionCountByAssessmentId[assessment.assessmentId]} subs</span>
                                     </div>
                                 </article>
                             </c:forEach>
                         </div>
+                        <c:if test="${fn:length(assessments) > 4}">
+                            <div class="ws-view-more">
+                                <a href="${assessmentWorkspaceBaseUrl}">View all ${fn:length(assessments)} assessments &rarr;</a>
+                            </div>
+                        </c:if>
                     </c:otherwise>
                 </c:choose>
-
-                <%-- Archived Assessments --%>
-                <c:if test="${not empty archivedAssessments}">
-                    <div style="margin-top: 24px; padding: 16px; background: #f8fafc; border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-size: 0.85rem; color: var(--ins-muted);">You have <strong>${fn:length(archivedAssessments)}</strong> archived assessments.</span>
-                        <button type="button" class="btn btn-secondary btn-sm" onclick="openAssessmentPage('archive')">Manage Archive</button>
-                    </div>
-                </c:if>
             </div>
         </section>
 
 
         <%-- SECTION 3: STUDENTS --%>
-        <section class="ins-section" id="students" style="margin-bottom: 32px;">
+        <section class="ins-section ws-section" id="students">
             <div class="section-card">
-                <div class="section-header">
-                    <div>
-                        <h3 class="section-title">Students</h3>
+                <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+                    <h3 class="section-title" style="margin: 0;">Students Overview</h3>
+                    <div style="position: relative; flex: 1; max-width: 300px;">
+                        <i class="fas fa-search" style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--ins-muted);"></i>
+                        <input type="text" placeholder="Search students..." 
+                               data-search-target="#ws-student-list-container" 
+                               data-search-item=".ws-student-row"
+                               style="width: 100%; padding: 8px 16px 8px 42px; border: 1px solid var(--ins-border); border-radius: 8px; font-family: inherit;">
                     </div>
                 </div>
                 <c:choose>
@@ -337,61 +186,66 @@
                         </div>
                     </c:when>
                     <c:otherwise>
-                        <div class="table-container">
-                            <table class="data-table">
-                                <thead>
-                                <tr>
-                                    <th>Student</th>
-                                    <th>Status</th>
-                                    <th>Progress</th>
-                                    <th>Enrolled</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <c:forEach var="enrollment" items="${enrollments}">
-                                    <tr>
-                                        <td><strong><c:out value="${enrollment.studentName}"/></strong><br><span style="color: var(--ins-muted); font-size: 0.85rem;"><c:out value="${enrollment.studentEmail}"/></span></td>
-                                        <td><span class="status-badge status-${fn:toLowerCase(enrollment.status)}"><c:out value="${enrollment.status}"/></span></td>
-                                        <td>
-                                            <div style="display: flex; align-items: center; gap: 12px;">
-                                                <span style="font-weight: 600; min-width: 32px;"><c:out value="${not empty enrollment.progress ? enrollment.progress : 0}"/>%</span>
-                                            </div>
-                                        </td>
-                                        <td><c:out value="${not empty enrollment.enrollmentDate ? enrollment.enrollmentDate : '-'}"/></td>
-                                    </tr>
-                                </c:forEach>
-                                </tbody>
-                            </table>
+                        <div class="ws-student-list" id="ws-student-list-container">
+                            <c:forEach var="enrollment" items="${enrollments}" end="5">
+                                <article class="ws-student-row">
+                                    <div class="ws-student-info">
+                                        <div class="ws-student-avatar">
+                                            <c:out value="${fn:substring(enrollment.studentName, 0, 1)}"/>
+                                        </div>
+                                        <div class="ws-student-details">
+                                            <strong data-search-text><c:out value="${enrollment.studentName}"/></strong>
+                                            <span data-search-text><c:out value="${enrollment.studentEmail}"/></span>
+                                        </div>
+                                    </div>
+                                    <div class="ws-student-status">
+                                        <span class="status-badge status-${fn:toLowerCase(enrollment.status)}"><c:out value="${enrollment.status}"/></span>
+                                    </div>
+                                    <div class="ws-student-progress">
+                                        <div class="ws-progress-bar">
+                                            <div class="ws-progress-fill" style="width: ${not empty enrollment.progress ? enrollment.progress : 0}%;"></div>
+                                        </div>
+                                        <span class="ws-progress-text"><c:out value="${not empty enrollment.progress ? enrollment.progress : 0}"/>% Completed</span>
+                                    </div>
+                                    <div class="ws-student-date">
+                                        <i class="far fa-calendar-alt"></i> Enrolled:<br>
+                                        <c:out value="${not empty enrollment.enrollmentDate ? enrollment.enrollmentDate : '-'}"/>
+                                    </div>
+                                </article>
+                            </c:forEach>
                         </div>
+                        <c:if test="${fn:length(enrollments) > 6}">
+                            <div class="ws-view-more">
+                                <a href="#">View all ${fn:length(enrollments)} students &rarr;</a>
+                            </div>
+                        </c:if>
                     </c:otherwise>
                 </c:choose>
             </div>
         </section>
 
         <%-- SECTION 4: ANALYTICS --%>
-        <section class="ins-section" id="analytics" style="margin-bottom: 32px;">
+        <section class="ins-section ws-section" id="analytics">
             <div class="section-card">
                 <div class="section-header">
-                    <div>
-                        <h3 class="section-title">Analytics Snapshot</h3>
-                    </div>
+                    <h3 class="section-title">Analytics Snapshot</h3>
                 </div>
-                <div class="workspace-analytics-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
-                    <div style="padding: 20px; border: 1px solid var(--ins-border); border-radius: 12px; background: #fafafa;">
-                        <span style="display: block; color: var(--ins-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">Completed Students</span>
-                        <strong style="font-size: 1.8rem; color: var(--ins-text);">${completedStudents}</strong>
+                <div class="ws-analytics-grid">
+                    <div class="ws-analytics-card">
+                        <span>Completed Students</span>
+                        <strong>${completedStudents}</strong>
                     </div>
-                    <div style="padding: 20px; border: 1px solid var(--ins-border); border-radius: 12px; background: #fafafa;">
-                        <span style="display: block; color: var(--ins-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">Active Students</span>
-                        <strong style="font-size: 1.8rem; color: var(--ins-text);">${totalStudents - completedStudents}</strong>
+                    <div class="ws-analytics-card">
+                        <span>Active Students</span>
+                        <strong>${totalStudents - completedStudents}</strong>
                     </div>
-                    <div style="padding: 20px; border: 1px solid var(--ins-border); border-radius: 12px; background: #fafafa;">
-                        <span style="display: block; color: var(--ins-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">Average Progress</span>
-                        <strong style="font-size: 1.8rem; color: var(--ins-text);"><fmt:formatNumber value="${averageProgress}" maxFractionDigits="0"/>%</strong>
+                    <div class="ws-analytics-card">
+                        <span>Average Progress</span>
+                        <strong><fmt:formatNumber value="${averageProgress}" maxFractionDigits="0"/>%</strong>
                     </div>
-                    <div style="padding: 20px; border: 1px solid var(--ins-border); border-radius: 12px; background: #fafafa;">
-                        <span style="display: block; color: var(--ins-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">Pending Grading</span>
-                        <strong style="font-size: 1.8rem; color: var(--ins-text);">${pendingGrading}</strong>
+                    <div class="ws-analytics-card">
+                        <span>Pending Grading</span>
+                        <strong>${pendingGrading}</strong>
                     </div>
                 </div>
             </div>
@@ -504,14 +358,7 @@
     </div>
 </div>
 
-<script src="${pageContext.request.contextPath}/js/theme-toggle.js"></script>
 <script>
-    (function(){
-        var btn = document.getElementById('insMenuBtn');
-        if(btn) btn.addEventListener('click', function(){ document.body.classList.toggle('ins-shell-collapsed'); });
-    })();
-
-    // Changed from iframe setting to window.location navigation
     function openAssessmentPage(view, assessmentId) {
         const baseUrl = '${assessmentWorkspaceBaseUrl}';
         const resolvedView = view || 'editor';

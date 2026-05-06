@@ -1000,3 +1000,203 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* --- WORKSPACE DASHBOARD REFRESH --- */
+.ws-page-head {
+    margin-bottom: 24px;
+}
+.ws-head-title {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    margin-bottom: 12px;
+}
+.ws-head-title h2 {
+    margin: 0;
+}
+.ws-action-bar {
+    margin-bottom: 32px;
+    padding: 16px 24px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    background: var(--ins-surface);
+}
+.ws-section {
+    margin-bottom: 32px;
+}
+.ws-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+}
+.ws-summary-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    border: 1px solid var(--ins-border);
+    border-radius: 12px;
+    background: #ffffff;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.ws-summary-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+.ws-summary-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: var(--ins-accent-soft);
+    color: var(--ins-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+.ws-summary-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    overflow: hidden;
+}
+.ws-summary-content strong {
+    font-size: 0.95rem;
+    color: var(--ins-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.ws-summary-content span {
+    font-size: 0.8rem;
+    color: var(--ins-muted);
+}
+.ws-view-more {
+    margin-top: 16px;
+    text-align: right;
+}
+.ws-view-more a {
+    color: var(--ins-primary);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+.ws-view-more a:hover {
+    text-decoration: underline;
+}
+.ws-analytics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+}
+.ws-analytics-card {
+    padding: 20px;
+    border: 1px solid var(--ins-border);
+    border-radius: 12px;
+    background: #fafafa;
+}
+.ws-analytics-card span {
+    display: block;
+    color: var(--ins-muted);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+}
+.ws-analytics-card strong {
+    font-size: 1.8rem;
+    color: var(--ins-text);
+}
+
+/* --- WORKSPACE STUDENT GRID --- */
+.ws-student-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.ws-student-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    align-items: center;
+    padding: 16px 20px;
+    background: #ffffff;
+    border: 1px solid var(--ins-border);
+    border-radius: 12px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.ws-student-row:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+    border-color: #93c5fd;
+}
+.ws-student-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+.ws-student-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--ins-accent-soft);
+    color: var(--ins-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+.ws-student-details {
+    display: flex;
+    flex-direction: column;
+}
+.ws-student-details strong {
+    font-size: 1rem;
+    color: var(--ins-text);
+}
+.ws-student-details span {
+    font-size: 0.85rem;
+    color: var(--ins-muted);
+}
+.ws-student-status {
+    font-size: 0.85rem;
+}
+.ws-student-progress {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.ws-progress-bar {
+    width: 80%;
+    height: 6px;
+    background: #e2e8f0;
+    border-radius: 4px;
+    overflow: hidden;
+}
+.ws-progress-fill {
+    height: 100%;
+    background: var(--ins-primary);
+    border-radius: 4px;
+}
+.ws-progress-text {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--ins-muted);
+}
+.ws-student-date {
+    font-size: 0.85rem;
+    color: var(--ins-muted);
+    text-align: right;
+}
+
+@media (max-width: 768px) {
+    .ws-student-row {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    .ws-student-date {
+        text-align: left;
+    }
+}

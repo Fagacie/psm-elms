@@ -422,9 +422,6 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-        const toggleBtn = document.getElementById('instructorMenuToggle');
-        if (toggleBtn) toggleBtn.addEventListener('click', () => document.body.classList.toggle('ins-shell-collapsed'));
-
         // bind grade and expand buttons
         // Grade buttons open modal with grading detail
         document.querySelectorAll('.ia-grade-btn').forEach(btn => {

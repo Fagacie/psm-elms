@@ -783,7 +783,7 @@
             </c:if>
 
             <div class="assessment-footer-nav">
-                <a class="sv-btn" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=assessments">
+                <a class="sv-btn" target="_parent" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=assessments">
                     <i class="fas fa-arrow-left"></i> Back to Assessment List
                 </a>
             </div>
@@ -851,7 +851,7 @@
                 </div>
             </c:if>
 
-            <form method="post" id="assessmentForm" action="${pageContext.request.contextPath}/student/assessments" style="display: grid; gap: 16px;">
+            <form method="post" id="assessmentForm" target="_parent" action="${pageContext.request.contextPath}/student/assessments" style="display: grid; gap: 16px;">
                 <input type="hidden" name="assessmentId" value="${assessment.assessmentId}">
                 <input type="hidden" name="enrollmentId" value="${enrollment.enrollmentId}">
                 <input type="hidden" name="timerStart" id="timerStart" value="${timerStartTime}">
@@ -1000,13 +1000,15 @@
 
         if (exitAttemptBtn) {
             exitAttemptBtn.addEventListener('click', function () {
-                const shouldExit = window.confirm('Exit now? Your current attempt will be submitted immediately.');
-                if (!shouldExit) {
-                    return;
-                }
-                isSubmitting = true;
-                exitSubmissionField.value = '1';
-                submitWithoutValidation('Submitting...');
+                StudentUX.confirm(
+                    'Confirm Exit',
+                    'Exit now? Your current attempt will be submitted immediately.',
+                    function() {
+                        isSubmitting = true;
+                        exitSubmissionField.value = '1';
+                        submitWithoutValidation('Submitting...');
+                    }
+                );
             });
         }
 

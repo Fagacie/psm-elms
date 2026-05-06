@@ -84,6 +84,18 @@
                             <c:when test="${param.error == 'invalidAssessment'}">
                                 The selected assessment does not belong to this enrollment.
                             </c:when>
+                            <c:when test="${param.error == 'assignmentFileTooLarge'}">
+                                The uploaded file exceeds the 50MB size limit. Please upload a smaller file.
+                            </c:when>
+                            <c:when test="${param.error == 'assignmentUploadFailed'}">
+                                File upload failed. Please try again.
+                            </c:when>
+                            <c:when test="${param.error == 'missingAnswerFile'}">
+                                Please upload a file or write a response before submitting.
+                            </c:when>
+                            <c:when test="${param.error == 'answerTooLong'}">
+                                Your response is too long (maximum 255 characters).
+                            </c:when>
                             <c:when test="${param.error == 'submitFailed'}">
                                 Submission could not be saved. Please try again.
                             </c:when>
@@ -242,101 +254,117 @@
                         </section>
                     </c:when>
                     <c:when test="${selectedMode == 'assessment' and not empty selectedAssessment}">
-                        <section class="lh-assessment-card">
-                            <div class="lh-assessment-card__grid">
-                                <div class="lh-assessment-block">
-                                    <span>Assessment Type</span>
-                                    <strong>${selectedAssessment.type}</strong>
-                                </div>
-                                <div class="lh-assessment-block">
-                                    <span>Duration</span>
-                                    <strong>${selectedAssessment.duration != null ? selectedAssessment.duration : 30} minutes</strong>
-                                </div>
-                                <div class="lh-assessment-block">
-                                    <span>Attempts</span>
-                                    <strong>${selectedAssessmentUsedAttempts} used / ${selectedAssessmentAllowedAttempts} allowed</strong>
-                                </div>
-                                <div class="lh-assessment-block">
-                                    <span>Submission</span>
-                                    <strong>${selectedAssessment.submissionMode == 'file' ? 'File Upload' : (selectedAssessment.submissionMode == 'text' ? 'Written Response' : (selectedAssessment.submissionMode == 'both' ? 'Text + File' : 'Objective Responses'))}</strong>
-                                </div>
-                            </div>
-
-                            <div class="lh-assessment-card__content">
-                                <div class="lh-assessment-block is-wide">
-                                    <span>Instructions</span>
-                                    <p>${not empty selectedAssessment.instructions ? selectedAssessment.instructions : 'Open the assessment when you are ready.'}</p>
-                                </div>
-
-                                <div class="lh-assessment-block is-wide">
-                                    <span>Current Status</span>
-                                    <p>
-                                        <strong>${selectedAssessmentStatusLabel}</strong>
-                                        <c:if test="${not empty selectedAssessmentLatest}">
-                                            <span aria-hidden="true">&middot;</span>
-                                            Latest attempt #${selectedAssessmentLatest.attemptNumber}
-                                            <c:if test="${not empty selectedAssessmentLatest.score}">
-                                                <span aria-hidden="true">&middot;</span>
-                                                Score ${selectedAssessmentLatest.score}
-                                            </c:if>
-                                        </c:if>
-                                    </p>
-                                </div>
-
-                                <c:if test="${not courseAccessGranted}">
-                                    <div class="lh-stage-notice is-warning">
-                                        <i class="fas fa-lock"></i>
-                                        <div>
-                                            <strong>Assessment access is locked.</strong>
-                                            <p>Complete payment first to continue through the assessment flow.</p>
+                        <c:set var="isAttempting" value="${(param.attempt == 'true' || selectedAssessmentStatusLabel == 'In Progress') && selectedAssessment.type != 'Assignment'}"/>
+                        <c:choose>
+                            <c:when test="${isAttempting}">
+                                <section class="lh-material-stage" style="height: 100%; min-height: 600px;">
+                                    <iframe
+                                        class="lh-workspace-frame"
+                                        id="lhAssessmentFrame"
+                                        title="Assessment Workspace"
+                                        src="${pageContext.request.contextPath}/courses/${enrollment.courseId}/assessments/${selectedAssessment.assessmentId}/attempt"></iframe>
+                                </section>
+                            </c:when>
+                            <c:otherwise>
+                                <section class="lh-assessment-card">
+                                    <div class="lh-assessment-card__grid">
+                                        <div class="lh-assessment-block">
+                                            <span>Assessment Type</span>
+                                            <strong>${selectedAssessment.type}</strong>
+                                        </div>
+                                        <div class="lh-assessment-block">
+                                            <span>Duration</span>
+                                            <strong>${selectedAssessment.duration != null ? selectedAssessment.duration : 30} minutes</strong>
+                                        </div>
+                                        <div class="lh-assessment-block">
+                                            <span>Attempts</span>
+                                            <strong>${selectedAssessmentUsedAttempts} used / ${selectedAssessmentAllowedAttempts} allowed</strong>
+                                        </div>
+                                        <div class="lh-assessment-block">
+                                            <span>Submission</span>
+                                            <strong>${selectedAssessment.submissionMode == 'file' ? 'File Upload' : (selectedAssessment.submissionMode == 'text' ? 'Written Response' : (selectedAssessment.submissionMode == 'both' ? 'Text + File' : 'Objective Responses'))}</strong>
                                         </div>
                                     </div>
-                                </c:if>
 
-                                <c:if test="${courseAccessGranted and selectedAssessment.type == 'Assignment'}">
-                                    <section class="lh-material-stage" style="margin-top: 18px;">
-                                        <div class="lh-stage-card">
-                                            <h3 style="margin:0 0 8px;">Assignment Workspace</h3>
-                                            <p style="margin:0 0 16px; color: var(--sv-muted);">Upload your assignment file here without leaving the learning hub.</p>
-
-                                            <c:if test="${not empty selectedAssessmentLatest}">
-                                                <div class="assignment-latest" style="margin-bottom: 16px;">
-                                                    Latest submission: ${selectedAssessmentLatest.status} on ${selectedAssessmentLatest.submitDate}
-                                                </div>
-                                            </c:if>
-
-                                            <form id="assignmentHubForm" method="post" action="${pageContext.request.contextPath}/student/assessments" enctype="multipart/form-data" style="display:grid; gap:14px;">
-                                                <input type="hidden" name="assessmentId" value="${selectedAssessment.assessmentId}">
-                                                <input type="hidden" name="enrollmentId" value="${enrollment.enrollmentId}">
-
-                                                <div class="assignment-upload-box">
-                                                    <label for="answerFileHub"><strong>Upload Assignment File</strong></label>
-                                                    <input id="answerFileHub" name="answerFile" type="file" required>
-                                                    <p class="assignment-upload-note">Accepted formats include PDF, DOC, DOCX, PPT, PPTX, ZIP, and image files. Maximum file size: 50MB.</p>
-                                                </div>
-
-                                                <div class="assessment-actions" style="margin-top: 8px;">
-                                                    <button class="sv-btn primary" type="submit">
-                                                        <i class="fas fa-upload"></i>&nbsp;Submit Assignment
-                                                    </button>
-                                                </div>
-                                            </form>
+                                    <div class="lh-assessment-card__content">
+                                        <div class="lh-assessment-block is-wide">
+                                            <span>Instructions</span>
+                                            <p>${not empty selectedAssessment.instructions ? selectedAssessment.instructions : 'Open the assessment when you are ready.'}</p>
                                         </div>
-                                    </section>
-                                </c:if>
 
-                                <section class="lh-material-stage">
-                                    <div class="lh-stage-card">
-                                        <h3 style="margin:0 0 8px;">Open assessment</h3>
-                                        <p style="margin:0 0 16px; color: var(--sv-muted);">Objective assessments still use the secure attempt page.</p>
-                                        <a class="sv-btn primary" href="${selectedAssessmentPrimaryUrl}">
-                                            <i class="fas fa-${workspacePrimaryActionIcon}"></i>
-                                            <span>${selectedAssessmentPrimaryLabel}</span>
-                                        </a>
+                                        <div class="lh-assessment-block is-wide">
+                                            <span>Current Status</span>
+                                            <p>
+                                                <strong>${selectedAssessmentStatusLabel}</strong>
+                                                <c:if test="${not empty selectedAssessmentLatest}">
+                                                    <span aria-hidden="true">&middot;</span>
+                                                    Latest attempt #${selectedAssessmentLatest.attemptNumber}
+                                                    <c:if test="${not empty selectedAssessmentLatest.score}">
+                                                        <span aria-hidden="true">&middot;</span>
+                                                        Score ${selectedAssessmentLatest.score}
+                                                    </c:if>
+                                                </c:if>
+                                            </p>
+                                        </div>
+
+                                        <c:if test="${not courseAccessGranted}">
+                                            <div class="lh-stage-notice is-warning">
+                                                <i class="fas fa-lock"></i>
+                                                <div>
+                                                    <strong>Assessment access is locked.</strong>
+                                                    <p>Complete payment first to continue through the assessment flow.</p>
+                                                </div>
+                                            </div>
+                                        </c:if>
+
+                                        <c:if test="${courseAccessGranted and selectedAssessment.type == 'Assignment'}">
+                                            <section class="lh-material-stage" style="margin-top: 18px;">
+                                                <div class="lh-stage-card">
+                                                    <h3 style="margin:0 0 8px;">Assignment Workspace</h3>
+                                                    <p style="margin:0 0 16px; color: var(--sv-muted);">Upload your assignment file here without leaving the learning hub.</p>
+
+                                                    <c:if test="${not empty selectedAssessmentLatest}">
+                                                        <div class="assignment-latest" style="margin-bottom: 16px;">
+                                                            Latest submission: ${selectedAssessmentLatest.status} on ${selectedAssessmentLatest.submitDate}
+                                                        </div>
+                                                    </c:if>
+
+                                                    <form id="assignmentHubForm" method="post" action="${pageContext.request.contextPath}/student/assessments" enctype="multipart/form-data" style="display:grid; gap:14px;">
+                                                        <input type="hidden" name="assessmentId" value="${selectedAssessment.assessmentId}">
+                                                        <input type="hidden" name="enrollmentId" value="${enrollment.enrollmentId}">
+
+                                                        <div class="assignment-upload-box">
+                                                            <label for="answerFileHub"><strong>Upload Assignment File</strong></label>
+                                                            <input id="answerFileHub" name="answerFile" type="file" required>
+                                                            <p class="assignment-upload-note">Accepted formats include PDF, DOC, DOCX, PPT, PPTX, ZIP, and image files. Maximum file size: 50MB.</p>
+                                                        </div>
+
+                                                        <div class="assessment-actions" style="margin-top: 8px;">
+                                                            <button class="sv-btn primary" type="submit">
+                                                                <i class="fas fa-upload"></i>&nbsp;Submit Assignment
+                                                            </button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </section>
+                                        </c:if>
+
+                                        <c:if test="${selectedAssessment.type != 'Assignment'}">
+                                            <section class="lh-material-stage">
+                                                <div class="lh-stage-card">
+                                                    <h3 style="margin:0 0 8px;">Start Assessment</h3>
+                                                    <p style="margin:0 0 16px; color: var(--sv-muted);">Take this objective assessment inside the secure Learning Hub workspace.</p>
+                                                    <a class="sv-btn primary" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=assessments&assessmentId=${selectedAssessment.assessmentId}&attempt=true">
+                                                        <i class="fas fa-play"></i>
+                                                        <span>${selectedAssessmentPrimaryLabel}</span>
+                                                    </a>
+                                                </div>
+                                            </section>
+                                        </c:if>
                                     </div>
                                 </section>
-                            </div>
-                        </section>
+                            </c:otherwise>
+                        </c:choose>
                     </c:when>
 
                     <c:when test="${not empty selectedMaterial}">
@@ -367,7 +395,7 @@
                     </a>
 
                     <c:choose>
-                        <c:when test="${selectedMode == 'assessment' and not empty selectedAssessment and not empty selectedAssessmentPrimaryUrl}">
+                        <c:when test="${selectedMode == 'assessment' and not empty selectedAssessment and not empty selectedAssessmentPrimaryUrl and not isAttempting}">
                             <c:choose>
                                 <c:when test="${selectedAssessment.type == 'Assignment'}">
                                     <button class="sv-btn primary" id="lhSubmitAction" type="submit" form="assignmentHubForm">
@@ -376,10 +404,20 @@
                                     </button>
                                 </c:when>
                                 <c:otherwise>
-                                    <a class="sv-btn primary" id="lhSubmitAction" href="${selectedAssessmentPrimaryUrl}">
-                                        <i class="fas fa-${workspacePrimaryActionIcon}"></i>
-                                        <span>${selectedAssessmentPrimaryLabel}</span>
-                                    </a>
+                                    <c:choose>
+                                        <c:when test="${selectedAssessmentPrimaryLabel == 'View Result'}">
+                                            <a class="sv-btn primary" id="lhSubmitAction" href="${selectedAssessmentPrimaryUrl}">
+                                                <i class="fas fa-chart-column"></i>
+                                                <span>View Result</span>
+                                            </a>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <a class="sv-btn primary" id="lhSubmitAction" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=assessments&assessmentId=${selectedAssessment.assessmentId}&attempt=true">
+                                                <i class="fas fa-play"></i>
+                                                <span>${selectedAssessmentPrimaryLabel}</span>
+                                            </a>
+                                        </c:otherwise>
+                                    </c:choose>
                                 </c:otherwise>
                             </c:choose>
                         </c:when>

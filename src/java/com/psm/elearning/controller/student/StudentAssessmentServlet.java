@@ -270,7 +270,7 @@ public class StudentAssessmentServlet extends HttpServlet {
             response.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
             response.setHeader("Pragma", "no-cache");
             response.setDateHeader("Expires", 0);
-            response.setHeader("X-Frame-Options", "DENY");
+            response.setHeader("X-Frame-Options", "SAMEORIGIN");
             response.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
         }
 

@@ -7,3 +7,4 @@
 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/student-v2.css">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/theme-toggle.css">
 <script defer src="${pageContext.request.contextPath}/js/theme-toggle.js"></script>
+<script defer src="${pageContext.request.contextPath}/js/student-ux.js"></script>

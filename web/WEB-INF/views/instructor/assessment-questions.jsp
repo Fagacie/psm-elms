@@ -75,6 +75,18 @@
         <c:if test="${param.error == 'publish_no_questions'}"><div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> Add at least one question before publishing this assessment.</div></c:if>
         <c:if test="${not empty errorMessage}"><div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> ${errorMessage}</div></c:if>
 
+        <div class="ia-stepper">
+            <a href="${pageContext.request.contextPath}/instructor/assessments?view=editor&courseId=${selectedCourse.courseId}&assessmentId=${selectedAssessment.assessmentId}" class="ia-step completed" style="text-decoration: none;">
+                <div class="ia-step-circle"><i class="fas fa-check"></i></div>
+                <div class="ia-step-label">Assessment Settings</div>
+            </a>
+            <div class="ia-step-line"></div>
+            <div class="ia-step active">
+                <div class="ia-step-circle">2</div>
+                <div class="ia-step-label">Question Bank</div>
+            </div>
+        </div>
+
         <div class="ia-flow-grid-question">
             <!-- Left Side: Add Question Form -->
             <div class="section-card ia-flow-sticky" style="padding: 24px;">
@@ -269,15 +281,5 @@
 
 
 
-<script>
-    document.addEventListener("DOMContentLoaded", () => {
-        const toggleBtn = document.getElementById("instructorMenuToggle");
-        if (toggleBtn) {
-            toggleBtn.addEventListener("click", () => {
-                document.body.classList.toggle("ins-shell-collapsed");
-            });
-        }
-    });
-</script>
 </body>
 </html>

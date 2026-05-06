@@ -2,7 +2,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
 <nav class="breadcrumb" aria-label="Breadcrumb">
-    <a href="${pageContext.request.contextPath}/instructor/dashboard">Dashboard</a>
+    <a href="${pageContext.request.contextPath}/dashboard">Dashboard</a>
     <span>&gt;</span>
     <a href="${pageContext.request.contextPath}/instructor/courses">Courses</a>
     <c:if test="${not empty selectedCourse}">
