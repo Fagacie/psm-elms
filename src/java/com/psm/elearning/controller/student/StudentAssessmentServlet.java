@@ -53,6 +53,20 @@ public class StudentAssessmentServlet extends HttpServlet {
 
     private static final long MAX_ASSIGNMENT_FILE_SIZE = 50L * 1024L * 1024L;
 
+    private static final class RouteContext {
+        private final Integer courseId;
+        private final Integer assessmentId;
+        private final String view;
+        private final boolean attemptRequested;
+
+        private RouteContext(Integer courseId, Integer assessmentId, String view, boolean attemptRequested) {
+            this.courseId = courseId;
+            this.assessmentId = assessmentId;
+            this.view = view;
+            this.attemptRequested = attemptRequested;
+        }
+    }
+
     private EnrollmentDAO enrollmentDAO;
     private AssessmentDAO assessmentDAO;
     private AssessmentQuestionDAO assessmentQuestionDAO;
@@ -86,11 +100,34 @@ public class StudentAssessmentServlet extends HttpServlet {
             return;
         }
 
+        RouteContext routeContext = resolveRouteContext(request.getPathInfo());
+
         Integer enrollmentId = parseInt(request.getParameter("enrollmentId"));
         Integer assessmentId = parseInt(request.getParameter("assessmentId"));
         Integer submissionId = parseInt(request.getParameter("submissionId"));
         Integer courseIdParam = parseInt(request.getParameter("courseId"));
-        String view = normalizeView(request.getParameter("view"), request.getParameter("mode"), request.getParameter("action"), assessmentId, submissionId);
+        String view = routeContext != null
+                ? routeContext.view
+                : normalizeView(request.getParameter("view"), request.getParameter("mode"), request.getParameter("action"), assessmentId, submissionId);
+
+        if (routeContext != null) {
+            if (assessmentId == null) {
+                assessmentId = routeContext.assessmentId;
+            }
+            if (courseIdParam == null) {
+                courseIdParam = routeContext.courseId;
+            }
+            if (enrollmentId == null && routeContext.courseId != null) {
+                Enrollment routeEnrollment = enrollmentDAO.findLatestEnrollmentByUserAndCourse(userId, routeContext.courseId);
+                if (routeEnrollment != null) {
+                    enrollmentId = routeEnrollment.getEnrollmentId();
+                }
+            }
+        }
+
+        boolean requestedAttemptMode = routeContext != null && routeContext.attemptRequested
+                || "attempt".equalsIgnoreCase(request.getParameter("mode"))
+                || "start".equalsIgnoreCase(request.getParameter("action"));
 
         if ("dashboard".equals(view) || "history".equals(view)) {
             if (enrollmentId == null) {
@@ -213,8 +250,6 @@ public class StudentAssessmentServlet extends HttpServlet {
         int allowedAttempts = baseAttempts + retakeRequestDAO.countApproved(assessmentId, userId);
         boolean canAttempt = usedAttempts < Math.max(allowedAttempts, 1) && materialCompleted && materialBlockReason == null;
 
-        boolean requestedAttemptMode = "attempt".equalsIgnoreCase(request.getParameter("mode"))
-                || "start".equalsIgnoreCase(request.getParameter("action"));
         boolean attemptMode = requestedAttemptMode && objectiveAssessment;
 
         if (attemptMode && !canAttempt) {
@@ -532,6 +567,46 @@ public class StudentAssessmentServlet extends HttpServlet {
         return "details";
     }
 
+    private RouteContext resolveRouteContext(String pathInfo) {
+        if (pathInfo == null || pathInfo.trim().isEmpty() || "/".equals(pathInfo.trim())) {
+            return null;
+        }
+
+        String[] parts = pathInfo.split("/");
+        List<String> tokens = new ArrayList<>();
+        for (String part : parts) {
+            if (part != null && !part.trim().isEmpty()) {
+                tokens.add(part.trim());
+            }
+        }
+
+        if (tokens.size() < 3) {
+            return null;
+        }
+
+        Integer courseId = parseInt(tokens.get(0));
+        if (courseId == null) {
+            return null;
+        }
+
+        String resourceType = tokens.get(1).toLowerCase();
+        Integer assessmentId = parseInt(tokens.get(2));
+        if (assessmentId == null) {
+            return null;
+        }
+
+        if ("assessments".equals(resourceType)) {
+            boolean attemptRequested = tokens.size() >= 4 && "attempt".equalsIgnoreCase(tokens.get(3));
+            return new RouteContext(courseId, assessmentId, attemptRequested ? "take" : "details", attemptRequested);
+        }
+
+        if ("assignments".equals(resourceType)) {
+            return new RouteContext(courseId, assessmentId, "take", false);
+        }
+
+        return null;
+    }
+
     private List<StudentAssessmentSummary> buildAssessmentSummaries(Enrollment enrollment, Integer userId, HttpSession session) {
         if (enrollment == null || enrollment.getCourseId() == null) {
             return Collections.emptyList();
@@ -762,28 +837,10 @@ public class StudentAssessmentServlet extends HttpServlet {
             return;
         }
 
-        List<AssessmentQuestion> questions = assessmentQuestionDAO.findByAssessment(assessmentId);
-        List<AssessmentGradeAudit> audits = assessmentGradeAuditDAO.findBySubmission(submissionId);
-        Map<Integer, String> studentAnswers = parseObjectiveAnswers(submission.getAnswersFilePath());
-        Map<Integer, String> correctAnswers = new LinkedHashMap<>();
-        if (questions != null) {
-            for (AssessmentQuestion question : questions) {
-                correctAnswers.put(question.getQuestionId(), question.getCorrectOption());
-            }
-        }
-
-        request.setAttribute("assessment", assessment);
-        request.setAttribute("enrollment", enrollment);
-        request.setAttribute("submission", submission);
-        request.setAttribute("submissionAudits", audits);
-        request.setAttribute("questions", questions != null ? questions : Collections.emptyList());
-        request.setAttribute("studentAnswerByQuestionId", studentAnswers);
-        request.setAttribute("correctAnswerByQuestionId", correctAnswers);
-        request.setAttribute("statusClass", statusClassForSubmission(submission));
-        request.setAttribute("submissionStatusLabel", humanizeSubmissionStatus(submission));
-        request.setAttribute("objectiveAssessment", isObjectiveAssessment(assessment));
-        request.setAttribute("percentage", computePercentage(submission.getScore(), assessment.getTotalMarks()));
-        request.getRequestDispatcher("/WEB-INF/views/student/assessment-result.jsp").forward(request, response);
+        response.sendRedirect(request.getContextPath() + "/student/enrollment-details?id="
+                + enrollment.getEnrollmentId()
+                + "&tab=assessments&view=result&assessmentId=" + assessmentId
+                + "&submissionId=" + submissionId);
     }
 
     private double computePercentage(Double score, Integer totalMarks) {

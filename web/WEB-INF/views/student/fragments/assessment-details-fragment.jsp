@@ -62,17 +62,15 @@
             <div class="sa-footer-actions">
                 <c:choose>
                     <c:when test="${canAttempt}">
-                        <%-- Button fires CP_StartAssessment event so the hub loads it inline --%>
-                        <button type="button" class="sv-btn primary"
-                                id="btnStartAssessment"
-                                data-attempt-url="${pageContext.request.contextPath}/student/assessments?view=take&enrollmentId=${enrollment.enrollmentId}&assessmentId=${assessment.assessmentId}&mode=attempt">
+                                <a class="sv-btn primary"
+                                    href="${pageContext.request.contextPath}/courses/${enrollment.courseId}/${assessment.type == 'Assignment' ? 'assignments' : 'assessments'}/${assessment.assessmentId}${assessment.type == 'Assignment' ? '' : '/attempt'}">
                             <i class="fas fa-play"></i> Start Assessment
-                        </button>
+                        </a>
                     </c:when>
                     <c:otherwise>
                         <span class="sa-no-attempts"><i class="fas fa-ban"></i> No attempts remaining</span>
                         <c:if test="${assessmentSummary.latestSubmission != null}">
-                            <a class="sv-btn" href="${pageContext.request.contextPath}/student/assessments?view=result&enrollmentId=${enrollment.enrollmentId}&assessmentId=${assessment.assessmentId}">
+                            <a class="sv-btn" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=assessments&view=result&assessmentId=${assessment.assessmentId}&submissionId=${assessmentSummary.latestSubmission.submissionId}">
                                 <i class="fas fa-eye"></i> View Results
                             </a>
                         </c:if>
@@ -82,19 +80,3 @@
         </article>
     </div>
 </div>
-
-<script>
-(function () {
-    var btn = document.getElementById('btnStartAssessment');
-    if (!btn) return;
-    btn.addEventListener('click', function () {
-        var url = this.getAttribute('data-attempt-url');
-        if (!url) return;
-        // Fire event upward to the course player host page
-        document.dispatchEvent(new CustomEvent('CP_StartAssessment', {
-            bubbles: true,
-            detail: { attemptUrl: url }
-        }));
-    });
-})();
-</script>

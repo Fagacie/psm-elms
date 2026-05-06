@@ -1,0 +1,84 @@
+/* Lightweight, custom styles for the assessment builder (no Bootstrap) */
+:root{
+    --builder-bg:#ffffff;
+    --builder-card:#fbfcfe;
+    --builder-border:#e6eef6;
+    --builder-accent:#045b8b;
+    --builder-muted:#6b7280;
+    --builder-radius:10px;
+}
+
+.app-main .ia-workspace .section-card{
+    background: var(--builder-bg);
+    border: 1px solid var(--builder-border);
+    padding: 22px;
+    border-radius: var(--builder-radius);
+}
+
+.ia-workspace .ia-wizard-form input[type="text"],
+.ia-workspace .ia-wizard-form input[type="number"],
+.ia-workspace .ia-wizard-form textarea,
+.ia-workspace .ia-wizard-form select{
+    border: 1px solid #d1e3f3;
+    background: #fff;
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 15px;
+    outline: none;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.ia-workspace .ia-wizard-form label{
+    display:block;
+    margin-bottom:8px;
+    font-weight:700;
+    color:var(--builder-muted);
+    font-size:0.78rem;
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+}
+
+.ia-workspace .ia-wizard-form .section-row{ display:grid; gap:16px; }
+
+.ia-workspace .btn-primary{
+    background: linear-gradient(180deg,var(--builder-accent),#033e5a);
+    color: #fff; border: none; padding: 10px 16px; border-radius:8px; font-weight:700; cursor:pointer;
+}
+
+.ia-workspace .btn-primary:active{ transform: translateY(1px); }
+
+.ia-workspace .ins-page-kicker{ font-size:0.8rem; color:var(--builder-muted); margin:0 0 6px; }
+
+.ia-workspace h2{ margin:0 0 8px; font-size:1.35rem; }
+
+.hidden-field{ display: none !important; }
+
+.ia-workspace .builder-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+}
+
+.ia-workspace .builder-actions .btn {
+    min-height: 38px;
+}
+
+/* Responsive tweaks */
+@media (max-width:900px){
+    .app-main .ia-workspace{ padding: 16px; }
+
+    .ia-workspace .builder-actions {
+        justify-content: stretch;
+    }
+
+    .ia-workspace .builder-actions .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* Small helper for error states */
+.field-error{ border-color:#dc2626 !important; }
+.error-message{ color:#dc2626; font-size:0.9rem; margin-top:6px; }

@@ -66,6 +66,25 @@
                             <span>Instructions</span>
                             <p><c:choose><c:when test="${not empty displayInstructions}">${displayInstructions}</c:when><c:otherwise>No instructions provided.</c:otherwise></c:choose></p>
                         </div>
+                        <c:if test="${not objectiveAssessment and not empty questions}">
+                            <div class="sa-detail-item">
+                                <span>Assignment prompt</span>
+                                <div style="display:grid; gap:10px; margin-top: 6px;">
+                                    <c:forEach var="q" items="${questions}" varStatus="loop">
+                                        <div class="sa-note warning" style="margin: 0;">
+                                            <strong>Item ${loop.index + 1}:</strong> ${q.questionText}
+                                            <c:if test="${not empty q.attachmentUrl}">
+                                                <div style="margin-top: 8px;">
+                                                    <a class="sv-btn" href="${q.attachmentUrl}" target="_blank" rel="noopener noreferrer">
+                                                        <i class="fas fa-file-pdf"></i> Open PDF Brief
+                                                    </a>
+                                                </div>
+                                            </c:if>
+                                        </div>
+                                    </c:forEach>
+                                </div>
+                            </div>
+                        </c:if>
                         <div class="sa-detail-item">
                             <span>Attempts</span>
                             <strong>${usedAttempts} used of ${allowedAttempts} allowed</strong>
@@ -119,8 +138,8 @@
                         <a class="sv-btn" href="${pageContext.request.contextPath}/student/assessments?view=dashboard&enrollmentId=${enrollment.enrollmentId}"><i class="fas fa-arrow-left"></i> Back</a>
                         <c:choose>
                             <c:when test="${canAttempt}">
-                                <a class="sv-btn primary" href="${pageContext.request.contextPath}/student/assessments?view=take&enrollmentId=${enrollment.enrollmentId}&assessmentId=${assessment.assessmentId}&mode=attempt">
-                                    <i class="fas fa-play"></i> Start Assessment
+                                <a class="sv-btn primary" href="${assessment.type == 'Assignment' ? pageContext.request.contextPath.concat('/student/enrollment-details?id=').concat(enrollment.enrollmentId).concat('&tab=assessments&assessmentId=').concat(assessment.assessmentId) : pageContext.request.contextPath.concat('/courses/').concat(enrollment.courseId).concat('/assessments/').concat(assessment.assessmentId).concat('/attempt')}">
+                                    <i class="fas fa-play"></i> ${objectiveAssessment ? 'Start Assessment' : 'Open Assignment'}
                                 </a>
                             </c:when>
                             <c:otherwise>

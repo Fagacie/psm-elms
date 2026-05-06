@@ -75,10 +75,10 @@
                     <a class="sv-btn" href="${pageContext.request.contextPath}/student/assessments?view=dashboard&enrollmentId=${enrollment.enrollmentId}"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
                     <c:choose>
                         <c:when test="${not empty submission.score}">
-                            <a class="sv-btn primary" href="${pageContext.request.contextPath}/student/assessments?view=result&enrollmentId=${enrollment.enrollmentId}&assessmentId=${assessment.assessmentId}&submissionId=${submission.submissionId}"><i class="fas fa-chart-column"></i> View Results</a>
+                            <a class="sv-btn primary" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=assessments&view=result&assessmentId=${assessment.assessmentId}&submissionId=${submission.submissionId}"><i class="fas fa-chart-column"></i> View Results</a>
                         </c:when>
                         <c:otherwise>
-                            <a class="sv-btn primary" href="${pageContext.request.contextPath}/student/assessments?view=result&enrollmentId=${enrollment.enrollmentId}&assessmentId=${assessment.assessmentId}&submissionId=${submission.submissionId}"><i class="fas fa-comment-dots"></i> Open Feedback</a>
+                            <a class="sv-btn primary" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=assessments&view=result&assessmentId=${assessment.assessmentId}&submissionId=${submission.submissionId}"><i class="fas fa-comment-dots"></i> Open Feedback</a>
                         </c:otherwise>
                     </c:choose>
                 </div>

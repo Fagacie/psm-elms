@@ -716,6 +716,22 @@
                                         <h4>Submit Assignment</h4>
                                         <span class="assignment-badge">File Upload</span>
                                     </div>
+                                    <c:if test="${not empty questions}">
+                                        <div style="display:grid; gap: 10px;">
+                                            <c:forEach var="q" items="${questions}" varStatus="loop">
+                                                <div class="assignment-latest">
+                                                    <strong>Prompt ${loop.index + 1}:</strong> ${q.questionText}
+                                                    <c:if test="${not empty q.attachmentUrl}">
+                                                        <div style="margin-top: 8px;">
+                                                            <a class="sv-btn" href="${q.attachmentUrl}" target="_blank" rel="noopener noreferrer">
+                                                                <i class="fas fa-file-pdf"></i> Open PDF Brief
+                                                            </a>
+                                                        </div>
+                                                    </c:if>
+                                                </div>
+                                            </c:forEach>
+                                        </div>
+                                    </c:if>
                                     <p class="assignment-intro">Upload your completed assignment file below. Text responses are not required for this assessment.</p>
 
                                     <c:if test="${param.success == 'submitted'}">

@@ -8,6 +8,8 @@ import com.psm.elearning.dao.PaymentDAO;
 import com.psm.elearning.dao.PaymentDAOImpl;
 import com.psm.elearning.dao.AssessmentDAO;
 import com.psm.elearning.dao.AssessmentDAOImpl;
+import com.psm.elearning.dao.AssessmentQuestionDAO;
+import com.psm.elearning.dao.AssessmentQuestionDAOImpl;
 import com.psm.elearning.dao.AssessmentSubmissionDAO;
 import com.psm.elearning.dao.AssessmentSubmissionDAOImpl;
 import com.psm.elearning.dao.AssessmentRetakeRequestDAO;
@@ -18,6 +20,7 @@ import com.psm.elearning.model.Enrollment;
 import com.psm.elearning.model.Material;
 import com.psm.elearning.model.Payment;
 import com.psm.elearning.model.Assessment;
+import com.psm.elearning.model.AssessmentQuestion;
 import com.psm.elearning.model.AssessmentSubmission;
 import com.psm.elearning.util.AssessmentPlacementUtil;
 import com.psm.elearning.service.AppSettingsService;
@@ -51,6 +54,7 @@ public class EnrollmentDetailsServlet extends HttpServlet {
     private PaymentDAO paymentDAO;
     private AssessmentDAO assessmentDAO;
     private AssessmentSubmissionDAO submissionDAO;
+        private AssessmentQuestionDAO assessmentQuestionDAO;
     private AssessmentRetakeRequestDAO retakeRequestDAO;
     private MaterialProgressDAO materialProgressDAO;
     private EnrollmentStateSyncService enrollmentStateSyncService;
@@ -204,6 +208,7 @@ public class EnrollmentDetailsServlet extends HttpServlet {
         materialDAO = new MaterialDAOImpl();
         paymentDAO = new PaymentDAOImpl();
         assessmentDAO = new AssessmentDAOImpl();
+            assessmentQuestionDAO = new AssessmentQuestionDAOImpl();
         submissionDAO = new AssessmentSubmissionDAOImpl();
         retakeRequestDAO = new AssessmentRetakeRequestDAOImpl();
         materialProgressDAO = new MaterialProgressDAOImpl();
@@ -701,6 +706,10 @@ public class EnrollmentDetailsServlet extends HttpServlet {
             Material focusMaterial = null;
             Material previousMaterial = null;
             Material nextMaterial = null;
+                LOGGER.info("EnrollmentDetailsServlet: enrollmentId=" + enrollmentId
+                    + ", courseId=" + enrollment.getCourseId()
+                    + ", materialCount=" + orderedMaterials.size()
+                    + ", assessmentCount=" + assessments.size());
             if (!orderedMaterials.isEmpty()) {
                 int focusIndex = -1;
                 for (int i = 0; i < orderedMaterials.size(); i++) {
@@ -741,9 +750,15 @@ public class EnrollmentDetailsServlet extends HttpServlet {
             }
 
             Integer requestedAssessmentId = parseIntegerParameter(request.getParameter("assessmentId"));
+            Integer requestedSubmissionId = parseIntegerParameter(request.getParameter("submissionId"));
             Integer requestedMaterialId = parseIntegerParameter(request.getParameter("materialId"));
             Assessment selectedAssessment = null;
             Material selectedMaterial = null;
+            String selectedMode = "empty";
+
+            LOGGER.info("EnrollmentDetailsServlet: tab=" + tab
+                    + ", requestedMaterialId=" + requestedMaterialId
+                    + ", requestedAssessmentId=" + requestedAssessmentId);
 
             if ("assessments".equalsIgnoreCase(tab)) {
                 Integer effectiveAssessmentId = requestedAssessmentId != null ? requestedAssessmentId : currentAssessmentId;
@@ -768,8 +783,12 @@ public class EnrollmentDetailsServlet extends HttpServlet {
             if (selectedMaterial == null && selectedAssessment == null && currentAssessmentId != null) {
                 selectedAssessment = findAssessmentById(assessments, currentAssessmentId);
             }
+            LOGGER.info("EnrollmentDetailsServlet: selectedMaterialId="
+                    + (selectedMaterial != null ? selectedMaterial.getMaterialId() : null)
+                    + ", selectedAssessmentId="
+                    + (selectedAssessment != null ? selectedAssessment.getAssessmentId() : null));
 
-            String selectedMode = selectedAssessment != null ? "assessment" : (selectedMaterial != null ? "material" : "empty");
+            selectedMode = selectedAssessment != null ? "assessment" : (selectedMaterial != null ? "material" : "empty");
             if ("assessment".equals(selectedMode)) {
                 tab = "assessments";
             } else if ("material".equals(selectedMode)) {
@@ -805,7 +824,53 @@ public class EnrollmentDetailsServlet extends HttpServlet {
             String materialCompletionButtonLabel = "Mark Complete";
             List<WorkspaceChip> workspaceChips = new ArrayList<>();
 
-            if (selectedAssessment != null) {
+            if (requestedAssessmentId != null && requestedSubmissionId != null) {
+                Assessment resultAssessment = assessmentDAO.findById(requestedAssessmentId);
+                AssessmentSubmission resultSubmission = submissionDAO.findById(requestedSubmissionId);
+                if (resultAssessment != null
+                        && resultSubmission != null
+                        && resultSubmission.getUserId() != null
+                        && resultSubmission.getUserId().equals(userId)
+                        && resultSubmission.getAssessmentId() != null
+                        && resultSubmission.getAssessmentId().equals(requestedAssessmentId)) {
+                    List<AssessmentQuestion> resultQuestions = assessmentQuestionDAO.findByAssessment(requestedAssessmentId);
+                    Map<Integer, String> studentAnswers = parseObjectiveAnswers(resultSubmission.getAnswersFilePath());
+                    Map<Integer, String> correctAnswers = new LinkedHashMap<>();
+                    if (resultQuestions != null) {
+                        for (AssessmentQuestion question : resultQuestions) {
+                            correctAnswers.put(question.getQuestionId(), question.getCorrectOption());
+                        }
+                    }
+
+                    request.setAttribute("assessmentResultAssessment", resultAssessment);
+                    request.setAttribute("assessmentResultSubmission", resultSubmission);
+                    request.setAttribute("assessmentResultQuestions", resultQuestions != null ? resultQuestions : new ArrayList<AssessmentQuestion>());
+                    request.setAttribute("assessmentResultStudentAnswers", studentAnswers);
+                    request.setAttribute("assessmentResultCorrectAnswers", correctAnswers);
+                    request.setAttribute("assessmentResultObjective", !"Assignment".equalsIgnoreCase(resultAssessment.getType()));
+                    request.setAttribute("assessmentResultPercentage", computePercentage(resultSubmission.getScore(), resultAssessment.getTotalMarks()));
+                    request.setAttribute("assessmentResultStatusLabel", humanizeSubmissionStatus(resultSubmission));
+                    request.setAttribute("assessmentResultStatusClass", statusClassForSubmission(resultSubmission));
+
+                    selectedAssessment = resultAssessment;
+                    selectedAssessmentLatest = resultSubmission;
+                    selectedAssessmentStatusLabel = humanizeSubmissionStatus(resultSubmission);
+                    selectedAssessmentStatusClass = statusClassForSubmission(resultSubmission);
+                    selectedAssessmentPrimaryLabel = "View Details";
+                    selectedAssessmentPrimaryUrl = request.getContextPath() + "/student/enrollment-details?id=" + enrollment.getEnrollmentId() + "&tab=assessments&view=result&assessmentId=" + resultAssessment.getAssessmentId() + "&submissionId=" + resultSubmission.getSubmissionId();
+                    selectedMode = "result";
+                    tab = "assessments";
+                    workspaceEyebrow = "Results & Feedback";
+                    workspaceTitle = resultAssessment.getTitle();
+                    workspaceDescription = "Review your score, submission details, and feedback inside the learning hub.";
+                    workspaceStatusLabel = humanizeSubmissionStatus(resultSubmission);
+                    workspaceStatusClass = statusClassForSubmission(resultSubmission);
+                    workspaceActionNote = "Results are shown inside the learning hub.";
+                    workspacePrimaryActionIcon = "chart-column";
+                }
+            }
+
+            if (selectedAssessment != null && !"result".equals(selectedMode)) {
                 if (!courseAccessGranted) {
                     selectedAssessmentStatusLabel = "Locked";
                     selectedAssessmentStatusClass = "status-Pending";
@@ -824,18 +889,12 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                     selectedAssessmentPrimaryLabel = Assessment.TYPE_ASSIGNMENT.equals(selectedAssessment.getType())
                             ? "Continue Submission"
                             : "Continue Assessment";
-                    selectedAssessmentPrimaryUrl = request.getContextPath()
-                            + "/student/assessments?courseId=" + enrollment.getCourseId()
-                            + "&assessmentId=" + selectedAssessment.getAssessmentId()
-                            + "&mode=attempt&fromHub=1&enrollmentId=" + enrollment.getEnrollmentId();
+                    selectedAssessmentPrimaryUrl = buildCourseAssessmentUrl(request, enrollment.getEnrollmentId(), enrollment.getCourseId(), selectedAssessment.getAssessmentId(), Assessment.TYPE_ASSIGNMENT.equals(selectedAssessment.getType()));
                 } else if (courseAccessGranted && selectedAssessmentUsedAttempts < selectedAssessmentAllowedAttempts) {
                     selectedAssessmentPrimaryLabel = Assessment.TYPE_ASSIGNMENT.equals(selectedAssessment.getType())
                             ? "Open Assignment"
                             : "Start Assessment";
-                    selectedAssessmentPrimaryUrl = request.getContextPath()
-                            + "/student/assessments?action=start&courseId=" + enrollment.getCourseId()
-                            + "&assessmentId=" + selectedAssessment.getAssessmentId()
-                            + "&fromHub=1&enrollmentId=" + enrollment.getEnrollmentId();
+                    selectedAssessmentPrimaryUrl = buildCourseAssessmentUrl(request, enrollment.getEnrollmentId(), enrollment.getCourseId(), selectedAssessment.getAssessmentId(), Assessment.TYPE_ASSIGNMENT.equals(selectedAssessment.getType()));
                 } else if (selectedAssessmentLatest != null && selectedAssessmentLatest.getSubmissionId() != null) {
                     selectedAssessmentPrimaryLabel = "View Result";
                     selectedAssessmentPrimaryUrl = request.getContextPath()
@@ -1147,6 +1206,73 @@ public class EnrollmentDetailsServlet extends HttpServlet {
         } catch (NumberFormatException ex) {
             return null;
         }
+    }
+
+    private Map<Integer, String> parseObjectiveAnswers(String rawAnswers) {
+        Map<Integer, String> answers = new LinkedHashMap<>();
+        if (rawAnswers == null || rawAnswers.trim().isEmpty()) {
+            return answers;
+        }
+        String[] tokens = rawAnswers.split(";");
+        for (String token : tokens) {
+            if (token == null || token.trim().isEmpty() || !token.startsWith("Q")) {
+                continue;
+            }
+            int splitIndex = token.indexOf(':');
+            if (splitIndex <= 1) {
+                continue;
+            }
+            try {
+                Integer questionId = Integer.parseInt(token.substring(1, splitIndex).trim());
+                String answer = token.substring(splitIndex + 1).trim();
+                answers.put(questionId, answer);
+            } catch (NumberFormatException ignore) {
+            }
+        }
+        return answers;
+    }
+
+    private double computePercentage(Double score, Integer totalMarks) {
+        if (score == null || totalMarks == null || totalMarks <= 0) {
+            return 0.0;
+        }
+        return Math.round((score / totalMarks) * 1000.0) / 10.0;
+    }
+
+    private String humanizeSubmissionStatus(AssessmentSubmission submission) {
+        if (submission == null || submission.getStatus() == null || submission.getStatus().trim().isEmpty()) {
+            return "Awaiting Review";
+        }
+        String status = submission.getStatus().trim();
+        if ("Graded".equalsIgnoreCase(status)) {
+            return "Graded";
+        }
+        if ("TimedOut".equalsIgnoreCase(status)) {
+            return "Timed Out";
+        }
+        return "Awaiting Review";
+    }
+
+    private String statusClassForSubmission(AssessmentSubmission submission) {
+        if (submission == null || submission.getStatus() == null) {
+            return "status-awaiting";
+        }
+        String status = submission.getStatus().trim();
+        if ("Graded".equalsIgnoreCase(status)) {
+            return "status-graded";
+        }
+        if ("TimedOut".equalsIgnoreCase(status)) {
+            return "status-closed";
+        }
+        return "status-awaiting";
+    }
+
+    private String buildCourseAssessmentUrl(HttpServletRequest request, Integer enrollmentId, Integer courseId, Integer assessmentId, boolean assignment) {
+        if (assignment) {
+            return request.getContextPath() + "/student/enrollment-details?id=" + enrollmentId + "&tab=assessments&assessmentId=" + assessmentId;
+        }
+        String base = request.getContextPath() + "/courses/" + courseId + "/assessments/" + assessmentId;
+        return base + "/attempt";
     }
 
     private Material findMaterialById(List<Material> materials, Integer materialId) {

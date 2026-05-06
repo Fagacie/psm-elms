@@ -102,7 +102,7 @@
                                                 <i class="fas fa-eye"></i> Open
                                             </a>
                                             <c:if test="${not empty item.latestSubmission}">
-                                                <a class="sa-subtle ass-inline-link" href="${pageContext.request.contextPath}/student/assessments?view=result&enrollmentId=${enrollment.enrollmentId}&assessmentId=${item.assessment.assessmentId}&submissionId=${item.latestSubmission.submissionId}">Result</a>
+                                                <a class="sa-subtle ass-inline-link" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=assessments&view=result&assessmentId=${item.assessment.assessmentId}&submissionId=${item.latestSubmission.submissionId}">Result</a>
                                             </c:if>
                                         </td>
                                     </tr>

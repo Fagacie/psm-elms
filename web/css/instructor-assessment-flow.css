@@ -1,0 +1,810 @@
+.ia-flow-grid-single {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 28px;
+    align-items: start;
+}
+
+.ia-flow-grid-question {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 28px;
+    align-items: start;
+}
+
+.ia-flow-grid-submission {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: 28px;
+    align-items: start;
+}
+
+/* Modern Submissions Table */
+.ia-submissions-table {
+    width: 100%;
+    margin: 0;
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+.ia-submissions-table thead {
+    background: linear-gradient(to bottom, #f8fafc, #f1f5f9);
+    border-bottom: 2px solid var(--ins-border);
+}
+
+.ia-submissions-table thead th {
+    padding: 14px 16px;
+    text-align: left;
+    font-size: 0.7rem;
+    font-weight: 800;
+    color: var(--ins-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    border: none;
+}
+
+.ia-submissions-table thead th.col-expand {
+    width: 48px;
+    text-align: center;
+}
+
+.ia-submissions-table thead th.col-student {
+    flex: 1;
+    min-width: 220px;
+}
+
+.ia-submissions-table thead th.col-status {
+    min-width: 120px;
+}
+
+.ia-submissions-table thead th.col-date {
+    min-width: 160px;
+}
+
+.ia-submissions-table thead th.col-attempt {
+    width: 80px;
+    text-align: center;
+}
+
+.ia-submissions-table thead th.col-score {
+    width: 120px;
+    text-align: center;
+}
+
+.ia-submissions-table thead th.col-actions {
+    width: 120px;
+    text-align: center;
+}
+
+.ia-submissions-table tbody {
+    background: #fff;
+}
+
+.ia-submission-row {
+    border-bottom: 1px solid #e2e8f0;
+    transition: all 0.15s ease;
+    position: relative;
+}
+
+.ia-submission-row:hover {
+    background-color: #f9fafb;
+    box-shadow: inset 0 0 0 1px #e2e8f0;
+}
+
+.ia-submission-row.ia-expanded {
+    background-color: #f3f8ff;
+    border-bottom-color: var(--ins-primary);
+    box-shadow: inset 0 1px 0 var(--ins-accent-soft);
+}
+
+.ia-submission-row td {
+    padding: 14px 16px;
+    vertical-align: middle;
+    font-size: 0.9rem;
+}
+
+.ia-submission-row td.col-expand {
+    text-align: center;
+    width: 48px;
+    padding: 14px 8px;
+}
+
+.ia-submission-row td.col-student {
+    flex: 1;
+    min-width: 220px;
+}
+
+.ia-submission-row td.col-status {
+    min-width: 120px;
+}
+
+.ia-submission-row td.col-date {
+    min-width: 160px;
+    font-size: 0.85rem;
+    color: var(--ins-muted);
+}
+
+.ia-submission-row td.col-attempt {
+    width: 80px;
+    text-align: center;
+}
+
+.ia-submission-row td.col-score {
+    width: 120px;
+    text-align: center;
+}
+
+.ia-submission-row td.col-actions {
+    width: 120px;
+    text-align: center;
+}
+
+/* Expand Button */
+.ia-expand-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--ins-border);
+    border-radius: 6px;
+    background: #fff;
+    color: var(--ins-text);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.85rem;
+    padding: 0;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+}
+
+.ia-expand-btn:hover {
+    background: var(--ins-accent-soft);
+    color: var(--ins-primary);
+    border-color: var(--ins-primary);
+    box-shadow: 0 2px 4px rgba(15, 23, 42, 0.1);
+}
+
+.ia-submission-row.ia-expanded .ia-expand-btn {
+    background: var(--ins-primary);
+    color: #fff;
+    border-color: var(--ins-primary);
+    transform: rotate(180deg);
+    box-shadow: 0 2px 6px rgba(59, 130, 246, 0.3);
+}
+
+/* Detail Row */
+.ia-detail-row {
+    background: #f9fafb;
+    border-bottom: 1px solid #e2e8f0;
+    animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        max-height: 0;
+    }
+    to {
+        opacity: 1;
+        max-height: 500px;
+    }
+}
+
+.ia-detail-row td {
+    padding: 0;
+}
+
+.ia-grading-detail {
+    padding: 24px;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    margin: 12px;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+}
+
+.ia-detail-section {
+    margin-bottom: 24px;
+}
+
+.ia-detail-section:last-child {
+    margin-bottom: 0;
+}
+
+.ia-detail-title {
+    margin: 0 0 16px 0;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--ins-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Grading Form */
+.ia-grading-form {
+    border-top: 1px dashed #e2e8f0;
+    padding-top: 24px;
+}
+
+.ia-form-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.ia-form-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 700;
+    color: var(--ins-muted);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.ia-score-input {
+    flex: 1;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--ins-primary);
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+    background: #fff;
+}
+
+.ia-score-input:hover {
+    border-color: var(--ins-primary);
+    background: #fcfdff;
+}
+
+.ia-score-input:focus {
+    outline: none;
+    border-color: var(--ins-primary);
+    box-shadow: 0 0 0 3px var(--ins-accent-soft);
+    background: #fff;
+}
+
+.ia-score-max {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--ins-muted);
+    white-space: nowrap;
+    padding: 0 8px;
+}
+
+.ia-feedback-textarea {
+    width: 100%;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    box-sizing: border-box;
+    resize: vertical;
+    transition: all 0.2s ease;
+    background: #fff;
+}
+
+.ia-feedback-textarea:hover {
+    border-color: var(--ins-primary);
+    background: #fcfdff;
+}
+
+.ia-feedback-textarea:focus {
+    outline: none;
+    border-color: var(--ins-primary);
+    box-shadow: 0 0 0 3px var(--ins-accent-soft);
+    background: #fff;
+}
+
+.ia-form-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #e2e8f0;
+}
+
+.ia-form-actions .btn {
+    flex: 1;
+    justify-content: center;
+    min-height: 40px;
+    border-radius: 8px;
+}
+
+/* Action Buttons in Table */
+.ia-action-buttons {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+
+.ia-grade-btn {
+    min-height: 36px;
+    padding: 8px 12px;
+    border-radius: 6px;
+}
+
+.ia-workspace .ins-page-head {
+    margin-bottom: 18px;
+}
+
+.ia-workspace .ins-page-head h2 {
+    margin: 0;
+    font-size: 1.45rem;
+    line-height: 1.2;
+    letter-spacing: -0.015em;
+}
+
+.ia-workspace .ins-page-kicker {
+    margin: 0 0 8px;
+    letter-spacing: 0.08em;
+}
+
+.ia-workspace .ins-hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.ia-workspace .ins-hero-actions .btn {
+    min-height: 38px;
+}
+
+.ia-workspace .section-card {
+    border-radius: 12px;
+    box-shadow: 0 1px 0 rgba(15, 23, 42, 0.03);
+}
+
+.ia-flow-sticky {
+    position: sticky;
+    top: 94px;
+}
+
+.ia-panel-head {
+    margin-bottom: 16px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--ins-border);
+}
+
+.ia-panel-head h3 {
+    margin: 0;
+    font-size: 1.06rem;
+    color: var(--ins-text);
+}
+
+.ia-panel-title-icon {
+    color: var(--ins-primary);
+}
+
+.ia-inline-form {
+    display: inline-flex;
+}
+
+.ia-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.ia-title-row h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    letter-spacing: -0.01em;
+}
+
+.ia-count-pill {
+    font-size: 0.82rem;
+    color: var(--ins-muted);
+    background: #f1f5f9;
+    padding: 4px 12px;
+    border-radius: 999px;
+}
+
+.ia-question-card {
+    padding: 20px;
+}
+
+.ia-question-card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 14px;
+}
+
+.ia-question-index {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: var(--ins-accent-soft);
+    color: var(--ins-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 0.8rem;
+}
+
+.ia-question-title {
+    font-size: 1.02rem;
+    font-weight: 600;
+    color: var(--ins-text);
+    line-height: 1.5;
+}
+
+.ia-question-points {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--ins-muted);
+    background: #f8fafc;
+    border: 1px solid var(--ins-border);
+    padding: 4px 10px;
+    border-radius: 6px;
+}
+
+.ia-options-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.ia-option-item {
+    padding: 12px;
+    border: 1px solid var(--ins-border);
+    border-radius: 10px;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #fff;
+}
+
+.ia-option-item.is-correct {
+    background: var(--ins-accent-soft);
+}
+
+.ia-question-actions {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 14px;
+    border-top: 1px solid var(--ins-border);
+}
+
+.ia-question-form-block {
+    margin-bottom: 20px;
+}
+
+.ia-question-form-grid {
+    display: grid;
+    gap: 14px;
+    margin-bottom: 20px;
+}
+
+.ia-question-form-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.ia-question-form .field-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 700;
+    color: var(--ins-muted);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.ia-question-form input,
+.ia-question-form textarea,
+.ia-question-form select {
+    width: 100%;
+    padding: 11px 12px;
+    box-sizing: border-box;
+}
+
+.ia-question-form .btn {
+    width: 100%;
+    justify-content: center;
+}
+
+.ia-submission-panel {
+    padding: 0;
+    overflow: hidden;
+    border-color: var(--ins-primary);
+}
+
+.ia-roster-head {
+    padding: 22px;
+    border-bottom: 1px solid var(--ins-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.ia-roster-head h3 {
+    margin: 0;
+    font-size: 1.08rem;
+    color: var(--ins-text);
+}
+
+.ia-roster-count {
+    font-size: 0.82rem;
+    color: var(--ins-muted);
+    background: #f1f5f9;
+    padding: 4px 12px;
+    border-radius: 999px;
+}
+
+.ia-roster-table {
+    margin: 0;
+    border: none;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.ia-roster-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: #f8fafc;
+    border-bottom: 1px solid var(--ins-border);
+    font-size: 0.74rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ins-muted);
+}
+
+.ia-roster-table tbody tr:nth-child(even) {
+    background: #fcfdff;
+}
+
+.ia-roster-table tbody tr:hover {
+    background: #f3f8ff;
+}
+
+.ia-roster-table th,
+.ia-roster-table td {
+    padding-top: 12px;
+    padding-bottom: 12px;
+}
+
+.ia-roster-table th:first-child,
+.ia-roster-table td:first-child {
+    padding-left: 22px;
+}
+
+.ia-roster-table th:last-child,
+.ia-roster-table td:last-child {
+    padding-right: 22px;
+    text-align: right;
+}
+
+.ia-student-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.ia-student-meta strong {
+    color: var(--ins-text);
+}
+
+.ia-student-meta span {
+    font-size: 0.8rem;
+    color: var(--ins-muted);
+}
+
+.ia-attempt-chip {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--ins-text);
+}
+
+.ia-muted-dash {
+    color: var(--ins-muted);
+}
+
+.ia-score-value {
+    color: var(--ins-primary);
+}
+
+.ia-score-total {
+    font-size: 0.8rem;
+    color: var(--ins-muted);
+}
+
+.ia-review-btn {
+    font-size: 0.75rem;
+    padding: 6px 12px;
+    white-space: nowrap;
+}
+
+.ia-no-work {
+    font-size: 0.75rem;
+    color: var(--ins-muted);
+    font-style: italic;
+}
+
+.ia-selected-row {
+    background: var(--ins-accent-soft);
+}
+
+.ia-submission-panel-head {
+    padding: 18px 22px;
+    background: var(--ins-primary);
+    color: #fff;
+}
+
+.ia-submission-panel-head h3 {
+    margin: 0;
+    font-size: 1.05rem;
+    color: #fff;
+}
+
+.ia-submission-panel-body {
+    padding: 22px;
+}
+
+.ia-panel-meta {
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--ins-border);
+}
+
+.ia-submission-panel-body label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 700;
+    color: var(--ins-muted);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.ia-submission-panel-body input,
+.ia-submission-panel-body textarea,
+.ia-submission-panel-body select {
+    width: 100%;
+    border: 1px solid var(--ins-border);
+    border-radius: 10px;
+    padding: 12px;
+    font-size: 0.92rem;
+    box-sizing: border-box;
+}
+
+.ia-workspace .btn.btn-primary,
+.ia-workspace .btn.btn-secondary {
+    border-radius: 9px;
+}
+
+.ia-workspace .btn.btn-sm {
+    min-height: 34px;
+}
+
+.ia-submission-file-box {
+    margin-bottom: 20px;
+    padding: 14px;
+    background: #f8fafc;
+    border: 1px solid var(--ins-border);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.ia-roster-table thead th:last-child,
+.ia-roster-table tbody td:last-child {
+    min-width: 140px;
+}
+
+.ia-answer-chip-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.ia-answer-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 10px;
+    border: 1px solid #dbeafe;
+    background: #eff6ff;
+    color: #1e3a8a;
+    border-radius: 999px;
+    font-size: 0.74rem;
+    font-weight: 700;
+}
+
+@media (max-width: 1100px) {
+    .ia-flow-grid-question,
+    .ia-flow-grid-submission {
+        grid-template-columns: 1fr;
+    }
+
+    .ia-workspace .ins-page-head {
+        gap: 12px;
+    }
+
+    .ia-workspace .ins-hero-actions {
+        justify-content: flex-start;
+    }
+
+    .ia-flow-sticky {
+        position: static;
+    }
+}
+
+@media (max-width: 760px) {
+    .ia-options-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Full view - expand the submissions card to occupy most of the viewport */
+body.ia-fullview-active .section-card {
+    position: fixed;
+    top: 64px;
+    left: 32px;
+    right: 32px;
+    bottom: 32px;
+    z-index: 1200;
+    width: auto !important;
+    height: auto;
+    overflow: auto;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 20px 40px rgba(2,6,23,0.24);
+}
+
+body.ia-fullview-active .table-responsive {
+    max-height: calc(100vh - 220px);
+    overflow: auto;
+}
+
+/* Modal styles for grading detail */
+.ia-modal {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1300;
+}
+.ia-modal.is-open { display: flex; }
+.ia-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+}
+.ia-modal-content {
+    position: relative;
+    z-index: 2;
+    max-width: 1000px;
+    width: min(1000px, 96%);
+    max-height: 90vh;
+    overflow: auto;
+    border-radius: 12px;
+    background: #fff;
+    padding: 18px;
+    box-shadow: 0 8px 40px rgba(2,6,23,0.3);
+}
+.ia-modal-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 3;
+}
+
+.ia-modal-content .ia-grading-detail { margin: 0; }
+.ia-modal-content .ia-detail-section { margin-bottom: 16px; }

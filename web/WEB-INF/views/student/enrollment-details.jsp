@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,6 +9,7 @@
     <title>${enrollment.courseName} - Learning Hub</title>
     <jsp:include page="/WEB-INF/views/common/student-head-assets.jsp"/>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/learning-hub.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/student-assessment-module.css">
 </head>
 <body class="sv-page lh-shell-page">
 <c:set var="topbarTitle" value="Learning Hub"/>
@@ -127,6 +129,118 @@
 
             <div class="lh-stage-body">
                 <c:choose>
+                    <c:when test="${not empty assessmentResultSubmission and not empty assessmentResultAssessment}">
+                        <section class="sa-shell" style="margin: 0;">
+                            <article class="sa-result-card sa-panel">
+                                <div class="sa-panel-head">
+                                    <div>
+                                        <h3>${assessmentResultAssessment.title}</h3>
+                                        <p>
+                                            Submission date:
+                                            <c:choose>
+                                                <c:when test="${not empty assessmentResultSubmission.submitDate}">${fn:replace(assessmentResultSubmission.submitDate, 'T', ' ')}</c:when>
+                                                <c:otherwise>--</c:otherwise>
+                                            </c:choose>
+                                            <c:if test="${not empty assessmentResultSubmission.endedAt}">
+                                                | Ended: ${fn:replace(assessmentResultSubmission.endedAt, 'T', ' ')}
+                                            </c:if>
+                                        </p>
+                                    </div>
+                                    <span class="sa-status ${assessmentResultStatusClass}">${assessmentResultStatusLabel}</span>
+                                </div>
+
+                                <div class="sa-result-score">
+                                    <div class="sa-score-card">
+                                        <span>Score</span>
+                                        <strong><c:choose><c:when test="${not empty assessmentResultSubmission.score}">${assessmentResultSubmission.score}</c:when><c:otherwise>--</c:otherwise></c:choose></strong>
+                                    </div>
+                                    <div class="sa-score-card">
+                                        <span>Percentage</span>
+                                        <strong><c:choose><c:when test="${assessmentResultPercentage > 0}">${assessmentResultPercentage}%</c:when><c:otherwise>--</c:otherwise></c:choose></strong>
+                                    </div>
+                                    <div class="sa-score-card">
+                                        <span>Attempt</span>
+                                        <strong>#${assessmentResultSubmission.attemptNumber}</strong>
+                                    </div>
+                                    <div class="sa-score-card">
+                                        <span>Format</span>
+                                        <strong><c:choose><c:when test="${assessmentResultObjective}">Multiple Choice</c:when><c:otherwise>Assignment</c:otherwise></c:choose></strong>
+                                    </div>
+                                </div>
+
+                                <div class="sa-note ${not empty assessmentResultSubmission.score ? 'success' : 'warning'}" style="margin-top: 18px;">
+                                    <c:choose>
+                                        <c:when test="${not empty assessmentResultSubmission.feedback}">
+                                            <strong>Instructor feedback:</strong> ${assessmentResultSubmission.feedback}
+                                        </c:when>
+                                        <c:when test="${not empty assessmentResultSubmission.score}">
+                                            This submission has been graded automatically.
+                                        </c:when>
+                                        <c:otherwise>
+                                            The submission is awaiting instructor review.
+                                        </c:otherwise>
+                                    </c:choose>
+                                </div>
+                            </article>
+
+                            <c:if test="${assessmentResultObjective and not empty assessmentResultQuestions}">
+                                <article class="sa-panel" style="margin-top: 18px;">
+                                    <div class="sa-panel-head">
+                                        <div>
+                                            <h3>Performance breakdown</h3>
+                                        </div>
+                                    </div>
+
+                                    <div class="sa-breakdown">
+                                        <c:forEach var="q" items="${assessmentResultQuestions}" varStatus="loop">
+                                            <div class="sa-breakdown-item">
+                                                <h4>Q${loop.index + 1}. ${q.questionText}</h4>
+                                                <p><strong>Your answer:</strong> <c:out value="${empty assessmentResultStudentAnswers[q.questionId] ? '--' : assessmentResultStudentAnswers[q.questionId]}"/></p>
+                                                <p><strong>Correct answer:</strong> <c:out value="${empty assessmentResultCorrectAnswers[q.questionId] ? '--' : assessmentResultCorrectAnswers[q.questionId]}"/></p>
+                                            </div>
+                                        </c:forEach>
+                                    </div>
+                                </article>
+                            </c:if>
+
+                            <article class="sa-panel" style="margin-top: 18px;">
+                                <div class="sa-panel-head">
+                                    <div>
+                                        <h3>Submission details</h3>
+                                    </div>
+                                </div>
+
+                                <div class="sa-detail-grid">
+                                    <div class="sa-detail-list">
+                                        <div class="sa-detail-item">
+                                            <span>Status</span>
+                                            <strong>${assessmentResultStatusLabel}</strong>
+                                        </div>
+                                        <div class="sa-detail-item">
+                                            <span>Submitted by</span>
+                                            <strong>${sessionScope.userName}</strong>
+                                        </div>
+                                    </div>
+                                    <div class="sa-detail-list">
+                                        <div class="sa-detail-item">
+                                            <span>Submission payload</span>
+                                            <p>
+                                                <c:choose>
+                                                    <c:when test="${not empty assessmentResultSubmission.answersFilePath}">${assessmentResultSubmission.answersFilePath}</c:when>
+                                                    <c:otherwise>--</c:otherwise>
+                                                </c:choose>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="sa-footer-actions" style="margin-top: 18px;">
+                                    <a class="sv-btn" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=assessments"><i class="fas fa-arrow-left"></i> Back to Assessments</a>
+                                    <a class="sv-btn primary" href="${pageContext.request.contextPath}/student/assessments?view=history&enrollmentId=${enrollment.enrollmentId}"><i class="fas fa-clock-rotate-left"></i> View History</a>
+                                </div>
+                            </article>
+                        </section>
+                    </c:when>
                     <c:when test="${selectedMode == 'assessment' and not empty selectedAssessment}">
                         <section class="lh-assessment-card">
                             <div class="lh-assessment-card__grid">
@@ -179,24 +293,60 @@
                                     </div>
                                 </c:if>
 
-                                <section class="lh-material-stage lh-assessment-embed-shell" id="lhAssessmentEmbedStage" hidden>
-                                    <iframe
-                                        class="lh-workspace-frame"
-                                        id="lhAssessmentFrame"
-                                        title="Assessment attempt workspace"></iframe>
+                                <c:if test="${courseAccessGranted and selectedAssessment.type == 'Assignment'}">
+                                    <section class="lh-material-stage" style="margin-top: 18px;">
+                                        <div class="lh-stage-card">
+                                            <h3 style="margin:0 0 8px;">Assignment Workspace</h3>
+                                            <p style="margin:0 0 16px; color: var(--sv-muted);">Upload your assignment file here without leaving the learning hub.</p>
+
+                                            <c:if test="${not empty selectedAssessmentLatest}">
+                                                <div class="assignment-latest" style="margin-bottom: 16px;">
+                                                    Latest submission: ${selectedAssessmentLatest.status} on ${selectedAssessmentLatest.submitDate}
+                                                </div>
+                                            </c:if>
+
+                                            <form id="assignmentHubForm" method="post" action="${pageContext.request.contextPath}/student/assessments" enctype="multipart/form-data" style="display:grid; gap:14px;">
+                                                <input type="hidden" name="assessmentId" value="${selectedAssessment.assessmentId}">
+                                                <input type="hidden" name="enrollmentId" value="${enrollment.enrollmentId}">
+
+                                                <div class="assignment-upload-box">
+                                                    <label for="answerFileHub"><strong>Upload Assignment File</strong></label>
+                                                    <input id="answerFileHub" name="answerFile" type="file" required>
+                                                    <p class="assignment-upload-note">Accepted formats include PDF, DOC, DOCX, PPT, PPTX, ZIP, and image files. Maximum file size: 50MB.</p>
+                                                </div>
+
+                                                <div class="assessment-actions" style="margin-top: 8px;">
+                                                    <button class="sv-btn primary" type="submit">
+                                                        <i class="fas fa-upload"></i>&nbsp;Submit Assignment
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </section>
+                                </c:if>
+
+                                <section class="lh-material-stage">
+                                    <div class="lh-stage-card">
+                                        <h3 style="margin:0 0 8px;">Open assessment</h3>
+                                        <p style="margin:0 0 16px; color: var(--sv-muted);">Objective assessments still use the secure attempt page.</p>
+                                        <a class="sv-btn primary" href="${selectedAssessmentPrimaryUrl}">
+                                            <i class="fas fa-${workspacePrimaryActionIcon}"></i>
+                                            <span>${selectedAssessmentPrimaryLabel}</span>
+                                        </a>
+                                    </div>
                                 </section>
                             </div>
                         </section>
                     </c:when>
 
                     <c:when test="${not empty selectedMaterial}">
-                        <section class="lh-material-stage">
-                            <iframe
-                                class="lh-workspace-frame"
-                                id="lhMaterialFrame"
-                                title="Learning material viewer"
-                                src="${pageContext.request.contextPath}/student/materials?action=preview&id=${selectedMaterial.materialId}&enrollmentId=${enrollment.enrollmentId}&fragment=true"></iframe>
-                        </section>
+                                <section class="lh-material-stage">
+                                    <iframe
+                                        class="lh-workspace-frame"
+                                        id="lhMaterialFrame"
+                                        title="Learning material viewer"
+                                        src="${pageContext.request.contextPath}/student/materials?action=preview&id=${selectedMaterial.materialId}&enrollmentId=${enrollment.enrollmentId}&fragment=true"></iframe>
+                                </section>
                     </c:when>
 
                     <c:otherwise>
@@ -218,10 +368,20 @@
 
                     <c:choose>
                         <c:when test="${selectedMode == 'assessment' and not empty selectedAssessment and not empty selectedAssessmentPrimaryUrl}">
-                            <button class="sv-btn primary" id="lhSubmitAction" type="button" data-attempt-url="${selectedAssessmentPrimaryUrl}">
-                                <i class="fas fa-${workspacePrimaryActionIcon}"></i>
-                                <span>${selectedAssessmentPrimaryLabel}</span>
-                            </button>
+                            <c:choose>
+                                <c:when test="${selectedAssessment.type == 'Assignment'}">
+                                    <button class="sv-btn primary" id="lhSubmitAction" type="submit" form="assignmentHubForm">
+                                        <i class="fas fa-upload"></i>
+                                        <span>Submit Assignment</span>
+                                    </button>
+                                </c:when>
+                                <c:otherwise>
+                                    <a class="sv-btn primary" id="lhSubmitAction" href="${selectedAssessmentPrimaryUrl}">
+                                        <i class="fas fa-${workspacePrimaryActionIcon}"></i>
+                                        <span>${selectedAssessmentPrimaryLabel}</span>
+                                    </a>
+                                </c:otherwise>
+                            </c:choose>
                         </c:when>
                         <c:when test="${not empty selectedMaterial}">
                             <button
@@ -260,9 +420,6 @@
     var itemStatusBadge = document.getElementById('lhItemStatusBadge');
     var progressPercentNode = document.getElementById('edProgressPercent');
     var progressBar = document.querySelector('.lh-progress-strip .sv-progress-bar');
-    var assessmentLaunchButton = document.getElementById('lhSubmitAction');
-    var assessmentEmbedStage = document.getElementById('lhAssessmentEmbedStage');
-    var assessmentFrame = document.getElementById('lhAssessmentFrame');
     var materialsViewedNode = document.getElementById('edMaterialsViewedCount');
     var currentMaterialType = '${not empty selectedMaterial ? selectedMaterial.materialType : ""}';
     var currentSelectionMode = '${selectedMode}';
@@ -358,29 +515,6 @@
             actionNote.textContent = note;
         }
     }
-
-    function openAssessmentInline(url) {
-        if (!url || !assessmentEmbedStage || !assessmentFrame) {
-            return;
-        }
-        assessmentFrame.src = url;
-        assessmentEmbedStage.hidden = false;
-        assessmentEmbedStage.scrollIntoView({behavior: 'smooth', block: 'start'});
-        if (actionNote) {
-            actionNote.textContent = 'Assessment loaded inside the learning hub.';
-        }
-    }
-
-    if (assessmentLaunchButton) {
-        assessmentLaunchButton.addEventListener('click', function () {
-            openAssessmentInline(this.getAttribute('data-attempt-url'));
-        });
-    }
-
-    document.addEventListener('CP_StartAssessment', function (event) {
-        var url = event && event.detail ? event.detail.attemptUrl : null;
-        openAssessmentInline(url);
-    });
 
     function setWaitingState() {
         if (!completeButton || viewerState.completed || currentSelectionMode !== 'material') {

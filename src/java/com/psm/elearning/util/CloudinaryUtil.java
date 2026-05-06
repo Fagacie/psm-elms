@@ -218,6 +218,10 @@ public class CloudinaryUtil {
         return props.getProperty("cloudinary.folder_assessment_answers", "psm/assessment-answers");
     }
 
+    public static String getAssessmentAttachmentsFolder() {
+        return props.getProperty("cloudinary.folder_assessment_attachments", "psm/assessment-attachments");
+    }
+
     public static String getCourseBannersFolder() {
         return props.getProperty("cloudinary.folder_course_banners", "psm/course-banners");
     }

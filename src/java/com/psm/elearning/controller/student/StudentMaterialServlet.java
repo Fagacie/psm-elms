@@ -36,8 +36,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Comparator;
 import java.util.stream.Collectors;
+import java.util.logging.Logger;
 
 public class StudentMaterialServlet extends HttpServlet {
+
+    private static final Logger LOGGER = Logger.getLogger(StudentMaterialServlet.class.getName());
 
     private final EnrollmentDAO enrollmentDAO = new EnrollmentDAOImpl();
     private final MaterialDAO materialDAO = new MaterialDAOImpl();
@@ -132,8 +135,13 @@ public class StudentMaterialServlet extends HttpServlet {
             int courseId = enrollment.getCourseId();
             List<Material> materials = materialDAO.findByCourse(courseId);
             if (materials == null) materials = new ArrayList<>();
+            int rawCount = materials.size();
             materials = filterMaterials(materials, keyword, materialType);
             materials = sortMaterials(materials, sort);
+            LOGGER.info("StudentMaterialServlet: courseId=" + courseId
+                    + ", rawMaterials=" + rawCount
+                    + ", filteredMaterials=" + materials.size()
+                    + ", keyword='" + keyword + "', materialType='" + materialType + "'");
             materialsByCourse.put(courseId, materials);
             totalMaterials += materials.size();
             Set<Integer> viewedIds = progressDAO.findViewedMaterialIdsByCourse(userId, courseId);

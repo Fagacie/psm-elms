@@ -7,100 +7,133 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Course Assessment Hub - Instructor</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-shell.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-assessments.css">
-    <jsp:include page="/WEB-INF/views/common/head-external-assets.jsp"/>
-</head>
-<body class="instructor-ui">
-<jsp:include page="/WEB-INF/views/common/instructor-header.jsp">
-    <jsp:param name="pageTitle" value="Course Assessment Hub"/>
-</jsp:include>
+    <title>Course Assessments - Instructor</title>
+        <c:if test="${not empty errorMessage}">
+            <div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> <c:out value="${errorMessage}"/></div>
+        </c:if>
 
-<c:if test="${param.success == 'deleted' or param.success == 'archived'}"><div class="alert alert-success"><i class="fas fa-check-circle"></i> Assessment archived successfully.</div></c:if>
-<c:if test="${param.success == 'restored'}"><div class="alert alert-success"><i class="fas fa-check-circle"></i> Assessment restored successfully.</div></c:if>
+        <c:url var="assessmentWorkspaceBaseUrl" value="/instructor/assessments">
+            <c:param name="courseId" value="${selectedCourse.courseId}"/>
+        </c:url>
 
-<c:set var="activeInstructorPage" value="assessments"/>
-<jsp:include page="/WEB-INF/views/common/instructor-sidebar.jsp"/>
-
-<main class="app-main">
-    <div class="content-wrapper ia-workspace">
-        <nav class="breadcrumb" aria-label="Breadcrumb">
-            <a href="${pageContext.request.contextPath}/instructor/dashboard">Dashboard</a>
-            <span>&gt;</span>
-            <a href="${pageContext.request.contextPath}/instructor/courses">Courses</a>
-            <span>&gt;</span>
-            <span>Course Assessment Hub</span>
-        </nav>
-
-        <section class="ia-topbar ia-topbar-split">
-            <div>
-                <p class="ia-card-kicker">Course Assessment Hub</p>
-                <h2>
-                    <c:choose>
-                        <c:when test="${not empty selectedCourse}">For <c:out value="${selectedCourse.courseName}"/></c:when>
-                        <c:otherwise>Workspace requires a course</c:otherwise>
-                    </c:choose>
-                </h2>
-                <p class="ia-topbar-subtitle">Keep each course's assessment library, builder, questions, grading, and archive in one flow.</p>
-            </div>
-            <div class="ia-topbar-actions">
-                <c:if test="${not empty selectedCourse}">
-                    <a class="btn btn-primary" href="${pageContext.request.contextPath}/instructor/assessments?view=editor&courseId=${selectedCourse.courseId}">
-                        <i class="fas fa-plus-circle"></i> Create Assessment
-                    </a>
-                </c:if>
-            </div>
+        <section class="workspace-kpi-grid" style="margin-bottom: 24px;">
+            <div class="workspace-kpi-card"><strong>${totalStudents}</strong><span>Students enrolled</span></div>
+            <div class="workspace-kpi-card"><strong>${publishedMaterials}</strong><span>Materials count</span></div>
+            <div class="workspace-kpi-card"><strong>${assessmentCount}</strong><span>Assessments count</span></div>
+            <div class="workspace-kpi-card"><strong><fmt:formatNumber value="${completionRate}" maxFractionDigits="0"/>%</strong><span>Completion rate</span></div>
         </section>
 
-        <c:if test="${not empty selectedCourse}">
-            <section class="ia-workspace-nav-grid" aria-label="Assessment workspace sections">
-                <a class="ia-workspace-nav-card ${activeView == 'dashboard' ? 'active' : ''}" href="${pageContext.request.contextPath}/instructor/assessments?view=dashboard&courseId=${selectedCourse.courseId}">
-                    <i class="fas fa-layer-group"></i>
-                    <strong>Library</strong>
-                    <span>Published assessments and actions.</span>
-                </a>
-                <a class="ia-workspace-nav-card ${activeView == 'editor' ? 'active' : ''}" href="${pageContext.request.contextPath}/instructor/assessments?view=editor&courseId=${selectedCourse.courseId}">
-                    <i class="fas fa-pen-to-square"></i>
-                    <strong>Builder</strong>
-                    <span>Set details, grading mode, and attempt rules.</span>
-                </a>
-                <a class="ia-workspace-nav-card ${activeView == 'questions' ? 'active' : ''}" href="${pageContext.request.contextPath}/instructor/assessments?view=questions&courseId=${selectedCourse.courseId}">
-                    <i class="fas fa-list-check"></i>
-                    <strong>Question Bank</strong>
-                    <span>Add questions, options, answers, and order.</span>
-                </a>
-                <a class="ia-workspace-nav-card ${activeView == 'archive' ? 'active' : ''}" href="${pageContext.request.contextPath}/instructor/assessments?view=archive&courseId=${selectedCourse.courseId}">
-                    <i class="fas fa-box-archive"></i>
-                    <strong>Archive</strong>
-                    <span>Restore past assessments when needed.</span>
-                </a>
+        <c:choose>
+            <c:when test="${empty selectedCourse}">
+                <section class="section-card">
+                    <div class="empty-state-box workspace-empty-box">
+                        <i class="fas fa-chalkboard"></i>
+                        <p>Select a course from the sidebar to view its assessment workspace.</p>
+                    </div>
+                </section>
+            </c:when>
+            <c:when test="${activeView == 'archive'}">
+                <section class="section-card">
+                    <div class="section-header"><div><h3 class="section-title">Archived Assessments</h3></div></div>
+                    <c:choose>
+                        <c:when test="${empty archivedAssessments}">
+                            <div class="empty-state-box workspace-empty-box">
+                                <i class="fas fa-box-archive"></i>
+                                <p>No archived assessments for this course.</p>
+                            </div>
+                        </c:when>
+                        <c:otherwise>
+                            <div class="table-container">
+                                <table class="data-table">
+                                    <thead>
+                                    <tr><th>Title</th><th>Type</th><th>Archived On</th><th>Actions</th></tr>
+                                    </thead>
+                                    <tbody>
+                                    <c:forEach var="a" items="${archivedAssessments}">
+                                        <tr>
+                                            <td><strong><c:out value="${a.title}"/></strong><div class="sv-course-line">${not empty a.totalMarks ? a.totalMarks : 'N/A'} marks</div></td>
+                                            <td><span class="assessment-type-badge type-${fn:replace(a.type, ' ', '-')}">${a.type}</span></td>
+                                            <td>${not empty a.deletedAt ? a.deletedAt.toLocalDate() : '-'}</td>
+                                            <td>
+                                                <a class="btn btn-secondary btn-sm" href="${pageContext.request.contextPath}/instructor/assessments?view=editor&courseId=${selectedCourse.courseId}&assessmentId=${a.assessmentId}">Open Builder</a>
+                                                <a class="btn btn-primary btn-sm" href="${pageContext.request.contextPath}/instructor/assessments?action=restoreAssessment&courseId=${selectedCourse.courseId}&id=${a.assessmentId}" onclick="return confirm('Restore this assessment?')">Restore</a>
+                                            </td>
+                                        </tr>
+                                    </c:forEach>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </c:otherwise>
+                    </c:choose>
+                </section>
+            </c:when>
+            <c:otherwise>
+                <section class="section-card">
+                    <div class="section-header">
+                        <div><h3 class="section-title">Assessment Library</h3><p class="section-caption">All assessments for this course.</p></div>
+                        <a class="btn btn-primary btn-sm" href="${assessmentWorkspaceBaseUrl}&view=editor">Create First</a>
+                    </div>
+
+                    <c:choose>
+                        <c:when test="${empty assessments}">
+                            <div class="empty-state-box workspace-empty-box">
+                                <i class="fas fa-clipboard-list"></i>
+                                <p>No assessments created for this course yet.</p>
+                            </div>
+                        </c:when>
+                        <c:otherwise>
+                            <div class="workspace-assessment-grid" style="display:grid; gap:20px; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr));">
+                                <c:forEach var="assessment" items="${assessments}">
+                                    <article class="ia-assessment-card" style="padding:20px; border:1px solid var(--ins-border); border-radius:12px; background:#fff;">
+                                        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
+                                            <div>
+                                                <span style="font-size:0.65rem; font-weight:800; text-transform:uppercase; color:var(--ins-primary); letter-spacing:0.05em; display:block; margin-bottom:4px;">${assessment.type}</span>
+                                                <strong style="display:block; font-size:1.1rem; color:var(--ins-text);"><c:out value="${assessment.title}"/></strong>
+                                            </div>
+                                            <div style="width:32px; height:32px; border-radius:8px; background:var(--ins-accent-soft); color:var(--ins-primary); display:flex; align-items:center; justify-content:center;">
+                                                <i class="fas ${assessment.type == 'Assignment' ? 'fa-file-signature' : 'fa-stopwatch'}"></i>
+                                            </div>
+                                        </div>
+                                        <div style="display:flex; gap:12px; margin-bottom:20px; font-size:0.8rem; color:var(--ins-muted);">
+                                            <span><i class="fas fa-users" style="margin-right:4px;"></i> ${submissionCountByAssessmentId[assessment.assessmentId]}</span>
+                                            <span style="color:#ea580c; font-weight:600;"><i class="fas fa-clock-rotate-left" style="margin-right:4px;"></i> ${not empty pendingCountByAssessmentId[assessment.assessmentId] ? pendingCountByAssessmentId[assessment.assessmentId] : 0} pending</span>
+                                        </div>
+                                        <div style="display:flex; gap:8px; border-top:1px solid var(--ins-border); padding-top:16px;">
+                                            <button type="button" class="btn btn-secondary btn-sm" onclick="openAssessmentPage('submissions', ${assessment.assessmentId})" style="flex:1; justify-content:center;">Review</button>
+                                            <button type="button" class="btn btn-secondary btn-sm" onclick="openAssessmentPage('editor', ${assessment.assessmentId})" style="width:40px; justify-content:center;"><i class="fas fa-cog"></i></button>
+                                            <a href="${pageContext.request.contextPath}/instructor/assessments?action=archiveAssessment&courseId=${selectedCourse.courseId}&id=${assessment.assessmentId}" class="btn btn-danger btn-sm" style="width:40px; justify-content:center;" onclick="return confirm('Archive this assessment?')" title="Archive Assessment"><i class="fas fa-box-archive"></i></a>
+                                        </div>
+                                    </article>
+                                </c:forEach>
+                            </div>
+
+                            <c:if test="${not empty archivedAssessments}">
+                                <div style="margin-top:24px; padding:16px; background:#f8fafc; border-radius:12px; display:flex; justify-content:space-between; align-items:center;">
+                                    <span style="font-size:0.85rem; color:var(--ins-muted);">You have <strong>${fn:length(archivedAssessments)}</strong> archived assessments.</span>
+                                    <button type="button" class="btn btn-secondary btn-sm" onclick="openAssessmentPage('archive')">Manage Archive</button>
+                                </div>
+                            </c:if>
+                        </c:otherwise>
+                    </c:choose>
+                </section>
+            </c:otherwise>
+        </c:choose>
+                                            <td><span class="assessment-type-badge type-${fn:replace(a.type, ' ', '-')}">${a.type}</span></td>
+                                            <td>${not empty a.deletedAt ? a.deletedAt.toLocalDate() : '-'}</td>
+                                            <td>
+                                                <a class="btn btn-secondary btn-sm" href="${pageContext.request.contextPath}/instructor/assessments?view=editor&courseId=${selectedCourse.courseId}&assessmentId=${a.assessmentId}">Open Builder</a>
+                                                <a class="btn btn-primary btn-sm" href="${pageContext.request.contextPath}/instructor/assessments?action=restoreAssessment&courseId=${selectedCourse.courseId}&id=${a.assessmentId}" onclick="return confirm('Restore this assessment?')">Restore</a>
+                                            </td>
+                                        </tr>
+                                    </c:forEach>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </form>
+                    </c:otherwise>
+                </c:choose>
             </section>
-        </c:if>
-
-        <c:if test="${not empty errorMessage}">
-            <div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> ${errorMessage}</div>
-        </c:if>
-        <c:if test="${param.success == 'created'}"><div class="alert alert-success"><i class="fas fa-check-circle"></i> Assessment created successfully.</div></c:if>
-        <c:if test="${param.success == 'updated'}"><div class="alert alert-success"><i class="fas fa-check-circle"></i> Assessment updated successfully.</div></c:if>
-        <c:if test="${param.success == 'deleted' or param.success == 'archived'}"><div class="alert alert-success"><i class="fas fa-check-circle"></i> Assessment archived successfully.</div></c:if>
-        <c:if test="${param.success == 'qcreated'}"><div class="alert alert-success"><i class="fas fa-check-circle"></i> Question added successfully.</div></c:if>
-        <c:if test="${param.success == 'qdeleted'}"><div class="alert alert-success"><i class="fas fa-check-circle"></i> Question deleted successfully.</div></c:if>
-        <c:if test="${param.success == 'qupdated'}"><div class="alert alert-success"><i class="fas fa-check-circle"></i> Question updated successfully.</div></c:if>
-        <c:if test="${param.success == 'qmoved'}"><div class="alert alert-success"><i class="fas fa-check-circle"></i> Question order updated.</div></c:if>
-        <c:if test="${param.success == 'published'}"><div class="alert alert-success"><i class="fas fa-check-circle"></i> Assessment published successfully.</div></c:if>
-        <c:if test="${param.success == 'rreviewed'}"><div class="alert alert-success"><i class="fas fa-check-circle"></i> Retake request reviewed successfully.</div></c:if>
-        <c:if test="${param.success == 'graded'}"><div class="alert alert-success"><i class="fas fa-check-circle"></i> Submission graded successfully.</div></c:if>
-        <c:if test="${param.success == 'autoregraded'}"><div class="alert alert-success"><i class="fas fa-check-circle"></i> Submission auto-regraded successfully.</div></c:if>
-        <c:if test="${param.success == 'autoregradedall'}"><div class="alert alert-success"><i class="fas fa-check-circle"></i> Bulk auto-regrade completed. Updated submissions: <strong><c:out value="${param.regradedCount}" default="0"/></strong>.</div></c:if>
-        <c:if test="${param.error != null}"><div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> Action failed. Please verify input and retry.</div></c:if>
-
-        <c:if test="${activeView == 'editor'}">
-            <jsp:include page="/WEB-INF/views/instructor/assessment-wizard.jsp"/>
-        </c:if>
+        </c:when>
 
         <c:choose>
             <c:when test="${empty selectedCourse}">
@@ -205,106 +238,6 @@
                 </section>
             </c:when>
 
-            <c:when test="${activeView == 'archive'}">
-                <section class="ia-card ia-card--soft">
-                    <div class="ia-card-head">
-                        <div>
-                            <h3>Archived Assessments</h3>
-                            <p class="section-caption">Recover assessments that were archived from the main library.</p>
-                        </div>
-                    </div>
-
-                    <c:choose>
-                        <c:when test="${empty archivedAssessments}">
-                            <div class="ia-empty-inline">No archived assessments for this course.</div>
-                        </c:when>
-                        <c:otherwise>
-                            <div class="table-responsive">
-                                <table class="data-table ia-table">
-                                    <thead>
-                                    <tr>
-                                        <th>Title</th>
-                                        <th>Type</th>
-                                        <th>Duration</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    <c:forEach var="a" items="${archivedAssessments}">
-                                        <tr>
-                                            <td data-label="Title"><strong>${a.title}</strong></td>
-                                            <td data-label="Type"><span class="assessment-type-badge type-${fn:replace(a.type, ' ', '-')}">${a.type}</span></td>
-                                            <td data-label="Duration">${not empty a.duration ? a.duration : '--'}${not empty a.duration ? ' min' : ''}</td>
-                                            <td data-label="Actions" class="ia-actions-cell">
-                                                <a class="btn btn-primary btn-sm" href="${pageContext.request.contextPath}/instructor/assessments?action=restoreAssessment&courseId=${selectedCourse.courseId}&id=${a.assessmentId}" onclick="return confirm('Restore this assessment?')"><i class="fas fa-undo"></i> Restore</a>
-                                            </td>
-                                        </tr>
-                                    </c:forEach>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </c:otherwise>
-                    </c:choose>
-                </section>
-            </c:when>
-
-            <c:when test="${false}">
-                <section class="ia-grid-2">
-                    <article class="ia-card">
-                        <div class="ia-card-head">
-                            <h3>Create Assessment</h3>
-                        </div>
-                        <form method="post" action="${pageContext.request.contextPath}/instructor/assessments" class="ia-form">
-                            <input type="hidden" name="action" value="createAssessment"/>
-                            <input type="hidden" name="courseId" value="${selectedCourse.courseId}"/>
-
-                            <label for="title">Title</label>
-                            <input id="title" name="title" type="text" required/>
-
-                            <label for="type">Type</label>
-                            <select id="type" name="type" onchange="syncAssessmentType(this, 'create')" required>
-                                <option value="Quiz">Quiz</option>
-                                <option value="Exam">Exam</option>
-                                <option value="Assignment">Assignment</option>
-                            </select>
-
-                            <div class="ia-form-row">
-                                <div>
-                                    <label for="gradingMode-create">Grading</label>
-                                    <select id="gradingMode-create" name="gradingMode">
-                                        <option value="auto">Auto</option>
-                                        <option value="manual">Manual</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label for="submissionMode-create">Submission</label>
-                                    <select id="submissionMode-create" name="submissionMode">
-                                        <option value="both">Text + File</option>
-                                        <option value="file">File only</option>
-                                        <option value="text">Text only</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="ia-form-row">
-                                <div>
-                                    <label for="duration">Duration (minutes)</label>
-                                    <input id="duration" name="duration" type="number" min="0"/>
-                                </div>
-                                <div>
-                                    <label for="totalMarks">Total Marks</label>
-                                    <input id="totalMarks" name="totalMarks" type="number" step="0.1" min="1"/>
-                                </div>
-                            </div>
-
-                            <div class="ia-form-row">
-                                <div>
-                                    <label for="maxAttempts">Max Attempts</label>
-                                    <input id="maxAttempts" name="maxAttempts" type="number" min="1" value="3"/>
-                                </div>
-                            </div>
-
-                            <label for="placement">Placement</label>
                             <select id="placement" name="placement" required>
                                 <option value="final">Course Completion</option>
                                 <option value="afterEveryMaterial">After Every Material</option>

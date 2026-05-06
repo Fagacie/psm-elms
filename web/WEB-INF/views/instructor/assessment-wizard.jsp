@@ -129,7 +129,12 @@
                 </div>
                 <div class="ia-inline-actions">
                     <button type="button" class="btn btn-secondary btn-sm" data-step-target="details"><i class="fas fa-arrow-left"></i> Back</button>
-                    <button type="submit" class="btn btn-primary btn-sm" form="assessmentDetailsForm" data-workflow-action="publish"><i class="fas fa-paper-plane"></i> Publish</button>
+                    <form method="post" action="${pageContext.request.contextPath}/instructor/assessments" style="display:inline-flex;">
+                        <input type="hidden" name="action" value="publishAssessment" />
+                        <input type="hidden" name="courseId" value="${selectedCourse.courseId}" />
+                        <input type="hidden" name="assessmentId" value="${selectedAssessment.assessmentId}" />
+                        <button type="submit" class="btn btn-primary btn-sm" ${empty questions ? 'disabled' : ''}><i class="fas fa-paper-plane"></i> Publish</button>
+                    </form>
                 </div>
             </div>
 
@@ -256,7 +261,7 @@
                                                 <input type="hidden" name="direction" value="down" />
                                                 <button class="btn btn-secondary btn-sm" type="submit" ${status.last ? 'disabled' : ''}><i class="fas fa-arrow-down"></i> Down</button>
                                             </form>
-                                            <a class="btn btn-danger btn-sm" href="${pageContext.request.contextPath}/instructor/assessments?action=deleteQuestion&courseId=${selectedCourse.courseId}&assessmentId=${selectedAssessment.assessmentId}&id=${q.questionId}" onclick="return confirm('Delete this question?')"><i class="fas fa-trash"></i> Delete</a>
+                                            <a class="btn btn-danger btn-sm" href="${pageContext.request.contextPath}/instructor/assessments?action=deleteQuestion&courseId=${selectedCourse.courseId}&assessmentId=${selectedAssessment.assessmentId}&questionId=${q.questionId}" onclick="return confirm('Delete this question?')"><i class="fas fa-trash"></i> Delete</a>
                                         </div>
                                     </article>
                                 </c:forEach>

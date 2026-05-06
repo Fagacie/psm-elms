@@ -123,23 +123,23 @@
                                         <td data-label="Action">
                                             <c:choose>
                                                 <c:when test="${item.activeAttempt}">
-                                                    <a class="sv-btn primary" href="${pageContext.request.contextPath}/student/assessments?view=take&enrollmentId=${enrollment.enrollmentId}&assessmentId=${item.assessment.assessmentId}&mode=attempt">
+                                                    <a class="sv-btn primary" href="${pageContext.request.contextPath}/courses/${enrollment.courseId}/assessments/${item.assessment.assessmentId}/attempt">
                                                         <i class="fas fa-play"></i> Continue
                                                     </a>
                                                 </c:when>
                                                 <c:when test="${item.attemptsRemaining > 0 and paidAccess}">
-                                                    <a class="sv-btn primary" href="${pageContext.request.contextPath}/student/assessments?view=details&enrollmentId=${enrollment.enrollmentId}&assessmentId=${item.assessment.assessmentId}">
+                                                    <a class="sv-btn primary" href="${item.assessment.type == 'Assignment' ? pageContext.request.contextPath.concat('/student/enrollment-details?id=').concat(enrollment.enrollmentId).concat('&tab=assessments&assessmentId=').concat(item.assessment.assessmentId) : pageContext.request.contextPath.concat('/courses/').concat(enrollment.courseId).concat('/assessments/').concat(item.assessment.assessmentId).concat('/attempt')}">
                                                         <i class="fas fa-eye"></i> Start
                                                     </a>
                                                 </c:when>
                                                 <c:otherwise>
-                                                    <a class="sv-btn" href="${pageContext.request.contextPath}/student/assessments?view=details&enrollmentId=${enrollment.enrollmentId}&assessmentId=${item.assessment.assessmentId}">
+                                                    <a class="sv-btn" href="${item.assessment.type == 'Assignment' ? pageContext.request.contextPath.concat('/student/enrollment-details?id=').concat(enrollment.enrollmentId).concat('&tab=assessments&assessmentId=').concat(item.assessment.assessmentId) : pageContext.request.contextPath.concat('/courses/').concat(enrollment.courseId).concat('/assessments/').concat(item.assessment.assessmentId).concat('/attempt')}">
                                                         <i class="fas fa-eye"></i> View
                                                     </a>
                                                 </c:otherwise>
                                             </c:choose>
                                             <c:if test="${not empty item.latestSubmission}">
-                                                <a class="sa-subtle ass-inline-link" href="${pageContext.request.contextPath}/student/assessments?view=result&enrollmentId=${enrollment.enrollmentId}&assessmentId=${item.assessment.assessmentId}&submissionId=${item.latestSubmission.submissionId}">Latest result</a>
+                                                <a class="sa-subtle ass-inline-link" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=assessments&view=result&assessmentId=${item.assessment.assessmentId}&submissionId=${item.latestSubmission.submissionId}">Latest result</a>
                                             </c:if>
                                             <c:if test="${item.attemptsRemaining <= 0 and not empty item.latestSubmission}">
                                                 <a class="sa-subtle ass-inline-link" href="${pageContext.request.contextPath}/student/assessments?view=history&enrollmentId=${enrollment.enrollmentId}">View full history</a>

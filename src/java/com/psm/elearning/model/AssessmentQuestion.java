@@ -34,6 +34,12 @@ public class AssessmentQuestion {
     
     @Pattern(regexp = "^[A-D]$", message = "Correct option must be A, B, C, or D")
     private String correctOption;
+
+    @Size(max = 500, message = "Attachment URL must not exceed 500 characters")
+    private String attachmentUrl;
+
+    @Size(max = 255, message = "Attachment name must not exceed 255 characters")
+    private String attachmentName;
     
     @DecimalMin(value = "0.0", message = "Marks must be >= 0")
     @DecimalMax(value = "100.0", message = "Marks must not exceed 100")
@@ -54,6 +60,14 @@ public class AssessmentQuestion {
         this.optionD = optionD;
         this.correctOption = correctOption;
         this.marks = marks;
+    }
+
+    public AssessmentQuestion(Integer questionId, Integer assessmentId, String questionText,
+                              String optionA, String optionB, String optionC, String optionD,
+                              String correctOption, Double marks, String attachmentUrl, String attachmentName) {
+        this(questionId, assessmentId, questionText, optionA, optionB, optionC, optionD, correctOption, marks);
+        this.attachmentUrl = attachmentUrl;
+        this.attachmentName = attachmentName;
     }
     
     // Getters and Setters
@@ -80,6 +94,12 @@ public class AssessmentQuestion {
     
     public String getCorrectOption() { return correctOption; }
     public void setCorrectOption(String correctOption) { this.correctOption = correctOption; }
+
+    public String getAttachmentUrl() { return attachmentUrl; }
+    public void setAttachmentUrl(String attachmentUrl) { this.attachmentUrl = attachmentUrl; }
+
+    public String getAttachmentName() { return attachmentName; }
+    public void setAttachmentName(String attachmentName) { this.attachmentName = attachmentName; }
     
     public Double getMarks() { return marks; }
     public void setMarks(Double marks) { this.marks = marks; }

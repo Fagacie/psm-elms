@@ -59,13 +59,7 @@
             </div>
 
             <div class="lh-stage-body">
-                <section class="mv-stage-panel">
-                    <iframe
-                        class="mv-fragment-frame"
-                        id="mvMaterialFrame"
-                        title="Learning material viewer"
-                        src="${pageContext.request.contextPath}/student/materials?action=preview&id=${material.materialId}&enrollmentId=${previewEnrollmentId}&fragment=true"></iframe>
-                </section>
+                <jsp:include page="/WEB-INF/views/student/fragments/material-viewer-fragment.jsp"/>
             </div>
 
             <footer class="lh-action-bar">

@@ -20,6 +20,12 @@
         <a href="${pageContext.request.contextPath}/instructor/courses" class="nav-item ${resolvedInstructorPage == 'courses' ? 'active' : ''}" title="Courses">
             <i class="fas fa-book"></i><span>Courses</span>
         </a>
+        <a href="${pageContext.request.contextPath}/instructor/materials" class="nav-item ${resolvedInstructorPage == 'materials' ? 'active' : ''}" title="Material Hub">
+            <i class="fas fa-folder-open"></i><span>Material Hub</span>
+        </a>
+        <a href="${pageContext.request.contextPath}/instructor/assessments?view=dashboard" class="nav-item ${resolvedInstructorPage == 'assessments' ? 'active' : ''}" title="Assessment Hub">
+            <i class="fas fa-clipboard-list"></i><span>Assessment Hub</span>
+        </a>
         <a href="${pageContext.request.contextPath}/profile" class="nav-item ${resolvedInstructorPage == 'profile' ? 'active' : ''}" title="Profile / Settings">
             <i class="fas fa-user-gear"></i><span>Profile / Settings</span>
         </a>

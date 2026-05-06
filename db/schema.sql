@@ -277,6 +277,8 @@ CREATE TABLE IF NOT EXISTS `AssessmentQuestion` (
   `OptionC` VARCHAR(500) NULL,
   `OptionD` VARCHAR(500) NULL,
   `CorrectOption` VARCHAR(10) NULL,
+  `AttachmentUrl` VARCHAR(500) NULL,
+  `AttachmentName` VARCHAR(255) NULL,
   `Marks` DECIMAL(5,2) NULL,
   KEY `idx_question_assessment` (`AssessmentID`),
   CONSTRAINT `fk_question_assessment` FOREIGN KEY (`AssessmentID`) REFERENCES `Assessment`(`AssessmentID`) ON DELETE CASCADE ON UPDATE CASCADE

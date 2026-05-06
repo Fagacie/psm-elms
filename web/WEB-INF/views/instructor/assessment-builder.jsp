@@ -2,6 +2,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <c:set var="assessmentFormAction" value="${not empty selectedAssessment ? 'updateAssessment' : 'createAssessment'}" />
+<c:set var="selectedQuestionCount" value="${not empty selectedAssessment and questionCountByAssessmentId[selectedAssessment.assessmentId] != null ? questionCountByAssessmentId[selectedAssessment.assessmentId] : 0}" />
 
 <!DOCTYPE html>
 <html lang="en">
@@ -14,12 +15,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-shell.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-assessments.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-assessment-builder.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-assessment-flow.css">
     <jsp:include page="/WEB-INF/views/common/head-external-assets.jsp"/>
-    <style>
-        .hidden-field {
-            display: none !important;
-        }
-    </style>
 </head>
 <body class="instructor-ui">
 <jsp:include page="/WEB-INF/views/common/instructor-header.jsp">
@@ -32,38 +30,46 @@
 
 <main class="app-main">
     <div class="content-wrapper ia-workspace">
-        <nav class="breadcrumb" aria-label="Breadcrumb">
-            <a href="${pageContext.request.contextPath}/instructor/dashboard">Dashboard</a>
-            <span>&gt;</span>
-            <a href="${pageContext.request.contextPath}/instructor/courses">Courses</a>
-            <c:if test="${not empty selectedCourse}">
-                <span>&gt;</span>
-                <a href="${pageContext.request.contextPath}/instructor/courses?action=workspace&courseId=${selectedCourse.courseId}">${selectedCourse.courseName}</a>
-            </c:if>
-            <span>&gt;</span>
-            <a href="${pageContext.request.contextPath}/instructor/assessments?courseId=${selectedCourse.courseId}">Assessment Hub</a>
-            <span>&gt;</span>
-            <span>${not empty selectedAssessment ? 'Settings' : 'New Assessment'}</span>
-        </nav>
+        <jsp:include page="/WEB-INF/views/instructor/fragments/assessment-breadcrumb.jsp">
+            <jsp:param name="currentLabel" value="${not empty selectedAssessment ? 'Settings' : 'New Assessment'}"/>
+        </jsp:include>
 
         <section class="ins-page-head">
             <div>
                 <p class="ins-page-kicker">Assessment Builder</p>
                 <h2>${not empty selectedAssessment ? 'Assessment Settings' : 'Create New Assessment'}</h2>
-                <p>Configure the foundational settings for this assessment. Changes here impact how students interact with and submit their work.</p>
             </div>
             <div class="ins-hero-actions">
-                <a href="${pageContext.request.contextPath}/instructor/assessments?courseId=${selectedCourse.courseId}" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left"></i> Back to Hub
+                <a href="${pageContext.request.contextPath}/instructor/assessments?view=dashboard&courseId=${selectedCourse.courseId}" class="btn btn-secondary">
+                    <i class="fas fa-layer-group"></i> Assessment Library
                 </a>
+                <c:if test="${not empty selectedAssessment}">
+                    <form method="post" action="${pageContext.request.contextPath}/instructor/assessments" class="ia-inline-form">
+                        <input type="hidden" name="action" value="publishAssessment" />
+                        <input type="hidden" name="courseId" value="${selectedCourse.courseId}" />
+                        <input type="hidden" name="assessmentId" value="${selectedAssessment.assessmentId}" />
+                        <button type="submit" class="btn btn-primary" ${selectedQuestionCount == 0 ? 'disabled' : ''} title="${selectedQuestionCount == 0 ? 'Add at least one question before publishing.' : 'Publish this assessment'}">
+                            <i class="fas fa-paper-plane"></i> Publish
+                        </button>
+                    </form>
+                    <a href="${pageContext.request.contextPath}/instructor/assessments?action=deleteAssessment&courseId=${selectedCourse.courseId}&id=${selectedAssessment.assessmentId}" class="btn btn-danger" onclick="return confirm('Archive this assessment? You can restore it later from archive.');">
+                        <i class="fas fa-box-archive"></i> Archive Assessment
+                    </a>
+                </c:if>
             </div>
         </section>
 
+        <c:if test="${param.success == 'created'}">
+            <div class="alert alert-success"><i class="fas fa-check-circle"></i> Assessment details saved. Continue with question setup.</div>
+        </c:if>
+        <c:if test="${param.success == 'updated'}">
+            <div class="alert alert-success"><i class="fas fa-check-circle"></i> Assessment settings updated successfully.</div>
+        </c:if>
         <c:if test="${not empty errorMessage}">
             <div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> ${errorMessage}</div>
         </c:if>
 
-        <div style="display: grid; grid-template-columns: 1fr 340px; gap: 32px; align-items: start;">
+        <div class="ia-flow-grid-single">
             <!-- Main Form Column -->
             <div class="section-card">
                 <form method="post" action="${pageContext.request.contextPath}/instructor/assessments" class="ia-wizard-form" id="assessmentDetailsForm">
@@ -87,7 +93,7 @@
                                     <option value="">Select type</option>
                                     <option value="Quiz" ${not empty selectedAssessment and selectedAssessment.type == 'Quiz' ? 'selected' : ''}>Quiz (Auto-graded MCQ)</option>
                                     <option value="Exam" ${not empty selectedAssessment and selectedAssessment.type == 'Exam' ? 'selected' : ''}>Exam (Auto-graded MCQ)</option>
-                                    <option value="Assignment" ${not empty selectedAssessment and selectedAssessment.type == 'Assignment' ? 'selected' : ''}>Assignment (Manual Upload)</option>
+                                    <option value="Assignment" ${not empty selectedAssessment and selectedAssessment.type == 'Assignment' ? 'selected' : ''}>Assignment (Written / PDF)</option>
                                 </select>
                             </div>
 
@@ -137,92 +143,32 @@
                         </div>
                     </div>
 
-                    <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--ins-border); display: flex; gap: 12px; justify-content: flex-end;">
-                        <button class="btn btn-primary" type="submit">
-                            <i class="fas fa-save"></i> ${not empty selectedAssessment ? 'Update Settings' : 'Create & Continue'}
-                        </button>
+                    <div class="builder-actions" style="margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--ins-border); display: flex; gap: 12px; justify-content: flex-end;">
+                        <c:choose>
+                            <c:when test="${not empty selectedAssessment}">
+                                <button class="btn btn-secondary" type="submit" data-workflow-action="details">
+                                    <i class="fas fa-floppy-disk"></i> Save Settings
+                                </button>
+                                <button class="btn btn-primary" type="submit" data-workflow-action="questions">
+                                    <i class="fas fa-arrow-right"></i> Save & Continue to Questions
+                                </button>
+                            </c:when>
+                            <c:otherwise>
+                                <button class="btn btn-primary" type="submit" data-workflow-action="questions">
+                                    <i class="fas fa-arrow-right"></i> Create & Continue to Questions
+                                </button>
+                            </c:otherwise>
+                        </c:choose>
                     </div>
                 </form>
             </div>
 
-            <!-- Sidebar Info Column -->
-            <aside>
-                <div class="section-card" style="padding: 24px; background: #f8fafc;">
-                    <h4 style="margin: 0 0 16px; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ins-muted);">Configuration Context</h4>
-                    <div style="display: grid; gap: 16px;">
-                        <div class="ia-metric" style="padding: 16px; background: #fff; border: 1px solid var(--ins-border); border-radius: 12px;">
-                            <span style="font-size: 0.75rem; color: var(--ins-muted); display: block; margin-bottom: 4px;">Course Workspace</span>
-                            <strong style="font-size: 1rem; color: var(--ins-primary);">${selectedCourse.courseName}</strong>
-                        </div>
-                        
-                        <c:if test="${not empty selectedAssessment}">
-                            <div class="ia-metric" style="padding: 16px; background: #fff; border: 1px solid var(--ins-border); border-radius: 12px;">
-                                <span style="font-size: 0.75rem; color: var(--ins-muted); display: block; margin-bottom: 4px;">Live Submissions</span>
-                                <strong style="font-size: 1.2rem; color: var(--ins-text);">${submissionCountByAssessmentId[selectedAssessment.assessmentId]}</strong>
-                            </div>
-                        </c:if>
-
-                        <div style="padding: 16px; background: var(--ins-accent-soft); border: 1px solid rgba(20, 83, 45, 0.1); border-radius: 12px; font-size: 0.85rem; line-height: 1.6;">
-                            <i class="fas fa-circle-info" style="color: var(--ins-primary); margin-right: 6px;"></i>
-                            <strong>Pro Tip:</strong> Quizzes and Exams are auto-graded based on the Question Bank. Assignments require you to grade them manually.
-                        </div>
-                        
-                        <c:if test="${not empty selectedAssessment and (selectedAssessment.type == 'Quiz' or selectedAssessment.type == 'Exam')}">
-                            <a href="${pageContext.request.contextPath}/instructor/assessments?view=questions&courseId=${selectedCourse.courseId}&assessmentId=${selectedAssessment.assessmentId}" class="btn btn-secondary" style="width: 100%; justify-content: center;">
-                                <i class="fas fa-list-check"></i> Edit Question Bank
-                            </a>
-                        </c:if>
-                    </div>
-                </div>
-            </aside>
+            <!-- Right-side configuration panel removed per UX update -->
         </div>
     </div>
 </main>
 
 
-<script>
-    document.addEventListener("DOMContentLoaded", () => {
-        // Sidebar Toggle
-        const toggleBtn = document.getElementById("instructorMenuToggle");
-        if (toggleBtn) {
-            toggleBtn.addEventListener("click", () => {
-                document.body.classList.toggle("ins-shell-collapsed");
-            });
-        }
-
-        // Dynamic Form Logic
-        const typeSelect = document.getElementById('assessmentType');
-        const durationInput = document.getElementById('assessmentDuration');
-        const marksInput = document.getElementById('assessmentTotalMarks');
-        const objectiveFields = document.querySelectorAll('[data-type-visible="objective"]');
-        const assignmentFields = document.querySelectorAll('[data-type-visible="assignment"]');
-
-        function updateFormFields() {
-            const type = typeSelect.value;
-            
-            if (type === 'Quiz' || type === 'Exam') {
-                objectiveFields.forEach(f => f.classList.remove('hidden-field'));
-                assignmentFields.forEach(f => f.classList.add('hidden-field'));
-                durationInput.setAttribute('required', 'required');
-                marksInput.removeAttribute('required');
-            } else if (type === 'Assignment') {
-                assignmentFields.forEach(f => f.classList.remove('hidden-field'));
-                objectiveFields.forEach(f => f.classList.add('hidden-field'));
-                durationInput.removeAttribute('required');
-                marksInput.setAttribute('required', 'required');
-            } else {
-                objectiveFields.forEach(f => f.classList.add('hidden-field'));
-                assignmentFields.forEach(f => f.classList.add('hidden-field'));
-                durationInput.removeAttribute('required');
-                marksInput.removeAttribute('required');
-            }
-        }
-
-        typeSelect.addEventListener('change', updateFormFields);
-        
-        // Initialize state on load
-        updateFormFields();
-    });
-</script>
+<script src="${pageContext.request.contextPath}/js/instructor-assessment-builder.js"></script>
 </body>
 </html>

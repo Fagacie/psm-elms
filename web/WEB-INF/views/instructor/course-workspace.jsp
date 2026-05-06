@@ -72,11 +72,11 @@
 
         <%-- ACTION BAR --%>
         <section class="ws-action-bar section-card" style="margin-bottom: 32px; padding: 16px 24px; display: flex; gap: 12px; align-items: center; background: var(--ins-surface);">
-            <button type="button" class="btn btn-primary" onclick="openUploadModal()">
-                <i class="fas fa-plus"></i> Add Material
-            </button>
-            <a href="${assessmentWorkspaceBaseUrl}&view=editor" class="btn btn-secondary">
-                <i class="fas fa-clipboard-list"></i> Add Assessment
+            <a href="${pageContext.request.contextPath}/instructor/materials?courseId=${selectedCourse.courseId}" class="btn btn-primary">
+                <i class="fas fa-folder-open"></i> Material Hub
+            </a>
+            <a href="${assessmentWorkspaceBaseUrl}&view=dashboard" class="btn btn-secondary">
+                <i class="fas fa-clipboard-list"></i> Assessment Hub
             </a>
             <button type="button" class="btn btn-secondary" onclick="document.getElementById('students').scrollIntoView({behavior: 'smooth'})">
                 <i class="fas fa-users"></i> View Students
@@ -293,8 +293,16 @@
                                     </div>
 
                                     <div style="display: flex; gap: 8px; border-top: 1px solid var(--ins-border); padding-top: 16px;">
-                                        <button type="button" class="btn btn-secondary btn-sm" onclick="openAssessmentPage('submissions', ${assessment.assessmentId})" style="flex: 1; justify-content: center;">Review</button>
-                                        <button type="button" class="btn btn-secondary btn-sm" onclick="openAssessmentPage('editor', ${assessment.assessmentId})" style="width: 40px; justify-content: center;"><i class="fas fa-cog"></i></button>
+                                        <button type="button" class="btn btn-secondary btn-sm" onclick="openAssessmentPage('submissions', ${assessment.assessmentId})" style="flex: 1; justify-content: center;">
+                                            <c:choose>
+                                                <c:when test="${assessment.type == 'Assignment'}">Review Files</c:when>
+                                                <c:otherwise>View Results</c:otherwise>
+                                            </c:choose>
+                                        </button>
+                                        <button type="button" class="btn btn-secondary btn-sm" onclick="openAssessmentPage('${assessment.type == 'Assignment' ? 'editor' : 'questions'}', ${assessment.assessmentId})" style="width: 40px; justify-content: center;" title="${assessment.type == 'Assignment' ? 'Assignment Settings' : 'Question Bank'}">
+                                            <i class="fas ${assessment.type == 'Assignment' ? 'fa-cog' : 'fa-list-check'}"></i>
+                                        </button>
+                                        <a href="${pageContext.request.contextPath}/instructor/assessments?action=archiveAssessment&courseId=${selectedCourse.courseId}&id=${assessment.assessmentId}" class="btn btn-danger btn-sm" style="width: 40px; justify-content: center;" onclick="return confirm('Archive this assessment?')" title="Archive Assessment"><i class="fas fa-box-archive"></i></a>
                                     </div>
                                 </article>
                             </c:forEach>
