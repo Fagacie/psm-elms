@@ -68,7 +68,7 @@
         .focus-assessment-card {
             border-radius: 8px;
             border: 1px solid var(--sv-border);
-            background: #ffffff;
+            background: var(--sv-surface);
             box-shadow: var(--sv-shadow-sm);
             padding: 20px;
         }
@@ -76,7 +76,7 @@
         .assessment-shell-card {
             border-radius: 8px;
             border: 1px solid var(--sv-border);
-            background: #ffffff;
+            background: var(--sv-surface);
             box-shadow: var(--sv-shadow-sm);
         }
 
@@ -126,7 +126,8 @@
             outline: none;
             transition: border-color 0.2s, box-shadow 0.2s;
             font-family: inherit;
-            background: #fff;
+            background: var(--sv-surface-soft);
+            color: var(--sv-text);
         }
 
         .submission-field textarea:focus,
@@ -138,7 +139,7 @@
         .assignment-workspace {
             border: 1px solid var(--sv-border);
             border-radius: 8px;
-            background: #ffffff;
+            background: var(--sv-surface);
             padding: 20px;
             display: grid;
             gap: 16px;
@@ -191,7 +192,8 @@
             border: 1px solid var(--sv-border);
             border-radius: 6px;
             padding: 8px;
-            background: #fff;
+            background: var(--sv-surface-soft);
+            color: var(--sv-text);
         }
 
         .assignment-upload-note {
@@ -314,7 +316,7 @@
         }
 
         .metric-card {
-            background: #ffffff;
+            background: var(--sv-surface-soft);
             border: 1px solid var(--sv-border);
             border-radius: 6px;
             padding: 14px 12px;
@@ -369,7 +371,7 @@
         }
 
         .question-container {
-            background: #ffffff;
+            background: var(--sv-surface);
             border: 1px solid var(--sv-border);
             border-radius: 8px;
             padding: 18px;
@@ -432,7 +434,8 @@
             border-radius: 6px;
             cursor: pointer;
             transition: all 0.2s;
-            background: #ffffff;
+            background: var(--sv-surface-soft);
+            color: var(--sv-text);
         }
 
         .option-label:hover {
@@ -594,8 +597,17 @@
         }
     </style>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/student-assessment-module.css">
+    <script>
+        if (window.self !== window.top) {
+            document.documentElement.classList.add('sv-page-embedded');
+            document.addEventListener('DOMContentLoaded', function() {
+                document.body.classList.add('sv-page-embedded');
+            });
+        }
+    </script>
 </head>
-<body class="${attemptMode ? 'assessment-focus-page' : 'sv-page'}">
+<c:set var="isEmbedded" value="${param.embed == 'true' || param.iframe == 'true'}"/>
+<body class="${attemptMode ? 'assessment-focus-page' : (isEmbedded ? 'sv-page sv-page-embedded' : 'sv-page')}">
 <c:set var="topbarTitle" value="Assessment Workspace"/>
 <c:set var="topbarSubtitle" value="Complete your assessment"/>
 <c:set var="topbarShowSearch" value="false"/>
@@ -603,28 +615,39 @@
 <c:set var="navContextPage" value="assessments"/>
 <c:set var="navCourseEnrollmentId" value="${enrollment.enrollmentId}"/>
 <c:set var="navCourseTitle" value="${enrollment.courseName}"/>
-<c:if test="${not attemptMode}">
+
+<c:if test="${not attemptMode and not isEmbedded}">
     <jsp:include page="/WEB-INF/views/common/student-topbar.jsp"/>
 </c:if>
 
 <c:if test="${not attemptMode}">
-<div class="sv-layout">
-    <c:set var="activePage" value="my-courses"/>
-    <jsp:include page="/WEB-INF/views/common/student-sidebar.jsp"/>
+    <c:choose>
+        <c:when test="${isEmbedded}">
+            <main class="sv-main" style="margin: 0 !important; padding: 12px !important; background: transparent !important;">
+                <section class="sv-card assessment-shell-card" style="box-shadow: none !important; border: 1px solid var(--sv-border);">
+                    <div class="assessment-shell-body" style="padding: 16px !important;">
+        </c:when>
+        <c:otherwise>
+            <div class="sv-layout">
+                <c:set var="activePage" value="my-courses"/>
+                <jsp:include page="/WEB-INF/views/common/student-sidebar.jsp"/>
 
-    <main class="sv-main">
-        <div class="sv-breadcrumb">
-            <a href="${pageContext.request.contextPath}/dashboard"><i class="fas fa-house"></i> Dashboard</a>
-            <span>/</span>
-            <a href="${pageContext.request.contextPath}/student/my-enrollments">My Courses</a>
-            <span>/</span>
-            <a href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=assessments">Assessments</a>
-            <span>/</span>
-            <span>${assessment.title}</span>
-        </div>
+                <main class="sv-main">
+                    <div class="sv-breadcrumb">
+                        <a href="${pageContext.request.contextPath}/dashboard"><i class="fas fa-house"></i> Dashboard</a>
+                        <span>/</span>
+                        <a href="${pageContext.request.contextPath}/student/my-enrollments">My Courses</a>
+                        <span>/</span>
+                        <a href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=assessments">Assessments</a>
+                        <span>/</span>
+                        <span>${assessment.title}</span>
+                    </div>
 
-        <section class="sv-card assessment-shell-card">
-            <div class="assessment-shell-body">
+                    <section class="sv-card assessment-shell-card">
+                        <div class="assessment-shell-body">
+        </c:otherwise>
+    </c:choose>
+</c:if>
             <!-- Assessment Header -->
             <div class="assessment-header">
                 <div class="assessment-header-left">
@@ -705,7 +728,7 @@
                             <c:when test="${objectiveAssessment}">
                                 <div class="attempt-cta-card">
                                     <p>Ready to take this assessment? You have <strong>${remainingAttempts} attempt(s)</strong> remaining.</p>
-                                    <a class="sv-btn primary" href="${pageContext.request.contextPath}/student/assessments?courseId=${assessment.courseId}&assessmentId=${assessment.assessmentId}&mode=attempt&enrollmentId=${enrollment.enrollmentId}" style="text-decoration: none;">
+                                    <a class="sv-btn primary" href="${pageContext.request.contextPath}/student/assessments?courseId=${assessment.courseId}&assessmentId=${assessment.assessmentId}&mode=attempt&enrollmentId=${enrollment.enrollmentId}${isEmbedded ? '&embed=true' : ''}" style="text-decoration: none;">
                                         <i class="fas fa-play"></i>&nbsp;Open Secure Attempt
                                     </a>
                                 </div>
@@ -753,7 +776,7 @@
                                         </div>
                                     </c:if>
 
-                                    <form method="post" action="${pageContext.request.contextPath}/student/assessments" enctype="multipart/form-data" style="display:grid; gap:14px;">
+                                    <form method="post" target="_parent" action="${pageContext.request.contextPath}/student/assessments" enctype="multipart/form-data" style="display:grid; gap:14px;">
                                         <input type="hidden" name="assessmentId" value="${assessment.assessmentId}">
                                         <input type="hidden" name="enrollmentId" value="${enrollment.enrollmentId}">
 
@@ -787,25 +810,28 @@
                     <i class="fas fa-arrow-left"></i> Back to Assessment List
                 </a>
             </div>
-            </div>
         </section>
     </main>
-</div>
+    <c:if test="${not isEmbedded}">
+        </div>
+    </c:if>
 </c:if>
 
 <c:if test="${attemptMode}">
-    <div class="assessment-focus-shell">
-        <div class="assessment-focus-topbar">
-            <div>
-                <h1 class="assessment-focus-title">${assessment.title}</h1>
+    <div class="assessment-focus-shell" style="${isEmbedded ? 'padding: 0 !important; max-width: 100% !important; margin: 0 !important;' : ''}">
+        <c:if test="${not isEmbedded}">
+            <div class="assessment-focus-topbar">
+                <div>
+                    <h1 class="assessment-focus-title">${assessment.title}</h1>
+                </div>
+                <div class="assessment-focus-lock">
+                    <i class="fas fa-shield-alt"></i>
+                    Secure Attempt Mode
+                </div>
             </div>
-            <div class="assessment-focus-lock">
-                <i class="fas fa-shield-alt"></i>
-                Secure Attempt Mode
-            </div>
-        </div>
+        </c:if>
 
-        <section class="focus-assessment-card">
+        <section class="focus-assessment-card" style="${isEmbedded ? 'box-shadow: none !important; border: 1px solid var(--sv-border) !important; background: rgba(30, 41, 59, 0.4) !important; padding: 16px !important;' : ''}">
             <!-- Assessment Header -->
             <div class="assessment-header" style="margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid #e0e0e0;">
                 <div class="assessment-header-left">

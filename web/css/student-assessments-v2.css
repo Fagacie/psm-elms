@@ -71,13 +71,13 @@
 }
 
 .ass-flow-item.is-done {
-  border-color: #86efac;
-  background: #ecfdf3;
+  border-color: #a7f3d0;
+  background: #ecfdf5;
 }
 
 .ass-flow-item.is-done .ass-flow-dot {
-  border-color: #16a34a;
-  color: #166534;
+  border-color: #10b981;
+  color: #059669;
 }
 
 .ass-course-selector .sv-card-body,

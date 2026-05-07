@@ -1,11 +1,11 @@
-﻿.me-page,
+.me-page,
 .me-hero,
 .me-metrics,
 .me-grid,
 .me-controlbar {
-  --me-accent: #14532d;
-  --me-accent-soft: rgba(20, 83, 45, 0.08);
-  --me-accent-border: rgba(20, 83, 45, 0.18);
+  --me-accent: var(--sv-accent);
+  --me-accent-soft: var(--sv-accent-soft);
+  --me-accent-border: var(--sv-accent-border);
 }
 
 .me-user {
@@ -326,11 +326,11 @@
 .me-card-footer .sv-btn.primary:hover,
 .sv-card-head .sv-btn.primary:hover {
   opacity: 1;
-  box-shadow: 0 12px 28px rgba(20, 83, 45, 0.18);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.16);
 }
 
 .me-card .sv-progress-bar {
-  background: var(--me-accent);
+  background: linear-gradient(90deg, #10b981, #34d399);
 }
 
 .me-empty-hidden {

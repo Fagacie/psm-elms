@@ -74,12 +74,12 @@
             <span class="theme-toggle-label">Dark mode</span>
         </button>
 
-        <div class="sv-profile-dropdown sv-popover" id="svProfileDropdown">
-            <button type="button" class="sv-profile-trigger" id="svProfileMenuBtn" aria-haspopup="true" aria-expanded="false">
+        <div class="sv-profile-dropdown" id="svProfileDropdown">
+            <a href="${pageContext.request.contextPath}/profile" class="sv-profile-trigger" style="background: transparent !important; border: none !important; box-shadow: none !important; padding: 0 !important; min-height: auto !important; text-decoration: none;">
                 <span class="sv-profile-copy">
                     <span class="sv-profile-name">${topbarUserName}</span>
                 </span>
-                <span class="sv-avatar-shell">
+                <span class="sv-avatar-shell" style="margin-left: 8px;">
                     <c:choose>
                         <c:when test="${not empty topbarProfilePicture}">
                             <c:choose>
@@ -90,18 +90,7 @@
                         <c:otherwise><span class="sv-avatar-fallback">${topbarInitials}</span></c:otherwise>
                     </c:choose>
                 </span>
-                <i class="fas fa-chevron-down" aria-hidden="true"></i>
-            </button>
-
-            <div class="sv-profile-menu sv-popover-panel" id="svProfileMenu" role="menu" aria-label="Profile menu">
-                <div class="sv-popover-head">
-                    <strong>${topbarUserName}</strong>
-                    <small>Student account</small>
-                </div>
-                <a href="${pageContext.request.contextPath}/dashboard" role="menuitem"><i class="fas fa-table-columns"></i> Dashboard</a>
-                <a href="${pageContext.request.contextPath}/profile" role="menuitem"><i class="fas fa-user"></i> Profile</a>
-                <a href="${pageContext.request.contextPath}/logout" role="menuitem"><i class="fas fa-right-from-bracket"></i> Logout</a>
-            </div>
+            </a>
         </div>
     </div>
 </header>

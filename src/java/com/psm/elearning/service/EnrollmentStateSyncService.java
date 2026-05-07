@@ -146,7 +146,7 @@ public class EnrollmentStateSyncService {
             submitted = true;
             if (submission.getScore() != null) {
                 graded = true;
-                double threshold = resolvePassThresholdStatic(assessment.getTotalMarks());
+                double threshold = resolvePassThresholdStatic(assessment);
                 if (submission.getScore() >= threshold) {
                     passed = true;
                     break;
@@ -157,18 +157,37 @@ public class EnrollmentStateSyncService {
         if (passed) {
             return new AssessmentProgressState(true, true, 1.0);
         }
-        if (graded || submitted) {
-            // Assessment progress credit is awarded only when pass threshold is met.
+
+
+        if (submitted) {
             return new AssessmentProgressState(true, false, 0.0);
         }
         return new AssessmentProgressState(false, false, 0.0);
     }
 
-    private static double resolvePassThresholdStatic(Integer totalMarks) {
+    private static double resolvePassThresholdStatic(Assessment assessment) {
         int passMarkPercent = AppSettingsService.getInt(
                 AppSettingsService.KEY_ASSESSMENT_PASS_MARK, 70, 1, 100
         );
+        Integer totalMarks = assessment != null ? assessment.getTotalMarks() : null;
         if (totalMarks == null || totalMarks <= 0) {
+            double sumOfMarks = 0.0;
+            if (assessment != null && assessment.getAssessmentId() != null) {
+                try (java.sql.Connection conn = com.psm.elearning.util.DBConnection.getConnection();
+                     java.sql.PreparedStatement ps = conn.prepareStatement("SELECT SUM(Marks) FROM AssessmentQuestion WHERE AssessmentID = ?")) {
+                    ps.setInt(1, assessment.getAssessmentId());
+                    try (java.sql.ResultSet rs = ps.executeQuery()) {
+                        if (rs.next()) {
+                            sumOfMarks = rs.getDouble(1);
+                        }
+                    }
+                } catch (Exception e) {
+                    // Ignore
+                }
+            }
+            if (sumOfMarks > 0) {
+                return sumOfMarks * (passMarkPercent / 100.0);
+            }
             return passMarkPercent;
         }
         return totalMarks * (passMarkPercent / 100.0);

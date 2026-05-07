@@ -1,32 +1,51 @@
 :root {
-    --ins-bg: #ffffff;
-    --ins-surface: #ffffff;
-    --ins-surface-2: #ffffff;
-    --ins-text: #0f172a;
+    --ins-bg: #f6f8fb;
+    --ins-bg-accent: radial-gradient(circle at top left, rgba(15, 23, 42, 0.04), transparent 28%),
+                     radial-gradient(circle at 85% 15%, rgba(15, 23, 42, 0.03), transparent 24%);
+    --ins-surface: rgba(255, 255, 255, 0.85);
+    --ins-surface-strong: #ffffff;
+    --ins-surface-soft: #f8fafc;
+    --ins-text: #334155;
+    --ins-heading: #0f172a;
     --ins-muted: #64748b;
-    --ins-border: #f1f5f9;
-    --ins-border-strong: #f1f5f9;
-    --ins-input-border: #e5e7eb;
-    --ins-primary: #14532d;
-    --ins-primary-strong: #0f3d21;
-    --ins-accent: #14532d;
-    --ins-accent-soft: rgba(20, 83, 45, 0.08);
-    --ins-success: #64748b;
-    --ins-warning: #64748b;
-    --ins-danger: #64748b;
-    --ins-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
-    --ins-shadow-md: 0 2px 8px rgba(15, 23, 42, 0.06);
+    --ins-muted-strong: #475569;
+    --ins-border: #e2e8f0;
+    --ins-border-strong: #cbd5e1;
+    --ins-input-border: #e2e8f0;
+    /* Premium Slate/Dark Accent Brand Colors (Synced with Student Side) */
+    --ins-primary: #0f172a;
+    --ins-primary-strong: #020617;
+    --ins-primary-soft: rgba(15, 23, 42, 0.05);
+    --ins-accent: #0f172a;
+    --ins-accent-soft: rgba(15, 23, 42, 0.05);
+    --ins-accent-border: rgba(15, 23, 42, 0.12);
+    
+    /* Modern Status States */
+    --ins-success: #10b981;
+    --ins-success-soft: rgba(16, 185, 129, 0.08);
+    --ins-warning: #f59e0b;
+    --ins-warning-soft: rgba(245, 158, 11, 0.08);
+    --ins-danger: #ef4444;
+    --ins-danger-soft: rgba(239, 68, 68, 0.08);
+    
+    /* Premium Spacing & Shadows */
+    --ins-shadow-sm: 0 10px 24px rgba(15, 23, 42, 0.04);
+    --ins-shadow-md: 0 16px 40px rgba(15, 23, 42, 0.06);
+    --ins-shadow-lg: 0 24px 48px rgba(15, 23, 42, 0.12);
+    
     --ins-radius-sm: 10px;
-    --ins-radius-md: 12px;
-    --ins-radius-lg: 12px;
+    --ins-radius-md: 16px;
+    --ins-radius-lg: 20px;
 }
 
 body.instructor-ui {
     margin: 0;
     background: var(--ins-bg);
+    background-image: var(--ins-bg-accent);
     color: var(--ins-text);
     font-family: "Inter", "Segoe UI", sans-serif;
     line-height: 1.5;
+    min-height: 100vh;
 }
 
 body.instructor-ui.ins-mobile-nav-open {
@@ -39,6 +58,7 @@ body.instructor-ui.ins-mobile-nav-open {
 
 .instructor-ui a {
     color: inherit;
+    text-decoration: none;
 }
 
 .instructor-ui .app-header,
@@ -62,10 +82,10 @@ body.instructor-ui.ins-mobile-nav-open {
     justify-content: space-between;
     height: 74px;
     padding: 0 22px 0 26px;
-    background: #ffffff;
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--ins-border);
-    box-shadow: 0 1px 0 rgba(15, 23, 42, 0.02);
+    background: rgba(246, 248, 251, 0.85);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.02);
 }
 
 .instructor-ui .header-left {
@@ -76,7 +96,7 @@ body.instructor-ui.ins-mobile-nav-open {
 .instructor-ui .logo-section {
     min-width: 208px;
     gap: 10px;
-    color: var(--ins-text);
+    color: var(--ins-heading);
     font-family: "Inter", "Segoe UI", sans-serif;
     font-size: 1rem;
     font-weight: 700;
@@ -93,6 +113,7 @@ body.instructor-ui.ins-mobile-nav-open {
     border: 1px solid var(--ins-border);
     color: #ffffff;
     font-size: 1.15rem;
+    box-shadow: 0 8px 16px rgba(79, 70, 229, 0.2);
 }
 
 .instructor-ui .page-title {
@@ -101,7 +122,7 @@ body.instructor-ui.ins-mobile-nav-open {
     font-family: "Inter", "Segoe UI", sans-serif;
     font-size: 1.1rem;
     font-weight: 700;
-    color: var(--ins-text);
+    color: var(--ins-heading);
 }
 
 .instructor-ui .dashboard-brand {
@@ -109,7 +130,7 @@ body.instructor-ui.ins-mobile-nav-open {
     align-items: baseline;
     gap: 8px;
     text-decoration: none;
-    color: var(--ins-text);
+    color: var(--ins-heading);
 }
 
 .instructor-ui .dashboard-brand-main {
@@ -181,33 +202,37 @@ body.instructor-ui.ins-mobile-nav-open {
     height: 42px;
     border: 1px solid var(--ins-border);
     border-radius: 12px;
-    background: #ffffff;
-    color: var(--ins-text);
+    background: var(--ins-surface-strong);
+    color: var(--ins-heading);
     cursor: pointer;
-    transition: background-color 0.2s ease, border-color 0.2s ease;
+    box-shadow: var(--ins-shadow-sm);
+    transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
 }
 
 .ins-menu-btn:hover {
-    background: var(--ins-accent-soft);
-    border-color: #cbd5e1;
+    background: var(--ins-primary-soft);
+    border-color: var(--ins-accent-border);
+    transform: translateY(-1px);
 }
 
 .instructor-ui .user-menu {
     gap: 12px;
-    padding: 8px 10px 8px 14px;
+    padding: 8px 14px;
     border: 1px solid var(--ins-border);
-    border-radius: 12px;
-    background: #ffffff;
+    border-radius: 14px;
+    background: var(--ins-surface-strong);
+    box-shadow: var(--ins-shadow-sm);
 }
 
 .instructor-ui .user-menu-link {
     text-decoration: none;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 
 .instructor-ui .user-menu-link:hover {
-    border-color: #cbd5e1;
-    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+    border-color: var(--ins-accent-border);
+    box-shadow: var(--ins-shadow-md);
+    transform: translateY(-1px);
 }
 
 .instructor-ui .user-info {
@@ -217,13 +242,17 @@ body.instructor-ui.ins-mobile-nav-open {
 }
 
 .instructor-ui .user-name {
-    font-size: 0.84rem;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--ins-heading);
 }
 
 .instructor-ui .user-role {
-    font-size: 0.72rem;
+    font-size: 0.7rem;
     text-transform: uppercase;
     letter-spacing: 0.08em;
+    font-weight: 700;
+    color: var(--ins-primary);
 }
 
 .instructor-ui .user-avatar {
@@ -239,7 +268,7 @@ body.instructor-ui.ins-mobile-nav-open {
     border-radius: 10px;
     background: var(--ins-primary);
     color: #ffffff;
-    box-shadow: none;
+    box-shadow: 0 4px 10px rgba(79, 70, 229, 0.15);
 }
 
 .instructor-ui .user-avatar img {
@@ -260,15 +289,22 @@ body.instructor-ui.ins-mobile-nav-open {
     width: 42px;
     height: 42px;
     border: 1px solid var(--ins-border);
-    border-radius: 10px;
-    background: #ffffff;
+    border-radius: 12px;
+    background: var(--ins-surface-strong);
     color: var(--ins-primary);
+    box-shadow: var(--ins-shadow-sm);
+    transition: transform 0.2s ease;
+}
+
+.instructor-ui .notifications:hover {
+    transform: translateY(-1px);
+    color: var(--ins-primary-strong);
 }
 
 .instructor-ui .notifications .badge {
     position: absolute;
-    top: -6px;
-    right: -6px;
+    top: -4px;
+    right: -4px;
     min-width: 18px;
     height: 18px;
     padding: 0 5px;
@@ -288,9 +324,10 @@ body.instructor-ui.ins-mobile-nav-open {
     top: 74px;
     width: 278px;
     height: calc(100vh - 74px);
-    background: #ffffff;
+    background: var(--ins-surface);
+    backdrop-filter: blur(14px);
     border-right: 1px solid var(--ins-border);
-    padding: 18px 16px 22px;
+    padding: 24px 18px 24px;
     box-sizing: border-box;
     transition: width 0.3s ease, padding 0.3s ease, opacity 0.3s ease;
 }
@@ -299,35 +336,54 @@ body.instructor-ui.ins-mobile-nav-open {
     padding: 0;
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 8px;
 }
 
 .instructor-ui .nav-item {
+    position: relative;
     text-decoration: none;
     border-left: none;
     border-radius: 12px;
-    padding: 13px 14px;
-    color: var(--ins-text);
+    padding: 13px 16px;
+    color: var(--ins-muted-strong);
     font-weight: 600;
+    font-size: 0.92rem;
     gap: 12px;
-    transition: transform 0.2s ease, color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .instructor-ui .nav-item i {
     width: 18px;
-    font-size: 0.95rem;
+    font-size: 0.98rem;
+    transition: transform 0.2s ease;
 }
 
 .instructor-ui .nav-item:hover {
-    background: var(--ins-accent-soft);
+    background: var(--ins-primary-soft);
     color: var(--ins-primary);
-    transform: translateX(2px);
+    transform: translateX(4px);
+}
+
+.instructor-ui .nav-item:hover i {
+    transform: scale(1.1);
 }
 
 .instructor-ui .nav-item.active {
-    background: var(--ins-accent-soft);
-    color: var(--ins-primary-strong);
-    box-shadow: inset 0 0 0 1px var(--ins-border);
+    background: var(--ins-primary-soft);
+    color: var(--ins-primary);
+    font-weight: 700;
+    box-shadow: inset 0 0 0 1px var(--ins-accent-border);
+}
+
+.instructor-ui .nav-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 12px;
+    bottom: 12px;
+    width: 4px;
+    background: var(--ins-primary);
+    border-radius: 0 4px 4px 0;
 }
 
 .instructor-ui .app-main {
@@ -366,10 +422,10 @@ body.ins-shell-collapsed .app-main {
 }
 
 .ins-page-kicker {
-    margin: 0 0 6px;
+    margin: 0 0 8px;
     color: var(--ins-primary);
-    font-size: 0.78rem;
-    font-weight: 700;
+    font-size: 0.76rem;
+    font-weight: 800;
     letter-spacing: 0.08em;
     text-transform: uppercase;
 }
@@ -378,7 +434,10 @@ body.ins-shell-collapsed .app-main {
     margin: 0;
     font-family: "Inter", "Segoe UI", sans-serif;
     font-size: clamp(1.6rem, 2.2vw, 2.15rem);
-    line-height: 1.1;
+    line-height: 1.15;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--ins-heading);
 }
 
 .ins-page-head p {
@@ -398,36 +457,47 @@ body.ins-shell-collapsed .app-main {
 .instructor-ui .action-bar,
 .instructor-ui .course-card,
 .instructor-ui .stat-card {
-    border-radius: 12px;
+    border-radius: var(--ins-radius-lg);
     border: 1px solid var(--ins-border);
-    background: #ffffff;
-    box-shadow: none;
+    background: var(--ins-surface-strong);
+    box-shadow: var(--ins-shadow-sm);
 }
 
 .instructor-ui .section-card,
 .instructor-ui .card,
 .instructor-ui .form-card {
-    padding: 24px;
-    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    padding: 28px;
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.25s ease;
     overflow: hidden;
 }
 
+.instructor-ui .section-card:hover,
+.instructor-ui .card:hover,
+.instructor-ui .form-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--ins-shadow-md);
+    border-color: var(--ins-accent-border);
+}
+
 .ins-hero-card {
-    padding: 24px;
+    padding: 28px;
     margin-bottom: 28px;
-    background: #ffffff;
+    background: var(--ins-surface-strong);
 }
 
 .ins-hero-grid {
     display: grid;
     grid-template-columns: 1.35fr 0.95fr;
-    gap: 20px;
+    gap: 24px;
 }
 
 .ins-hero-grid h3 {
     margin: 0;
     font-family: "Inter", "Segoe UI", sans-serif;
-    font-size: 1.32rem;
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--ins-heading);
+    letter-spacing: -0.01em;
     line-height: 1.25;
 }
 
@@ -441,27 +511,35 @@ body.ins-shell-collapsed .app-main {
 .ins-hero-actions {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 12px;
     margin-top: 20px;
 }
 
 .ins-hero-metrics {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
+    gap: 16px;
 }
 
 .ins-metric {
-    padding: 16px;
+    padding: 20px;
     border: 1px solid var(--ins-border);
-    border-radius: 14px;
-    background: #ffffff;
+    border-radius: var(--ins-radius-md);
+    background: var(--ins-surface-strong);
+    box-shadow: var(--ins-shadow-sm);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ins-metric:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--ins-shadow-md);
 }
 
 .ins-metric strong {
     display: block;
     font-family: "Inter", "Segoe UI", sans-serif;
-    font-size: 1.4rem;
+    font-size: 1.55rem;
+    font-weight: 800;
     color: var(--ins-primary);
 }
 
@@ -469,98 +547,119 @@ body.ins-shell-collapsed .app-main {
     display: block;
     margin-top: 6px;
     color: var(--ins-muted);
-    font-size: 0.8rem;
+    font-size: 0.82rem;
+    font-weight: 600;
     line-height: 1.5;
 }
 
 .instructor-ui .btn {
-    border-radius: 10px;
-    padding: 10px 16px;
+    border-radius: var(--ins-radius-sm);
+    padding: 11px 20px;
     font-weight: 700;
-    box-shadow: none;
+    font-size: 0.9rem;
+    box-shadow: var(--ins-shadow-sm);
     justify-content: center;
     gap: 8px;
     border: 1px solid transparent;
     text-decoration: none;
     cursor: pointer;
-    transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease, background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .instructor-ui .btn-primary {
-    background: var(--ins-primary);
+    background: linear-gradient(135deg, var(--ins-primary) 0%, var(--ins-accent) 100%);
     color: #fff;
+    box-shadow: 0 4px 14px rgba(79, 70, 229, 0.25);
 }
 
 .instructor-ui .btn-primary:hover {
-    background: var(--ins-primary-strong);
+    background: linear-gradient(135deg, var(--ins-primary-strong) 0%, var(--ins-primary) 100%);
     transform: translateY(-2px);
-    opacity: 0.92;
+    box-shadow: 0 6px 20px rgba(79, 70, 229, 0.35);
 }
 
 .instructor-ui .btn-secondary {
-    background: #ffffff;
+    background: var(--ins-surface-strong);
     color: var(--ins-primary);
     border: 1px solid var(--ins-border);
 }
 
 .instructor-ui .btn-secondary:hover {
-    background: var(--ins-accent-soft);
+    background: var(--ins-primary-soft);
     color: var(--ins-primary-strong);
+    border-color: var(--ins-accent-border);
     transform: translateY(-2px);
+    box-shadow: var(--ins-shadow-sm);
 }
 
 .instructor-ui .btn-danger {
-    background: #ffffff;
-    color: var(--ins-text);
-    border: 1px solid var(--ins-input-border);
+    background: var(--ins-danger-soft);
+    color: var(--ins-danger);
+    border: 1px solid transparent;
 }
 
 .instructor-ui .btn-danger:hover {
-    background: #f8fafc;
+    background: var(--ins-danger);
+    color: #ffffff;
     transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(239, 68, 68, 0.2);
 }
 
 .instructor-ui .btn-sm {
-    padding: 8px 12px;
+    padding: 8px 14px;
     font-size: 0.8rem;
+    border-radius: 8px;
 }
 
 .instructor-ui .alert {
-    border-left: 3px solid var(--ins-primary);
-    padding: 14px 16px;
+    border: 1px solid var(--ins-border);
+    border-left: 4px solid var(--ins-primary);
+    padding: 16px 20px;
     display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    margin-bottom: 16px;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    border-radius: 12px;
+    box-shadow: var(--ins-shadow-sm);
 }
 
 .instructor-ui .alert-success {
-    background: #ffffff;
-    color: var(--ins-text);
+    background: var(--ins-success-soft);
+    border-left-color: var(--ins-success);
+    color: #065f46;
 }
 
 .instructor-ui .alert-error,
 .instructor-ui .alert-danger {
-    background: #ffffff;
-    color: var(--ins-text);
+    background: var(--ins-danger-soft);
+    border-left-color: var(--ins-danger);
+    color: #991b1b;
 }
 
 .instructor-ui .alert-warning {
-    background: #ffffff;
-    color: var(--ins-text);
+    background: var(--ins-warning-soft);
+    border-left-color: var(--ins-warning);
+    color: #92400e;
 }
 
 .instructor-ui .empty-state-box,
 .instructor-ui .empty-state {
     text-align: center;
-    padding: 36px 24px;
+    padding: 48px 32px;
     color: var(--ins-muted);
+    border: 1px dashed var(--ins-border-strong);
+    border-radius: var(--ins-radius-lg);
+    background: var(--ins-surface-strong);
+    box-shadow: var(--ins-shadow-sm);
 }
 
 .instructor-ui .empty-state-box strong,
 .instructor-ui .empty-state strong {
-    color: var(--ins-text);
-    font-size: 0.98rem;
+    color: var(--ins-heading);
+    font-size: 1.05rem;
+    font-weight: 700;
+    display: block;
+    margin-bottom: 6px;
 }
 
 .instructor-ui .empty-state-box p,
@@ -568,13 +667,16 @@ body.ins-shell-collapsed .app-main {
     margin: 0;
     max-width: 48ch;
     margin-inline: auto;
+    font-size: 0.92rem;
+    line-height: 1.6;
 }
 
 .instructor-ui .empty-state-box i,
 .instructor-ui .empty-state i {
-    font-size: 2.1rem;
-    margin-bottom: 10px;
+    font-size: 2.5rem;
+    margin-bottom: 16px;
     color: var(--ins-primary);
+    opacity: 0.8;
 }
 
 .instructor-ui .action-bar {
@@ -583,13 +685,17 @@ body.ins-shell-collapsed .app-main {
     align-items: center;
     gap: 16px;
     flex-wrap: wrap;
-    padding: 16px 18px;
+    padding: 20px 24px;
+    background: var(--ins-surface-strong);
+    border: 1px solid var(--ins-border);
+    border-radius: var(--ins-radius-md);
+    box-shadow: var(--ins-shadow-sm);
 }
 
 .instructor-ui .form-header,
 .instructor-ui .breadcrumb,
 .instructor-ui .content-header {
-    border-bottom-color: rgba(191, 209, 227, 0.85);
+    border-bottom-color: var(--ins-border);
 }
 
 .instructor-ui .form-input,
@@ -599,9 +705,13 @@ body.ins-shell-collapsed .app-main {
 .instructor-ui input,
 .instructor-ui select,
 .instructor-ui textarea {
-    border-radius: 8px !important;
-    border: 1px solid var(--ins-input-border);
-    background: linear-gradient(180deg, #ffffff 0%, #fcfcfd 100%);
+    border-radius: 10px !important;
+    border: 1px solid var(--ins-border);
+    padding: 12px 16px;
+    font-size: 0.92rem;
+    background: var(--ins-surface-strong);
+    color: var(--ins-heading);
+    box-shadow: var(--ins-shadow-sm);
     transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
 }
 
@@ -612,9 +722,11 @@ body.ins-shell-collapsed .app-main {
 .instructor-ui input:focus,
 .instructor-ui select:focus,
 .instructor-ui textarea:focus {
-    border-color: #111111;
-    box-shadow: 0 0 0 4px rgba(20, 83, 45, 0.1);
+    border-color: var(--ins-accent);
+    box-shadow: 0 0 0 4px var(--ins-primary-soft);
     transform: translateY(-1px);
+    background: var(--ins-surface-strong);
+    outline: none;
 }
 
 .instructor-ui .form-input::placeholder,
@@ -628,7 +740,8 @@ body.ins-shell-collapsed .app-main {
 .instructor-ui .card-title,
 .instructor-ui .form-header h2 {
     font-family: "Inter", "Segoe UI", sans-serif;
-    color: var(--ins-text);
+    color: var(--ins-heading);
+    font-weight: 800;
 }
 
 .instructor-ui .section-header {
@@ -636,13 +749,14 @@ body.ins-shell-collapsed .app-main {
     justify-content: space-between;
     align-items: flex-start;
     gap: 14px;
-    margin-bottom: 16px;
+    margin-bottom: 20px;
 }
 
 .instructor-ui .section-caption {
     margin: 8px 0 0;
     color: var(--ins-muted);
-    font-size: 0.88rem;
+    font-size: 0.9rem;
+    line-height: 1.5;
 }
 
 .instructor-ui .breadcrumb {
@@ -650,15 +764,16 @@ body.ins-shell-collapsed .app-main {
     align-items: center;
     flex-wrap: wrap;
     gap: 8px;
-    margin-bottom: 18px;
+    margin-bottom: 24px;
     color: var(--ins-muted);
-    font-size: 0.84rem;
+    font-size: 0.86rem;
 }
 
 .instructor-ui .breadcrumb a {
     color: var(--ins-primary);
     font-weight: 700;
     text-decoration: none;
+    transition: color 0.2s ease;
 }
 
 .instructor-ui .breadcrumb a:hover {
@@ -669,25 +784,26 @@ body.ins-shell-collapsed .app-main {
 .instructor-ui .data-table,
 .instructor-ui .course-table {
     width: 100%;
-    border-radius: 12px;
+    border-radius: var(--ins-radius-md);
     overflow: hidden;
     border: 1px solid var(--ins-border);
-    background: #ffffff;
+    background: var(--ins-surface-strong);
     border-collapse: separate;
     border-spacing: 0;
+    box-shadow: var(--ins-shadow-sm);
 }
 
 .instructor-ui .table thead,
 .instructor-ui .data-table thead,
 .instructor-ui .course-table thead {
-    background: #ffffff;
+    background: var(--ins-surface-soft);
 }
 
 .instructor-ui .table th,
 .instructor-ui .data-table th,
 .instructor-ui .course-table th {
-    color: var(--ins-muted);
-    font-size: 0.75rem;
+    color: var(--ins-muted-strong);
+    font-size: 0.74rem;
     font-weight: 800;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -699,22 +815,22 @@ body.ins-shell-collapsed .app-main {
 .instructor-ui .data-table td,
 .instructor-ui .course-table th,
 .instructor-ui .course-table td {
-    padding: 14px 16px;
-    border-bottom-color: var(--ins-border);
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--ins-border);
     vertical-align: middle;
 }
 
 .instructor-ui .table td,
 .instructor-ui .data-table td,
 .instructor-ui .course-table td {
-    background: linear-gradient(180deg, #ffffff 0%, #fcfcfd 100%);
+    background: var(--ins-surface-strong);
     transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
-.instructor-ui .table tbody tr:hover,
-.instructor-ui .data-table tbody tr:hover,
-.instructor-ui .course-table tbody tr:hover {
-    background: #f8fafc;
+.instructor-ui .table tbody tr:hover td,
+.instructor-ui .data-table tbody tr:hover td,
+.instructor-ui .course-table tbody tr:hover td {
+    background: var(--ins-surface-soft);
 }
 
 .form-section {
@@ -723,20 +839,22 @@ body.ins-shell-collapsed .app-main {
 }
 
 .form-header {
-    margin-bottom: 22px;
-    padding-bottom: 18px;
+    margin-bottom: 24px;
+    padding-bottom: 20px;
     border-bottom: 1px solid var(--ins-border);
 }
 
 .form-header h2 {
     margin: 0 0 8px;
-    font-size: 1.45rem;
-    letter-spacing: -0.03em;
+    font-size: 1.55rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
 }
 
 .form-description {
     margin: 0;
     color: var(--ins-muted);
+    font-size: 0.94rem;
     line-height: 1.65;
 }
 
@@ -748,7 +866,7 @@ body.ins-shell-collapsed .app-main {
 .form-row {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 18px;
+    gap: 20px;
 }
 
 .form-group {
@@ -757,15 +875,15 @@ body.ins-shell-collapsed .app-main {
 }
 
 .form-group label {
-    font-size: 0.8rem;
+    font-size: 0.78rem;
     font-weight: 700;
-    color: var(--ins-muted);
+    color: var(--ins-muted-strong);
     letter-spacing: 0.08em;
     text-transform: uppercase;
 }
 
 .required {
-    color: #b91c1c;
+    color: var(--ins-danger);
 }
 
 .text-muted {
@@ -784,7 +902,7 @@ body.ins-shell-collapsed .app-main {
     display: flex;
     justify-content: flex-end;
     gap: 12px;
-    padding-top: 20px;
+    padding-top: 24px;
     border-top: 1px solid var(--ins-border);
 }
 
@@ -798,12 +916,15 @@ body.ins-shell-collapsed .app-main {
     max-width: 320px;
     width: 100%;
     border: 1px solid var(--ins-border);
-    border-radius: 12px;
+    border-radius: var(--ins-radius-md);
     display: block;
 }
 
 .instructor-ui .table-container {
     overflow-x: auto;
+    border-radius: var(--ins-radius-md);
+    border: 1px solid var(--ins-border);
+    background: var(--ins-surface-strong);
 }
 
 .ins-shell-overlay {
@@ -814,15 +935,38 @@ body.ins-shell-collapsed .app-main {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 6px 10px;
+    gap: 6px;
+    padding: 6px 12px;
     border-radius: 999px;
-    font-size: 0.68rem;
+    font-size: 0.72rem;
     font-weight: 800;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.05em;
     text-transform: uppercase;
     border: 1px solid var(--ins-border);
-    background: #ffffff;
-    color: var(--ins-muted);
+    background: var(--ins-surface-soft);
+    color: var(--ins-muted-strong);
+}
+
+/* Specific Badge State Overrides */
+.instructor-ui .status-active,
+.instructor-ui .status-published {
+    background: var(--ins-success-soft);
+    border-color: rgba(16, 185, 129, 0.2);
+    color: var(--ins-success);
+}
+
+.instructor-ui .status-draft,
+.instructor-ui .status-pending {
+    background: var(--ins-warning-soft);
+    border-color: rgba(245, 158, 11, 0.2);
+    color: var(--ins-warning);
+}
+
+.instructor-ui .status-archived,
+.instructor-ui .status-inactive {
+    background: var(--ins-danger-soft);
+    border-color: rgba(239, 68, 68, 0.2);
+    color: var(--ins-danger);
 }
 
 .instructor-ui .page-actions {
@@ -851,20 +995,20 @@ body.ins-shell-collapsed .app-main {
 
 .ins-course-card {
     border: 1px solid var(--ins-border);
-    border-radius: 16px;
-    background: #ffffff;
-    padding: 20px;
+    border-radius: var(--ins-radius-md);
+    background: var(--ins-surface-strong);
+    padding: 24px;
     display: flex;
     flex-direction: column;
-    gap: 16px;
-    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-    box-shadow: var(--ins-card-shadow, 0 1px 2px rgba(15, 23, 42, 0.04));
+    gap: 18px;
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+    box-shadow: var(--ins-shadow-sm);
 }
 
 .ins-course-card:hover {
     transform: translateY(-4px);
-    box-shadow: var(--ins-card-shadow-hover, 0 10px 24px rgba(15, 23, 42, 0.08));
-    border-color: var(--ins-primary-light, #93c5fd);
+    box-shadow: var(--ins-shadow-md);
+    border-color: var(--ins-accent-border);
 }
 
 .ins-course-card__top {
@@ -877,9 +1021,9 @@ body.ins-shell-collapsed .app-main {
 .ins-course-card__top h4 {
     margin: 0;
     font-size: 1.15rem;
-    color: var(--ins-text);
-    line-height: 1.3;
-    font-weight: 700;
+    color: var(--ins-heading);
+    line-height: 1.35;
+    font-weight: 800;
 }
 
 .ins-course-card__meta {
@@ -900,10 +1044,11 @@ body.ins-shell-collapsed .app-main {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 16px;
-    background: #f8fafc;
+    background: var(--ins-surface-soft);
     padding: 16px;
     border-radius: 12px;
     margin-top: auto;
+    border: 1px solid var(--ins-border);
 }
 
 .ins-course-card__stats div {
@@ -913,7 +1058,7 @@ body.ins-shell-collapsed .app-main {
 
 .ins-course-card__stats strong {
     font-size: 1.25rem;
-    color: var(--ins-text);
+    color: var(--ins-heading);
     font-weight: 800;
 }
 
@@ -974,7 +1119,7 @@ body.ins-shell-collapsed .app-main {
     .instructor-ui .app-sidebar.open,
     body.instructor-ui.ins-mobile-nav-open .app-sidebar {
         transform: translateX(0);
-        box-shadow: 0 24px 80px rgba(15, 23, 42, 0.18);
+        box-shadow: var(--ins-shadow-lg);
     }
 
     .instructor-ui .sidebar-nav {
@@ -1078,10 +1223,10 @@ body.ins-shell-collapsed .app-main {
     display: flex;
     align-items: center;
     gap: 12px;
-    background: #ffffff;
+    background: var(--ins-surface-strong);
     padding: 16px 20px;
-    border-radius: 12px;
-    box-shadow: 0 10px 40px rgba(15, 23, 42, 0.12), 0 1px 3px rgba(15, 23, 42, 0.05);
+    border-radius: var(--ins-radius-md);
+    box-shadow: var(--ins-shadow-md);
     border-left: 4px solid var(--ins-primary);
     transform: translateX(120%) scale(0.9);
     opacity: 0;
@@ -1100,18 +1245,18 @@ body.ins-shell-collapsed .app-main {
     font-size: 1.25rem;
 }
 
-.ins-toast-success { border-left-color: #10b981; }
-.ins-toast-success .ins-toast-icon { color: #10b981; }
+.ins-toast-success { border-left-color: var(--ins-success); }
+.ins-toast-success .ins-toast-icon { color: var(--ins-success); }
 
-.ins-toast-error { border-left-color: #ef4444; }
-.ins-toast-error .ins-toast-icon { color: #ef4444; }
+.ins-toast-error { border-left-color: var(--ins-danger); }
+.ins-toast-error .ins-toast-icon { color: var(--ins-danger); }
 
-.ins-toast-warning { border-left-color: #f59e0b; }
-.ins-toast-warning .ins-toast-icon { color: #f59e0b; }
+.ins-toast-warning { border-left-color: var(--ins-warning); }
+.ins-toast-warning .ins-toast-icon { color: var(--ins-warning); }
 
 .ins-toast-msg {
     flex: 1;
-    color: var(--ins-text);
+    color: var(--ins-heading);
     font-size: 0.9375rem;
     font-weight: 500;
 }
@@ -1129,16 +1274,16 @@ body.ins-shell-collapsed .app-main {
 
 .ins-toast-close:hover {
     opacity: 1;
-    color: var(--ins-text);
+    color: var(--ins-heading);
 }
 
 /* Modals / Dialog */
 .ins-dialog {
     padding: 0;
     border: none;
-    border-radius: 20px;
-    background: #ffffff;
-    box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25);
+    border-radius: var(--ins-radius-lg);
+    background: var(--ins-surface-strong);
+    box-shadow: var(--ins-shadow-lg);
     max-width: 480px;
     width: 90%;
     margin: auto;
@@ -1172,16 +1317,17 @@ body.ins-shell-collapsed .app-main {
 }
 
 .ins-dialog-title {
-    font-size: 1.25rem;
-    color: var(--ins-text);
+    font-size: 1.3rem;
+    color: var(--ins-heading);
     margin: 0 0 12px 0;
-    font-weight: 700;
+    font-weight: 800;
+    letter-spacing: -0.01em;
 }
 
 .ins-dialog-msg {
-    color: var(--ins-text-light);
+    color: var(--ins-muted-strong);
     font-size: 0.9375rem;
-    line-height: 1.5;
+    line-height: 1.55;
     margin: 0 0 24px 0;
 }
 

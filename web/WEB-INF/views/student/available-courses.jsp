@@ -158,7 +158,7 @@
                                     <span><i class="fas fa-clock"></i> ${course.displayDuration}</span>
                                     <span><i class="fas fa-wallet"></i>
                                         <c:choose>
-                                            <c:when test="${course.courseFee == 0}">Free</c:when>
+                                            <c:when test="${empty course.courseFee || course.courseFee le 0}">Free</c:when>
                                             <c:otherwise><fmt:formatNumber value="${course.courseFee}" type="number" minFractionDigits="2" maxFractionDigits="2"/></c:otherwise>
                                         </c:choose>
                                     </span>
@@ -170,7 +170,17 @@
                                             <a href="${pageContext.request.contextPath}/student/my-enrollments" class="sv-btn">My Course</a>
                                         </c:when>
                                         <c:otherwise>
-                                            <a href="${pageContext.request.contextPath}/student/enrollment-summary?courseId=${course.courseId}" class="sv-btn primary">Enroll</a>
+                                            <c:choose>
+                                                <c:when test="${empty course.courseFee || course.courseFee le 0}">
+                                                    <form method="post" action="${pageContext.request.contextPath}/student/enroll" style="display:inline;">
+                                                        <input type="hidden" name="courseId" value="${course.courseId}">
+                                                        <button type="submit" class="sv-btn primary">Enroll for Free</button>
+                                                    </form>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <a href="${pageContext.request.contextPath}/student/enrollment-summary?courseId=${course.courseId}" class="sv-btn primary">Enroll</a>
+                                                </c:otherwise>
+                                            </c:choose>
                                         </c:otherwise>
                                     </c:choose>
                                 </div>

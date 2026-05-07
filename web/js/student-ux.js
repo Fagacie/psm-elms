@@ -206,16 +206,106 @@ const StudentUX = (function() {
         });
     }
 
+    // --- 5. ZERO-DEPENDENCY COLUMN SORTING FOR TABLES ---
+
+    function initTableSorting() {
+        const tables = document.querySelectorAll('.assessment-table, .history-table, table[data-sortable]');
+        tables.forEach(table => {
+            const headers = table.querySelectorAll('th');
+            
+            headers.forEach((header, index) => {
+                // Ignore action columns
+                if (header.textContent.toLowerCase().includes('action') || header.hasAttribute('data-unsortable')) {
+                    return;
+                }
+                
+                header.style.cursor = 'pointer';
+                header.title = 'Click to sort column';
+                header.classList.add('sv-sortable-header');
+                
+                // Add indicator wrapper if not present
+                if (!header.querySelector('.sv-sort-icon')) {
+                    header.innerHTML += ' <span class="sv-sort-icon" style="opacity: 0.3; font-size: 0.75rem; margin-left: 6px;"><i class="fas fa-sort"></i></span>';
+                }
+                
+                let ascending = true;
+                
+                header.addEventListener('click', () => {
+                    // Reset all other headers in this table
+                    headers.forEach(h => {
+                        if (h !== header && h.querySelector('.sv-sort-icon')) {
+                            h.querySelector('.sv-sort-icon').innerHTML = '<i class="fas fa-sort"></i>';
+                            h.querySelector('.sv-sort-icon').style.opacity = '0.3';
+                        }
+                    });
+                    
+                    const tbody = table.querySelector('tbody');
+                    if (!tbody) return;
+                    
+                    const rows = Array.from(tbody.querySelectorAll('tr'));
+                    
+                    // Sort rows
+                    rows.sort((rowA, rowB) => {
+                        const cellA = rowA.children[index]?.textContent.trim() || '';
+                        const cellB = rowB.children[index]?.textContent.trim() || '';
+                        
+                        // Numeric check
+                        const numA = parseFloat(cellA.replace(/[^0-9.-]+/g, ""));
+                        const numB = parseFloat(cellB.replace(/[^0-9.-]+/g, ""));
+                        
+                        if (!isNaN(numA) && !isNaN(numB)) {
+                            return ascending ? numA - numB : numB - numA;
+                        }
+                        
+                        return ascending ? cellA.localeCompare(cellB) : cellB.localeCompare(cellA);
+                    });
+                    
+                    // Update rows in DOM
+                    rows.forEach(row => tbody.appendChild(row));
+                    
+                    // Update headers icons
+                    const iconSpan = header.querySelector('.sv-sort-icon');
+                    if (iconSpan) {
+                        iconSpan.innerHTML = ascending ? '<i class="fas fa-sort-up"></i>' : '<i class="fas fa-sort-down"></i>';
+                        iconSpan.style.opacity = '1';
+                    }
+                    
+                    // Flip state
+                    ascending = !ascending;
+                });
+            });
+        });
+    }
+
+    // --- 6. NAV-LINK CLICKS & POPOVER TRANSITIONS ---
+
+    function initMicroAnimations() {
+        // Soft scale-up / pulse on sidebar nav hover/click
+        const navLinks = document.querySelectorAll('.sv-nav-link');
+        navLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                // Play a brief click scale effect
+                this.style.transform = 'scale(0.96) translateX(4px)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 150);
+            });
+        });
+    }
+
     // Initialize everything on DOM load
     document.addEventListener('DOMContentLoaded', () => {
         initLiveSearch();
         convertAlertsToToasts();
+        initTableSorting();
+        initMicroAnimations();
     });
 
     // Public API
     return {
         showToast,
         confirm: confirmAction,
-        initLiveSearch
+        initLiveSearch,
+        initTableSorting
     };
 })();

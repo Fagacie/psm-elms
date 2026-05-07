@@ -489,6 +489,14 @@ public class StudentAssessmentServlet extends HttpServlet {
             return;
         }
 
+        // Centralized enrollment state synchronization on assessment submission
+        try {
+            new com.psm.elearning.service.EnrollmentStateSyncService().syncEnrollmentState(enrollment);
+        } catch (Exception syncEx) {
+            java.util.logging.Logger.getLogger(StudentAssessmentServlet.class.getName())
+                .log(java.util.logging.Level.WARNING, "StudentAssessmentServlet: sync failed on submit", syncEx);
+        }
+
         String successParam = timedOut ? "timed-out" : (exitSubmission ? "exited" : "submitted");
         response.sendRedirect(request.getContextPath() + "/student/enrollment-details?id=" + enrollmentId + "&tab=assessments&success=" + successParam + "&assessmentId=" + assessmentId);
     }

@@ -30,9 +30,17 @@
         </div>
 
         <div class="ef-stepper">
-            <div class="ef-step active">1. Enrollment Summary</div>
-            <div class="ef-step">2. Payment</div>
-            <div class="ef-step">3. Access Learning Hub</div>
+            <c:choose>
+                <c:when test="${empty course.courseFee || course.courseFee le 0}">
+                    <div class="ef-step active">1. Enrollment Summary</div>
+                    <div class="ef-step">2. Access Learning Hub</div>
+                </c:when>
+                <c:otherwise>
+                    <div class="ef-step active">1. Enrollment Summary</div>
+                    <div class="ef-step">2. Payment</div>
+                    <div class="ef-step">3. Access Learning Hub</div>
+                </c:otherwise>
+            </c:choose>
         </div>
 
         <c:if test="${empty course}">
@@ -50,14 +58,14 @@
                     <div class="ef-meta"><span>Duration</span><strong><c:out value="${course.displayDuration}" default="-"/></strong></div>
                 </div>
 
-                <div class="ef-amount"><span>Total Fee</span><strong><c:choose><c:when test="${course.courseFee == 0}">Free</c:when><c:otherwise><fmt:formatNumber value="${course.courseFee}" type="number" minFractionDigits="2" maxFractionDigits="2"/></c:otherwise></c:choose></strong></div>
+                <div class="ef-amount"><span>Total Fee</span><strong><c:choose><c:when test="${empty course.courseFee || course.courseFee le 0}">Free</c:when><c:otherwise><fmt:formatNumber value="${course.courseFee}" type="number" minFractionDigits="2" maxFractionDigits="2"/></c:otherwise></c:choose></strong></div>
 
                 <form method="post" action="${pageContext.request.contextPath}/student/enroll">
                     <input type="hidden" name="courseId" value="${course.courseId}" />
                     <div class="ef-actions">
                         <button type="submit" class="sv-btn primary">
                             <c:choose>
-                                <c:when test="${course.courseFee == 0}">Enroll for Free</c:when>
+                                <c:when test="${empty course.courseFee || course.courseFee le 0}">Enroll for Free</c:when>
                                 <c:otherwise>Proceed to Payment</c:otherwise>
                             </c:choose>
                         </button>

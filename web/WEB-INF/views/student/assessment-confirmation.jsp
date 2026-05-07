@@ -10,6 +10,14 @@
     <title>Submission Confirmed - PSM E-Learning</title>
     <jsp:include page="/WEB-INF/views/common/student-head-assets.jsp"/>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/student-assessment-module.css">
+    <script>
+        if (window.self !== window.top) {
+            document.documentElement.classList.add('sv-page-embedded');
+            document.addEventListener('DOMContentLoaded', function() {
+                document.body.classList.add('sv-page-embedded');
+            });
+        }
+    </script>
 </head>
 <body class="sv-page">
 <c:set var="topbarTitle" value="Submission Confirmation"/>

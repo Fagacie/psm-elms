@@ -42,7 +42,7 @@
                         </c:when>
                         <c:otherwise>
                             <c:choose>
-                                <c:when test="${course.courseFee == 0}">
+                                <c:when test="${empty course.courseFee || course.courseFee le 0}">
                                     <form method="post" action="${pageContext.request.contextPath}/student/enroll" style="display:inline;">
                                         <input type="hidden" name="courseId" value="${course.courseId}">
                                         <button type="submit" class="sv-btn primary">Enroll for Free</button>
@@ -83,7 +83,7 @@
                         <div class="cd-meta-card"><span>Category</span><strong><c:out value="${course.category}"/></strong></div>
                         <div class="cd-meta-card"><span>Level</span><strong><c:out value="${course.level}"/></strong></div>
                         <div class="cd-meta-card"><span>Duration</span><strong><c:out value="${course.displayDuration}"/></strong></div>
-                        <div class="cd-meta-card"><span>Fee</span><strong><c:choose><c:when test="${course.courseFee == 0}">Free</c:when><c:otherwise><fmt:formatNumber value="${course.courseFee}" type="number" minFractionDigits="2" maxFractionDigits="2"/></c:otherwise></c:choose></strong></div>
+                        <div class="cd-meta-card"><span>Fee</span><strong><c:choose><c:when test="${empty course.courseFee || course.courseFee le 0}">Free</c:when><c:otherwise><fmt:formatNumber value="${course.courseFee}" type="number" minFractionDigits="2" maxFractionDigits="2"/></c:otherwise></c:choose></strong></div>
                         <div class="cd-meta-card"><span>Instructor</span><strong><c:out value="${instructor.fullName}" default="TBA"/></strong></div>
                         <div class="cd-meta-card"><span>Language</span><strong><c:out value="${course.language}" default="English"/></strong></div>
                     </div>
@@ -95,7 +95,7 @@
                         <a class="sv-btn" href="${pageContext.request.contextPath}/student/my-enrollments"><i class="fas fa-layer-group"></i>&nbsp;Open Learning Hub</a>
                         <c:if test="${not isEnrolled}">
                             <c:choose>
-                                <c:when test="${course.courseFee == 0}">
+                                <c:when test="${empty course.courseFee || course.courseFee le 0}">
                                     <form method="post" action="${pageContext.request.contextPath}/student/enroll" style="display:block; width:100%;">
                                         <input type="hidden" name="courseId" value="${course.courseId}">
                                         <button type="submit" class="sv-btn primary" style="width:100%;">Enroll for Free</button>

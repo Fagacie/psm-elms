@@ -2,6 +2,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <c:set var="isAdminProfile" value="${sessionScope.userRole == 'Admin'}"/>
 <c:set var="isStudentProfile" value="${sessionScope.userRole == 'Student'}"/>
+<c:set var="isInstructorProfile" value="${sessionScope.userRole == 'Instructor'}"/>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,10 +13,18 @@
     <c:if test="${isAdminProfile}">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin-dashboard.css">
     </c:if>
+    <c:if test="${isInstructorProfile}">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-shell.css">
+    </c:if>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/profile-v2.css">
 </head>
-<body class="sv-page ${isAdminProfile ? 'admin-page profile-admin' : ''}">
+<body class="${isInstructorProfile ? 'instructor-ui' : (isAdminProfile ? 'admin-page profile-admin sv-page' : 'sv-page')}">
 <c:choose>
+    <c:when test="${isInstructorProfile}">
+        <jsp:include page="/WEB-INF/views/common/instructor-header.jsp">
+            <jsp:param name="pageTitle" value="Profile"/>
+        </jsp:include>
+    </c:when>
     <c:when test="${isAdminProfile}">
         <jsp:include page="/WEB-INF/views/common/admin-header.jsp">
             <jsp:param name="pageTitle" value="Profile"/>
@@ -35,27 +44,43 @@
     </c:otherwise>
 </c:choose>
 
-<div class="sv-layout">
-    <c:choose>
-        <c:when test="${isAdminProfile}">
-            <jsp:include page="/WEB-INF/views/common/admin-sidebar.jsp"/>
-        </c:when>
-        <c:when test="${isStudentProfile}">
-            <c:set var="activePage" value="profile"/>
-            <jsp:include page="/WEB-INF/views/common/student-sidebar.jsp"/>
-        </c:when>
-        <c:otherwise>
-            <c:set var="activePage" value="profile"/>
-            <jsp:include page="/WEB-INF/views/common/account-sidebar.jsp"/>
-        </c:otherwise>
-    </c:choose>
+<c:choose>
+    <c:when test="${isInstructorProfile}">
+        <c:set var="activeInstructorPage" value="profile"/>
+        <jsp:include page="/WEB-INF/views/common/instructor-sidebar.jsp"/>
+        
+        <main class="app-main profile-page">
+            <div class="content-wrapper">
+                <nav class="breadcrumb" aria-label="Breadcrumb">
+                    <a href="${pageContext.request.contextPath}/dashboard">Dashboard</a>
+                    <span>&gt;</span>
+                    <span>Profile</span>
+                </nav>
+    </c:when>
+    <c:otherwise>
+        <div class="sv-layout">
+            <c:choose>
+                <c:when test="${isAdminProfile}">
+                    <jsp:include page="/WEB-INF/views/common/admin-sidebar.jsp"/>
+                </c:when>
+                <c:when test="${isStudentProfile}">
+                    <c:set var="activePage" value="profile"/>
+                    <jsp:include page="/WEB-INF/views/common/student-sidebar.jsp"/>
+                </c:when>
+                <c:otherwise>
+                    <c:set var="activePage" value="profile"/>
+                    <jsp:include page="/WEB-INF/views/common/account-sidebar.jsp"/>
+                </c:otherwise>
+            </c:choose>
 
-    <main class="sv-main profile-page">
-        <div class="sv-breadcrumb">
-            <a href="${pageContext.request.contextPath}/dashboard">Dashboard</a>
-            <i class="fas fa-angle-right"></i>
-            <span>Profile</span>
-        </div>
+            <main class="sv-main profile-page">
+                <div class="sv-breadcrumb">
+                    <a href="${pageContext.request.contextPath}/dashboard">Dashboard</a>
+                    <i class="fas fa-angle-right"></i>
+                    <span>Profile</span>
+                </div>
+    </c:otherwise>
+</c:choose>
 
         <section class="profile-v2-hero" aria-label="Profile overview highlights">
             <div class="profile-v2-hero-copy">
@@ -332,8 +357,16 @@
                 </form>
             </section>
         </section>
+<c:choose>
+    <c:when test="${isInstructorProfile}">
+            </div>
+        </main>
+    </c:when>
+    <c:otherwise>
     </main>
 </div>
+    </c:otherwise>
+</c:choose>
 
 <div class="profile-v2-password-modal" id="passwordModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="passwordModalTitle">
     <div class="profile-v2-password-dialog">

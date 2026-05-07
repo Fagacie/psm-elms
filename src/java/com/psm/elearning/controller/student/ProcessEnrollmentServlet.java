@@ -72,7 +72,26 @@ public class ProcessEnrollmentServlet extends HttpServlet {
                 if (isPaidStatus(paymentStatus)) {
                     response.sendRedirect(request.getContextPath() + "/student/my-enrollments?error=already");
                 } else {
-                    response.sendRedirect(request.getContextPath() + "/student/payment?enrollmentId=" + existingEnrollment.getEnrollmentId());
+                    Course existingCourse = courseDAO.findById(courseId);
+                    if (existingCourse != null && isFreeCourse(existingCourse.getCourseFee())) {
+                        String freeReference = "FREE-" + existingEnrollment.getEnrollmentId() + "-" + UUID.randomUUID().toString().substring(0, 8);
+                        enrollmentDAO.updatePaymentStatus(existingEnrollment.getEnrollmentId(), "Paid", freeReference);
+                        enrollmentDAO.updateStatus(existingEnrollment.getEnrollmentId(), "Enrolled");
+
+                        Payment freePayment = new Payment();
+                        freePayment.setEnrollmentId(existingEnrollment.getEnrollmentId());
+                        freePayment.setAmount(0.0);
+                        freePayment.setMethod("Free");
+                        freePayment.setStatus("Paid");
+                        freePayment.setPaymentRef(freeReference);
+                        freePayment.setPaystackReference(freeReference);
+                        freePayment.setPaystackStatus("success");
+                        paymentDAO.createPayment(freePayment);
+
+                        response.sendRedirect(request.getContextPath() + "/student/enrollment-details?id=" + existingEnrollment.getEnrollmentId() + "&message=freeenrolled");
+                    } else {
+                        response.sendRedirect(request.getContextPath() + "/student/payment?enrollmentId=" + existingEnrollment.getEnrollmentId());
+                    }
                 }
                 return;
             }

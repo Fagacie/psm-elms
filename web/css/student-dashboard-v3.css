@@ -1,7 +1,7 @@
 .sd3-main {
-  --sd3-accent: #14532d;
-  --sd3-accent-soft: rgba(20, 83, 45, 0.08);
-  --sd3-accent-border: rgba(20, 83, 45, 0.18);
+  --sd3-accent: var(--sv-accent);
+  --sd3-accent-soft: var(--sv-accent-soft);
+  --sd3-accent-border: var(--sv-accent-border);
   position: relative;
 }
 
@@ -286,11 +286,11 @@
 
 .sd3-main .sv-btn.primary:hover {
   opacity: 1;
-  box-shadow: 0 12px 28px rgba(20, 83, 45, 0.18);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.16);
 }
 
 .sd3-main .sv-progress-bar {
-  background: var(--sd3-accent);
+  background: linear-gradient(90deg, #10b981, #34d399);
 }
 
 

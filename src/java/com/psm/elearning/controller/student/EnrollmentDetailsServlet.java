@@ -58,6 +58,7 @@ public class EnrollmentDetailsServlet extends HttpServlet {
     private AssessmentRetakeRequestDAO retakeRequestDAO;
     private MaterialProgressDAO materialProgressDAO;
     private EnrollmentStateSyncService enrollmentStateSyncService;
+    private com.psm.elearning.dao.CertificateDAO certificateDAO;
 
     public static class LearningItem {
         private Integer itemId;
@@ -213,6 +214,7 @@ public class EnrollmentDetailsServlet extends HttpServlet {
         retakeRequestDAO = new AssessmentRetakeRequestDAOImpl();
         materialProgressDAO = new MaterialProgressDAOImpl();
         enrollmentStateSyncService = new EnrollmentStateSyncService();
+        certificateDAO = new com.psm.elearning.dao.CertificateDAOImpl();
     }
     
     @Override
@@ -243,6 +245,13 @@ public class EnrollmentDetailsServlet extends HttpServlet {
             if (enrollment == null) {
                 response.sendRedirect(request.getContextPath() + "/student/my-enrollments?error=notfound");
                 return;
+            }
+
+            // Sync enrollment state upon load
+            try {
+                enrollmentStateSyncService.syncEnrollmentState(enrollment);
+            } catch (Exception syncEx) {
+                LOGGER.log(Level.WARNING, "Failed to sync enrollment on page load", syncEx);
             }
             
             // Verify ownership
@@ -1080,6 +1089,14 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                         : "Your records are almost ready. Open the certificate area to review your current status.";
             }
 
+            com.psm.elearning.model.Certificate userCertificate = null;
+            try {
+                userCertificate = certificateDAO.findByEnrollment(enrollment.getEnrollmentId());
+            } catch (Exception e) {
+                LOGGER.log(Level.WARNING, "Failed to query certificate in enrollment details", e);
+            }
+            request.setAttribute("userCertificate", userCertificate);
+
             request.setAttribute("certificateEligible", eligibleForCertificate);
             request.setAttribute("certificatePaidReady", paid);
             request.setAttribute("certificateCompletedReady", completed);
@@ -1320,7 +1337,7 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                     for (AssessmentSubmission s : subs) {
                         if (s.getScore() == null) continue;
                         if ("TimedOut".equalsIgnoreCase(s.getStatus())) continue;
-                        double threshold = resolvePassThreshold(a.getTotalMarks());
+                        double threshold = resolvePassThreshold(a);
                         if (s.getScore() >= threshold) {
                             passed = true;
                             break;
@@ -1336,9 +1353,29 @@ public class EnrollmentDetailsServlet extends HttpServlet {
         return Math.max(0, Math.min(100, percent));
     }
 
-    private double resolvePassThreshold(Integer totalMarks) {
+    private double resolvePassThreshold(Assessment a) {
         int passMarkPercent = AppSettingsService.getInt(AppSettingsService.KEY_ASSESSMENT_PASS_MARK, 70, 1, 100);
-        if (totalMarks == null || totalMarks <= 0) return passMarkPercent;
+        Integer totalMarks = a != null ? a.getTotalMarks() : null;
+        if (totalMarks == null || totalMarks <= 0) {
+            double sumOfMarks = 0.0;
+            if (a != null && a.getAssessmentId() != null) {
+                try (java.sql.Connection conn = com.psm.elearning.util.DBConnection.getConnection();
+                     java.sql.PreparedStatement ps = conn.prepareStatement("SELECT SUM(Marks) FROM AssessmentQuestion WHERE AssessmentID = ?")) {
+                    ps.setInt(1, a.getAssessmentId());
+                    try (java.sql.ResultSet rs = ps.executeQuery()) {
+                        if (rs.next()) {
+                            sumOfMarks = rs.getDouble(1);
+                        }
+                    }
+                } catch (Exception e) {
+                    // Ignore
+                }
+            }
+            if (sumOfMarks > 0) {
+                return sumOfMarks * (passMarkPercent / 100.0);
+            }
+            return passMarkPercent;
+        }
         return totalMarks * (passMarkPercent / 100.0);
     }
 

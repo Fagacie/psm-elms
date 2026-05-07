@@ -70,7 +70,7 @@ public class PaymentPageServlet extends HttpServlet {
                 return;
             }
 
-            if (enrollment.getCoursePrice() != null && enrollment.getCoursePrice() <= 0) {
+            if (enrollment.getCoursePrice() == null || enrollment.getCoursePrice() <= 0) {
                 response.sendRedirect(request.getContextPath() + "/student/enrollment-details?id=" + enrollment.getEnrollmentId() + "&message=freeenrolled");
                 return;
             }

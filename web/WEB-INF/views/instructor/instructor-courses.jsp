@@ -37,11 +37,6 @@
                     <h2>Manage your courses and student workspaces</h2>
                     <p>Access workspaces to grade assessments, arrange materials, and track student progress. You have ${courses != null ? courses.size() : 0} courses assigned.</p>
                 </div>
-                <div class="ins-hero-actions">
-                    <a href="${pageContext.request.contextPath}/instructor/courses?action=create" class="btn btn-primary">
-                        <i class="fas fa-plus"></i> Create Course
-                    </a>
-                </div>
             </section>
 
             <c:if test="${param.success == 'updated'}">
