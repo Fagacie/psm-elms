@@ -806,6 +806,14 @@ public class EnrollmentDetailsServlet extends HttpServlet {
             Integer selectedMaterialId = selectedMaterial != null ? selectedMaterial.getMaterialId() : null;
             Integer selectedAssessmentId = selectedAssessment != null ? selectedAssessment.getAssessmentId() : null;
             String selectedMaterialStatus = selectedMaterialId != null ? materialStatusById.getOrDefault(selectedMaterialId, "") : "";
+            if (selectedMaterialId != null && courseAccessGranted && !"completed".equalsIgnoreCase(selectedMaterialStatus)) {
+                try {
+                    materialProgressDAO.markInProgress(userId, selectedMaterialId, enrollment.getCourseId());
+                    selectedMaterialStatus = materialStatusById.getOrDefault(selectedMaterialId, "in_progress");
+                } catch (Exception progressException) {
+                    LOGGER.log(Level.WARNING, "EnrollmentDetailsServlet: unable to mark material in progress", progressException);
+                }
+            }
             int selectedAssessmentUsedAttempts = selectedAssessment != null
                     ? usedAttemptsByAssessment.getOrDefault(selectedAssessment.getAssessmentId(), 0)
                     : 0;

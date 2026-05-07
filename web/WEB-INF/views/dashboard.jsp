@@ -28,7 +28,7 @@
         <section class="sd3-hero sv-card">
             <div class="sv-card-body sd3-hero-body">
                 <div class="sd3-hero-copy">
-                    <h2>Welcome back, ${sessionScope.userName} 👋</h2>
+                    <h2>Welcome back, ${sessionScope.userName}</h2>
                     <p>Pick up where you left off or explore something new.</p>
                     <div class="sd3-hero-actions">
                         <a href="${pageContext.request.contextPath}/student/my-enrollments" class="sv-btn primary">My Courses</a>
@@ -41,7 +41,7 @@
                         <strong>${overallProgress}%</strong>
                     </div>
                     <div class="sv-progress">
-                        <div class="sv-progress-bar sd3-progress-bar" data-progress="${overallProgress}" style="width:${overallProgress}%;"></div>
+                        <div class="sv-progress-bar sd3-progress-bar" data-progress="${overallProgress}"></div>
                     </div>
                     <div class="sd3-summary-grid">
                         <div>
@@ -52,36 +52,9 @@
                             <span>Completed</span>
                             <strong>${completedCoursesCount}</strong>
                         </div>
-                        <div>
-                            <span>Paid</span>
-                            <strong>${paidEnrollmentsCount}</strong>
-                        </div>
-                        <div>
-                            <span>Certificates</span>
-                            <strong>${certificatesCount}</strong>
-                        </div>
                     </div>
                 </div>
             </div>
-        </section>
-
-        <section class="sv-metrics sd3-metrics">
-            <article class="sv-metric">
-                <p>Total Enrollments</p>
-                <h3 class="sd3-count" data-counter="${enrolledCoursesCount}">${enrolledCoursesCount}</h3>
-            </article>
-            <article class="sv-metric">
-                <p>Active Courses</p>
-                <h3 class="sd3-count" data-counter="${activeCoursesCount}">${activeCoursesCount}</h3>
-            </article>
-            <article class="sv-metric">
-                <p>Completed Courses</p>
-                <h3 class="sd3-count" data-counter="${completedCoursesCount}">${completedCoursesCount}</h3>
-            </article>
-            <article class="sv-metric">
-                <p>Certificates Issued</p>
-                <h3 class="sd3-count" data-counter="${certificatesCount}">${certificatesCount}</h3>
-            </article>
         </section>
 
         <section class="sd3-grid">
@@ -89,22 +62,9 @@
                 <div class="sv-card-head">
                     <div>
                         <h2>Continue Learning</h2>
-                        <p class="sd3-head-copy">Your current courses are shown in a simple layout so you can jump back in quickly.</p>
+                        <p class="sd3-head-copy">Resume your active coursework from one focused workspace.</p>
                     </div>
                     <a href="${pageContext.request.contextPath}/student/my-enrollments" class="sv-btn">View All</a>
-                </div>
-
-                <div class="sd3-controlbar">
-                    <div class="sd3-filter-group">
-                        <button type="button" class="sd3-filter active" data-filter="all">All</button>
-                        <button type="button" class="sd3-filter" data-filter="live">In Progress</button>
-                        <button type="button" class="sd3-filter" data-filter="done">Completed</button>
-                        <button type="button" class="sd3-filter" data-filter="hold">Not Started</button>
-                    </div>
-                    <div class="sd3-search-wrap">
-                        <label for="sd3CourseSearch" class="sd3-sr-only">Search courses</label>
-                        <input id="sd3CourseSearch" type="text" placeholder="Search courses..." autocomplete="off">
-                    </div>
                 </div>
 
                 <div class="sv-card-body">
@@ -136,8 +96,8 @@
                                                 </c:choose>
                                             </div>
                                             <div class="sv-course-copy">
-                                                <h3 class="sv-course-title">${course.courseName}</h3>
-                                                <p class="sv-course-line">Instructor: ${course.instructorName}</p>
+                                                <h3 class="sv-course-title"><c:out value="${course.courseName}"/></h3>
+                                                <p class="sv-course-line">Instructor: <c:out value="${course.instructorName}"/></p>
                                             </div>
                                             <div class="sv-course-progress-block">
                                                 <div class="sv-course-progress-top">
@@ -145,7 +105,7 @@
                                                     <strong>${courseProgress}%</strong>
                                                 </div>
                                                 <div class="sv-progress">
-                                                    <div class="sv-progress-bar sd3-progress-bar" data-progress="${courseProgress}" style="width:${courseProgress}%;"></div>
+                                                    <div class="sv-progress-bar sd3-progress-bar" data-progress="${courseProgress}"></div>
                                                 </div>
                                             </div>
                                             <div class="sv-course-actions">

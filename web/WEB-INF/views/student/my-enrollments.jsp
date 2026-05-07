@@ -52,16 +52,9 @@
             <div class="sv-card-body me-hero-body">
                 <div class="me-hero-copy">
                     <h2>My Courses</h2>
-                    <p>Track progress and continue learning.</p>
-                    <div class="me-hero-actions">
-                        <a href="${pageContext.request.contextPath}/student/courses" class="sv-btn">Browse New Courses</a>
-                    </div>
+                    <p>Manage enrolled courses and resume your current learning path.</p>
                 </div>
                 <div class="me-hero-summary">
-                    <div>
-                        <span>Total Enrolled</span>
-                        <strong>${not empty enrollments ? enrollments.size() : 0}</strong>
-                    </div>
                     <div>
                         <span>In Progress</span>
                         <strong>${inProgressCount}</strong>
@@ -70,26 +63,14 @@
                         <span>Completed</span>
                         <strong>${completedCount}</strong>
                     </div>
-                    <div>
-                        <span>Paid Enrollments</span>
-                        <strong>${paidCount}</strong>
-                    </div>
                 </div>
             </div>
-        </section>
-
-        <section class="sv-metrics me-metrics">
-            <article class="sv-metric"><p>Total Enrolled</p><h3 class="me-count" data-counter="${not empty enrollments ? enrollments.size() : 0}">${not empty enrollments ? enrollments.size() : 0}</h3></article>
-            <article class="sv-metric"><p>In Progress</p><h3 class="me-count" data-counter="${inProgressCount}">${inProgressCount}</h3></article>
-            <article class="sv-metric"><p>Completed</p><h3 class="me-count" data-counter="${completedCount}">${completedCount}</h3></article>
-            <article class="sv-metric"><p>Paid Enrollments</p><h3 class="me-count" data-counter="${paidCount}">${paidCount}</h3></article>
         </section>
 
         <section class="sv-card">
             <div class="sv-card-head">
                 <div>
-                    <h2>Course Grid</h2>
-                    <p class="me-head-copy">Card-based courses with clear progress, status, and the next action.</p>
+                    <h2>Current Courses</h2>
                 </div>
                 <a href="${pageContext.request.contextPath}/student/courses" class="sv-btn primary"><i class="fas fa-search"></i>&nbsp;Browse Courses</a>
             </div>
@@ -148,8 +129,8 @@
                                         <span class="sv-chip ${courseAccessGranted ? 'done' : 'status-Pending'}">${courseAccessGranted && !enrollmentPaid ? 'Free Course' : (empty enrollment.paymentStatus ? 'Pending' : enrollment.paymentStatus)}</span>
                                     </div>
                                     <div class="sv-course-copy">
-                                        <h3 class="sv-course-title" data-search-text>${enrollment.courseName}</h3>
-                                        <p class="sv-course-line" data-search-text>Instructor: ${enrollment.instructorName}</p>
+                                        <h3 class="sv-course-title" data-search-text><c:out value="${enrollment.courseName}"/></h3>
+                                        <p class="sv-course-line" data-search-text>Instructor: <c:out value="${enrollment.instructorName}"/></p>
                                     </div>
 
                                     <div class="sv-course-progress-block">
@@ -157,14 +138,10 @@
                                             <span>Progress</span>
                                             <strong>${progress}%</strong>
                                         </div>
-                                        <div class="sv-progress"><div class="sv-progress-bar" data-progress="${progress}" style="width:${progress}%;"></div></div>
+                                        <div class="sv-progress"><div class="sv-progress-bar" data-progress="${progress}"></div></div>
                                     </div>
 
                                     <div class="me-card-footer">
-                                        <div class="me-card-meta">
-                                            <span>${progress}% complete</span>
-                                            <span>#${enrollment.enrollmentId}</span>
-                                        </div>
                                         <a class="sv-btn primary me-continue-link" href="${courseAccessGranted ? pageContext.request.contextPath.concat('/student/enrollment-details?id=').concat(enrollment.enrollmentId) : pageContext.request.contextPath.concat('/student/payment?enrollmentId=').concat(enrollment.enrollmentId).concat('&error=required')}">${courseAccessGranted ? 'Continue' : 'Pay Now'}</a>
                                     </div>
                                 </article>

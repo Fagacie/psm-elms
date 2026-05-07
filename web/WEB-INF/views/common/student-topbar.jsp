@@ -44,7 +44,7 @@
         </a>
 
         <div class="sv-page-title">
-            <h1>${resolvedStudentTitle}</h1>
+            <h1><c:out value="${resolvedStudentTitle}"/></h1>
         </div>
     </div>
 
@@ -61,10 +61,10 @@
             <div class="sv-popover-panel sv-notification-panel" id="svNotificationPanel" role="menu" aria-label="Notifications">
                 <div class="sv-popover-head">
                     <strong>Notifications</strong>
-                    <small>${topbarNotificationCount > 0 ? 'Unread updates available' : 'You are all caught up'}</small>
+                    <small><c:out value="${topbarNotificationCount > 0 ? 'Unread updates available' : 'You are all caught up'}"/></small>
                 </div>
                 <div class="sv-popover-body">
-                    <p>${topbarNotificationCount > 0 ? 'New course and progress notifications will appear here.' : 'No new alerts right now. Keep learning.'}</p>
+                    <p><c:out value="${topbarNotificationCount > 0 ? 'New course and progress notifications will appear here.' : 'No new alerts right now. Keep learning.'}"/></p>
                 </div>
             </div>
         </div>
@@ -75,11 +75,11 @@
         </button>
 
         <div class="sv-profile-dropdown" id="svProfileDropdown">
-            <a href="${pageContext.request.contextPath}/profile" class="sv-profile-trigger" style="background: transparent !important; border: none !important; box-shadow: none !important; padding: 0 !important; min-height: auto !important; text-decoration: none;">
+            <a href="${pageContext.request.contextPath}/profile" class="sv-profile-trigger">
                 <span class="sv-profile-copy">
-                    <span class="sv-profile-name">${topbarUserName}</span>
+                    <span class="sv-profile-name"><c:out value="${topbarUserName}"/></span>
                 </span>
-                <span class="sv-avatar-shell" style="margin-left: 8px;">
+                <span class="sv-avatar-shell">
                     <c:choose>
                         <c:when test="${not empty topbarProfilePicture}">
                             <c:choose>
@@ -87,7 +87,7 @@
                                 <c:otherwise><img src="${pageContext.request.contextPath}${topbarProfilePicture}" alt="Profile" class="sv-avatar-img"></c:otherwise>
                             </c:choose>
                         </c:when>
-                        <c:otherwise><span class="sv-avatar-fallback">${topbarInitials}</span></c:otherwise>
+                        <c:otherwise><span class="sv-avatar-fallback"><c:out value="${topbarInitials}"/></span></c:otherwise>
                     </c:choose>
                 </span>
             </a>
