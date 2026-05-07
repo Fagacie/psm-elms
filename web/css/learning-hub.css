@@ -589,3 +589,250 @@ body.lh-shell-page .lh-main {
     grid-template-columns: 1fr;
   }
 }
+
+/* ============================================
+   GAMIFIED CERTIFICATE HUB & PROGRESS DASHBOARD
+   ============================================ */
+
+.lh-certificate-hub {
+  max-width: 760px;
+  width: 100%;
+  margin: 20px auto;
+  padding: 0 16px;
+  animation: lh-fade-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes lh-fade-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.lh-cert-card {
+  position: relative;
+  border-radius: 24px;
+  padding: 40px 32px;
+  text-align: center;
+  overflow: hidden;
+  box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.12);
+  margin-bottom: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.lh-cert-card:hover {
+  transform: translateY(-4px);
+}
+
+/* Gold Gradient for Earned */
+.lh-cert-card.is-earned {
+  background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%);
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  box-shadow: 0 20px 40px -15px rgba(212, 175, 55, 0.15), inset 0 0 24px rgba(212, 175, 55, 0.05);
+}
+
+/* Indigo Gradient for Claimable */
+.lh-cert-card.is-claimable {
+  background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  box-shadow: 0 20px 40px -15px rgba(99, 102, 241, 0.2), inset 0 0 24px rgba(99, 102, 241, 0.05);
+}
+
+.lh-cert-badge-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  margin-bottom: 24px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.is-earned .lh-cert-badge-wrapper {
+  border: 2px dashed rgba(212, 175, 55, 0.4);
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
+}
+
+.is-claimable .lh-cert-badge-wrapper {
+  border: 2px dashed rgba(99, 102, 241, 0.4);
+  box-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
+}
+
+.lh-cert-icon-glowing {
+  font-size: 3rem;
+  animation: lh-float 3s ease-in-out infinite;
+}
+
+.is-earned .lh-cert-icon-glowing {
+  color: #fbbf24;
+  text-shadow: 0 0 16px rgba(251, 191, 36, 0.6);
+}
+
+.is-claimable .lh-cert-icon-glowing {
+  color: #818cf8;
+  text-shadow: 0 0 16px rgba(129, 140, 248, 0.6);
+}
+
+@keyframes lh-float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-6px) rotate(2deg); }
+}
+
+.lh-cert-card h3 {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0 0 12px 0;
+  letter-spacing: -0.02em;
+}
+
+.lh-cert-card p {
+  font-size: 1.05rem;
+  color: #94a3b8;
+  max-width: 520px;
+  margin: 0 auto 28px;
+  line-height: 1.6;
+}
+
+.lh-cert-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  width: 100%;
+  max-width: 440px;
+  margin-bottom: 32px;
+  padding: 16px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.lh-cert-meta-item {
+  text-align: left;
+}
+
+.lh-cert-meta-item span {
+  display: block;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #64748b;
+  margin-bottom: 4px;
+}
+
+.lh-cert-meta-item strong {
+  display: block;
+  font-size: 0.95rem;
+  color: #f1f5f9;
+  font-weight: 600;
+}
+
+.lh-progress-dashboard {
+  background: var(--sv-surface);
+  border: 1px solid var(--sv-border);
+  border-radius: 20px;
+  padding: 32px;
+  box-shadow: var(--sv-shadow-sm);
+}
+
+.lh-dashboard-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--sv-heading);
+  margin: 0 0 8px 0;
+}
+
+.lh-dashboard-subtitle {
+  font-size: 0.92rem;
+  color: var(--sv-muted);
+  margin: 0 0 24px 0;
+}
+
+.lh-milestones {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.lh-milestone-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  border-radius: 14px;
+  background: var(--sv-surface-soft);
+  border: 1px solid var(--sv-border);
+  transition: all 0.2s ease;
+}
+
+.lh-milestone-item:hover {
+  background: var(--sv-surface-strong);
+  border-color: rgba(99, 102, 241, 0.2);
+}
+
+.lh-milestone-icon {
+  font-size: 1.4rem;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.lh-milestone-item:hover .lh-milestone-icon {
+  transform: scale(1.1);
+}
+
+.lh-milestone-icon.is-completed {
+  color: #10b981;
+}
+
+.lh-milestone-icon.is-pending {
+  color: var(--sv-muted);
+  opacity: 0.4;
+}
+
+.lh-milestone-copy {
+  flex: 1;
+}
+
+.lh-milestone-name {
+  display: block;
+  font-weight: 600;
+  color: var(--sv-heading);
+  font-size: 0.95rem;
+}
+
+.lh-milestone-desc {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--sv-muted);
+  margin-top: 2px;
+}
+
+.lh-milestone-action {
+  flex-shrink: 0;
+}
+
+.lh-milestone-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.lh-milestone-badge.is-completed {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+
+.lh-milestone-badge.is-pending {
+  background: var(--sv-surface-strong);
+  border: 1px solid var(--sv-border);
+  color: var(--sv-muted);
+}
+
