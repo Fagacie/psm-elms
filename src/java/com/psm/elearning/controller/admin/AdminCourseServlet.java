@@ -100,6 +100,8 @@ public class AdminCourseServlet extends HttpServlet {
             restoreCourse(request, response);
         } else if ("create".equals(action)) {
             createCourse(request, response);
+        } else if ("edit".equals(action)) {
+            editCourse(request, response);
         } else if ("assign".equals(action)) {
             assignInstructor(request, response);
         } else {
@@ -127,8 +129,17 @@ public class AdminCourseServlet extends HttpServlet {
                 courses = new java.util.ArrayList<>();
             }
             
+            // Calculate enrollment counts
+            com.psm.elearning.dao.EnrollmentDAO enrollmentDAO = new com.psm.elearning.dao.EnrollmentDAOImpl();
+            java.util.Map<Integer, Integer> enrollmentCounts = new java.util.HashMap<>();
+            for (Course c : courses) {
+                List<com.psm.elearning.model.Enrollment> enrs = enrollmentDAO.getEnrollmentsByCourse(c.getCourseId());
+                enrollmentCounts.put(c.getCourseId(), enrs != null ? enrs.size() : 0);
+            }
+            
             request.setAttribute("courses", courses);
             request.setAttribute("statusFilter", statusFilter);
+            request.setAttribute("enrollmentCounts", enrollmentCounts);
             request.setAttribute("instructors", resolveActiveInstructors());
             request.getRequestDispatcher("/WEB-INF/views/admin/admin-courses.jsp").forward(request, response);
             
@@ -361,6 +372,65 @@ public class AdminCourseServlet extends HttpServlet {
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error creating course as admin", e);
             response.sendRedirect(request.getContextPath() + "/admin/courses?error=createfailed");
+        }
+    }
+
+    private void editCourse(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        try {
+            Integer courseId = parsePositiveInt(request.getParameter("courseId"));
+            if (courseId == null) {
+                response.sendRedirect(request.getContextPath() + "/admin/courses?error=invalid");
+                return;
+            }
+
+            Course course = courseDAO.findById(courseId);
+            if (course == null) {
+                response.sendRedirect(request.getContextPath() + "/admin/courses?error=notfound");
+                return;
+            }
+
+            String courseName = request.getParameter("courseName");
+            String feeStr = request.getParameter("courseFee");
+            Integer instructorId = parsePositiveInt(request.getParameter("instructorId"));
+            String courseBannerUrl = uploadCourseBannerIfProvided(request);
+
+            if (courseName == null || courseName.trim().isEmpty() || feeStr == null || feeStr.trim().isEmpty()) {
+                response.sendRedirect(request.getContextPath() + "/admin/courses?error=invalid");
+                return;
+            }
+
+            course.setCourseName(courseName.trim());
+            course.setDescription(trimToEmpty(request.getParameter("description")));
+            course.setCategory(trimToEmpty(request.getParameter("category")));
+            course.setLevel(request.getParameter("level") != null ? request.getParameter("level") : Course.LEVEL_BEGINNER);
+            course.setDuration(parsePositiveInt(request.getParameter("duration")));
+            
+            try {
+                course.setCourseFee(new BigDecimal(feeStr.trim()));
+            } catch (Exception ex) {
+                course.setCourseFee(BigDecimal.ZERO);
+            }
+            
+            if (courseBannerUrl != null) {
+                course.setCourseBanner(courseBannerUrl);
+            }
+
+            boolean updated = courseDAO.update(course);
+            if (!updated) {
+                response.sendRedirect(request.getContextPath() + "/admin/courses?error=editfailed");
+                return;
+            }
+
+            // Assign instructor if provided
+            if (instructorId != null) {
+                courseDAO.assignInstructor(courseId, instructorId);
+            }
+
+            response.sendRedirect(request.getContextPath() + "/admin/courses?success=edited");
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error editing course as admin", e);
+            response.sendRedirect(request.getContextPath() + "/admin/courses?error=editfailed");
         }
     }
 

@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin-dashboard.css" />
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin-dashboard.css?v=2.2" />
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css" />
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.dataTables.min.css" />
     <jsp:include page="/WEB-INF/views/common/head-external-assets.jsp"/>
@@ -19,7 +19,7 @@
 <body class="admin-page">
 <jsp:include page="/WEB-INF/views/common/admin-header.jsp">
     <jsp:param name="pageTitle" value="Payments"/>
-    <jsp:param name="pageSubtitle" value="Track transactions, monitor statuses, and inspect payment records."/>
+    <jsp:param name="pageSubtitle" value="Track transactions and inspect payment records."/>
 </jsp:include>
 
 <jsp:include page="/WEB-INF/views/common/admin-sidebar.jsp"/>
@@ -54,46 +54,28 @@
                 <span>&gt;</span>
                 <span>Payments</span>
             </div>
-
-            <div class="admin-hero">
-                <div class="admin-hero-copy">
-                    <p class="admin-kicker">Payment Operations</p>
-                    <h2>Track transaction health from one clean payments workspace</h2>
-                    <p>Review payment status, inspect details in context, and export records without falling back to a raw admin table experience.</p>
-                </div>
-                <div class="admin-hero-scene" aria-hidden="true">
-                    <div class="admin-scene-panel">
-                        <span>Total Payments</span>
-                        <strong>${paymentCount}</strong>
-                    </div>
-                    <div class="admin-scene-panel">
-                        <span>Paid</span>
-                        <strong>${paidCount}</strong>
-                    </div>
-                </div>
-            </div>
         </section>
 
         <section class="metrics-grid">
             <article class="metric-card">
                 <span class="metric-label">Total Records</span>
                 <div class="metric-value">${paymentCount}</div>
-                <p class="metric-meta">All payment rows currently loaded into the workspace.</p>
+                <p class="metric-meta">All payment rows loaded</p>
             </article>
             <article class="metric-card">
                 <span class="metric-label">Paid</span>
                 <div class="metric-value">${paidCount}</div>
-                <p class="metric-meta">Successful transactions available for audit and review.</p>
+                <p class="metric-meta">Successful transactions</p>
             </article>
             <article class="metric-card">
                 <span class="metric-label">Pending</span>
                 <div class="metric-value">${pendingCount}</div>
-                <p class="metric-meta">Payments that still need completion or callback confirmation.</p>
+                <p class="metric-meta">Confirmations pending</p>
             </article>
             <article class="metric-card">
                 <span class="metric-label">Failed</span>
                 <div class="metric-value">${failedCount}</div>
-                <p class="metric-meta">Transactions that were declined or interrupted.</p>
+                <p class="metric-meta">Declined transactions</p>
             </article>
         </section>
 
@@ -121,13 +103,12 @@
                     <div class="empty-state empty-state-inset">
                         <i class="fas fa-credit-card"></i>
                         <strong>No payments found</strong>
-                        <p>Payment records will appear here once learners begin checkout and transaction callbacks are stored.</p>
+                        <p>Payment records will appear here once learners begin checkout.</p>
                     </div>
                 </c:when>
                 <c:otherwise>
                     <div class="admin-table-toolbar">
                         <span class="admin-code">Live list</span>
-                        <span class="table-subtext">Use search, paging, and export actions from the table controls.</span>
                     </div>
 
                     <div class="table-wrapper">

@@ -12,9 +12,7 @@
         <a href="${pageContext.request.contextPath}/admin/users" class="nav-item ${fn:contains(currentPath, '/admin/users') and not isInstructorUsersView ? 'active' : ''}">
             <i class="fas fa-users"></i><span>Users</span>
         </a>
-        <a href="${pageContext.request.contextPath}/admin/users?role=Instructor" class="nav-item ${isInstructorUsersView ? 'active' : ''}">
-            <i class="fas fa-chalkboard-teacher"></i><span>Instructors</span>
-        </a>
+
         <a href="${pageContext.request.contextPath}/admin/courses" class="nav-item ${fn:contains(currentPath, 'admin/courses') ? 'active' : ''}">
             <i class="fas fa-book"></i><span>Courses</span>
         </a>

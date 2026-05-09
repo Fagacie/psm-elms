@@ -11,9 +11,45 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin-dashboard.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin-dashboard.css?v=2.2">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css" />
     <jsp:include page="/WEB-INF/views/common/head-external-assets.jsp"/>
+    <style>
+        /* Modern Details Modal Specific Styling */
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 8px;
+        }
+        .details-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            padding: 12px 16px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+        }
+        .details-item-full {
+            grid-column: span 2;
+        }
+        .details-label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #64748b;
+        }
+        .details-value {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #0f172a;
+        }
+        .details-value strong {
+            font-weight: 700;
+        }
+    </style>
 </head>
 <body class="admin-page">
 <jsp:include page="/WEB-INF/views/common/admin-header.jsp">
@@ -49,24 +85,6 @@
                 <a href="${pageContext.request.contextPath}/dashboard">Dashboard</a>
                 <span>&gt;</span>
                 <span>Enrollments</span>
-            </div>
-
-            <div class="admin-hero">
-                <div class="admin-hero-copy">
-                    <p class="admin-kicker">Enrollment Operations</p>
-                    <h2>Track learning access, payment progress, and enrollment movement</h2>
-                    <p>Use this workspace to review payment state, monitor completion, and open full enrollment records for operational follow-up.</p>
-                </div>
-                <div class="admin-hero-scene" aria-hidden="true">
-                    <div class="admin-scene-panel">
-                        <span>Total Enrollments</span>
-                        <strong>${totalCount}</strong>
-                    </div>
-                    <div class="admin-scene-panel">
-                        <span>Paid</span>
-                        <strong>${paidCount}</strong>
-                    </div>
-                </div>
             </div>
         </section>
 
@@ -121,31 +139,31 @@
                         <table id="enrollmentsTable" class="data-table display nowrap" style="width:100%">
                             <thead>
                                 <tr>
-                                    <th>ID</th>
-                                    <th>Student</th>
-                                    <th>Email</th>
-                                    <th>Course</th>
-                                    <th>Amount (NGN)</th>
-                                    <th>Enrollment Status</th>
-                                    <th>Payment</th>
-                                    <th>Reference</th>
-                                    <th>Completion</th>
-                                    <th>Enrolled Date</th>
+                                    <th>Student Email</th>
+                                    <th>Course Enrolled</th>
+                                    <th>Status</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <c:forEach items="${enrollments}" var="enrollment">
-                                    <tr>
-                                        <td>#${enrollment.enrollmentId}</td>
-                                        <td><strong><c:out value="${enrollment.studentName}"/></strong></td>
+                                    <tr 
+                                        data-id="${enrollment.enrollmentId}"
+                                        data-student-name="${fn:escapeXml(enrollment.studentName)}"
+                                        data-student-email="${fn:escapeXml(enrollment.studentEmail)}"
+                                        data-course-name="${fn:escapeXml(enrollment.courseName)}"
+                                        data-course-price="${enrollment.coursePrice != null ? enrollment.coursePrice : '0.00'}"
+                                        data-status="${enrollment.status}"
+                                        data-payment-status="${enrollment.paymentStatus}"
+                                        data-payment-ref="${enrollment.paymentRef}"
+                                        data-completion="${not empty enrollment.completionStatus ? enrollment.completionStatus : 'Not Started'}"
+                                        data-date="${enrollment.enrollmentDate != null ? fn:substring(enrollment.enrollmentDate.toString(), 0, 10) : 'N/A'}"
+                                    >
                                         <td><c:out value="${enrollment.studentEmail}"/></td>
-                                        <td><c:out value="${enrollment.courseName}"/></td>
-                                        <td><fmt:formatNumber value="${enrollment.coursePrice}" type="number" minFractionDigits="2" maxFractionDigits="2"/></td>
+                                        <td><strong><c:out value="${enrollment.courseName}"/></strong></td>
                                         <td>
                                             <c:choose>
-                                                <c:when test="${enrollment.status == 'Enrolled' or enrollment.status == 'enrolled'}"><span class="status-badge status-success">Enrolled</span></c:when>
-                                                <c:when test="${enrollment.status == 'Active' or enrollment.status == 'active'}"><span class="status-badge status-success">Active</span></c:when>
+                                                <c:when test="${enrollment.status == 'Enrolled' or enrollment.status == 'enrolled' or enrollment.status == 'Active' or enrollment.status == 'active'}"><span class="status-badge status-success">Active</span></c:when>
                                                 <c:when test="${enrollment.status == 'Completed' or enrollment.status == 'completed'}"><span class="status-badge status-success">Completed</span></c:when>
                                                 <c:when test="${enrollment.status == 'Pending' or enrollment.status == 'pending'}"><span class="status-badge status-warning">Pending</span></c:when>
                                                 <c:when test="${enrollment.status == 'Cancelled' or enrollment.status == 'cancelled'}"><span class="status-badge status-danger">Cancelled</span></c:when>
@@ -153,32 +171,8 @@
                                             </c:choose>
                                         </td>
                                         <td>
-                                            <c:set var="ps" value="${enrollment.paymentStatus}"/>
-                                            <c:choose>
-                                                <c:when test="${ps eq 'success' or ps eq 'Success' or ps eq 'SUCCESS' or ps eq 'paid' or ps eq 'Paid' or ps eq 'PAID'}"><span class="status-badge status-success">Paid</span></c:when>
-                                                <c:when test="${ps eq 'pending' or ps eq 'Pending' or ps eq 'PENDING'}"><span class="status-badge status-warning">Pending</span></c:when>
-                                                <c:when test="${ps eq 'failed' or ps eq 'Failed' or ps eq 'FAILED'}"><span class="status-badge status-danger">Failed</span></c:when>
-                                                <c:when test="${ps eq 'abandoned' or ps eq 'Abandoned' or ps eq 'ABANDONED'}"><span class="status-badge status-secondary">Abandoned</span></c:when>
-                                                <c:when test="${empty ps or ps eq 'null'}"><span class="status-badge status-warning">Pending</span></c:when>
-                                                <c:otherwise><span class="status-badge status-secondary"><c:out value="${ps}"/></span></c:otherwise>
-                                            </c:choose>
-                                        </td>
-                                        <td>
-                                            <c:choose>
-                                                <c:when test="${not empty enrollment.paymentRef}"><span class="admin-code"><c:out value="${enrollment.paymentRef}"/></span></c:when>
-                                                <c:otherwise>-</c:otherwise>
-                                            </c:choose>
-                                        </td>
-                                        <td><c:out value="${not empty enrollment.completionStatus ? enrollment.completionStatus : 'Not Started'}"/></td>
-                                        <td>
-                                            <c:choose>
-                                                <c:when test="${enrollment.enrollmentDate != null}"><c:out value="${fn:substring(enrollment.enrollmentDate.toString(), 0, 10)}"/></c:when>
-                                                <c:otherwise>N/A</c:otherwise>
-                                            </c:choose>
-                                        </td>
-                                        <td>
                                             <div class="admin-table-actions">
-                                                <a href="${pageContext.request.contextPath}/admin/enrollment-details?id=${enrollment.enrollmentId}" class="admin-btn secondary">View</a>
+                                                <button type="button" class="admin-btn secondary js-view-receipt">View</button>
                                             </div>
                                         </td>
                                     </tr>
@@ -192,13 +186,70 @@
     </div>
 </main>
 
+<div id="enrollmentReceiptModal" class="admin-modal" aria-hidden="true">
+    <div class="admin-modal-backdrop" data-close-modal="enrollmentReceiptModal"></div>
+    <div class="admin-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="receiptModalTitle" style="max-width: 600px; margin: 40px auto;">
+        <div class="admin-modal-header">
+            <h3 id="receiptModalTitle" class="admin-modal-title">Enrollment Information</h3>
+            <button type="button" class="admin-modal-close" data-close-modal="enrollmentReceiptModal" aria-label="Close">x</button>
+        </div>
+        <div class="admin-modal-body" style="padding: 24px;">
+            <div class="details-grid">
+                <div class="details-item">
+                    <span class="details-label">Enrollment ID</span>
+                    <span class="details-value" id="rcpEnrollmentId">-</span>
+                </div>
+                <div class="details-item">
+                    <span class="details-label">Registration Date</span>
+                    <span class="details-value" id="rcpEnrollmentDate">-</span>
+                </div>
+                <div class="details-item">
+                    <span class="details-label">Student Name</span>
+                    <span class="details-value" id="rcpStudentName">-</span>
+                </div>
+                <div class="details-item">
+                    <span class="details-label">Student Email</span>
+                    <span class="details-value" id="rcpStudentEmail">-</span>
+                </div>
+                <div class="details-item details-item-full">
+                    <span class="details-label">Course Enrolled</span>
+                    <span class="details-value" id="rcpCourseName">-</span>
+                </div>
+                <div class="details-item">
+                    <span class="details-label">Course Price</span>
+                    <span class="details-value" id="rcpCoursePrice">-</span>
+                </div>
+                <div class="details-item">
+                    <span class="details-label">Completion Status</span>
+                    <span class="details-value" id="rcpCompletionStatus">-</span>
+                </div>
+                <div class="details-item">
+                    <span class="details-label">Enrollment Status</span>
+                    <span class="details-value" id="rcpStatus">-</span>
+                </div>
+                <div class="details-item">
+                    <span class="details-label">Payment Status</span>
+                    <span class="details-value" id="rcpPaymentStatus">-</span>
+                </div>
+                <div class="details-item details-item-full">
+                    <span class="details-label">Payment Reference</span>
+                    <span class="details-value" id="rcpPaymentRef" style="font-family: monospace; font-size: 0.85rem;">-</span>
+                </div>
+            </div>
+        </div>
+        <div class="admin-modal-footer" style="display: flex; justify-content: flex-end; gap: 10px; padding: 15px 20px; border-top: 1px solid var(--admin-border);">
+            <button type="button" class="admin-btn primary" data-close-modal="enrollmentReceiptModal">Close</button>
+        </div>
+    </div>
+</div>
+
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
 <script>
     $(function() {
-        if ($('#enrollmentsTable').length && $('#enrollmentsTable tbody tr').length > 1) {
+        if ($('#enrollmentsTable').length) {
             $('#enrollmentsTable').DataTable({
-                order: [[0, 'desc']],
+                order: [[1, 'asc']],
                 pageLength: 25,
                 lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'All']],
                 language: {
@@ -212,11 +263,65 @@
                     paginate: { first: 'First', last: 'Last', next: 'Next', previous: 'Previous' }
                 },
                 columnDefs: [
-                    { orderable: true, targets: [0, 1, 2, 3, 4, 9] },
-                    { orderable: false, targets: [5, 6, 7, 8, 10] }
+                    { orderable: true, targets: [0, 1, 2] },
+                    { orderable: false, targets: [3] }
                 ]
             });
         }
+
+        var receiptModal = $('#enrollmentReceiptModal');
+        
+        function openModal(modal) {
+            modal.addClass('active').attr('aria-hidden', 'false');
+            $('body').addClass('admin-modal-open');
+        }
+        
+        function closeModal(modal) {
+            modal.removeClass('active').attr('aria-hidden', 'true');
+            $('body').removeClass('admin-modal-open');
+        }
+        
+        $(document).on('click', '[data-close-modal]', function() {
+            var targetId = $(this).attr('data-close-modal');
+            closeModal($('#' + targetId));
+        });
+        
+        $(document).on('click', '.js-view-receipt', function(e) {
+            e.preventDefault();
+            var row = $(this).closest('tr');
+            
+            $('#rcpEnrollmentId').text('#' + (row.data('id') || '-'));
+            $('#rcpEnrollmentDate').text(row.data('date') || '-');
+            $('#rcpStudentName').text(row.data('student-name') || '-');
+            $('#rcpStudentEmail').text(row.data('student-email') || '-');
+            $('#rcpCourseName').text(row.data('course-name') || '-');
+            
+            var price = row.data('course-price');
+            if (price) {
+                var amt = parseFloat(price);
+                if (!isNaN(amt)) {
+                    price = 'NGN ' + amt.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                }
+            }
+            $('#rcpCoursePrice').text(price || 'Free');
+            
+            var status = row.data('status') || '-';
+            $('#rcpStatus').text(status.charAt(0).toUpperCase() + status.slice(1));
+            
+            var pStatus = row.data('payment-status') || '-';
+            $('#rcpPaymentStatus').text(pStatus.charAt(0).toUpperCase() + pStatus.slice(1));
+            
+            $('#rcpPaymentRef').text(row.data('payment-ref') || 'N/A');
+            $('#rcpCompletionStatus').text(row.data('completion') || 'Not Started');
+            
+            openModal(receiptModal);
+        });
+        
+        $(document).on('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal(receiptModal);
+            }
+        });
     });
 </script>
 </body>

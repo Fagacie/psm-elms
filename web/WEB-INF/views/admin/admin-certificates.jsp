@@ -8,9 +8,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Certificate Management - PSM E-Learning</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin-dashboard.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin-dashboard.css?v=2.2">
     <jsp:include page="/WEB-INF/views/common/head-external-assets.jsp"/>
 </head>
 <body class="admin-page">
@@ -38,28 +37,6 @@
                 <a href="${pageContext.request.contextPath}/dashboard">Dashboard</a>
                 <span>&gt;</span>
                 <span>Certificates</span>
-            </div>
-
-            <div class="admin-hero">
-                <div class="admin-hero-copy">
-                    <p class="admin-kicker">Credential Governance</p>
-                    <h2>Manage issued certificates, verification flow, and revocation actions</h2>
-                    <p>Review every issued credential, preview templates, open verification links, and run enrollment state backfill when certificate eligibility data needs resyncing.</p>
-                </div>
-                <div class="admin-hero-scene" aria-hidden="true">
-                    <span class="admin-orb admin-orb-a"></span>
-                    <span class="admin-orb admin-orb-b"></span>
-                    <span class="admin-shape admin-shape-a"></span>
-                    <span class="admin-shape admin-shape-b"></span>
-                    <div class="admin-scene-panel admin-scene-panel-a">
-                        <span>Issued</span>
-                        <strong>${totalCertificates}</strong>
-                    </div>
-                    <div class="admin-scene-panel admin-scene-panel-b">
-                        <span>Revoked</span>
-                        <strong>${revokedCertificates}</strong>
-                    </div>
-                </div>
             </div>
         </section>
 

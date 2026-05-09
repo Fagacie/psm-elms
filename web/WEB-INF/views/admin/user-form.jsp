@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin-dashboard.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin-dashboard.css?v=2.2">
     <jsp:include page="/WEB-INF/views/common/head-external-assets.jsp"/>
 </head>
 <body class="admin-page ${embeddedMode ? 'admin-embedded' : ''}">
@@ -34,28 +34,6 @@
                 <a href="${pageContext.request.contextPath}/admin/users">Users</a>
                 <span>&gt;</span>
                 <span><c:out value="${empty requestScope.user ? 'Create User' : 'Edit User'}"/></span>
-            </div>
-
-            <div class="admin-hero">
-                <div class="admin-hero-copy">
-                    <p class="admin-kicker">Identity Configuration</p>
-                    <h2><c:out value="${empty requestScope.user ? 'Create a new user account with role-specific details' : 'Update the selected user account and role profile'}"/></h2>
-                    <p>Use this form to configure the root user record and attach the correct student, instructor, or admin profile information without leaving the admin workspace.</p>
-                </div>
-                <div class="admin-hero-scene" aria-hidden="true">
-                    <span class="admin-orb admin-orb-a"></span>
-                    <span class="admin-orb admin-orb-b"></span>
-                    <span class="admin-shape admin-shape-a"></span>
-                    <span class="admin-shape admin-shape-b"></span>
-                    <div class="admin-scene-panel admin-scene-panel-a">
-                        <span>Mode</span>
-                        <strong><c:out value="${empty requestScope.user ? 'Create' : 'Edit'}"/></strong>
-                    </div>
-                    <div class="admin-scene-panel admin-scene-panel-b">
-                        <span>Role</span>
-                        <strong><c:out value="${empty requestScope.user.role ? 'Select' : requestScope.user.role}"/></strong>
-                    </div>
-                </div>
             </div>
         </section>
         </c:if>

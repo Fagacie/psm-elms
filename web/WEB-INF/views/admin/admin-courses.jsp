@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin-dashboard.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin-dashboard.css?v=2.2">
     <jsp:include page="/WEB-INF/views/common/head-external-assets.jsp"/>
 </head>
 <body class="admin-page">
@@ -76,7 +76,6 @@
                 <a href="${pageContext.request.contextPath}/admin/courses?status=Pending" class="admin-btn ${param.status == 'Pending' ? 'primary' : 'secondary'}">Pending Review</a>
                 <a href="${pageContext.request.contextPath}/admin/courses?status=Approved" class="admin-btn ${param.status == 'Approved' ? 'primary' : 'secondary'}">Approved</a>
                 <a href="${pageContext.request.contextPath}/admin/courses?status=Archived" class="admin-btn ${param.status == 'Archived' ? 'primary' : 'secondary'}">Archived</a>
-                <span class="course-filter-note">The custom search box filters the table live without reloading the page.</span>
             </div>
         </section>
 
@@ -93,6 +92,11 @@
         <c:if test="${param.success == 'created'}">
             <div class="alert alert-success">
                 <i class="fas fa-check-circle"></i> Course created successfully.
+            </div>
+        </c:if>
+        <c:if test="${param.success == 'edited'}">
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle"></i> Course details updated successfully.
             </div>
         </c:if>
         <c:if test="${param.success == 'assigned'}">
@@ -138,7 +142,6 @@
             <div class="section-header course-table-header">
                 <div>
                     <h2>All Courses</h2>
-                    <p class="section-caption">The table keeps the essential fields visible and moves supporting details into the course drawer.</p>
                 </div>
                 <span class="section-caption">${totalCourses} course${totalCourses == 1 ? '' : 's'} in view</span>
             </div>
@@ -199,6 +202,7 @@
                                         data-course-reject-url="${pageContext.request.contextPath}/admin/courses?action=reject&id=${course.courseId}"
                                         data-course-archive-url="${pageContext.request.contextPath}/admin/courses?action=archive&id=${course.courseId}"
                                         data-course-restore-url="${pageContext.request.contextPath}/admin/courses?action=restore&id=${course.courseId}"
+                                        data-course-enrolled-count="${empty enrollmentCounts[course.courseId] ? 0 : enrollmentCounts[course.courseId]}"
                                     >
                                         <td>
                                             <strong><c:out value="${course.courseName}"/></strong>
@@ -241,6 +245,7 @@
                                                 </button>
                                                 <div class="course-actions-menu" role="menu" aria-label="Course actions" style="display:none;">
                                                     <button type="button" class="course-menu-item js-course-view" data-course-view>View Details</button>
+                                                    <button type="button" class="course-menu-item js-course-edit" data-course-edit>Edit Course</button>
                                                     <button type="button" class="course-menu-item js-course-assign" data-course-assign>Assign Instructor</button>
                                                     <c:choose>
                                                         <c:when test="${course.status eq 'Pending'}">
@@ -319,6 +324,7 @@
                     }
 
                     var createModal = document.getElementById('courseCreateModal');
+                    var editModal = document.getElementById('courseEditModal');
                     var assignModal = document.getElementById('courseAssignModal');
                     var detailsModal = document.getElementById('courseDetailsModal');
                     var assignCourseIdInput = document.getElementById('courseAssignId');
@@ -336,6 +342,7 @@
                     var detailsPrimaryAction = document.getElementById('courseDetailsPrimaryAction');
                     var detailsPrimaryActionLabel = document.getElementById('courseDetailsPrimaryActionLabel');
                     var detailsAssignAction = document.getElementById('courseDetailsAssignAction');
+                    var detailsEnrolled = document.getElementById('courseDetailsEnrolled');
 
                     function openModal(modal) {
                         if (!modal) {
@@ -385,6 +392,9 @@
                         detailsFee.textContent = fee;
                         detailsCreated.textContent = data.courseCreated ? data.courseCreated.substring(0, 10) : '-';
                         detailsDescription.textContent = data.courseDescription || 'No description provided for this course yet.';
+                        if (detailsEnrolled) {
+                            detailsEnrolled.textContent = data.courseEnrolledCount || '0';
+                        }
 
                         var primaryUrl = '';
                         var primaryLabel = '';
@@ -498,6 +508,45 @@
                         });
                     });
 
+                    function populateEditForm(row) {
+                        if (!row) return;
+                        var data = row.dataset;
+                        
+                        document.getElementById('courseEditId').value = data.courseId || '';
+                        document.getElementById('courseEditName').value = data.courseName || '';
+                        document.getElementById('courseEditCategory').value = data.courseCategory || '';
+                        document.getElementById('courseEditLevel').value = data.courseLevel || 'Beginner';
+                        
+                        var duration = data.courseDuration || '';
+                        if (duration && duration.indexOf(' ') !== -1) {
+                            duration = duration.split(' ')[0];
+                        }
+                        document.getElementById('courseEditDuration').value = duration;
+                        document.getElementById('courseEditFee').value = data.courseFee || '0';
+                        document.getElementById('courseEditInstructorId').value = data.courseInstructorId || '';
+                        document.getElementById('courseEditDescription').value = data.courseDescription || '';
+                    }
+
+                    document.querySelectorAll('.js-course-edit').forEach(function (button) {
+                        if (button.dataset.bound) {
+                            return;
+                        }
+                        button.dataset.bound = '1';
+                        button.addEventListener('click', function (event) {
+                            event.stopPropagation();
+                            var row = button.closest('tr');
+                            populateEditForm(row);
+                            openModal(editModal);
+                            document.querySelectorAll('.course-actions.is-open').forEach(function (menu) {
+                                menu.classList.remove('is-open');
+                                var hiddenMenu = menu.querySelector('.course-actions-menu');
+                                if (hiddenMenu) {
+                                    hiddenMenu.style.display = 'none';
+                                }
+                            });
+                        });
+                    });
+
                     if (detailsAssignAction && !detailsAssignAction.dataset.bound) {
                         detailsAssignAction.dataset.bound = '1';
                         detailsAssignAction.addEventListener('click', function () {
@@ -521,6 +570,7 @@
                     document.addEventListener('keydown', function (event) {
                         if (event.key === 'Escape') {
                             closeModal(createModal);
+                            closeModal(editModal);
                             closeModal(assignModal);
                             closeModal(detailsModal);
                             document.querySelectorAll('.course-actions.is-open').forEach(function (menu) {
@@ -601,6 +651,70 @@
     </div>
 </div>
 
+<div id="courseEditModal" class="admin-modal admin-course-drawer" aria-hidden="true">
+    <div class="admin-modal-backdrop" data-close-modal="courseEditModal"></div>
+    <div class="admin-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="courseEditModalTitle">
+        <div class="admin-modal-header">
+            <h3 id="courseEditModalTitle" class="admin-modal-title">Edit Course Information</h3>
+            <button type="button" class="admin-modal-close" data-close-modal="courseEditModal" aria-label="Close">x</button>
+        </div>
+        <div class="course-drawer-body">
+            <form method="post" action="${pageContext.request.contextPath}/admin/courses" enctype="multipart/form-data" class="course-drawer-form">
+                <input type="hidden" name="action" value="edit"/>
+                <input type="hidden" name="courseId" id="courseEditId" value=""/>
+                <div class="course-form-grid course-form-grid-create">
+                    <div class="form-group">
+                        <label for="courseEditName">Course Name</label>
+                        <input id="courseEditName" name="courseName" type="text" required class="form-control" placeholder="Course Name"/>
+                    </div>
+                    <div class="form-group">
+                        <label for="courseEditCategory">Category</label>
+                        <input id="courseEditCategory" name="category" type="text" class="form-control" placeholder="Category"/>
+                    </div>
+                    <div class="form-group">
+                        <label for="courseEditLevel">Level</label>
+                        <select id="courseEditLevel" name="level" class="form-control">
+                            <option value="Beginner">Beginner</option>
+                            <option value="Intermediate">Intermediate</option>
+                            <option value="Advanced">Advanced</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="courseEditDuration">Duration (Days)</label>
+                        <input id="courseEditDuration" name="duration" type="number" min="1" class="form-control" placeholder="Days"/>
+                    </div>
+                    <div class="form-group">
+                        <label for="courseEditFee">Fee (NGN)</label>
+                        <input id="courseEditFee" name="courseFee" type="number" min="0" step="0.01" required class="form-control" placeholder="0.00"/>
+                    </div>
+                    <div class="form-group">
+                        <label for="courseEditInstructorId">Instructor</label>
+                        <select id="courseEditInstructorId" name="instructorId" class="form-control">
+                            <option value="">No instructor assigned</option>
+                            <c:forEach items="${instructors}" var="ins">
+                                <option value="${ins.userId}"><c:out value="${ins.fullName}"/> (<c:out value="${ins.email}"/>)</option>
+                            </c:forEach>
+                        </select>
+                    </div>
+                    <div class="form-group form-group-full">
+                        <label for="courseEditBanner">Update Course Banner</label>
+                        <input id="courseEditBanner" name="courseBanner" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" class="form-control"/>
+                        <small class="text-muted">Optional: select to change current banner.</small>
+                    </div>
+                    <div class="form-group form-group-full course-description-group">
+                        <label for="courseEditDescription">Description</label>
+                        <textarea id="courseEditDescription" name="description" rows="5" class="form-control" placeholder="Description of the course."></textarea>
+                    </div>
+                </div>
+                <div class="course-drawer-footer">
+                    <button type="button" class="admin-btn secondary" data-close-modal="courseEditModal">Cancel</button>
+                    <button type="submit" class="admin-btn primary"><i class="fas fa-save"></i>&nbsp;Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <div id="courseAssignModal" class="admin-modal admin-course-drawer" aria-hidden="true">
     <div class="admin-modal-backdrop" data-close-modal="courseAssignModal"></div>
     <div class="admin-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="courseAssignModalTitle">
@@ -675,6 +789,10 @@
                     <div class="course-detail-card">
                         <span>Created</span>
                         <strong id="courseDetailsCreated">-</strong>
+                    </div>
+                    <div class="course-detail-card" style="grid-column: span 2;">
+                        <span>Enrolled Students</span>
+                        <strong id="courseDetailsEnrolled" style="color: var(--primary); font-size: 16px;">0</strong>
                     </div>
                 </div>
             </div>

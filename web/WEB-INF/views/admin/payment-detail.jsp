@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin-dashboard.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin-dashboard.css?v=2.2">
     <jsp:include page="/WEB-INF/views/common/head-external-assets.jsp"/>
 </head>
 <body class="${embeddedMode ? 'admin-embedded' : 'admin-page'}">
@@ -34,24 +34,6 @@
                 <a href="${pageContext.request.contextPath}/admin/payments">Payments</a>
                 <span>&gt;</span>
                 <span>#${payment.paymentId}</span>
-            </div>
-
-            <div class="admin-hero">
-                <div class="admin-hero-copy">
-                    <p class="admin-kicker">Transaction Record</p>
-                    <h2>Review one payment in a clean, readable layout</h2>
-                    <p>The detail view keeps the record focused on the operational fields support and finance teams actually need.</p>
-                </div>
-                <div class="admin-hero-scene" aria-hidden="true">
-                    <div class="admin-scene-panel">
-                        <span>Status</span>
-                        <strong><c:out value="${payment.status}" default="Unknown"/></strong>
-                    </div>
-                    <div class="admin-scene-panel">
-                        <span>Amount</span>
-                        <strong>NGN <fmt:formatNumber value="${payment.amount}" type="number" minFractionDigits="2" maxFractionDigits="2"/></strong>
-                    </div>
-                </div>
             </div>
         </section>
         </c:if>

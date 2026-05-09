@@ -48,8 +48,12 @@
 
 <c:set var="adminContextCourse" value="${not empty selectedCourse ? selectedCourse.courseName : not empty course ? course.courseName : ''}"/>
 <c:set var="adminContextAssessment" value="${not empty selectedAssessment ? selectedAssessment.title : ''}"/>
+
 <header class="app-header">
     <div class="header-left">
+        <button type="button" class="sidebar-toggle-btn" id="sidebarToggle" aria-label="Toggle Navigation Sidebar">
+            <i class="fas fa-bars"></i>
+        </button>
         <a href="${pageContext.request.contextPath}/dashboard" class="dashboard-brand" aria-label="PSM E-Learning home">
             <span class="dashboard-brand-main">PSM</span>
             <span class="dashboard-brand-sub">E-Learning</span>
@@ -103,3 +107,19 @@
         </a>
     </div>
 </header>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const toggleBtn = document.getElementById('sidebarToggle');
+        if (toggleBtn) {
+            const sidebarState = localStorage.getItem('adminSidebarCollapsed');
+            if (sidebarState === 'true') {
+                document.body.classList.add('sidebar-collapsed');
+            }
+            toggleBtn.addEventListener('click', function() {
+                const isCollapsed = document.body.classList.toggle('sidebar-collapsed');
+                localStorage.setItem('adminSidebarCollapsed', isCollapsed);
+            });
+        }
+    });
+</script>

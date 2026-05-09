@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin-dashboard.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin-dashboard.css?v=2.2">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin-settings.css">
     <jsp:include page="/WEB-INF/views/common/head-external-assets.jsp"/>
 </head>
@@ -33,33 +33,6 @@
                 <a href="${pageContext.request.contextPath}/dashboard">Dashboard</a>
                 <span>&gt;</span>
                 <span>Settings</span>
-            </div>
-
-            <div class="admin-hero admin-settings-hero">
-                <div class="admin-hero-copy">
-                    <p class="admin-kicker">System Settings</p>
-                    <h2>Run the platform from one operational settings workspace</h2>
-                    <p>Configure platform identity, security policy, payments, email delivery, and learning defaults in one professional admin control center.</p>
-                    <div class="admin-settings-actions">
-                        <button type="submit" form="adminSettingsForm" name="action" value="save" class="admin-btn primary">
-                            <i class="fas fa-save"></i> Save Settings
-                        </button>
-                        <button type="submit" form="adminSettingsForm" name="action" value="testsmtp" class="admin-btn secondary">
-                            <i class="fas fa-envelope-circle-check"></i> Test SMTP
-                        </button>
-                        <a href="${pageContext.request.contextPath}/admin/settings" class="admin-btn secondary">Reset</a>
-                    </div>
-                </div>
-                <div class="admin-hero-scene admin-settings-scene" aria-hidden="true">
-                    <div class="admin-scene-panel">
-                        <span>Payment Mode</span>
-                        <strong>${settings['payment.mode']}</strong>
-                    </div>
-                    <div class="admin-scene-panel">
-                        <span>SMTP</span>
-                        <strong>${smtpConfigured ? 'Ready' : 'Needs Setup'}</strong>
-                    </div>
-                </div>
             </div>
         </section>
 

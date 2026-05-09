@@ -82,31 +82,78 @@ public class UserManagementServlet extends HttpServlet {
     private void listUsers(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
-        String roleFilter = request.getParameter("role");
-        String statusFilter = request.getParameter("status");
-        String searchQuery = request.getParameter("search");
-
         List<User> users = userDAO.findAll();
-        
-        // Apply filters
-        if (roleFilter != null && !roleFilter.isEmpty()) {
-            users.removeIf(u -> !u.getRole().equals(roleFilter));
+        if (users == null) {
+            users = new java.util.ArrayList<>();
         }
-        if (statusFilter != null && !statusFilter.isEmpty()) {
-            users.removeIf(u -> !u.getStatus().equals(statusFilter));
-        }
-        if (searchQuery != null && !searchQuery.trim().isEmpty()) {
-            String query = searchQuery.toLowerCase();
-            users.removeIf(u -> 
-                !u.getFullName().toLowerCase().contains(query) && 
-                !u.getEmail().toLowerCase().contains(query)
-            );
+
+        java.util.Map<Integer, Student> studentDetailsMap = new java.util.HashMap<>();
+        java.util.Map<Integer, Instructor> instructorDetailsMap = new java.util.HashMap<>();
+        java.util.Map<Integer, String> studentEnrollmentsMap = new java.util.HashMap<>();
+        java.util.Map<Integer, String> instructorCoursesMap = new java.util.HashMap<>();
+        java.util.Map<Integer, Integer> instructorMaterialsCountMap = new java.util.HashMap<>();
+        java.util.Map<Integer, Integer> instructorAssessmentsCountMap = new java.util.HashMap<>();
+
+        // Load metrics for each user role dynamically
+        CourseDAO courseDAO = new CourseDAOImpl();
+        MaterialDAO materialDAO = new MaterialDAOImpl();
+        AssessmentDAO assessmentDAO = new AssessmentDAOImpl();
+        EnrollmentDAO enrollmentDAO = new EnrollmentDAOImpl();
+
+        for (User u : users) {
+            int uid = u.getUserId();
+            if ("Student".equals(u.getRole())) {
+                Student s = studentDAO.findByUserId(uid);
+                if (s != null) {
+                    studentDetailsMap.put(uid, s);
+                }
+                List<Enrollment> enrs = enrollmentDAO.getEnrollmentsByStudent(uid);
+                if (enrs != null && !enrs.isEmpty()) {
+                    java.util.StringJoiner sj = new java.util.StringJoiner("; ");
+                    for (Enrollment e : enrs) {
+                        sj.add(e.getCourseName() + " (" + e.getCompletionStatus() + ", " + e.getProgress() + "%)");
+                    }
+                    studentEnrollmentsMap.put(uid, sj.toString());
+                } else {
+                    studentEnrollmentsMap.put(uid, "None");
+                }
+            } else if ("Instructor".equals(u.getRole())) {
+                Instructor ins = instructorDAO.findByUserId(uid);
+                if (ins != null) {
+                    instructorDetailsMap.put(uid, ins);
+                }
+                List<Course> courses = courseDAO.findByInstructor(uid);
+                int matCount = 0;
+                int assCount = 0;
+                if (courses != null && !courses.isEmpty()) {
+                    java.util.StringJoiner sj = new java.util.StringJoiner(", ");
+                    for (Course c : courses) {
+                        sj.add(c.getCourseName());
+                        List<Material> mats = materialDAO.findByCourse(c.getCourseId());
+                        if (mats != null) {
+                            matCount += mats.size();
+                        }
+                        List<Assessment> asses = assessmentDAO.findByCourse(c.getCourseId());
+                        if (asses != null) {
+                            assCount += asses.size();
+                        }
+                    }
+                    instructorCoursesMap.put(uid, sj.toString());
+                } else {
+                    instructorCoursesMap.put(uid, "None");
+                }
+                instructorMaterialsCountMap.put(uid, matCount);
+                instructorAssessmentsCountMap.put(uid, assCount);
+            }
         }
 
         request.setAttribute("users", users);
-        request.setAttribute("roleFilter", roleFilter);
-        request.setAttribute("statusFilter", statusFilter);
-        request.setAttribute("searchQuery", searchQuery);
+        request.setAttribute("studentDetailsMap", studentDetailsMap);
+        request.setAttribute("instructorDetailsMap", instructorDetailsMap);
+        request.setAttribute("studentEnrollmentsMap", studentEnrollmentsMap);
+        request.setAttribute("instructorCoursesMap", instructorCoursesMap);
+        request.setAttribute("instructorMaterialsCountMap", instructorMaterialsCountMap);
+        request.setAttribute("instructorAssessmentsCountMap", instructorAssessmentsCountMap);
         
         request.getRequestDispatcher("/WEB-INF/views/admin/users.jsp").forward(request, response);
     }
