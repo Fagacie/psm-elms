@@ -55,14 +55,7 @@ public class AdminEnrollmentDetailsServlet extends HttpServlet {
                 return;
             }
 
-            // Attach payment info
-            Payment p = paymentDAO.getPaymentByEnrollmentId(enrollmentId);
-            if (p != null) {
-                enrollment.setPaymentStatus(p.getStatus());
-                enrollment.setPaymentRef(p.getPaystackReference());
-            } else {
-                enrollment.setPaymentStatus("Pending");
-            }
+            enrichEnrollmentPayment(enrollment);
             
             request.setAttribute("enrollment", enrollment);
             request.getRequestDispatcher("/WEB-INF/views/admin/admin-enrollment-details.jsp").forward(request, response);
@@ -74,6 +67,27 @@ public class AdminEnrollmentDetailsServlet extends HttpServlet {
             e.printStackTrace();
             response.sendRedirect(request.getContextPath() + "/admin/enrollments?error=exception");
         }
+    }
+
+    private void enrichEnrollmentPayment(Enrollment enrollment) {
+        Payment payment = paymentDAO.getPaymentByEnrollmentId(enrollment.getEnrollmentId());
+        if (payment == null) {
+            enrollment.setPaymentStatus("Pending");
+            return;
+        }
+
+        enrollment.setPaymentStatus(payment.getStatus());
+        enrollment.setPaymentRef(firstNonBlank(payment.getPaymentRef(), payment.getPaystackReference()));
+    }
+
+    private String firstNonBlank(String primary, String fallback) {
+        if (primary != null && !primary.trim().isEmpty()) {
+            return primary.trim();
+        }
+        if (fallback != null && !fallback.trim().isEmpty()) {
+            return fallback.trim();
+        }
+        return null;
     }
 
 }

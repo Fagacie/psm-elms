@@ -1,4 +1,4 @@
-﻿.ef-main {
+.ef-main {
   display: grid;
   gap: 28px;
 }
@@ -196,5 +196,20 @@
   .ef-result-top {
     align-items: flex-start;
   }
+}
+
+/* Enforce subtle rounded system globally across enrollment flows */
+* {
+  border-radius: 6px !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+/* Protect perfect circular elements */
+input[type="radio"],
+input[type="checkbox"],
+.fa-circle-check,
+.fa-circle-xmark {
+  border-radius: 50% !important;
 }
 

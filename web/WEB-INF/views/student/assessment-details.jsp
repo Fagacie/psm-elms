@@ -41,7 +41,12 @@
                 <div class="sa-hero-top">
                     <div>
                         <h2>${assessment.title}</h2>
-                        <p>${fn:trim(displayInstructions)}</p>
+                        <p>
+                            <c:choose>
+                                <c:when test="${not empty displayInstructions}">${fn:trim(displayInstructions)}</c:when>
+                                <c:otherwise>Please review the duration, questions, and attempt configurations below before commencing.</c:otherwise>
+                            </c:choose>
+                        </p>
                     </div>
                     <div class="sa-badges">
                         <span class="sa-chip"><i class="fas fa-clock"></i> ${assessment.duration != null ? assessment.duration : '--'}${assessment.duration != null ? ' min' : ''}</span>

@@ -595,6 +595,21 @@
                 align-items: flex-start;
             }
         }
+
+        /* Enforce subtle rounded system globally on this page */
+        * {
+            border-radius: 6px !important;
+            box-shadow: none !important;
+            text-shadow: none !important;
+        }
+
+        /* Protect perfect circular elements (radio selections) */
+        input[type="radio"],
+        input[type="checkbox"],
+        .fa-circle-check,
+        .fa-circle-xmark {
+            border-radius: 50% !important;
+        }
     </style>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/student-assessment-module.css">
     <script>

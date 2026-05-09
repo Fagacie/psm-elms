@@ -49,24 +49,71 @@ public class AdminEnrollmentListServlet extends HttpServlet {
         
         try {
             List<Enrollment> enrollments = enrollmentDAO.getAllEnrollments();
-            // Enrich with payment data
+            String successCode = request.getParameter("success");
+            String errorCode = request.getParameter("error");
+
             for (Enrollment e : enrollments) {
-                Payment p = paymentDAO.getPaymentByEnrollmentId(e.getEnrollmentId());
-                if (p != null) {
-                    e.setPaymentStatus(p.getStatus());
-                    e.setPaymentRef(p.getPaystackReference());
-                } else {
-                    e.setPaymentStatus("Pending");
-                }
+                enrichEnrollmentPayment(e);
             }
             request.setAttribute("enrollments", enrollments);
+            request.setAttribute("successMessage", resolveSuccessMessage(successCode));
+            request.setAttribute("errorMessage", resolveErrorMessage(errorCode));
             request.getRequestDispatcher("/WEB-INF/views/admin/admin-enrollment-list.jsp").forward(request, response);
             
         } catch (Exception e) {
             System.err.println("AdminEnrollmentListServlet: Error: " + e.getMessage());
             e.printStackTrace();
-            response.sendRedirect(request.getContextPath() + "/dashboard?error=exception");
+            request.setAttribute("enrollments", java.util.Collections.emptyList());
+            request.setAttribute("errorMessage", "Enrollments could not be loaded right now. Please try again.");
+            request.getRequestDispatcher("/WEB-INF/views/admin/admin-enrollment-list.jsp").forward(request, response);
         }
+    }
+
+    private void enrichEnrollmentPayment(Enrollment enrollment) {
+        Payment payment = paymentDAO.getPaymentByEnrollmentId(enrollment.getEnrollmentId());
+        if (payment == null) {
+            enrollment.setPaymentStatus("Pending");
+            return;
+        }
+
+        enrollment.setPaymentStatus(payment.getStatus());
+        enrollment.setPaymentRef(firstNonBlank(payment.getPaymentRef(), payment.getPaystackReference()));
+    }
+
+    private String firstNonBlank(String primary, String fallback) {
+        if (primary != null && !primary.trim().isEmpty()) {
+            return primary.trim();
+        }
+        if (fallback != null && !fallback.trim().isEmpty()) {
+            return fallback.trim();
+        }
+        return null;
+    }
+
+    private String resolveSuccessMessage(String code) {
+        if (code == null || code.trim().isEmpty()) {
+            return null;
+        }
+        if ("updated".equalsIgnoreCase(code)) {
+            return "Enrollment details were refreshed successfully.";
+        }
+        return null;
+    }
+
+    private String resolveErrorMessage(String code) {
+        if (code == null || code.trim().isEmpty()) {
+            return null;
+        }
+        if ("invalid".equalsIgnoreCase(code)) {
+            return "Choose a valid enrollment record to continue.";
+        }
+        if ("notfound".equalsIgnoreCase(code)) {
+            return "The enrollment record you requested could not be found.";
+        }
+        if ("exception".equalsIgnoreCase(code)) {
+            return "An enrollment error occurred. Please try again.";
+        }
+        return "An enrollment error occurred. Please try again.";
     }
 
 }

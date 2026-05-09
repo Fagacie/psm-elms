@@ -26,8 +26,10 @@
 
 <main class="app-main">
     <div class="content-wrapper">
+        <c:set var="paymentCount" value="${empty payments ? 0 : payments.size()}"/>
         <c:set var="paidCount" value="0"/>
         <c:set var="pendingCount" value="0"/>
+        <c:set var="abandonedCount" value="0"/>
         <c:set var="failedCount" value="0"/>
         <c:forEach var="row" items="${payments}">
             <c:choose>
@@ -39,6 +41,9 @@
                 </c:when>
                 <c:when test="${row.status eq 'Failed'}">
                     <c:set var="failedCount" value="${failedCount + 1}"/>
+                </c:when>
+                <c:when test="${row.status eq 'Abandoned'}">
+                    <c:set var="abandonedCount" value="${abandonedCount + 1}"/>
                 </c:when>
             </c:choose>
         </c:forEach>
@@ -59,7 +64,7 @@
                 <div class="admin-hero-scene" aria-hidden="true">
                     <div class="admin-scene-panel">
                         <span>Total Payments</span>
-                        <strong>${payments.size()}</strong>
+                        <strong>${paymentCount}</strong>
                     </div>
                     <div class="admin-scene-panel">
                         <span>Paid</span>
@@ -72,7 +77,7 @@
         <section class="metrics-grid">
             <article class="metric-card">
                 <span class="metric-label">Total Records</span>
-                <div class="metric-value">${payments.size()}</div>
+                <div class="metric-value">${paymentCount}</div>
                 <p class="metric-meta">All payment rows currently loaded into the workspace.</p>
             </article>
             <article class="metric-card">
@@ -92,60 +97,79 @@
             </article>
         </section>
 
-        <c:if test="${not empty success}">
-            <div class="alert alert-success"><span>${success}</span></div>
+        <c:if test="${not empty successMessage}">
+            <div class="alert alert-success"><i class="fas fa-check-circle"></i> <span><c:out value="${successMessage}"/></span></div>
         </c:if>
-        <c:if test="${not empty error}">
-            <div class="alert alert-error"><span>${error}</span></div>
+        <c:if test="${not empty errorMessage}">
+            <div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> <span><c:out value="${errorMessage}"/></span></div>
         </c:if>
 
         <section class="section-card">
             <div class="section-header">
                 <h2>Payment Records</h2>
             </div>
-
-            <div class="admin-table-toolbar">
-                <span class="admin-code">Live list</span>
-                <span class="table-subtext">Use search, paging, and export actions from the table controls.</span>
+            <div class="section-actions-inset">
+                <a href="${pageContext.request.contextPath}/admin/payments" class="admin-btn ${empty status ? 'primary' : 'secondary'}">All Payments</a>
+                <a href="${pageContext.request.contextPath}/admin/payments?status=Paid" class="admin-btn ${status == 'Paid' ? 'primary' : 'secondary'}">Paid</a>
+                <a href="${pageContext.request.contextPath}/admin/payments?status=Pending" class="admin-btn ${status == 'Pending' ? 'primary' : 'secondary'}">Pending</a>
+                <a href="${pageContext.request.contextPath}/admin/payments?status=Failed" class="admin-btn ${status == 'Failed' ? 'primary' : 'secondary'}">Failed</a>
+                <a href="${pageContext.request.contextPath}/admin/payments?status=Abandoned" class="admin-btn ${status == 'Abandoned' ? 'primary' : 'secondary'}">Abandoned</a>
             </div>
 
-            <div class="table-wrapper">
-                <table id="paymentsTable" class="data-table display nowrap" style="width:100%">
-                    <thead>
-                        <tr>
-                            <th>Student</th>
-                            <th>Course</th>
-                            <th>Amount</th>
-                            <th>Status</th>
-                            <th>Paid At</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <c:forEach var="p" items="${payments}">
-                            <tr>
-                                <td>${p.studentName}</td>
-                                <td>${p.courseName}</td>
-                                <td>NGN ${p.amount}</td>
-                                <td>
-                                    <c:choose>
-                                        <c:when test="${p.status eq 'Paid'}"><span class="status-badge status-success">Paid</span></c:when>
-                                        <c:when test="${p.status eq 'Pending'}"><span class="status-badge status-warning">Pending</span></c:when>
-                                        <c:when test="${p.status eq 'Failed'}"><span class="status-badge status-danger">Failed</span></c:when>
-                                        <c:otherwise><span class="status-badge status-secondary">${p.status}</span></c:otherwise>
-                                    </c:choose>
-                                </td>
-                                <td>${p.paymentDate}</td>
-                                <td>
-                                    <div class="admin-table-actions">
-                                        <button type="button" class="admin-btn js-open-payment-modal" data-payment-url="${pageContext.request.contextPath}/admin/payment?id=${p.paymentId}&modal=1">View</button>
-                                    </div>
-                                </td>
-                            </tr>
-                        </c:forEach>
-                    </tbody>
-                </table>
-            </div>
+            <c:choose>
+                <c:when test="${empty payments}">
+                    <div class="empty-state empty-state-inset">
+                        <i class="fas fa-credit-card"></i>
+                        <strong>No payments found</strong>
+                        <p>Payment records will appear here once learners begin checkout and transaction callbacks are stored.</p>
+                    </div>
+                </c:when>
+                <c:otherwise>
+                    <div class="admin-table-toolbar">
+                        <span class="admin-code">Live list</span>
+                        <span class="table-subtext">Use search, paging, and export actions from the table controls.</span>
+                    </div>
+
+                    <div class="table-wrapper">
+                        <table id="paymentsTable" class="data-table display nowrap" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th>Student</th>
+                                    <th>Course</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Paid At</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <c:forEach var="p" items="${payments}">
+                                    <tr>
+                                        <td><c:out value="${p.studentName}"/></td>
+                                        <td><c:out value="${p.courseName}"/></td>
+                                        <td>NGN <c:out value="${p.amount}"/></td>
+                                        <td>
+                                            <c:choose>
+                                                <c:when test="${p.status eq 'Paid'}"><span class="status-badge status-success">Paid</span></c:when>
+                                                <c:when test="${p.status eq 'Pending'}"><span class="status-badge status-warning">Pending</span></c:when>
+                                                <c:when test="${p.status eq 'Failed'}"><span class="status-badge status-danger">Failed</span></c:when>
+                                                <c:when test="${p.status eq 'Abandoned'}"><span class="status-badge status-secondary">Abandoned</span></c:when>
+                                                <c:otherwise><span class="status-badge status-secondary"><c:out value="${p.status}"/></span></c:otherwise>
+                                            </c:choose>
+                                        </td>
+                                        <td><c:out value="${p.paymentDate}"/></td>
+                                        <td>
+                                            <div class="admin-table-actions">
+                                                <button type="button" class="admin-btn js-open-payment-modal" data-payment-url="${pageContext.request.contextPath}/admin/payment?id=${p.paymentId}&modal=1">View</button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </c:forEach>
+                            </tbody>
+                        </table>
+                    </div>
+                </c:otherwise>
+            </c:choose>
         </section>
     </div>
 </main>

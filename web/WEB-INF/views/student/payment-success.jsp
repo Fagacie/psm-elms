@@ -43,7 +43,7 @@
             </div>
 
             <!-- Automated Redirection Countdown -->
-            <div class="ef-redirect-banner" id="redirectBanner" style="display:flex; align-items:center; gap:12px; margin-bottom: 20px; padding:12px 16px; background:rgba(var(--sv-accent-rgb, 99, 102, 241), 0.1); border:1px solid var(--sv-accent); border-radius:6px; color:var(--sv-accent); font-size:0.9rem;">
+            <div class="ef-redirect-banner" id="redirectBanner" style="display:flex; align-items:center; gap:12px; margin-bottom: 20px; padding:12px 16px; background:rgba(var(--sv-accent-rgb, 99, 102, 241), 0.1); border:1px solid var(--sv-accent); border-radius:0px !important; color:var(--sv-accent); font-size:0.9rem;">
                 <i class="fas fa-circle-notch fa-spin"></i>
                 <div>
                     <strong style="display:block; font-weight:700;">Launching Learning Hub Workspace...</strong>

@@ -934,6 +934,13 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                     workspaceActionNote = "Continue the active attempt when you are ready.";
                 } else if (Assessment.TYPE_ASSIGNMENT.equals(selectedAssessment.getType())) {
                     workspaceActionNote = "Use the submit action to open the upload workspace and send your response.";
+                    try {
+                        List<AssessmentQuestion> assignmentQuestions = assessmentQuestionDAO.findByAssessment(selectedAssessment.getAssessmentId());
+                        request.setAttribute("selectedAssessmentQuestions", assignmentQuestions != null ? assignmentQuestions : new ArrayList<AssessmentQuestion>());
+                    } catch (Exception qEx) {
+                        LOGGER.log(Level.WARNING, "Failed to load assignment questions inside Learning Hub", qEx);
+                        request.setAttribute("selectedAssessmentQuestions", new ArrayList<AssessmentQuestion>());
+                    }
                 } else {
                     workspaceActionNote = "Start the assessment from here when you are ready to proceed.";
                 }

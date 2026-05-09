@@ -3,6 +3,7 @@ package com.psm.elearning.controller.admin;
 import com.psm.elearning.dao.PaymentDAO;
 import com.psm.elearning.dao.PaymentDAOImpl;
 import com.psm.elearning.model.Payment;
+import com.psm.elearning.util.SessionUtil;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -15,25 +16,17 @@ public class AdminPaymentListServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        // Simple admin guard
-        Object role = req.getSession(false) != null ? req.getSession(false).getAttribute("userRole") : null;
-        if (role == null || !"Admin".equals(role)) {
+        Integer userId = SessionUtil.resolveUserId(req.getSession(false));
+        String role = SessionUtil.resolveRole(req.getSession(false));
+        if (userId == null) {
             resp.sendRedirect(req.getContextPath() + "/login");
             return;
         }
-        String status = req.getParameter("status");
-        int page = parseInt(req.getParameter("page"), 1);
-        int pageSize = parseInt(req.getParameter("pageSize"), 20);
-
-        List<Payment> payments = paymentDAO.listPayments(status, page, pageSize);
-        req.setAttribute("payments", payments);
-        req.setAttribute("status", status);
-        req.setAttribute("page", page);
-        req.setAttribute("pageSize", pageSize);
-        req.getRequestDispatcher("/admin/payments.jsp").forward(req, resp);
-    }
-
-    private int parseInt(String s, int def) {
-        try { return Integer.parseInt(s); } catch (Exception e) { return def; }
+        if (!"Admin".equals(role)) {
+            resp.sendRedirect(req.getContextPath() + "/dashboard");
+            return;
+        }
+        String queryString = req.getQueryString();
+        resp.sendRedirect(req.getContextPath() + "/admin/payments" + (queryString == null || queryString.isEmpty() ? "" : "?" + queryString));
     }
 }

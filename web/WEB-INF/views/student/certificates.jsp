@@ -293,13 +293,17 @@
                                         </td>
                                         <td>
                                             <div class="cert-actions">
-                                                <button type="button" class="sv-btn primary cert-table-btn" data-cert-download="${pageContext.request.contextPath}/student/certificate?enrollmentId=${cert.enrollmentId}&download=png">
-                                                    <i class="fas fa-image"></i>
-                                                    <span>Download PNG</span>
+                                                <a class="sv-btn primary cert-table-btn" href="${pageContext.request.contextPath}/student/certificate?enrollmentId=${cert.enrollmentId}" style="border-radius: 0;">
+                                                    <i class="fas fa-eye"></i>
+                                                    <span>View</span>
+                                                </a>
+                                                <button type="button" class="sv-btn cert-table-btn" style="border-radius: 0; border-color: #cbd5e1; background: #ffffff;" data-cert-download="${pageContext.request.contextPath}/student/certificate?enrollmentId=${cert.enrollmentId}&download=pdf">
+                                                    <i class="fas fa-file-pdf" style="color: #ef4444;"></i>
+                                                    <span>PDF</span>
                                                 </button>
-                                                <button type="button" class="sv-btn cert-copy-code-btn cert-table-btn" data-cert-copy="${cert.certificateNo}">
+                                                <button type="button" class="sv-btn cert-copy-code-btn cert-table-btn" style="border-radius: 0;" data-cert-copy="${cert.certificateNo}">
                                                     <i class="fas fa-copy"></i>
-                                                    <span>Copy Code</span>
+                                                    <span>Code</span>
                                                 </button>
                                             </div>
                                         </td>

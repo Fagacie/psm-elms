@@ -6,10 +6,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enrollment Details - PSM E-Learning</title>
+    <title>Enrollment Details | Admin</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin-dashboard.css">
     <jsp:include page="/WEB-INF/views/common/head-external-assets.jsp"/>
 </head>
@@ -93,6 +93,7 @@
                     <a href="${pageContext.request.contextPath}/admin/enrollments" class="admin-btn secondary">Back to List</a>
                     <a href="${pageContext.request.contextPath}/admin/users?action=edit&userId=${enrollment.userId}" class="admin-btn primary">Open Student</a>
                     <a href="${pageContext.request.contextPath}/admin/courses" class="admin-btn secondary">Open Courses</a>
+                    <a href="${pageContext.request.contextPath}/admin/payments" class="admin-btn secondary">Open Payments</a>
                 </div>
             </div>
         </section>
@@ -103,8 +104,8 @@
                     <h2>Student Information</h2>
                 </div>
                 <div class="panel-stack">
-                    <div class="status-item"><div class="status-item-copy"><strong>Student Name</strong><span>${enrollment.studentName}</span></div></div>
-                    <div class="status-item"><div class="status-item-copy"><strong>Email</strong><span>${enrollment.studentEmail}</span></div></div>
+                    <div class="status-item"><div class="status-item-copy"><strong>Student Name</strong><span><c:out value="${enrollment.studentName}"/></span></div></div>
+                    <div class="status-item"><div class="status-item-copy"><strong>Email</strong><span><c:out value="${enrollment.studentEmail}"/></span></div></div>
                     <div class="status-item"><div class="status-item-copy"><strong>User ID</strong><span>#${enrollment.userId}</span></div></div>
                 </div>
             </section>
@@ -114,10 +115,10 @@
                     <h2>Course Information</h2>
                 </div>
                 <div class="panel-stack">
-                    <div class="status-item"><div class="status-item-copy"><strong>Course Name</strong><span>${enrollment.courseName}</span></div></div>
-                    <div class="status-item"><div class="status-item-copy"><strong>Instructor</strong><span>${enrollment.instructorName}</span></div></div>
+                    <div class="status-item"><div class="status-item-copy"><strong>Course Name</strong><span><c:out value="${enrollment.courseName}"/></span></div></div>
+                    <div class="status-item"><div class="status-item-copy"><strong>Instructor</strong><span><c:out value="${not empty enrollment.instructorName ? enrollment.instructorName : 'Not assigned'}"/></span></div></div>
                     <div class="status-item"><div class="status-item-copy"><strong>Course ID</strong><span>#${enrollment.courseId}</span></div></div>
-                    <div class="status-item"><div class="status-item-copy"><strong>Description</strong><span>${enrollment.courseDescription}</span></div></div>
+                    <div class="status-item"><div class="status-item-copy"><strong>Description</strong><span><c:out value="${not empty enrollment.courseDescription ? enrollment.courseDescription : 'No course description available.'}"/></span></div></div>
                 </div>
             </section>
         </section>
@@ -128,10 +129,10 @@
                     <h2>Enrollment Timeline</h2>
                 </div>
                 <div class="panel-stack">
-                    <div class="status-item"><div class="status-item-copy"><strong>Enrollment Status</strong><span>${enrollment.status}</span></div></div>
-                    <div class="status-item"><div class="status-item-copy"><strong>Completion Status</strong><span>${enrollment.completionStatus}</span></div></div>
-                    <div class="status-item"><div class="status-item-copy"><strong>Enrolled Date</strong><span><c:choose><c:when test="${enrollment.enrollmentDate != null}">${enrollment.enrollmentDate.toString().substring(0, 10)}</c:when><c:otherwise>N/A</c:otherwise></c:choose></span></div></div>
-                    <div class="status-item"><div class="status-item-copy"><strong>Last Updated</strong><span><c:choose><c:when test="${enrollment.updatedDate != null}">${enrollment.updatedDate.toString().substring(0, 10)}</c:when><c:otherwise>N/A</c:otherwise></c:choose></span></div></div>
+                    <div class="status-item"><div class="status-item-copy"><strong>Enrollment Status</strong><span><c:out value="${enrollment.status}"/></span></div></div>
+                    <div class="status-item"><div class="status-item-copy"><strong>Completion Status</strong><span><c:out value="${not empty enrollment.completionStatus ? enrollment.completionStatus : 'Not Started'}"/></span></div></div>
+                    <div class="status-item"><div class="status-item-copy"><strong>Enrolled Date</strong><span><c:choose><c:when test="${enrollment.enrollmentDate != null}"><c:out value="${enrollment.enrollmentDate.toLocalDate()}"/></c:when><c:otherwise>N/A</c:otherwise></c:choose></span></div></div>
+                    <div class="status-item"><div class="status-item-copy"><strong>Last Updated</strong><span><c:choose><c:when test="${enrollment.updatedDate != null}"><c:out value="${enrollment.updatedDate.toLocalDate()}"/></c:when><c:otherwise>N/A</c:otherwise></c:choose></span></div></div>
                 </div>
             </section>
 
@@ -140,10 +141,10 @@
                     <h2>Payment Information</h2>
                 </div>
                 <div class="panel-stack">
-                    <div class="status-item"><div class="status-item-copy"><strong>Payment Status</strong><span>${not empty enrollment.paymentStatus ? enrollment.paymentStatus : 'Pending'}</span></div></div>
+                    <div class="status-item"><div class="status-item-copy"><strong>Payment Status</strong><span><c:out value="${not empty enrollment.paymentStatus ? enrollment.paymentStatus : 'Pending'}"/></span></div></div>
                     <div class="status-item"><div class="status-item-copy"><strong>Amount</strong><span>NGN <fmt:formatNumber value="${enrollment.coursePrice}" type="number" minFractionDigits="2" maxFractionDigits="2"/></span></div></div>
                     <c:if test="${not empty enrollment.paymentRef}">
-                        <div class="status-item"><div class="status-item-copy"><strong>Payment Reference</strong><span>${enrollment.paymentRef}</span></div></div>
+                        <div class="status-item"><div class="status-item-copy"><strong>Payment Reference</strong><span><c:out value="${enrollment.paymentRef}"/></span></div></div>
                     </c:if>
                 </div>
             </section>

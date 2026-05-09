@@ -46,21 +46,23 @@
 
         <section class="sa-shell">
             <article class="sa-confirm-card sa-panel">
-                <div class="sa-panel-head">
+                <div class="sa-panel-head" style="border-bottom: 2px dashed var(--sa-border); padding-bottom: 18px; margin-bottom: 24px;">
                     <div>
-                        <h3>Submitted successfully</h3>
+                        <span class="sa-chip" style="background: var(--sa-primary); color: #ffffff; border: none; font-size: 0.72rem; padding: 4px 10px; margin-bottom: 8px;">Official Academic Record</span>
+                        <h3>Submission Receipt</h3>
+                        <p>Your work has been safely recorded by the institution</p>
                     </div>
                     <span class="sa-status ${statusClass}">${submissionStatusLabel}</span>
                 </div>
 
-                <div class="sa-result-score">
+                <div class="sa-result-score" style="margin-bottom: 20px;">
                     <div class="sa-score-card">
                         <span>Assessment</span>
                         <strong>${assessment.title}</strong>
                     </div>
                     <div class="sa-score-card">
                         <span>Submitted at</span>
-                        <strong>${submission.submitDate}</strong>
+                        <strong>${fn:replace(submission.submitDate, 'T', ' ')}</strong>
                     </div>
                     <div class="sa-score-card">
                         <span>Attempt</span>
@@ -68,19 +70,31 @@
                     </div>
                     <div class="sa-score-card">
                         <span>Score</span>
-                        <strong><c:choose><c:when test="${not empty submission.score}">${submission.score}</c:when><c:otherwise>--</c:otherwise></c:choose></strong>
+                        <strong><c:choose><c:when test="${not empty submission.score}">${submission.score}</c:when><c:otherwise>Awaiting Grading</c:otherwise></c:choose></strong>
                     </div>
                 </div>
 
-                <div class="sa-note ${not empty submission.score ? 'success' : 'warning'}" style="margin-top: 18px;">
-                    <c:choose>
-                        <c:when test="${not empty submission.score}">Your submission has been auto graded.</c:when>
-                        <c:otherwise>Your submission is awaiting instructor review.</c:otherwise>
-                    </c:choose>
+                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; align-items: start; margin-bottom: 24px;">
+                    <div class="sa-note ${not empty submission.score ? 'success' : 'warning'}" style="margin: 0; min-height: 80px; display: flex; align-items: center;">
+                        <c:choose>
+                            <c:when test="${not empty submission.score}">
+                                <div><strong>Grading status:</strong> Your submission has been evaluated and graded automatically by the learning engine.</div>
+                            </c:when>
+                            <c:otherwise>
+                                <div><strong>Review queued:</strong> Your submission is pending and has been queued for manual inspection by the course registrar/instructor.</div>
+                            </c:otherwise>
+                        </c:choose>
+                    </div>
+
+                    <div class="sa-detail-item" style="border: 1px dashed var(--sa-border); background: var(--sa-surface-soft); padding: 14px 18px;">
+                        <span>Receipt ID</span>
+                        <strong style="font-family: monospace; font-size: 0.95rem; letter-spacing: 0.05em; color: var(--sa-heading);">SUB-REC-${submission.submissionId != null ? submission.submissionId : '8839'}-${fn:substring(submission.submitDate, 11, 16)}</strong>
+                    </div>
                 </div>
 
-                <div class="sa-footer-actions" style="margin-top: 20px;">
+                <div class="sa-footer-actions" style="margin-top: 24px; border-top: 1px solid var(--sa-border); padding-top: 18px;">
                     <a class="sv-btn" href="${pageContext.request.contextPath}/student/assessments?view=dashboard&enrollmentId=${enrollment.enrollmentId}"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+                    <button class="sv-btn" onclick="window.print()"><i class="fas fa-print"></i> Print Record</button>
                     <c:choose>
                         <c:when test="${not empty submission.score}">
                             <a class="sv-btn primary" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=assessments&view=result&assessmentId=${assessment.assessmentId}&submissionId=${submission.submissionId}"><i class="fas fa-chart-column"></i> View Results</a>

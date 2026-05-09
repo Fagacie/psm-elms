@@ -11,6 +11,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -44,21 +46,21 @@ public class CertificateTemplateServlet extends HttpServlet {
         if (certificateId != null) {
             certificateView = certificateDAO.findDetailedById(certificateId);
             if (certificateView == null) {
-                response.sendRedirect(request.getContextPath() + "/dashboard?error=certificate");
+                redirectToWorkspace(request, response, "certificate");
                 return;
             }
             if (!canViewCertificate(session, certificateView)) {
-                response.sendRedirect(request.getContextPath() + "/dashboard?error=permission");
+                redirectToWorkspace(request, response, "permission");
                 return;
             }
         } else if (enrollmentId != null) {
             certificateView = certificateDAO.findDetailedByEnrollment(enrollmentId);
             if (certificateView == null) {
-                response.sendRedirect(request.getContextPath() + "/dashboard?error=certificate");
+                redirectToWorkspace(request, response, "certificate");
                 return;
             }
             if (!canViewCertificate(session, certificateView)) {
-                response.sendRedirect(request.getContextPath() + "/dashboard?error=permission");
+                redirectToWorkspace(request, response, "permission");
                 return;
             }
         } else {
@@ -96,7 +98,7 @@ public class CertificateTemplateServlet extends HttpServlet {
     }
 
     private String sanitizeBackUrl(HttpServletRequest request, String rawBackUrl) {
-        String defaultBack = request.getContextPath() + "/dashboard";
+        String defaultBack = resolveDefaultBackUrl(request);
         if (rawBackUrl == null) {
             return defaultBack;
         }
@@ -118,6 +120,37 @@ public class CertificateTemplateServlet extends HttpServlet {
             return contextPath + back;
         }
         return defaultBack;
+    }
+
+    private void redirectToWorkspace(HttpServletRequest request,
+                                     HttpServletResponse response,
+                                     String errorCode) throws IOException {
+        String baseUrl = sanitizeBackUrl(request, request.getParameter("back"));
+        response.sendRedirect(appendQueryParam(baseUrl, "error", errorCode));
+    }
+
+    private String resolveDefaultBackUrl(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        String role = SessionUtil.resolveRole(session);
+        String contextPath = request.getContextPath();
+        if ("Admin".equals(role)) {
+            return contextPath + "/admin/certificates";
+        }
+        if ("Instructor".equals(role)) {
+            return contextPath + "/instructor/certificates";
+        }
+        if ("Student".equals(role)) {
+            return contextPath + "/student/certificates";
+        }
+        return contextPath + "/dashboard";
+    }
+
+    private String appendQueryParam(String baseUrl, String key, String value) {
+        String separator = baseUrl.contains("?") ? "&" : "?";
+        return baseUrl + separator
+                + URLEncoder.encode(key, StandardCharsets.UTF_8)
+                + "="
+                + URLEncoder.encode(value, StandardCharsets.UTF_8);
     }
 
     private boolean canViewCertificate(HttpSession session, CertificateView certificate) {

@@ -97,7 +97,7 @@
             btn.addEventListener('click', function () {
                 var url = btn.getAttribute('data-cert-download');
                 triggerBackgroundDownload(url);
-                showCopyToast('Preparing certificate PNG download...');
+                showCopyToast('Preparing certificate PDF download...');
             });
         });
     }

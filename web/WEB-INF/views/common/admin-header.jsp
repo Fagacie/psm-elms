@@ -19,7 +19,13 @@
     <c:when test="${fn:contains(currentPath, '/admin/payments')}">
         <c:set var="resolvedAdminTitle" value="Payments"/>
     </c:when>
+    <c:when test="${fn:contains(currentPath, '/admin/payment')}">
+        <c:set var="resolvedAdminTitle" value="Payments"/>
+    </c:when>
     <c:when test="${fn:contains(currentPath, '/admin/enrollments')}">
+        <c:set var="resolvedAdminTitle" value="Enrollments"/>
+    </c:when>
+    <c:when test="${fn:contains(currentPath, '/admin/enrollment-details')}">
         <c:set var="resolvedAdminTitle" value="Enrollments"/>
     </c:when>
     <c:when test="${fn:contains(currentPath, '/admin/certificates')}">

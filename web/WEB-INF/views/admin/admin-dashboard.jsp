@@ -180,12 +180,12 @@
                 </a>
                 <a href="${pageContext.request.contextPath}/admin/enrollments" class="quick-link-card">
                     <i class="fas fa-id-card"></i>
-                    <strong>Enrollment</strong>
+                    <strong>Enrollments</strong>
                     <span>Check enrollment records</span>
                 </a>
                 <a href="${pageContext.request.contextPath}/admin/payments" class="quick-link-card">
                     <i class="fas fa-credit-card"></i>
-                    <strong>Payment</strong>
+                    <strong>Payments</strong>
                     <span>View transaction records</span>
                 </a>
             </div>

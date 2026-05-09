@@ -335,9 +335,29 @@
                                                     <h3 class="lh-card-title">Assignment Workspace</h3>
                                                     <p class="lh-card-copy">Submit and review your assignment materials directly from the learning hub workspace.</p>
 
+                                                    <c:if test="${not empty selectedAssessmentQuestions}">
+                                                        <div class="lh-assignment-prompt-box" style="margin: 20px 0; padding: 20px; background: var(--sv-surface-soft); border-left: 4px solid var(--sv-accent); border-top: 1px solid var(--sv-border); border-right: 1px solid var(--sv-border); border-bottom: 1px solid var(--sv-border);">
+                                                            <h4 class="prompt-title" style="margin: 0 0 16px; font-size: 1.1rem; font-weight: 700; color: var(--sv-heading); display: flex; align-items: center; gap: 8px;"><i class="fas fa-file-signature"></i> Assignment Prompt & Tasks</h4>
+                                                            <div class="prompt-items" style="display: grid; gap: 14px;">
+                                                                <c:forEach var="q" items="${selectedAssessmentQuestions}" varStatus="loop">
+                                                                    <div class="prompt-item" style="padding: 16px; background: var(--sv-surface); border: 1px solid var(--sv-border);">
+                                                                        <strong style="display: block; font-size: 0.8rem; color: var(--sv-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">Task ${loop.index + 1}</strong>
+                                                                        <div class="prompt-text" style="font-size: 0.98rem; line-height: 1.6; color: var(--sv-text);"><c:out value="${q.questionText}"/></div>
+                                                                        <c:if test="${not empty q.attachmentUrl}">
+                                                                            <div class="prompt-attachment" style="margin-top: 12px;">
+                                                                                <a class="sv-btn" href="${q.attachmentUrl}" target="_blank" rel="noopener noreferrer">
+                                                                                    <i class="fas fa-file-pdf"></i> Open PDF Brief
+                                                                                </a>
+                                                                            </div>
+                                                                        </c:if>
+                                                                    </div>
+                                                                </c:forEach>
+                                                            </div>
+                                                        </div>
+                                                    </c:if>
+
                                                     <c:choose>
                                                         <c:when test="${not empty selectedAssessmentLatest and empty selectedAssessmentLatest.score}">
-                                                            <!-- Submission is awaiting review/grading -->
                                                             <div class="lh-assignment-status-card is-pending">
                                                                 <div class="status-icon-wrapper">
                                                                     <i class="fas fa-clock-rotate-left fa-spin-hover"></i>
@@ -368,7 +388,6 @@
                                                         </c:when>
 
                                                         <c:when test="${not empty selectedAssessmentLatest and not empty selectedAssessmentLatest.score}">
-                                                            <!-- Submission is graded -->
                                                             <c:set var="passThreshold" value="${selectedAssessment.totalMarks * 0.7}"/>
                                                             <c:set var="hasPassedAssignment" value="${selectedAssessmentLatest.score >= passThreshold}"/>
                                                             
@@ -404,9 +423,8 @@
                                                                 </div>
                                                             </div>
                                                             
-                                                            <!-- If failed and has attempts left, show retry upload form -->
                                                             <c:if test="${not hasPassedAssignment and selectedAssessmentUsedAttempts < selectedAssessmentAllowedAttempts}">
-                                                                <div class="lh-stage-card is-retry lh-mt-20">
+                                                                <div class="lh-stage-card is-retry lh-mt-20" style="border: 1px solid var(--sv-border);">
                                                                     <h3 class="lh-card-title"><i class="fas fa-rotate-left"></i> Submit Assignment Retake</h3>
                                                                     <p class="lh-card-copy">Upload an updated file to improve your score. You have ${selectedAssessmentAllowedAttempts - selectedAssessmentUsedAttempts} attempt(s) remaining.</p>
                                                                     
@@ -420,13 +438,17 @@
                                                                             <p class="assignment-upload-note">Accepted formats include PDF, DOC, DOCX, PPT, PPTX, ZIP, and image files. Maximum file size: 50MB.</p>
                                                                         </div>
 
+                                                                        <div class="assessment-actions" style="margin-top: 18px;">
+                                                                            <button class="sv-btn primary" type="submit">
+                                                                                <i class="fas fa-upload"></i>&nbsp;Submit Assignment Retake
+                                                                            </button>
+                                                                        </div>
                                                                     </form>
                                                                 </div>
                                                             </c:if>
                                                         </c:when>
 
                                                         <c:otherwise>
-                                                            <!-- Default upload form when no submissions exist yet -->
                                                             <form id="assignmentHubForm" method="post" action="${pageContext.request.contextPath}/student/assessments" enctype="multipart/form-data" class="lh-assignment-form">
                                                                 <input type="hidden" name="assessmentId" value="${selectedAssessment.assessmentId}">
                                                                 <input type="hidden" name="enrollmentId" value="${enrollment.enrollmentId}">
@@ -437,6 +459,11 @@
                                                                     <p class="assignment-upload-note">Accepted formats include PDF, DOC, DOCX, PPT, PPTX, ZIP, and image files. Maximum file size: 50MB.</p>
                                                                 </div>
 
+                                                                <div class="assessment-actions" style="margin-top: 18px;">
+                                                                    <button class="sv-btn primary" type="submit">
+                                                                        <i class="fas fa-upload"></i>&nbsp;Submit Assignment
+                                                                    </button>
+                                                                </div>
                                                             </form>
                                                         </c:otherwise>
                                                     </c:choose>

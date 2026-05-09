@@ -7,17 +7,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enrollment Management - PSM E-Learning</title>
+    <title>Enrollment Management | Admin</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin-dashboard.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css" />
     <jsp:include page="/WEB-INF/views/common/head-external-assets.jsp"/>
 </head>
 <body class="admin-page">
 <jsp:include page="/WEB-INF/views/common/admin-header.jsp">
     <jsp:param name="pageTitle" value="Enrollments"/>
-    <jsp:param name="pageSubtitle" value="Track payments, progress, and enrollment movement"/>
+    <jsp:param name="pageSubtitle" value="Track payments, access, and learner completion across enrollments"/>
 </jsp:include>
 
 <jsp:include page="/WEB-INF/views/common/admin-sidebar.jsp"/>
@@ -53,19 +54,30 @@
             <div class="admin-hero">
                 <div class="admin-hero-copy">
                     <p class="admin-kicker">Enrollment Operations</p>
-                    <h2>Track learning access, payment progress, and overall enrollment movement</h2>
-                    <p>Use this workspace to review payment state, monitor completion progress, and open full enrollment records for operational follow-up.</p>
+                    <h2>Track learning access, payment progress, and enrollment movement</h2>
+                    <p>Use this workspace to review payment state, monitor completion, and open full enrollment records for operational follow-up.</p>
+                </div>
+                <div class="admin-hero-scene" aria-hidden="true">
+                    <div class="admin-scene-panel">
+                        <span>Total Enrollments</span>
+                        <strong>${totalCount}</strong>
+                    </div>
+                    <div class="admin-scene-panel">
+                        <span>Paid</span>
+                        <strong>${paidCount}</strong>
+                    </div>
+                </div>
             </div>
         </section>
 
         <c:if test="${not empty successMessage}">
             <div class="alert alert-success">
-                <i class="fas fa-check-circle"></i> ${successMessage}
+                <i class="fas fa-check-circle"></i> <c:out value="${successMessage}"/>
             </div>
         </c:if>
         <c:if test="${not empty errorMessage}">
             <div class="alert alert-error">
-                <i class="fas fa-exclamation-circle"></i> ${errorMessage}
+                <i class="fas fa-exclamation-circle"></i> <c:out value="${errorMessage}"/>
             </div>
         </c:if>
 
@@ -99,14 +111,14 @@
             </div>
             <c:choose>
                 <c:when test="${empty enrollments}">
-                    <div class="empty-state" style="margin: 14px 16px 16px;">
+                    <div class="empty-state empty-state-inset">
                         <i class="fas fa-inbox"></i>
                         <p>No enrollments found.</p>
                     </div>
                 </c:when>
                 <c:otherwise>
                     <div class="table-wrapper">
-                        <table id="enrollmentsTable" class="data-table">
+                        <table id="enrollmentsTable" class="data-table display nowrap" style="width:100%">
                             <thead>
                                 <tr>
                                     <th>ID</th>
@@ -114,10 +126,10 @@
                                     <th>Email</th>
                                     <th>Course</th>
                                     <th>Amount (NGN)</th>
-                                    <th>Status</th>
+                                    <th>Enrollment Status</th>
                                     <th>Payment</th>
                                     <th>Reference</th>
-                                    <th>Progress</th>
+                                    <th>Completion</th>
                                     <th>Enrolled Date</th>
                                     <th>Actions</th>
                                 </tr>
@@ -126,16 +138,18 @@
                                 <c:forEach items="${enrollments}" var="enrollment">
                                     <tr>
                                         <td>#${enrollment.enrollmentId}</td>
-                                        <td><strong>${enrollment.studentName}</strong></td>
-                                        <td>${enrollment.studentEmail}</td>
-                                        <td>${enrollment.courseName}</td>
+                                        <td><strong><c:out value="${enrollment.studentName}"/></strong></td>
+                                        <td><c:out value="${enrollment.studentEmail}"/></td>
+                                        <td><c:out value="${enrollment.courseName}"/></td>
                                         <td><fmt:formatNumber value="${enrollment.coursePrice}" type="number" minFractionDigits="2" maxFractionDigits="2"/></td>
                                         <td>
                                             <c:choose>
                                                 <c:when test="${enrollment.status == 'Enrolled' or enrollment.status == 'enrolled'}"><span class="status-badge status-success">Enrolled</span></c:when>
+                                                <c:when test="${enrollment.status == 'Active' or enrollment.status == 'active'}"><span class="status-badge status-success">Active</span></c:when>
+                                                <c:when test="${enrollment.status == 'Completed' or enrollment.status == 'completed'}"><span class="status-badge status-success">Completed</span></c:when>
                                                 <c:when test="${enrollment.status == 'Pending' or enrollment.status == 'pending'}"><span class="status-badge status-warning">Pending</span></c:when>
                                                 <c:when test="${enrollment.status == 'Cancelled' or enrollment.status == 'cancelled'}"><span class="status-badge status-danger">Cancelled</span></c:when>
-                                                <c:otherwise><span class="status-badge status-secondary">${enrollment.status}</span></c:otherwise>
+                                                <c:otherwise><span class="status-badge status-secondary"><c:out value="${enrollment.status}"/></span></c:otherwise>
                                             </c:choose>
                                         </td>
                                         <td>
@@ -146,23 +160,27 @@
                                                 <c:when test="${ps eq 'failed' or ps eq 'Failed' or ps eq 'FAILED'}"><span class="status-badge status-danger">Failed</span></c:when>
                                                 <c:when test="${ps eq 'abandoned' or ps eq 'Abandoned' or ps eq 'ABANDONED'}"><span class="status-badge status-secondary">Abandoned</span></c:when>
                                                 <c:when test="${empty ps or ps eq 'null'}"><span class="status-badge status-warning">Pending</span></c:when>
-                                                <c:otherwise><span class="status-badge status-secondary">${ps}</span></c:otherwise>
+                                                <c:otherwise><span class="status-badge status-secondary"><c:out value="${ps}"/></span></c:otherwise>
                                             </c:choose>
                                         </td>
                                         <td>
                                             <c:choose>
-                                                <c:when test="${not empty enrollment.paymentRef}"><code style="font-size: 11px; background: rgba(16, 33, 56, 0.46); padding: 2px 6px; color:#dcecff;">${enrollment.paymentRef}</code></c:when>
+                                                <c:when test="${not empty enrollment.paymentRef}"><span class="admin-code"><c:out value="${enrollment.paymentRef}"/></span></c:when>
                                                 <c:otherwise>-</c:otherwise>
                                             </c:choose>
                                         </td>
-                                        <td>${enrollment.completionStatus}</td>
+                                        <td><c:out value="${not empty enrollment.completionStatus ? enrollment.completionStatus : 'Not Started'}"/></td>
                                         <td>
                                             <c:choose>
-                                                <c:when test="${enrollment.enrollmentDate != null}">${enrollment.enrollmentDate.toString().substring(0, 10)}</c:when>
+                                                <c:when test="${enrollment.enrollmentDate != null}"><c:out value="${fn:substring(enrollment.enrollmentDate.toString(), 0, 10)}"/></c:when>
                                                 <c:otherwise>N/A</c:otherwise>
                                             </c:choose>
                                         </td>
-                                        <td><div class="admin-table-actions"><a href="${pageContext.request.contextPath}/admin/enrollment-details?id=${enrollment.enrollmentId}" class="admin-btn secondary">View</a></div></td>
+                                        <td>
+                                            <div class="admin-table-actions">
+                                                <a href="${pageContext.request.contextPath}/admin/enrollment-details?id=${enrollment.enrollmentId}" class="admin-btn secondary">View</a>
+                                            </div>
+                                        </td>
                                     </tr>
                                 </c:forEach>
                             </tbody>
@@ -174,8 +192,10 @@
     </div>
 </main>
 
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
 <script>
-    $(document).ready(function() {
+    $(function() {
         if ($('#enrollmentsTable').length && $('#enrollmentsTable tbody tr').length > 1) {
             $('#enrollmentsTable').DataTable({
                 order: [[0, 'desc']],

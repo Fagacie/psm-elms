@@ -121,6 +121,16 @@
                 <i class="fas fa-exclamation-circle"></i> Invalid certificate action request.
             </div>
         </c:if>
+        <c:if test="${param.error == 'certificate'}">
+            <div class="alert alert-error">
+                <i class="fas fa-exclamation-circle"></i> The requested certificate record could not be found.
+            </div>
+        </c:if>
+        <c:if test="${param.error == 'permission'}">
+            <div class="alert alert-error">
+                <i class="fas fa-exclamation-circle"></i> You do not have permission to open that certificate record.
+            </div>
+        </c:if>
 
         <section class="section-card">
             <div class="section-header">

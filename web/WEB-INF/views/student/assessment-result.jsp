@@ -114,10 +114,17 @@
                     <c:otherwise>
                         <div class="sa-breakdown">
                             <c:forEach var="q" items="${questions}" varStatus="loop">
-                                <div class="sa-breakdown-item">
-                                    <h4>Q${loop.index + 1}. ${q.questionText}</h4>
-                                    <p><strong>Your answer:</strong> <c:out value="${empty studentAnswerByQuestionId[q.questionId] ? '--' : studentAnswerByQuestionId[q.questionId]}"/></p>
-                                    <p><strong>Correct answer:</strong> <c:out value="${empty correctAnswerByQuestionId[q.questionId] ? '--' : correctAnswerByQuestionId[q.questionId]}"/></p>
+                                <c:set var="studAns" value="${empty studentAnswerByQuestionId[q.questionId] ? '' : studentAnswerByQuestionId[q.questionId]}" />
+                                <c:set var="corrAns" value="${empty correctAnswerByQuestionId[q.questionId] ? '' : correctAnswerByQuestionId[q.questionId]}" />
+                                <c:set var="isCorrect" value="${not empty studAns and studAns == corrAns}" />
+                                <div class="sa-breakdown-item ${isCorrect ? 'correct' : 'incorrect'}">
+                                    <span class="sa-badge-flat ${isCorrect ? 'success' : 'danger'}" style="margin-bottom: 12px;">
+                                        <i class="fas ${isCorrect ? 'fa-circle-check' : 'fa-circle-xmark'}"></i>
+                                        ${isCorrect ? 'Correct' : 'Incorrect'}
+                                    </span>
+                                    <h4 style="margin: 0 0 10px 0;">Q${loop.index + 1}. ${q.questionText}</h4>
+                                    <p><strong>Your answer:</strong> <c:out value="${empty studAns ? '--' : studAns}"/></p>
+                                    <p><strong>Correct answer:</strong> <c:out value="${empty corrAns ? '--' : corrAns}"/></p>
                                 </div>
                             </c:forEach>
                         </div>
@@ -167,11 +174,18 @@
                         <div class="sa-detail-item">
                             <span>Audit trail</span>
                             <c:choose>
-                                <c:when test="${empty submissionAudits}"><p>No grading audit entries yet.</p></c:when>
+                                <c:when test="${empty submissionAudits}">
+                                    <p style="margin: 0; color: var(--sa-muted); font-size: 0.9rem;">No grading audit entries yet.</p>
+                                </c:when>
                                 <c:otherwise>
-                                    <c:forEach var="audit" items="${submissionAudits}">
-                                        <p>${audit.actionType} by ${audit.gradedByName} on ${fn:replace(audit.gradedAt, 'T', ' ')}</p>
-                                    </c:forEach>
+                                    <div class="sa-timeline">
+                                        <c:forEach var="audit" items="${submissionAudits}">
+                                            <div class="sa-timeline-item">
+                                                <h5 style="margin: 0 0 2px 0; font-size: 0.92rem; font-weight: 700; color: var(--sa-heading);">${audit.actionType} by ${audit.gradedByName}</h5>
+                                                <p style="margin: 0; font-size: 0.82rem; color: var(--sa-muted);">${fn:replace(audit.gradedAt, 'T', ' ')}</p>
+                                            </div>
+                                        </c:forEach>
+                                    </div>
                                 </c:otherwise>
                             </c:choose>
                         </div>
