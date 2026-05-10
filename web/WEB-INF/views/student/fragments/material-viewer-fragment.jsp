@@ -3,10 +3,64 @@
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/course-player.css">
+<style>
+.mv-youtube-wrap {
+    position: relative;
+    width: 100%;
+    padding-top: 56.25%; /* 16:9 ratio */
+    background: #000;
+    border-radius: 12px;
+    overflow: hidden;
+}
+.mv-youtube-frame {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+    border-radius: 12px;
+}
+.mv-youtube-note {
+    margin: 14px 0 0;
+    font-size: 0.84rem;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.mv-youtube-note .fab { color: #ef4444; font-size: 1.1rem; }
+</style>
 
 <div class="cp-fragment lh-fragment-viewer">
     <div class="cp-viewer-container">
         <c:choose>
+            <c:when test="${isYouTubeMaterial}">
+                <c:choose>
+                    <c:when test="${not empty youtubeVideoId}">
+                        <div class="mv-youtube-wrap">
+                            <iframe
+                                class="mv-youtube-frame"
+                                src="https://www.youtube.com/embed/${youtubeVideoId}?rel=0&modestbranding=1&enablejsapi=1"
+                                title="${material.title}"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                allowfullscreen
+                                loading="lazy">
+                            </iframe>
+                        </div>
+                        <p class="mv-youtube-note">
+                            <i class="fab fa-youtube"></i>
+                            This video is hosted on YouTube. Scroll to the bottom and click <strong>Mark Complete</strong> once you've watched it.
+                        </p>
+                    </c:when>
+                    <c:otherwise>
+                        <div class="mv-link-state">
+                            <i class="fab fa-youtube"></i>
+                            <h3>YouTube Video</h3>
+                            <p>The YouTube URL for this material appears to be invalid. Contact your instructor.</p>
+                        </div>
+                    </c:otherwise>
+                </c:choose>
+            </c:when>
             <c:when test="${isLinkMaterial}">
                 <div class="mv-link-state">
                     <i class="fas fa-link"></i>
@@ -122,13 +176,18 @@
         return;
     }
 
-    if (completionRule === 'link') {
+    if (completionRule === 'link' || completionRule === 'youtube') {
         if (openResourceLink) {
             openResourceLink.addEventListener('click', function () {
                 window.setTimeout(function () {
                     postToParent('lhViewerUnlock', 'After reviewing the external resource, you can mark this item complete.');
                 }, 1200);
             });
+        } else if (completionRule === 'youtube') {
+            // Unlock after a delay for YouTube viewers
+            window.setTimeout(function () {
+                postToParent('lhViewerUnlock', 'You can mark this YouTube material complete now.');
+            }, 4000);
         }
         return;
     }

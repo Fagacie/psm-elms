@@ -98,6 +98,23 @@
                                             <div class="sv-course-copy">
                                                 <h3 class="sv-course-title"><c:out value="${course.courseName}"/></h3>
                                                 <p class="sv-course-line">Instructor: <c:out value="${course.instructorName}"/></p>
+                                                <c:if test="${not empty course.displayDuration}">
+                                                    <div class="sv-course-duration-badge" style="font-size: 0.72rem; color: #64748b; margin-top: 6px; display: flex; align-items: center; gap: 4px;">
+                                                        <i class="far fa-clock" style="color: #3b82f6;"></i>
+                                                        <span>Duration: <strong><c:out value="${course.displayDuration}"/></strong></span>
+                                                        <c:set var="daysLeft" value="${course.daysRemaining}"/>
+                                                        <c:if test="${daysLeft >= 0}">
+                                                            <span style="color: ${daysLeft <= 2 ? '#ef4444' : '#10b981'}; margin-left: auto; font-weight: 600;">
+                                                                ⏳ ${daysLeft} ${daysLeft == 1 ? 'day' : 'days'} left
+                                                            </span>
+                                                        </c:if>
+                                                        <c:if test="${daysLeft < 0 && not empty course.courseDuration && course.courseDuration > 0}">
+                                                            <span style="color: #ef4444; margin-left: auto; font-weight: 600;">
+                                                                ⚠️ Expired
+                                                            </span>
+                                                        </c:if>
+                                                    </div>
+                                                </c:if>
                                             </div>
                                             <div class="sv-course-progress-block">
                                                 <div class="sv-course-progress-top">

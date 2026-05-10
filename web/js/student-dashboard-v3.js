@@ -59,6 +59,16 @@
             var target = parseFloat(bar.getAttribute('data-progress'));
             if (isNaN(target)) return;
             bar.dataset.animated = '1';
+            
+            // Set dynamic color based on progress percentage
+            var color = '#dc2626'; // Red for < 35%
+            if (target >= 35 && target < 75) {
+                color = '#f59e0b'; // Yellow/Amber for 35% - 75%
+            } else if (target >= 75) {
+                color = '#10b981'; // Emerald Green for >= 75%
+            }
+            bar.style.backgroundColor = color;
+
             if (prefersReducedMotion) {
                 bar.style.width = target + '%';
                 return;

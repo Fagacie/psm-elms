@@ -326,17 +326,25 @@ public class StudentMaterialServlet extends HttpServlet {
             break;
         }
 
-        boolean isLink = Material.TYPE_LINK.equalsIgnoreCase(material.getMaterialType());
+        boolean isYouTube = Material.TYPE_YOUTUBE.equalsIgnoreCase(material.getMaterialType())
+                || filePath.contains("youtube.com")
+                || filePath.contains("youtu.be");
+        boolean isLink = Material.TYPE_LINK.equalsIgnoreCase(material.getMaterialType()) && !isYouTube;
         boolean isPdf = "pdf".equals(extension);
-        boolean isVideo = "mp4".equals(extension)
+        boolean isVideo = ("mp4".equals(extension)
                 || "webm".equals(extension)
                 || "mov".equals(extension)
                 || "m4v".equals(extension)
-                || Material.TYPE_VIDEO.equalsIgnoreCase(material.getMaterialType());
+                || Material.TYPE_VIDEO.equalsIgnoreCase(material.getMaterialType())) && !isYouTube;
         boolean isAudio = "mp3".equals(extension);
         boolean canInlinePreview = isPdf || isVideo || isAudio;
         boolean isExternalPdf = isPdf && isExternalHttpUrl(filePath);
-        String completionRule = resolveCompletionRule(material, extension, isPdf, isVideo, isAudio, isLink);
+        // Extract YouTube video ID for iframe embedding
+        String youtubeVideoId = "";
+        if (isYouTube) {
+            youtubeVideoId = extractYouTubeVideoId(filePath);
+        }
+        String completionRule = resolveCompletionRule(material, extension, isPdf, isVideo, isAudio, isLink, isYouTube);
         String materialStatus = normalize(statusById.get(materialId));
         if (materialStatus.isEmpty()) {
             materialStatus = "in_progress";
@@ -353,6 +361,8 @@ public class StudentMaterialServlet extends HttpServlet {
         request.setAttribute("material", material);
         request.setAttribute("streamUrl", streamUrl);
         request.setAttribute("isLinkMaterial", isLink);
+        request.setAttribute("isYouTubeMaterial", isYouTube);
+        request.setAttribute("youtubeVideoId", youtubeVideoId);
         request.setAttribute("isPdfMaterial", isPdf);
         request.setAttribute("isExternalPdfMaterial", isExternalPdf);
         request.setAttribute("isVideoMaterial", isVideo);
@@ -487,23 +497,47 @@ public class StudentMaterialServlet extends HttpServlet {
                                          boolean isPdf,
                                          boolean isVideo,
                                          boolean isAudio,
-                                         boolean isLink) {
-        if (isVideo) {
-            return "video";
-        }
-        if (isAudio) {
-            return "audio";
-        }
-        if (isPdf) {
-            return "document";
-        }
-        if (isLink) {
-            return "link";
-        }
+                                         boolean isLink,
+                                         boolean isYouTube) {
+        if (isVideo) { return "video"; }
+        if (isAudio) { return "audio"; }
+        if (isPdf)   { return "document"; }
+        if (isLink)  { return "link"; }
+        if (isYouTube) { return "youtube"; }
         if ("ppt".equals(extension) || "pptx".equals(extension) || Material.TYPE_SLIDES.equalsIgnoreCase(material.getMaterialType())) {
             return "slides";
         }
         return "default";
+    }
+
+    /** Extracts YouTube video ID from various URL formats. */
+    private String extractYouTubeVideoId(String url) {
+        if (url == null || url.isEmpty()) return "";
+        // youtu.be/ID
+        if (url.contains("youtu.be/")) {
+            String[] parts = url.split("youtu\\.be/");
+            if (parts.length > 1) {
+                String id = parts[1].split("[?&]")[0];
+                return id.trim();
+            }
+        }
+        // youtube.com/watch?v=ID
+        if (url.contains("v=")) {
+            String[] parts = url.split("v=");
+            if (parts.length > 1) {
+                String id = parts[1].split("[?&]")[0];
+                return id.trim();
+            }
+        }
+        // youtube.com/embed/ID
+        if (url.contains("/embed/")) {
+            String[] parts = url.split("/embed/");
+            if (parts.length > 1) {
+                String id = parts[1].split("[?&]")[0];
+                return id.trim();
+            }
+        }
+        return "";
     }
 
     private Integer parseInt(String value) {

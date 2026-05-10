@@ -124,13 +124,26 @@
                                             </c:otherwise>
                                         </c:choose>
                                     </div>
-                                    <div class="me-card-top">
-                                        <span class="sv-chip ${lifecycleStatus == 'Completed' ? 'done' : 'status-Pending'}">${lifecycleStatus}</span>
-                                        <span class="sv-chip ${courseAccessGranted ? 'done' : 'status-Pending'}">${courseAccessGranted && !enrollmentPaid ? 'Free Course' : (empty enrollment.paymentStatus ? 'Pending' : enrollment.paymentStatus)}</span>
-                                    </div>
                                     <div class="sv-course-copy">
                                         <h3 class="sv-course-title" data-search-text><c:out value="${enrollment.courseName}"/></h3>
                                         <p class="sv-course-line" data-search-text>Instructor: <c:out value="${enrollment.instructorName}"/></p>
+                                        <c:if test="${not empty enrollment.displayDuration}">
+                                            <div class="sv-course-duration-badge" style="font-size: 0.72rem; color: #64748b; margin-top: 6px; display: flex; align-items: center; gap: 4px;">
+                                                <i class="far fa-clock" style="color: #3b82f6;"></i>
+                                                <span>Duration: <strong><c:out value="${enrollment.displayDuration}"/></strong></span>
+                                                <c:set var="daysLeft" value="${enrollment.daysRemaining}"/>
+                                                <c:if test="${daysLeft >= 0}">
+                                                    <span style="color: ${daysLeft <= 2 ? '#ef4444' : '#10b981'}; margin-left: auto; font-weight: 600;">
+                                                        ⏳ ${daysLeft} ${daysLeft == 1 ? 'day' : 'days'} left
+                                                    </span>
+                                                </c:if>
+                                                <c:if test="${daysLeft < 0 && not empty enrollment.courseDuration && enrollment.courseDuration > 0}">
+                                                    <span style="color: #ef4444; margin-left: auto; font-weight: 600;">
+                                                        ⚠️ Expired
+                                                    </span>
+                                                </c:if>
+                                            </div>
+                                        </c:if>
                                     </div>
 
                                     <div class="sv-course-progress-block">

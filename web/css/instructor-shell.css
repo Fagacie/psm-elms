@@ -1336,3 +1336,422 @@ body.ins-shell-collapsed .app-main {
     justify-content: flex-end;
     gap: 12px;
 }
+
+/* ===================================================
+   INSTRUCTOR DARK NAVIGATION SHELL
+   (Header + Sidebar match admin dark panel)
+   =================================================== */
+
+/* Dark Header Overrides */
+.instructor-ui .app-header.ins-dark-header {
+    background: #0b1220 !important;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.14) !important;
+    box-shadow: 0 4px 20px rgba(2, 6, 17, 0.25) !important;
+}
+
+.instructor-ui .ins-dark-header .dashboard-brand-main {
+    color: #ffffff !important;
+}
+
+.instructor-ui .ins-dark-header .dashboard-brand-sub {
+    color: #94a3b8 !important;
+}
+
+.instructor-ui .ins-dark-header .dashboard-title-copy {
+    border-left-color: rgba(148, 163, 184, 0.14) !important;
+}
+
+.instructor-ui .ins-dark-header .dashboard-title-copy .page-title {
+    color: #ffffff !important;
+}
+
+.instructor-ui .ins-dark-header .dashboard-title-copy p {
+    color: #94a3b8 !important;
+}
+
+.instructor-ui .ins-dark-header .user-menu {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border-color: rgba(148, 163, 184, 0.14) !important;
+    color: #ffffff !important;
+}
+
+.instructor-ui .ins-dark-header .user-name {
+    color: #f1f5f9 !important;
+}
+
+.instructor-ui .ins-dark-header .user-role {
+    color: #94a3b8 !important;
+}
+
+/* Premium Light Header Overrides (similar to student topbar) */
+.instructor-ui .app-header.ins-light-header {
+    background: rgba(248, 250, 252, 0.95) !important;
+    backdrop-filter: blur(14px) !important;
+    border-bottom: 1px solid rgba(221, 228, 236, 0.75) !important;
+    box-shadow: 0 4px 18px rgba(15, 23, 42, 0.03) !important;
+    height: 68px !important;
+}
+
+.instructor-ui .ins-light-header .dashboard-brand-main {
+    color: #1e3a8a !important;
+    font-weight: 800;
+}
+
+.instructor-ui .ins-light-header .dashboard-brand-sub {
+    color: #64748b !important;
+}
+
+.instructor-ui .ins-light-header .dashboard-title-copy {
+    border-left-color: rgba(16, 38, 26, 0.08) !important;
+}
+
+.instructor-ui .ins-light-header .dashboard-title-copy .page-title {
+    color: #0f172a !important;
+    font-weight: 800;
+}
+
+.instructor-ui .ins-light-header .dashboard-title-copy p {
+    color: #64748b !important;
+}
+
+/* User Menu & Avatar */
+.instructor-ui .ins-light-header .user-menu {
+    background: rgba(255, 255, 255, 0.9) !important;
+    border: 1px solid rgba(16, 38, 26, 0.08) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02) !important;
+    color: #0f172a !important;
+    border-radius: 14px !important;
+}
+
+.instructor-ui .ins-light-header .user-name {
+    color: #1e293b !important;
+    font-weight: 700;
+}
+
+.instructor-ui .ins-light-header .user-role {
+    color: #64748b !important;
+}
+
+/* Sidebar Toggle & Notification Buttons (Light overrides) */
+.instructor-ui .ins-light-header .ins-toggle-btn,
+.instructor-ui .ins-light-header .ins-notif-btn {
+    border: 1px solid rgba(16, 38, 26, 0.08) !important;
+    background: rgba(255, 255, 255, 0.92) !important;
+    color: #334155 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02) !important;
+}
+
+.instructor-ui .ins-light-header .ins-toggle-btn:hover,
+.instructor-ui .ins-light-header .ins-notif-btn:hover {
+    background: #f8fafc !important;
+    color: #0f172a !important;
+    border-color: rgba(16, 38, 26, 0.14) !important;
+    transform: translateY(-1px);
+}
+
+/* Logout Button (Light override) */
+.instructor-ui .ins-light-header .ins-logout-btn {
+    border: 1px solid rgba(239, 68, 68, 0.2) !important;
+    background: rgba(239, 68, 68, 0.05) !important;
+    color: #dc2626 !important;
+    border-radius: 12px !important;
+}
+
+.instructor-ui .ins-light-header .ins-logout-btn:hover {
+    background: rgba(239, 68, 68, 0.12) !important;
+    color: #b91c1c !important;
+    transform: translateY(-1px);
+}
+
+/* Sidebar Toggle Button (new) */
+.ins-toggle-btn {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    background: rgba(255, 255, 255, 0.06);
+    color: #94a3b8;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.ins-toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.25);
+}
+
+/* Dark mode toggle icon button */
+.ins-dark-toggle {
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    background: rgba(255, 255, 255, 0.05);
+    color: #94a3b8;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.ins-dark-toggle:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+}
+
+/* Notification Bell (header) */
+.ins-notif-btn {
+    position: relative;
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    background: rgba(255, 255, 255, 0.05);
+    color: #94a3b8;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.ins-notif-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+}
+
+.ins-notif-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 999px;
+    background: #ef4444;
+    color: #ffffff;
+    font-size: 0.65rem;
+    font-weight: 700;
+    line-height: 18px;
+    text-align: center;
+}
+
+/* Logout button (icon only) */
+.ins-logout-btn {
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    background: rgba(239, 68, 68, 0.07);
+    color: #f87171;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.ins-logout-btn:hover {
+    background: rgba(239, 68, 68, 0.18);
+    color: #fca5a5;
+}
+
+/* Dark Sidebar */
+.instructor-ui .app-sidebar {
+    background: #0b1220 !important;
+    border-right: 1px solid rgba(148, 163, 184, 0.12) !important;
+}
+
+.instructor-ui .sidebar-nav .nav-item {
+    color: #94a3b8 !important;
+}
+
+.instructor-ui .sidebar-nav .nav-item:hover {
+    background: rgba(148, 163, 184, 0.08) !important;
+    color: #ffffff !important;
+    border-color: transparent !important;
+}
+
+.instructor-ui .sidebar-nav .nav-item.active {
+    background: rgba(255, 255, 255, 0.10) !important;
+    color: #ffffff !important;
+    border-color: rgba(255, 255, 255, 0.15) !important;
+    box-shadow: none !important;
+}
+
+.instructor-ui .sidebar-nav .nav-item.active::before {
+    background: #ffffff !important;
+}
+
+.instructor-ui .sidebar-nav .nav-item-danger {
+    color: #f87171 !important;
+}
+
+.instructor-ui .sidebar-nav .nav-item-danger:hover {
+    background: rgba(239, 68, 68, 0.12) !important;
+    color: #fca5a5 !important;
+}
+
+/* Sidebar section labels */
+.instructor-ui .sidebar-section-label {
+    color: #64748b !important;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 0 12px;
+    margin-bottom: 8px;
+    margin-top: 16px;
+}
+
+/* ===================================================
+   COMPREHENSIVE INSTRUCTOR DARK MODE THEME
+   =================================================== */
+:root[data-theme="dark"] body.instructor-ui,
+:root[data-theme="dark"] .instructor-ui {
+    --ins-bg: #090f1d !important;
+    --ins-surface: #0e1726 !important;
+    --ins-surface-strong: #0e1726 !important;
+    --ins-surface-soft: #142138 !important;
+    --ins-text: #f1f5f9 !important;
+    --ins-heading: #ffffff !important;
+    --ins-muted: #94a3b8 !important;
+    --ins-muted-strong: #cbd5e1 !important;
+    --ins-border: rgba(148, 163, 184, 0.12) !important;
+    --ins-border-strong: rgba(148, 163, 184, 0.22) !important;
+    --ins-shadow-sm: 0 8px 24px rgba(2, 6, 17, 0.3) !important;
+    --ins-shadow-md: 0 14px 36px rgba(2, 6, 17, 0.45) !important;
+    --ins-shadow-lg: 0 22px 50px rgba(2, 6, 17, 0.6) !important;
+}
+
+:root[data-theme="dark"] body.instructor-ui {
+    background: #090f1d !important;
+    color: #f1f5f9 !important;
+}
+
+:root[data-theme="dark"] .instructor-ui .app-main {
+    background: #090f1d !important;
+}
+
+/* Cards & Surfaces */
+:root[data-theme="dark"] .instructor-ui .section-card,
+:root[data-theme="dark"] .instructor-ui .card,
+:root[data-theme="dark"] .instructor-ui .form-card,
+:root[data-theme="dark"] .instructor-ui .ins-hero-card,
+:root[data-theme="dark"] .instructor-ui .ins-metric,
+:root[data-theme="dark"] .instructor-ui .action-bar {
+    background: #0e1726 !important;
+    border-color: rgba(148, 163, 184, 0.12) !important;
+    box-shadow: 0 8px 24px rgba(2, 6, 17, 0.3) !important;
+}
+
+/* Headings inside cards */
+:root[data-theme="dark"] .instructor-ui h2,
+:root[data-theme="dark"] .instructor-ui h3,
+:root[data-theme="dark"] .instructor-ui h4,
+:root[data-theme="dark"] .instructor-ui .section-title,
+:root[data-theme="dark"] .instructor-ui .card-title,
+:root[data-theme="dark"] .instructor-ui .ins-page-head h2 {
+    color: #ffffff !important;
+}
+
+/* Inputs & Selects */
+:root[data-theme="dark"] .instructor-ui input,
+:root[data-theme="dark"] .instructor-ui select,
+:root[data-theme="dark"] .instructor-ui textarea {
+    background: #111a2e !important;
+    border-color: rgba(148, 163, 184, 0.18) !important;
+    color: #f1f5f9 !important;
+}
+
+:root[data-theme="dark"] .instructor-ui input:focus,
+:root[data-theme="dark"] .instructor-ui select:focus,
+:root[data-theme="dark"] .instructor-ui textarea:focus {
+    border-color: #10b981 !important;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15) !important;
+}
+
+/* Tables */
+:root[data-theme="dark"] .instructor-ui .table thead,
+:root[data-theme="dark"] .instructor-ui .data-table thead,
+:root[data-theme="dark"] .instructor-ui .course-table thead {
+    background: #111a2e !important;
+}
+
+:root[data-theme="dark"] .instructor-ui .table thead th,
+:root[data-theme="dark"] .instructor-ui .data-table thead th,
+:root[data-theme="dark"] .instructor-ui .course-table thead th {
+    color: #f1f5f9 !important;
+    border-bottom: 2px solid rgba(148, 163, 184, 0.14) !important;
+}
+
+:root[data-theme="dark"] .instructor-ui .table tbody td,
+:root[data-theme="dark"] .instructor-ui .data-table tbody td {
+    color: #e2e8f0 !important;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.08) !important;
+}
+
+:root[data-theme="dark"] .instructor-ui .table tbody tr:hover,
+:root[data-theme="dark"] .instructor-ui .data-table tbody tr:hover {
+    background: rgba(148, 163, 184, 0.04) !important;
+}
+
+/* Alert boxes */
+:root[data-theme="dark"] .instructor-ui .alert {
+    background: #111a2e !important;
+    border-color: rgba(148, 163, 184, 0.15) !important;
+}
+
+/* Empty state */
+:root[data-theme="dark"] .instructor-ui .empty-state-box,
+:root[data-theme="dark"] .instructor-ui .empty-state {
+    background: #0e1726 !important;
+    border-color: rgba(148, 163, 184, 0.15) !important;
+}
+
+/* Buttons secondary in dark */
+:root[data-theme="dark"] .instructor-ui .btn-secondary {
+    background: rgba(255, 255, 255, 0.04) !important;
+    border-color: rgba(148, 163, 184, 0.2) !important;
+    color: #ffffff !important;
+}
+
+:root[data-theme="dark"] .instructor-ui .btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Breadcrumb */
+:root[data-theme="dark"] .instructor-ui .breadcrumb {
+    color: #94a3b8 !important;
+}
+
+/* Modals / Dialogs */
+:root[data-theme="dark"] .instructor-ui .modal-content,
+:root[data-theme="dark"] .instructor-ui .ins-dialog {
+    background: #0e1726 !important;
+    border-color: rgba(148, 163, 184, 0.2) !important;
+}
+
+:root[data-theme="dark"] .instructor-ui .modal-header {
+    border-bottom-color: rgba(148, 163, 184, 0.12) !important;
+}
+
+:root[data-theme="dark"] .instructor-ui .modal-header h3 {
+    color: #ffffff !important;
+}
+
+:root[data-theme="dark"] .instructor-ui .modal-footer {
+    border-top-color: rgba(148, 163, 184, 0.12) !important;
+}
+

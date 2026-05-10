@@ -20,6 +20,11 @@
 <div class="sv-layout">
     <aside class="sv-sidebar lh-course-sidebar" id="svSidebar" aria-label="Course flow navigation">
         <div class="lh-course-sidebar__header">
+            <div class="lh-sidebar-back-row" style="margin-bottom: 6px;">
+                <a href="${pageContext.request.contextPath}/student/my-enrollments" class="lh-sidebar-back-link" style="font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; color: rgba(255,255,255,0.4); text-decoration: none; display: inline-flex; align-items: center; gap: 4px; transition: color 0.2s;" onmouseover="this.style.color='#38bdf8'" onmouseout="this.style.color='rgba(255,255,255,0.4)'">
+                    <i class="fas fa-arrow-left" style="font-size: 0.62rem;"></i> <span>My Courses</span>
+                </a>
+            </div>
             <h2 class="lh-course-sidebar__title">${enrollment.courseName}</h2>
             <div class="lh-sidebar-progress">
                 <div class="lh-sidebar-progress__row">
@@ -29,6 +34,30 @@
                 <div class="sv-progress lh-sidebar-progress__bar">
                     <div class="sv-progress-bar" id="lhSidebarProgressBar" data-progress="${progressPercent}"></div>
                 </div>
+            </div>
+            
+            <div class="lh-sidebar-duration" style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 12px; font-size: 0.72rem; color: rgba(255,255,255,0.6); display: flex; flex-direction: column; gap: 6px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="display: flex; align-items: center; gap: 4px;"><i class="far fa-clock" style="font-size: 0.72rem; opacity: 0.8;"></i> Course Duration:</span>
+                    <strong style="color: #fff; font-weight: 600;">${courseDuration}</strong>
+                </div>
+                <c:if test="${not empty courseEndDate && courseEndDate != '-'}">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="display: flex; align-items: center; gap: 4px;"><i class="far fa-calendar" style="font-size: 0.72rem; opacity: 0.8;"></i> Ends On:</span>
+                        <strong style="color: #fff; font-weight: 600;">${courseEndDate}</strong>
+                    </div>
+                </c:if>
+                <c:if test="${daysRemaining >= 0}">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="display: flex; align-items: center; gap: 4px;"><i class="fas fa-hourglass-half" style="font-size: 0.72rem; opacity: 0.8;"></i> Time Left:</span>
+                        <strong style="color: ${daysRemaining <= 2 ? '#f87171' : '#60a5fa'}; font-weight: 700;">${daysRemaining} Days</strong>
+                    </div>
+                </c:if>
+                <c:if test="${courseExpired}">
+                    <div style="color: #f87171; font-weight: 600; text-align: center; margin-top: 6px; background: rgba(239, 68, 68, 0.12); padding: 6px; border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 0; font-size: 0.7rem; display: flex; align-items: center; justify-content: center; gap: 4px;">
+                        <i class="fas fa-exclamation-triangle"></i> Course Expired
+                    </div>
+                </c:if>
             </div>
         </div>
 
@@ -65,6 +94,20 @@
     </aside>
 
     <main class="sv-main lh-main">
+        <div class="sv-breadcrumb" style="margin-bottom: 20px; margin-top: 0; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--sv-border);">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <a href="${pageContext.request.contextPath}/dashboard" style="color: var(--sv-muted); text-decoration: none; font-weight: 500; font-size: 0.9rem; transition: color 0.2s;" onmouseover="this.style.color='var(--sv-accent)'" onmouseout="this.style.color='var(--sv-muted)'">Dashboard</a>
+                <span style="color: var(--sv-border);">/</span>
+                <a href="${pageContext.request.contextPath}/student/my-enrollments" style="color: var(--sv-muted); text-decoration: none; font-weight: 500; font-size: 0.9rem; transition: color 0.2s;" onmouseover="this.style.color='var(--sv-accent)'" onmouseout="this.style.color='var(--sv-muted)'">My Courses</a>
+                <span style="color: var(--sv-border);">/</span>
+                <span style="color: var(--sv-text); font-weight: 600; font-size: 0.9rem;">Learning Hub</span>
+            </div>
+            <a href="${pageContext.request.contextPath}/student/my-enrollments" class="sv-btn" style="padding: 6px 14px; font-size: 0.82rem; height: auto; display: inline-flex; align-items: center; gap: 6px; border-radius: 6px; background: var(--sv-surface); border: 1px solid var(--sv-border); color: var(--sv-text); text-decoration: none; transition: all 0.2s;" onmouseover="this.style.background='var(--sv-surface-soft)'" onmouseout="this.style.background='var(--sv-surface)'">
+                <i class="fas fa-arrow-left"></i>
+                <span>Exit Workspace</span>
+            </a>
+        </div>
+
         <c:if test="${not empty param.error or not empty param.success or not empty param.message}">
             <section class="lh-feedback ${not empty param.error ? 'is-error' : 'is-success'}" aria-live="polite">
                 <div class="lh-feedback__icon">
@@ -564,6 +607,30 @@
                         <c:set var="materialViewUrl" value="${pageContext.request.contextPath}/student/materials?action=view&id=${selectedMaterial.materialId}"/>
                         <section class="lh-material-stage">
                             <c:choose>
+                                <c:when test="${isYouTubeMaterial}">
+                                    <c:choose>
+                                        <c:when test="${not empty youtubeVideoId}">
+                                            <div class="lh-video-shell" style="margin-bottom: 20px;">
+                                                <iframe 
+                                                    style="width: 100%; aspect-ratio: 16/9; border: none; border-radius: 12px; display: block; box-shadow: var(--sv-shadow-md);"
+                                                    src="https://www.youtube.com/embed/${youtubeVideoId}"
+                                                    allowfullscreen>
+                                                </iframe>
+                                            </div>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <div class="lh-link-preview">
+                                                <span class="lh-link-preview__type"><i class="fab fa-youtube" style="color: #ef4444;"></i> YouTube Video</span>
+                                                <h3><c:out value="${selectedMaterial.title}"/></h3>
+                                                <p>The YouTube URL for this material appears to be invalid or unparseable. Try opening the link directly.</p>
+                                                <a class="sv-btn primary" href="${fn:escapeXml(selectedMaterial.filePath)}" target="_blank" rel="noopener">
+                                                    <i class="fas fa-arrow-up-right-from-square"></i>
+                                                    <span>Open Link</span>
+                                                </a>
+                                            </div>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </c:when>
                                 <c:when test="${materialType == 'pdf' or fn:endsWith(fn:toLowerCase(materialPath), '.pdf')}">
                                     <div class="lh-viewer-toolbar">
                                         <span><i class="fas fa-file-pdf"></i> PDF Material</span>
@@ -940,6 +1007,15 @@
         }
         if (progressBar) {
             progressBar.style.width = progressPercent + '%';
+            
+            // Set dynamic color based on progress percentage
+            var color = '#dc2626'; // Red for < 35%
+            if (progressPercent >= 35 && progressPercent < 75) {
+                color = '#f59e0b'; // Yellow/Amber for 35% - 75%
+            } else if (progressPercent >= 75) {
+                color = '#10b981'; // Emerald Green for >= 75%
+            }
+            progressBar.style.backgroundColor = color;
         }
     }
 

@@ -47,6 +47,9 @@ public class AdminSettingsServlet extends HttpServlet {
     private static final String KEY_LEARNING_COMPLETION_PERCENT = "learning.completionMaterialPercent";
     private static final String KEY_ASSESSMENT_PASS_MARK = "assessment.defaultPassMark";
     private static final String KEY_ASSESSMENT_MAX_ATTEMPTS = "assessment.defaultMaxAttempts";
+    private static final String KEY_YOUTUBE_API_KEY = "platform.youtubeApiKey";
+    private static final String KEY_MAX_FILE_UPLOAD_MB = "platform.maxFileUploadMB";
+    private static final String KEY_CERTIFICATE_ENABLED = "platform.certificateEnabled";
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -162,6 +165,9 @@ public class AdminSettingsServlet extends HttpServlet {
         input.put(KEY_LEARNING_COMPLETION_PERCENT, normalize(request.getParameter("completionMaterialPercent")));
         input.put(KEY_ASSESSMENT_PASS_MARK, normalize(request.getParameter("defaultPassMark")));
         input.put(KEY_ASSESSMENT_MAX_ATTEMPTS, normalize(request.getParameter("defaultMaxAttempts")));
+        input.put(KEY_YOUTUBE_API_KEY, normalize(request.getParameter("youtubeApiKey")));
+        input.put(KEY_MAX_FILE_UPLOAD_MB, normalize(request.getParameter("maxFileUploadMB")));
+        input.put(KEY_CERTIFICATE_ENABLED, "true".equalsIgnoreCase(normalize(request.getParameter("certificateEnabled"))) ? "true" : "false");
         return input;
     }
 
@@ -205,6 +211,9 @@ public class AdminSettingsServlet extends HttpServlet {
         defaults.put(KEY_LEARNING_COMPLETION_PERCENT, "100");
         defaults.put(KEY_ASSESSMENT_PASS_MARK, "70");
         defaults.put(KEY_ASSESSMENT_MAX_ATTEMPTS, "3");
+        defaults.put(KEY_YOUTUBE_API_KEY, "");
+        defaults.put(KEY_MAX_FILE_UPLOAD_MB, "50");
+        defaults.put(KEY_CERTIFICATE_ENABLED, "true");
         return defaults;
     }
 

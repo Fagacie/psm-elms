@@ -71,18 +71,33 @@
                         </a>
                     </c:if>
 
-                    <button
-                        id="mvMarkCompleted"
-                        type="button"
-                        class="sv-btn primary"
-                        data-material-id="${material.materialId}"
-                        data-enrollment-id="${previewEnrollmentId}"
-                        data-completed="${isCompletedMaterial}"
-                        data-complete-url="${completeActionUrl}"
-                        <c:if test="${isCompletedMaterial}">disabled="disabled"</c:if>>
-                        <i class="fas fa-check-circle"></i>
-                        <span>${isCompletedMaterial ? 'Completed' : 'Mark Complete'}</span>
-                    </button>
+                    <c:choose>
+                        <c:when test="${previewEnrollment.daysRemaining < 0 && previewEnrollment.courseDuration != null && previewEnrollment.courseDuration > 0}">
+                            <button
+                                id="mvMarkCompleted"
+                                type="button"
+                                class="sv-btn"
+                                style="background: rgba(239, 68, 68, 0.1); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.2); cursor: not-allowed;"
+                                disabled="disabled">
+                                <i class="fas fa-calendar-times"></i>
+                                <span>Expired (Read-Only)</span>
+                            </button>
+                        </c:when>
+                        <c:otherwise>
+                            <button
+                                id="mvMarkCompleted"
+                                type="button"
+                                class="sv-btn primary"
+                                data-material-id="${material.materialId}"
+                                data-enrollment-id="${previewEnrollmentId}"
+                                data-completed="${isCompletedMaterial}"
+                                data-complete-url="${completeActionUrl}"
+                                <c:if test="${isCompletedMaterial}">disabled="disabled"</c:if>>
+                                <i class="fas fa-check-circle"></i>
+                                <span>${isCompletedMaterial ? 'Completed' : 'Mark Complete'}</span>
+                            </button>
+                        </c:otherwise>
+                    </c:choose>
 
                     <a class="sv-btn ${empty nextMaterial ? 'mv-hidden' : ''}" id="mvNextAction" href="${not empty nextMaterial ? pageContext.request.contextPath.concat('/student/materials?action=preview&id=').concat(nextMaterial.materialId).concat('&enrollmentId=').concat(previewEnrollmentId) : backToHubUrl}">
                         <span>Next</span>

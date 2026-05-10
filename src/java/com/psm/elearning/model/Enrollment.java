@@ -40,6 +40,7 @@ public class Enrollment {
     private String completionStatus;
 
     private Integer progress;
+    private Boolean reminderSent = false;
     
     // Additional fields for joined queries
     @Size(max = 200, message = "Course name must not exceed 200 characters")
@@ -68,6 +69,8 @@ public class Enrollment {
 
     @Size(max = 255, message = "Course banner path must not exceed 255 characters")
     private String courseBanner;
+    
+    private Integer courseDuration;
     
     // Status constants
     public static final String STATUS_PENDING = "Pending";
@@ -140,6 +143,9 @@ public class Enrollment {
     public Integer getProgress() { return progress; }
     public void setProgress(Integer progress) { this.progress = progress; }
     
+    public Boolean getReminderSent() { return reminderSent != null ? reminderSent : false; }
+    public void setReminderSent(Boolean reminderSent) { this.reminderSent = reminderSent; }
+    
     public String getCourseName() { return courseName; }
     public void setCourseName(String courseName) { this.courseName = courseName; }
     
@@ -163,4 +169,32 @@ public class Enrollment {
 
     public String getCourseBanner() { return courseBanner; }
     public void setCourseBanner(String courseBanner) { this.courseBanner = courseBanner; }
+
+    public Integer getCourseDuration() { return courseDuration; }
+    public void setCourseDuration(Integer courseDuration) { this.courseDuration = courseDuration; }
+
+    public String getDisplayDuration() {
+        if (courseDuration == null || courseDuration <= 0) {
+            return "-";
+        }
+        int val = courseDuration;
+        if (val % 30 == 0) {
+            int m = val / 30;
+            return m + (m == 1 ? " month" : " months");
+        }
+        if (val % 7 == 0) {
+            int w = val / 7;
+            return w + (w == 1 ? " week" : " weeks");
+        }
+        return val + (val == 1 ? " day" : " days");
+    }
+
+    public long getDaysRemaining() {
+        if (enrollmentDate == null || courseDuration == null || courseDuration <= 0) {
+            return -1;
+        }
+        java.time.LocalDateTime endDate = enrollmentDate.plusDays(courseDuration);
+        java.time.Duration diff = java.time.Duration.between(java.time.LocalDateTime.now(), endDate);
+        return diff.toDays();
+    }
 }

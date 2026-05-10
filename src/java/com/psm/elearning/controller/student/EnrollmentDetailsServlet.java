@@ -260,6 +260,60 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                 return;
             }
 
+            // Course Expiry & Duration Logic
+            String displayDuration = enrollment.getDisplayDuration();
+            String formattedEndDate = "-";
+            long daysRemaining = enrollment.getDaysRemaining();
+            boolean courseExpired = false;
+            
+            if (enrollment.getCourseDuration() != null && enrollment.getCourseDuration() > 0 && enrollment.getEnrollmentDate() != null) {
+                java.time.LocalDateTime endDate = enrollment.getEnrollmentDate().plusDays(enrollment.getCourseDuration());
+                java.time.format.DateTimeFormatter dtf = java.time.format.DateTimeFormatter.ofPattern("MMM dd, yyyy");
+                formattedEndDate = endDate.format(dtf);
+                if (daysRemaining < 0) {
+                    courseExpired = true;
+                }
+                
+                // Trigger reminder email precisely when 2 days or less are left and it hasn't been sent yet
+                if (daysRemaining >= 0 && daysRemaining <= 2 && !enrollment.getReminderSent()) {
+                    String studentEmail = null;
+                    String studentFullName = null;
+                    
+                    try (java.sql.Connection conn = com.psm.elearning.util.DBConnection.getConnection();
+                         java.sql.PreparedStatement ps = conn.prepareStatement("SELECT Email, FullName FROM User WHERE UserID = ?")) {
+                        ps.setInt(1, userId);
+                        try (java.sql.ResultSet rs = ps.executeQuery()) {
+                            if (rs.next()) {
+                                studentEmail = rs.getString("Email");
+                                studentFullName = rs.getString("FullName");
+                            }
+                        }
+                    } catch (Exception e) {
+                        LOGGER.log(Level.WARNING, "Failed to load student email for reminder alert", e);
+                    }
+                    
+                    if (studentEmail != null && !studentEmail.trim().isEmpty()) {
+                        String name = (studentFullName != null && !studentFullName.trim().isEmpty()) ? studentFullName : "Student";
+                        boolean mailSent = com.psm.elearning.util.EmailUtil.sendCourseDurationReminderEmail(
+                            studentEmail, 
+                            name, 
+                            enrollment.getCourseName(), 
+                            (int) Math.max(1, daysRemaining)
+                        );
+                        if (mailSent) {
+                            enrollmentDAO.updateReminderSent(enrollment.getEnrollmentId(), true);
+                            enrollment.setReminderSent(true);
+                            LOGGER.info("Course duration expiry reminder sent to " + studentEmail);
+                        }
+                    }
+                }
+            }
+            
+            request.setAttribute("courseDuration", displayDuration);
+            request.setAttribute("courseEndDate", formattedEndDate);
+            request.setAttribute("daysRemaining", daysRemaining);
+            request.setAttribute("courseExpired", courseExpired);
+
             boolean safeMode = "1".equals(request.getParameter("safe")) || "true".equalsIgnoreCase(request.getParameter("safe"));
             if (safeMode) {
                 request.setAttribute("enrollment", enrollment);
@@ -959,9 +1013,23 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                         : "Choose a material or assessment from the sidebar to continue your course sequence.";
                 workspaceStatusLabel = "completed".equalsIgnoreCase(selectedMaterialStatus) ? "Completed" : "In Progress";
                 workspaceStatusClass = "completed".equalsIgnoreCase(selectedMaterialStatus) ? "status-Approved" : "status-Pending";
+                
+                String filePath = selectedMaterial.getFilePath() != null ? selectedMaterial.getFilePath() : "";
+                boolean isYouTube = "YouTube".equalsIgnoreCase(selectedMaterial.getMaterialType())
+                        || filePath.contains("youtube.com")
+                        || filePath.contains("youtu.be");
+                String youtubeVideoId = "";
+                if (isYouTube) {
+                    youtubeVideoId = extractYouTubeVideoId(filePath);
+                }
+                request.setAttribute("isYouTubeMaterial", isYouTube);
+                request.setAttribute("youtubeVideoId", youtubeVideoId);
+
                 if ("completed".equalsIgnoreCase(selectedMaterialStatus)) {
                     workspaceActionNote = "This material is already counted in your progress.";
                     materialCompletionButtonLabel = "Completed";
+                } else if (isYouTube) {
+                    workspaceActionNote = "Review the video material, then mark it complete from the action bar.";
                 } else if (Material.TYPE_VIDEO.equalsIgnoreCase(selectedMaterial.getMaterialType())
                         || "Audio".equalsIgnoreCase(selectedMaterial.getMaterialType())) {
                     workspaceActionNote = "Playback unlocks completion once you reach the required threshold.";
@@ -1456,6 +1524,32 @@ public class EnrollmentDetailsServlet extends HttpServlet {
         return "Paid".equalsIgnoreCase(normalized)
                 || "Completed".equalsIgnoreCase(normalized)
                 || "Success".equalsIgnoreCase(normalized);
+    }
+
+    private String extractYouTubeVideoId(String url) {
+        if (url == null || url.isEmpty()) return "";
+        if (url.contains("youtu.be/")) {
+            String[] parts = url.split("youtu\\.be/");
+            if (parts.length > 1) {
+                String id = parts[1].split("[?&]")[0];
+                return id.trim();
+            }
+        }
+        if (url.contains("v=")) {
+            String[] parts = url.split("v=");
+            if (parts.length > 1) {
+                String id = parts[1].split("[?&]")[0];
+                return id.trim();
+            }
+        }
+        if (url.contains("/embed/")) {
+            String[] parts = url.split("/embed/");
+            if (parts.length > 1) {
+                String id = parts[1].split("[?&]")[0];
+                return id.trim();
+            }
+        }
+        return "";
     }
 }
 

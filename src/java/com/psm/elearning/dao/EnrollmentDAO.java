@@ -112,6 +112,14 @@ public interface EnrollmentDAO {
      * @return Count of enrollments with status=Enrolled
      */
     Integer countActiveEnrollmentsByInstructor(Integer instructorId);
+
+    /**
+     * Update whether the remaining course duration reminder has been sent to the student.
+     * @param enrollmentId Enrollment ID
+     * @param reminderSent True if reminder email has been sent
+     * @return true if updated successfully, false otherwise
+     */
+    boolean updateReminderSent(Integer enrollmentId, boolean reminderSent);
 }
 
 

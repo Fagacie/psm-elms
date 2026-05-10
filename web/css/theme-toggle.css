@@ -151,9 +151,9 @@ html[data-theme='dark'] body.sv-page {
   --sv-text: #e8edf5;
   --sv-muted: #96a2b3;
   --sv-border: #252c36;
-  --sv-accent: #9ed0a8;
-  --sv-accent-soft: rgba(158, 208, 168, 0.12);
-  --sv-accent-border: rgba(158, 208, 168, 0.26);
+  --sv-accent: #60a5fa;
+  --sv-accent-soft: rgba(96, 165, 250, 0.1);
+  --sv-accent-border: rgba(96, 165, 250, 0.25);
   --sv-surface: #12161d;
   --sv-surface-soft: #181d25;
   --sv-shadow-sm: 0 8px 24px rgba(0, 0, 0, 0.36);

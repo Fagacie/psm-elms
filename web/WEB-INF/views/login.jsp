@@ -37,12 +37,6 @@
                 <p>Access your account using your registration number or email.</p>
             </header>
 
-            <div class="theme-toolbar theme-toolbar-compact">
-                <button type="button" class="theme-toggle" data-theme-toggle aria-pressed="false">
-                    <span class="theme-toggle-label">Dark mode</span>
-                </button>
-            </div>
-
             <c:if test="${not empty sessionScope.successMessage}">
                 <div class="auth-alert auth-alert-success">${sessionScope.successMessage}</div>
                 <c:remove var="successMessage" scope="session"/>

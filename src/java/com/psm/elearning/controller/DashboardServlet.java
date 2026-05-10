@@ -124,6 +124,11 @@ public class DashboardServlet extends HttpServlet {
                 request.setAttribute("certificatesCount", certificatesCount);
                 request.setAttribute("overallProgress", overallProgress);
                 request.setAttribute("dashboardDate", LocalDate.now());
+                // Notification bell
+                try {
+                    int unreadCount = notificationDAO.countUnreadByRecipientUserId(user.getUserId());
+                    request.setAttribute("unreadNotificationCount", unreadCount);
+                } catch (Exception ignored) { }
                 
             } catch (Exception e) {
                 LOGGER.log(Level.WARNING, "Student dashboard data load failed", e);
@@ -331,6 +336,11 @@ public class DashboardServlet extends HttpServlet {
                 request.setAttribute("courseAssessmentCountById", courseAssessmentCountById);
                 request.setAttribute("pendingSubmissionsByCourseId", pendingSubmissionsByCourseId);
                 request.setAttribute("courseStatusById", courseStatusById);
+                // Notification bell for instructor
+                try {
+                    int unreadCount = notificationDAO.countUnreadByRecipientUserId(userId);
+                    request.setAttribute("unreadNotificationCount", unreadCount);
+                } catch (Exception ignored) { }
             } catch (Exception e) {
                 // Log and continue; view will render empty state
                 LOGGER.log(Level.WARNING, "Failed to load instructor dashboard", e);

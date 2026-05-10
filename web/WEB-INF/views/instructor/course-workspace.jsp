@@ -275,9 +275,10 @@
                         <select name="materialType" id="materialType" required>
                             <option value="">Select type</option>
                             <option value="PDF">PDF</option>
-                            <option value="Video">Video</option>
+                            <option value="Video">Video File</option>
                             <option value="Slides">Slides</option>
-                            <option value="Link">Link</option>
+                            <option value="Link">External Link</option>
+                            <option value="YouTube">YouTube Video</option>
                         </select>
                     </div>
                     <div class="field">
@@ -327,9 +328,10 @@
                         <label>Type *</label>
                         <select id="editType" name="materialType" required>
                             <option value="PDF">PDF</option>
-                            <option value="Video">Video</option>
+                            <option value="Video">Video File</option>
                             <option value="Slides">Slides</option>
-                            <option value="Link">Link</option>
+                            <option value="Link">External Link</option>
+                            <option value="YouTube">YouTube Video</option>
                         </select>
                     </div>
                     <div class="field">
@@ -435,14 +437,15 @@
         const editUrl = document.getElementById('editExternalUrl');
 
         const applyTypeRules = function (selectedType, fileInput, urlInput) {
-            const isLink = selectedType === 'Link';
+            const isUrlBased = selectedType === 'Link' || selectedType === 'YouTube';
             if (fileInput) {
-                fileInput.required = !!selectedType && !isLink;
-                fileInput.disabled = !!selectedType && isLink;
+                fileInput.required = !!selectedType && !isUrlBased;
+                fileInput.disabled = !!selectedType && isUrlBased;
             }
             if (urlInput) {
-                urlInput.required = !!selectedType && isLink;
-                urlInput.disabled = !!selectedType && !isLink;
+                urlInput.required = !!selectedType && isUrlBased;
+                urlInput.disabled = !!selectedType && !isUrlBased;
+                urlInput.placeholder = selectedType === 'YouTube' ? 'https://www.youtube.com/watch?v=...' : 'https://';
             }
         };
 

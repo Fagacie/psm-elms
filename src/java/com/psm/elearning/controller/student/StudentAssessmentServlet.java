@@ -248,12 +248,15 @@ public class StudentAssessmentServlet extends HttpServlet {
             ? maxAttemptsValue
             : defaultMaxAttempts;
         int allowedAttempts = baseAttempts + retakeRequestDAO.countApproved(assessmentId, userId);
-        boolean canAttempt = usedAttempts < Math.max(allowedAttempts, 1) && materialCompleted && materialBlockReason == null;
+        boolean isCourseExpired = enrollment.getDaysRemaining() < 0 && enrollment.getCourseDuration() != null && enrollment.getCourseDuration() > 0;
+        boolean canAttempt = usedAttempts < Math.max(allowedAttempts, 1) && materialCompleted && materialBlockReason == null && !isCourseExpired;
 
         boolean attemptMode = requestedAttemptMode && objectiveAssessment;
 
         if (attemptMode && !canAttempt) {
-            if (materialBlockReason != null) {
+            if (isCourseExpired) {
+                response.sendRedirect(request.getContextPath() + "/student/enrollment-details?id=" + enrollmentId + "&tab=assessments&error=expired");
+            } else if (materialBlockReason != null) {
                 response.sendRedirect(request.getContextPath() + "/student/enrollment-details?id=" + enrollmentId + "&tab=assessments&error=blocked&reason=" + java.net.URLEncoder.encode(materialBlockReason, "UTF-8"));
             } else {
                 response.sendRedirect(request.getContextPath() + "/student/enrollment-details?id=" + enrollmentId + "&tab=assessments&error=maxAttempts");
@@ -374,6 +377,11 @@ public class StudentAssessmentServlet extends HttpServlet {
             ? maxAttemptsValue
             : defaultMaxAttempts;
         int allowedAttempts = baseAttempts + retakeRequestDAO.countApproved(assessmentId, userId);
+        boolean isCourseExpired = enrollment.getDaysRemaining() < 0 && enrollment.getCourseDuration() != null && enrollment.getCourseDuration() > 0;
+        if (isCourseExpired) {
+            response.sendRedirect(request.getContextPath() + "/student/enrollment-details?id=" + enrollmentId + "&tab=assessments&error=expired");
+            return;
+        }
         if (usedAttempts >= Math.max(allowedAttempts, 1)) {
             response.sendRedirect(request.getContextPath() + "/student/enrollment-details?id=" + enrollmentId + "&tab=assessments&error=maxAttempts");
             return;

@@ -49,7 +49,7 @@
 <c:set var="adminContextCourse" value="${not empty selectedCourse ? selectedCourse.courseName : not empty course ? course.courseName : ''}"/>
 <c:set var="adminContextAssessment" value="${not empty selectedAssessment ? selectedAssessment.title : ''}"/>
 
-<header class="app-header">
+<header class="app-header admin-light-header">
     <div class="header-left">
         <button type="button" class="sidebar-toggle-btn" id="sidebarToggle" aria-label="Toggle Navigation Sidebar">
             <i class="fas fa-bars"></i>
@@ -71,14 +71,11 @@
     </div>
     <div class="header-right">
         <c:if test="${param.showNotifications == 'true' and not empty notificationCount and notificationCount > 0}">
-            <div class="notifications" aria-label="Notifications">
+            <div class="admin-notif-btn" aria-label="Notifications">
                 <i class="fas fa-bell"></i>
-                <span class="badge"><c:out value="${notificationCount}"/></span>
+                <span class="admin-notif-badge"><c:out value="${notificationCount}"/></span>
             </div>
         </c:if>
-        <button type="button" class="theme-toggle" data-theme-toggle aria-pressed="false">
-            <span class="theme-toggle-label">Dark mode</span>
-        </button>
         <a href="${pageContext.request.contextPath}/profile" class="user-menu user-menu-link">
             <div class="user-info">
                 <span class="user-name"><c:out value="${headerUser.fullName}"/></span>
@@ -102,8 +99,8 @@
                 </c:choose>
             </div>
         </a>
-        <a href="${pageContext.request.contextPath}/logout" class="btn btn-secondary btn-sm">
-            <i class="fas fa-sign-out-alt"></i> Logout
+        <a href="${pageContext.request.contextPath}/logout" class="admin-logout-btn" title="Logout">
+            <i class="fas fa-sign-out-alt"></i>
         </a>
     </div>
 </header>

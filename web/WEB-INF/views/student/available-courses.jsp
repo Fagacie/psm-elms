@@ -35,7 +35,7 @@
                     <div class="bc-hero-stats">
                         <div><strong class="bc-count" data-counter="${not empty courses ? courses.size() : 0}">${not empty courses ? courses.size() : 0}</strong><span>Available</span></div>
                         <div><strong class="bc-count" data-counter="${not empty enrolledCourseIds ? enrolledCourseIds.size() : 0}">${not empty enrolledCourseIds ? enrolledCourseIds.size() : 0}</strong><span>Already Enrolled</span></div>
-                        <div><strong>${not empty searchKeyword ? 'Search Active' : 'All Catalog'}</strong><span>Mode</span></div>
+                        <div><strong>Instant</strong><span>Live Filter</span></div>
                     </div>
                 </div>
                 <div class="bc-hero-scene" id="bcHeroScene" aria-hidden="true">
@@ -49,44 +49,6 @@
 
         <c:if test="${not empty param.success}"><div class="alert alert-success">Course enrollment action completed successfully.</div></c:if>
         <c:if test="${not empty param.error}"><div class="alert alert-error">Action failed. Please retry.</div></c:if>
-
-        <section class="sv-card">
-            <div class="sv-card-head"><h3>Search And Filter</h3></div>
-            <div class="sv-card-body">
-                <form method="get" action="${pageContext.request.contextPath}/student/courses" class="bc-filter-grid">
-                    <div>
-                        <label>Keyword</label>
-                        <input type="text" name="keyword" placeholder="Title, category, level" value="${searchKeyword}">
-                    </div>
-                    <div>
-                        <label>Category</label>
-                        <input type="text" name="category" placeholder="e.g. Programming" value="${filterCategory}">
-                    </div>
-                    <div>
-                        <label>Level</label>
-                        <select name="level">
-                            <option value="">All Levels</option>
-                            <option value="Beginner" ${filterLevel == 'Beginner' ? 'selected' : ''}>Beginner</option>
-                            <option value="Intermediate" ${filterLevel == 'Intermediate' ? 'selected' : ''}>Intermediate</option>
-                            <option value="Advanced" ${filterLevel == 'Advanced' ? 'selected' : ''}>Advanced</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label>Min Fee</label>
-                        <input type="number" step="0.01" min="0" name="minFee" value="${filterMinFee}">
-                    </div>
-                    <div>
-                        <label>Max Fee</label>
-                        <input type="number" step="0.01" min="0" name="maxFee" value="${filterMaxFee}">
-                    </div>
-                    <div class="bc-filter-actions">
-                        <button class="sv-btn" type="submit" name="action" value="search">Search</button>
-                        <button class="sv-btn primary" type="submit" name="action" value="filter">Apply Filters</button>
-                        <a href="${pageContext.request.contextPath}/student/courses" class="sv-btn">Clear</a>
-                    </div>
-                </form>
-            </div>
-        </section>
 
         <section class="sv-card">
             <div class="sv-card-body bc-controlbar" aria-label="Quick browser controls">

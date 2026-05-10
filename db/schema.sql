@@ -205,6 +205,7 @@ CREATE TABLE IF NOT EXISTS `Enrollment` (
   `UpdatedDate` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `CompletionStatus` ENUM('Not Started','In Progress','Completed') NOT NULL DEFAULT 'Not Started',
   `Progress` INT DEFAULT 0,
+  `ReminderSent` TINYINT(1) NOT NULL DEFAULT 0,
   UNIQUE KEY `uk_enrollment_user_course` (`UserID`, `CourseID`),
   KEY `idx_enrollment_course` (`CourseID`),
   KEY `idx_enrollment_user` (`UserID`),
@@ -407,3 +408,6 @@ CREATE TABLE IF NOT EXISTS `PasswordResetToken` (
   KEY `idx_token_user` (`UserID`),
   CONSTRAINT `fk_token_user` FOREIGN KEY (`UserID`) REFERENCES `User`(`UserID`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Migration to add course reminder field to existing Enrollment table
+ALTER TABLE `Enrollment` ADD COLUMN `ReminderSent` TINYINT(1) NOT NULL DEFAULT 0;

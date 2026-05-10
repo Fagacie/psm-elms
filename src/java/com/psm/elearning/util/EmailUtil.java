@@ -301,6 +301,69 @@ public class EmailUtil {
     }
 
     /**
+     * Sends course duration expiry reminder email to the student
+     * 
+     * @param toEmail Student's email address
+     * @param fullName Student's full name
+     * @param courseName Name of the course
+     * @param daysRemaining Number of remaining days (e.g., 2)
+     * @return true if email sent successfully
+     */
+    public static boolean sendCourseDurationReminderEmail(String toEmail, String fullName, String courseName, int daysRemaining) {
+        String subject = "Course Expiry Reminder: Only " + daysRemaining + " days left in " + courseName + "! ⏳";
+        
+        String htmlBody = "<!DOCTYPE html>" +
+                "<html><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'><style>" +
+                "body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.6; margin: 0; padding: 0; background-color: #f5f5f5; }" +
+                ".email-wrapper { max-width: 600px; margin: 20px auto; background: #ffffff; border: 1px solid #e0e0e0; overflow: hidden; }" +
+                ".header { background: #2563eb; color: white; padding: 40px 20px; text-align: center; }" +
+                ".header h1 { margin: 0; font-size: 24px; font-weight: 600; }" +
+                ".header p { margin: 10px 0 0 0; opacity: 0.95; font-size: 14px; }" +
+                ".content { padding: 40px 30px; }" +
+                ".greeting { font-size: 18px; color: #1a1a1a; margin-bottom: 20px; font-weight: 500; }" +
+                ".message { color: #4a4a4a; margin-bottom: 30px; font-size: 15px; line-height: 1.7; }" +
+                ".warning-card { background: #fffbeb; color: #b45309; padding: 25px; border-left: 4px solid #f59e0b; margin: 25px 0; border-radius: 4px; }" +
+                ".warning-card h2 { margin: 0 0 10px 0; font-size: 16px; font-weight: 600; color: #92400e; }" +
+                ".warning-card p { margin: 0; font-size: 14px; line-height: 1.5; }" +
+                ".btn { display: inline-block; background: #2563eb; color: white !important; padding: 14px 32px; text-decoration: none; margin: 25px 0; font-weight: 600; text-align: center; }" +
+                ".footer { background: #1a1a1a; color: #d0d0d0; padding: 30px; text-align: center; font-size: 13px; border-top: 1px solid #333; }" +
+                ".footer-links { margin: 15px 0; }" +
+                ".footer-links a { color: #60a5fa; text-decoration: none; margin: 0 10px; }" +  
+                ".footer p { margin: 10px 0; }" +
+                "</style></head><body>" +
+                "<div class='email-wrapper'>" +
+                "<div class='header'>" +
+                "<h1>⏳ Course Expiry Reminder</h1>" +
+                "<p>Don't miss out on earning your certificate!</p>" +
+                "</div>" +
+                "<div class='content'>" +
+                "<p class='greeting'>Dear <strong>" + fullName + "</strong>,</p>" +
+                "<p class='message'>This is a friendly reminder that your enrollment in the course <strong>\"" + courseName + "\"</strong> is nearing its expiration. Our records show that you have exactly <strong>" + daysRemaining + " days</strong> left to access the materials and complete your requirements.</p>" +
+                "<div class='warning-card'>" +
+                "<h2>⚠️ Action Required</h2>" +
+                "<p>To earn your professional certificate, please ensure you complete all required course materials, watch any remaining videos, and successfully pass the course assessments before the access period ends.</p>" +
+                "</div>" +
+                "<div style='text-align: center;'>" +
+                "<a class='btn' href='https://localhost:8080/PSME/login'>Go to Learning Hub</a>" +
+                "</div>" +
+                "<p style='margin-top: 30px; color: #555;'>Keep up the amazing effort! Finishing this course is a fantastic step forward in your career and skill set.</p>" +
+                "</div>" +
+                "<div class='footer'>" +
+                "<p><strong>PSM E-Learning Platform</strong></p>" +
+                "<p>Empowering Education Through Technology</p>" +
+                "<div class='footer-links'>" +
+                "<a href='#'>Help Center</a> | " +
+                "<a href='#'>Contact Support</a> | " +
+                "<a href='#'>Terms of Service</a>" +
+                "</div>" +
+                "<p style='margin-top: 20px; opacity: 0.8;'>&copy; 2026 PSM E-Learning Platform. All rights reserved.</p>" +
+                "</div>" +
+                "</div></body></html>";
+        
+        return sendHtmlEmail(toEmail, subject, htmlBody);
+    }
+
+    /**
      * Sends enrollment confirmation email
      * 
      * @param toEmail Recipient email address

@@ -20,6 +20,13 @@ public class AppInitializer implements ServletContextListener {
                     "/WEB-INF/db/schema.sql");
         }
         MaterialProgressSchemaUtil.ensureCompatibility();
+        // Run DB cleanup migration (idempotent — uses IF EXISTS / INSERT IGNORE)
+        boolean cleanupApplied = SchemaSqlRunner.runFromClasspath("db/migration_db_cleanup.sql");
+        if (!cleanupApplied) {
+            SchemaSqlRunner.runFromServletContext(sce.getServletContext(),
+                    "/WEB-INF/classes/db/migration_db_cleanup.sql",
+                    "/WEB-INF/db/migration_db_cleanup.sql");
+        }
         if (!schemaApplied) {
             System.out.println("AppInitializer: schema runner skipped because no packaged schema.sql was found.");
         }

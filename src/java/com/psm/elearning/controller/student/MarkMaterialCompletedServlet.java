@@ -80,6 +80,12 @@ public class MarkMaterialCompletedServlet extends HttpServlet {
                 return;
             }
 
+            if (enrollment.getDaysRemaining() < 0 && enrollment.getCourseDuration() != null && enrollment.getCourseDuration() > 0) {
+                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                out.print("{\"success\":false,\"message\":\"Course has expired. Learning workspace is in read-only mode.\"}");
+                return;
+            }
+
             boolean completed = markCompleted(userId, material.getMaterialId(), material.getCourseId());
             if (!completed) {
                 response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);

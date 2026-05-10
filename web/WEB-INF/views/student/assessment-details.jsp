@@ -142,6 +142,11 @@
                     <div class="sa-footer-actions" style="margin-top: 18px;">
                         <a class="sv-btn" href="${pageContext.request.contextPath}/student/assessments?view=dashboard&enrollmentId=${enrollment.enrollmentId}"><i class="fas fa-arrow-left"></i> Back</a>
                         <c:choose>
+                            <c:when test="${enrollment.daysRemaining < 0 && enrollment.courseDuration != null && enrollment.courseDuration > 0}">
+                                <span class="sa-status sa-status-closed" style="background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3);">
+                                    <i class="fas fa-calendar-times"></i> Course Expired (Read-Only)
+                                </span>
+                            </c:when>
                             <c:when test="${canAttempt}">
                                 <a class="sv-btn primary" href="${assessment.type == 'Assignment' ? pageContext.request.contextPath.concat('/student/enrollment-details?id=').concat(enrollment.enrollmentId).concat('&tab=assessments&assessmentId=').concat(assessment.assessmentId) : pageContext.request.contextPath.concat('/courses/').concat(enrollment.courseId).concat('/assessments/').concat(assessment.assessmentId).concat('/attempt')}">
                                     <i class="fas fa-play"></i> ${objectiveAssessment ? 'Start Assessment' : 'Open Assignment'}

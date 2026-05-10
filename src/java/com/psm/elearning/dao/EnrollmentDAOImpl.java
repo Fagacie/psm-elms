@@ -160,7 +160,7 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
     @Override
     public List<Enrollment> getEnrollmentsByStudent(Integer userId) {
         List<Enrollment> enrollments = new ArrayList<>();
-        String sql = "SELECT e.*, c.Title AS CourseTitle, c.Description, c.CourseFee, c.CourseBanner, u.FullName AS InstructorName " +
+        String sql = "SELECT e.*, c.Title AS CourseTitle, c.Description, c.CourseFee, c.CourseBanner, c.Duration AS CourseDuration, u.FullName AS InstructorName " +
                 "FROM Enrollment e " +
                 "JOIN Course c ON e.CourseID = c.CourseID " +
                 "LEFT JOIN User u ON c.InstructorID = u.UserID " +
@@ -179,6 +179,10 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
                     enrollment.setCourseDescription(rs.getString("Description"));
                     enrollment.setCoursePrice(rs.getDouble("CourseFee"));
                     enrollment.setCourseBanner(rs.getString("CourseBanner"));
+                    int durationVal = rs.getInt("CourseDuration");
+                    if (!rs.wasNull()) {
+                        enrollment.setCourseDuration(durationVal);
+                    }
                     enrollment.setInstructorName(rs.getString("InstructorName"));
                     enrollments.add(enrollment);
                 }
@@ -191,7 +195,7 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
 
     @Override
     public Enrollment getEnrollment(Integer enrollmentId) {
-        String sql = "SELECT e.*, c.Title AS CourseTitle, c.Description, c.CourseFee, c.CourseBanner, u.FullName AS InstructorName " +
+        String sql = "SELECT e.*, c.Title AS CourseTitle, c.Description, c.CourseFee, c.CourseBanner, c.Duration AS CourseDuration, u.FullName AS InstructorName " +
                 "FROM Enrollment e " +
                 "JOIN Course c ON e.CourseID = c.CourseID " +
                 "LEFT JOIN User u ON c.InstructorID = u.UserID " +
@@ -209,6 +213,10 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
                     enrollment.setCourseDescription(rs.getString("Description"));
                     enrollment.setCoursePrice(rs.getDouble("CourseFee"));
                     enrollment.setCourseBanner(rs.getString("CourseBanner"));
+                    int durationVal = rs.getInt("CourseDuration");
+                    if (!rs.wasNull()) {
+                        enrollment.setCourseDuration(durationVal);
+                    }
                     enrollment.setInstructorName(rs.getString("InstructorName"));
                     return enrollment;
                 }
@@ -285,6 +293,9 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
             if (!rs.wasNull()) {
                 enrollment.setProgress(progress);
             }
+        }
+        if (hasColumn(rs, "ReminderSent")) {
+            enrollment.setReminderSent(rs.getBoolean("ReminderSent"));
         }
         return enrollment;
     }
@@ -426,5 +437,20 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
             LOGGER.log(Level.SEVERE, "Error counting active enrollments by instructor instructorId=" + instructorId, e);
         }
         return 0;
+    }
+
+    @Override
+    public boolean updateReminderSent(Integer enrollmentId, boolean reminderSent) {
+        String sql = "UPDATE Enrollment SET ReminderSent = ? WHERE EnrollmentID = ?";
+        LOGGER.info("Updating enrollment reminderSent enrollmentId=" + enrollmentId + ", reminderSent=" + reminderSent);
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, reminderSent ? 1 : 0);
+            ps.setInt(2, enrollmentId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error updating reminderSent for enrollmentId=" + enrollmentId, e);
+        }
+        return false;
     }
 }

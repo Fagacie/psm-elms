@@ -6,7 +6,7 @@
 <c:set var="currentPath" value="${pageContext.request.requestURI}"/>
 <c:set var="resolvedStudentTitle" value="${not empty topbarTitle ? topbarTitle : 'Your Learning Hub'}"/>
 <c:set var="resolvedTopbarContext" value="${not empty navContext ? navContext : 'default'}"/>
-<c:set var="topbarNotificationCount" value="${not empty sessionScope.unreadNotifications ? sessionScope.unreadNotifications : 0}"/>
+<c:set var="topbarNotificationCount" value="${not empty unreadNotificationCount ? unreadNotificationCount : (not empty sessionScope.unreadNotifications ? sessionScope.unreadNotifications : 0)}"/>
 <c:set var="topbarUserName" value="${not empty sessionScope.userName ? sessionScope.userName : 'Student'}"/>
 <c:set var="topbarInitialOne" value="${fn:length(topbarUserName) > 0 ? fn:substring(topbarUserName, 0, 1) : 'S'}"/>
 <c:set var="topbarInitialTwo" value="${fn:length(topbarUserName) > 1 ? fn:substring(topbarUserName, 1, 2) : ''}"/>
@@ -92,5 +92,10 @@
                 </span>
             </a>
         </div>
+
+        <!-- Premium Topbar Logout Button -->
+        <a href="${pageContext.request.contextPath}/logout" class="sv-top-icon-btn" title="Logout" style="text-decoration: none; font-size: 1rem; color: #ef4444 !important; border-color: rgba(239, 68, 68, 0.2) !important;">
+            <i class="fas fa-sign-out-alt"></i>
+        </a>
     </div>
 </header>

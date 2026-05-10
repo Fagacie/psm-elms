@@ -75,9 +75,10 @@
         <copy todir="${build.web.dir}/WEB-INF/classes/db" overwrite="true" failonerror="false">
             <fileset dir="${basedir}/db">
                 <include name="schema.sql"/>
+                <include name="migration_db_cleanup.sql"/>
             </fileset>
         </copy>
-        <echo message="Copied db/schema.sql to WEB-INF/classes/db for startup migrations"/>
+        <echo message="Copied db SQL files to WEB-INF/classes/db for startup migrations"/>
     </target>
     <!--
 

@@ -25,7 +25,7 @@ public class Material {
     private String description;
     
     @NotBlank(message = "Material type is required")
-    @Pattern(regexp = "^(PDF|Video|Link|Slides)$", message = "Type must be PDF, Video, Link, or Slides")
+    @Pattern(regexp = "^(PDF|Video|Link|Slides|YouTube)$", message = "Type must be PDF, Video, Link, Slides, or YouTube")
     private String materialType;
     
     @NotBlank(message = "File path is required")
@@ -49,6 +49,7 @@ public class Material {
     public static final String TYPE_VIDEO = "Video";
     public static final String TYPE_LINK = "Link";
     public static final String TYPE_SLIDES = "Slides";
+    public static final String TYPE_YOUTUBE = "YouTube";
     
     // Constructors
     public Material() {}

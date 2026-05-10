@@ -7,10 +7,10 @@
   --sv-muted-strong: #475569;
   --sv-border: #e2e8f0;
   --sv-border-strong: #cbd5e1;
-  --sv-accent: #0f172a;
-  --sv-accent-soft: rgba(15, 23, 42, 0.05);
-  --sv-accent-border: rgba(15, 23, 42, 0.12);
-  --sv-accent-strong: #020617;
+  --sv-accent: #2563eb;
+  --sv-accent-soft: rgba(37, 99, 235, 0.06);
+  --sv-accent-border: rgba(37, 99, 235, 0.16);
+  --sv-accent-strong: #1d4ed8;
   --sv-surface: rgba(255, 255, 255, 0.82);
   --sv-surface-strong: #ffffff;
   --sv-surface-soft: #f8fafc;
@@ -787,7 +787,7 @@ body.sv-shell-collapsed .sv-nav-link[title]:hover::after {
 .sv-progress-bar {
   height: 100%;
   background: #0f172a;
-  transition: width 0.3s ease;
+  transition: width 0.3s ease, background-color 0.3s ease;
 }
 
 .alert {
@@ -1424,16 +1424,60 @@ input[type="password"],
 }
 
 /* ==========================================================================
-   PSME INSTITUTIONAL SUBTLE ROUNDED SYSTEM GLOBAL OVERRIDE
+   PSME INSTITUTIONAL MODERN DESIGN SYSTEM GLOBAL OVERRIDE
    ========================================================================== */
-* {
-  border-radius: 6px !important;
-  box-shadow: none !important;
-  text-shadow: none !important;
+
+/* Set clean default border radius for buttons and forms */
+.sv-btn,
+input,
+select,
+textarea {
+  border-radius: 4px !important;
+}
+
+/* Remove rounded corners from all navigations in the student view */
+.sv-topbar,
+.sv-sidebar,
+.sv-shell-toggle,
+.sv-menu-btn,
+.sv-top-icon-btn,
+.theme-toggle,
+.sv-profile-trigger,
+.sv-profile-link,
+.sv-logout,
+.sv-popover-panel,
+.sv-profile-menu,
+.sv-profile-menu a,
+.sv-nav-link,
+.sv-nav-link::before,
+body.sv-shell-collapsed .sv-nav-link::after,
+.lh-sidebar-back-link,
+.lh-back-link-item,
+.sc-back-link,
+.sc-immersive-header,
+.lh-course-sidebar,
+.lh-course-sidebar__header {
+  border-radius: 0 !important;
+}
+
+/* Premium Rounded Corners for Course Cards specifically */
+.sv-course-card,
+.me-card,
+.bc-card {
+  border-radius: 18px !important;
+}
+
+/* Rounded corners for general content cards and metrics */
+.sv-card,
+.sv-metric,
+.empty-state-box,
+.alert {
+  border-radius: 12px !important;
 }
 
 /* Protect perfect circular elements (avatars, radio inputs, circular badges) */
 .sv-profile-trigger .sv-avatar-shell,
+.sv-avatar-shell,
 .sv-avatar,
 .avatar,
 .circle-progress,

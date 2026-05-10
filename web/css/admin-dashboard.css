@@ -52,6 +52,130 @@ textarea {
   box-shadow: 0 1px 0 rgba(15, 23, 42, 0.02);
 }
 
+/* Premium Light Header Overrides (similar to student topbar) */
+.app-header.admin-light-header {
+  background: rgba(248, 250, 252, 0.95) !important;
+  backdrop-filter: blur(14px) !important;
+  border-bottom: 1px solid rgba(221, 228, 236, 0.75) !important;
+  box-shadow: 0 4px 18px rgba(15, 23, 42, 0.03) !important;
+  height: 68px !important;
+}
+
+.app-sidebar {
+  top: 68px !important;
+  height: calc(100vh - 68px) !important;
+}
+
+.app-main {
+  padding-top: 68px !important;
+}
+
+.admin-light-header .dashboard-brand-main {
+  color: var(--admin-accent) !important;
+  font-weight: 800;
+}
+
+.admin-light-header .dashboard-brand-sub {
+  color: #64748b !important;
+}
+
+.admin-light-header .dashboard-title-copy {
+  border-left-color: rgba(16, 38, 26, 0.08) !important;
+}
+
+.admin-light-header .dashboard-title-copy .page-title {
+  color: #0f172a !important;
+  font-weight: 800;
+}
+
+.admin-light-header .dashboard-title-copy p {
+  color: #64748b !important;
+}
+
+/* User Menu & Avatar */
+.admin-light-header .user-menu {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border: 1px solid rgba(16, 38, 26, 0.08) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02) !important;
+  color: #0f172a !important;
+  border-radius: 14px !important;
+}
+
+.admin-light-header .user-name {
+  color: #1e293b !important;
+  font-weight: 700;
+}
+
+.admin-light-header .user-role {
+  color: #64748b !important;
+}
+
+/* Sidebar Toggle & Notification Buttons (Light overrides) */
+.admin-light-header .sidebar-toggle-btn,
+.admin-light-header .admin-notif-btn {
+  border: 1px solid rgba(16, 38, 26, 0.08) !important;
+  background: rgba(255, 255, 255, 0.92) !important;
+  color: #334155 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02) !important;
+  width: 38px !important;
+  height: 38px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease, border-color 0.2s ease !important;
+}
+
+.admin-light-header .sidebar-toggle-btn:hover,
+.admin-light-header .admin-notif-btn:hover {
+  background: #f8fafc !important;
+  color: #0f172a !important;
+  border-color: rgba(16, 38, 26, 0.14) !important;
+  transform: translateY(-1px) !important;
+}
+
+.admin-light-header .admin-notif-btn {
+  position: relative !important;
+}
+
+.admin-light-header .admin-notif-badge {
+  position: absolute !important;
+  top: -5px !important;
+  right: -5px !important;
+  min-width: 18px !important;
+  height: 18px !important;
+  padding: 0 5px !important;
+  border-radius: 999px !important;
+  background: #ef4444 !important;
+  color: #ffffff !important;
+  font-size: 0.65rem !important;
+  font-weight: 700 !important;
+  line-height: 18px !important;
+  text-align: center !important;
+}
+
+/* Logout Button (Light override) */
+.admin-light-header .admin-logout-btn {
+  border: 1px solid rgba(239, 68, 68, 0.2) !important;
+  background: rgba(239, 68, 68, 0.05) !important;
+  color: #dc2626 !important;
+  border-radius: 12px !important;
+  width: 38px !important;
+  height: 38px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease !important;
+  text-decoration: none !important;
+}
+
+.admin-light-header .admin-logout-btn:hover {
+  background: rgba(239, 68, 68, 0.12) !important;
+  color: #b91c1c !important;
+  transform: translateY(-1px) !important;
+}
+
 .header-left,
 .header-right {
   display: flex;
