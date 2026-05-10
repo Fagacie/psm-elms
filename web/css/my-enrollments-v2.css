@@ -215,13 +215,17 @@
 }
 
 .me-card {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  padding: 16px;
+  background: var(--sv-surface);
+  border: 1px solid var(--sv-border);
+  border-radius: 16px !important;
+  padding: 18px !important;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.25s ease;
 }
 
 .me-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
+  transform: translateY(-4px) !important;
+  box-shadow: 0 16px 36px rgba(30, 58, 138, 0.08) !important;
+  border-color: var(--me-accent-border) !important;
 }
 
 .me-card:hover,
@@ -230,13 +234,21 @@
 }
 
 .me-card .sv-course-media {
-  margin: 0 0 14px;
+  margin: 0 0 16px;
+  overflow: hidden;
+  border-radius: 12px;
 }
 
 .me-card .sv-course-banner,
 .me-card .sv-course-banner-placeholder {
-  height: 112px;
-  border-radius: 8px;
+  height: 124px !important;
+  border-radius: 12px !important;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.me-card:hover .sv-course-banner {
+  transform: scale(1.04);
 }
 
 .me-card-top {

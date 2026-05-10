@@ -378,3 +378,311 @@
   }
 }
 
+/* ==========================================
+   PREMIUM ASYMMETRICAL MODERNIZATION
+   ========================================== */
+
+/* Asymmetrical layout */
+.sd3-asym-grid {
+  display: grid;
+  grid-template-columns: 1.55fr 0.95fr;
+  gap: 24px;
+  align-items: start;
+  margin-top: 24px;
+}
+
+/* Hero circular progress ring */
+.sd3-hero-stats-quick {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding-right: 12px;
+}
+
+.sd3-stat-circle-wrap {
+  position: relative;
+  width: 120px;
+  height: 120px;
+}
+
+.sd3-stat-circle {
+  width: 100%;
+  height: 100%;
+}
+
+.sd3-stat-circle .circle-bg {
+  fill: none;
+  stroke: rgba(226, 232, 240, 0.4);
+  stroke-width: 3.2;
+}
+
+.sd3-stat-circle .circle {
+  fill: none;
+  stroke-width: 3.2;
+  stroke-linecap: round;
+  transition: stroke-dasharray 0.8s ease-in-out;
+}
+
+.sd3-stat-circle-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  line-height: 1.1;
+}
+
+.sd3-stat-circle-text strong {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--sv-heading);
+  letter-spacing: -0.02em;
+}
+
+.sd3-stat-circle-text span {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--sv-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 2px;
+}
+
+/* Modern course list rows */
+.sd3-course-grid-modern {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sd3-course-grid-modern .sv-course-card {
+  display: grid;
+  grid-template-columns: 100px 1.5fr 1fr 110px;
+  gap: 20px;
+  align-items: center;
+  background: var(--sv-surface);
+  border: 1px solid var(--sv-border);
+  border-radius: 16px;
+  padding: 18px 24px;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.sd3-course-grid-modern .sv-course-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.04);
+  border-color: var(--sv-accent-border);
+}
+
+.sd3-course-grid-modern .sv-course-banner {
+  width: 100px;
+  height: 65px;
+  border-radius: 10px;
+  object-fit: cover;
+}
+
+.sd3-course-grid-modern .sv-course-banner-placeholder {
+  width: 100px;
+  height: 65px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: var(--sv-surface-soft);
+  color: var(--sv-muted);
+}
+
+/* Stats panel */
+.sd3-summary-grid-compact {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.sd3-summary-metric {
+  background: var(--sv-surface-soft);
+  border: 1px solid var(--sv-border);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sd3-metric-lbl {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--sv-muted);
+  letter-spacing: 0.06em;
+}
+
+.sd3-metric-val {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--sv-heading);
+  letter-spacing: -0.02em;
+}
+
+/* Badge achievements gallery */
+.sd3-badge-gallery {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.sd3-badge-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid var(--sv-border);
+  border-radius: 14px;
+  padding: 12px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.sd3-badge-item.unlocked {
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.02);
+}
+
+.sd3-badge-item.locked {
+  background: rgba(241, 245, 249, 0.5);
+  border-style: dashed;
+  opacity: 0.65;
+}
+
+.sd3-badge-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  font-size: 1.5rem;
+  flex-shrink: 0;
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.sd3-badge-item.unlocked .sd3-badge-icon {
+  background: var(--sv-accent-soft);
+  text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transform: scale(1.1);
+}
+
+.sd3-badge-item.locked .sd3-badge-icon {
+  background: #e2e8f0;
+  filter: grayscale(1);
+}
+
+.sd3-badge-info {
+  display: grid;
+  gap: 2px;
+  line-height: 1.1;
+}
+
+.sd3-badge-info strong {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--sv-heading);
+}
+
+.sd3-badge-info span {
+  font-size: 0.7rem;
+  color: var(--sv-muted);
+}
+
+.sd3-badge-item:hover .sd3-badge-icon {
+  transform: rotate(10deg) scale(1.15);
+}
+
+/* Timeline */
+.sd3-timeline-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sd3-timeline-item {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--sv-border);
+}
+
+.sd3-timeline-item.warning {
+  background: rgba(245, 158, 11, 0.05);
+  border-color: rgba(245, 158, 11, 0.2);
+}
+
+.sd3-timeline-item.expired {
+  background: rgba(239, 68, 68, 0.05);
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
+.sd3-timeline-marker {
+  font-size: 1.15rem;
+  flex-shrink: 0;
+}
+
+.sd3-timeline-content {
+  display: grid;
+  gap: 2px;
+  line-height: 1.2;
+}
+
+.sd3-timeline-content strong {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--sv-heading);
+}
+
+.sd3-timeline-content span {
+  font-size: 0.76rem;
+  color: var(--sv-muted);
+}
+
+.sd3-timeline-empty {
+  text-align: center;
+  padding: 24px 12px;
+}
+
+.sd3-timeline-empty-icon {
+  font-size: 2rem;
+  margin-bottom: 8px;
+}
+
+.sd3-timeline-empty p {
+  color: var(--sv-muted);
+  font-size: 0.8rem;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Responsive Overrides */
+@media (max-width: 1024px) {
+  .sd3-asym-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .sd3-course-grid-modern .sv-course-card {
+    grid-template-columns: 1fr;
+    gap: 14px;
+    padding: 18px;
+    text-align: center;
+  }
+  
+  .sd3-course-grid-modern .sv-course-banner,
+  .sd3-course-grid-modern .sv-course-banner-placeholder {
+    width: 100%;
+    height: 120px;
+  }
+
+  .sd3-course-grid-modern .sv-course-duration-badge {
+    justify-content: center;
+  }
+}
+

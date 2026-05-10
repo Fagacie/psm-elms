@@ -151,7 +151,7 @@
                                             <span>Progress</span>
                                             <strong>${progress}%</strong>
                                         </div>
-                                        <div class="sv-progress"><div class="sv-progress-bar" data-progress="${progress}"></div></div>
+                                        <div class="sv-progress"><div class="sv-progress-bar" data-progress="${progress}" style="width: ${progress}%; background: ${progress < 35 ? '#ef4444' : (progress < 75 ? '#eab308' : '#10b981')};"></div></div>
                                     </div>
 
                                     <div class="me-card-footer">
