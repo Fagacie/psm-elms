@@ -2,11 +2,11 @@
     var heroScene = document.getElementById('meHeroScene');
     var filterButtons = document.querySelectorAll('.me-filter');
     var searchInput = document.getElementById('meCourseSearch');
-    var cards = document.querySelectorAll('.me-card');
+    var cards = document.querySelectorAll('.bc-card');
     var noRows = document.getElementById('meNoRows');
     var counters = document.querySelectorAll('.me-count[data-counter]');
-    var progressBars = document.querySelectorAll('.me-card .sv-progress-bar[data-progress]');
-    var tiltEls = document.querySelectorAll('.me-tilt');
+    var progressBars = document.querySelectorAll('.bc-card .sv-progress-bar[data-progress]');
+    var tiltEls = document.querySelectorAll('.bc-tilt');
     var prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     function animateCounters() {
@@ -160,7 +160,75 @@
         });
     });
 
+    function initStreakTracker() {
+        var streakDaysKey = 'meStudyStreakDays';
+        var streakCountKey = 'meStudyStreakCount';
+        var lastLoginDateKey = 'meStudyStreakLastDate';
+
+        var today = new Date();
+        var todayStr = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
+        var currentDayOfWeek = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
+
+        // Load streak array
+        var streakDays = [];
+        try {
+            streakDays = JSON.parse(localStorage.getItem(streakDaysKey)) || [];
+        } catch (e) {
+            streakDays = [];
+        }
+
+        // Check if yesterday was active to maintain count
+        var lastLogin = localStorage.getItem(lastLoginDateKey);
+        var streakCount = parseInt(localStorage.getItem(streakCountKey), 10) || 1;
+
+        if (lastLogin) {
+            var lastDateObj = new Date(lastLogin);
+            // Reset hours for clean date math
+            var d1 = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+            var d2 = new Date(lastDateObj.getFullYear(), lastDateObj.getMonth(), lastDateObj.getDate());
+            var diffTime = d1 - d2;
+            var diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffDays > 1) {
+                // Streak broken
+                streakCount = 1;
+                streakDays = [];
+            } else if (diffDays === 1) {
+                // Streak continued
+                streakCount += 1;
+            }
+        }
+
+        // Record today
+        localStorage.setItem(lastLoginDateKey, todayStr);
+        localStorage.setItem(streakCountKey, streakCount);
+
+        if (streakDays.indexOf(currentDayOfWeek) === -1) {
+            streakDays.push(currentDayOfWeek);
+            localStorage.setItem(streakDaysKey, JSON.stringify(streakDays));
+        }
+
+        // Update UI Flame count
+        var flameCountEl = document.getElementById('meStreakCount');
+        if (flameCountEl) {
+            flameCountEl.textContent = streakCount + (streakCount === 1 ? ' Day' : ' Days');
+        }
+
+        // Update UI Day circles
+        var dayCircles = document.querySelectorAll('.me-day-circle');
+        dayCircles.forEach(function (circle) {
+            var circleDay = parseInt(circle.getAttribute('data-day'), 10);
+            if (circleDay === currentDayOfWeek) {
+                circle.classList.add('active');
+            }
+            if (streakDays.indexOf(circleDay) !== -1) {
+                circle.classList.add('checked');
+            }
+        });
+    }
+
     animateCounters();
     animateProgress();
     applyFilters();
+    initStreakTracker();
 })();

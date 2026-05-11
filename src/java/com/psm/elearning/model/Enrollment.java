@@ -72,6 +72,12 @@ public class Enrollment {
     
     private Integer courseDuration;
     
+    @Size(max = 100, message = "Course level must not exceed 100 characters")
+    private String level;
+    
+    @Size(max = 100, message = "Course category must not exceed 100 characters")
+    private String category;
+    
     // Status constants
     public static final String STATUS_PENDING = "Pending";
     public static final String STATUS_ENROLLED = "Enrolled";
@@ -172,6 +178,12 @@ public class Enrollment {
 
     public Integer getCourseDuration() { return courseDuration; }
     public void setCourseDuration(Integer courseDuration) { this.courseDuration = courseDuration; }
+
+    public String getLevel() { return level; }
+    public void setLevel(String level) { this.level = level; }
+
+    public String getCategory() { return category; }
+    public void setCategory(String category) { this.category = category; }
 
     public String getDisplayDuration() {
         if (courseDuration == null || courseDuration <= 0) {

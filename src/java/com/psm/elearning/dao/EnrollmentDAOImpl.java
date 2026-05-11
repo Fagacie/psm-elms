@@ -160,7 +160,7 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
     @Override
     public List<Enrollment> getEnrollmentsByStudent(Integer userId) {
         List<Enrollment> enrollments = new ArrayList<>();
-        String sql = "SELECT e.*, c.Title AS CourseTitle, c.Description, c.CourseFee, c.CourseBanner, c.Duration AS CourseDuration, u.FullName AS InstructorName " +
+        String sql = "SELECT e.*, c.Title AS CourseTitle, c.Description, c.CourseFee, c.CourseBanner, c.Duration AS CourseDuration, c.Level AS CourseLevel, c.Category AS CourseCategory, u.FullName AS InstructorName " +
                 "FROM Enrollment e " +
                 "JOIN Course c ON e.CourseID = c.CourseID " +
                 "LEFT JOIN User u ON c.InstructorID = u.UserID " +
@@ -184,6 +184,8 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
                         enrollment.setCourseDuration(durationVal);
                     }
                     enrollment.setInstructorName(rs.getString("InstructorName"));
+                    enrollment.setLevel(rs.getString("CourseLevel"));
+                    enrollment.setCategory(rs.getString("CourseCategory"));
                     enrollments.add(enrollment);
                 }
             }
@@ -195,7 +197,7 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
 
     @Override
     public Enrollment getEnrollment(Integer enrollmentId) {
-        String sql = "SELECT e.*, c.Title AS CourseTitle, c.Description, c.CourseFee, c.CourseBanner, c.Duration AS CourseDuration, u.FullName AS InstructorName " +
+        String sql = "SELECT e.*, c.Title AS CourseTitle, c.Description, c.CourseFee, c.CourseBanner, c.Duration AS CourseDuration, c.Level AS CourseLevel, c.Category AS CourseCategory, u.FullName AS InstructorName " +
                 "FROM Enrollment e " +
                 "JOIN Course c ON e.CourseID = c.CourseID " +
                 "LEFT JOIN User u ON c.InstructorID = u.UserID " +
@@ -218,6 +220,8 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
                         enrollment.setCourseDuration(durationVal);
                     }
                     enrollment.setInstructorName(rs.getString("InstructorName"));
+                    enrollment.setLevel(rs.getString("CourseLevel"));
+                    enrollment.setCategory(rs.getString("CourseCategory"));
                     return enrollment;
                 }
             }

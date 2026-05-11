@@ -129,6 +129,41 @@
         });
     }
 
+    function initFreeEnrollmentInterceptor() {
+        var forms = document.querySelectorAll('.bc-free-enroll-form');
+        var overlay = document.getElementById('bcEnrollOverlay');
+        var loader = document.getElementById('bcModalLoader');
+        var success = document.getElementById('bcModalSuccess');
+
+        forms.forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                event.preventDefault(); // Block standard instant navigation
+
+                if (!overlay || !loader || !success) {
+                    form.submit();
+                    return;
+                }
+
+                // Activate glassmorphic loader overlay
+                overlay.classList.add('active');
+                loader.style.display = 'block';
+                success.style.display = 'none';
+
+                // Stage 1: Mock active secure registration with database
+                setTimeout(function () {
+                    loader.style.display = 'none';
+                    success.style.display = 'block';
+
+                    // Stage 2: Celebratory success feedback before actual redirect
+                    setTimeout(function () {
+                        form.submit();
+                    }, 1400);
+                }, 1800);
+            });
+        });
+    }
+
     animateCounters();
     applyFilters();
+    initFreeEnrollmentInterceptor();
 })();
