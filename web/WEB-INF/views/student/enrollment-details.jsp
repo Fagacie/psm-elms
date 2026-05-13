@@ -321,46 +321,8 @@
                                 </section>
                             </c:when>
                             <c:otherwise>
-                                <section class="lh-assessment-card">
-                                    <div class="lh-assessment-card__grid">
-                                        <div class="lh-assessment-block">
-                                            <span>Assessment Type</span>
-                                            <strong>${selectedAssessment.type}</strong>
-                                        </div>
-                                        <div class="lh-assessment-block">
-                                            <span>Duration</span>
-                                            <strong>${selectedAssessment.duration != null ? selectedAssessment.duration : 30} minutes</strong>
-                                        </div>
-                                        <div class="lh-assessment-block">
-                                            <span>Attempts</span>
-                                            <strong>${selectedAssessmentUsedAttempts} used / ${selectedAssessmentAllowedAttempts} allowed</strong>
-                                        </div>
-                                        <div class="lh-assessment-block">
-                                            <span>Submission</span>
-                                            <strong>${selectedAssessment.submissionMode == 'file' ? 'File Upload' : (selectedAssessment.submissionMode == 'text' ? 'Written Response' : (selectedAssessment.submissionMode == 'both' ? 'Text + File' : 'Objective Responses'))}</strong>
-                                        </div>
-                                    </div>
-
-                                    <div class="lh-assessment-card__content">
-                                        <div class="lh-assessment-block is-wide">
-                                            <span>Instructions</span>
-                                            <p><c:out value="${not empty selectedAssessment.instructions ? selectedAssessment.instructions : 'Open the assessment when you are ready.'}"/></p>
-                                        </div>
-
-                                        <div class="lh-assessment-block is-wide">
-                                            <span>Current Status</span>
-                                            <p>
-                                                <strong>${selectedAssessmentStatusLabel}</strong>
-                                                <c:if test="${not empty selectedAssessmentLatest}">
-                                                    <span aria-hidden="true">&middot;</span>
-                                                    Latest attempt #${selectedAssessmentLatest.attemptNumber}
-                                                    <c:if test="${not empty selectedAssessmentLatest.score}">
-                                                        <span aria-hidden="true">&middot;</span>
-                                                        Score ${selectedAssessmentLatest.score}
-                                                    </c:if>
-                                                </c:if>
-                                            </p>
-                                        </div>
+                                <section class="lh-assessment-card" style="padding-top: 0; border: none; box-shadow: none; background: transparent;">
+                                    <div class="lh-assessment-card__content" style="padding: 0;">
 
                                         <c:if test="${not courseAccessGranted}">
                                             <div class="lh-stage-notice is-warning">

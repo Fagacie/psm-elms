@@ -308,6 +308,25 @@
   border-bottom-color: var(--sa-primary-light);
 }
 
+/* Premium Row Card Overrides */
+.sa-row-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--sv-accent) !important;
+  box-shadow: 0 12px 24px -6px rgba(59, 130, 246, 0.08), 0 8px 16px -8px rgba(59, 130, 246, 0.08) !important;
+}
+
+@media (max-width: 768px) {
+  .sa-row-card {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 16px !important;
+  }
+  .sa-row-card > div {
+    width: 100% !important;
+    justify-content: flex-start !important;
+  }
+}
+
 /* ==========================================================================
    ATTEMPT WORKSPACE (QUESTION CARDS & ACTIVE OPTIONS)
    ========================================================================== */

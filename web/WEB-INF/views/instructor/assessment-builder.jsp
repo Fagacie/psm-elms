@@ -34,6 +34,9 @@
             <jsp:param name="currentLabel" value="${not empty selectedAssessment ? 'Settings' : 'New Assessment'}"/>
         </jsp:include>
 
+            <c:set var="currentCourseFlow" value="assessments"/>
+            <jsp:include page="/WEB-INF/views/instructor/fragments/course-flow-nav.jsp"/>
+
         <section class="ins-page-head">
             <div>
                 <p class="ins-page-kicker">Assessment Builder</p>

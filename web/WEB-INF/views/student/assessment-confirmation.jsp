@@ -48,7 +48,7 @@
             <article class="sa-confirm-card sa-panel">
                 <div class="sa-panel-head" style="border-bottom: 2px dashed var(--sa-border); padding-bottom: 18px; margin-bottom: 24px;">
                     <div>
-                        <span class="sa-chip" style="background: var(--sa-primary); color: #ffffff; border: none; font-size: 0.72rem; padding: 4px 10px; margin-bottom: 8px;">Official Academic Record</span>
+                        <span class="sa-chip" style="background: var(--sa-primary); color: #ffffff; border: none; font-size: 0.72rem; padding: 4px 10px; margin-bottom: 8px;">Assessment Result</span>
                         <h3>Submission Receipt</h3>
                         <p>Your work has been safely recorded by the institution</p>
                     </div>

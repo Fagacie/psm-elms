@@ -13,7 +13,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-shell.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-courses.css">
-    <jsp:include page="/WEB-INF/views/common/head-external-assets.jsp"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/theme-toggle.css">
+    <script defer src="${pageContext.request.contextPath}/js/theme-toggle.js"></script>
+    <script defer src="${pageContext.request.contextPath}/js/instructor-shell.js"></script>
 </head>
 <body class="instructor-ui">
     <jsp:include page="/WEB-INF/views/common/instructor-header.jsp">
@@ -40,17 +43,17 @@
             </section>
 
             <c:if test="${param.success == 'updated'}">
-                <div class="alert alert-success">
+                <div class="ws-alert ws-alert-success">
                     <i class="fas fa-check-circle"></i> Course updated successfully!
                 </div>
             </c:if>
             <c:if test="${param.error != null}">
-                <div class="alert alert-error">
+                <div class="ws-alert ws-alert-error">
                     <i class="fas fa-exclamation-circle"></i> An error occurred. Please try again.
                 </div>
             </c:if>
             <c:if test="${not empty errorMessage}">
-                <div class="alert alert-error">
+                <div class="ws-alert ws-alert-error">
                     <i class="fas fa-exclamation-circle"></i> <c:out value="${errorMessage}"/>
                 </div>
             </c:if>
@@ -69,38 +72,63 @@
                             <i class="fas fa-search" style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--ins-muted);"></i>
                             <input type="text" placeholder="Search courses by name or status..." 
                                    data-search-target="#course-list-container" 
-                                   data-search-item=".ins-course-card"
+                                   data-search-item=".ins-course-card-v2"
                                    style="width: 100%; padding: 12px 16px 12px 42px; border: 1px solid var(--ins-border); border-radius: 8px; font-family: inherit;">
                         </div>
                     </div>
                     <section class="ins-course-grid" id="course-list-container" aria-label="Assigned courses">
                         <c:forEach var="course" items="${courses}">
-                            <article class="ins-course-card">
-                                <c:if test="${not empty course.courseBanner}">
-                                    <div style="width: 100%; height: 120px; border-radius: 8px; margin-bottom: 12px; overflow: hidden;">
-                                        <img src="${course.courseBanner}" alt="Banner" style="width: 100%; height: 100%; object-fit: cover;">
-                                    </div>
-                                </c:if>
-                                <div class="ins-course-card__top">
-                                    <h4 data-search-text><c:out value="${course.courseName}"/></h4>
-                                    <span class="status-badge status-${fn:toLowerCase(course.status)}" data-search-text><c:out value="${course.status}"/></span>
-                                </div>
-                                <p class="ins-course-card__meta">
-                                    <c:out value="${empty course.category ? 'General' : course.category}"/> · <c:out value="${course.level}"/>
-                                </p>
-                                <div class="ins-course-card__stats">
-                                    <div>
-                                        <strong><c:out value="${courseStudentCounts[course.courseId] != null ? courseStudentCounts[course.courseId] : 0}"/></strong>
-                                        <span>Students</span>
-                                    </div>
-                                    <div>
-                                        <strong><c:out value="${not empty course.updatedAt ? course.updatedAt.toLocalDate() : '-'}"/></strong>
-                                        <span>Updated</span>
+                            <article class="ins-course-card-v2">
+                                <div class="ins-card-banner-wrap">
+                                    <c:choose>
+                                        <c:when test="${not empty course.courseBanner}">
+                                            <img src="${course.courseBanner}" alt="Banner" class="ins-card-banner">
+                                        </c:when>
+                                        <c:otherwise>
+                                            <div class="ins-card-banner-placeholder">
+                                                <i class="fas fa-graduation-cap"></i>
+                                            </div>
+                                        </c:otherwise>
+                                    </c:choose>
+                                    <div class="ins-card-badges">
+                                        <span class="chip chip-category"><c:out value="${empty course.category ? 'General' : course.category}"/></span>
+                                        <span class="chip chip-level"><c:out value="${course.level}"/></span>
                                     </div>
                                 </div>
-                                <a href="${pageContext.request.contextPath}/instructor/courses?action=workspace&courseId=${course.courseId}" class="btn btn-primary ins-course-card__cta">
-                                    Open Workspace <i class="fas fa-arrow-right" style="margin-left: 8px;"></i>
-                                </a>
+                                <div class="ins-card-body">
+                                    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 4px;">
+                                        <h4 class="ins-card-title" data-search-text><c:out value="${course.courseName}"/></h4>
+                                        <span class="status-badge status-${fn:toLowerCase(course.status)}" style="flex-shrink: 0;" data-search-text><c:out value="${course.status}"/></span>
+                                    </div>
+                                    <p class="ins-card-desc"><c:out value="${course.description}" default="No course summary description has been written for this curriculum yet."/></p>
+                                    
+                                    <div class="ins-card-metrics-row">
+                                        <div class="ins-metric-item">
+                                            <i class="fas fa-users icon-blue"></i>
+                                            <div class="ins-metric-details">
+                                                <span class="ins-metric-label">Enrolled</span>
+                                                <span class="ins-metric-val"><c:out value="${courseStudentCounts[course.courseId] != null ? courseStudentCounts[course.courseId] : 0}"/></span>
+                                            </div>
+                                        </div>
+                                        <div class="ins-metric-item">
+                                            <i class="fas fa-history icon-green"></i>
+                                            <div class="ins-metric-details">
+                                                <span class="ins-metric-label">Duration</span>
+                                                <span class="ins-metric-val" style="font-size: 0.78rem;"><c:out value="${course.displayDuration}"/></span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="ins-card-meta-footer">
+                                        <span><i class="far fa-calendar-alt"></i> Updated: <c:out value="${not empty course.updatedAt ? course.updatedAt.toLocalDate() : '-'}"/></span>
+                                        <span><i class="fas fa-code-branch"></i> ID: #${course.courseId}</span>
+                                    </div>
+                                </div>
+                                <div class="ins-card-action">
+                                    <a href="${pageContext.request.contextPath}/instructor/courses?action=workspace&courseId=${course.courseId}" class="sv-btn primary btn-workspace-cta">
+                                        Open Course Workspace <i class="fas fa-arrow-right arrow-icon"></i>
+                                    </a>
+                                </div>
                             </article>
                         </c:forEach>
                     </section>

@@ -32,6 +32,9 @@
             <jsp:param name="currentLabel" value="Question Bank"/>
         </jsp:include>
 
+        <c:set var="currentCourseFlow" value="assessments"/>
+        <jsp:include page="/WEB-INF/views/instructor/fragments/course-flow-nav.jsp"/>
+
         <section class="ins-page-head">
             <div>
                 <p class="ins-page-kicker"><c:out value="${isAssignment ? 'Assignment Prompt Builder' : 'MCQ Question Engine'}"/></p>

@@ -16,6 +16,51 @@
             <c:param name="courseId" value="${selectedCourse.courseId}"/>
         </c:url>
 
+        <style>
+        .ws-navbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 8px;
+            margin-bottom: 24px;
+            border: 1px solid var(--ins-border);
+            border-radius: 16px;
+            background: #ffffff;
+            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+        }
+
+        .ws-nav-link {
+            flex: 1 1 180px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 14px 18px;
+            border-radius: 12px;
+            text-decoration: none;
+            color: var(--ins-muted);
+            font-weight: 700;
+            font-size: 0.95rem;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .ws-nav-link:hover,
+        .ws-nav-link.active {
+            background: var(--ins-primary, #6366f1);
+            color: #ffffff;
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.22);
+        }
+
+        @media (max-width: 768px) {
+            .ws-navbar {
+                flex-direction: column;
+            }
+        }
+        </style>
+
+        <c:set var="currentCourseFlow" value="assessments"/>
+        <jsp:include page="/WEB-INF/views/instructor/fragments/course-flow-nav.jsp"/>
+
         <section class="workspace-kpi-grid" style="margin-bottom: 24px;">
             <div class="workspace-kpi-card"><strong>${totalStudents}</strong><span>Students enrolled</span></div>
             <div class="workspace-kpi-card"><strong>${publishedMaterials}</strong><span>Materials count</span></div>
@@ -99,7 +144,14 @@
                                             <span style="color:#ea580c; font-weight:600;"><i class="fas fa-clock-rotate-left" style="margin-right:4px;"></i> ${not empty pendingCountByAssessmentId[assessment.assessmentId] ? pendingCountByAssessmentId[assessment.assessmentId] : 0} pending</span>
                                         </div>
                                         <div style="display:flex; gap:8px; border-top:1px solid var(--ins-border); padding-top:16px;">
-                                            <button type="button" class="btn btn-secondary btn-sm" onclick="openAssessmentPage('submissions', ${assessment.assessmentId})" style="flex:1; justify-content:center;">Review</button>
+                                            <c:choose>
+                                                <c:when test="${assessment.type == 'Assignment'}">
+                                                    <button type="button" class="btn btn-secondary btn-sm" onclick="openAssessmentPage('submissions', ${assessment.assessmentId})" style="flex:1; justify-content:center;">View & Grade</button>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <button type="button" class="btn btn-secondary btn-sm" onclick="openAssessmentPage('dashboard', ${assessment.assessmentId})" style="flex:1; justify-content:center;">Review</button>
+                                                </c:otherwise>
+                                            </c:choose>
                                             <button type="button" class="btn btn-secondary btn-sm" onclick="openAssessmentPage('editor', ${assessment.assessmentId})" style="width:40px; justify-content:center;"><i class="fas fa-cog"></i></button>
                                             <a href="${pageContext.request.contextPath}/instructor/assessments?action=archiveAssessment&courseId=${selectedCourse.courseId}&id=${assessment.assessmentId}" class="btn btn-danger btn-sm" style="width:40px; justify-content:center;" onclick="return confirm('Archive this assessment?')" title="Archive Assessment"><i class="fas fa-box-archive"></i></a>
                                         </div>

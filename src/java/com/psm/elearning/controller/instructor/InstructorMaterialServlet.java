@@ -98,7 +98,7 @@ public class InstructorMaterialServlet extends HttpServlet {
         if (courseIdStr != null && !courseIdStr.trim().isEmpty()) {
             try {
                 int courseId = Integer.parseInt(courseIdStr);
-                response.sendRedirect(request.getContextPath() + "/instructor/courses?action=workspace&courseId=" + courseId + "#materials");
+                response.sendRedirect(request.getContextPath() + "/instructor/content-organizer?courseId=" + courseId);
                 return;
             } catch (NumberFormatException e) {
                 // Ignore and fall through to redirect
@@ -111,7 +111,7 @@ public class InstructorMaterialServlet extends HttpServlet {
     private void createMaterial(HttpServletRequest request, HttpServletResponse response, Integer userId)
             throws IOException, ServletException {
 
-        String courseIdStr = request.getParameter("courseId");
+        String courseIdStr = valueOrEmpty(request.getParameter("courseId"));
         String title = valueOrEmpty(request.getParameter("title"));
         String description = valueOrEmpty(request.getParameter("description"));
         String materialType = normalizeMaterialType(valueOrEmpty(request.getParameter("materialType")));
@@ -138,7 +138,7 @@ public class InstructorMaterialServlet extends HttpServlet {
         }
 
         String uploadedUrl;
-        if (Material.TYPE_LINK.equals(materialType)) {
+        if (isUrlBasedMaterialType(materialType)) {
             if (!isValidHttpUrl(externalUrl)) {
                 response.sendRedirect(request.getContextPath() + "/instructor/materials?courseId=" + courseId + "&error=link");
                 return;
@@ -244,7 +244,7 @@ public class InstructorMaterialServlet extends HttpServlet {
         String contentType = request.getContentType();
         boolean isMultipart = contentType != null && contentType.toLowerCase().contains("multipart/");
 
-        if (Material.TYPE_LINK.equals(materialType)) {
+        if (isUrlBasedMaterialType(materialType)) {
             if (!isValidHttpUrl(externalUrl)) {
                 response.sendRedirect(workspaceMaterialsRedirect(request, courseId, "error=link"));
                 return;
@@ -582,7 +582,12 @@ public class InstructorMaterialServlet extends HttpServlet {
         if ("video".equalsIgnoreCase(normalized)) return Material.TYPE_VIDEO;
         if ("link".equalsIgnoreCase(normalized)) return Material.TYPE_LINK;
         if ("slides".equalsIgnoreCase(normalized)) return Material.TYPE_SLIDES;
+        if ("youtube".equalsIgnoreCase(normalized)) return Material.TYPE_YOUTUBE;
         return normalized;
+    }
+
+    private boolean isUrlBasedMaterialType(String materialType) {
+        return Material.TYPE_LINK.equals(materialType) || Material.TYPE_YOUTUBE.equals(materialType);
     }
 
     private boolean isMaterialTypeExtensionCompatible(String materialType, String ext) {
@@ -598,7 +603,7 @@ public class InstructorMaterialServlet extends HttpServlet {
             return "mp4".equals(e) || "mp3".equals(e)
                     || "webm".equals(e) || "mov".equals(e) || "m4v".equals(e);
         }
-        return Material.TYPE_LINK.equals(materialType);
+        return isUrlBasedMaterialType(materialType);
     }
 
     private String extractExtensionFromUrl(String rawUrl) {
@@ -629,13 +634,21 @@ public class InstructorMaterialServlet extends HttpServlet {
     }
 
     private String workspaceMaterialsRedirect(HttpServletRequest request, int courseId, String query) {
-        StringBuilder builder = new StringBuilder(request.getContextPath())
-                .append("/instructor/courses?action=workspace&courseId=")
-                .append(courseId);
-        if (query != null && !query.trim().isEmpty()) {
-            builder.append('&').append(query.trim());
+        String source = request.getParameter("source");
+        StringBuilder builder = new StringBuilder(request.getContextPath());
+        
+        if ("workspace".equals(source)) {
+            builder.append("/instructor/courses?action=workspace&courseId=").append(courseId);
+            if (query != null && !query.trim().isEmpty()) {
+                builder.append('&').append(query.trim());
+            }
+            builder.append("#materials");
+        } else {
+            builder.append("/instructor/content-organizer?courseId=").append(courseId);
+            if (query != null && !query.trim().isEmpty()) {
+                builder.append('&').append(query.trim());
+            }
         }
-        builder.append("#materials");
         return builder.toString();
     }
 }

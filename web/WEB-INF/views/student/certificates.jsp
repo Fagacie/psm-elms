@@ -57,9 +57,9 @@
         <section class="sv-card cert-hero cert-card-animated">
             <div class="sv-card-body cert-hero-body">
                 <div class="cert-hero-copy">
-                    <p class="cert-kicker">Credential Center</p>
-                    <h2>Earned Credentials</h2>
-                    <p>Generate certificates after completion, confirm eligibility quickly, and keep every issued credential in one trusted place.</p>
+                    <p class="cert-kicker">Certificates</p>
+                    <h2>Your issued certificates</h2>
+                    <p>Generate certificates after completion, check eligibility, and keep each issued credential in one place.</p>
                     <div class="cert-hero-actions">
                         <a href="${pageContext.request.contextPath}/student/my-enrollments" class="sv-btn primary">Open My Courses</a>
                         <a href="${pageContext.request.contextPath}/student/courses" class="sv-btn">Browse Courses</a>
@@ -106,7 +106,7 @@
                     <i class="fas fa-shield-check"></i>
                     <div>
                         <strong>Verification is public.</strong>
-                        <p>Share certificate code with employers or institutions. They can verify authenticity from the landing page under Public Certificate Verification.</p>
+                        <p>Share the certificate code with employers or institutions. They can verify authenticity from the public verification page.</p>
                     </div>
                 </div>
             </div>
@@ -134,8 +134,8 @@
             <div class="sv-card-body">
                 <div class="cert-section-intro">
                     <div>
-                        <strong>Certificates are unlocked only when the course is fully ready.</strong>
-                        <p>Eligible enrollments have synced completion, passed required assessments, and successful payment before generation is enabled.</p>
+                        <strong>Certificates are available only when the course is fully complete.</strong>
+                        <p>Eligible enrollments must have completion sync, required assessments, and successful payment before generation is enabled.</p>
                     </div>
                 </div>
                 <c:choose>
@@ -192,8 +192,8 @@
             <div class="sv-card-body">
                 <div class="cert-section-intro cert-section-intro-compact">
                     <div>
-                        <strong>These enrollments are close but still blocked by one or more requirements.</strong>
-                        <p>Open each learning hub to complete remaining steps, then return here to generate instantly.</p>
+                        <strong>These enrollments still need one or more requirements.</strong>
+                        <p>Open each learning hub to complete the remaining steps, then return here to generate the certificate.</p>
                     </div>
                 </div>
                 <c:choose>
@@ -246,8 +246,8 @@
             <div class="sv-card-body">
                 <div class="cert-section-intro cert-section-intro-compact">
                     <div>
-                        <strong>Review and share every issued certificate.</strong>
-                        <p>Use search and filters to find a certificate, open the template, then share certificate code for public verification on the landing page.</p>
+                        <strong>Review and share each issued certificate.</strong>
+                        <p>Use search and filters to find a certificate, open the template, then share the certificate code for public verification.</p>
                     </div>
                 </div>
                 <c:choose>

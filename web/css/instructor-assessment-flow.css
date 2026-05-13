@@ -518,6 +518,47 @@
     justify-content: center;
 }
 
+/* Shared course flow navigation for assessment pages */
+.ws-navbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 8px;
+    margin-bottom: 24px;
+    border: 1px solid var(--ins-border);
+    border-radius: 16px;
+    background: var(--ins-surface-strong, #fff);
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+}
+
+.ws-nav-link {
+    flex: 1 1 180px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px 18px;
+    border-radius: 12px;
+    text-decoration: none;
+    color: var(--ins-muted);
+    font-weight: 700;
+    font-size: 0.95rem;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ws-nav-link:hover,
+.ws-nav-link.active {
+    background: var(--ins-primary, #6366f1);
+    color: #ffffff;
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.22);
+}
+
+@media (max-width: 768px) {
+    .ws-navbar {
+        flex-direction: column;
+    }
+}
+
 .ia-submission-panel {
     padding: 0;
     overflow: hidden;

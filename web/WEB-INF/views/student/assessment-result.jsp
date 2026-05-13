@@ -47,20 +47,10 @@
         <section class="sa-shell">
             <article class="sa-result-card sa-panel">
                 <div class="sa-panel-head">
-                    <div>
-                        <h3>${assessment.title}</h3>
-                        <p>
-                            Submission date:
-                            <c:choose>
-                                <c:when test="${not empty submission.submitDate}">${fn:replace(submission.submitDate, 'T', ' ')}</c:when>
-                                <c:otherwise>--</c:otherwise>
-                            </c:choose>
-                            <c:if test="${not empty submission.endedAt}">
-                                | Ended: ${fn:replace(submission.endedAt, 'T', ' ')}
-                            </c:if>
-                        </p>
+                    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                        <h3 style="margin: 0; font-size: 1.4rem;">${assessment.title}</h3>
+                        <span class="sa-status ${statusClass}">${submissionStatusLabel}</span>
                     </div>
-                    <span class="sa-status ${statusClass}">${submissionStatusLabel}</span>
                 </div>
 
                 <div class="sa-result-score">
@@ -88,7 +78,7 @@
                             <strong>Instructor feedback:</strong> ${submission.feedback}
                         </c:when>
                         <c:when test="${not empty submission.score}">
-                            This submission has been graded automatically.
+                            This submission was graded automatically.
                         </c:when>
                         <c:otherwise>
                             The submission is awaiting instructor review.
@@ -100,7 +90,7 @@
             <article class="sa-panel">
                 <div class="sa-panel-head">
                     <div>
-                        <h3>Performance breakdown</h3>
+                        <h3>Question breakdown</h3>
                     </div>
                 </div>
 
@@ -108,7 +98,7 @@
                     <c:when test="${not objectiveAssessment || empty questions}">
                         <div class="sa-empty">
                             <h3>No breakdown available</h3>
-                            <p>This assessment was submitted as a file or the question set is unavailable.</p>
+                            <p>This assessment was submitted as a file or the question set is not available.</p>
                         </div>
                     </c:when>
                     <c:otherwise>
@@ -117,14 +107,17 @@
                                 <c:set var="studAns" value="${empty studentAnswerByQuestionId[q.questionId] ? '' : studentAnswerByQuestionId[q.questionId]}" />
                                 <c:set var="corrAns" value="${empty correctAnswerByQuestionId[q.questionId] ? '' : correctAnswerByQuestionId[q.questionId]}" />
                                 <c:set var="isCorrect" value="${not empty studAns and studAns == corrAns}" />
-                                <div class="sa-breakdown-item ${isCorrect ? 'correct' : 'incorrect'}">
-                                    <span class="sa-badge-flat ${isCorrect ? 'success' : 'danger'}" style="margin-bottom: 12px;">
+                                <div class="sa-breakdown-item ${isCorrect ? 'correct' : 'incorrect'}" style="padding: 12px; margin-bottom: 8px;">
+                                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                                        <span class="sa-badge-flat ${isCorrect ? 'success' : 'danger'}" style="margin: 0;">
                                         <i class="fas ${isCorrect ? 'fa-circle-check' : 'fa-circle-xmark'}"></i>
                                         ${isCorrect ? 'Correct' : 'Incorrect'}
-                                    </span>
-                                    <h4 style="margin: 0 0 10px 0;">Q${loop.index + 1}. ${q.questionText}</h4>
-                                    <p><strong>Your answer:</strong> <c:out value="${empty studAns ? '--' : studAns}"/></p>
-                                    <p><strong>Correct answer:</strong> <c:out value="${empty corrAns ? '--' : corrAns}"/></p>
+                                    </div>
+                                    <h4 style="margin: 0 0 8px 0; font-size: 1rem;">Q${loop.index + 1}. ${q.questionText}</h4>
+                                    <div style="display: flex; gap: 24px; font-size: 0.9rem;">
+                                        <p style="margin: 0;"><strong>Your answer:</strong> <c:out value="${empty studAns ? '--' : studAns}"/></p>
+                                        <p style="margin: 0;"><strong>Correct answer:</strong> <c:out value="${empty corrAns ? '--' : corrAns}"/></p>
+                                    </div>
                                 </div>
                             </c:forEach>
                         </div>
@@ -132,69 +125,9 @@
                 </c:choose>
             </article>
 
-            <article class="sa-panel">
-                <div class="sa-panel-head">
-                    <div>
-                        <h3>Submission details</h3>
-                    </div>
-                </div>
-
-                <div class="sa-detail-grid">
-                    <div class="sa-detail-list">
-                        <div class="sa-detail-item">
-                            <span>Raw submission</span>
-                            <p>
-                                <c:choose>
-                                    <c:when test="${not empty submission.answersFilePath}">${submission.answersFilePath}</c:when>
-                                    <c:otherwise>--</c:otherwise>
-                                </c:choose>
-                            </p>
-                            <c:if test="${not empty submission.answersFilePath and (fn:startsWith(submission.answersFilePath, 'http://') or fn:startsWith(submission.answersFilePath, 'https://'))}">
-                                <div class="sa-footer-actions" style="margin-top: 10px; gap: 8px;">
-                                    <a class="sv-btn" href="${submission.answersFilePath}" target="_blank" rel="noopener noreferrer">
-                                        <i class="fas fa-up-right-from-square"></i> Open Submission
-                                    </a>
-                                    <button type="button" class="sv-btn" data-copy-url="${submission.answersFilePath}">
-                                        <i class="fas fa-copy"></i> Copy Link
-                                    </button>
-                                </div>
-                            </c:if>
-                        </div>
-                        <div class="sa-detail-item">
-                            <span>Status</span>
-                            <strong>${submissionStatusLabel}</strong>
-                        </div>
-                        <div class="sa-detail-item">
-                            <span>Submitted by</span>
-                            <strong><c:choose><c:when test="${not empty submission.studentName}">${submission.studentName}</c:when><c:otherwise>${sessionScope.userName}</c:otherwise></c:choose></strong>
-                        </div>
-                    </div>
-
-                    <div class="sa-detail-list">
-                        <div class="sa-detail-item">
-                            <span>Audit trail</span>
-                            <c:choose>
-                                <c:when test="${empty submissionAudits}">
-                                    <p style="margin: 0; color: var(--sa-muted); font-size: 0.9rem;">No grading audit entries yet.</p>
-                                </c:when>
-                                <c:otherwise>
-                                    <div class="sa-timeline">
-                                        <c:forEach var="audit" items="${submissionAudits}">
-                                            <div class="sa-timeline-item">
-                                                <h5 style="margin: 0 0 2px 0; font-size: 0.92rem; font-weight: 700; color: var(--sa-heading);">${audit.actionType} by ${audit.gradedByName}</h5>
-                                                <p style="margin: 0; font-size: 0.82rem; color: var(--sa-muted);">${fn:replace(audit.gradedAt, 'T', ' ')}</p>
-                                            </div>
-                                        </c:forEach>
-                                    </div>
-                                </c:otherwise>
-                            </c:choose>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="sa-footer-actions" style="margin-top: 18px;">
-                    <a class="sv-btn" href="${pageContext.request.contextPath}/student/assessments?view=dashboard&enrollmentId=${enrollment.enrollmentId}"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
-                    <a class="sv-btn primary" href="${pageContext.request.contextPath}/student/assessments?view=history&enrollmentId=${enrollment.enrollmentId}"><i class="fas fa-clock-rotate-left"></i> View History</a>
+                <div class="sa-footer-actions" style="margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--sv-border);">
+                    <a class="sv-btn" href="${pageContext.request.contextPath}/student/assessments?view=dashboard&enrollmentId=${enrollment.enrollmentId}"><i class="fas fa-arrow-left"></i> Back to Assessments</a>
+                    <a class="sv-btn primary" href="${pageContext.request.contextPath}/student/assessments?view=history&enrollmentId=${enrollment.enrollmentId}"><i class="fas fa-clock-rotate-left"></i> View Attempts</a>
                 </div>
             </article>
         </section>

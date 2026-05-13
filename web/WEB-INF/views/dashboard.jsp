@@ -182,28 +182,28 @@
                     <div class="sv-card-body">
                         <div class="sd3-badge-gallery">
                             <div class="sd3-badge-item ${enrolledCoursesCount > 0 ? 'unlocked' : 'locked'}" title="Enrolled in your first course!">
-                                <div class="sd3-badge-icon">🎓</div>
+                                <div class="sd3-badge-icon"><i class="fas fa-graduation-cap" style="color: var(--sv-accent);"></i></div>
                                 <div class="sd3-badge-info">
                                     <strong>First Step</strong>
                                     <span>Enrolled</span>
                                 </div>
                             </div>
                             <div class="sd3-badge-item ${completedCoursesCount > 0 ? 'unlocked' : 'locked'}" title="Finished at least one course!">
-                                <div class="sd3-badge-icon">🏆</div>
+                                <div class="sd3-badge-icon"><i class="fas fa-trophy" style="color: #f59e0b;"></i></div>
                                 <div class="sd3-badge-info">
                                     <strong>Finisher</strong>
                                     <span>Course Done</span>
                                 </div>
                             </div>
                             <div class="sd3-badge-item ${overallProgress >= 50 ? 'unlocked' : 'locked'}" title="Average progress is 50% or more!">
-                                <div class="sd3-badge-icon">⚡</div>
+                                <div class="sd3-badge-icon"><i class="fas fa-bolt" style="color: #10b981;"></i></div>
                                 <div class="sd3-badge-info">
                                     <strong>Consistent</strong>
                                     <span>50%+ Done</span>
                                 </div>
                             </div>
                             <div class="sd3-badge-item ${certificatesCount > 0 ? 'unlocked' : 'locked'}" title="Earned an official certificate of completion!">
-                                <div class="sd3-badge-icon">🏅</div>
+                                <div class="sd3-badge-icon"><i class="fas fa-award" style="color: #8b5cf6;"></i></div>
                                 <div class="sd3-badge-info">
                                     <strong>Scholar</strong>
                                     <span>Certified</span>
@@ -226,7 +226,7 @@
                                 <c:if test="${days >= 0 && days <= 5}">
                                     <c:set var="hasReminders" value="true"/>
                                     <div class="sd3-timeline-item warning">
-                                        <div class="sd3-timeline-marker">⏳</div>
+                                        <div class="sd3-timeline-marker"><i class="fas fa-hourglass-half" style="color: #f59e0b;"></i></div>
                                         <div class="sd3-timeline-content">
                                             <strong>Access Ending</strong>
                                             <span><c:out value="${course.courseName}"/> ends in ${days} ${days == 1 ? 'day' : 'days'}!</span>
@@ -236,7 +236,7 @@
                                 <c:if test="${days < 0 && not empty course.courseDuration && course.courseDuration > 0}">
                                     <c:set var="hasReminders" value="true"/>
                                     <div class="sd3-timeline-item expired">
-                                        <div class="sd3-timeline-marker">⚠️</div>
+                                        <div class="sd3-timeline-marker"><i class="fas fa-triangle-exclamation" style="color: #ef4444;"></i></div>
                                         <div class="sd3-timeline-content">
                                             <strong>Course Expired</strong>
                                             <span><c:out value="${course.courseName}"/> is now in read-only mode.</span>
@@ -246,7 +246,7 @@
                             </c:forEach>
                             <c:if test="${not hasReminders}">
                                 <div class="sd3-timeline-empty">
-                                    <div class="sd3-timeline-empty-icon">🎉</div>
+                                    <div class="sd3-timeline-empty-icon"><i class="fas fa-check-circle" style="color: #10b981; font-size: 1.5rem;"></i></div>
                                     <p>All clear! No urgent timelines approaching.</p>
                                 </div>
                             </c:if>

@@ -31,6 +31,9 @@
             <jsp:param name="currentLabel" value="Submissions"/>
         </jsp:include>
 
+        <c:set var="currentCourseFlow" value="assessments"/>
+        <jsp:include page="/WEB-INF/views/instructor/fragments/course-flow-nav.jsp"/>
+
         <section class="ins-page-head">
             <div>
                 <p class="ins-page-kicker">Submissions & Grading</p>

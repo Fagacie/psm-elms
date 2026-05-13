@@ -31,10 +31,10 @@
             <div class="sv-card-body" style="padding: 24px 28px !important; display: flex; flex-direction: column; gap: 20px;">
                 <div class="bc-hero-copy" style="max-width: 800px;">
                     <span style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--sv-accent); font-weight: 800; display: inline-flex; align-items: center; gap: 6px; margin-bottom: 6px;">
-                        <i class="fas fa-compass" style="font-size: 0.8rem;"></i> Course Navigator
+                        <i class="fas fa-compass" style="font-size: 0.8rem;"></i> Course Catalog
                     </span>
-                    <h2 style="margin: 0; font-size: clamp(1.5rem, 2.1vw, 2.0rem); font-weight: 800; letter-spacing: -0.03em; line-height: 1.2;">Explore Our Academic Catalog</h2>
-                    <p style="margin: 6px 0 0; color: var(--sv-muted); font-size: 0.92rem; line-height: 1.5;">Filter courses by difficulty, category, or pricing. Enroll with a single click to start learning instantly.</p>
+                    <h2 style="margin: 0; font-size: clamp(1.5rem, 2.1vw, 2.0rem); font-weight: 800; letter-spacing: -0.03em; line-height: 1.2;">Browse available courses</h2>
+                    <p style="margin: 6px 0 0; color: var(--sv-muted); font-size: 0.92rem; line-height: 1.5;">Filter by difficulty, category, or price. Open a course to review the details before enrolling.</p>
                 </div>
                 
                 <div style="display: flex; gap: 12px; flex-wrap: wrap; border-top: 1px solid var(--sv-border); padding-top: 16px;">
@@ -50,13 +50,6 @@
                         <div style="display: flex; flex-direction: column;">
                             <strong class="bc-count" style="font-size: 0.95rem; font-weight: 700; line-height: 1.1;" data-counter="${not empty enrolledCourseIds ? enrolledCourseIds.size() : 0}">${not empty enrolledCourseIds ? enrolledCourseIds.size() : 0}</strong>
                             <span style="font-size: 0.65rem; color: var(--sv-muted); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">Enrolled</span>
-                        </div>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 10px; background: var(--sv-surface); border: 1px solid var(--sv-border); padding: 8px 14px; border-radius: 10px; min-width: 130px;">
-                        <i class="fas fa-bolt" style="color: #f59e0b; font-size: 0.95rem;"></i>
-                        <div style="display: flex; flex-direction: column;">
-                            <strong style="font-size: 0.95rem; font-weight: 700; line-height: 1.1;">Live</strong>
-                            <span style="font-size: 0.65rem; color: var(--sv-muted); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">Filtering</span>
                         </div>
                     </div>
                 </div>
@@ -127,19 +120,6 @@
                                 </div>
                                 <h3 data-search-text style="margin-bottom: 8px !important;"><c:out value="${course.courseName}"/></h3>
                                 
-                                <!-- Ratings & Social Proof -->
-                                <div class="bc-social-proof">
-                                    <div class="bc-rating">
-                                        <i class="fas fa-star" style="color: #f59e0b;"></i>
-                                        <span>4.${(course.courseId % 4) + 6}</span>
-                                        <span class="bc-reviews-count">(${(course.courseId * 13) % 120 + 24})</span>
-                                    </div>
-                                    <div class="bc-student-count">
-                                        <i class="fas fa-users"></i>
-                                        <span>${(course.courseId * 29) % 600 + 140} enrolled</span>
-                                    </div>
-                                </div>
-
                                 <p style="margin-top: 10px !important;">
                                     <c:choose>
                                         <c:when test="${not empty course.description && course.description.length() > 120}">${course.description.substring(0, 120)}...</c:when>

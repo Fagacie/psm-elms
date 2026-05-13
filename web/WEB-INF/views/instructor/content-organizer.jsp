@@ -9,9 +9,14 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-shell.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-organizer.css">
-    <jsp:include page="/WEB-INF/views/common/head-external-assets.jsp"/>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-shell.css?v=3">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-courses.css?v=3">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-organizer.css?v=3">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-assessment-flow.css?v=3">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/theme-toggle.css?v=3">
+    <script defer src="${pageContext.request.contextPath}/js/theme-toggle.js"></script>
+    <script defer src="${pageContext.request.contextPath}/js/instructor-shell.js"></script>
 </head>
 <body class="instructor-ui">
 <jsp:include page="/WEB-INF/views/common/instructor-header.jsp">
@@ -32,11 +37,12 @@
             <span>Organizer</span>
         </nav>
 
-        <section class="ins-page-head">
+        <c:set var="currentCourseFlow" value="materials" scope="request"/>
+        <jsp:include page="/WEB-INF/views/instructor/fragments/course-flow-nav.jsp"/>
+
+        <section class="ins-page-head" style="margin-bottom: 24px;">
             <div>
-                <p class="ins-page-kicker">Course Flow Studio</p>
-                <h2>Arrange materials and assessments in the order students should experience them</h2>
-                <p>This workspace connects the learning sequence into one visual flow. Reorder materials, attach assessments after the right chapter, and keep final evaluations clearly separated at the end of the course.</p>
+                <h2>Arrange Course Content</h2>
             </div>
             <div class="ins-hero-actions">
                 <a href="${pageContext.request.contextPath}/instructor/courses" class="btn btn-secondary">
@@ -48,40 +54,13 @@
             </div>
         </section>
 
-        <section class="ins-hero-card organizer-hero">
-            <div class="ins-hero-grid">
-                <div>
-                    <h3>${course.courseName}</h3>
-                    <p>Drag materials to change chapter sequence. Drag assessments beneath a material to make them appear after that chapter, or place them in the final section to position them after all learning materials.</p>
-                </div>
-                <div class="ins-hero-metrics">
-                    <div class="ins-metric">
-                        <strong>${materials.size()}</strong>
-                        <span>Materials in sequence</span>
-                    </div>
-                    <div class="ins-metric">
-                        <strong>${finalAssessments.size()}</strong>
-                        <span>Final assessments</span>
-                    </div>
-                    <div class="ins-metric">
-                        <strong>${param.success == 'reordered' ? 'Saved' : 'Ready'}</strong>
-                        <span>Flow state</span>
-                    </div>
-                    <div class="ins-metric">
-                        <strong>${empty materials ? 'Empty' : 'Structured'}</strong>
-                        <span>Learning path</span>
-                    </div>
-                </div>
-            </div>
-        </section>
-
         <c:if test="${param.success == 'reordered'}">
-            <div class="alert alert-success">
+            <div class="ws-alert ws-alert-success">
                 <i class="fas fa-check-circle"></i> Course content order saved successfully.
             </div>
         </c:if>
         <c:if test="${param.error == 'invalid'}">
-            <div class="alert alert-error">
+            <div class="ws-alert ws-alert-error">
                 <i class="fas fa-exclamation-circle"></i> Unable to save the current arrangement. Please try again.
             </div>
         </c:if>
@@ -90,7 +69,6 @@
             <div class="section-header">
                 <div>
                     <h3 class="section-title">Course Content Flow</h3>
-                    <p class="section-caption">Materials create the main learning path. Assessments can be attached after a material or moved to the final assessment area.</p>
                 </div>
             </div>
 
@@ -98,7 +76,7 @@
                 <div class="empty-state-box">
                     <i class="fas fa-folder-open"></i>
                     <p>No materials or assessments yet. Add materials and assessments first, then organize them here.</p>
-                    <a href="${pageContext.request.contextPath}/instructor/materials" class="btn btn-primary">Add Materials</a>
+                    <a href="${pageContext.request.contextPath}/instructor/courses?action=workspace&amp;courseId=${course.courseId}#materials" class="btn btn-primary">Add Materials</a>
                 </div>
             </c:if>
 
@@ -121,8 +99,8 @@
                                         <div class="organizer-item-meta">Material • Order: <c:out value="${material.displayOrder}" default="N/A"/></div>
                                     </div>
                                     <div class="organizer-item-actions">
-                                        <a href="${pageContext.request.contextPath}/instructor/materials?courseId=${course.courseId}" class="btn btn-secondary btn-sm" title="Edit Material">
-                                            <i class="fas fa-edit"></i>
+                                        <a href="${pageContext.request.contextPath}/instructor/courses?action=workspace&amp;courseId=${course.courseId}#materials" class="btn btn-secondary btn-sm" title="Open Material Manager">
+                                            <i class="fas fa-external-link-alt"></i>
                                         </a>
                                     </div>
                                 </div>

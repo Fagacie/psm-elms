@@ -167,6 +167,15 @@ public class InstructorCourseServlet extends HttpServlet {
             if (archivedAssessments == null) archivedAssessments = java.util.Collections.emptyList();
             if (enrollments == null) enrollments = java.util.Collections.emptyList();
 
+            java.util.Map<Integer, Integer> submissionCountByAssessmentId = new java.util.HashMap<>();
+            for (Assessment assessment : assessments) {
+                List<AssessmentSubmission> submissions = submissionDAO.findByAssessment(assessment.getAssessmentId());
+                submissionCountByAssessmentId.put(
+                        assessment.getAssessmentId(),
+                        submissions != null ? submissions.size() : 0
+                );
+            }
+
             int completedStudents = 0;
             int progressSum = 0;
             for (Enrollment enrollment : enrollments) {
@@ -198,6 +207,7 @@ public class InstructorCourseServlet extends HttpServlet {
             request.setAttribute("publishedMaterials", materials.size());
             request.setAttribute("deletedMaterials", materialDAO.findDeletedByCourse(courseId));
             request.setAttribute("assessmentCount", assessments.size());
+            request.setAttribute("submissionCountByAssessmentId", submissionCountByAssessmentId);
             request.getRequestDispatcher("/WEB-INF/views/instructor/course-workspace.jsp").forward(request, response);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error loading course workspace", e);

@@ -12,6 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-shell.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-assessments.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-assessment-flow.css">
     <jsp:include page="/WEB-INF/views/common/head-external-assets.jsp"/>
 </head>
 <body class="instructor-ui">
@@ -28,6 +29,9 @@
         <jsp:include page="/WEB-INF/views/instructor/fragments/assessment-breadcrumb.jsp">
             <jsp:param name="currentLabel" value="Course Assessments"/>
         </jsp:include>
+
+        <c:set var="currentCourseFlow" value="assessments"/>
+        <jsp:include page="/WEB-INF/views/instructor/fragments/course-flow-nav.jsp"/>
 
         <section class="ins-page-head">
             <div>

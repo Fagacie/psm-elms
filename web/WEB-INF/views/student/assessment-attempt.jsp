@@ -662,7 +662,7 @@
                         <div class="assessment-shell-body">
         </c:otherwise>
     </c:choose>
-</c:if>
+
             <!-- Assessment Header -->
             <div class="assessment-header">
                 <div class="assessment-header-left">
@@ -825,6 +825,7 @@
                     <i class="fas fa-arrow-left"></i> Back to Assessment List
                 </a>
             </div>
+            </div>
         </section>
     </main>
     <c:if test="${not isEmbedded}">
@@ -850,7 +851,7 @@
             <!-- Assessment Header -->
             <div class="assessment-header" style="margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid #e0e0e0;">
                 <div class="assessment-header-left">
-                    <h3>${assessment.title}</h3>
+                    <h3 style="margin: 0;">${assessment.title}</h3>
                 </div>
                 <div class="assessment-header-right">
                     <div class="timer-container">
@@ -864,33 +865,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Metrics -->
-            <div class="assessment-metrics">
-                <div class="metric-card">
-                    <div class="metric-label">Type</div>
-                    <div class="metric-value">${assessment.type}</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-label">Duration</div>
-                    <div class="metric-value">${assessment.duration != null ? assessment.duration : '-'}${assessment.duration != null ? ' min' : ''}</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-label">Attempts</div>
-                    <div class="metric-value">${usedAttempts} / ${allowedAttempts}</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-label">Questions</div>
-                    <div class="metric-value">${questions.size()}</div>
-                </div>
-            </div>
-
-            <c:if test="${not empty displayInstructions}">
-                <div class="instructions-box">
-                    <i class="fas fa-info-circle" style="margin-right: 6px;"></i>
-                    <strong>Instructions:</strong> ${displayInstructions}
-                </div>
-            </c:if>
 
             <form method="post" id="assessmentForm" target="_parent" action="${pageContext.request.contextPath}/student/assessments" style="display: grid; gap: 16px;">
                 <input type="hidden" name="assessmentId" value="${assessment.assessmentId}">

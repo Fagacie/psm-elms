@@ -50,31 +50,11 @@
             </div>
         </c:if>
 
-        <section class="me-hero sv-card" style="margin-bottom: 24px;">
-            <div class="sv-card-body me-hero-body" style="display: flex; justify-content: space-between; align-items: center;">
-                <div class="me-hero-copy">
-                    <h2>My Courses</h2>
-                    <p>Track your active courses, continue where you left off, and review completed material in read-only mode.</p>
-                </div>
-                <div class="me-hero-stats-quick">
-                    <div class="me-stat-circle-wrap">
-                        <svg class="me-stat-circle" viewBox="0 0 36 36">
-                            <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                            <path class="circle" stroke-dasharray="${(inProgressCount + completedCount) > 0 ? (completedCount * 100 / (inProgressCount + completedCount)) : 0}, 100" stroke="#10b981" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                        </svg>
-                        <div class="me-stat-circle-text">
-                            <strong><fmt:formatNumber value="${(inProgressCount + completedCount) > 0 ? (completedCount * 100 / (inProgressCount + completedCount)) : 0}" maxFractionDigits="0"/>%</strong>
-                            <span>Finished</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section class="sv-card">
+        <section class="sv-card" style="margin-top: 24px;">
             <div class="sv-card-head">
                 <div>
-                    <h2>Current Courses</h2>
+                    <h2>My Courses</h2>
+                    <p style="margin: 4px 0 0; color: var(--sv-muted); font-size: 0.9rem;">Track your courses, review progress, and resume learning.</p>
                 </div>
                 <a href="${pageContext.request.contextPath}/student/courses" class="sv-btn primary"><i class="fas fa-search"></i>&nbsp;Browse Courses</a>
             </div>
@@ -156,12 +136,12 @@
                                                 <c:set var="daysLeft" value="${enrollment.daysRemaining}"/>
                                                 <c:if test="${daysLeft >= 0}">
                                                     <span style="color: ${daysLeft <= 2 ? '#ef4444' : '#10b981'}; margin-left: auto; font-weight: 700;">
-                                                        ⏳ ${daysLeft} ${daysLeft == 1 ? 'day' : 'days'} left
+                                                        ${daysLeft} ${daysLeft == 1 ? 'day' : 'days'} remaining
                                                     </span>
                                                 </c:if>
                                                 <c:if test="${daysLeft < 0 && not empty enrollment.courseDuration && enrollment.courseDuration > 0}">
                                                     <span style="color: #ef4444; margin-left: auto; font-weight: 700;">
-                                                        ⚠️ Expired
+                                                        Expired
                                                     </span>
                                                 </c:if>
                                             </c:if>
