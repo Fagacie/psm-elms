@@ -31,123 +31,123 @@
 
         <c:set var="isEnrolled" value="${not empty enrolledCourseIds && enrolledCourseIds.contains(course.courseId)}"/>
 
-        <section class="sv-card" style="border-radius: 16px;">
-            <div class="sv-card-head" style="border-bottom: 1px solid var(--sv-border); padding: 24px 28px !important; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap;">
-                <div style="display: flex; flex-direction: column; gap: 6px;">
-                    <span style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--sv-accent); font-weight: 800;"><i class="fas fa-graduation-cap"></i> Course Details</span>
-                    <h2 style="margin: 0; font-size: clamp(1.4rem, 2.2vw, 1.9rem); font-weight: 800; color: var(--sv-foreground); letter-spacing: -0.03em;"><c:out value="${course.courseName}"/></h2>
+        <section class="sv-card cd-shell-card">
+            <div class="sv-card-head cd-shell-head">
+                <div class="cd-shell-copy">
+                    <span class="cd-kicker"><i class="fas fa-graduation-cap"></i> Course Details</span>
+                    <h2 class="cd-shell-title"><c:out value="${course.courseName}"/></h2>
                 </div>
-                <div class="sv-inline-actions" style="display: flex; gap: 8px; align-items: center;">
+                <div class="sv-inline-actions cd-shell-actions">
                     <c:choose>
                         <c:when test="${isEnrolled}">
-                            <span class="sv-chip done" style="height: 32px; font-size: 0.7rem; border-radius: 6px;"><i class="fas fa-check-circle"></i> Enrolled</span>
-                            <a href="${pageContext.request.contextPath}/student/my-enrollments" class="sv-btn" style="height: 36px; padding: 0 14px; border-radius: 8px;"><i class="fas fa-book"></i> My Courses</a>
+                            <span class="sv-chip done cd-chip"><i class="fas fa-check-circle"></i> Enrolled</span>
+                            <a href="${pageContext.request.contextPath}/student/my-enrollments" class="sv-btn cd-btn-compact"><i class="fas fa-book"></i> My Courses</a>
                         </c:when>
                         <c:otherwise>
                             <c:choose>
                                 <c:when test="${empty course.courseFee || course.courseFee le 0}">
-                                    <form method="post" action="${pageContext.request.contextPath}/student/enroll" style="display:inline;">
+                                    <form method="post" action="${pageContext.request.contextPath}/student/enroll" class="cd-inline-form">
                                         <input type="hidden" name="courseId" value="${course.courseId}">
-                                        <button type="submit" class="sv-btn primary" style="height: 36px; padding: 0 16px; border-radius: 8px;"><i class="fas fa-user-plus"></i> Enroll Free</button>
+                                        <button type="submit" class="sv-btn primary cd-btn-compact"><i class="fas fa-user-plus"></i> Enroll Free</button>
                                     </form>
                                 </c:when>
                                 <c:otherwise>
-                                    <a href="${pageContext.request.contextPath}/student/enrollment-summary?courseId=${course.courseId}" class="sv-btn primary" style="height: 36px; padding: 0 16px; border-radius: 8px;"><i class="fas fa-shopping-cart"></i> Enroll Now</a>
+                                    <a href="${pageContext.request.contextPath}/student/enrollment-summary?courseId=${course.courseId}" class="sv-btn primary cd-btn-compact"><i class="fas fa-shopping-cart"></i> Enroll Now</a>
                                 </c:otherwise>
                             </c:choose>
                         </c:otherwise>
                     </c:choose>
-                    <a href="${pageContext.request.contextPath}/student/courses" class="sv-btn" style="height: 36px; padding: 0 14px; border-radius: 8px; border: 1px solid var(--sv-border); background: var(--sv-surface); color: var(--sv-foreground);"><i class="fas fa-arrow-left"></i> Back</a>
+                    <a href="${pageContext.request.contextPath}/student/courses" class="sv-btn cd-btn-compact cd-btn-back"><i class="fas fa-arrow-left"></i> Back</a>
                 </div>
             </div>
-            <div class="sv-card-body cd-hero-grid" style="padding: 28px !important;">
+
+            <div class="sv-card-body cd-shell-body cd-hero-grid">
                 <div>
-                    <!-- Banner Frame -->
-                    <div class="cd-banner-wrap" style="border-radius: 14px; overflow: hidden; border: 1px solid var(--sv-border); margin-bottom: 24px; box-shadow: var(--sv-shadow-sm);">
+                    <div class="cd-banner-wrap cd-banner-frame">
                         <c:choose>
                             <c:when test="${not empty course.courseBanner}">
                                 <c:choose>
                                     <c:when test="${course.courseBanner.startsWith('http')}">
-                                        <img class="cd-banner" src="${course.courseBanner}" alt="${course.courseName} banner" style="max-height: 280px; width: 100%; object-fit: cover; display: block;">
+                                        <img class="cd-banner cd-banner-frame__image" src="${course.courseBanner}" alt="${course.courseName} banner">
                                     </c:when>
                                     <c:otherwise>
-                                        <img class="cd-banner" src="${pageContext.request.contextPath}/${course.courseBanner}" alt="${course.courseName} banner" style="max-height: 280px; width: 100%; object-fit: cover; display: block;">
+                                        <img class="cd-banner cd-banner-frame__image" src="${pageContext.request.contextPath}/${course.courseBanner}" alt="${course.courseName} banner">
                                     </c:otherwise>
                                 </c:choose>
                             </c:when>
                             <c:otherwise>
-                                <div class="cd-banner-placeholder" style="height: 220px; background: var(--sv-surface-soft); display: flex; align-items: center; justify-content: center; color: var(--sv-muted); gap: 10px;">
-                                    <i class="fas fa-image" style="font-size: 1.5rem;"></i> <span>No banner uploaded</span>
+                                <div class="cd-banner-placeholder cd-banner-frame__placeholder">
+                                    <i class="fas fa-image"></i>
+                                    <span>No banner uploaded</span>
                                 </div>
                             </c:otherwise>
                         </c:choose>
                     </div>
 
-                    <!-- Description card -->
-                    <div style="background: var(--sv-surface-soft); border: 1px solid var(--sv-border); border-radius: 14px; padding: 22px; margin-bottom: 24px;">
-                        <h4 style="margin: 0 0 10px; font-size: 1.1rem; font-weight: 800; color: var(--sv-foreground);"><i class="fas fa-info-circle" style="color: var(--sv-accent);"></i> Course Overview</h4>
-                        <p class="cd-description" style="margin: 0; line-height: 1.6; color: var(--sv-muted); font-size: 0.94rem;"><c:out value="${course.description}"/></p>
+                    <div class="cd-overview-card">
+                        <h4 class="cd-section-title"><i class="fas fa-info-circle"></i> Course Overview</h4>
+                        <p class="cd-description cd-overview-text"><c:out value="${course.description}"/></p>
                     </div>
 
-                    <!-- Instructor Highlight Card -->
-                    <div style="display: flex; align-items: center; gap: 16px; padding: 18px; border: 1px solid var(--sv-border); border-radius: 14px; background: var(--sv-surface); margin-bottom: 24px; box-shadow: var(--sv-shadow-sm);">
-                        <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(59, 130, 246, 0.08); display: flex; align-items: center; justify-content: center; color: #3b82f6; font-size: 1.3rem; flex-shrink: 0;">
+                    <div class="cd-instructor-card">
+                        <div class="cd-instructor-icon">
                             <i class="fas fa-user-tie"></i>
                         </div>
-                        <div style="display: flex; flex-direction: column; gap: 2px;">
-                            <span style="font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--sv-muted); font-weight: 700;">Assigned Instructor</span>
-                            <strong style="font-size: 1rem; color: var(--sv-foreground); font-weight: 700;"><c:out value="${instructor.fullName}" default="TBA"/></strong>
-                            <span style="font-size: 0.78rem; color: var(--sv-muted);"><c:out value="${instructor.email}" default="Contact academic advisor"/></span>
+                        <div class="cd-instructor-copy">
+                            <span class="cd-instructor-label">Assigned Instructor</span>
+                            <strong class="cd-instructor-name"><c:out value="${instructor.fullName}" default="TBA"/></strong>
+                            <span class="cd-instructor-email"><c:out value="${instructor.email}" default="Contact academic advisor"/></span>
                         </div>
                     </div>
 
-                    <!-- Course Metadata grid -->
-                    <div class="cd-meta-grid" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px;">
-                        <div class="cd-meta-card" style="border: 1px solid var(--sv-border); border-radius: 12px; background: var(--sv-surface); padding: 16px 20px; border-left: 4px solid #3b82f6;">
-                            <span style="display: block; color: var(--sv-muted); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700;">Category</span>
-                            <strong style="display: block; margin-top: 6px; font-size: 0.98rem; color: var(--sv-foreground); font-weight: 700;"><c:out value="${course.category}"/></strong>
+                    <div class="cd-meta-grid">
+                        <div class="cd-meta-card cd-meta-card--category">
+                            <span>Category</span>
+                            <strong><c:out value="${course.category}"/></strong>
                         </div>
-                        <div class="cd-meta-card" style="border: 1px solid var(--sv-border); border-radius: 12px; background: var(--sv-surface); padding: 16px 20px; border-left: 4px solid #8b5cf6;">
-                            <span style="display: block; color: var(--sv-muted); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700;">Level</span>
-                            <strong style="display: block; margin-top: 6px; font-size: 0.98rem; color: var(--sv-foreground); font-weight: 700;"><c:out value="${course.level}"/></strong>
+                        <div class="cd-meta-card cd-meta-card--level">
+                            <span>Level</span>
+                            <strong><c:out value="${course.level}"/></strong>
                         </div>
-                        <div class="cd-meta-card" style="border: 1px solid var(--sv-border); border-radius: 12px; background: var(--sv-surface); padding: 16px 20px; border-left: 4px solid #10b981;">
-                            <span style="display: block; color: var(--sv-muted); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700;">Duration</span>
-                            <strong style="display: block; margin-top: 6px; font-size: 0.98rem; color: var(--sv-foreground); font-weight: 700;"><c:out value="${course.displayDuration}"/></strong>
+                        <div class="cd-meta-card cd-meta-card--duration">
+                            <span>Duration</span>
+                            <strong><c:out value="${course.displayDuration}"/></strong>
                         </div>
-                        <div class="cd-meta-card" style="border: 1px solid var(--sv-border); border-radius: 12px; background: var(--sv-surface); padding: 16px 20px; border-left: 4px solid #f59e0b;">
-                            <span style="display: block; color: var(--sv-muted); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700;">Course Fee</span>
-                            <strong style="display: block; margin-top: 6px; font-size: 0.98rem; color: var(--sv-foreground); font-weight: 700;">
-                                <c:choose><c:when test="${empty course.courseFee || course.courseFee le 0}">Free</c:when><c:otherwise>₦<fmt:formatNumber value="${course.courseFee}" type="number" minFractionDigits="2" maxFractionDigits="2"/></c:otherwise></c:choose>
+                        <div class="cd-meta-card cd-meta-card--fee">
+                            <span>Course Fee</span>
+                            <strong>
+                                <c:choose>
+                                    <c:when test="${empty course.courseFee || course.courseFee le 0}">Free</c:when>
+                                    <c:otherwise>NGN <fmt:formatNumber value="${course.courseFee}" type="number" minFractionDigits="2" maxFractionDigits="2"/></c:otherwise>
+                                </c:choose>
                             </strong>
                         </div>
                     </div>
                 </div>
 
-                <!-- Right actions panel -->
-                <aside class="cd-side-panel" style="border: 1px solid var(--sv-border); border-radius: 14px; background: var(--sv-surface-soft); padding: 24px; display: flex; flex-direction: column; gap: 16px;">
-                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
-                        <div style="width: 32px; height: 32px; border-radius: 8px; background: var(--sv-accent-soft); display: flex; align-items: center; justify-content: center; color: var(--sv-accent); font-size: 0.95rem;">
+                <aside class="cd-side-panel cd-actions-panel">
+                    <div class="cd-actions-head">
+                        <div class="cd-actions-icon">
                             <i class="fas fa-shopping-bag"></i>
                         </div>
-                        <h3 style="margin: 0; font-size: 1.1rem; font-weight: 800; color: var(--sv-foreground);">Course Actions</h3>
+                        <h3 class="cd-actions-title">Course Actions</h3>
                     </div>
-                    <p style="margin: 0; color: var(--sv-muted); font-size: 0.88rem; line-height: 1.5;">View details, open your courses, and continue learning from one place.</p>
-                    
-                    <div class="cd-action-stack" style="display: flex; flex-direction: column; gap: 10px; margin-top: 8px;">
-                        <a class="sv-btn" href="${pageContext.request.contextPath}/student/my-enrollments" style="height: 42px; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid var(--sv-border); background: var(--sv-surface); color: var(--sv-foreground); font-weight: 600;">
+                    <p class="cd-actions-copy">View details, open your courses, and continue learning from one place.</p>
+
+                    <div class="cd-action-stack cd-actions-stack">
+                        <a class="sv-btn cd-action-button" href="${pageContext.request.contextPath}/student/my-enrollments">
                             <i class="fas fa-layer-group"></i> My Courses
                         </a>
                         <c:if test="${not isEnrolled}">
                             <c:choose>
                                 <c:when test="${empty course.courseFee || course.courseFee le 0}">
-                                    <form method="post" action="${pageContext.request.contextPath}/student/enroll" style="display:block; width:100%;">
+                                    <form method="post" action="${pageContext.request.contextPath}/student/enroll" class="cd-action-form">
                                         <input type="hidden" name="courseId" value="${course.courseId}">
-                                        <button type="submit" class="sv-btn primary" style="width:100%; height: 42px; border-radius: 8px; font-weight: 700;"><i class="fas fa-user-plus"></i> Enroll Free</button>
+                                        <button type="submit" class="sv-btn primary cd-action-button cd-action-button--primary"><i class="fas fa-user-plus"></i> Enroll Free</button>
                                     </form>
                                 </c:when>
                                 <c:otherwise>
-                                    <a class="sv-btn primary" href="${pageContext.request.contextPath}/student/enrollment-summary?courseId=${course.courseId}" style="height: 42px; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700;">
+                                    <a class="sv-btn primary cd-action-button cd-action-button--primary" href="${pageContext.request.contextPath}/student/enrollment-summary?courseId=${course.courseId}">
                                         <i class="fas fa-shopping-cart"></i> Enroll Now
                                     </a>
                                 </c:otherwise>
@@ -155,13 +155,13 @@
                         </c:if>
                     </div>
 
-                    <div style="border-top: 1px solid var(--sv-border); padding-top: 14px; margin-top: 10px; display: flex; flex-direction: column; gap: 8px; font-size: 0.72rem; color: var(--sv-muted);">
-                        <div style="display: flex; align-items: center; gap: 6px;">
-                            <i class="fas fa-shield-alt" style="color: #10b981;"></i>
+                    <div class="cd-support-list">
+                        <div class="cd-support-item">
+                            <i class="fas fa-shield-alt cd-support-icon--success"></i>
                             <span>Secure checkout</span>
                         </div>
-                        <div style="display: flex; align-items: center; gap: 6px;">
-                            <i class="fas fa-undo-alt" style="color: #3b82f6;"></i>
+                        <div class="cd-support-item">
+                            <i class="fas fa-undo-alt cd-support-icon--accent"></i>
                             <span>Access course materials and certificates</span>
                         </div>
                     </div>
@@ -175,4 +175,3 @@
 <script src="${pageContext.request.contextPath}/js/student-v2.js"></script>
 </body>
 </html>
-

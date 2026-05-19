@@ -27,29 +27,29 @@
             <span>Browse Courses</span>
         </div>
 
-        <section class="bc-hero sv-card" style="margin-bottom: 24px; background: linear-gradient(135deg, var(--sv-surface) 0%, var(--sv-surface-soft) 100%); border-radius: 16px;">
-            <div class="sv-card-body" style="padding: 24px 28px !important; display: flex; flex-direction: column; gap: 20px;">
-                <div class="bc-hero-copy" style="max-width: 800px;">
-                    <span style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--sv-accent); font-weight: 800; display: inline-flex; align-items: center; gap: 6px; margin-bottom: 6px;">
-                        <i class="fas fa-compass" style="font-size: 0.8rem;"></i> Course Catalog
+        <section class="bc-hero sv-card bc-hero-card">
+            <div class="sv-card-body bc-hero-card__body">
+                <div class="bc-hero-copy bc-hero-card__copy">
+                    <span class="bc-hero-card__kicker">
+                        <i class="fas fa-compass bc-hero-card__kicker-icon"></i> Course Catalog
                     </span>
-                    <h2 style="margin: 0; font-size: clamp(1.5rem, 2.1vw, 2.0rem); font-weight: 800; letter-spacing: -0.03em; line-height: 1.2;">Browse available courses</h2>
-                    <p style="margin: 6px 0 0; color: var(--sv-muted); font-size: 0.92rem; line-height: 1.5;">Filter by difficulty, category, or price. Open a course to review the details before enrolling.</p>
+                    <h2 class="bc-hero-card__title">Browse available courses</h2>
+                    <p class="bc-hero-card__text">Filter by difficulty, category, or price. Open a course to review the details before enrolling.</p>
                 </div>
                 
-                <div style="display: flex; gap: 12px; flex-wrap: wrap; border-top: 1px solid var(--sv-border); padding-top: 16px;">
-                    <div style="display: flex; align-items: center; gap: 10px; background: var(--sv-surface); border: 1px solid var(--sv-border); padding: 8px 14px; border-radius: 10px; min-width: 130px;">
-                        <i class="fas fa-book" style="color: var(--sv-accent); font-size: 0.95rem;"></i>
-                        <div style="display: flex; flex-direction: column;">
-                            <strong class="bc-count" style="font-size: 0.95rem; font-weight: 700; line-height: 1.1;" data-counter="${not empty courses ? courses.size() : 0}">${not empty courses ? courses.size() : 0}</strong>
-                            <span style="font-size: 0.65rem; color: var(--sv-muted); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">Available</span>
+                <div class="bc-hero-card__stats">
+                    <div class="bc-hero-card__stat">
+                        <i class="fas fa-book bc-hero-card__stat-icon"></i>
+                        <div class="bc-hero-card__stat-copy">
+                            <strong class="bc-count bc-hero-card__stat-value" data-counter="${not empty courses ? courses.size() : 0}">${not empty courses ? courses.size() : 0}</strong>
+                            <span class="bc-hero-card__stat-label">Available</span>
                         </div>
                     </div>
-                    <div style="display: flex; align-items: center; gap: 10px; background: var(--sv-surface); border: 1px solid var(--sv-border); padding: 8px 14px; border-radius: 10px; min-width: 130px;">
-                        <i class="fas fa-user-check" style="color: #10b981; font-size: 0.95rem;"></i>
-                        <div style="display: flex; flex-direction: column;">
-                            <strong class="bc-count" style="font-size: 0.95rem; font-weight: 700; line-height: 1.1;" data-counter="${not empty enrolledCourseIds ? enrolledCourseIds.size() : 0}">${not empty enrolledCourseIds ? enrolledCourseIds.size() : 0}</strong>
-                            <span style="font-size: 0.65rem; color: var(--sv-muted); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">Enrolled</span>
+                    <div class="bc-hero-card__stat">
+                        <i class="fas fa-user-check bc-hero-card__stat-icon is-success"></i>
+                        <div class="bc-hero-card__stat-copy">
+                            <strong class="bc-count bc-hero-card__stat-value" data-counter="${not empty enrolledCourseIds ? enrolledCourseIds.size() : 0}">${not empty enrolledCourseIds ? enrolledCourseIds.size() : 0}</strong>
+                            <span class="bc-hero-card__stat-label">Enrolled</span>
                         </div>
                     </div>
                 </div>
@@ -97,7 +97,7 @@
                                 <span class="bc-level-badge level-${fn:toLowerCase(course.level)}">${course.level}</span>
                                 <span class="bc-cat">${course.category}</span>
                             </div>
-                            <div class="sv-card-body" style="padding-top: 0 !important;">
+                            <div class="sv-card-body bc-card-body-tight">
                                 <div class="bc-banner-wrap">
                                         <c:choose>
                                             <c:when test="${not empty course.courseBanner}">
@@ -118,17 +118,17 @@
                                         </c:otherwise>
                                     </c:choose>
                                 </div>
-                                <h3 data-search-text style="margin-bottom: 8px !important;"><c:out value="${course.courseName}"/></h3>
+                                <h3 data-search-text class="bc-course-title"><c:out value="${course.courseName}"/></h3>
                                 
-                                <p style="margin-top: 10px !important;">
+                                <p class="bc-course-copy">
                                     <c:choose>
                                         <c:when test="${not empty course.description && course.description.length() > 120}">${course.description.substring(0, 120)}...</c:when>
                                         <c:otherwise>${course.description}</c:otherwise>
                                     </c:choose>
                                 </p>
                                 <div class="bc-meta">
-                                    <span><i class="fas fa-clock" style="color: #3b82f6;"></i> ${course.displayDuration}</span>
-                                    <span><i class="fas fa-wallet" style="color: #10b981;"></i>
+                                    <span><i class="fas fa-clock bc-meta-icon"></i> ${course.displayDuration}</span>
+                                    <span><i class="fas fa-wallet bc-meta-icon is-success"></i>
                                         <c:choose>
                                             <c:when test="${empty course.courseFee || course.courseFee le 0}">Free</c:when>
                                             <c:otherwise><fmt:formatNumber value="${course.courseFee}" type="number" minFractionDigits="2" maxFractionDigits="2"/></c:otherwise>
@@ -139,7 +139,7 @@
                                     <a href="${pageContext.request.contextPath}/student/courses?action=details&id=${course.courseId}" class="sv-btn">Details</a>
                                     <c:choose>
                                         <c:when test="${isEnrolled}">
-                                            <a href="${pageContext.request.contextPath}/student/my-enrollments" class="sv-btn" style="background: rgba(16, 185, 129, 0.1); color: #10b981; border-color: rgba(16, 185, 129, 0.2); font-weight: 600;">My Course</a>
+                                            <a href="${pageContext.request.contextPath}/student/my-enrollments" class="sv-btn bc-btn-enrolled">My Course</a>
                                         </c:when>
                                         <c:otherwise>
                                             <c:choose>
@@ -182,7 +182,7 @@
             <h3>Securing Your Spot...</h3>
             <p>We are initializing your workspace resources and enrolling you into the course.</p>
         </div>
-        <div class="bc-modal-success" id="bcModalSuccess" style="display: none;">
+        <div class="bc-modal-success is-hidden" id="bcModalSuccess">
             <div class="bc-success-checkmark">
                 <i class="fas fa-circle-check"></i>
             </div>

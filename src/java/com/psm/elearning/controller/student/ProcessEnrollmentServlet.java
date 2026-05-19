@@ -9,6 +9,8 @@ import com.psm.elearning.dao.PaymentDAOImpl;
 import com.psm.elearning.model.Course;
 import com.psm.elearning.model.Enrollment;
 import com.psm.elearning.model.Payment;
+import com.psm.elearning.service.StudentAccessService;
+import com.psm.elearning.util.SessionUtil;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -27,12 +29,14 @@ public class ProcessEnrollmentServlet extends HttpServlet {
     private EnrollmentDAO enrollmentDAO;
     private CourseDAO courseDAO;
     private PaymentDAO paymentDAO;
+    private StudentAccessService studentAccessService;
     
     @Override
     public void init() {
         enrollmentDAO = new EnrollmentDAOImpl();
         courseDAO = new CourseDAOImpl();
         paymentDAO = new PaymentDAOImpl();
+        studentAccessService = new StudentAccessService();
     }
     
     @Override
@@ -40,15 +44,9 @@ public class ProcessEnrollmentServlet extends HttpServlet {
             throws ServletException, IOException {
         
         HttpSession session = request.getSession(false);
-        Integer userId = resolveUserId(session);
-        if (session == null || userId == null) {
+        Integer userId = SessionUtil.resolveUserId(session);
+        if (!studentAccessService.isStudentSession(session) || userId == null) {
             response.sendRedirect(request.getContextPath() + "/login");
-            return;
-        }
-        
-        String role = resolveRole(session);
-        if (!"Student".equals(role)) {
-            response.sendRedirect(request.getContextPath() + "/dashboard");
             return;
         }
         
@@ -69,7 +67,7 @@ public class ProcessEnrollmentServlet extends HttpServlet {
             if (existingEnrollment != null) {
                 Payment existingPayment = paymentDAO.getPaymentByEnrollmentId(existingEnrollment.getEnrollmentId());
                 String paymentStatus = existingPayment != null ? existingPayment.getStatus() : existingEnrollment.getPaymentStatus();
-                if (isPaidStatus(paymentStatus)) {
+                if (studentAccessService.isPaymentComplete(paymentStatus)) {
                     response.sendRedirect(request.getContextPath() + "/student/my-enrollments?error=already");
                 } else {
                     Course existingCourse = courseDAO.findById(courseId);
@@ -140,50 +138,6 @@ public class ProcessEnrollmentServlet extends HttpServlet {
         }
     }
 
-    private Integer resolveUserId(HttpSession session) {
-        if (session == null) {
-            return null;
-        }
-        Object raw = session.getAttribute("userId");
-        if (raw instanceof Integer) {
-            Integer parsed = (Integer) raw;
-            return parsed > 0 ? parsed : null;
-        }
-        if (raw instanceof String) {
-            try {
-                int parsed = Integer.parseInt(((String) raw).trim());
-                return parsed > 0 ? parsed : null;
-            } catch (NumberFormatException ignored) {
-                return null;
-            }
-        }
-        return null;
-    }
-
-    private String resolveRole(HttpSession session) {
-        if (session == null) {
-            return null;
-        }
-        Object role = session.getAttribute("role");
-        if (!(role instanceof String) || ((String) role).trim().isEmpty()) {
-            role = session.getAttribute("userRole");
-        }
-        if (!(role instanceof String)) {
-            return null;
-        }
-        String normalized = ((String) role).trim();
-        if ("Student".equalsIgnoreCase(normalized)) {
-            return "Student";
-        }
-        if ("Admin".equalsIgnoreCase(normalized)) {
-            return "Admin";
-        }
-        if ("Instructor".equalsIgnoreCase(normalized)) {
-            return "Instructor";
-        }
-        return null;
-    }
-
     private Integer parseCourseId(String value) {
         if (value == null) {
             return null;
@@ -199,13 +153,4 @@ public class ProcessEnrollmentServlet extends HttpServlet {
         return fee == null || fee.compareTo(BigDecimal.ZERO) <= 0;
     }
 
-    private boolean isPaidStatus(String status) {
-        if (status == null) {
-            return false;
-        }
-        String normalized = status.trim();
-        return "Paid".equalsIgnoreCase(normalized)
-                || "Completed".equalsIgnoreCase(normalized)
-                || "Success".equalsIgnoreCase(normalized);
-    }
 }

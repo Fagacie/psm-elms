@@ -4,7 +4,7 @@
 
 <c:set var="topbarProfilePicture" value="${not empty sessionScope.student.passportPath ? sessionScope.student.passportPath : null}"/>
 <c:set var="currentPath" value="${pageContext.request.requestURI}"/>
-<c:set var="resolvedStudentTitle" value="${not empty topbarTitle ? topbarTitle : 'Your Learning Hub'}"/>
+<c:set var="resolvedStudentTitle" value="${not empty topbarTitle ? topbarTitle : 'Student Workspace'}"/>
 <c:set var="resolvedTopbarContext" value="${not empty navContext ? navContext : 'default'}"/>
 <c:set var="topbarNotificationCount" value="${not empty unreadNotificationCount ? unreadNotificationCount : (not empty sessionScope.unreadNotifications ? sessionScope.unreadNotifications : 0)}"/>
 <c:set var="topbarUserName" value="${not empty sessionScope.userName ? sessionScope.userName : 'Student'}"/>
@@ -49,8 +49,6 @@
     </div>
 
     <div class="sv-top-right">
-
-
         <div class="sv-popover sv-notification-wrap" id="svNotificationWrap">
             <button type="button" class="sv-top-icon-btn" id="svNotificationBtn" aria-haspopup="true" aria-expanded="false" aria-label="Notifications">
                 <i class="fas fa-bell" aria-hidden="true"></i>
@@ -69,13 +67,13 @@
             </div>
         </div>
 
-        <button type="button" class="theme-toggle" data-theme-toggle aria-pressed="false">
-            <i class="fas fa-circle-half-stroke" aria-hidden="true"></i>
+        <button type="button" class="theme-toggle" data-theme-toggle aria-pressed="false" aria-label="Switch to dark mode" title="Switch to dark mode">
+            <i class="fas fa-moon" aria-hidden="true"></i>
             <span class="theme-toggle-label">Dark mode</span>
         </button>
 
         <div class="sv-profile-dropdown" id="svProfileDropdown">
-            <a href="${pageContext.request.contextPath}/profile" class="sv-profile-trigger">
+            <button type="button" class="sv-profile-trigger" id="svProfileMenuBtn" aria-haspopup="true" aria-expanded="false">
                 <span class="sv-profile-copy">
                     <span class="sv-profile-name"><c:out value="${topbarUserName}"/></span>
                 </span>
@@ -90,12 +88,14 @@
                         <c:otherwise><span class="sv-avatar-fallback"><c:out value="${topbarInitials}"/></span></c:otherwise>
                     </c:choose>
                 </span>
-            </a>
-        </div>
+                <i class="fas fa-angle-down" aria-hidden="true"></i>
+            </button>
 
-        <!-- Premium Topbar Logout Button -->
-        <a href="${pageContext.request.contextPath}/logout" class="sv-top-icon-btn" title="Logout" style="text-decoration: none; font-size: 1rem; color: #ef4444 !important; border-color: rgba(239, 68, 68, 0.2) !important;">
-            <i class="fas fa-sign-out-alt"></i>
-        </a>
+            <div class="sv-profile-menu" id="svProfileMenu" role="menu" aria-label="Profile menu">
+                <a href="${pageContext.request.contextPath}/profile" role="menuitem"><i class="fas fa-user"></i> Profile</a>
+                <a href="${pageContext.request.contextPath}/student/my-enrollments" role="menuitem"><i class="fas fa-book-open"></i> My Courses</a>
+                <a href="${pageContext.request.contextPath}/logout" role="menuitem" class="sv-logout"><i class="fas fa-right-from-bracket"></i> Logout</a>
+            </div>
+        </div>
     </div>
 </header>

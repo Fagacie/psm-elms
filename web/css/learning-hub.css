@@ -6,6 +6,7 @@
 
 body.lh-shell-page .sv-layout {
   min-height: calc(100vh - var(--sv-topbar-height));
+  padding-left: 0;
 }
 
 body.lh-shell-page .lh-main {
@@ -594,6 +595,31 @@ body.lh-shell-page .lh-main {
   border-bottom: 1px solid rgba(148, 163, 184, 0.14);
 }
 
+.lh-sidebar-back-row {
+  margin-bottom: 6px;
+}
+
+.lh-sidebar-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: rgba(255, 255, 255, 0.46);
+  text-decoration: none;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: color 0.2s ease;
+}
+
+.lh-sidebar-back-link:hover {
+  color: #38bdf8;
+}
+
+.lh-sidebar-back-link__icon {
+  font-size: 0.62rem;
+}
+
 .lh-course-sidebar__title {
   color: #ffffff;
   font-size: 0.98rem;
@@ -607,6 +633,65 @@ body.lh-shell-page .lh-main {
 
 .lh-sidebar-progress__row strong {
   color: #ffffff;
+}
+
+.lh-sidebar-duration {
+  display: grid;
+  gap: 8px;
+  margin-top: 15px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 0.72rem;
+}
+
+.lh-sidebar-duration__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.lh-sidebar-duration__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.lh-sidebar-duration__icon {
+  font-size: 0.72rem;
+  opacity: 0.8;
+}
+
+.lh-sidebar-duration__value {
+  color: #ffffff;
+  font-weight: 600;
+  text-align: right;
+}
+
+.lh-sidebar-duration__value.is-urgent {
+  color: #fca5a5;
+  font-weight: 700;
+}
+
+.lh-sidebar-duration__value.is-calm {
+  color: #7dd3fc;
+  font-weight: 700;
+}
+
+.lh-sidebar-duration__alert {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 6px;
+  padding: 6px 8px;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+  text-align: center;
+  font-size: 0.7rem;
+  font-weight: 700;
 }
 
 .lh-course-sidebar__scroll {
@@ -694,6 +779,69 @@ body.lh-shell-page .lh-main {
   box-shadow: none;
 }
 
+.lh-breadcrumb {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 0 0 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--sv-border);
+}
+
+.lh-breadcrumb__trail {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.lh-breadcrumb__link,
+.lh-breadcrumb__current,
+.lh-breadcrumb__separator {
+  font-size: 0.9rem;
+}
+
+.lh-breadcrumb__link {
+  color: var(--sv-muted);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.lh-breadcrumb__link:hover {
+  color: var(--sv-accent);
+}
+
+.lh-breadcrumb__separator {
+  color: var(--sv-border);
+}
+
+.lh-breadcrumb__current {
+  color: var(--sv-text);
+  font-weight: 700;
+}
+
+.lh-breadcrumb__action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: auto;
+  padding: 6px 14px;
+  background: var(--sv-surface);
+  border: 1px solid var(--sv-border);
+  border-radius: 6px;
+  color: var(--sv-text);
+  text-decoration: none;
+  font-size: 0.82rem;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.lh-breadcrumb__action:hover {
+  background: var(--sv-surface-soft);
+}
+
 .lh-workspace {
   margin-top: 16px;
   min-height: calc(100vh - var(--sv-topbar-height) - 118px);
@@ -760,6 +908,19 @@ body.lh-shell-page .lh-main {
   place-items: center;
 }
 
+.lh-video-shell--spaced {
+  margin-bottom: 20px;
+}
+
+.lh-video-embed {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 0;
+  border-radius: 12px;
+  box-shadow: var(--sv-shadow-md);
+}
+
 .lh-video-player {
   width: 100%;
   max-height: min(78vh, 820px);
@@ -810,6 +971,14 @@ body.lh-shell-page .lh-main {
   font-weight: 700;
 }
 
+.lh-link-preview__type-icon {
+  flex-shrink: 0;
+}
+
+.lh-link-preview__type-icon--youtube {
+  color: #ef4444;
+}
+
 .lh-focus-icon {
   width: 56px;
   height: 56px;
@@ -830,6 +999,13 @@ body.lh-shell-page .lh-main {
   margin: 0 auto;
 }
 
+.lh-assessment-card--flush {
+  padding-top: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
 .lh-assessment-card__grid {
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
@@ -845,6 +1021,10 @@ body.lh-shell-page .lh-main {
   gap: 14px;
 }
 
+.lh-assessment-card__content--flush {
+  padding: 0;
+}
+
 .lh-stage-card,
 .lh-assignment-status-card,
 .assignment-upload-box {
@@ -856,6 +1036,65 @@ body.lh-shell-page .lh-main {
 
 .lh-stage-card {
   padding: 18px;
+}
+
+.lh-stage-card--outlined {
+  border: 1px solid var(--sv-border);
+}
+
+.lh-assignment-prompt-box {
+  display: grid;
+  gap: 16px;
+  margin: 20px 0;
+  padding: 20px;
+  background: var(--sv-surface-soft);
+  border: 1px solid var(--sv-border);
+  border-left: 4px solid var(--sv-accent);
+}
+
+.lh-assignment-prompt-box__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--sv-heading);
+  font-size: 1.1rem;
+  font-weight: 750;
+}
+
+.lh-assignment-prompt-box__items {
+  display: grid;
+  gap: 14px;
+}
+
+.lh-assignment-prompt-box__item {
+  padding: 16px;
+  background: var(--sv-surface);
+  border: 1px solid var(--sv-border);
+}
+
+.lh-assignment-prompt-box__task-label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--sv-muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.lh-assignment-prompt-box__text {
+  color: var(--sv-text);
+  font-size: 0.98rem;
+  line-height: 1.6;
+}
+
+.lh-assignment-prompt-box__attachment {
+  margin-top: 12px;
+}
+
+.lh-assessment-actions {
+  margin-top: 18px;
 }
 
 .lh-action-bar {
@@ -1397,6 +1636,23 @@ body.lh-shell-page .lh-workspace {
     padding: 12px;
   }
 
+  .lh-breadcrumb {
+    align-items: stretch;
+  }
+
+  .lh-breadcrumb__action {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .lh-sidebar-duration__row {
+    align-items: flex-start;
+  }
+
+  .lh-sidebar-duration__value {
+    max-width: 40%;
+  }
+
   .lh-pdf-viewer {
     height: 62vh;
     min-height: 420px;
@@ -1411,4 +1667,3 @@ body.lh-shell-page .lh-workspace {
     padding-bottom: 120px;
   }
 }
-

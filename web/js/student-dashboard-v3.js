@@ -159,39 +159,6 @@
         });
     });
 
-    // Dynamic Time-of-day greeting
-    var greetingEl = document.getElementById('dynamicGreeting');
-    if (greetingEl) {
-        var hrs = new Date().getHours();
-        var greetText = 'Welcome back';
-        if (hrs >= 5 && hrs < 12) {
-            greetText = 'Good morning 🌅';
-        } else if (hrs >= 12 && hrs < 17) {
-            greetText = 'Good afternoon ☀️';
-        } else {
-            greetText = 'Good evening 🌙';
-        }
-        var currentName = greetingEl.textContent.replace('Welcome back, ', '').trim();
-        if (currentName) {
-            greetingEl.textContent = greetText + ', ' + currentName;
-        }
-    }
-
-    // Dynamic Quote Carousel rotation
-    var quoteEl = document.getElementById('sd3QuoteLine');
-    if (quoteEl) {
-        var quotes = [
-            '"The expert in anything was once a beginner."',
-            '"Your talent determines what you can do. Your motivation determines how much you are willing to do."',
-            '"Education is the most powerful weapon which you can use to change the world."',
-            '"Learn as if you were to live forever; live as if you were to die tomorrow."',
-            '"The mind is not a vessel to be filled, but a fire to be kindled."',
-            '"Failure is the opportunity to begin again more intelligently."'
-        ];
-        var idx = Math.floor(Math.random() * quotes.length);
-        quoteEl.textContent = quotes[idx];
-    }
-
     animateCounters();
     animateProgress();
     applyRowFilters();

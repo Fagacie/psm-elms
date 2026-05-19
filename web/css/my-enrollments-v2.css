@@ -8,6 +8,102 @@
   --me-accent-border: var(--sv-accent-border);
 }
 
+.me-section-card {
+  margin-top: 24px;
+}
+
+.me-card-intro {
+  margin: 4px 0 0;
+  color: var(--sv-muted);
+  font-size: 0.9rem;
+}
+
+.me-card-head {
+  padding: 18px 18px 0 !important;
+}
+
+.me-card-body {
+  padding-top: 0 !important;
+}
+
+.me-course-title {
+  margin-bottom: 6px !important;
+}
+
+.me-course-line {
+  margin: 0 0 12px;
+  color: var(--sv-muted);
+  font-size: 0.84rem;
+}
+
+.me-course-progress {
+  margin-bottom: 12px;
+}
+
+.me-progress-top {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--sv-muted);
+  margin-bottom: 4px;
+}
+
+.me-progress-track {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--sv-border);
+  overflow: hidden;
+}
+
+.me-progress-bar {
+  height: 100%;
+  transition: width 0.4s ease;
+}
+
+.me-progress-bar.is-low {
+  background: #ef4444;
+}
+
+.me-progress-bar.is-mid {
+  background: #eab308;
+}
+
+.me-progress-bar.is-high {
+  background: #10b981;
+}
+
+.me-course-meta {
+  margin-top: 10px !important;
+}
+
+.me-meta-icon {
+  color: #3b82f6;
+}
+
+.me-days-left {
+  margin-left: auto;
+  font-weight: 700;
+}
+
+.me-days-left.is-urgent,
+.me-days-left.is-expired {
+  color: #ef4444;
+}
+
+.me-days-left.is-healthy {
+  color: #10b981;
+}
+
+.me-actions {
+  margin-top: 14px !important;
+}
+
+.me-continue-button {
+  width: 100%;
+  text-align: center;
+}
+
 .me-user {
   display: inline-flex;
   align-items: center;

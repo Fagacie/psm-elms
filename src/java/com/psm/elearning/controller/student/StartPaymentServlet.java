@@ -11,6 +11,8 @@ import com.psm.elearning.model.Enrollment;
 import com.psm.elearning.model.Payment;
 import com.psm.elearning.service.AppSettingsService;
 import com.psm.elearning.service.PaystackService;
+import com.psm.elearning.service.StudentAccessService;
+import com.psm.elearning.util.SessionUtil;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -20,7 +22,6 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Locale;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -37,6 +38,7 @@ public class StartPaymentServlet extends HttpServlet {
     private CourseDAO courseDAO;
     private PaymentDAO paymentDAO;
     private PaystackService paystackService;
+    private StudentAccessService studentAccessService;
 
     @Override
     public void init() {
@@ -45,6 +47,7 @@ public class StartPaymentServlet extends HttpServlet {
         courseDAO = new CourseDAOImpl();
         paymentDAO = new PaymentDAOImpl();
         paystackService = new PaystackService();
+        studentAccessService = new StudentAccessService();
     }
 
     @Override
@@ -54,17 +57,10 @@ public class StartPaymentServlet extends HttpServlet {
         LOGGER.info("StartPaymentServlet payment request received");
 
         HttpSession session = request.getSession(false);
-        Integer userId = resolveUserId(session);
-        if (session == null || userId == null) {
+        Integer userId = SessionUtil.resolveUserId(session);
+        if (!studentAccessService.isStudentSession(session) || userId == null) {
             LOGGER.warning("Payment start rejected: missing session");
             response.sendRedirect(request.getContextPath() + "/login");
-            return;
-        }
-
-        String role = resolveRole(session);
-        if (!"Student".equals(role)) {
-            LOGGER.warning("Payment start rejected: unauthorized role");
-            response.sendRedirect(request.getContextPath() + "/dashboard");
             return;
         }
 
@@ -96,7 +92,7 @@ public class StartPaymentServlet extends HttpServlet {
             }
 
             // Verify ownership
-            if (!enrollment.getUserId().equals(userId)) {
+            if (!studentAccessService.belongsToStudent(enrollment, userId)) {
                 LOGGER.warning("Payment start rejected: enrollment ownership mismatch id=" + enrollmentId);
                 response.sendRedirect(request.getContextPath() + "/student/my-enrollments?error=unauthorized");
                 return;
@@ -112,7 +108,7 @@ public class StartPaymentServlet extends HttpServlet {
 
             // Check if already paid
             Payment existingPayment = paymentDAO.getPaymentByEnrollmentId(enrollmentId);
-            if (existingPayment != null && isPaid(existingPayment.getStatus())) {
+            if (existingPayment != null && studentAccessService.isPaymentComplete(existingPayment.getStatus())) {
                 LOGGER.info("Payment start skipped: enrollment already paid id=" + enrollmentId);
                 response.sendRedirect(request.getContextPath() + "/student/my-enrollments?message=alreadypaid");
                 return;
@@ -151,7 +147,7 @@ public class StartPaymentServlet extends HttpServlet {
                 LOGGER.info("Gateway reference=" + maskReference(paystackReference));
 
                 boolean paymentStored;
-                if (existingPayment != null && !isPaid(existingPayment.getStatus())) {
+                if (existingPayment != null && !studentAccessService.isPaymentComplete(existingPayment.getStatus())) {
                     paymentStored = paymentDAO.refreshPaymentInitialization(
                             existingPayment.getPaymentId(),
                             amount.doubleValue(),
@@ -211,58 +207,6 @@ public class StartPaymentServlet extends HttpServlet {
         } catch (NumberFormatException ex) {
             return null;
         }
-    }
-
-    private Integer resolveUserId(HttpSession session) {
-        if (session == null) {
-            return null;
-        }
-        Object raw = session.getAttribute("userId");
-        if (raw instanceof Integer) {
-            Integer parsed = (Integer) raw;
-            return parsed > 0 ? parsed : null;
-        }
-        if (raw instanceof String) {
-            try {
-                int parsed = Integer.parseInt(((String) raw).trim());
-                return parsed > 0 ? parsed : null;
-            } catch (NumberFormatException ignored) {
-                return null;
-            }
-        }
-        return null;
-    }
-
-    private String resolveRole(HttpSession session) {
-        if (session == null) {
-            return null;
-        }
-        Object role = session.getAttribute("role");
-        if (!(role instanceof String) || ((String) role).trim().isEmpty()) {
-            role = session.getAttribute("userRole");
-        }
-        if (!(role instanceof String)) {
-            return null;
-        }
-        String normalized = ((String) role).trim();
-        if ("Student".equalsIgnoreCase(normalized)) {
-            return "Student";
-        }
-        if ("Admin".equalsIgnoreCase(normalized)) {
-            return "Admin";
-        }
-        if ("Instructor".equalsIgnoreCase(normalized)) {
-            return "Instructor";
-        }
-        return null;
-    }
-
-    private boolean isPaid(String status) {
-        if (status == null) {
-            return false;
-        }
-        String normalized = status.trim().toLowerCase(Locale.ENGLISH);
-        return "paid".equals(normalized) || "completed".equals(normalized) || "success".equals(normalized);
     }
 
     private String buildCallbackUrl(HttpServletRequest request) {

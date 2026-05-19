@@ -13,6 +13,7 @@ import com.psm.elearning.model.Enrollment;
 import com.psm.elearning.model.Material;
 import com.psm.elearning.model.Payment;
 import com.psm.elearning.service.EnrollmentStateSyncService;
+import com.psm.elearning.service.StudentAccessService;
 import com.psm.elearning.util.SessionUtil;
 
 import javax.servlet.ServletException;
@@ -24,7 +25,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -41,6 +41,7 @@ public class MyEnrollmentsServlet extends HttpServlet {
     private MaterialDAO materialDAO;
     private AssessmentDAO assessmentDAO;
     private EnrollmentStateSyncService enrollmentStateSyncService;
+    private StudentAccessService studentAccessService;
 
     @Override
     public void init() {
@@ -49,6 +50,7 @@ public class MyEnrollmentsServlet extends HttpServlet {
         materialDAO = new MaterialDAOImpl();
         assessmentDAO = new AssessmentDAOImpl();
         enrollmentStateSyncService = new EnrollmentStateSyncService();
+        studentAccessService = new StudentAccessService();
     }
 
     @Override
@@ -62,8 +64,7 @@ public class MyEnrollmentsServlet extends HttpServlet {
             return;
         }
 
-        String role = SessionUtil.resolveRole(session);
-        if (!"Student".equals(role)) {
+        if (!studentAccessService.isStudentSession(session)) {
             response.sendRedirect(request.getContextPath() + "/dashboard");
             return;
         }
@@ -81,13 +82,12 @@ public class MyEnrollmentsServlet extends HttpServlet {
                 enrollmentStateSyncService.syncEnrollmentState(e);
                 Payment p = paymentDAO.getPaymentByEnrollmentId(e.getEnrollmentId());
                 if (p != null) {
-                    e.setPaymentStatus(p.getStatus());
-                    e.setPaymentRef(p.getPaystackReference());
+                    studentAccessService.syncPaymentStatus(e);
                 } else {
                     e.setPaymentStatus("Pending");
                 }
 
-                if (isPaymentComplete(e.getPaymentStatus())) {
+                if (studentAccessService.isPaymentComplete(e.getPaymentStatus())) {
                     paidCount++;
                 }
                 if ("Completed".equalsIgnoreCase(e.getCompletionStatus()) || "Completed".equalsIgnoreCase(e.getStatus())) {
@@ -120,13 +120,4 @@ public class MyEnrollmentsServlet extends HttpServlet {
         }
     }
 
-    private boolean isPaymentComplete(String paymentStatus) {
-        if (paymentStatus == null) {
-            return false;
-        }
-        String normalized = paymentStatus.trim().toLowerCase(Locale.ENGLISH);
-        return "paid".equals(normalized)
-                || "completed".equals(normalized)
-                || "success".equals(normalized);
-    }
 }

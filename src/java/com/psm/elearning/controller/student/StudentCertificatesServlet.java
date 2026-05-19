@@ -8,6 +8,7 @@ import com.psm.elearning.model.Certificate;
 import com.psm.elearning.model.CertificateView;
 import com.psm.elearning.model.Enrollment;
 import com.psm.elearning.service.EnrollmentStateSyncService;
+import com.psm.elearning.service.StudentAccessService;
 import com.psm.elearning.util.SessionUtil;
 
 import javax.servlet.ServletException;
@@ -24,13 +25,14 @@ public class StudentCertificatesServlet extends HttpServlet {
     private final CertificateDAO certificateDAO = new CertificateDAOImpl();
     private final EnrollmentDAO enrollmentDAO = new EnrollmentDAOImpl();
     private final EnrollmentStateSyncService enrollmentStateSyncService = new EnrollmentStateSyncService();
+    private final StudentAccessService studentAccessService = new StudentAccessService();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
         HttpSession session = request.getSession(false);
-        if (!isStudent(session)) {
+        if (!studentAccessService.isStudentSession(session)) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
@@ -90,13 +92,8 @@ public class StudentCertificatesServlet extends HttpServlet {
         }
     }
 
-    private boolean isStudent(HttpSession session) {
-        return SessionUtil.resolveUserId(session) != null && "Student".equals(SessionUtil.resolveRole(session));
-    }
-
     private boolean issuesCertificate(Enrollment enrollment) {
         return enrollment != null
-                && enrollment.getCoursePrice() != null
-                && enrollment.getCoursePrice() > 0d;
+                && !studentAccessService.isFreeEnrollment(enrollment);
     }
 }

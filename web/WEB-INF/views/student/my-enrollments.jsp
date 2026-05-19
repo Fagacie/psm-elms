@@ -50,11 +50,11 @@
             </div>
         </c:if>
 
-        <section class="sv-card" style="margin-top: 24px;">
+        <section class="sv-card me-section-card">
             <div class="sv-card-head">
                 <div>
                     <h2>My Courses</h2>
-                    <p style="margin: 4px 0 0; color: var(--sv-muted); font-size: 0.9rem;">Track your courses, review progress, and resume learning.</p>
+                    <p class="me-card-intro">Track your courses, review progress, and resume learning.</p>
                 </div>
                 <a href="${pageContext.request.contextPath}/student/courses" class="sv-btn primary"><i class="fas fa-search"></i>&nbsp;Browse Courses</a>
             </div>
@@ -85,17 +85,18 @@
                         <div class="bc-course-grid me-grid" id="meGrid">
                             <c:forEach var="enrollment" items="${enrollments}">
                                 <c:set var="lifecycleStatus" value="${not empty enrollment.completionStatus ? enrollment.completionStatus : (enrollment.status == 'Completed' ? 'Completed' : (enrollment.status == 'Active' || enrollment.status == 'Enrolled' ? 'In Progress' : 'Not Started'))}"/>
-                                <c:set var="progress" value="${not empty enrollment.progress ? enrollment.progress : (lifecycleStatus == 'Completed' ? 100 : (lifecycleStatus == 'In Progress' ? 65 : 0))}"/>
+                                <c:set var="progress" value="${not empty enrollment.progress ? enrollment.progress : (lifecycleStatus == 'Completed' ? 100 : 0)}"/>
                                 <c:set var="enrollmentPaid" value="${enrollment.paymentStatus == 'Paid' || enrollment.paymentStatus == 'Completed' || enrollment.paymentStatus == 'COMPLETED' || enrollment.paymentStatus == 'Success' || enrollment.paymentStatus == 'SUCCESS'}"/>
                                 <c:set var="courseAccessGranted" value="${enrollmentPaid || enrollment.coursePrice == null || enrollment.coursePrice <= 0}"/>
+                                <c:set var="progressTone" value="${progress < 35 ? 'is-low' : (progress < 75 ? 'is-mid' : 'is-high')}"/>
                                 
                                 <!-- Card matches Browse Courses exactly in styling -->
                                 <article class="bc-card sv-card bc-tilt" data-status="${lifecycleStatus == 'Completed' ? 'done' : (lifecycleStatus == 'In Progress' ? 'live' : 'hold')}" data-course="${enrollment.courseName}" data-instructor="${enrollment.instructorName}">
-                                    <div class="bc-card-head" style="padding: 18px 18px 0 !important;">
+                                    <div class="bc-card-head me-card-head">
                                         <span class="bc-level-badge level-${fn:toLowerCase(enrollment.level)}">${not empty enrollment.level ? enrollment.level : 'Beginner'}</span>
                                         <span class="bc-cat">${enrollment.category}</span>
                                     </div>
-                                    <div class="sv-card-body" style="padding-top: 0 !important;">
+                                    <div class="sv-card-body me-card-body">
                                         <div class="bc-banner-wrap">
                                             <c:choose>
                                                 <c:when test="${not empty enrollment.courseBanner}">
@@ -116,38 +117,37 @@
                                                 </c:otherwise>
                                             </c:choose>
                                         </div>
-                                        <h3 data-search-text style="margin-bottom: 6px !important;"><c:out value="${enrollment.courseName}"/></h3>
-                                        <p class="sv-course-line" data-search-text style="font-size: 0.84rem; color: var(--sv-muted); margin: 0 0 12px;">Instructor: <c:out value="${enrollment.instructorName}"/></p>
+                                        <h3 data-search-text class="me-course-title"><c:out value="${enrollment.courseName}"/></h3>
+                                        <p class="sv-course-line me-course-line" data-search-text>Instructor: <c:out value="${enrollment.instructorName}"/></p>
                                         
-                                        <!-- Custom Progress bar with dynamic coloring -->
-                                        <div class="sv-course-progress-block" style="margin-bottom: 12px;">
-                                            <div class="sv-course-progress-top" style="display:flex; justify-content:space-between; font-size:0.78rem; font-weight:600; color:var(--sv-muted); margin-bottom:4px;">
+                                        <div class="sv-course-progress-block me-course-progress">
+                                            <div class="sv-course-progress-top me-progress-top">
                                                 <span>Progress</span>
                                                 <strong>${progress}%</strong>
                                             </div>
-                                            <div class="sv-progress" style="height:6px; border-radius:999px; background:var(--sv-border); overflow:hidden;">
-                                                <div class="sv-progress-bar" style="height:100%; width: ${progress}%; background: ${progress < 35 ? '#ef4444' : (progress < 75 ? '#eab308' : '#10b981')}; transition:width 0.4s ease;"></div>
+                                            <div class="sv-progress me-progress-track">
+                                                <div class="sv-progress-bar me-progress-bar ${progressTone}" style="width: ${progress}%;"></div>
                                             </div>
                                         </div>
 
-                                        <div class="bc-meta" style="margin-top: 10px !important;">
+                                        <div class="bc-meta me-course-meta">
                                             <c:if test="${not empty enrollment.displayDuration}">
-                                                <span><i class="fas fa-clock" style="color: #3b82f6;"></i> ${enrollment.displayDuration}</span>
+                                                <span><i class="fas fa-clock me-meta-icon"></i> ${enrollment.displayDuration}</span>
                                                 <c:set var="daysLeft" value="${enrollment.daysRemaining}"/>
                                                 <c:if test="${daysLeft >= 0}">
-                                                    <span style="color: ${daysLeft <= 2 ? '#ef4444' : '#10b981'}; margin-left: auto; font-weight: 700;">
+                                                    <span class="me-days-left ${daysLeft <= 2 ? 'is-urgent' : 'is-healthy'}">
                                                         ${daysLeft} ${daysLeft == 1 ? 'day' : 'days'} remaining
                                                     </span>
                                                 </c:if>
                                                 <c:if test="${daysLeft < 0 && not empty enrollment.courseDuration && enrollment.courseDuration > 0}">
-                                                    <span style="color: #ef4444; margin-left: auto; font-weight: 700;">
+                                                    <span class="me-days-left is-expired">
                                                         Expired
                                                     </span>
                                                 </c:if>
                                             </c:if>
                                         </div>
-                                        <div class="bc-actions" style="margin-top: 14px !important;">
-                                            <a class="sv-btn primary me-continue-link" style="width:100%; text-align:center;" href="${courseAccessGranted ? pageContext.request.contextPath.concat('/student/enrollment-details?id=').concat(enrollment.enrollmentId) : pageContext.request.contextPath.concat('/student/payment?enrollmentId=').concat(enrollment.enrollmentId).concat('&error=required')}">${courseAccessGranted ? 'Continue' : 'Pay Now'}</a>
+                                        <div class="bc-actions me-actions">
+                                            <a class="sv-btn primary me-continue-link me-continue-button" href="${courseAccessGranted ? pageContext.request.contextPath.concat('/student/enrollment-details?id=').concat(enrollment.enrollmentId) : pageContext.request.contextPath.concat('/student/payment?enrollmentId=').concat(enrollment.enrollmentId).concat('&error=required')}">${courseAccessGranted ? 'Continue' : 'Pay Now'}</a>
                                         </div>
                                     </div>
                                 </article>

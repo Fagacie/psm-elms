@@ -8,12 +8,10 @@ import com.psm.elearning.dao.MaterialDAO;
 import com.psm.elearning.dao.MaterialDAOImpl;
 import com.psm.elearning.dao.MaterialProgressDAO;
 import com.psm.elearning.dao.MaterialProgressDAOImpl;
-import com.psm.elearning.dao.PaymentDAO;
-import com.psm.elearning.dao.PaymentDAOImpl;
 import com.psm.elearning.model.Course;
 import com.psm.elearning.model.Enrollment;
 import com.psm.elearning.model.Material;
-import com.psm.elearning.model.Payment;
+import com.psm.elearning.service.StudentAccessService;
 import com.psm.elearning.util.SessionUtil;
 
 import javax.servlet.ServletException;
@@ -46,7 +44,7 @@ public class StudentMaterialServlet extends HttpServlet {
     private final MaterialDAO materialDAO = new MaterialDAOImpl();
     private final MaterialProgressDAO progressDAO = new MaterialProgressDAOImpl();
     private final CourseDAO courseDAO = new CourseDAOImpl();
-    private final PaymentDAO paymentDAO = new PaymentDAOImpl();
+    private final StudentAccessService studentAccessService = new StudentAccessService();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -54,7 +52,7 @@ public class StudentMaterialServlet extends HttpServlet {
 
         HttpSession session = request.getSession(false);
         Integer userId = SessionUtil.resolveUserId(session);
-        if (userId == null || !isStudent(session)) {
+        if (userId == null || !studentAccessService.isStudentSession(session)) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
@@ -566,23 +564,11 @@ public class StudentMaterialServlet extends HttpServlet {
         if (enrollment.getCourseId() == null || !enrollment.getCourseId().equals(courseId)) {
             return false;
         }
-        if (isFreeEnrollment(enrollment)) {
-            return true;
-        }
-        if (enrollment.getEnrollmentId() == null) {
-            return false;
-        }
-        Payment payment = paymentDAO.getPaymentByEnrollmentId(enrollment.getEnrollmentId());
-        if (payment != null && isPaymentComplete(payment.getStatus())) {
-            return true;
-        }
-        return isPaymentComplete(enrollment.getPaymentStatus());
+        return studentAccessService.hasCourseAccess(enrollment);
     }
 
     private boolean isFreeEnrollment(Enrollment enrollment) {
-        return enrollment != null
-                && enrollment.getCoursePrice() != null
-                && enrollment.getCoursePrice() <= 0.0;
+        return studentAccessService.isFreeEnrollment(enrollment);
     }
 
     private String normalize(String value) {
@@ -607,15 +593,4 @@ public class StudentMaterialServlet extends HttpServlet {
         return normalized.startsWith("http://") || normalized.startsWith("https://");
     }
 
-    private boolean isPaymentComplete(String paymentStatus) {
-        if (paymentStatus == null) return false;
-        String normalized = paymentStatus.trim();
-        return "Paid".equalsIgnoreCase(normalized)
-                || "Completed".equalsIgnoreCase(normalized)
-                || "Success".equalsIgnoreCase(normalized);
-    }
-
-    private boolean isStudent(HttpSession session) {
-        return SessionUtil.resolveUserId(session) != null && "Student".equals(SessionUtil.resolveRole(session));
-    }
 }

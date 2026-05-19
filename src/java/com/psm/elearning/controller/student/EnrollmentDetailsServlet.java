@@ -4,8 +4,6 @@ import com.psm.elearning.dao.EnrollmentDAO;
 import com.psm.elearning.dao.EnrollmentDAOImpl;
 import com.psm.elearning.dao.MaterialDAO;
 import com.psm.elearning.dao.MaterialDAOImpl;
-import com.psm.elearning.dao.PaymentDAO;
-import com.psm.elearning.dao.PaymentDAOImpl;
 import com.psm.elearning.dao.AssessmentDAO;
 import com.psm.elearning.dao.AssessmentDAOImpl;
 import com.psm.elearning.dao.AssessmentQuestionDAO;
@@ -16,15 +14,19 @@ import com.psm.elearning.dao.AssessmentRetakeRequestDAO;
 import com.psm.elearning.dao.AssessmentRetakeRequestDAOImpl;
 import com.psm.elearning.dao.MaterialProgressDAO;
 import com.psm.elearning.dao.MaterialProgressDAOImpl;
+import com.psm.elearning.dao.UserDAO;
+import com.psm.elearning.dao.UserDAOImpl;
 import com.psm.elearning.model.Enrollment;
 import com.psm.elearning.model.Material;
-import com.psm.elearning.model.Payment;
 import com.psm.elearning.model.Assessment;
 import com.psm.elearning.model.AssessmentQuestion;
 import com.psm.elearning.model.AssessmentSubmission;
+import com.psm.elearning.model.User;
 import com.psm.elearning.util.AssessmentPlacementUtil;
 import com.psm.elearning.service.AppSettingsService;
 import com.psm.elearning.service.EnrollmentStateSyncService;
+import com.psm.elearning.service.StudentAccessService;
+import com.psm.elearning.util.ActiveAssessmentAttemptUtil;
 import com.psm.elearning.util.SessionUtil;
 
 import javax.servlet.ServletException;
@@ -51,14 +53,15 @@ public class EnrollmentDetailsServlet extends HttpServlet {
     
     private EnrollmentDAO enrollmentDAO;
     private MaterialDAO materialDAO;
-    private PaymentDAO paymentDAO;
     private AssessmentDAO assessmentDAO;
     private AssessmentSubmissionDAO submissionDAO;
-        private AssessmentQuestionDAO assessmentQuestionDAO;
+    private AssessmentQuestionDAO assessmentQuestionDAO;
     private AssessmentRetakeRequestDAO retakeRequestDAO;
     private MaterialProgressDAO materialProgressDAO;
     private EnrollmentStateSyncService enrollmentStateSyncService;
     private com.psm.elearning.dao.CertificateDAO certificateDAO;
+    private UserDAO userDAO;
+    private StudentAccessService studentAccessService;
 
     public static class LearningItem {
         private Integer itemId;
@@ -207,14 +210,15 @@ public class EnrollmentDetailsServlet extends HttpServlet {
     public void init() {
         enrollmentDAO = new EnrollmentDAOImpl();
         materialDAO = new MaterialDAOImpl();
-        paymentDAO = new PaymentDAOImpl();
         assessmentDAO = new AssessmentDAOImpl();
-            assessmentQuestionDAO = new AssessmentQuestionDAOImpl();
+        assessmentQuestionDAO = new AssessmentQuestionDAOImpl();
         submissionDAO = new AssessmentSubmissionDAOImpl();
         retakeRequestDAO = new AssessmentRetakeRequestDAOImpl();
         materialProgressDAO = new MaterialProgressDAOImpl();
         enrollmentStateSyncService = new EnrollmentStateSyncService();
         certificateDAO = new com.psm.elearning.dao.CertificateDAOImpl();
+        userDAO = new UserDAOImpl();
+        studentAccessService = new StudentAccessService();
     }
     
     @Override
@@ -227,7 +231,7 @@ public class EnrollmentDetailsServlet extends HttpServlet {
             return;
         }
         
-        if (!"Student".equals(SessionUtil.resolveRole(session))) {
+        if (!studentAccessService.isStudentSession(session)) {
             response.sendRedirect(request.getContextPath() + "/dashboard");
             return;
         }
@@ -255,7 +259,7 @@ public class EnrollmentDetailsServlet extends HttpServlet {
             }
             
             // Verify ownership
-            if (!enrollment.getUserId().equals(userId)) {
+            if (!studentAccessService.belongsToStudent(enrollment, userId)) {
                 response.sendRedirect(request.getContextPath() + "/student/my-enrollments?error=unauthorized");
                 return;
             }
@@ -278,15 +282,11 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                 if (daysRemaining >= 0 && daysRemaining <= 2 && !enrollment.getReminderSent()) {
                     String studentEmail = null;
                     String studentFullName = null;
-                    
-                    try (java.sql.Connection conn = com.psm.elearning.util.DBConnection.getConnection();
-                         java.sql.PreparedStatement ps = conn.prepareStatement("SELECT Email, FullName FROM User WHERE UserID = ?")) {
-                        ps.setInt(1, userId);
-                        try (java.sql.ResultSet rs = ps.executeQuery()) {
-                            if (rs.next()) {
-                                studentEmail = rs.getString("Email");
-                                studentFullName = rs.getString("FullName");
-                            }
+                    try {
+                        User studentUser = userDAO.findById(userId);
+                        if (studentUser != null) {
+                            studentEmail = studentUser.getEmail();
+                            studentFullName = studentUser.getFullName();
                         }
                     } catch (Exception e) {
                         LOGGER.log(Level.WARNING, "Failed to load student email for reminder alert", e);
@@ -316,78 +316,24 @@ public class EnrollmentDetailsServlet extends HttpServlet {
 
             boolean safeMode = "1".equals(request.getParameter("safe")) || "true".equalsIgnoreCase(request.getParameter("safe"));
             if (safeMode) {
-                request.setAttribute("enrollment", enrollment);
-                request.setAttribute("materials", new ArrayList<Material>());
-                request.setAttribute("assessments", new ArrayList<Assessment>());
-                request.setAttribute("materialCount", 0);
-                request.setAttribute("assessmentCount", 0);
-                request.setAttribute("paidAccess", isPaymentComplete(enrollment.getPaymentStatus()));
-                request.setAttribute("activeTab", "learning");
-                request.setAttribute("progressPercent", enrollment.getProgress() != null ? enrollment.getProgress() : 0);
-                request.setAttribute("usedAttemptsByAssessment", new LinkedHashMap<Integer, Integer>());
-                request.setAttribute("allowedAttemptsByAssessment", new LinkedHashMap<Integer, Integer>());
-                request.setAttribute("latestSubmissionByAssessment", new LinkedHashMap<Integer, AssessmentSubmission>());
-                request.setAttribute("activeAttemptByAssessment", new LinkedHashMap<Integer, Boolean>());
-                request.setAttribute("materialsViewedCount", 0);
-                request.setAttribute("viewedMaterialIds", new HashSet<Integer>());
-                request.setAttribute("learningItems", new ArrayList<LearningItem>());
-                request.setAttribute("recommendedItem", null);
-                request.setAttribute("courseAccessGranted", isPaymentComplete(enrollment.getPaymentStatus()) || enrollment.getCoursePrice() == null || enrollment.getCoursePrice() <= 0);
-                request.setAttribute("focusMaterial", null);
-                request.setAttribute("previousMaterial", null);
-                request.setAttribute("nextMaterial", null);
-                request.setAttribute("selectedMode", "empty");
-                request.setAttribute("selectedMaterial", null);
-                request.setAttribute("selectedMaterialId", null);
-                request.setAttribute("selectedMaterialStatus", "");
-                request.setAttribute("selectedAssessment", null);
-                request.setAttribute("selectedAssessmentId", null);
-                request.setAttribute("selectedAssessmentUsedAttempts", 0);
-                request.setAttribute("selectedAssessmentAllowedAttempts", 0);
-                request.setAttribute("selectedAssessmentLatest", null);
-                request.setAttribute("selectedAssessmentHasActiveAttempt", false);
-                request.setAttribute("selectedAssessmentStatusLabel", "Not Started");
-                request.setAttribute("selectedAssessmentStatusClass", "status-Archived");
-                request.setAttribute("selectedAssessmentPrimaryLabel", "");
-                request.setAttribute("selectedAssessmentPrimaryUrl", "");
-                request.setAttribute("workspaceEyebrow", "Learning Item");
-                request.setAttribute("workspaceTitle", "Select an item from the course flow");
-                request.setAttribute("workspaceDescription", "Choose a material or assessment from the sidebar to continue your course sequence.");
-                request.setAttribute("workspaceStatusLabel", "Ready");
-                request.setAttribute("workspaceStatusClass", "status-Pending");
-                request.setAttribute("workspaceAccessLabel", "Workspace Ready");
-                request.setAttribute("workspaceAccessIcon", "shield-check");
-                request.setAttribute("workspaceChips", new ArrayList<WorkspaceChip>());
-                request.setAttribute("workspaceActionNote", "Select an item from the course flow to continue.");
-                request.setAttribute("workspacePrimaryActionIcon", "paper-plane");
-                request.setAttribute("materialCompletionButtonLabel", "Mark Complete");
-                request.setAttribute("certificateEligible", false);
-                request.setAttribute("certificatePaidReady", isPaymentComplete(enrollment.getPaymentStatus()));
-                request.setAttribute("certificateCompletedReady", false);
-                request.setAttribute("certificateAssessmentsReady", false);
-                request.setAttribute("certificateRemainingMaterials", 0);
-                request.setAttribute("certificateRemainingAssessments", 0);
-                request.setAttribute("certificateReadinessStepsComplete", 0);
-                request.setAttribute("certificateReadinessPercent", 0);
-                request.setAttribute("certificatePrimaryActionLabel", "Back to Courses");
-                request.setAttribute("certificatePrimaryActionUrl", request.getContextPath() + "/student/my-enrollments");
-                request.setAttribute("certificatePrimaryActionIcon", "fa-arrow-left");
-                request.setAttribute("certificateReadinessHint", "We could not fully load this enrollment. Return to your course list and reopen it.");
-                request.setAttribute("totalMaterialsCount", 0);
-                request.setAttribute("passedAssessmentsCount", 0);
-                request.setAttribute("totalAssessmentsCount", 0);
-                request.getRequestDispatcher("/WEB-INF/views/student/enrollment-details.jsp").forward(request, response);
+                boolean paidAccess = studentAccessService.isPaymentComplete(enrollment.getPaymentStatus());
+                boolean courseAccessGranted = studentAccessService.hasCourseAccess(enrollment);
+                applyEmptyWorkspaceState(
+                        request,
+                        enrollment,
+                        paidAccess,
+                        courseAccessGranted,
+                        courseAccessGranted ? "Workspace Ready" : "Payment Required",
+                        courseAccessGranted ? "shield-check" : "lock",
+                        "We could not fully load this enrollment. Return to your course list and reopen it."
+                );
+                forwardLearningHub(request, response);
                 return;
             }
 
-            Payment payment = paymentDAO.getPaymentByEnrollmentId(enrollment.getEnrollmentId());
-            if (payment != null) {
-                enrollment.setPaymentStatus(payment.getStatus());
-                enrollment.setPaymentRef(payment.getPaystackReference());
-            }
-
-            boolean paidAccess = isPaymentComplete(enrollment.getPaymentStatus());
-            boolean paymentRequired = enrollment.getCoursePrice() != null && enrollment.getCoursePrice() > 0;
+            studentAccessService.syncPaymentStatus(enrollment);
+            boolean paidAccess = studentAccessService.isPaymentComplete(enrollment.getPaymentStatus());
+            boolean paymentRequired = studentAccessService.requiresPayment(enrollment);
             boolean courseAccessGranted = paidAccess || !paymentRequired;
             if (paymentRequired && !paidAccess) {
                 response.sendRedirect(request.getContextPath() + "/student/payment?enrollmentId=" + enrollment.getEnrollmentId() + "&error=required");
@@ -420,21 +366,7 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                 allowedAttemptsByAssessment.put(assessment.getAssessmentId(), allowed);
                 latestSubmissionByAssessment.put(assessment.getAssessmentId(), (submissions != null && !submissions.isEmpty()) ? submissions.get(0) : null);
 
-                Object attemptStateObj = session.getAttribute("assessmentAttempt_" + assessment.getAssessmentId());
-                boolean hasValidAttempt = false;
-                if (attemptStateObj != null) {
-                    try {
-                        java.lang.reflect.Field deadlineField = attemptStateObj.getClass().getDeclaredField("deadlineMillis");
-                        deadlineField.setAccessible(true);
-                        long deadlineMillis = deadlineField.getLong(attemptStateObj);
-                        hasValidAttempt = System.currentTimeMillis() < deadlineMillis;
-                        if (!hasValidAttempt) {
-                            session.removeAttribute("assessmentAttempt_" + assessment.getAssessmentId());
-                        }
-                    } catch (Exception e) {
-                        hasValidAttempt = true;
-                    }
-                }
+                boolean hasValidAttempt = ActiveAssessmentAttemptUtil.hasActiveAttempt(session, assessment.getAssessmentId());
                 activeAttemptByAssessment.put(assessment.getAssessmentId(), hasValidAttempt);
             }
 
@@ -1216,67 +1148,17 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                 }
                 Enrollment fallbackEnrollment = fallbackEnrollmentId != null ? enrollmentDAO.getEnrollment(fallbackEnrollmentId) : null;
                 if (fallbackEnrollment != null && fallbackEnrollment.getUserId() != null && fallbackEnrollment.getUserId().equals(userId)) {
-                    request.setAttribute("enrollment", fallbackEnrollment);
-                    request.setAttribute("materials", new ArrayList<Material>());
-                    request.setAttribute("assessments", new ArrayList<Assessment>());
-                    request.setAttribute("materialCount", 0);
-                    request.setAttribute("assessmentCount", 0);
-                    request.setAttribute("paidAccess", false);
-                    request.setAttribute("activeTab", "learning");
-                    request.setAttribute("progressPercent", 0);
-                    request.setAttribute("usedAttemptsByAssessment", new LinkedHashMap<Integer, Integer>());
-                    request.setAttribute("allowedAttemptsByAssessment", new LinkedHashMap<Integer, Integer>());
-                    request.setAttribute("latestSubmissionByAssessment", new LinkedHashMap<Integer, AssessmentSubmission>());
-                    request.setAttribute("activeAttemptByAssessment", new LinkedHashMap<Integer, Boolean>());
-                    request.setAttribute("materialsViewedCount", 0);
-                    request.setAttribute("viewedMaterialIds", new HashSet<Integer>());
-                    request.setAttribute("learningItems", new ArrayList<LearningItem>());
-                    request.setAttribute("recommendedItem", null);
-                    request.setAttribute("courseAccessGranted", false);
-                    request.setAttribute("focusMaterial", null);
-                    request.setAttribute("previousMaterial", null);
-                    request.setAttribute("nextMaterial", null);
-                    request.setAttribute("selectedMode", "empty");
-                    request.setAttribute("selectedMaterial", null);
-                    request.setAttribute("selectedMaterialId", null);
-                    request.setAttribute("selectedMaterialStatus", "");
-                    request.setAttribute("selectedAssessment", null);
-                    request.setAttribute("selectedAssessmentId", null);
-                    request.setAttribute("selectedAssessmentUsedAttempts", 0);
-                    request.setAttribute("selectedAssessmentAllowedAttempts", 0);
-                    request.setAttribute("selectedAssessmentLatest", null);
-                    request.setAttribute("selectedAssessmentHasActiveAttempt", false);
-                    request.setAttribute("selectedAssessmentStatusLabel", "Not Started");
-                    request.setAttribute("selectedAssessmentStatusClass", "status-Archived");
-                    request.setAttribute("selectedAssessmentPrimaryLabel", "");
-                    request.setAttribute("selectedAssessmentPrimaryUrl", "");
-                    request.setAttribute("workspaceEyebrow", "Learning Item");
-                    request.setAttribute("workspaceTitle", "Select an item from the course flow");
-                    request.setAttribute("workspaceDescription", "Choose a material or assessment from the sidebar to continue your course sequence.");
-                    request.setAttribute("workspaceStatusLabel", "Ready");
-                    request.setAttribute("workspaceStatusClass", "status-Pending");
-                    request.setAttribute("workspaceAccessLabel", "Payment Required");
-                    request.setAttribute("workspaceAccessIcon", "lock");
-                    request.setAttribute("workspaceChips", new ArrayList<WorkspaceChip>());
-                    request.setAttribute("workspaceActionNote", "Select an item from the course flow to continue.");
-                    request.setAttribute("workspacePrimaryActionIcon", "paper-plane");
-                    request.setAttribute("materialCompletionButtonLabel", "Mark Complete");
-                    request.setAttribute("certificateEligible", false);
-                    request.setAttribute("certificatePaidReady", false);
-                    request.setAttribute("certificateCompletedReady", false);
-                    request.setAttribute("certificateAssessmentsReady", false);
-                    request.setAttribute("certificateRemainingMaterials", 0);
-                    request.setAttribute("certificateRemainingAssessments", 0);
-                    request.setAttribute("certificateReadinessStepsComplete", 0);
-                    request.setAttribute("certificateReadinessPercent", 0);
-                    request.setAttribute("certificatePrimaryActionLabel", "Back to Courses");
-                    request.setAttribute("certificatePrimaryActionUrl", request.getContextPath() + "/student/my-enrollments");
-                    request.setAttribute("certificatePrimaryActionIcon", "fa-arrow-left");
-                    request.setAttribute("certificateReadinessHint", "We could not fully load this enrollment. Return to your course list and reopen it.");
-                    request.setAttribute("totalMaterialsCount", 0);
-                    request.setAttribute("passedAssessmentsCount", 0);
-                    request.setAttribute("totalAssessmentsCount", 0);
-                    request.getRequestDispatcher("/WEB-INF/views/student/enrollment-details.jsp").forward(request, response);
+                    boolean paidAccess = studentAccessService.hasCourseAccess(fallbackEnrollment);
+                    applyEmptyWorkspaceState(
+                            request,
+                            fallbackEnrollment,
+                            paidAccess,
+                            false,
+                            "Payment Required",
+                            "lock",
+                            "We could not fully load this enrollment. Return to your course list and reopen it."
+                    );
+                    forwardLearningHub(request, response);
                     return;
                 }
             } catch (Exception fallbackException) {
@@ -1521,12 +1403,78 @@ public class EnrollmentDetailsServlet extends HttpServlet {
         return AssessmentPlacementUtil.parsePlacement(assessment.getInstructions());
     }
 
-    private boolean isPaymentComplete(String paymentStatus) {
-        if (paymentStatus == null) return false;
-        String normalized = paymentStatus.trim();
-        return "Paid".equalsIgnoreCase(normalized)
-                || "Completed".equalsIgnoreCase(normalized)
-                || "Success".equalsIgnoreCase(normalized);
+    private void applyEmptyWorkspaceState(HttpServletRequest request,
+                                          Enrollment enrollment,
+                                          boolean paidAccess,
+                                          boolean courseAccessGranted,
+                                          String workspaceAccessLabel,
+                                          String workspaceAccessIcon,
+                                          String readinessHint) {
+        request.setAttribute("enrollment", enrollment);
+        request.setAttribute("materials", new ArrayList<Material>());
+        request.setAttribute("assessments", new ArrayList<Assessment>());
+        request.setAttribute("materialCount", 0);
+        request.setAttribute("assessmentCount", 0);
+        request.setAttribute("paidAccess", paidAccess);
+        request.setAttribute("activeTab", "learning");
+        request.setAttribute("progressPercent", enrollment != null && enrollment.getProgress() != null ? enrollment.getProgress() : 0);
+        request.setAttribute("usedAttemptsByAssessment", new LinkedHashMap<Integer, Integer>());
+        request.setAttribute("allowedAttemptsByAssessment", new LinkedHashMap<Integer, Integer>());
+        request.setAttribute("latestSubmissionByAssessment", new LinkedHashMap<Integer, AssessmentSubmission>());
+        request.setAttribute("activeAttemptByAssessment", new LinkedHashMap<Integer, Boolean>());
+        request.setAttribute("materialsViewedCount", 0);
+        request.setAttribute("viewedMaterialIds", new HashSet<Integer>());
+        request.setAttribute("learningItems", new ArrayList<LearningItem>());
+        request.setAttribute("recommendedItem", null);
+        request.setAttribute("courseAccessGranted", courseAccessGranted);
+        request.setAttribute("focusMaterial", null);
+        request.setAttribute("previousMaterial", null);
+        request.setAttribute("nextMaterial", null);
+        request.setAttribute("selectedMode", "empty");
+        request.setAttribute("selectedMaterial", null);
+        request.setAttribute("selectedMaterialId", null);
+        request.setAttribute("selectedMaterialStatus", "");
+        request.setAttribute("selectedAssessment", null);
+        request.setAttribute("selectedAssessmentId", null);
+        request.setAttribute("selectedAssessmentUsedAttempts", 0);
+        request.setAttribute("selectedAssessmentAllowedAttempts", 0);
+        request.setAttribute("selectedAssessmentLatest", null);
+        request.setAttribute("selectedAssessmentHasActiveAttempt", false);
+        request.setAttribute("selectedAssessmentStatusLabel", "Not Started");
+        request.setAttribute("selectedAssessmentStatusClass", "status-Archived");
+        request.setAttribute("selectedAssessmentPrimaryLabel", "");
+        request.setAttribute("selectedAssessmentPrimaryUrl", "");
+        request.setAttribute("workspaceEyebrow", "Learning Item");
+        request.setAttribute("workspaceTitle", "Select an item from the course flow");
+        request.setAttribute("workspaceDescription", "Choose a material or assessment from the sidebar to continue your course sequence.");
+        request.setAttribute("workspaceStatusLabel", "Ready");
+        request.setAttribute("workspaceStatusClass", "status-Pending");
+        request.setAttribute("workspaceAccessLabel", workspaceAccessLabel);
+        request.setAttribute("workspaceAccessIcon", workspaceAccessIcon);
+        request.setAttribute("workspaceChips", new ArrayList<WorkspaceChip>());
+        request.setAttribute("workspaceActionNote", "Select an item from the course flow to continue.");
+        request.setAttribute("workspacePrimaryActionIcon", "paper-plane");
+        request.setAttribute("materialCompletionButtonLabel", "Mark Complete");
+        request.setAttribute("certificateEligible", false);
+        request.setAttribute("certificatePaidReady", paidAccess);
+        request.setAttribute("certificateCompletedReady", false);
+        request.setAttribute("certificateAssessmentsReady", false);
+        request.setAttribute("certificateRemainingMaterials", 0);
+        request.setAttribute("certificateRemainingAssessments", 0);
+        request.setAttribute("certificateReadinessStepsComplete", 0);
+        request.setAttribute("certificateReadinessPercent", 0);
+        request.setAttribute("certificatePrimaryActionLabel", "Back to Courses");
+        request.setAttribute("certificatePrimaryActionUrl", request.getContextPath() + "/student/my-enrollments");
+        request.setAttribute("certificatePrimaryActionIcon", "fa-arrow-left");
+        request.setAttribute("certificateReadinessHint", readinessHint);
+        request.setAttribute("totalMaterialsCount", 0);
+        request.setAttribute("passedAssessmentsCount", 0);
+        request.setAttribute("totalAssessmentsCount", 0);
+    }
+
+    private void forwardLearningHub(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        request.getRequestDispatcher("/WEB-INF/views/student/enrollment-details.jsp").forward(request, response);
     }
 
     private String extractYouTubeVideoId(String url) {

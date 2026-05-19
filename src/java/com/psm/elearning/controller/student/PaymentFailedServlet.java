@@ -3,6 +3,8 @@ package com.psm.elearning.controller.student;
 import com.psm.elearning.dao.EnrollmentDAO;
 import com.psm.elearning.dao.EnrollmentDAOImpl;
 import com.psm.elearning.model.Enrollment;
+import com.psm.elearning.service.StudentAccessService;
+import com.psm.elearning.util.SessionUtil;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -17,10 +19,12 @@ import java.io.IOException;
 public class PaymentFailedServlet extends HttpServlet {
 
     private EnrollmentDAO enrollmentDAO;
+    private StudentAccessService studentAccessService;
 
     @Override
     public void init() {
         enrollmentDAO = new EnrollmentDAOImpl();
+        studentAccessService = new StudentAccessService();
     }
     
     @Override
@@ -28,15 +32,9 @@ public class PaymentFailedServlet extends HttpServlet {
             throws ServletException, IOException {
         
         HttpSession session = request.getSession(false);
-        Integer userId = resolveUserId(session);
-        if (session == null || userId == null) {
+        Integer userId = SessionUtil.resolveUserId(session);
+        if (!studentAccessService.isStudentSession(session) || userId == null) {
             response.sendRedirect(request.getContextPath() + "/login");
-            return;
-        }
-
-        String role = resolveRole(session);
-        if (!"Student".equals(role)) {
-            response.sendRedirect(request.getContextPath() + "/dashboard");
             return;
         }
 
@@ -52,7 +50,7 @@ public class PaymentFailedServlet extends HttpServlet {
                     throw new IllegalArgumentException("Invalid enrollmentId");
                 }
                 Enrollment enrollment = enrollmentDAO.getEnrollment(enrollmentId);
-                if (enrollment != null && enrollment.getUserId() != null && enrollment.getUserId().equals(userId)) {
+                if (studentAccessService.belongsToStudent(enrollment, userId)) {
                     safeEnrollmentId = enrollmentId;
                     retryPaymentUrl = request.getContextPath() + "/student/payment?enrollmentId=" + enrollmentId;
                     detailsUrl = request.getContextPath() + "/student/enrollment-details?id=" + enrollmentId;
@@ -80,47 +78,4 @@ public class PaymentFailedServlet extends HttpServlet {
         }
     }
 
-    private Integer resolveUserId(HttpSession session) {
-        if (session == null) {
-            return null;
-        }
-        Object raw = session.getAttribute("userId");
-        if (raw instanceof Integer) {
-            Integer parsed = (Integer) raw;
-            return parsed > 0 ? parsed : null;
-        }
-        if (raw instanceof String) {
-            try {
-                int parsed = Integer.parseInt(((String) raw).trim());
-                return parsed > 0 ? parsed : null;
-            } catch (NumberFormatException ignored) {
-                return null;
-            }
-        }
-        return null;
-    }
-
-    private String resolveRole(HttpSession session) {
-        if (session == null) {
-            return null;
-        }
-        Object role = session.getAttribute("role");
-        if (!(role instanceof String) || ((String) role).trim().isEmpty()) {
-            role = session.getAttribute("userRole");
-        }
-        if (!(role instanceof String)) {
-            return null;
-        }
-        String normalized = ((String) role).trim();
-        if ("Student".equalsIgnoreCase(normalized)) {
-            return "Student";
-        }
-        if ("Admin".equalsIgnoreCase(normalized)) {
-            return "Admin";
-        }
-        if ("Instructor".equalsIgnoreCase(normalized)) {
-            return "Instructor";
-        }
-        return null;
-    }
 }
