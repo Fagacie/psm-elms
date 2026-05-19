@@ -379,6 +379,13 @@ a {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  flex: 1 1 auto;
+  min-height: 100%;
+}
+
+.sv-nav-spacer {
+  flex: 1 1 auto;
+  min-height: 18px;
 }
 
 .sv-nav-link {
@@ -429,8 +436,17 @@ a {
   background: #60a5fa;
 }
 
+.sv-nav-divider {
+  margin-top: 8px;
+  border-top: 1px solid var(--sv-sidebar-border);
+}
+
 .sv-nav-link-danger {
   color: #fca5a5;
+}
+
+.sv-nav-link-logout {
+  margin-top: 0;
 }
 
 .sv-nav-label {

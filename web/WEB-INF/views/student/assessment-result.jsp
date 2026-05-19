@@ -218,7 +218,7 @@
 
                 <div class="sa-footer-actions lh-mt-18" style="display: flex; gap: 10px; flex-wrap: wrap;">
                     <a class="sv-btn" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=assessments"><i class="fas fa-arrow-left"></i> Back to Assessments</a>
-                    <a class="sv-btn primary" href="${pageContext.request.contextPath}/student/assessments?view=history&enrollmentId=${enrollment.enrollmentId}"><i class="fas fa-clock-rotate-left"></i> View History</a>
+                    <a class="sv-btn primary" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=performance"><i class="fas fa-chart-column"></i> Performance</a>
                 </div>
             </article>
         </section>

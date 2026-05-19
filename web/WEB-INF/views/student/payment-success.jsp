@@ -49,7 +49,7 @@
                 <i class="fas fa-circle-notch fa-spin" style="font-size: 1.3rem;"></i>
                 <div>
                     <strong style="display:block; font-weight:800; color: var(--sv-foreground); margin-bottom: 2px;">Setting Up Your Curriculum Desk...</strong>
-                    <span style="color: var(--sv-muted);">Redirecting to your learning hub in <span id="countdown" style="font-weight:800; color: #2563eb;">5</span> seconds. <a href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=learning" style="color:#2563eb; text-decoration:none; font-weight:700;">Open now</a></span>
+                    <span style="color: var(--sv-muted);">Redirecting to your learning hub in <span id="countdown" style="font-weight:800; color: #2563eb;">5</span> seconds. <a href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=overview" style="color:#2563eb; text-decoration:none; font-weight:700;">Open now</a></span>
                 </div>
             </div>
 
@@ -95,7 +95,7 @@
     (function() {
         var count = 5;
         var countdownEl = document.getElementById('countdown');
-        var targetUrl = "${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=learning";
+        var targetUrl = "${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=overview";
         
         var timer = setInterval(function() {
             count--;

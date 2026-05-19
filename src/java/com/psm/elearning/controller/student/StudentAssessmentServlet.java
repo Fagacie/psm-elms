@@ -740,88 +740,12 @@ public class StudentAssessmentServlet extends HttpServlet {
 
     private void renderDashboard(HttpServletRequest request, HttpServletResponse response, HttpSession session, Integer userId, Enrollment enrollment)
             throws ServletException, IOException {
-        List<StudentAssessmentSummary> summaries = buildAssessmentSummaries(enrollment, userId, session);
-        int availableCount = 0;
-        int pendingCount = 0;
-        int completedCount = 0;
-        double scoreSum = 0.0;
-        int scoreCount = 0;
-        for (StudentAssessmentSummary summary : summaries) {
-            if ("Graded".equalsIgnoreCase(summary.getStatusLabel())) {
-                completedCount++;
-            } else if ("Awaiting Review".equalsIgnoreCase(summary.getStatusLabel())) {
-                pendingCount++;
-            } else if ("Available".equalsIgnoreCase(summary.getStatusLabel()) || "In Progress".equalsIgnoreCase(summary.getStatusLabel())) {
-                availableCount++;
-            }
-            if (summary.getBestScore() != null) {
-                scoreSum += summary.getBestScore();
-                scoreCount++;
-            }
-        }
-
-        request.setAttribute("enrollment", enrollment);
-        request.setAttribute("assessmentSummaries", summaries);
-        request.setAttribute("paidAccess", hasCourseAccess(enrollment));
-        request.setAttribute("upcomingCount", availableCount);
-        request.setAttribute("pendingReviewCount", pendingCount);
-        request.setAttribute("completedCount", completedCount);
-        request.setAttribute("averageScore", scoreCount > 0 ? round2(scoreSum / scoreCount) : null);
-        request.setAttribute("searchQuery", safeTrim(request.getParameter("q")));
-        request.setAttribute("statusFilter", safeTrim(request.getParameter("status")));
-        request.getRequestDispatcher("/WEB-INF/views/student/assessment-dashboard.jsp").forward(request, response);
+        response.sendRedirect(request.getContextPath() + "/student/enrollment-details?id=" + enrollment.getEnrollmentId() + "&tab=assessments");
     }
 
     private void renderHistory(HttpServletRequest request, HttpServletResponse response, HttpSession session, Integer userId, Enrollment enrollment)
             throws ServletException, IOException {
-        List<StudentAssessmentSummary> summaries = buildAssessmentSummaries(enrollment, userId, session);
-        int gradedCount = 0;
-        int latestSubmissionCount = 0;
-        double bestScoreTotal = 0.0;
-        int bestScoreCount = 0;
-        StudentAssessmentSummary highestAssessmentSummary = null;
-        StudentAssessmentSummary lowestAssessmentSummary = null;
-        Double highestAssessmentPercentage = null;
-        Double lowestAssessmentPercentage = null;
-        for (StudentAssessmentSummary summary : summaries) {
-            if (summary != null) {
-                if (summary.getLatestSubmission() != null) {
-                    latestSubmissionCount++;
-                    if (summary.getLatestSubmission().getScore() != null) {
-                        gradedCount++;
-                    }
-                }
-                if (summary.getBestScore() != null) {
-                    bestScoreTotal += summary.getBestScore();
-                    bestScoreCount++;
-                }
-                if (summary.getBestScore() != null
-                        && summary.getAssessment() != null
-                        && summary.getAssessment().getTotalMarks() != null
-                        && summary.getAssessment().getTotalMarks() > 0) {
-                    double summaryPercentage = computePercentage(summary.getBestScore(), summary.getAssessment().getTotalMarks());
-                    if (highestAssessmentPercentage == null || summaryPercentage > highestAssessmentPercentage) {
-                        highestAssessmentPercentage = summaryPercentage;
-                        highestAssessmentSummary = summary;
-                    }
-                    if (lowestAssessmentPercentage == null || summaryPercentage < lowestAssessmentPercentage) {
-                        lowestAssessmentPercentage = summaryPercentage;
-                        lowestAssessmentSummary = summary;
-                    }
-                }
-            }
-        }
-        request.setAttribute("enrollment", enrollment);
-        request.setAttribute("assessmentSummaries", summaries);
-        request.setAttribute("assessmentTotalCount", summaries != null ? summaries.size() : 0);
-        request.setAttribute("assessmentAttemptedCount", latestSubmissionCount);
-        request.setAttribute("assessmentGradedCount", gradedCount);
-        request.setAttribute("assessmentAverageBestScore", bestScoreCount > 0 ? round2(bestScoreTotal / bestScoreCount) : null);
-        request.setAttribute("highestAssessmentSummary", highestAssessmentSummary);
-        request.setAttribute("highestAssessmentPercentage", highestAssessmentPercentage);
-        request.setAttribute("lowestAssessmentSummary", lowestAssessmentSummary);
-        request.setAttribute("lowestAssessmentPercentage", lowestAssessmentPercentage);
-        request.getRequestDispatcher("/WEB-INF/views/student/assessment-history.jsp").forward(request, response);
+        response.sendRedirect(request.getContextPath() + "/student/enrollment-details?id=" + enrollment.getEnrollmentId() + "&tab=performance");
     }
 
     private void renderConfirmation(HttpServletRequest request, HttpServletResponse response, Integer userId, Enrollment enrollment, Integer assessmentId, Integer submissionId)

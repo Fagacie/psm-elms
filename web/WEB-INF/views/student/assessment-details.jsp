@@ -31,7 +31,7 @@
             <span>/</span>
             <a href="${pageContext.request.contextPath}/student/my-enrollments">My Courses</a>
             <span>/</span>
-            <a href="${pageContext.request.contextPath}/student/assessments?view=dashboard&enrollmentId=${enrollment.enrollmentId}">Assessments</a>
+            <a href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=assessments">Assessments</a>
             <span>/</span>
             <span>Details</span>
         </div>
@@ -92,7 +92,7 @@
                     </div>
 
                     <div class="sa-footer-actions" style="margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--sv-border);">
-                        <a class="sv-btn" href="${pageContext.request.contextPath}/student/assessments?view=dashboard&enrollmentId=${enrollment.enrollmentId}"><i class="fas fa-arrow-left"></i> Back</a>
+                        <a class="sv-btn" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=assessments"><i class="fas fa-arrow-left"></i> Back</a>
                         <c:choose>
                             <c:when test="${enrollment.daysRemaining < 0 && enrollment.courseDuration != null && enrollment.courseDuration > 0}">
                                 <span class="sa-status sa-status-closed" style="background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3);">

@@ -39,7 +39,7 @@
             <span>/</span>
             <a href="${pageContext.request.contextPath}/student/my-enrollments">My Courses</a>
             <span>/</span>
-            <a href="${pageContext.request.contextPath}/student/assessments?view=dashboard&enrollmentId=${enrollment.enrollmentId}">Assessments</a>
+            <a href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=assessments">Assessments</a>
             <span>/</span>
             <span>Confirmation</span>
         </div>
@@ -93,7 +93,7 @@
                 </div>
 
                 <div class="sa-footer-actions" style="margin-top: 24px; border-top: 1px solid var(--sa-border); padding-top: 18px;">
-                    <a class="sv-btn" href="${pageContext.request.contextPath}/student/assessments?view=dashboard&enrollmentId=${enrollment.enrollmentId}"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+                    <a class="sv-btn" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=assessments"><i class="fas fa-arrow-left"></i> Back to Learning Hub</a>
                     <button class="sv-btn" onclick="window.print()"><i class="fas fa-print"></i> Print Record</button>
                     <c:choose>
                         <c:when test="${not empty submission.score}">

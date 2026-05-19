@@ -63,6 +63,60 @@ body.lh-shell-page .lh-main {
   white-space: nowrap;
 }
 
+.lh-course-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0 0 18px;
+  padding: 10px;
+  border: 1px solid var(--sv-border);
+  border-radius: 14px;
+  background: var(--sv-surface);
+}
+
+.lh-course-tabs__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: 10px;
+  text-decoration: none;
+  color: var(--sv-muted);
+  border: 1px solid transparent;
+  background: transparent;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.lh-course-tabs__link:hover {
+  background: var(--sv-surface-soft);
+  color: var(--sv-heading);
+}
+
+.lh-course-tabs__link.is-active {
+  background: var(--sv-accent-soft);
+  color: var(--sv-accent);
+  border-color: rgba(59, 130, 246, 0.15);
+}
+
+.lh-course-tabs__link i {
+  font-size: 0.95rem;
+}
+
+@media (max-width: 768px) {
+  .lh-course-tabs {
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .lh-course-tabs__link {
+    flex: 1 1 calc(50% - 8px);
+    justify-content: center;
+  }
+}
+
 /* ============================================
    SIDEBAR & COURSE NAVIGATION
    ============================================ */

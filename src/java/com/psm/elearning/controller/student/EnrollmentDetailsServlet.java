@@ -775,7 +775,7 @@ public class EnrollmentDetailsServlet extends HttpServlet {
             }
 
             String tab = request.getParameter("tab");
-            if (tab == null || tab.trim().isEmpty()) tab = "learning";
+            if (tab == null || tab.trim().isEmpty()) tab = "overview";
             Map<Integer, String> materialStatusById = materialProgressDAO.findMaterialStatusByCourse(userId, enrollment.getCourseId());
 
             Integer currentAssessmentId = null;
@@ -808,11 +808,20 @@ public class EnrollmentDetailsServlet extends HttpServlet {
             } else if ("assessments".equalsIgnoreCase(tab)) {
                 Integer effectiveAssessmentId = requestedAssessmentId != null ? requestedAssessmentId : currentAssessmentId;
                 selectedAssessment = findAssessmentById(assessments, effectiveAssessmentId);
+            } else if ("overview".equalsIgnoreCase(tab)) {
+                selectedMode = "overview";
             } else {
                 Integer effectiveMaterialId = requestedMaterialId != null
                         ? requestedMaterialId
                         : (focusMaterial != null ? focusMaterial.getMaterialId() : null);
-                selectedMaterial = findMaterialById(orderedMaterials, effectiveMaterialId);
+                if (effectiveMaterialId != null) {
+                    selectedMaterial = findMaterialById(orderedMaterials, effectiveMaterialId);
+                } else if (requestedAssessmentId != null) {
+                    Integer effectiveAssessmentId = requestedAssessmentId != null ? requestedAssessmentId : currentAssessmentId;
+                    selectedAssessment = findAssessmentById(assessments, effectiveAssessmentId);
+                } else {
+                    selectedMode = "overview";
+                }
             }
 
             if (!performanceView && selectedAssessment == null && requestedAssessmentId != null) {
@@ -834,12 +843,14 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                     + (selectedAssessment != null ? selectedAssessment.getAssessmentId() : null));
 
             if (!performanceView) {
-                selectedMode = selectedAssessment != null ? "assessment" : (selectedMaterial != null ? "material" : "empty");
+                selectedMode = selectedAssessment != null ? "assessment" : (selectedMaterial != null ? "material" : "overview");
             }
             if ("assessment".equals(selectedMode)) {
                 tab = "assessments";
             } else if ("material".equals(selectedMode)) {
                 tab = "learning";
+            } else if ("overview".equals(selectedMode)) {
+                tab = "overview";
             }
             Integer selectedMaterialId = selectedMaterial != null ? selectedMaterial.getMaterialId() : null;
             Integer selectedAssessmentId = selectedAssessment != null ? selectedAssessment.getAssessmentId() : null;
@@ -867,16 +878,20 @@ public class EnrollmentDetailsServlet extends HttpServlet {
             String selectedAssessmentStatusClass = "status-Archived";
             String selectedAssessmentPrimaryLabel = "";
             String selectedAssessmentPrimaryUrl = "";
-            String workspaceEyebrow = "Learning Item";
-            String workspaceTitle = "Select an item from the course flow";
-            String workspaceDescription = "Choose a material or assessment from the sidebar to continue your course sequence.";
+                String workspaceEyebrow = "Course Overview";
+                String workspaceTitle = enrollment.getCourseName();
+                String workspaceDescription = enrollment.getCourseDescription() != null && !enrollment.getCourseDescription().trim().isEmpty()
+                    ? enrollment.getCourseDescription()
+                    : "Your course home for progress, materials, assessments, and performance.";
             String workspaceStatusLabel = "Open";
-            String workspaceStatusClass = "status-Pending";
+                String workspaceStatusClass = courseExpired ? "status-Archived" : (courseAccessGranted ? "status-Approved" : "status-Pending");
             String workspaceAccessLabel = courseExpired ? "Course Expired" : (courseAccessGranted ? "Available" : "Payment Required");
             String workspaceAccessIcon = courseExpired ? "hourglass-end" : (courseAccessGranted ? "shield-check" : "lock");
             String workspaceAccessStateClass = courseExpired ? "is-expired" : (courseAccessGranted ? "is-ready" : "is-locked");
-            String workspaceActionNote = "Select an item from the course flow to continue.";
-            String workspacePrimaryActionIcon = "paper-plane";
+                String workspaceActionNote = courseAccessGranted
+                    ? "Use the course flow to continue learning or open performance for a summary view."
+                    : "Complete payment to unlock the course flow.";
+                String workspacePrimaryActionIcon = "layer-group";
             String materialCompletionButtonLabel = "Mark Complete";
             List<WorkspaceChip> workspaceChips = new ArrayList<>();
 
@@ -934,6 +949,18 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                 workspaceStatusClass = "status-Approved";
                 workspaceActionNote = "Use the performance tab to compare every assessment at a glance.";
                 workspacePrimaryActionIcon = "chart-column";
+            } else if ("overview".equalsIgnoreCase(tab)) {
+                workspaceEyebrow = "Course Overview";
+                workspaceTitle = enrollment.getCourseName();
+                workspaceDescription = enrollment.getCourseDescription() != null && !enrollment.getCourseDescription().trim().isEmpty()
+                        ? enrollment.getCourseDescription()
+                        : "Your course home for progress, materials, assessments, and performance.";
+                workspaceStatusLabel = courseExpired ? "Expired" : (courseAccessGranted ? "Open" : "Locked");
+                workspaceStatusClass = courseExpired ? "status-Archived" : (courseAccessGranted ? "status-Approved" : "status-Pending");
+                workspaceActionNote = courseAccessGranted
+                        ? "Use the course flow to continue learning or open performance for a summary view."
+                        : "Complete payment to unlock the course flow.";
+                workspacePrimaryActionIcon = "layer-group";
             }
 
             if (selectedAssessment != null && !"result".equals(selectedMode)) {

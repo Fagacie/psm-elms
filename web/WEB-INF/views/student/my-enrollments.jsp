@@ -58,7 +58,6 @@
                 </div>
                 <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                     <a href="${pageContext.request.contextPath}/student/payments" class="sv-btn"><i class="fas fa-receipt"></i>&nbsp;Payments</a>
-                    <a href="${pageContext.request.contextPath}/student/assessments?view=history&enrollmentId=${enrollment.enrollmentId}" class="sv-btn"><i class="fas fa-chart-column"></i>&nbsp;Performance</a>
                     <a href="${pageContext.request.contextPath}/student/courses" class="sv-btn primary"><i class="fas fa-search"></i>&nbsp;Browse Courses</a>
                 </div>
             </div>

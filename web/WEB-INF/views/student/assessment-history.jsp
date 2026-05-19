@@ -31,92 +31,21 @@
             <span>/</span>
             <a href="${pageContext.request.contextPath}/student/my-enrollments">My Courses</a>
             <span>/</span>
-            <a href="${pageContext.request.contextPath}/student/assessments?view=dashboard&enrollmentId=${enrollment.enrollmentId}">Assessments</a>
+            <a href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=assessments">Assessments</a>
             <span>/</span>
             <span>Performance</span>
         </div>
 
         <section class="sa-shell">
-            <article class="sv-card" style="border-radius: 16px; border: 1px solid var(--sv-border); background: linear-gradient(135deg, var(--sv-surface) 0%, var(--sv-surface-soft) 100%); padding: 24px !important; margin-bottom: 20px;">
-                <div style="display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; align-items: start;">
-                    <div style="max-width: 760px;">
-                        <span style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 999px; background: rgba(37, 99, 235, 0.08); color: #2563eb; font-weight: 700; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px;">
-                            <i class="fas fa-chart-column"></i> Standalone performance view
-                        </span>
-                        <h2 style="margin: 0 0 8px; font-size: 1.6rem; font-weight: 800; letter-spacing: -0.03em; color: var(--sv-foreground);">${enrollment.courseName}</h2>
-                        <p style="margin: 0; color: var(--sv-muted); line-height: 1.65;">This page brings every assessment in the course into one place so the student can compare attempts, best scores, and result status without opening each item separately.</p>
-                    </div>
-                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        <a class="sv-btn" href="${pageContext.request.contextPath}/student/assessments?view=dashboard&enrollmentId=${enrollment.enrollmentId}" style="height: 40px; border-radius: 10px; display: inline-flex; align-items: center; gap: 8px; font-size: 0.88rem;"><i class="fas fa-grid-2"></i> Assessment Dashboard</a>
-                        <a class="sv-btn primary" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=assessments" style="height: 40px; border-radius: 10px; display: inline-flex; align-items: center; gap: 8px; font-size: 0.88rem;"><i class="fas fa-layer-group"></i> Learning Hub</a>
-                    </div>
-                </div>
-
-                <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 18px;">
-                    <div style="border: 1px solid var(--sv-border); border-radius: 12px; background: var(--sv-surface-soft); padding: 16px;">
-                        <span style="display: block; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sv-muted); margin-bottom: 6px;">Assessments</span>
-                        <strong style="font-size: 1.35rem; color: var(--sv-foreground);">${assessmentTotalCount}</strong>
-                    </div>
-                    <div style="border: 1px solid var(--sv-border); border-radius: 12px; background: rgba(59, 130, 246, 0.06); padding: 16px;">
-                        <span style="display: block; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sv-muted); margin-bottom: 6px;">Attempted</span>
-                        <strong style="font-size: 1.35rem; color: #2563eb;">${assessmentAttemptedCount}</strong>
-                    </div>
-                    <div style="border: 1px solid var(--sv-border); border-radius: 12px; background: rgba(16, 185, 129, 0.06); padding: 16px;">
-                        <span style="display: block; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sv-muted); margin-bottom: 6px;">Graded</span>
-                        <strong style="font-size: 1.35rem; color: #10b981;">${assessmentGradedCount}</strong>
-                    </div>
-                    <div style="border: 1px solid var(--sv-border); border-radius: 12px; background: rgba(245, 158, 11, 0.08); padding: 16px;">
-                        <span style="display: block; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sv-muted); margin-bottom: 6px;">Average best score</span>
-                        <strong style="font-size: 1.35rem; color: #d97706;">
-                            <c:choose>
-                                <c:when test="${not empty assessmentAverageBestScore}"><fmt:formatNumber value="${assessmentAverageBestScore}" maxFractionDigits="1"/></c:when>
-                                <c:otherwise>--</c:otherwise>
-                            </c:choose>
-                        </strong>
-                    </div>
-                </div>
-
-                <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 12px;">
-                    <div style="border: 1px solid var(--sv-border); border-radius: 12px; background: rgba(16, 185, 129, 0.06); padding: 16px;">
-                        <span style="display: block; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sv-muted); margin-bottom: 6px;">Highest performing assessment</span>
-                        <strong style="display: block; font-size: 1.05rem; color: var(--sv-foreground); margin-bottom: 4px;">
-                            <c:choose>
-                                <c:when test="${not empty highestAssessmentSummary}">${highestAssessmentSummary.assessmentTitle}</c:when>
-                                <c:otherwise>--</c:otherwise>
-                            </c:choose>
-                        </strong>
-                        <span style="color: #10b981; font-weight: 700;">
-                            <c:choose>
-                                <c:when test="${not empty highestAssessmentPercentage}"><fmt:formatNumber value="${highestAssessmentPercentage}" maxFractionDigits="1"/>%</c:when>
-                                <c:otherwise>--</c:otherwise>
-                            </c:choose>
-                        </span>
-                    </div>
-                    <div style="border: 1px solid var(--sv-border); border-radius: 12px; background: rgba(239, 68, 68, 0.06); padding: 16px;">
-                        <span style="display: block; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sv-muted); margin-bottom: 6px;">Lowest performing assessment</span>
-                        <strong style="display: block; font-size: 1.05rem; color: var(--sv-foreground); margin-bottom: 4px;">
-                            <c:choose>
-                                <c:when test="${not empty lowestAssessmentSummary}">${lowestAssessmentSummary.assessmentTitle}</c:when>
-                                <c:otherwise>--</c:otherwise>
-                            </c:choose>
-                        </strong>
-                        <span style="color: #ef4444; font-weight: 700;">
-                            <c:choose>
-                                <c:when test="${not empty lowestAssessmentPercentage}"><fmt:formatNumber value="${lowestAssessmentPercentage}" maxFractionDigits="1"/>%</c:when>
-                                <c:otherwise>--</c:otherwise>
-                            </c:choose>
-                        </span>
-                    </div>
-                </div>
-            </article>
-
             <article class="sa-panel sv-card" style="border-radius: 16px; border: 1px solid var(--sv-border); background: var(--sv-surface); padding: 24px !important;">
                 <div class="sa-panel-head" style="display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 20px; flex-wrap: wrap;">
                     <div>
-                        <h3 style="margin: 0; font-size: 1.2rem; font-weight: 800; color: var(--sv-foreground); letter-spacing: -0.02em;">Assessment Performance Table</h3>
-                        <p style="margin: 6px 0 0; color: var(--sv-muted); font-size: 0.88rem;">Each row summarizes one assessment in the course.</p>
+                        <span style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 999px; background: rgba(37, 99, 235, 0.08); color: #2563eb; font-weight: 700; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px;">
+                            <i class="fas fa-chart-column"></i> Course performance
+                        </span>
+                        <h2 style="margin: 0 0 6px; font-size: 1.45rem; font-weight: 800; color: var(--sv-foreground); letter-spacing: -0.03em;">${enrollment.courseName}</h2>
+                        <p style="margin: 0; color: var(--sv-muted); font-size: 0.88rem;">Each row summarizes one assessment in the course.</p>
                     </div>
-                    <a class="sv-btn" href="${pageContext.request.contextPath}/student/assessments?view=dashboard&enrollmentId=${enrollment.enrollmentId}" style="height: 40px; border-radius: 10px; display: inline-flex; align-items: center; gap: 8px; font-size: 0.88rem;"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
                 </div>
 
                 <c:choose>
