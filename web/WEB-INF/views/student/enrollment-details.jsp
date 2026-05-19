@@ -111,7 +111,7 @@
             </div>
             <a href="${pageContext.request.contextPath}/student/my-enrollments" class="sv-btn lh-breadcrumb__action">
                 <i class="fas fa-arrow-left"></i>
-                <span>Exit Workspace</span>
+                <span>Back to Courses</span>
             </a>
         </div>
 
@@ -248,6 +248,52 @@
                                         </c:otherwise>
                                     </c:choose>
                                 </div>
+
+                                <div class="sa-detail-grid lh-mt-18">
+                                    <div class="sa-detail-list">
+                                        <div class="sa-detail-item">
+                                            <span>Status</span>
+                                            <strong>${assessmentResultStatusLabel}</strong>
+                                        </div>
+                                        <div class="sa-detail-item">
+                                            <span>Attempt</span>
+                                            <strong>#${assessmentResultSubmission.attemptNumber}</strong>
+                                        </div>
+                                        <div class="sa-detail-item">
+                                            <span>Submitted</span>
+                                            <strong>
+                                                <c:choose>
+                                                    <c:when test="${not empty assessmentResultSubmission.submitDate}">${fn:replace(assessmentResultSubmission.submitDate, 'T', ' ')}</c:when>
+                                                    <c:otherwise>--</c:otherwise>
+                                                </c:choose>
+                                            </strong>
+                                        </div>
+                                    </div>
+                                    <div class="sa-detail-list">
+                                        <div class="sa-detail-item">
+                                            <span>Result format</span>
+                                            <strong><c:choose><c:when test="${assessmentResultObjective}">Multiple Choice</c:when><c:otherwise>Assignment</c:otherwise></c:choose></strong>
+                                        </div>
+                                        <div class="sa-detail-item">
+                                            <span>Graded date</span>
+                                            <strong>
+                                                <c:choose>
+                                                    <c:when test="${not empty assessmentResultSubmission.endedAt}">${fn:replace(assessmentResultSubmission.endedAt, 'T', ' ')}</c:when>
+                                                    <c:otherwise>--</c:otherwise>
+                                                </c:choose>
+                                            </strong>
+                                        </div>
+                                        <div class="sa-detail-item">
+                                            <span>Submission payload</span>
+                                            <p>
+                                                <c:choose>
+                                                    <c:when test="${not empty assessmentResultSubmission.answersFilePath}">${assessmentResultSubmission.answersFilePath}</c:when>
+                                                    <c:otherwise>--</c:otherwise>
+                                                </c:choose>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
                             </article>
 
                             <c:if test="${assessmentResultObjective and not empty assessmentResultQuestions}">
@@ -270,46 +316,96 @@
                                 </article>
                             </c:if>
 
-                            <article class="sa-panel lh-mt-18">
-                                <div class="sa-panel-head">
-                                    <div>
-                                        <h3>Submission details</h3>
-                                    </div>
+                            <div class="sa-footer-actions lh-mt-18">
+                                <a class="sv-btn" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=assessments"><i class="fas fa-arrow-left"></i> Back to Assessments</a>
+                                <a class="sv-btn primary" href="${pageContext.request.contextPath}/student/assessments?view=history&enrollmentId=${enrollment.enrollmentId}"><i class="fas fa-clock-rotate-left"></i> View History</a>
+                            </div>
+                        </section>
+                    </c:when>
+                    <c:when test="${selectedMode == 'performance'}">
+                        <section class="sa-panel lh-performance-shell" style="padding: 24px; border-radius: 18px; border: 1px solid var(--sv-border); background: var(--sv-surface);">
+                            <div class="sa-panel-head" style="display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; align-items: start; margin-bottom: 18px;">
+                                <div>
+                                    <span class="sa-badge-flat success" style="margin-bottom: 10px;"><i class="fas fa-chart-column"></i> Course performance</span>
+                                    <h3 style="margin: 0; font-size: 1.5rem; color: var(--sv-foreground);">Course overview</h3>
+                                    <p style="margin: 8px 0 0; color: var(--sv-muted); max-width: 760px; line-height: 1.65;">Compare attempts, best scores, and mastery at a glance.</p>
                                 </div>
+                                <a class="sv-btn primary" href="${pageContext.request.contextPath}/student/assessments?view=history&enrollmentId=${enrollment.enrollmentId}" style="height: 40px; border-radius: 10px; display: inline-flex; align-items: center; gap: 8px; font-size: 0.88rem;"><i class="fas fa-table-list"></i> Full Table</a>
+                            </div>
 
-                                <div class="sa-detail-grid">
-                                    <div class="sa-detail-list">
-                                        <div class="sa-detail-item">
-                                            <span>Status</span>
-                                            <strong>${assessmentResultStatusLabel}</strong>
-                                        </div>
-                                        <div class="sa-detail-item">
-                                            <span>Submitted by</span>
-                                            <strong>${sessionScope.userName}</strong>
-                                        </div>
-                                    </div>
-                                    <div class="sa-detail-list">
-                                        <div class="sa-detail-item">
-                                            <span>Submission payload</span>
-                                            <p>
-                                                <c:choose>
-                                                    <c:when test="${not empty assessmentResultSubmission.answersFilePath}">${assessmentResultSubmission.answersFilePath}</c:when>
-                                                    <c:otherwise>--</c:otherwise>
-                                                </c:choose>
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
+                            <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 18px;">
+                                <div style="border: 1px solid var(--sv-border); border-radius: 12px; background: var(--sv-surface-soft); padding: 16px;"><span style="display: block; font-size: 0.68rem; text-transform: uppercase; color: var(--sv-muted); letter-spacing: 0.08em; margin-bottom: 6px;">Assessments</span><strong style="font-size: 1.3rem; color: var(--sv-foreground);">${assessmentCount}</strong></div>
+                                <div style="border: 1px solid var(--sv-border); border-radius: 12px; background: rgba(59,130,246,0.06); padding: 16px;"><span style="display: block; font-size: 0.68rem; text-transform: uppercase; color: var(--sv-muted); letter-spacing: 0.08em; margin-bottom: 6px;">Attempted</span><strong style="font-size: 1.3rem; color: #2563eb;">${performanceAttemptedCount}</strong></div>
+                                <div style="border: 1px solid var(--sv-border); border-radius: 12px; background: rgba(16,185,129,0.06); padding: 16px;"><span style="display: block; font-size: 0.68rem; text-transform: uppercase; color: var(--sv-muted); letter-spacing: 0.08em; margin-bottom: 6px;">Graded</span><strong style="font-size: 1.3rem; color: #10b981;">${performanceGradedCount}</strong></div>
+                                <div style="border: 1px solid var(--sv-border); border-radius: 12px; background: rgba(245,158,11,0.08); padding: 16px;"><span style="display: block; font-size: 0.68rem; text-transform: uppercase; color: var(--sv-muted); letter-spacing: 0.08em; margin-bottom: 6px;">Average best score</span><strong style="font-size: 1.3rem; color: #d97706;"><c:choose><c:when test="${not empty performanceAverageBestScore}"><fmt:formatNumber value="${performanceAverageBestScore}" maxFractionDigits="1"/></c:when><c:otherwise>--</c:otherwise></c:choose></strong></div>
+                            </div>
 
-                                <div class="sa-footer-actions lh-mt-18">
-                                    <a class="sv-btn" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=assessments"><i class="fas fa-arrow-left"></i> Back to Assessments</a>
-                                    <a class="sv-btn primary" href="${pageContext.request.contextPath}/student/assessments?view=history&enrollmentId=${enrollment.enrollmentId}"><i class="fas fa-clock-rotate-left"></i> View History</a>
+                            <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-bottom: 18px;">
+                                <div style="border: 1px solid var(--sv-border); border-radius: 12px; background: rgba(16,185,129,0.06); padding: 16px;">
+                                    <span style="display: block; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sv-muted); margin-bottom: 6px;">Highest performing assessment</span>
+                                    <strong style="display: block; font-size: 1.02rem; color: var(--sv-foreground); margin-bottom: 4px;"><c:choose><c:when test="${not empty performanceHighestAssessmentTitle}">${performanceHighestAssessmentTitle}</c:when><c:otherwise>--</c:otherwise></c:choose></strong>
+                                    <span style="color: #10b981; font-weight: 700;"><c:choose><c:when test="${not empty performanceHighestAssessmentPercent}"><fmt:formatNumber value="${performanceHighestAssessmentPercent}" maxFractionDigits="1"/>%</c:when><c:otherwise>--</c:otherwise></c:choose></span>
                                 </div>
-                            </article>
+                                <div style="border: 1px solid var(--sv-border); border-radius: 12px; background: rgba(239,68,68,0.06); padding: 16px;">
+                                    <span style="display: block; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sv-muted); margin-bottom: 6px;">Lowest performing assessment</span>
+                                    <strong style="display: block; font-size: 1.02rem; color: var(--sv-foreground); margin-bottom: 4px;"><c:choose><c:when test="${not empty performanceLowestAssessmentTitle}">${performanceLowestAssessmentTitle}</c:when><c:otherwise>--</c:otherwise></c:choose></strong>
+                                    <span style="color: #ef4444; font-weight: 700;"><c:choose><c:when test="${not empty performanceLowestAssessmentPercent}"><fmt:formatNumber value="${performanceLowestAssessmentPercent}" maxFractionDigits="1"/>%</c:when><c:otherwise>--</c:otherwise></c:choose></span>
+                                </div>
+                            </div>
+
+                            <div style="overflow-x: auto;">
+                                <table style="width: 100%; border-collapse: collapse; min-width: 940px;">
+                                    <thead>
+                                        <tr style="text-align: left; color: var(--sv-muted); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em;">
+                                            <th style="padding: 14px 10px; border-bottom: 1px solid var(--sv-border);">Assessment</th>
+                                            <th style="padding: 14px 10px; border-bottom: 1px solid var(--sv-border);">Attempts</th>
+                                            <th style="padding: 14px 10px; border-bottom: 1px solid var(--sv-border);">Best Score</th>
+                                            <th style="padding: 14px 10px; border-bottom: 1px solid var(--sv-border);">Best %</th>
+                                            <th style="padding: 14px 10px; border-bottom: 1px solid var(--sv-border);">Mastery</th>
+                                            <th style="padding: 14px 10px; border-bottom: 1px solid var(--sv-border);">Latest Submission</th>
+                                            <th style="padding: 14px 10px; border-bottom: 1px solid var(--sv-border);">Status</th>
+                                            <th style="padding: 14px 10px; border-bottom: 1px solid var(--sv-border);">Open</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <c:forEach var="assessment" items="${assessments}">
+                                            <c:set var="assessmentId" value="${assessment.assessmentId}"/>
+                                            <c:set var="bestScore" value="${bestScoreByAssessment[assessmentId]}"/>
+                                            <c:set var="bestPercent" value="${bestPercentageByAssessment[assessmentId]}"/>
+                                            <c:set var="latestSubmission" value="${latestSubmissionByAssessment[assessmentId]}"/>
+                                            <c:set var="usedAttempts" value="${usedAttemptsByAssessment[assessmentId]}"/>
+                                            <c:set var="allowedAttempts" value="${allowedAttemptsByAssessment[assessmentId]}"/>
+                                            <c:set var="hasActiveAttempt" value="${activeAttemptByAssessment[assessmentId]}"/>
+                                            <tr style="border-bottom: 1px solid var(--sv-border);">
+                                                <td style="padding: 16px 10px; vertical-align: top;"><strong style="display: block; color: var(--sv-foreground);">${assessment.title}</strong><span style="display: block; margin-top: 4px; color: var(--sv-muted); font-size: 0.82rem;">${assessment.type}</span></td>
+                                                <td style="padding: 16px 10px; vertical-align: top; white-space: nowrap; color: var(--sv-foreground); font-weight: 600;">${usedAttempts} / ${allowedAttempts}</td>
+                                                <td style="padding: 16px 10px; vertical-align: top; white-space: nowrap; color: var(--sv-foreground); font-weight: 600;"><c:choose><c:when test="${not empty bestScore}"><fmt:formatNumber value="${bestScore}" maxFractionDigits="1"/></c:when><c:otherwise>--</c:otherwise></c:choose></td>
+                                                <td style="padding: 16px 10px; vertical-align: top; white-space: nowrap; color: var(--sv-foreground); font-weight: 600;"><c:choose><c:when test="${not empty bestPercent}"><fmt:formatNumber value="${bestPercent}" maxFractionDigits="1"/>%</c:when><c:otherwise>--</c:otherwise></c:choose></td>
+                                                <td style="padding: 16px 10px; vertical-align: top; white-space: nowrap;">
+                                                    <c:choose>
+                                                        <c:when test="${not empty bestPercent and bestPercent >= 85}"><span class="sa-status status-Approved" style="min-height: 28px; font-size: 0.7rem; padding: 0 12px; border-radius: 999px;">Excellent</span></c:when>
+                                                        <c:when test="${not empty bestPercent and bestPercent >= 70}"><span class="sa-status status-Pending" style="min-height: 28px; font-size: 0.7rem; padding: 0 12px; border-radius: 999px; background: rgba(59, 130, 246, 0.1); color: #2563eb;">Strong</span></c:when>
+                                                        <c:when test="${not empty bestPercent and bestPercent >= 50}"><span class="sa-status status-Pending" style="min-height: 28px; font-size: 0.7rem; padding: 0 12px; border-radius: 999px; background: rgba(245, 158, 11, 0.12); color: #d97706;">Developing</span></c:when>
+                                                        <c:otherwise><span class="sa-status status-Archived" style="min-height: 28px; font-size: 0.7rem; padding: 0 12px; border-radius: 999px;">Needs Review</span></c:otherwise>
+                                                    </c:choose>
+                                                </td>
+                                                <td style="padding: 16px 10px; vertical-align: top; color: var(--sv-muted); white-space: nowrap;"><c:choose><c:when test="${not empty latestSubmission}">${fn:replace(latestSubmission.submitDate, 'T', ' ')}</c:when><c:otherwise>--</c:otherwise></c:choose></td>
+                                                <td style="padding: 16px 10px; vertical-align: top;"><c:choose><c:when test="${hasActiveAttempt}"><span class="sa-status status-Pending" style="min-height: 28px; font-size: 0.7rem; padding: 0 12px; border-radius: 999px;">Active</span></c:when><c:when test="${not empty latestSubmission and not empty latestSubmission.score}"><span class="sa-status status-Approved" style="min-height: 28px; font-size: 0.7rem; padding: 0 12px; border-radius: 999px;">Graded</span></c:when><c:when test="${not empty latestSubmission}"><span class="sa-status status-Pending" style="min-height: 28px; font-size: 0.7rem; padding: 0 12px; border-radius: 999px;">Awaiting Review</span></c:when><c:otherwise><span class="sa-status status-Archived" style="min-height: 28px; font-size: 0.7rem; padding: 0 12px; border-radius: 999px;">Not Started</span></c:otherwise></c:choose></td>
+                                                <td style="padding: 16px 10px; vertical-align: top; white-space: nowrap;">
+                                                    <c:choose>
+                                                        <c:when test="${not empty latestSubmission}"><a class="sv-btn primary" href="${pageContext.request.contextPath}/student/assessments?view=result&enrollmentId=${enrollment.enrollmentId}&assessmentId=${assessment.assessmentId}&submissionId=${latestSubmission.submissionId}" style="height: 36px; padding: 0 14px; border-radius: 8px; display: inline-flex; align-items: center; gap: 6px; font-size: 0.85rem;"><i class="fas fa-chart-column"></i> Result</a></c:when>
+                                                        <c:otherwise><a class="sv-btn" href="${pageContext.request.contextPath}/student/assessments?view=details&enrollmentId=${enrollment.enrollmentId}&assessmentId=${assessment.assessmentId}" style="height: 36px; padding: 0 14px; border-radius: 8px; display: inline-flex; align-items: center; gap: 6px; font-size: 0.85rem; border: 1px solid var(--sv-border);"><i class="fas fa-eye"></i> Open</a></c:otherwise>
+                                                    </c:choose>
+                                                </td>
+                                            </tr>
+                                        </c:forEach>
+                                    </tbody>
+                                </table>
+                            </div>
                         </section>
                     </c:when>
                     <c:when test="${selectedMode == 'assessment' and not empty selectedAssessment}">
-                        <c:set var="isAttempting" value="${(param.attempt == 'true' || selectedAssessmentStatusLabel == 'In Progress') && selectedAssessment.type != 'Assignment'}"/>
+                        <c:set var="isAttempting" value="${(param.attempt == 'true' || selectedAssessmentStatusLabel == 'Active') && selectedAssessment.type != 'Assignment'}"/>
                         <c:choose>
                             <c:when test="${isAttempting}">
                                 <section class="lh-assessment-focus">
@@ -588,11 +684,7 @@
                                             <div class="lh-link-preview">
                                                 <span class="lh-link-preview__type"><i class="fab fa-youtube lh-link-preview__type-icon lh-link-preview__type-icon--youtube"></i> YouTube Video</span>
                                                 <h3><c:out value="${selectedMaterial.title}"/></h3>
-                                                <p>The YouTube URL for this material appears to be invalid or unparseable. Try opening the link directly.</p>
-                                                <a class="sv-btn primary" href="${fn:escapeXml(selectedMaterial.filePath)}" target="_blank" rel="noopener">
-                                                    <i class="fas fa-arrow-up-right-from-square"></i>
-                                                    <span>Open Link</span>
-                                                </a>
+                                                <p>The YouTube URL for this material could not be embedded. Please update the link format so it can stay inside the page.</p>
                                             </div>
                                         </c:otherwise>
                                     </c:choose>

@@ -357,7 +357,17 @@ public class EnrollmentDetailsServlet extends HttpServlet {
             Map<Integer, Integer> usedAttemptsByAssessment = new LinkedHashMap<>();
             Map<Integer, Integer> allowedAttemptsByAssessment = new LinkedHashMap<>();
             Map<Integer, AssessmentSubmission> latestSubmissionByAssessment = new LinkedHashMap<>();
+            Map<Integer, Double> bestScoreByAssessment = new LinkedHashMap<>();
+            Map<Integer, Double> bestPercentageByAssessment = new LinkedHashMap<>();
             Map<Integer, Boolean> activeAttemptByAssessment = new LinkedHashMap<>();
+            int performanceAttemptedCount = 0;
+            int performanceGradedCount = 0;
+            double performanceBestScoreTotal = 0.0;
+            int performanceBestScoreCount = 0;
+            String performanceHighestAssessmentTitle = null;
+            Double performanceHighestAssessmentPercent = null;
+            String performanceLowestAssessmentTitle = null;
+            Double performanceLowestAssessmentPercent = null;
 
             for (Assessment assessment : assessments) {
                 List<AssessmentSubmission> submissions = submissionDAO.findByAssessmentAndUser(assessment.getAssessmentId(), userId);
@@ -368,6 +378,40 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                 usedAttemptsByAssessment.put(assessment.getAssessmentId(), used);
                 allowedAttemptsByAssessment.put(assessment.getAssessmentId(), allowed);
                 latestSubmissionByAssessment.put(assessment.getAssessmentId(), (submissions != null && !submissions.isEmpty()) ? submissions.get(0) : null);
+                if (submissions != null && !submissions.isEmpty()) {
+                    performanceAttemptedCount++;
+                    if (submissions.get(0).getScore() != null) {
+                        performanceGradedCount++;
+                    }
+                }
+
+                Double bestScore = null;
+                if (submissions != null) {
+                    for (AssessmentSubmission submission : submissions) {
+                        if (submission != null && submission.getScore() != null) {
+                            if (bestScore == null || submission.getScore() > bestScore) {
+                                bestScore = submission.getScore();
+                            }
+                        }
+                    }
+                }
+                bestScoreByAssessment.put(assessment.getAssessmentId(), bestScore);
+                if (bestScore != null && assessment.getTotalMarks() != null && assessment.getTotalMarks() > 0) {
+                    Double bestPercentage = computePercentage(bestScore, assessment.getTotalMarks());
+                    bestPercentageByAssessment.put(assessment.getAssessmentId(), bestPercentage);
+                    performanceBestScoreTotal += bestScore;
+                    performanceBestScoreCount++;
+                    if (performanceHighestAssessmentPercent == null || bestPercentage > performanceHighestAssessmentPercent) {
+                        performanceHighestAssessmentPercent = bestPercentage;
+                        performanceHighestAssessmentTitle = assessment.getTitle();
+                    }
+                    if (performanceLowestAssessmentPercent == null || bestPercentage < performanceLowestAssessmentPercent) {
+                        performanceLowestAssessmentPercent = bestPercentage;
+                        performanceLowestAssessmentTitle = assessment.getTitle();
+                    }
+                } else {
+                    bestPercentageByAssessment.put(assessment.getAssessmentId(), null);
+                }
 
                 boolean hasValidAttempt = ActiveAssessmentAttemptUtil.hasActiveAttempt(session, assessment.getAssessmentId());
                 activeAttemptByAssessment.put(assessment.getAssessmentId(), hasValidAttempt);
@@ -753,12 +797,15 @@ public class EnrollmentDetailsServlet extends HttpServlet {
             Assessment selectedAssessment = null;
             Material selectedMaterial = null;
             String selectedMode = "empty";
+            boolean performanceView = "performance".equalsIgnoreCase(tab);
 
             LOGGER.info("EnrollmentDetailsServlet: tab=" + tab
                     + ", requestedMaterialId=" + requestedMaterialId
                     + ", requestedAssessmentId=" + requestedAssessmentId);
 
-            if ("assessments".equalsIgnoreCase(tab)) {
+            if (performanceView) {
+                selectedMode = "performance";
+            } else if ("assessments".equalsIgnoreCase(tab)) {
                 Integer effectiveAssessmentId = requestedAssessmentId != null ? requestedAssessmentId : currentAssessmentId;
                 selectedAssessment = findAssessmentById(assessments, effectiveAssessmentId);
             } else {
@@ -768,17 +815,17 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                 selectedMaterial = findMaterialById(orderedMaterials, effectiveMaterialId);
             }
 
-            if (selectedAssessment == null && requestedAssessmentId != null) {
+            if (!performanceView && selectedAssessment == null && requestedAssessmentId != null) {
                 selectedAssessment = findAssessmentById(assessments, requestedAssessmentId);
             }
-            if (selectedMaterial == null && requestedMaterialId != null) {
+            if (!performanceView && selectedMaterial == null && requestedMaterialId != null) {
                 selectedMaterial = findMaterialById(orderedMaterials, requestedMaterialId);
             }
 
-            if (selectedMaterial == null && selectedAssessment == null && focusMaterial != null) {
+            if (!performanceView && selectedMaterial == null && selectedAssessment == null && focusMaterial != null) {
                 selectedMaterial = focusMaterial;
             }
-            if (selectedMaterial == null && selectedAssessment == null && currentAssessmentId != null) {
+            if (!performanceView && selectedMaterial == null && selectedAssessment == null && currentAssessmentId != null) {
                 selectedAssessment = findAssessmentById(assessments, currentAssessmentId);
             }
             LOGGER.info("EnrollmentDetailsServlet: selectedMaterialId="
@@ -786,7 +833,9 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                     + ", selectedAssessmentId="
                     + (selectedAssessment != null ? selectedAssessment.getAssessmentId() : null));
 
-            selectedMode = selectedAssessment != null ? "assessment" : (selectedMaterial != null ? "material" : "empty");
+            if (!performanceView) {
+                selectedMode = selectedAssessment != null ? "assessment" : (selectedMaterial != null ? "material" : "empty");
+            }
             if ("assessment".equals(selectedMode)) {
                 tab = "assessments";
             } else if ("material".equals(selectedMode)) {
@@ -821,9 +870,9 @@ public class EnrollmentDetailsServlet extends HttpServlet {
             String workspaceEyebrow = "Learning Item";
             String workspaceTitle = "Select an item from the course flow";
             String workspaceDescription = "Choose a material or assessment from the sidebar to continue your course sequence.";
-            String workspaceStatusLabel = "Ready";
+            String workspaceStatusLabel = "Open";
             String workspaceStatusClass = "status-Pending";
-            String workspaceAccessLabel = courseExpired ? "Course Expired" : (courseAccessGranted ? "Workspace Ready" : "Payment Required");
+            String workspaceAccessLabel = courseExpired ? "Course Expired" : (courseAccessGranted ? "Available" : "Payment Required");
             String workspaceAccessIcon = courseExpired ? "hourglass-end" : (courseAccessGranted ? "shield-check" : "lock");
             String workspaceAccessStateClass = courseExpired ? "is-expired" : (courseAccessGranted ? "is-ready" : "is-locked");
             String workspaceActionNote = "Select an item from the course flow to continue.";
@@ -877,6 +926,16 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                 }
             }
 
+            if ("performance".equalsIgnoreCase(tab)) {
+                workspaceEyebrow = "Course Insights";
+                workspaceTitle = "Course Performance";
+                workspaceDescription = "Review all assessments in one place with scores, attempts, and mastery status.";
+                workspaceStatusLabel = "Overview";
+                workspaceStatusClass = "status-Approved";
+                workspaceActionNote = "Use the performance tab to compare every assessment at a glance.";
+                workspacePrimaryActionIcon = "chart-column";
+            }
+
             if (selectedAssessment != null && !"result".equals(selectedMode)) {
                 if (courseExpired) {
                     selectedAssessmentStatusLabel = "Expired";
@@ -885,7 +944,7 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                     selectedAssessmentStatusLabel = "Locked";
                     selectedAssessmentStatusClass = "status-Pending";
                 } else if (selectedAssessmentHasActiveAttempt) {
-                    selectedAssessmentStatusLabel = "In Progress";
+                    selectedAssessmentStatusLabel = "Active";
                     selectedAssessmentStatusClass = "status-Pending";
                 } else if (selectedAssessmentLatest != null && selectedAssessmentLatest.getScore() != null) {
                     selectedAssessmentStatusLabel = "Completed";
@@ -958,7 +1017,7 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                 workspaceDescription = selectedMaterial.getDescription() != null && !selectedMaterial.getDescription().trim().isEmpty()
                         ? selectedMaterial.getDescription()
                         : "Choose a material or assessment from the sidebar to continue your course sequence.";
-                workspaceStatusLabel = "completed".equalsIgnoreCase(selectedMaterialStatus) ? "Completed" : "In Progress";
+                workspaceStatusLabel = "completed".equalsIgnoreCase(selectedMaterialStatus) ? "Completed" : "Active";
                 workspaceStatusClass = "completed".equalsIgnoreCase(selectedMaterialStatus) ? "status-Approved" : "status-Pending";
                 
                 String filePath = selectedMaterial.getFilePath() != null ? selectedMaterial.getFilePath() : "";
@@ -1038,7 +1097,16 @@ public class EnrollmentDetailsServlet extends HttpServlet {
             request.setAttribute("usedAttemptsByAssessment", usedAttemptsByAssessment);
             request.setAttribute("allowedAttemptsByAssessment", allowedAttemptsByAssessment);
             request.setAttribute("latestSubmissionByAssessment", latestSubmissionByAssessment);
+            request.setAttribute("bestScoreByAssessment", bestScoreByAssessment);
+            request.setAttribute("bestPercentageByAssessment", bestPercentageByAssessment);
             request.setAttribute("activeAttemptByAssessment", activeAttemptByAssessment);
+            request.setAttribute("performanceAttemptedCount", performanceAttemptedCount);
+            request.setAttribute("performanceGradedCount", performanceGradedCount);
+            request.setAttribute("performanceAverageBestScore", performanceBestScoreCount > 0 ? (Math.round((performanceBestScoreTotal / performanceBestScoreCount) * 100.0) / 100.0) : null);
+            request.setAttribute("performanceHighestAssessmentTitle", performanceHighestAssessmentTitle);
+            request.setAttribute("performanceHighestAssessmentPercent", performanceHighestAssessmentPercent);
+            request.setAttribute("performanceLowestAssessmentTitle", performanceLowestAssessmentTitle);
+            request.setAttribute("performanceLowestAssessmentPercent", performanceLowestAssessmentPercent);
             request.setAttribute("materialsViewedCount", materialsViewedCount);
             request.setAttribute("viewedMaterialIds", viewedMaterialIds);
             request.setAttribute("materialStatusById", materialStatusById);
@@ -1355,6 +1423,7 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                     // Ignore
                 }
             }
+
             if (sumOfMarks > 0) {
                 return sumOfMarks * (passMarkPercent / 100.0);
             }
@@ -1497,6 +1566,13 @@ public class EnrollmentDetailsServlet extends HttpServlet {
         if (url == null || url.isEmpty()) return "";
         if (url.contains("youtu.be/")) {
             String[] parts = url.split("youtu\\.be/");
+            if (parts.length > 1) {
+                String id = parts[1].split("[?&]")[0];
+                return id.trim();
+            }
+        }
+        if (url.contains("/shorts/")) {
+            String[] parts = url.split("/shorts/");
             if (parts.length > 1) {
                 String id = parts[1].split("[?&]")[0];
                 return id.trim();

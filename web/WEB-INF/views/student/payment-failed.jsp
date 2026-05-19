@@ -58,6 +58,7 @@
             <div class="ef-actions" style="display: flex; gap: 10px; flex-wrap: wrap;">
                 <a href="${retryPaymentUrl}" class="sv-btn primary" style="height: 42px; border-radius: 8px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; padding: 0 20px; gap: 8px;"><i class="fas fa-redo"></i> Retry Payment</a>
                 <a href="${detailsUrl}" class="sv-btn" style="height: 42px; border-radius: 8px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; padding: 0 16px; border: 1px solid var(--sv-border); background: var(--sv-surface); color: var(--sv-foreground);"><i class="fas fa-file-invoice"></i> View Enrollment Details</a>
+                <a href="${pageContext.request.contextPath}/student/payments" class="sv-btn" style="height: 42px; border-radius: 8px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; padding: 0 16px; border: 1px solid var(--sv-border); background: var(--sv-surface); color: var(--sv-foreground);"><i class="fas fa-clock-rotate-left"></i> Payment History</a>
                 <a href="${pageContext.request.contextPath}/student/courses" class="sv-btn" style="height: 42px; border-radius: 8px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; padding: 0 16px; border: 1px solid var(--sv-border); background: var(--sv-surface); color: var(--sv-foreground);"><i class="fas fa-search"></i> Browse Other Courses</a>
             </div>
         </section>

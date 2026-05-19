@@ -16,10 +16,10 @@ public class PaymentDAOImpl implements PaymentDAO {
     
     @Override
     public Payment createPayment(Payment payment) {
-        String sql = "INSERT INTO Payment (EnrollmentID, Amount, PaymentMethod, PaymentStatus, Reference, PaymentRef, PaystackReference, AccessCode, AuthorizationUrl, PaystackStatus) " +
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO Payment (EnrollmentID, Amount, PaymentMethod, PaymentStatus, Reference, PaymentRef, PaystackReference, AccessCode, AuthorizationUrl, PaystackStatus, PaymentDate) " +
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         
-        LOGGER.info("Creating payment for enrollmentId=" + payment.getEnrollmentId());
+        LOGGER.log(Level.INFO, "Creating payment for enrollmentId={0}", payment.getEnrollmentId());
         
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -34,6 +34,7 @@ public class PaymentDAOImpl implements PaymentDAO {
             ps.setString(8, payment.getAccessCode());
             ps.setString(9, payment.getAuthorizationUrl());
             ps.setString(10, payment.getPaystackStatus() == null ? "pending" : payment.getPaystackStatus());
+            ps.setTimestamp(11, Timestamp.valueOf(payment.getPaymentDate() != null ? payment.getPaymentDate() : LocalDateTime.now()));
             
             int affected = ps.executeUpdate();
             
@@ -42,7 +43,7 @@ public class PaymentDAOImpl implements PaymentDAO {
                     if (rs.next()) {
                         payment.setPaymentId(rs.getInt(1));
                         payment.setPaymentDate(LocalDateTime.now());
-                        LOGGER.info("Payment created successfully paymentId=" + payment.getPaymentId());
+                        LOGGER.log(Level.INFO, "Payment created successfully paymentId={0}", payment.getPaymentId());
                         return payment;
                     }
                 }
@@ -55,9 +56,10 @@ public class PaymentDAOImpl implements PaymentDAO {
     
     @Override
     public boolean updatePaymentStatus(Integer paymentId, String status, String method, String paystackStatus) {
-        String sql = "UPDATE Payment SET PaymentStatus = ?, PaymentMethod = ?, PaystackStatus = ?, PaymentDate = CASE WHEN ? = 'Paid' THEN NOW() ELSE PaymentDate END WHERE PaymentID = ?";
+        String sql = "UPDATE Payment SET PaymentStatus = ?, PaymentMethod = ?, PaystackStatus = ?, PaymentDate = COALESCE(PaymentDate, NOW()) WHERE PaymentID = ?";
         
-        LOGGER.info("Updating payment status paymentId=" + paymentId + ", status=" + status + ", paystackStatus=" + paystackStatus);
+        LOGGER.log(Level.INFO, "Updating payment status paymentId={0}, status={1}, paystackStatus={2}",
+            new Object[]{paymentId, status, paystackStatus});
         
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -65,8 +67,7 @@ public class PaymentDAOImpl implements PaymentDAO {
             ps.setString(1, status);
             ps.setString(2, method);
             ps.setString(3, paystackStatus);
-            ps.setString(4, status);
-            ps.setInt(5, paymentId);
+            ps.setInt(4, paymentId);
             
             int affected = ps.executeUpdate();
             return affected > 0;
@@ -85,7 +86,7 @@ public class PaymentDAOImpl implements PaymentDAO {
                                                 String authorizationUrl,
                                                 String paystackStatus) {
         String sql = "UPDATE Payment SET Amount = ?, PaymentMethod = ?, PaymentStatus = ?, Reference = ?, PaymentRef = ?, "
-                + "PaystackReference = ?, AccessCode = ?, AuthorizationUrl = ?, PaystackStatus = ? WHERE PaymentID = ?";
+            + "PaystackReference = ?, AccessCode = ?, AuthorizationUrl = ?, PaystackStatus = ?, PaymentDate = COALESCE(PaymentDate, NOW()) WHERE PaymentID = ?";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -178,6 +179,40 @@ public class PaymentDAOImpl implements PaymentDAO {
             }
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Error listing payments", e);
+        }
+        return list;
+    }
+
+    @Override
+    public java.util.List<Payment> getPaymentsByStudentId(Integer userId) {
+        java.util.List<Payment> list = new java.util.ArrayList<>();
+        String sql = "SELECT p.*, c.Title AS CourseTitle, u.FullName AS StudentName, u.Email AS StudentEmail "
+                + "FROM Payment p "
+                + "JOIN Enrollment e ON e.EnrollmentID = p.EnrollmentID "
+                + "JOIN Course c ON c.CourseID = e.CourseID "
+                + "JOIN User u ON u.UserID = e.UserID "
+                + "WHERE e.UserID = ? "
+                + "ORDER BY p.PaymentDate DESC, p.PaymentID DESC";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, userId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Payment payment = extractPaymentFromResultSet(rs);
+                    try {
+                        payment.setCourseName(rs.getString("CourseTitle"));
+                        payment.setStudentName(rs.getString("StudentName"));
+                        payment.setStudentEmail(rs.getString("StudentEmail"));
+                    } catch (SQLException ignored) {
+                    }
+                    list.add(payment);
+                }
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error fetching payments for student userId=" + userId, e);
         }
         return list;
     }

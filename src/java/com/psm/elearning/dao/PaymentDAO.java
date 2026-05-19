@@ -39,6 +39,7 @@ public interface PaymentDAO {
     // Admin helpers
     Payment getPaymentById(Integer paymentId);
     java.util.List<Payment> listPayments(String status, int page, int pageSize);
+    java.util.List<Payment> getPaymentsByStudentId(Integer userId);
     /**
      * Get payment by enrollment ID.
      * @param enrollmentId Enrollment ID

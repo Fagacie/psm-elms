@@ -19,6 +19,7 @@
     <c:choose>
         <c:when test="${fn:contains(currentPath, '/student/my-enrollments')}"><c:set var="resolvedStudentTitle" value="My Courses"/></c:when>
         <c:when test="${fn:contains(currentPath, '/student/courses')}"><c:set var="resolvedStudentTitle" value="Browse Courses"/></c:when>
+        <c:when test="${fn:contains(currentPath, '/student/payments')}"><c:set var="resolvedStudentTitle" value="Payments"/></c:when>
         <c:when test="${fn:contains(currentPath, '/student/enrollment-summary')}"><c:set var="resolvedStudentTitle" value="Enrollment Summary"/></c:when>
         <c:when test="${fn:contains(currentPath, '/student/payment-success')}"><c:set var="resolvedStudentTitle" value="Payment Success"/></c:when>
         <c:when test="${fn:contains(currentPath, '/student/payment-failed')}"><c:set var="resolvedStudentTitle" value="Payment Failed"/></c:when>

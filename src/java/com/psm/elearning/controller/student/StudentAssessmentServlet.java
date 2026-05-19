@@ -775,8 +775,52 @@ public class StudentAssessmentServlet extends HttpServlet {
     private void renderHistory(HttpServletRequest request, HttpServletResponse response, HttpSession session, Integer userId, Enrollment enrollment)
             throws ServletException, IOException {
         List<StudentAssessmentSummary> summaries = buildAssessmentSummaries(enrollment, userId, session);
+        int gradedCount = 0;
+        int latestSubmissionCount = 0;
+        double bestScoreTotal = 0.0;
+        int bestScoreCount = 0;
+        StudentAssessmentSummary highestAssessmentSummary = null;
+        StudentAssessmentSummary lowestAssessmentSummary = null;
+        Double highestAssessmentPercentage = null;
+        Double lowestAssessmentPercentage = null;
+        for (StudentAssessmentSummary summary : summaries) {
+            if (summary != null) {
+                if (summary.getLatestSubmission() != null) {
+                    latestSubmissionCount++;
+                    if (summary.getLatestSubmission().getScore() != null) {
+                        gradedCount++;
+                    }
+                }
+                if (summary.getBestScore() != null) {
+                    bestScoreTotal += summary.getBestScore();
+                    bestScoreCount++;
+                }
+                if (summary.getBestScore() != null
+                        && summary.getAssessment() != null
+                        && summary.getAssessment().getTotalMarks() != null
+                        && summary.getAssessment().getTotalMarks() > 0) {
+                    double summaryPercentage = computePercentage(summary.getBestScore(), summary.getAssessment().getTotalMarks());
+                    if (highestAssessmentPercentage == null || summaryPercentage > highestAssessmentPercentage) {
+                        highestAssessmentPercentage = summaryPercentage;
+                        highestAssessmentSummary = summary;
+                    }
+                    if (lowestAssessmentPercentage == null || summaryPercentage < lowestAssessmentPercentage) {
+                        lowestAssessmentPercentage = summaryPercentage;
+                        lowestAssessmentSummary = summary;
+                    }
+                }
+            }
+        }
         request.setAttribute("enrollment", enrollment);
         request.setAttribute("assessmentSummaries", summaries);
+        request.setAttribute("assessmentTotalCount", summaries != null ? summaries.size() : 0);
+        request.setAttribute("assessmentAttemptedCount", latestSubmissionCount);
+        request.setAttribute("assessmentGradedCount", gradedCount);
+        request.setAttribute("assessmentAverageBestScore", bestScoreCount > 0 ? round2(bestScoreTotal / bestScoreCount) : null);
+        request.setAttribute("highestAssessmentSummary", highestAssessmentSummary);
+        request.setAttribute("highestAssessmentPercentage", highestAssessmentPercentage);
+        request.setAttribute("lowestAssessmentSummary", lowestAssessmentSummary);
+        request.setAttribute("lowestAssessmentPercentage", lowestAssessmentPercentage);
         request.getRequestDispatcher("/WEB-INF/views/student/assessment-history.jsp").forward(request, response);
     }
 
@@ -808,10 +852,30 @@ public class StudentAssessmentServlet extends HttpServlet {
             return;
         }
 
-        response.sendRedirect(request.getContextPath() + "/student/enrollment-details?id="
-                + enrollment.getEnrollmentId()
-                + "&tab=assessments&view=result&assessmentId=" + assessmentId
-                + "&submissionId=" + submissionId);
+        boolean objectiveAssessment = isObjectiveAssessment(assessment);
+        double percentage = computePercentage(submission.getScore(), assessment.getTotalMarks());
+        List<AssessmentGradeAudit> audits = assessmentGradeAuditDAO.findBySubmission(submissionId);
+        List<AssessmentQuestion> questions = objectiveAssessment ? assessmentQuestionDAO.findByAssessment(assessmentId) : Collections.emptyList();
+        Map<Integer, String> studentAnswers = parseObjectiveAnswers(submission.getAnswersFilePath());
+        Map<Integer, String> correctAnswers = new LinkedHashMap<>();
+        if (questions != null) {
+            for (AssessmentQuestion question : questions) {
+                correctAnswers.put(question.getQuestionId(), question.getCorrectOption());
+            }
+        }
+
+        request.setAttribute("assessment", assessment);
+        request.setAttribute("enrollment", enrollment);
+        request.setAttribute("submission", submission);
+        request.setAttribute("submissionAudits", audits);
+        request.setAttribute("submissionStatusLabel", humanizeSubmissionStatus(submission));
+        request.setAttribute("statusClass", statusClassForSubmission(submission));
+        request.setAttribute("percentage", percentage);
+        request.setAttribute("objectiveAssessment", objectiveAssessment);
+        request.setAttribute("questions", questions);
+        request.setAttribute("studentAnswerByQuestionId", studentAnswers);
+        request.setAttribute("correctAnswerByQuestionId", correctAnswers);
+        request.getRequestDispatcher("/WEB-INF/views/student/assessment-result.jsp").forward(request, response);
     }
 
     private double computePercentage(Double score, Integer totalMarks) {

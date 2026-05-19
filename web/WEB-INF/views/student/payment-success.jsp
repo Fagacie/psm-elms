@@ -83,6 +83,8 @@
 
             <div class="ef-actions" style="display: flex; gap: 10px; flex-wrap: wrap;">
                 <a href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=learning" class="sv-btn primary" style="height: 42px; border-radius: 8px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; padding: 0 20px; gap: 8px;"><i class="fas fa-play"></i> Start Learning Workspace</a>
+                <a href="${pageContext.request.contextPath}/student/payments?receiptPaymentId=${payment.paymentId}" class="sv-btn" style="height: 42px; border-radius: 8px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; padding: 0 16px; border: 1px solid var(--sv-border); background: var(--sv-surface); color: var(--sv-foreground);"><i class="fas fa-file-invoice"></i> View Receipt</a>
+                <a href="${pageContext.request.contextPath}/student/payments" class="sv-btn" style="height: 42px; border-radius: 8px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; padding: 0 16px; border: 1px solid var(--sv-border); background: var(--sv-surface); color: var(--sv-foreground);"><i class="fas fa-clock-rotate-left"></i> Payment History</a>
                 <a href="${pageContext.request.contextPath}/student/my-enrollments" class="sv-btn" style="height: 42px; border-radius: 8px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; padding: 0 16px; border: 1px solid var(--sv-border); background: var(--sv-surface); color: var(--sv-foreground);"><i class="fas fa-layer-group"></i> Back to My Courses</a>
             </div>
         </section>

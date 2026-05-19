@@ -230,6 +230,24 @@
     </servlet-mapping>
 
     <servlet>
+        <servlet-name>StudentPaymentHistoryServlet</servlet-name>
+        <servlet-class>com.psm.elearning.controller.student.StudentPaymentHistoryServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>StudentPaymentHistoryServlet</servlet-name>
+        <url-pattern>/student/payments</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>StudentPaymentReceiptServlet</servlet-name>
+        <servlet-class>com.psm.elearning.controller.student.StudentPaymentReceiptServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>StudentPaymentReceiptServlet</servlet-name>
+        <url-pattern>/student/payment-receipt</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
         <servlet-name>StudentMaterialServlet</servlet-name>
         <servlet-class>com.psm.elearning.controller.student.StudentMaterialServlet</servlet-class>
     </servlet>

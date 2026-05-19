@@ -113,11 +113,11 @@
 <script>
 (function () {
     var completeButton = document.getElementById('mvMarkCompleted');
-    var actionNote = null; /* removed from DOM */
     var statusBadge = document.getElementById('mvStatusBadge');
     var statusChip = document.getElementById('mvStatusChip');
     var courseProgressBadge = document.getElementById('mvCourseProgressPercent');
     var nextAction = document.getElementById('mvNextAction');
+    var completedNote = 'This material is already part of your course progress.';
     var viewerState = {
         unlocked: '${isCompletedMaterial}' === 'true',
         completed: '${isCompletedMaterial}' === 'true'
@@ -178,11 +178,11 @@
         if (viewerState.completed) {
             return;
         }
-        setButtonState(true, 'Review In Progress');
+        setButtonState(true, 'Reviewing');
     }
 
     if (viewerState.completed) {
-        applyCompletedState('This material is already part of your course progress.');
+        applyCompletedState(completedNote);
     } else {
         setWaitingState();
     }
@@ -244,11 +244,8 @@
 
         if (event.data.type === 'lhViewerState') {
             if (event.data.completed) {
-                applyCompletedState('This material is already part of your course progress.');
+                applyCompletedState(completedNote);
                 return;
-            }
-            if (actionNote && event.data.note) {
-                actionNote.textContent = event.data.note;
             }
         }
 

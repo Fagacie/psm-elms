@@ -56,7 +56,30 @@
                     <h2>My Courses</h2>
                     <p class="me-card-intro">Track your courses, review progress, and resume learning.</p>
                 </div>
-                <a href="${pageContext.request.contextPath}/student/courses" class="sv-btn primary"><i class="fas fa-search"></i>&nbsp;Browse Courses</a>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <a href="${pageContext.request.contextPath}/student/payments" class="sv-btn"><i class="fas fa-receipt"></i>&nbsp;Payments</a>
+                    <a href="${pageContext.request.contextPath}/student/assessments?view=history&enrollmentId=${enrollment.enrollmentId}" class="sv-btn"><i class="fas fa-chart-column"></i>&nbsp;Performance</a>
+                    <a href="${pageContext.request.contextPath}/student/courses" class="sv-btn primary"><i class="fas fa-search"></i>&nbsp;Browse Courses</a>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 20px;">
+                <div style="border: 1px solid var(--sv-border); border-radius: 12px; background: var(--sv-surface-soft); padding: 16px;">
+                    <span style="display: block; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sv-muted); margin-bottom: 6px;">Total</span>
+                    <strong style="font-size: 1.35rem; color: var(--sv-foreground);">${not empty enrollments ? enrollments.size() : 0}</strong>
+                </div>
+                <div style="border: 1px solid var(--sv-border); border-radius: 12px; background: rgba(59, 130, 246, 0.06); padding: 16px;">
+                    <span style="display: block; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sv-muted); margin-bottom: 6px;">In Progress</span>
+                    <strong style="font-size: 1.35rem; color: #2563eb;">${inProgressCount}</strong>
+                </div>
+                <div style="border: 1px solid var(--sv-border); border-radius: 12px; background: rgba(16, 185, 129, 0.06); padding: 16px;">
+                    <span style="display: block; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sv-muted); margin-bottom: 6px;">Completed</span>
+                    <strong style="font-size: 1.35rem; color: #10b981;">${completedCount}</strong>
+                </div>
+                <div style="border: 1px solid var(--sv-border); border-radius: 12px; background: rgba(245, 158, 11, 0.08); padding: 16px;">
+                    <span style="display: block; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sv-muted); margin-bottom: 6px;">Paid</span>
+                    <strong style="font-size: 1.35rem; color: #d97706;">${paidCount}</strong>
+                </div>
             </div>
 
             <div class="me-controlbar" aria-label="Course pipeline controls">

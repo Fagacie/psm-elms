@@ -35,6 +35,11 @@
                     </span>
                     <h2 class="bc-hero-card__title">Browse available courses</h2>
                     <p class="bc-hero-card__text">Filter by difficulty, category, or price. Open a course to review the details before enrolling.</p>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px;">
+                        <a href="${pageContext.request.contextPath}/student/my-enrollments" class="sv-btn"><i class="fas fa-book-open-reader"></i> My Courses</a>
+                        <a href="${pageContext.request.contextPath}/student/payments" class="sv-btn"><i class="fas fa-receipt"></i> Payments</a>
+                        <a href="${pageContext.request.contextPath}/dashboard" class="sv-btn primary"><i class="fas fa-house"></i> Dashboard</a>
+                    </div>
                 </div>
                 
                 <div class="bc-hero-card__stats">
@@ -50,6 +55,13 @@
                         <div class="bc-hero-card__stat-copy">
                             <strong class="bc-count bc-hero-card__stat-value" data-counter="${not empty enrolledCourseIds ? enrolledCourseIds.size() : 0}">${not empty enrolledCourseIds ? enrolledCourseIds.size() : 0}</strong>
                             <span class="bc-hero-card__stat-label">Enrolled</span>
+                        </div>
+                    </div>
+                    <div class="bc-hero-card__stat">
+                        <i class="fas fa-circle-dollar-to-slot bc-hero-card__stat-icon is-success"></i>
+                        <div class="bc-hero-card__stat-copy">
+                            <strong class="bc-count bc-hero-card__stat-value" data-counter="${not empty courses ? courses.size() : 0}">${not empty courses ? courses.size() : 0}</strong>
+                            <span class="bc-hero-card__stat-label">In catalog</span>
                         </div>
                     </div>
                 </div>
@@ -89,6 +101,30 @@
                 </section>
             </c:when>
             <c:otherwise>
+                <c:set var="freeCourseCount" value="0"/>
+                <c:forEach var="course" items="${courses}">
+                    <c:if test="${empty course.courseFee || course.courseFee le 0}">
+                        <c:set var="freeCourseCount" value="${freeCourseCount + 1}"/>
+                    </c:if>
+                </c:forEach>
+
+                <section class="sv-card" style="margin-bottom: 18px;">
+                    <div class="sv-card-body" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px;">
+                        <div style="border: 1px solid var(--sv-border); border-radius: 12px; background: var(--sv-surface-soft); padding: 16px;">
+                            <span style="display: block; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sv-muted); margin-bottom: 6px;">Available</span>
+                            <strong style="font-size: 1.35rem; color: var(--sv-foreground);">${not empty courses ? courses.size() : 0}</strong>
+                        </div>
+                        <div style="border: 1px solid var(--sv-border); border-radius: 12px; background: rgba(59, 130, 246, 0.06); padding: 16px;">
+                            <span style="display: block; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sv-muted); margin-bottom: 6px;">Enrolled</span>
+                            <strong style="font-size: 1.35rem; color: #2563eb;">${not empty enrolledCourseIds ? enrolledCourseIds.size() : 0}</strong>
+                        </div>
+                        <div style="border: 1px solid var(--sv-border); border-radius: 12px; background: rgba(16, 185, 129, 0.06); padding: 16px;">
+                            <span style="display: block; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sv-muted); margin-bottom: 6px;">Free</span>
+                            <strong style="font-size: 1.35rem; color: #10b981;">${freeCourseCount}</strong>
+                        </div>
+                    </div>
+                </section>
+
                 <section class="bc-course-grid" id="bcGrid">
                     <c:forEach var="course" items="${courses}">
                         <c:set var="isEnrolled" value="${not empty enrolledCourseIds && enrolledCourseIds.contains(course.courseId)}"/>

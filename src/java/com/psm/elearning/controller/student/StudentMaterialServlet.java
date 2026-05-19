@@ -519,6 +519,14 @@ public class StudentMaterialServlet extends HttpServlet {
                 return id.trim();
             }
         }
+        // youtube.com/shorts/ID
+        if (url.contains("/shorts/")) {
+            String[] parts = url.split("/shorts/");
+            if (parts.length > 1) {
+                String id = parts[1].split("[?&]")[0];
+                return id.trim();
+            }
+        }
         // youtube.com/watch?v=ID
         if (url.contains("v=")) {
             String[] parts = url.split("v=");

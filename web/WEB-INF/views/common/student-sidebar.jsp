@@ -17,6 +17,9 @@
         <c:when test="${fn:contains(currentPath, '/student/courses')}">
             <c:set var="resolvedActivePage" value="browse-courses"/>
         </c:when>
+                <c:when test="${fn:contains(currentPath, '/student/payments')}">
+                    <c:set var="resolvedActivePage" value="payments"/>
+                </c:when>
         <c:when test="${fn:contains(currentPath, '/student/certificates') or fn:contains(currentPath, '/student/certificate')}">
             <c:set var="resolvedActivePage" value="certificates"/>
         </c:when>
@@ -58,6 +61,9 @@
                 </c:when>
                 <c:when test="${param.tab == 'assessments'}">
                     <c:set var="resolvedNavContextPage" value="assessments"/>
+                </c:when>
+                <c:when test="${param.tab == 'performance'}">
+                    <c:set var="resolvedNavContextPage" value="performance"/>
                 </c:when>
                 <c:otherwise>
                     <c:set var="resolvedNavContextPage" value="progress"/>
@@ -111,6 +117,12 @@
                         <i class="fas fa-clipboard-check" aria-hidden="true"></i>
                         <span class="sv-nav-label">Assessments</span>
                     </a>
+                          <a href="${pageContext.request.contextPath}/student/enrollment-details?id=${resolvedCourseEnrollmentId}&tab=performance"
+                              class="sv-nav-link ${resolvedNavContextPage == 'performance' ? 'active' : ''}"
+                              title="Performance">
+                                <i class="fas fa-chart-column" aria-hidden="true"></i>
+                                <span class="sv-nav-label">Performance</span>
+                          </a>
                     <a href="${pageContext.request.contextPath}/student/enrollment-details?id=${resolvedCourseEnrollmentId}&tab=learning"
                        class="sv-nav-link ${resolvedNavContextPage == 'progress' ? 'active' : ''}"
                        title="Progress">
@@ -170,6 +182,12 @@
                               title="Browse Courses">
                                 <i class="fas fa-compass" aria-hidden="true"></i>
                                 <span class="sv-nav-label">Browse Courses</span>
+                          </a>
+                          <a href="${pageContext.request.contextPath}/student/payments"
+                             class="sv-nav-link ${resolvedActivePage == 'payments' ? 'active' : ''}"
+                             title="Payments">
+                            <i class="fas fa-receipt" aria-hidden="true"></i>
+                            <span class="sv-nav-label">Payments</span>
                           </a>
                     <a href="${pageContext.request.contextPath}/student/certificates"
                        class="sv-nav-link ${resolvedActivePage == 'certificates' ? 'active' : ''}"

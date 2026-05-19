@@ -49,7 +49,7 @@
                         </div>
                         <p class="mv-youtube-note">
                             <i class="fab fa-youtube"></i>
-                            This video is hosted on YouTube. Scroll to the bottom and click <strong>Mark Complete</strong> once you've watched it.
+                            You can mark this material complete after watching.
                         </p>
                     </c:when>
                     <c:otherwise>
@@ -65,7 +65,7 @@
                 <div class="mv-link-state">
                     <i class="fas fa-link"></i>
                     <h3>External Resource</h3>
-                    <p>This resource opens in a new tab.</p>
+                    <p>Opens in a new tab.</p>
                     <a id="mvOpenResource"
                        class="cp-inline-link"
                        target="_blank"
@@ -137,15 +137,15 @@
 
     function initialNote() {
         if (alreadyCompleted) {
-            return 'This material is already part of your course progress.';
+            return 'Already complete.';
         }
         if (completionRule === 'video' || completionRule === 'audio') {
-            return 'Playback unlocks completion once you reach the required threshold.';
+            return 'Playback unlocks completion.';
         }
         if (completionRule === 'link') {
-            return 'Open the external resource in the viewer.';
+            return 'Open the resource to continue.';
         }
-        return 'Review the current material.';
+        return 'Review the material.';
     }
 
     postToParent('lhViewerState', initialNote());
@@ -156,7 +156,7 @@
 
     if (completionRule === 'video' || completionRule === 'audio') {
         if (!playbackMedia) {
-            postToParent('lhViewerUnlock', 'Playback could not be detected. You can mark this material complete manually.');
+            postToParent('lhViewerUnlock', 'You can mark this material complete manually.');
             return;
         }
 
@@ -166,12 +166,12 @@
             }
             var progress = playbackMedia.currentTime / playbackMedia.duration;
             if (progress >= 0.85) {
-                postToParent('lhViewerUnlock', 'Playback threshold reached. You can mark this material complete now.');
+                postToParent('lhViewerUnlock', 'You can mark this material complete now.');
             }
         });
 
         playbackMedia.addEventListener('ended', function () {
-            postToParent('lhViewerUnlock', 'Playback finished. You can mark this material complete now.');
+            postToParent('lhViewerUnlock', 'You can mark this material complete now.');
         });
         return;
     }
@@ -180,20 +180,20 @@
         if (openResourceLink) {
             openResourceLink.addEventListener('click', function () {
                 window.setTimeout(function () {
-                    postToParent('lhViewerUnlock', 'After reviewing the external resource, you can mark this item complete.');
+                    postToParent('lhViewerUnlock', 'You can mark this material complete now.');
                 }, 1200);
             });
         } else if (completionRule === 'youtube') {
             // Unlock after a delay for YouTube viewers
             window.setTimeout(function () {
-                postToParent('lhViewerUnlock', 'You can mark this YouTube material complete now.');
+                postToParent('lhViewerUnlock', 'You can mark this material complete now.');
             }, 4000);
         }
         return;
     }
 
     window.setTimeout(function () {
-        postToParent('lhViewerUnlock', 'Review complete. You can mark this material complete now.');
+        postToParent('lhViewerUnlock', 'You can mark this material complete now.');
     }, completionRule === 'document' || completionRule === 'slides' ? 5000 : 3000);
 })();
 </script>
