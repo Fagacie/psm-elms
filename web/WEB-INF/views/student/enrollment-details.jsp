@@ -329,43 +329,94 @@
                         </section>
                     </c:when>
                     <c:when test="${selectedMode == 'overview'}">
-                        <section class="sa-panel lh-performance-shell" style="padding: 24px; border-radius: 18px; border: 1px solid var(--sv-border); background: var(--sv-surface);">
-                            <div class="sa-panel-head" style="display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; align-items: start; margin-bottom: 18px;">
-                                <div>
-                                    <span class="sa-badge-flat success" style="margin-bottom: 10px;"><i class="fas fa-layer-group"></i> Course overview</span>
-                                    <h3 style="margin: 0; font-size: 1.5rem; color: var(--sv-foreground);"><c:out value="${enrollment.courseName}"/></h3>
+                        <section class="lh-overview">
+                            <div class="lh-overview__header">
+                                <div class="lh-overview__header-left">
+                                    <span class="lh-overview__kicker"><i class="fas fa-layer-group"></i> Course Overview</span>
+                                    <h2 class="lh-overview__title"><c:out value="${enrollment.courseName}"/></h2>
+                                    <c:if test="${not empty enrollment.instructorName}">
+                                        <p class="lh-overview__instructor"><i class="fas fa-chalkboard-user"></i> Instructor: <strong><c:out value="${enrollment.instructorName}"/></strong></p>
+                                    </c:if>
+                                </div>
+                                <div class="lh-overview__header-actions">
+                                    <a class="sv-btn primary" href="${not empty recommendedItem ? recommendedItem.navigationUrl : pageContext.request.contextPath.concat('/student/enrollment-details?id=').concat(enrollment.enrollmentId).concat('&tab=assessments')}">
+                                        <i class="fas fa-play"></i> Continue Learning
+                                    </a>
+                                    <a class="sv-btn" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=performance">
+                                        <i class="fas fa-chart-column"></i> Performance
+                                    </a>
                                 </div>
                             </div>
 
-                            <div class="sv-card" style="border: 1px solid var(--sv-border); border-radius: 14px; background: var(--sv-surface-soft); padding: 18px; margin-bottom: 18px;">
-                                <p style="margin: 0 0 14px; color: var(--sv-muted); line-height: 1.65;">
-                                    <c:choose>
-                                        <c:when test="${not empty enrollment.courseDescription}"><c:out value="${enrollment.courseDescription}"/></c:when>
-                                        <c:otherwise>Your course home for materials, assessments, progress, and performance.</c:otherwise>
-                                    </c:choose>
-                                </p>
-                                <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px;">
-                                    <div style="border: 1px solid var(--sv-border); border-radius: 12px; background: var(--sv-surface); padding: 16px;">
-                                        <span style="display: block; font-size: 0.68rem; text-transform: uppercase; color: var(--sv-muted); letter-spacing: 0.08em; margin-bottom: 6px;">Progress</span>
-                                        <strong style="font-size: 1.3rem; color: var(--sv-foreground);">${progressPercent}%</strong>
-                                    </div>
-                                    <div style="border: 1px solid var(--sv-border); border-radius: 12px; background: var(--sv-surface); padding: 16px;">
-                                        <span style="display: block; font-size: 0.68rem; text-transform: uppercase; color: var(--sv-muted); letter-spacing: 0.08em; margin-bottom: 6px;">Materials</span>
-                                        <strong style="font-size: 1.3rem; color: var(--sv-foreground);">${materialCount}</strong>
-                                    </div>
-                                    <div style="border: 1px solid var(--sv-border); border-radius: 12px; background: var(--sv-surface); padding: 16px;">
-                                        <span style="display: block; font-size: 0.68rem; text-transform: uppercase; color: var(--sv-muted); letter-spacing: 0.08em; margin-bottom: 6px;">Assessments</span>
-                                        <strong style="font-size: 1.3rem; color: var(--sv-foreground);">${assessmentCount}</strong>
-                                    </div>
-                                </div>
+                            <div class="lh-overview__description">
+                                <c:choose>
+                                    <c:when test="${not empty enrollment.courseDescription}"><c:out value="${enrollment.courseDescription}"/></c:when>
+                                    <c:otherwise>Your course home for materials, assessments, progress tracking, and performance analytics.</c:otherwise>
+                                </c:choose>
                             </div>
 
-                            <div class="sa-footer-actions" style="display: flex; gap: 10px; flex-wrap: wrap;">
-                                <a class="sv-btn primary" href="${not empty recommendedItem ? recommendedItem.navigationUrl : pageContext.request.contextPath.concat('/student/enrollment-details?id=').concat(enrollment.enrollmentId).concat('&tab=assessments')}" style="height: 40px; border-radius: 10px; display: inline-flex; align-items: center; gap: 8px; font-size: 0.88rem;"><i class="fas fa-play"></i> Continue</a>
-                                <a class="sv-btn" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=performance" style="height: 40px; border-radius: 10px; display: inline-flex; align-items: center; gap: 8px; font-size: 0.88rem;"><i class="fas fa-chart-column"></i> Performance</a>
+                            <div class="lh-overview__stats">
+                                <div class="lh-overview__stat">
+                                    <div class="lh-overview__stat-icon"><i class="fas fa-chart-line"></i></div>
+                                    <div class="lh-overview__stat-data">
+                                        <strong>${progressPercent}%</strong>
+                                        <span>Progress</span>
+                                    </div>
+                                </div>
+                                <div class="lh-overview__stat">
+                                    <div class="lh-overview__stat-icon lh-overview__stat-icon--blue"><i class="fas fa-file-lines"></i></div>
+                                    <div class="lh-overview__stat-data">
+                                        <strong>${materialCount}</strong>
+                                        <span>Materials</span>
+                                    </div>
+                                </div>
+                                <div class="lh-overview__stat">
+                                    <div class="lh-overview__stat-icon lh-overview__stat-icon--purple"><i class="fas fa-clipboard-check"></i></div>
+                                    <div class="lh-overview__stat-data">
+                                        <strong>${assessmentCount}</strong>
+                                        <span>Assessments</span>
+                                    </div>
+                                </div>
+                                <c:if test="${not empty courseDuration}">
+                                    <div class="lh-overview__stat">
+                                        <div class="lh-overview__stat-icon lh-overview__stat-icon--amber"><i class="fas fa-clock"></i></div>
+                                        <div class="lh-overview__stat-data">
+                                            <strong>${courseDuration}</strong>
+                                            <span>Duration</span>
+                                        </div>
+                                    </div>
+                                </c:if>
+                            </div>
+
+                            <div class="lh-overview__milestones">
+                                <h3 class="lh-overview__section-title">Completion Milestones</h3>
+                                <div class="lh-overview__milestone-list">
+                                    <div class="lh-overview__milestone ${enrollment.paymentStatus == 'Paid' || enrollment.paymentStatus == 'Free' ? 'is-done' : ''}">
+                                        <i class="fas fa-${enrollment.paymentStatus == 'Paid' || enrollment.paymentStatus == 'Free' ? 'circle-check' : 'circle'} lh-overview__milestone-icon"></i>
+                                        <div class="lh-overview__milestone-copy">
+                                            <strong>Payment</strong>
+                                            <span>${enrollment.paymentStatus == 'Paid' ? 'Paid' : (enrollment.paymentStatus == 'Free' ? 'Free Course' : 'Pending')}</span>
+                                        </div>
+                                    </div>
+                                    <div class="lh-overview__milestone ${progressPercent >= 100 ? 'is-done' : ''}">
+                                        <i class="fas fa-${progressPercent >= 100 ? 'circle-check' : 'circle'} lh-overview__milestone-icon"></i>
+                                        <div class="lh-overview__milestone-copy">
+                                            <strong>Materials</strong>
+                                            <span>${progressPercent >= 100 ? 'All viewed' : progressPercent.concat('% complete')}</span>
+                                        </div>
+                                    </div>
+                                    <div class="lh-overview__milestone ${enrollment.completionStatus == 'Completed' ? 'is-done' : ''}">
+                                        <i class="fas fa-${enrollment.completionStatus == 'Completed' ? 'circle-check' : 'circle'} lh-overview__milestone-icon"></i>
+                                        <div class="lh-overview__milestone-copy">
+                                            <strong>Course Completion</strong>
+                                            <span>${enrollment.completionStatus}</span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </section>
                     </c:when>
+
                     <c:when test="${selectedMode == 'performance'}">
                         <section class="sa-panel lh-performance-shell" style="padding: 24px; border-radius: 18px; border: 1px solid var(--sv-border); background: var(--sv-surface);">
                             <div class="sa-panel-head" style="display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; align-items: start; margin-bottom: 18px;">

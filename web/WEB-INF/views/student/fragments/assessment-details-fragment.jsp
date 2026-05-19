@@ -62,7 +62,7 @@
             <div class="sa-footer-actions">
                 <c:choose>
                     <c:when test="${enrollment.daysRemaining < 0 && enrollment.courseDuration != null && enrollment.courseDuration > 0}">
-                        <span class="sa-no-attempts" style="background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); padding: 8px 12px; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; font-weight: 500;">
+                        <span class="sa-no-attempts sa-no-attempts--expired">
                             <i class="fas fa-calendar-times"></i> Course Expired (Read-Only)
                         </span>
                         <c:if test="${assessmentSummary.latestSubmission != null}">

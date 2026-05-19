@@ -62,22 +62,34 @@
                 </div>
             </div>
 
-            <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 20px;">
-                <div style="border: 1px solid var(--sv-border); border-radius: 12px; background: var(--sv-surface-soft); padding: 16px;">
-                    <span style="display: block; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sv-muted); margin-bottom: 6px;">Total</span>
-                    <strong style="font-size: 1.35rem; color: var(--sv-foreground);">${not empty enrollments ? enrollments.size() : 0}</strong>
+            <div class="me-metrics-strip">
+                <div class="me-metric-tile">
+                    <div class="me-metric-icon-wrap"><i class="fas fa-book-open"></i></div>
+                    <div class="me-metric-body">
+                        <span class="me-metric-label">Total Courses</span>
+                        <strong class="me-metric-value">${not empty enrollments ? enrollments.size() : 0}</strong>
+                    </div>
                 </div>
-                <div style="border: 1px solid var(--sv-border); border-radius: 12px; background: rgba(59, 130, 246, 0.06); padding: 16px;">
-                    <span style="display: block; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sv-muted); margin-bottom: 6px;">In Progress</span>
-                    <strong style="font-size: 1.35rem; color: #2563eb;">${inProgressCount}</strong>
+                <div class="me-metric-tile me-metric-tile--blue">
+                    <div class="me-metric-icon-wrap"><i class="fas fa-circle-play"></i></div>
+                    <div class="me-metric-body">
+                        <span class="me-metric-label">In Progress</span>
+                        <strong class="me-metric-value">${inProgressCount}</strong>
+                    </div>
                 </div>
-                <div style="border: 1px solid var(--sv-border); border-radius: 12px; background: rgba(16, 185, 129, 0.06); padding: 16px;">
-                    <span style="display: block; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sv-muted); margin-bottom: 6px;">Completed</span>
-                    <strong style="font-size: 1.35rem; color: #10b981;">${completedCount}</strong>
+                <div class="me-metric-tile me-metric-tile--green">
+                    <div class="me-metric-icon-wrap"><i class="fas fa-circle-check"></i></div>
+                    <div class="me-metric-body">
+                        <span class="me-metric-label">Completed</span>
+                        <strong class="me-metric-value">${completedCount}</strong>
+                    </div>
                 </div>
-                <div style="border: 1px solid var(--sv-border); border-radius: 12px; background: rgba(245, 158, 11, 0.08); padding: 16px;">
-                    <span style="display: block; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sv-muted); margin-bottom: 6px;">Paid</span>
-                    <strong style="font-size: 1.35rem; color: #d97706;">${paidCount}</strong>
+                <div class="me-metric-tile me-metric-tile--amber">
+                    <div class="me-metric-icon-wrap"><i class="fas fa-wallet"></i></div>
+                    <div class="me-metric-body">
+                        <span class="me-metric-label">Paid Courses</span>
+                        <strong class="me-metric-value">${paidCount}</strong>
+                    </div>
                 </div>
             </div>
 

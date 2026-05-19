@@ -99,7 +99,7 @@
         <nav class="sv-nav" aria-label="Primary navigation">
             <c:choose>
                 <c:when test="${resolvedNavContext == 'course' and not empty resolvedCourseEnrollmentId}">
-                    <div class="lh-course-tabs" aria-label="Course section tabs">
+                    <div class="sv-nav-group" aria-label="Course section tabs">
                         <a href="${pageContext.request.contextPath}/student/enrollment-details?id=${resolvedCourseEnrollmentId}&tab=overview"
                            class="sv-nav-link ${resolvedNavContextPage == 'overview' ? 'active' : ''}"
                            title="Course Overview">
@@ -149,6 +149,8 @@
                 </c:when>
 
                 <c:otherwise>
+                    <%-- Learning Section --%>
+                    <span class="sv-nav-section-label">Learning</span>
                     <a href="${pageContext.request.contextPath}/dashboard"
                        class="sv-nav-link ${resolvedActivePage == 'dashboard' ? 'active' : ''}"
                        title="Dashboard">
@@ -161,34 +163,41 @@
                         <i class="fas fa-book-open-reader" aria-hidden="true"></i>
                         <span class="sv-nav-label">My Courses</span>
                     </a>
-                          <a href="${pageContext.request.contextPath}/student/courses"
-                              class="sv-nav-link ${resolvedActivePage == 'browse-courses' ? 'active' : ''}"
-                              title="Browse Courses">
-                                <i class="fas fa-compass" aria-hidden="true"></i>
-                                <span class="sv-nav-label">Browse Courses</span>
-                          </a>
-                          <a href="${pageContext.request.contextPath}/student/payments"
-                             class="sv-nav-link ${resolvedActivePage == 'payments' ? 'active' : ''}"
-                             title="Payments">
-                            <i class="fas fa-receipt" aria-hidden="true"></i>
-                            <span class="sv-nav-label">Payments</span>
-                          </a>
+                    <a href="${pageContext.request.contextPath}/student/courses"
+                       class="sv-nav-link ${resolvedActivePage == 'browse-courses' ? 'active' : ''}"
+                       title="Browse Courses">
+                        <i class="fas fa-compass" aria-hidden="true"></i>
+                        <span class="sv-nav-label">Browse Courses</span>
+                    </a>
+
+                    <%-- Resources Section --%>
+                    <div class="sv-nav-divider" aria-hidden="true"></div>
+                    <span class="sv-nav-section-label">Resources</span>
+                    <a href="${pageContext.request.contextPath}/student/payments"
+                       class="sv-nav-link ${resolvedActivePage == 'payments' ? 'active' : ''}"
+                       title="Payments">
+                        <i class="fas fa-receipt" aria-hidden="true"></i>
+                        <span class="sv-nav-label">Payments</span>
+                    </a>
                     <a href="${pageContext.request.contextPath}/student/certificates"
                        class="sv-nav-link ${resolvedActivePage == 'certificates' ? 'active' : ''}"
                        title="Certificates">
                         <i class="fas fa-certificate" aria-hidden="true"></i>
                         <span class="sv-nav-label">Certificates</span>
                     </a>
+
+                    <%-- Account Section --%>
+                    <div class="sv-nav-divider" aria-hidden="true"></div>
+                    <span class="sv-nav-section-label">Account</span>
                     <a href="${pageContext.request.contextPath}/profile"
                        class="sv-nav-link ${resolvedActivePage == 'profile' ? 'active' : ''}"
                        title="Profile">
                         <i class="fas fa-user-gear" aria-hidden="true"></i>
                         <span class="sv-nav-label">Profile</span>
                     </a>
-                          <div class="sv-nav-spacer" aria-hidden="true"></div>
-                          <div class="sv-nav-divider" aria-hidden="true"></div>
+                    <div class="sv-nav-spacer" aria-hidden="true"></div>
                     <a href="${pageContext.request.contextPath}/logout"
-                              class="sv-nav-link sv-nav-link-danger sv-nav-link-logout"
+                       class="sv-nav-link sv-nav-link-danger sv-nav-link-logout"
                        title="Logout">
                         <i class="fas fa-right-from-bracket" aria-hidden="true"></i>
                         <span class="sv-nav-label">Logout</span>

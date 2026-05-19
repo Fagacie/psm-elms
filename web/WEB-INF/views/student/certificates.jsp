@@ -54,66 +54,76 @@
             </div>
         </c:if>
 
-        <section class="sv-card cert-hero cert-card-animated">
+        <%-- Beautiful self-contained Certificates Page Header --%>
+        <section class="sv-card cert-hero">
             <div class="sv-card-body cert-hero-body">
-                <div class="cert-hero-copy">
-                    <p class="cert-kicker">Certificates</p>
-                    <h2>Your issued certificates</h2>
-                    <p>Generate certificates after completion, check eligibility, and keep each issued credential in one place.</p>
+                <div class="cert-hero-content">
+                    <span class="cert-kicker"><i class="fas fa-certificate"></i> Certificates & Credentials</span>
+                    <h2>Your Course Certificates</h2>
+                    <p class="cert-hero-intro">View and manage your officially issued course certificates, verify your academic completion status, or instantly generate newly earned credentials.</p>
                     <div class="cert-hero-actions">
-                        <a href="${pageContext.request.contextPath}/student/my-enrollments" class="sv-btn primary">Open My Courses</a>
-                        <a href="${pageContext.request.contextPath}/student/courses" class="sv-btn">Browse Courses</a>
+                        <a href="${pageContext.request.contextPath}/student/my-enrollments" class="sv-btn"><i class="fas fa-book-open"></i>&nbsp;My Courses</a>
+                        <a href="${pageContext.request.contextPath}/student/courses" class="sv-btn primary"><i class="fas fa-search"></i>&nbsp;Browse Catalog</a>
                     </div>
                 </div>
-                <div class="cert-hero-scene" aria-hidden="true">
-                    <span class="cert-orb cert-orb-a" data-depth="18"></span>
-                    <span class="cert-orb cert-orb-b" data-depth="26"></span>
-                    <span class="cert-orb cert-orb-c" data-depth="14"></span>
+                <div class="cert-hero-scene">
                     <div class="cert-scene-panel cert-scene-panel-a">
-                        <span>Eligible</span>
-                        <strong>${fn:length(readyToGenerate)}</strong>
-                    </div>
-                    <div class="cert-scene-panel cert-scene-panel-b">
                         <span>Issued</span>
                         <strong>${fn:length(issuedCertificates)}</strong>
                     </div>
-                </div>
-            </div>
-        </section>
-
-        <section class="sv-metrics cert-metrics">
-            <article class="sv-metric cert-metric">
-                <h3 class="cert-count" data-counter="${fn:length(readyToGenerate)}">${fn:length(readyToGenerate)}</h3>
-                <p>Ready to Generate</p>
-            </article>
-            <article class="sv-metric cert-metric">
-                <h3 class="cert-count" data-counter="${fn:length(issuedCertificates)}">${fn:length(issuedCertificates)}</h3>
-                <p>Issued Certificates</p>
-            </article>
-            <article class="sv-metric cert-metric">
-                <h3 class="cert-count" data-counter="${activeCount}">${activeCount}</h3>
-                <p>Active</p>
-            </article>
-            <article class="sv-metric cert-metric">
-                <h3 class="cert-count" data-counter="${revokedCount}">${revokedCount}</h3>
-                <p>Revoked</p>
-            </article>
-        </section>
-
-        <section class="sv-card cert-card cert-card-animated cert-public-verify-note">
-            <div class="sv-card-body">
-                <div class="cert-public-verify-copy">
-                    <i class="fas fa-shield-check"></i>
-                    <div>
-                        <strong>Verification is public.</strong>
-                        <p>Share the certificate code with employers or institutions. They can verify authenticity from the public verification page.</p>
+                    <div class="cert-scene-panel cert-scene-panel-b">
+                        <span>Ready</span>
+                        <strong>${fn:length(readyToGenerate)}</strong>
                     </div>
+                    <div class="cert-orb cert-orb-a"></div>
+                    <div class="cert-orb cert-orb-b"></div>
+                    <div class="cert-orb cert-orb-c"></div>
                 </div>
             </div>
         </section>
 
-        <section class="sv-card cert-controls cert-card cert-card-animated">
-            <div class="sv-card-body cert-controls-body" aria-label="Certificate list controls">
+        <%-- Dynamic Metrics strip (Now self-contained and perfectly styled) --%>
+        <div class="cert-metrics-strip">
+            <div class="cert-metric-tile">
+                <div class="cert-metric-icon-wrap"><i class="fas fa-certificate"></i></div>
+                <div class="cert-metric-body">
+                    <span class="cert-metric-label">Issued Certificates</span>
+                    <strong class="cert-metric-value">${fn:length(issuedCertificates)}</strong>
+                </div>
+            </div>
+            <div class="cert-metric-tile cert-metric-tile--green">
+                <div class="cert-metric-icon-wrap"><i class="fas fa-circle-check"></i></div>
+                <div class="cert-metric-body">
+                    <span class="cert-metric-label">Active Credentials</span>
+                    <strong class="cert-metric-value">${activeCount}</strong>
+                </div>
+            </div>
+            <div class="cert-metric-tile cert-metric-tile--blue">
+                <div class="cert-metric-icon-wrap"><i class="fas fa-circle-play"></i></div>
+                <div class="cert-metric-body">
+                    <span class="cert-metric-label">Ready to Generate</span>
+                    <strong class="cert-metric-value">${fn:length(readyToGenerate)}</strong>
+                </div>
+            </div>
+            <div class="cert-metric-tile cert-metric-tile--amber">
+                <div class="cert-metric-icon-wrap"><i class="fas fa-lock"></i></div>
+                <div class="cert-metric-body">
+                    <span class="cert-metric-label">Blocked/Pending</span>
+                    <strong class="cert-metric-value">${fn:length(blockedEnrollments)}</strong>
+                </div>
+            </div>
+        </div>
+
+        <%-- Primary Section: Already Issued Certificates --%>
+        <section class="sv-card cert-card">
+            <div class="sv-card-head">
+                <div>
+                    <h2>Issued Certificates</h2>
+                    <p class="cert-section-intro-desc">Review, view templates, download PDFs, or copy verification codes.</p>
+                </div>
+            </div>
+            
+            <div class="cert-controls-body" aria-label="Certificate list controls">
                 <div class="cert-filter-group">
                     <button type="button" class="cert-filter active" data-filter="all">All</button>
                     <button type="button" class="cert-filter" data-filter="active">Active</button>
@@ -121,140 +131,16 @@
                 </div>
                 <div class="cert-search-wrap">
                     <label for="certQuickSearch" class="cert-sr-only">Search certificates</label>
-                    <input id="certQuickSearch" type="text" placeholder="Search course or certificate no..." autocomplete="off">
+                    <input id="certQuickSearch" type="text" placeholder="Search by course or certificate code..." autocomplete="off">
                 </div>
             </div>
-        </section>
 
-        <section class="sv-card cert-card cert-card-animated">
-            <div class="sv-card-head">
-                <h2>Ready to Generate</h2>
-                <span class="cert-head-count">${fn:length(readyToGenerate)} Enrollment(s)</span>
-            </div>
             <div class="sv-card-body">
-                <div class="cert-section-intro">
-                    <div>
-                        <strong>Certificates are available only when the course is fully complete.</strong>
-                        <p>Eligible enrollments must have completion sync, required assessments, and successful payment before generation is enabled.</p>
-                    </div>
-                </div>
-                <c:choose>
-                    <c:when test="${empty readyToGenerate}">
-                        <div class="sv-empty">
-                            <i class="fas fa-award"></i>
-                            <p>No completed and paid enrollments are waiting for generation.</p>
-                        </div>
-                    </c:when>
-                    <c:otherwise>
-                        <div class="cert-table-wrap">
-                            <table class="history-table cert-table">
-                                <thead>
-                                <tr>
-                                    <th>Course</th>
-                                    <th>Status</th>
-                                    <th>Action</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <c:forEach var="enrollment" items="${readyToGenerate}">
-                                    <tr>
-                                        <td>
-                                            <div class="cert-course-name">${enrollment.courseName}</div>
-                                        </td>
-                                        <td>
-                                            <span class="sv-chip done">${enrollment.completionStatus}</span>
-                                        </td>
-                                        <td>
-                                            <form method="post" action="${pageContext.request.contextPath}/student/certificate" class="cert-inline-form">
-                                                <input type="hidden" name="enrollmentId" value="${enrollment.enrollmentId}">
-                                                <input type="hidden" name="redirectTo" value="certificates">
-                                                <button class="sv-btn primary cert-generate-btn" type="submit">
-                                                    <i class="fas fa-file-signature"></i>
-                                                    <span>Generate</span>
-                                                </button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                </c:forEach>
-                                </tbody>
-                            </table>
-                        </div>
-                    </c:otherwise>
-                </c:choose>
-            </div>
-        </section>
-
-        <section class="sv-card cert-card cert-card-animated cert-card-delay">
-            <div class="sv-card-head">
-                <h2>Not Yet Eligible</h2>
-                <span class="cert-head-count">${fn:length(blockedEnrollments)} Enrollment(s)</span>
-            </div>
-            <div class="sv-card-body">
-                <div class="cert-section-intro cert-section-intro-compact">
-                    <div>
-                        <strong>These enrollments still need one or more requirements.</strong>
-                        <p>Open each learning hub to complete the remaining steps, then return here to generate the certificate.</p>
-                    </div>
-                </div>
-                <c:choose>
-                    <c:when test="${empty blockedEnrollments}">
-                        <div class="sv-empty">
-                            <i class="fas fa-circle-check"></i>
-                            <p>No enrollments are currently blocked.</p>
-                        </div>
-                    </c:when>
-                    <c:otherwise>
-                        <div class="cert-table-wrap">
-                            <table class="history-table cert-table">
-                                <thead>
-                                <tr>
-                                    <th>Course</th>
-                                    <th>Payment</th>
-                                    <th>Materials</th>
-                                    <th>Assessments</th>
-                                    <th>Action</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <c:forEach var="item" items="${blockedEnrollments}">
-                                    <tr>
-                                        <td><div class="cert-course-name">${item.enrollment.courseName}</div></td>
-                                        <td><span class="sv-chip ${item.syncResult.paid ? 'done' : 'status-Pending'}">${item.syncResult.paid ? 'Done' : 'Pending'}</span></td>
-                                        <td><span class="sv-chip ${item.syncResult.viewedAllMaterials ? 'done' : 'status-Pending'}">${item.syncResult.viewedMaterials}/${item.syncResult.totalMaterials}</span></td>
-                                        <td><span class="sv-chip ${item.syncResult.passedRequiredAssessments ? 'done' : 'status-Pending'}">${item.syncResult.passedAssessments}/${item.syncResult.totalAssessments}</span></td>
-                                        <td>
-                                            <a class="sv-btn" href="${pageContext.request.contextPath}/student/enrollment-details?id=${item.enrollment.enrollmentId}&tab=learning">
-                                                <i class="fas fa-route"></i>
-                                                <span>Complete Requirements</span>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                </c:forEach>
-                                </tbody>
-                            </table>
-                        </div>
-                    </c:otherwise>
-                </c:choose>
-            </div>
-        </section>
-
-        <section class="sv-card cert-card cert-card-animated cert-card-delay">
-            <div class="sv-card-head">
-                <h2>Issued Certificates</h2>
-                <span class="cert-head-count">${fn:length(issuedCertificates)} Certificate(s)</span>
-            </div>
-            <div class="sv-card-body">
-                <div class="cert-section-intro cert-section-intro-compact">
-                    <div>
-                        <strong>Review and share each issued certificate.</strong>
-                        <p>Use search and filters to find a certificate, open the template, then share the certificate code for public verification.</p>
-                    </div>
-                </div>
                 <c:choose>
                     <c:when test="${empty issuedCertificates}">
-                        <div class="sv-empty">
+                        <div class="empty-state-box">
                             <i class="fas fa-scroll"></i>
-                            <p>No certificates generated yet.</p>
+                            <p>No certificates have been issued to your account yet.</p>
                         </div>
                     </c:when>
                     <c:otherwise>
@@ -293,15 +179,15 @@
                                         </td>
                                         <td>
                                             <div class="cert-actions">
-                                                <a class="sv-btn primary cert-table-btn" href="${pageContext.request.contextPath}/student/certificate?enrollmentId=${cert.enrollmentId}" style="border-radius: 0;">
+                                                <a class="sv-btn primary cert-table-btn" href="${pageContext.request.contextPath}/student/certificate?enrollmentId=${cert.enrollmentId}">
                                                     <i class="fas fa-eye"></i>
                                                     <span>View</span>
                                                 </a>
-                                                <button type="button" class="sv-btn cert-table-btn" style="border-radius: 0; border-color: #cbd5e1; background: #ffffff;" data-cert-download="${pageContext.request.contextPath}/student/certificate?enrollmentId=${cert.enrollmentId}&download=pdf">
+                                                <button type="button" class="sv-btn cert-table-btn" style="border-color: var(--sv-border-strong); background: var(--sv-surface-soft);" data-cert-download="${pageContext.request.contextPath}/student/certificate?enrollmentId=${cert.enrollmentId}&download=pdf">
                                                     <i class="fas fa-file-pdf" style="color: #ef4444;"></i>
                                                     <span>PDF</span>
                                                 </button>
-                                                <button type="button" class="sv-btn cert-copy-code-btn cert-table-btn" style="border-radius: 0;" data-cert-copy="${cert.certificateNo}">
+                                                <button type="button" class="sv-btn cert-copy-code-btn cert-table-btn" data-cert-copy="${cert.certificateNo}">
                                                     <i class="fas fa-copy"></i>
                                                     <span>Code</span>
                                                 </button>
@@ -312,14 +198,114 @@
                                 </tbody>
                             </table>
                         </div>
-                        <div class="sv-empty cert-empty-hidden" id="certNoRows">
+                        <div class="empty-state-box cert-empty-hidden" id="certNoRows">
                             <i class="fas fa-magnifying-glass"></i>
-                            <p>No certificates match your filter/search.</p>
+                            <p>No certificates match your search query.</p>
                         </div>
                     </c:otherwise>
                 </c:choose>
             </div>
         </section>
+
+        <%-- Stacked Section: Ready to Generate & Blocked Enrollments --%>
+        <div class="cert-sections-grid">
+            <%-- Ready to Generate --%>
+            <section class="sv-card cert-card">
+                <div class="sv-card-head">
+                    <div>
+                        <h2>Ready to Generate</h2>
+                        <p class="me-card-intro">Enrollments fully completed and waiting to generate official certificates.</p>
+                    </div>
+                </div>
+                <div class="sv-card-body">
+                    <c:choose>
+                        <c:when test="${empty readyToGenerate}">
+                            <div class="empty-state-box">
+                                <i class="fas fa-award"></i>
+                                <p>No completed and paid enrollments are currently waiting for generation.</p>
+                            </div>
+                        </c:when>
+                        <c:otherwise>
+                            <div class="cert-table-wrap">
+                                <table class="history-table cert-table" style="min-width: auto; width: 100%;">
+                                    <thead>
+                                    <tr>
+                                        <th>Course</th>
+                                        <th>Action</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <c:forEach var="enrollment" items="${readyToGenerate}">
+                                        <tr>
+                                            <td>
+                                                <div class="cert-course-name">${enrollment.courseName}</div>
+                                            </td>
+                                            <td>
+                                                <form method="post" action="${pageContext.request.contextPath}/student/certificate" class="cert-inline-form">
+                                                    <input type="hidden" name="enrollmentId" value="${enrollment.enrollmentId}">
+                                                    <input type="hidden" name="redirectTo" value="certificates">
+                                                    <button class="sv-btn primary cert-generate-btn" type="submit">
+                                                        <i class="fas fa-file-signature"></i>
+                                                        <span>Generate</span>
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    </c:forEach>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </c:otherwise>
+                    </c:choose>
+                </div>
+            </section>
+
+            <%-- Not Yet Eligible --%>
+            <section class="sv-card cert-card">
+                <div class="sv-card-head">
+                    <div>
+                        <h2>Not Yet Eligible</h2>
+                        <p class="me-card-intro">Active courses requiring one or more criteria to be completed.</p>
+                    </div>
+                </div>
+                <div class="sv-card-body">
+                    <c:choose>
+                        <c:when test="${empty blockedEnrollments}">
+                            <div class="empty-state-box">
+                                <i class="fas fa-circle-check"></i>
+                                <p>All active enrollments are either fully complete or already issued.</p>
+                            </div>
+                        </c:when>
+                        <c:otherwise>
+                            <div class="cert-table-wrap">
+                                <table class="history-table cert-table" style="min-width: auto; width: 100%;">
+                                    <thead>
+                                    <tr>
+                                        <th>Course</th>
+                                        <th>Pending Requirements</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <c:forEach var="item" items="${blockedEnrollments}">
+                                        <tr>
+                                            <td><div class="cert-course-name">${item.enrollment.courseName}</div></td>
+                                            <td>
+                                                <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                                                    <span class="sv-chip ${item.syncResult.paid ? 'done' : 'status-Pending'}"><i class="fas fa-wallet"></i> Paid: ${item.syncResult.paid ? 'Yes' : 'No'}</span>
+                                                    <span class="sv-chip ${item.syncResult.viewedAllMaterials ? 'done' : 'status-Pending'}"><i class="fas fa-book-open"></i> Materials: ${item.syncResult.viewedMaterials}/${item.syncResult.totalMaterials}</span>
+                                                    <span class="sv-chip ${item.syncResult.passedRequiredAssessments ? 'done' : 'status-Pending'}"><i class="fas fa-layer-group"></i> Quiz: ${item.syncResult.passedAssessments}/${item.syncResult.totalAssessments}</span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </c:forEach>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </c:otherwise>
+                    </c:choose>
+                </div>
+            </section>
+        </div>
     </main>
 </div>
 

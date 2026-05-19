@@ -24,7 +24,10 @@
   --sv-shadow-md: 0 14px 30px rgba(15, 23, 42, 0.055);
   --sv-shadow-lg: 0 22px 44px rgba(15, 23, 42, 0.16);
   --sv-radius-card: 12px;
-  --sv-radius-button: 8px;
+  --sv-radius-btn: 4px;
+  --sv-radius-chip: 6px;
+  --sv-radius-input: 4px;
+  --sv-radius-course-card: 18px;
   --sv-topbar-height: 68px;
   --sv-sidebar-width: 256px;
   --sv-sidebar-collapsed-width: 76px;
@@ -349,6 +352,7 @@ a {
   min-height: 100vh;
   padding-top: var(--sv-topbar-height);
   padding-left: var(--sv-sidebar-width);
+  transition: padding-left 0.26s ease;
 }
 
 .sv-sidebar {
@@ -378,7 +382,7 @@ a {
 .sv-nav {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 5px;
   flex: 1 1 auto;
   min-height: 100%;
 }
@@ -397,9 +401,9 @@ a {
   min-height: 42px;
   padding: 0 12px;
   border: 1px solid transparent;
-  border-radius: 16px;
+  border-radius: 0;
   color: var(--sv-sidebar-muted);
-  font-size: 0.92rem;
+  font-size: 0.88rem;
   font-weight: 600;
   transition: transform 0.22s ease, background-color 0.22s ease, border-color 0.22s ease, color 0.22s ease, box-shadow 0.22s ease;
 }
@@ -412,14 +416,14 @@ a {
 
 .sv-nav-link:hover {
   transform: translateX(2px);
-  background: var(--sv-sidebar-hover);
+  background: rgba(148, 163, 184, 0.1);
   color: #ffffff;
   box-shadow: none;
 }
 
 .sv-nav-link.active {
-  background: var(--sv-sidebar-active);
-  border-color: rgba(96, 165, 250, 0.22);
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(148, 163, 184, 0.16);
   color: #ffffff;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
   font-weight: 700;
@@ -439,6 +443,16 @@ a {
 .sv-nav-divider {
   margin-top: 8px;
   border-top: 1px solid var(--sv-sidebar-border);
+}
+
+.sv-nav-section-label {
+  display: block;
+  padding: 14px 12px 4px;
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(148, 163, 184, 0.5);
 }
 
 .sv-nav-link-danger {
@@ -491,6 +505,20 @@ body.sv-shell-collapsed .sv-nav-label {
   transform: translateX(-8px);
   pointer-events: none;
   overflow: hidden;
+}
+
+body.sv-shell-collapsed .sv-nav-section-label {
+  opacity: 0;
+  max-height: 0;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+  pointer-events: none;
+  transition: opacity 0.2s ease, max-height 0.2s ease, padding 0.2s ease, margin 0.2s ease;
+}
+
+body.sv-shell-collapsed .sv-nav-divider {
+  margin: 8px 4px;
 }
 
 body.sv-shell-collapsed .sv-sidebar {
@@ -562,7 +590,7 @@ body.sv-shell-collapsed .sv-nav-link[title]:hover::after {
   justify-content: center;
   min-height: 40px;
   padding: 0 14px;
-  border-radius: var(--sv-radius-button);
+  border-radius: var(--sv-radius-btn);
   border: 1px solid rgba(16, 38, 26, 0.08);
   background: rgba(255, 255, 255, 0.92);
   color: var(--sv-heading);
@@ -599,7 +627,6 @@ body.sv-shell-collapsed .sv-nav-link[title]:hover::after {
 
 .sv-card,
 .sv-metric,
-.sv-course-card,
 .empty-state-box {
   border: 1px solid rgba(16, 38, 26, 0.08);
   border-radius: var(--sv-radius-card);
@@ -607,8 +634,15 @@ body.sv-shell-collapsed .sv-nav-link[title]:hover::after {
   box-shadow: var(--sv-shadow-sm);
 }
 
+.sv-course-card {
+  border: 1px solid rgba(16, 38, 26, 0.08);
+  border-radius: var(--sv-radius-course-card);
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: var(--sv-shadow-sm);
+}
+
 .sv-card {
-  margin-bottom: 30px;
+  margin-bottom: 22px;
 }
 
 .sv-card-head {
@@ -678,7 +712,7 @@ body.sv-shell-collapsed .sv-nav-link[title]:hover::after {
   display: flex;
   flex-direction: column;
   min-height: 100%;
-  padding: 24px;
+  padding: 18px;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -697,7 +731,7 @@ body.sv-shell-collapsed .sv-nav-link[title]:hover::after {
   width: 100%;
   height: 132px;
   border: 1px solid rgba(16, 38, 26, 0.08);
-  border-radius: 16px;
+  border-radius: 8px;
   background: #fafcf9;
 }
 
@@ -776,7 +810,7 @@ body.sv-shell-collapsed .sv-nav-link[title]:hover::after {
   align-items: center;
   min-height: 26px;
   padding: 0 11px;
-  border-radius: 999px;
+  border-radius: var(--sv-radius-chip);
   border: 1px solid rgba(16, 38, 26, 0.08);
   background: rgba(255, 255, 255, 0.96);
   font-size: 0.78rem;
@@ -891,7 +925,7 @@ body.sv-shell-collapsed .sv-nav-link[title]:hover::after {
 
 .question-card {
   border: 1px solid rgba(16, 38, 26, 0.08);
-  border-radius: 18px;
+  border-radius: 8px;
   background: rgba(255, 255, 255, 0.92);
   padding: 20px;
   margin-bottom: 16px;
@@ -927,7 +961,7 @@ input[type="file"],
 input[type="password"] {
   width: 100%;
   border: 1px solid rgba(16, 38, 26, 0.12);
-  border-radius: 14px;
+  border-radius: var(--sv-radius-input);
   background: rgba(255, 255, 255, 0.96);
   color: var(--sv-heading);
   padding: 12px 14px;
@@ -945,7 +979,7 @@ input:focus {
 
 .upload-panel {
   border: 1px solid rgba(16, 38, 26, 0.08);
-  border-radius: 18px;
+  border-radius: 8px;
   background: rgba(255, 255, 255, 0.92);
   padding: 16px;
   margin-bottom: 16px;
@@ -974,7 +1008,7 @@ input:focus {
   min-height: 44px;
   padding: 0 14px;
   border: 1px solid rgba(16, 38, 26, 0.08);
-  border-radius: 15px;
+  border-radius: 8px;
   background: rgba(255, 255, 255, 0.94);
   color: var(--sv-heading);
   box-shadow: var(--sv-shadow-sm);
@@ -1383,135 +1417,41 @@ body.sv-page-embedded .sv-main {
   background: transparent !important;
 }
 
-.sv-nav {
-  gap: 5px;
-}
-
-.sv-nav-link {
-  border-radius: 8px;
-  font-size: 0.88rem;
-}
-
-.sv-nav-link:hover {
-  color: #ffffff;
-  background: rgba(148, 163, 184, 0.1);
-  box-shadow: none;
-}
-
-.sv-nav-link.active {
-  color: #ffffff;
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(148, 163, 184, 0.16);
+/* Additional nav shell overrides */
+.sv-shell-toggle,
+.sv-menu-btn,
+.sv-top-icon-btn,
+.theme-toggle,
+.sv-popover-panel,
+.sv-profile-menu,
+.sv-profile-menu a {
+  border-radius: 0;
 }
 
 .sv-profile-trigger {
   min-height: 40px;
   padding: 0 6px 0 12px;
-  border-radius: 8px;
+  border-radius: 0;
   background: transparent;
   box-shadow: none;
 }
 
 .sv-profile-trigger .sv-avatar-shell {
   margin-left: 4px;
-  border-radius: 8px;
 }
 
-.sv-card {
-  margin-bottom: 22px;
-}
-
-.sv-course-card {
-  padding: 18px;
-}
-
-.sv-course-banner,
-.sv-course-banner-placeholder {
-  border-radius: 8px;
-}
-
-.sv-chip,
-.status-badge,
-.assessment-type-badge {
-  border-radius: 6px;
-}
-
-.question-card,
-.upload-panel,
-.timer-bar {
-  border-radius: 8px;
-}
-
-textarea,
-select,
-input[type="text"],
-input[type="email"],
-input[type="file"],
-input[type="password"],
-.question-textarea {
-  border-radius: 8px;
-}
-
-@media (max-width: 760px) {
-  .sv-main {
-    padding: 18px 12px;
-  }
-}
-
-/* ==========================================================================
-   PSME INSTITUTIONAL MODERN DESIGN SYSTEM GLOBAL OVERRIDE
-   ========================================================================== */
-
-/* Set clean default border radius for buttons and forms */
-.sv-btn,
-input,
-select,
-textarea {
-  border-radius: 4px !important;
-}
-
-/* Remove rounded corners from all navigations in the student view */
-.sv-topbar,
-.sv-sidebar,
-.sv-shell-toggle,
-.sv-menu-btn,
-.sv-top-icon-btn,
-.theme-toggle,
-.sv-profile-trigger,
-.sv-profile-link,
-.sv-logout,
-.sv-popover-panel,
-.sv-profile-menu,
-.sv-profile-menu a,
-.sv-nav-link,
-.sv-nav-link::before,
-body.sv-shell-collapsed .sv-nav-link::after,
-.lh-sidebar-back-link,
-.lh-back-link-item,
-.sc-back-link,
-.sc-immersive-header,
-.lh-course-sidebar,
-.lh-course-sidebar__header {
-  border-radius: 0 !important;
-}
-
-/* Premium Rounded Corners for Course Cards specifically */
-.sv-course-card,
+/* Course card variant classes */
 .me-card,
 .bc-card {
-  border-radius: 18px !important;
+  border-radius: var(--sv-radius-course-card);
 }
 
-/* Rounded corners for general content cards and metrics */
-.sv-card,
-.sv-metric,
-.empty-state-box,
+/* Alert border-radius */
 .alert {
-  border-radius: 12px !important;
+  border-radius: var(--sv-radius-card);
 }
 
-/* Protect perfect circular elements (avatars, radio inputs, circular badges) */
-.sv-profile-trigger .sv-avatar-shell,
+/* Circular elements */
 .sv-avatar-shell,
 .sv-avatar,
 .avatar,
@@ -1520,10 +1460,12 @@ body.sv-shell-collapsed .sv-nav-link::after,
 .status-indicator,
 input[type="radio"],
 input[type="checkbox"],
-.fa-circle-check,
-.fa-circle-xmark,
 .circle-badge {
-  border-radius: 50% !important;
+  border-radius: 50%;
 }
 
-
+@media (max-width: 760px) {
+  .sv-main {
+    padding: 18px 12px;
+  }
+}

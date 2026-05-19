@@ -6,6 +6,52 @@
   gap: 32px;
 }
 
+.bc-hero-card__actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+}
+
+.bc-metrics-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.bc-metric-tile {
+  border: 1px solid var(--sv-border);
+  border-radius: var(--sv-radius-card);
+  background: var(--sv-surface-soft);
+  padding: 16px;
+}
+
+.bc-metric-tile--blue {
+  background: rgba(59, 130, 246, 0.06);
+}
+
+.bc-metric-tile--green {
+  background: rgba(16, 185, 129, 0.06);
+}
+
+.bc-metric-label {
+  display: block;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--sv-muted);
+  margin-bottom: 6px;
+}
+
+.bc-metric-value {
+  font-size: 1.35rem;
+  color: var(--sv-foreground);
+}
+
+.bc-metric-tile--blue .bc-metric-value { color: #2563eb; }
+.bc-metric-tile--green .bc-metric-value { color: #10b981; }
+
 .bc-count {
   display: inline-block;
 }
@@ -455,7 +501,8 @@
 
   .bc-course-grid,
   .bc-filter-grid,
-  .bc-hero-stats {
+  .bc-hero-stats,
+  .bc-metrics-strip {
     grid-template-columns: 1fr;
   }
 
@@ -465,6 +512,14 @@
   }
 
   .bc-filter-group {
+    width: 100%;
+  }
+
+  .bc-hero-card__actions {
+    flex-direction: column;
+  }
+
+  .bc-hero-card__actions .sv-btn {
     width: 100%;
   }
 }

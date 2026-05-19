@@ -152,10 +152,12 @@ html[data-theme='dark'] body.sv-page {
   --sv-muted: #96a2b3;
   --sv-border: #252c36;
   --sv-accent: #60a5fa;
-  --sv-accent-soft: rgba(96, 165, 250, 0.1);
-  --sv-accent-border: rgba(96, 165, 250, 0.25);
+  --sv-accent-soft: rgba(96, 165, 250, 0.12);
+  --sv-accent-border: rgba(96, 165, 250, 0.3);
+  --sv-accent-strong: #93c5fd;
   --sv-surface: #12161d;
   --sv-surface-soft: #181d25;
+  --sv-surface-strong: #151a22;
   --sv-shadow-sm: 0 8px 24px rgba(0, 0, 0, 0.36);
   --sv-shadow-md: 0 16px 36px rgba(0, 0, 0, 0.46);
   background:
@@ -238,6 +240,23 @@ html[data-theme='dark'] body.sv-page .history-table th {
   background: var(--sv-surface-soft);
   border-color: var(--sv-border);
   color: var(--sv-text);
+}
+
+html[data-theme='dark'] body.sv-page .history-table,
+html[data-theme='dark'] body.sv-page .assessment-table {
+  background: var(--sv-surface-strong) !important;
+  border-color: var(--sv-border) !important;
+}
+
+html[data-theme='dark'] body.sv-page .history-table td,
+html[data-theme='dark'] body.sv-page .assessment-table td {
+  border-bottom-color: var(--sv-border) !important;
+  color: var(--sv-text) !important;
+}
+
+html[data-theme='dark'] body.sv-page .history-table tr:hover,
+html[data-theme='dark'] body.sv-page .assessment-table tr:hover {
+  background: rgba(255, 255, 255, 0.03) !important;
 }
 
 html[data-theme='dark'] body.sv-page .sv-course-line,
@@ -353,12 +372,40 @@ html[data-theme='dark'] body.sv-page .sd3-summary-card,
 html[data-theme='dark'] body.sv-page .sd3-filter,
 html[data-theme='dark'] body.sv-page .sd3-search-wrap input,
 html[data-theme='dark'] body.sv-page .sd3-card,
+html[data-theme='dark'] body.sv-page .sd3-course-card,
+html[data-theme='dark'] body.sv-page .sd3-sidebar-panel,
+html[data-theme='dark'] body.sv-page .sd3-sidebar-metric,
+html[data-theme='dark'] body.sv-page .sd3-sidebar-action,
+html[data-theme='dark'] body.sv-page .sd3-empty-state,
 html[data-theme='dark'] body.sv-page .me-user,
 html[data-theme='dark'] body.sv-page .me-user-icon,
 html[data-theme='dark'] body.sv-page .me-hero-summary,
 html[data-theme='dark'] body.sv-page .me-filter,
 html[data-theme='dark'] body.sv-page .me-search-wrap input,
 html[data-theme='dark'] body.sv-page .me-card,
+html[data-theme='dark'] body.sv-page .me-metrics-strip,
+html[data-theme='dark'] body.sv-page .me-metric-tile,
+html[data-theme='dark'] body.sv-page .me-controlbar,
+html[data-theme='dark'] body.sv-page .lh-progress-strip,
+html[data-theme='dark'] body.sv-page .lh-course-tabs,
+html[data-theme='dark'] body.sv-page .lh-course-sidebar,
+html[data-theme='dark'] body.sv-page .lh-course-sidebar__header,
+html[data-theme='dark'] body.sv-page .lh-flow-link,
+html[data-theme='dark'] body.sv-page .lh-overview-card,
+html[data-theme='dark'] body.sv-page .lh-details-grid,
+html[data-theme='dark'] body.sv-page .lh-instructor-card,
+html[data-theme='dark'] body.sv-page .lh-overview-stat-tile,
+html[data-theme='dark'] body.sv-page .lh-milestone-item,
+html[data-theme='dark'] body.sv-page .lh-milestone-marker,
+html[data-theme='dark'] body.sv-page .lh-readiness-card,
+html[data-theme='dark'] body.sv-page .lh-materials-card,
+html[data-theme='dark'] body.sv-page .lh-assessments-card,
+html[data-theme='dark'] body.sv-page .lh-card,
+html[data-theme='dark'] body.sv-page .sa-no-attempts,
+html[data-theme='dark'] body.sv-page .sa-no-attempts--expired,
+html[data-theme='dark'] body.sv-page .sa-attempt-container,
+html[data-theme='dark'] body.sv-page .sa-question-card,
+html[data-theme='dark'] body.sv-page .sa-option-item,
 html[data-theme='dark'] body.sv-page .cd-meta-card,
 html[data-theme='dark'] body.sv-page .cd-side-panel,
 html[data-theme='dark'] body.sv-page .cd-banner,
@@ -375,6 +422,9 @@ html[data-theme='dark'] body.sv-page .cert-user-icon,
 html[data-theme='dark'] body.sv-page .cert-hero-scene,
 html[data-theme='dark'] body.sv-page .cert-scene-panel,
 html[data-theme='dark'] body.sv-page .cert-filter,
+html[data-theme='dark'] body.sv-page .cert-metrics-strip,
+html[data-theme='dark'] body.sv-page .cert-metric-tile,
+html[data-theme='dark'] body.sv-page .cert-controls-body,
 html[data-theme='dark'] body.sv-page .cert-metric,
 html[data-theme='dark'] body.sv-page .mat-summary-item,
 html[data-theme='dark'] body.sv-page .mat-course,
@@ -430,8 +480,9 @@ html[data-theme='dark'] body.sv-page .me-filter:hover,
 html[data-theme='dark'] body.sv-page .me-filter.active,
 html[data-theme='dark'] body.sv-page .sd3-filter:hover,
 html[data-theme='dark'] body.sv-page .sd3-filter.active {
-  background: rgba(158, 208, 168, 0.14);
+  background: var(--sv-accent-soft);
   border-color: var(--sv-accent-border);
+  color: var(--sv-accent) !important;
 }
 
 html[data-theme='dark'] body.sv-page .cert-page {
@@ -1670,3 +1721,123 @@ html[data-theme='dark'] body.instructor-ui .student-count-badge {
   background: rgba(111, 208, 162, 0.15);
   border-color: rgba(111, 208, 162, 0.3);
 }
+
+/* ==========================================================================
+   Student Portal Contrast & High Readability Dark Mode Accent Overrides
+   ========================================================================== */
+html[data-theme='dark'] body.sv-page .me-metric-tile--blue .me-metric-icon-wrap,
+html[data-theme='dark'] body.sv-page .cert-metric-tile--blue .cert-metric-icon-wrap,
+html[data-theme='dark'] body.sv-page .bc-metric-tile--blue .bc-metric-value,
+html[data-theme='dark'] body.sv-page .sd3-sidebar-metric__icon {
+  background: rgba(96, 165, 250, 0.16) !important;
+  color: #60a5fa !important;
+}
+
+html[data-theme='dark'] body.sv-page .me-metric-tile--green .me-metric-icon-wrap,
+html[data-theme='dark'] body.sv-page .cert-metric-tile--green .cert-metric-icon-wrap,
+html[data-theme='dark'] body.sv-page .bc-metric-tile--green .bc-metric-value,
+html[data-theme='dark'] body.sv-page .sd3-sidebar-metric__icon--green {
+  background: rgba(52, 211, 153, 0.16) !important;
+  color: #34d399 !important;
+}
+
+html[data-theme='dark'] body.sv-page .me-metric-tile--amber .me-metric-icon-wrap,
+html[data-theme='dark'] body.sv-page .cert-metric-tile--amber .cert-metric-icon-wrap,
+html[data-theme='dark'] body.sv-page .sd3-sidebar-metric__icon--gold {
+  background: rgba(251, 191, 36, 0.16) !important;
+  color: #fbbf24 !important;
+}
+
+html[data-theme='dark'] body.sv-page .sd3-summary-card__percentage {
+  color: #60a5fa !important;
+}
+
+html[data-theme='dark'] body.sv-page .sd3-sidebar-metric__value {
+  color: #fbbf24 !important;
+}
+
+html[data-theme='dark'] body.sv-page .sd3-sidebar-metric__value--completed {
+  color: #34d399 !important;
+}
+
+/* ==========================================================================
+   Global High-Contrast Text Color Adjustments in Dark Mode
+   ========================================================================== */
+html[data-theme='dark'] body.sv-page {
+  color: var(--sv-text) !important;
+}
+
+html[data-theme='dark'] body.sv-page h1,
+html[data-theme='dark'] body.sv-page h2,
+html[data-theme='dark'] body.sv-page h3,
+html[data-theme='dark'] body.sv-page h4,
+html[data-theme='dark'] body.sv-page h5,
+html[data-theme='dark'] body.sv-page h6 {
+  color: var(--sv-heading) !important;
+}
+
+html[data-theme='dark'] body.sv-page p,
+html[data-theme='dark'] body.sv-page span,
+html[data-theme='dark'] body.sv-page label,
+html[data-theme='dark'] body.sv-page th,
+html[data-theme='dark'] body.sv-page td {
+  color: var(--sv-text);
+}
+
+html[data-theme='dark'] body.sv-page .sv-muted,
+html[data-theme='dark'] body.sv-page .sv-muted-strong,
+html[data-theme='dark'] body.sv-page .text-muted,
+html[data-theme='dark'] body.sv-page .me-card-intro,
+html[data-theme='dark'] body.sv-page .cert-hero-intro,
+html[data-theme='dark'] body.sv-page .cert-section-intro-desc {
+  color: var(--sv-muted) !important;
+}
+
+/* Navigation items contrast inside Sidebar & Learning Hub */
+html[data-theme='dark'] body.sv-page .sv-sidebar .sv-nav-item,
+html[data-theme='dark'] body.sv-page .sv-sidebar .sv-nav-section-label {
+  color: #e5eef8 !important;
+}
+
+html[data-theme='dark'] body.sv-page .sv-sidebar .sv-nav-item:hover,
+html[data-theme='dark'] body.sv-page .sv-sidebar .sv-nav-item.active {
+  color: #ffffff !important;
+}
+
+/* Learning hub specific text nodes contrast booster */
+html[data-theme='dark'] body.sv-page .lh-main,
+html[data-theme='dark'] body.sv-page .lh-sidebar,
+html[data-theme='dark'] body.sv-page .lh-course-sidebar__header {
+  color: var(--sv-text);
+}
+
+html[data-theme='dark'] body.sv-page .lh-course-sidebar__header h2,
+html[data-theme='dark'] body.sv-page .lh-course-sidebar__header h3 {
+  color: var(--sv-heading) !important;
+}
+
+/* Tables, headers & rows contrast rules */
+html[data-theme='dark'] body.sv-page .history-table th,
+html[data-theme='dark'] body.sv-page .assessment-table th {
+  color: var(--sv-muted) !important;
+  font-weight: 700 !important;
+}
+
+html[data-theme='dark'] body.sv-page .history-table td,
+html[data-theme='dark'] body.sv-page .assessment-table td {
+  color: var(--sv-text) !important;
+}
+
+/* Metrics and Cards specific text indicators */
+html[data-theme='dark'] body.sv-page .sd3-sidebar-metric__data strong,
+html[data-theme='dark'] body.sv-page .cert-metric-value,
+html[data-theme='dark'] body.sv-page .me-metric-value {
+  color: var(--sv-heading) !important;
+}
+
+html[data-theme='dark'] body.sv-page .sd3-sidebar-metric__data span,
+html[data-theme='dark'] body.sv-page .cert-metric-label,
+html[data-theme='dark'] body.sv-page .me-metric-label {
+  color: var(--sv-muted) !important;
+}
+
