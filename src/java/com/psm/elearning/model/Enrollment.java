@@ -33,6 +33,7 @@ public class Enrollment {
     private String paymentRef;
     
     private LocalDateTime enrollmentDate;
+    private LocalDateTime expiryDateOverride;
     private LocalDateTime updatedDate;
     
     @Pattern(regexp = "^(Not Started|In Progress|Completed)$", 
@@ -139,6 +140,9 @@ public class Enrollment {
     
     public LocalDateTime getEnrollmentDate() { return enrollmentDate; }
     public void setEnrollmentDate(LocalDateTime enrollmentDate) { this.enrollmentDate = enrollmentDate; }
+
+    public LocalDateTime getExpiryDateOverride() { return expiryDateOverride; }
+    public void setExpiryDateOverride(LocalDateTime expiryDateOverride) { this.expiryDateOverride = expiryDateOverride; }
     
     public LocalDateTime getUpdatedDate() { return updatedDate; }
     public void setUpdatedDate(LocalDateTime updatedDate) { this.updatedDate = updatedDate; }
@@ -202,11 +206,21 @@ public class Enrollment {
     }
 
     public long getDaysRemaining() {
-        if (enrollmentDate == null || courseDuration == null || courseDuration <= 0) {
+        LocalDateTime endDate = getEffectiveEndDate();
+        if (endDate == null) {
             return -1;
         }
-        java.time.LocalDateTime endDate = enrollmentDate.plusDays(courseDuration);
         java.time.Duration diff = java.time.Duration.between(java.time.LocalDateTime.now(), endDate);
         return diff.toDays();
+    }
+
+    public LocalDateTime getEffectiveEndDate() {
+        if (expiryDateOverride != null) {
+            return expiryDateOverride;
+        }
+        if (enrollmentDate == null || courseDuration == null || courseDuration <= 0) {
+            return null;
+        }
+        return enrollmentDate.plusDays(courseDuration);
     }
 }

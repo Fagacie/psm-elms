@@ -14,6 +14,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -69,6 +71,54 @@ public class AdminEnrollmentListServlet extends HttpServlet {
         }
     }
 
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        HttpSession session = request.getSession(false);
+        Integer userId = SessionUtil.resolveUserId(session);
+        if (userId == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
+        String role = SessionUtil.resolveRole(session);
+        if (!"Admin".equals(role)) {
+            response.sendRedirect(request.getContextPath() + "/dashboard");
+            return;
+        }
+
+        Integer enrollmentId = parseInteger(request.getParameter("enrollmentId"));
+        if (enrollmentId == null) {
+            response.sendRedirect(request.getContextPath() + "/admin/enrollments?error=invalid");
+            return;
+        }
+
+        Enrollment enrollment = enrollmentDAO.getEnrollment(enrollmentId);
+        if (enrollment == null) {
+            response.sendRedirect(request.getContextPath() + "/admin/enrollments?error=notfound");
+            return;
+        }
+
+        String expiryDateValue = request.getParameter("expiryDateOverride");
+        LocalDateTime expiryDateOverride = null;
+        try {
+            if (expiryDateValue != null && !expiryDateValue.trim().isEmpty()) {
+                expiryDateOverride = LocalDate.parse(expiryDateValue.trim()).atTime(23, 59, 59);
+            }
+        } catch (Exception ex) {
+            response.sendRedirect(request.getContextPath() + "/admin/enrollments?error=invalidExpiry");
+            return;
+        }
+
+        try {
+            boolean updated = enrollmentDAO.updateExpiryDateOverride(enrollmentId, expiryDateOverride);
+            response.sendRedirect(request.getContextPath() + "/admin/enrollments?" + (updated ? "success=expiryUpdated" : "error=exception"));
+        } catch (Exception ex) {
+            response.sendRedirect(request.getContextPath() + "/admin/enrollments?error=exception");
+        }
+    }
+
     private void enrichEnrollmentPayment(Enrollment enrollment) {
         Payment payment = paymentDAO.getPaymentByEnrollmentId(enrollment.getEnrollmentId());
         if (payment == null) {
@@ -97,6 +147,9 @@ public class AdminEnrollmentListServlet extends HttpServlet {
         if ("updated".equalsIgnoreCase(code)) {
             return "Enrollment details were refreshed successfully.";
         }
+        if ("expiryUpdated".equalsIgnoreCase(code)) {
+            return "Enrollment expiry date was updated successfully.";
+        }
         return null;
     }
 
@@ -113,7 +166,21 @@ public class AdminEnrollmentListServlet extends HttpServlet {
         if ("exception".equalsIgnoreCase(code)) {
             return "An enrollment error occurred. Please try again.";
         }
+        if ("invalidExpiry".equalsIgnoreCase(code)) {
+            return "Enter a valid expiry date to continue.";
+        }
         return "An enrollment error occurred. Please try again.";
+    }
+
+    private Integer parseInteger(String raw) {
+        if (raw == null || raw.trim().isEmpty()) {
+            return null;
+        }
+        try {
+            return Integer.valueOf(raw.trim());
+        } catch (NumberFormatException ex) {
+            return null;
+        }
     }
 
 }

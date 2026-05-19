@@ -270,10 +270,12 @@ public class EnrollmentDetailsServlet extends HttpServlet {
             long daysRemaining = enrollment.getDaysRemaining();
             boolean courseExpired = false;
             
-            if (enrollment.getCourseDuration() != null && enrollment.getCourseDuration() > 0 && enrollment.getEnrollmentDate() != null) {
-                java.time.LocalDateTime endDate = enrollment.getEnrollmentDate().plusDays(enrollment.getCourseDuration());
+            if (enrollment.getCourseDuration() != null && enrollment.getCourseDuration() > 0) {
+                java.time.LocalDateTime endDate = enrollment.getEffectiveEndDate();
                 java.time.format.DateTimeFormatter dtf = java.time.format.DateTimeFormatter.ofPattern("MMM dd, yyyy");
-                formattedEndDate = endDate.format(dtf);
+                if (endDate != null) {
+                    formattedEndDate = endDate.format(dtf);
+                }
                 if (daysRemaining < 0) {
                     courseExpired = true;
                 }
@@ -323,8 +325,8 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                         enrollment,
                         paidAccess,
                         courseAccessGranted,
-                        courseAccessGranted ? "Workspace Ready" : "Payment Required",
-                        courseAccessGranted ? "shield-check" : "lock",
+                        courseExpired ? "Course Expired" : (courseAccessGranted ? "Workspace Ready" : "Payment Required"),
+                        courseExpired ? "hourglass-end" : (courseAccessGranted ? "shield-check" : "lock"),
                         "We could not fully load this enrollment. Return to your course list and reopen it."
                 );
                 forwardLearningHub(request, response);
@@ -335,6 +337,7 @@ public class EnrollmentDetailsServlet extends HttpServlet {
             boolean paidAccess = studentAccessService.isPaymentComplete(enrollment.getPaymentStatus());
             boolean paymentRequired = studentAccessService.requiresPayment(enrollment);
             boolean courseAccessGranted = paidAccess || !paymentRequired;
+            boolean activeCourseAccess = courseAccessGranted && !courseExpired;
             if (paymentRequired && !paidAccess) {
                 response.sendRedirect(request.getContextPath() + "/student/payment?enrollmentId=" + enrollment.getEnrollmentId() + "&error=required");
                 return;
@@ -792,7 +795,7 @@ public class EnrollmentDetailsServlet extends HttpServlet {
             Integer selectedMaterialId = selectedMaterial != null ? selectedMaterial.getMaterialId() : null;
             Integer selectedAssessmentId = selectedAssessment != null ? selectedAssessment.getAssessmentId() : null;
             String selectedMaterialStatus = selectedMaterialId != null ? materialStatusById.getOrDefault(selectedMaterialId, "") : "";
-            if (selectedMaterialId != null && courseAccessGranted && !"completed".equalsIgnoreCase(selectedMaterialStatus)) {
+            if (selectedMaterialId != null && activeCourseAccess && !"completed".equalsIgnoreCase(selectedMaterialStatus)) {
                 try {
                     materialProgressDAO.markInProgress(userId, selectedMaterialId, enrollment.getCourseId());
                     selectedMaterialStatus = materialStatusById.getOrDefault(selectedMaterialId, "in_progress");
@@ -820,8 +823,9 @@ public class EnrollmentDetailsServlet extends HttpServlet {
             String workspaceDescription = "Choose a material or assessment from the sidebar to continue your course sequence.";
             String workspaceStatusLabel = "Ready";
             String workspaceStatusClass = "status-Pending";
-            String workspaceAccessLabel = courseAccessGranted ? "Workspace Ready" : "Payment Required";
-            String workspaceAccessIcon = courseAccessGranted ? "shield-check" : "lock";
+            String workspaceAccessLabel = courseExpired ? "Course Expired" : (courseAccessGranted ? "Workspace Ready" : "Payment Required");
+            String workspaceAccessIcon = courseExpired ? "hourglass-end" : (courseAccessGranted ? "shield-check" : "lock");
+            String workspaceAccessStateClass = courseExpired ? "is-expired" : (courseAccessGranted ? "is-ready" : "is-locked");
             String workspaceActionNote = "Select an item from the course flow to continue.";
             String workspacePrimaryActionIcon = "paper-plane";
             String materialCompletionButtonLabel = "Mark Complete";
@@ -874,7 +878,10 @@ public class EnrollmentDetailsServlet extends HttpServlet {
             }
 
             if (selectedAssessment != null && !"result".equals(selectedMode)) {
-                if (!courseAccessGranted) {
+                if (courseExpired) {
+                    selectedAssessmentStatusLabel = "Expired";
+                    selectedAssessmentStatusClass = "status-Archived";
+                } else if (!courseAccessGranted) {
                     selectedAssessmentStatusLabel = "Locked";
                     selectedAssessmentStatusClass = "status-Pending";
                 } else if (selectedAssessmentHasActiveAttempt) {
@@ -888,7 +895,10 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                     selectedAssessmentStatusClass = "status-Pending";
                 }
 
-                if (courseAccessGranted && selectedAssessmentHasActiveAttempt) {
+                if (courseExpired) {
+                    selectedAssessmentPrimaryLabel = "";
+                    selectedAssessmentPrimaryUrl = "";
+                } else if (courseAccessGranted && selectedAssessmentHasActiveAttempt) {
                     selectedAssessmentPrimaryLabel = Assessment.TYPE_ASSIGNMENT.equals(selectedAssessment.getType())
                             ? "Continue Submission"
                             : "Continue Assessment";
@@ -914,7 +924,9 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                         : "Review the assessment details below, then use the action bar to start or continue.";
                 workspaceStatusLabel = selectedAssessmentStatusLabel;
                 workspaceStatusClass = selectedAssessmentStatusClass;
-                if (!courseAccessGranted) {
+                if (courseExpired) {
+                    workspaceActionNote = "This course access window has ended. You can review available content, but progress updates and new assessment attempts are now locked.";
+                } else if (!courseAccessGranted) {
                     workspaceActionNote = "Assessment access will unlock after payment is completed.";
                 } else if (selectedAssessmentHasActiveAttempt) {
                     workspaceActionNote = "Continue the active attempt when you are ready.";
@@ -960,7 +972,10 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                 request.setAttribute("isYouTubeMaterial", isYouTube);
                 request.setAttribute("youtubeVideoId", youtubeVideoId);
 
-                if ("completed".equalsIgnoreCase(selectedMaterialStatus)) {
+                if (courseExpired) {
+                    workspaceActionNote = "This course access window has ended. Materials remain viewable, but progress updates are now read-only.";
+                    materialCompletionButtonLabel = "Course Expired";
+                } else if ("completed".equalsIgnoreCase(selectedMaterialStatus)) {
                     workspaceActionNote = "This material is already counted in your progress.";
                     materialCompletionButtonLabel = "Completed";
                 } else if (isYouTube) {
@@ -1054,6 +1069,7 @@ public class EnrollmentDetailsServlet extends HttpServlet {
             request.setAttribute("workspaceStatusClass", workspaceStatusClass);
             request.setAttribute("workspaceAccessLabel", workspaceAccessLabel);
             request.setAttribute("workspaceAccessIcon", workspaceAccessIcon);
+            request.setAttribute("workspaceAccessStateClass", workspaceAccessStateClass);
             request.setAttribute("workspaceChips", workspaceChips);
             request.setAttribute("workspaceActionNote", workspaceActionNote);
             request.setAttribute("workspacePrimaryActionIcon", workspacePrimaryActionIcon);

@@ -1,6 +1,7 @@
 package com.psm.elearning.dao;
 
 import com.psm.elearning.model.Enrollment;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -120,6 +121,14 @@ public interface EnrollmentDAO {
      * @return true if updated successfully, false otherwise
      */
     boolean updateReminderSent(Integer enrollmentId, boolean reminderSent);
+
+    /**
+     * Update the explicit expiry date override for an enrollment.
+     * @param enrollmentId Enrollment ID
+     * @param expiryDateOverride Nullable explicit access end date
+     * @return true if updated successfully, false otherwise
+     */
+    boolean updateExpiryDateOverride(Integer enrollmentId, LocalDateTime expiryDateOverride);
 }
 
 

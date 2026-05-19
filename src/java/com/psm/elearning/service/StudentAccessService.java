@@ -78,4 +78,15 @@ public class StudentAccessService {
         syncPaymentStatus(enrollment);
         return isPaymentComplete(enrollment.getPaymentStatus());
     }
+
+    public boolean isCourseExpired(Enrollment enrollment) {
+        return enrollment != null
+                && enrollment.getCourseDuration() != null
+                && enrollment.getCourseDuration() > 0
+                && enrollment.getDaysRemaining() < 0;
+    }
+
+    public boolean hasActiveCourseAccess(Enrollment enrollment) {
+        return hasCourseAccess(enrollment) && !isCourseExpired(enrollment);
+    }
 }

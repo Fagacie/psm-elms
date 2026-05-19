@@ -18,7 +18,8 @@
       data-material-count="${materialCount}"
       data-current-material-type="${not empty selectedMaterial ? selectedMaterial.materialType : ''}"
       data-current-selection-mode="${selectedMode}"
-      data-material-completed="${selectedMaterialStatus == 'completed'}">
+      data-material-completed="${selectedMaterialStatus == 'completed'}"
+      data-course-expired="${courseExpired}">
 <c:set var="topbarTitle" value="Learning Hub"/>
 <c:set var="topbarSubtitle" value=""/>
 <jsp:include page="/WEB-INF/views/common/student-topbar.jsp"/>
@@ -156,6 +157,9 @@
                             <c:when test="${param.error == 'submitFailed'}">
                                 Submission could not be saved. Please try again.
                             </c:when>
+                            <c:when test="${param.error == 'expired'}">
+                                This course duration has ended. The learning hub is now in read-only mode.
+                            </c:when>
                             <c:when test="${param.success == 'submitted'}">
                                 Assessment submitted successfully.
                             </c:when>
@@ -183,18 +187,12 @@
                 </div>
                 <div class="lh-stage-head__status">
                     <span class="status-badge ${workspaceStatusClass}" id="lhItemStatusBadge"><c:out value="${workspaceStatusLabel}"/></span>
-                    <span class="lh-stage-access ${courseAccessGranted ? 'is-ready' : 'is-locked'}" id="lhAccessStatusBadge">
+                    <span class="lh-stage-access ${workspaceAccessStateClass}" id="lhAccessStatusBadge">
                         <i class="fas fa-${workspaceAccessIcon}"></i>
                         <c:out value="${workspaceAccessLabel}"/>
                     </span>
                 </div>
             </header>
-
-            <div class="lh-stage-meta">
-                <c:forEach var="chip" items="${workspaceChips}">
-                    <span class="lh-stage-chip"><i class="fas ${chip.iconClass}"></i> <c:out value="${chip.label}"/></span>
-                </c:forEach>
-            </div>
 
             <div class="lh-stage-body">
                 <c:choose>
@@ -799,6 +797,12 @@
                     </a>
 
                     <c:choose>
+                        <c:when test="${courseExpired and (not empty selectedAssessment or not empty selectedMaterial)}">
+                            <button class="sv-btn primary" id="lhSubmitAction" disabled="disabled">
+                                <i class="fas fa-hourglass-end"></i>
+                                <span>Course Expired</span>
+                            </button>
+                        </c:when>
                         <c:when test="${selectedMode == 'assessment' and not empty selectedAssessment and not isAttempting}">
                             <c:choose>
                                 <c:when test="${selectedAssessment.type == 'Assignment'}">
@@ -895,7 +899,7 @@
                                 data-material-id="${selectedMaterial.materialId}"
                                 data-enrollment-id="${enrollment.enrollmentId}"
                                 data-completed="${selectedMaterialStatus == 'completed'}"
-                                <c:if test="${selectedMaterialStatus == 'completed'}">disabled="disabled"</c:if>>
+                                <c:if test="${selectedMaterialStatus == 'completed' or courseExpired}">disabled="disabled"</c:if>>
                                 <i class="fas fa-check-circle"></i>
                                 <span>${materialCompletionButtonLabel}</span>
                             </button>

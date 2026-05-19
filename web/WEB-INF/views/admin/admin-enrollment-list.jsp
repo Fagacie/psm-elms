@@ -49,6 +49,55 @@
         .details-value strong {
             font-weight: 700;
         }
+        .expiry-form {
+            margin-top: 20px;
+            padding-top: 18px;
+            border-top: 1px solid #e2e8f0;
+            display: grid;
+            gap: 12px;
+        }
+        .expiry-form__head h4 {
+            margin: 0;
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: #0f172a;
+        }
+        .expiry-form__head p {
+            margin: 4px 0 0;
+            font-size: 0.84rem;
+            color: #64748b;
+            line-height: 1.5;
+        }
+        .expiry-form__row {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto auto;
+            gap: 10px;
+            align-items: end;
+        }
+        .expiry-form__field {
+            display: grid;
+            gap: 6px;
+        }
+        .expiry-form__field label {
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #64748b;
+        }
+        .expiry-form__field input {
+            min-height: 40px;
+            padding: 0 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font: inherit;
+            color: #0f172a;
+            background: #fff;
+        }
+        .expiry-form__hint {
+            font-size: 0.8rem;
+            color: #64748b;
+        }
     </style>
 </head>
 <body class="admin-page">
@@ -158,6 +207,9 @@
                                         data-payment-ref="${enrollment.paymentRef}"
                                         data-completion="${not empty enrollment.completionStatus ? enrollment.completionStatus : 'Not Started'}"
                                         data-date="${enrollment.enrollmentDate != null ? fn:substring(enrollment.enrollmentDate.toString(), 0, 10) : 'N/A'}"
+                                        data-duration="${enrollment.displayDuration}"
+                                        data-expiry-date="${enrollment.effectiveEndDate != null ? fn:substring(enrollment.effectiveEndDate.toString(), 0, 10) : ''}"
+                                        data-expiry-override="${enrollment.expiryDateOverride != null ? fn:substring(enrollment.expiryDateOverride.toString(), 0, 10) : ''}"
                                     >
                                         <td><c:out value="${enrollment.studentEmail}"/></td>
                                         <td><strong><c:out value="${enrollment.courseName}"/></strong></td>
@@ -204,6 +256,14 @@
                     <span class="details-value" id="rcpEnrollmentDate">-</span>
                 </div>
                 <div class="details-item">
+                    <span class="details-label">Course Duration</span>
+                    <span class="details-value" id="rcpCourseDuration">-</span>
+                </div>
+                <div class="details-item">
+                    <span class="details-label">Access Ends</span>
+                    <span class="details-value" id="rcpExpiryDate">-</span>
+                </div>
+                <div class="details-item">
                     <span class="details-label">Student Name</span>
                     <span class="details-value" id="rcpStudentName">-</span>
                 </div>
@@ -236,6 +296,23 @@
                     <span class="details-value" id="rcpPaymentRef" style="font-family: monospace; font-size: 0.85rem;">-</span>
                 </div>
             </div>
+
+            <form class="expiry-form" method="post" action="${pageContext.request.contextPath}/admin/enrollments">
+                <div class="expiry-form__head">
+                    <h4>Manage Course Expiry</h4>
+                    <p>Set a custom access end date for this enrollment. Leave it blank to fall back to the normal course-duration expiry.</p>
+                </div>
+                <input type="hidden" name="enrollmentId" id="expiryEnrollmentId" value="">
+                <div class="expiry-form__row">
+                    <div class="expiry-form__field">
+                        <label for="expiryDateOverride">Expiry Date Override</label>
+                        <input type="date" id="expiryDateOverride" name="expiryDateOverride">
+                    </div>
+                    <button type="submit" class="admin-btn primary">Save Expiry</button>
+                    <button type="button" class="admin-btn secondary" id="clearExpiryOverride">Clear Override</button>
+                </div>
+                <div class="expiry-form__hint">This is the simplest admin extension flow: update one date and the student learning hub will honor it automatically.</div>
+            </form>
         </div>
         <div class="admin-modal-footer" style="display: flex; justify-content: flex-end; gap: 10px; padding: 15px 20px; border-top: 1px solid var(--admin-border);">
             <button type="button" class="admin-btn primary" data-close-modal="enrollmentReceiptModal">Close</button>
@@ -292,9 +369,13 @@
             
             $('#rcpEnrollmentId').text('#' + (row.data('id') || '-'));
             $('#rcpEnrollmentDate').text(row.data('date') || '-');
+            $('#rcpCourseDuration').text(row.data('duration') || '-');
+            $('#rcpExpiryDate').text(row.data('expiry-date') || '-');
             $('#rcpStudentName').text(row.data('student-name') || '-');
             $('#rcpStudentEmail').text(row.data('student-email') || '-');
             $('#rcpCourseName').text(row.data('course-name') || '-');
+            $('#expiryEnrollmentId').val(row.data('id') || '');
+            $('#expiryDateOverride').val(row.data('expiry-override') || '');
             
             var price = row.data('course-price');
             if (price) {
@@ -321,6 +402,10 @@
             if (e.key === 'Escape') {
                 closeModal(receiptModal);
             }
+        });
+
+        $('#clearExpiryOverride').on('click', function() {
+            $('#expiryDateOverride').val('');
         });
     });
 </script>

@@ -17,6 +17,7 @@
     var currentMaterialType = body.dataset.currentMaterialType || '';
     var currentSelectionMode = body.dataset.currentSelectionMode || '';
     var totalMaterialCount = Number(body.dataset.materialCount || '0');
+    var courseExpired = body.dataset.courseExpired === 'true';
     var viewerState = {
         completionRule: '',
         unlocked: body.dataset.materialCompleted === 'true',
@@ -122,6 +123,11 @@
             return;
         }
 
+        if (courseExpired) {
+            setCompletionButton(true, 'Course Expired');
+            return;
+        }
+
         var label = 'Mark Complete';
         if (currentMaterialType === 'Video' || currentMaterialType === 'Audio') {
             label = 'Complete After Playback';
@@ -135,7 +141,7 @@
     }
 
     function unlockCompletion(note) {
-        if (!completeButton || viewerState.completed || currentSelectionMode !== 'material') {
+        if (!completeButton || viewerState.completed || currentSelectionMode !== 'material' || courseExpired) {
             return;
         }
         viewerState.unlocked = true;
@@ -146,7 +152,7 @@
     }
 
     function bindNativeMediaUnlock() {
-        if (currentSelectionMode !== 'material' || viewerState.completed) {
+        if (currentSelectionMode !== 'material' || viewerState.completed || courseExpired) {
             return;
         }
         var mediaNodes = Array.prototype.slice.call(document.querySelectorAll('.lh-video-player, .lh-audio-player'));
@@ -174,7 +180,7 @@
     }
 
     function bindExternalResourceUnlock() {
-        if (currentSelectionMode !== 'material' || currentMaterialType !== 'Link' || viewerState.completed) {
+        if (currentSelectionMode !== 'material' || currentMaterialType !== 'Link' || viewerState.completed || courseExpired) {
             return;
         }
         var resourceLink = document.querySelector('.lh-link-preview a[target="_blank"]');
@@ -193,6 +199,8 @@
     if (completeButton) {
         if (viewerState.completed) {
             setCompletionButton(true, 'Completed');
+        } else if (courseExpired) {
+            setCompletionButton(true, 'Course Expired');
         } else {
             setWaitingState();
             if (currentMaterialType !== 'Video' && currentMaterialType !== 'Audio' && currentMaterialType !== 'Link') {

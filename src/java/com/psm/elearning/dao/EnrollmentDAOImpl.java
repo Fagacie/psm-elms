@@ -234,7 +234,7 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
     @Override
     public List<Enrollment> getAllEnrollments() {
         List<Enrollment> enrollments = new ArrayList<>();
-        String sql = "SELECT e.*, c.Title AS CourseTitle, c.CourseFee, u.FullName AS StudentName, u.Email AS StudentEmail " +
+        String sql = "SELECT e.*, c.Title AS CourseTitle, c.CourseFee, c.Duration AS CourseDuration, u.FullName AS StudentName, u.Email AS StudentEmail " +
                 "FROM Enrollment e " +
                 "JOIN Course c ON e.CourseID = c.CourseID " +
                 "JOIN User u ON e.UserID = u.UserID " +
@@ -248,6 +248,10 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
                 Enrollment enrollment = mapResultSet(rs);
                 enrollment.setCourseName(rs.getString("CourseTitle"));
                 enrollment.setCoursePrice(rs.getDouble("CourseFee"));
+                int durationVal = rs.getInt("CourseDuration");
+                if (!rs.wasNull()) {
+                    enrollment.setCourseDuration(durationVal);
+                }
                 enrollment.setStudentName(rs.getString("StudentName"));
                 enrollment.setStudentEmail(rs.getString("StudentEmail"));
                 enrollments.add(enrollment);
@@ -281,6 +285,13 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
         }
         if (enrollmentTs != null) {
             enrollment.setEnrollmentDate(enrollmentTs.toLocalDateTime());
+        }
+        Timestamp expiryOverrideTs = null;
+        if (hasColumn(rs, "ExpiryDateOverride")) {
+            expiryOverrideTs = rs.getTimestamp("ExpiryDateOverride");
+        }
+        if (expiryOverrideTs != null) {
+            enrollment.setExpiryDateOverride(expiryOverrideTs.toLocalDateTime());
         }
         Timestamp updatedTs = null;
         if (hasColumn(rs, "UpdatedDate")) {
@@ -456,5 +467,43 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
             LOGGER.log(Level.SEVERE, "Error updating reminderSent for enrollmentId=" + enrollmentId, e);
         }
         return false;
+    }
+
+    @Override
+    public boolean updateExpiryDateOverride(Integer enrollmentId, LocalDateTime expiryDateOverride) {
+        ensureExpiryOverrideColumn();
+        String sql = "UPDATE Enrollment SET ExpiryDateOverride = ? WHERE EnrollmentID = ?";
+        LOGGER.info("Updating enrollment expiry override enrollmentId=" + enrollmentId + ", expiryDateOverride=" + expiryDateOverride);
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            if (expiryDateOverride == null) {
+                ps.setNull(1, Types.TIMESTAMP);
+            } else {
+                ps.setTimestamp(1, Timestamp.valueOf(expiryDateOverride));
+            }
+            ps.setInt(2, enrollmentId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error updating expiry override for enrollmentId=" + enrollmentId, e);
+        }
+        return false;
+    }
+
+    private void ensureExpiryOverrideColumn() {
+        try (Connection conn = DBConnection.getConnection()) {
+            DatabaseMetaData metaData = conn.getMetaData();
+            try (ResultSet rs = metaData.getColumns(conn.getCatalog(), null, "Enrollment", "ExpiryDateOverride")) {
+                if (rs.next()) {
+                    return;
+                }
+            }
+
+            try (Statement stmt = conn.createStatement()) {
+                stmt.executeUpdate("ALTER TABLE Enrollment ADD COLUMN ExpiryDateOverride DATETIME NULL");
+                LOGGER.info("Added ExpiryDateOverride column to Enrollment table.");
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.WARNING, "Unable to ensure ExpiryDateOverride column exists", e);
+        }
     }
 }

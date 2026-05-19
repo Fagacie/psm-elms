@@ -371,6 +371,12 @@ body.lh-shell-page .lh-main {
   border: 1px solid rgba(239, 68, 68, 0.2);
 }
 
+.lh-stage-access.is-expired {
+  background: rgba(249, 115, 22, 0.1);
+  color: #ea580c;
+  border: 1px solid rgba(249, 115, 22, 0.24);
+}
+
 .lh-stage-meta {
   padding: 16px 24px;
   border-bottom: 1px solid var(--sv-border);
