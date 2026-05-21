@@ -43,12 +43,23 @@
         cards.forEach(function (card) {
             var level = card.getAttribute('data-level') || '';
             var enrolled = card.getAttribute('data-enrolled') || 'no';
+            var priceType = card.getAttribute('data-price-type') || 'paid';
             var courseName = (card.getAttribute('data-course') || '').toLowerCase();
             var category = (card.getAttribute('data-category') || '').toLowerCase();
 
-            var modeMatch = mode === 'all'
-                ? true
-                : (mode === 'enrolled' ? enrolled === 'yes' : level === mode);
+            var modeMatch = false;
+            if (mode === 'all') {
+                modeMatch = true;
+            } else if (mode === 'enrolled') {
+                modeMatch = enrolled === 'yes';
+            } else if (mode === 'free') {
+                modeMatch = priceType === 'free';
+            } else if (mode === 'paid') {
+                modeMatch = priceType === 'paid';
+            } else {
+                modeMatch = level === mode;
+            }
+
             var searchMatch = q ? (courseName.indexOf(q) !== -1 || category.indexOf(q) !== -1) : true;
             var show = modeMatch && searchMatch;
 
@@ -137,24 +148,21 @@
 
         forms.forEach(function (form) {
             form.addEventListener('submit', function (event) {
-                event.preventDefault(); // Block standard instant navigation
+                event.preventDefault();
 
                 if (!overlay || !loader || !success) {
                     form.submit();
                     return;
                 }
 
-                // Activate glassmorphic loader overlay
                 overlay.classList.add('active');
                 loader.style.display = 'block';
                 success.style.display = 'none';
 
-                // Stage 1: Mock active secure registration with database
                 setTimeout(function () {
                     loader.style.display = 'none';
                     success.style.display = 'block';
 
-                    // Stage 2: Celebratory success feedback before actual redirect
                     setTimeout(function () {
                         form.submit();
                     }, 1400);
@@ -163,7 +171,73 @@
         });
     }
 
+    function initCardClickRouting() {
+        var courseCards = document.querySelectorAll('.bc-card[data-href]');
+        courseCards.forEach(function (card) {
+            // Click routing
+            card.addEventListener('click', function (event) {
+                // Ignore click if user clicked on a link, button, input, form, or standard interactive elements
+                var target = event.target;
+                while (target && target !== card) {
+                    var tag = target.tagName.toLowerCase();
+                    if (tag === 'a' || tag === 'button' || tag === 'form' || tag === 'input') {
+                        return;
+                    }
+                    target = target.parentNode;
+                }
+                var href = card.getAttribute('data-href');
+                if (href) {
+                    window.location.href = href;
+                }
+            });
+
+            // Keyboard navigation (Enter key support)
+            card.addEventListener('keydown', function (event) {
+                if (event.key === 'Enter') {
+                    // Ignore if interactive child is focused
+                    var tag = document.activeElement.tagName.toLowerCase();
+                    if (tag === 'a' || tag === 'button' || tag === 'form' || tag === 'input') {
+                        return;
+                    }
+                    var href = card.getAttribute('data-href');
+                    if (href) {
+                        window.location.href = href;
+                    }
+                }
+            });
+        });
+    }
+
+    function initSkeletonLoader() {
+        setTimeout(function () {
+            var skeletonGrid = document.getElementById('bcSkeletonGrid');
+            var mainGrid = document.getElementById('bcGrid');
+            if (skeletonGrid) {
+                skeletonGrid.classList.add('is-hidden');
+            }
+            if (mainGrid) {
+                mainGrid.classList.remove('is-hidden');
+                // Re-run animateCounters to capture count labels dynamically inside the newly visible grid!
+                animateCounters();
+            }
+        }, 750);
+    }
+
+    function initCheckoutSpinner() {
+        var buttons = document.querySelectorAll('.bc-paid-enroll-btn, .bc-free-enroll-btn');
+        buttons.forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                if (!btn.closest('form')) {
+                    btn.classList.add('loading');
+                }
+            });
+        });
+    }
+
     animateCounters();
     applyFilters();
     initFreeEnrollmentInterceptor();
+    initCardClickRouting();
+    initSkeletonLoader();
+    initCheckoutSpinner();
 })();
