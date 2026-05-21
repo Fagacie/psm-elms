@@ -185,21 +185,6 @@
         </c:if>
 
         <section class="lh-workspace">
-            <header class="lh-stage-head">
-                <div class="lh-stage-head__copy">
-                    <span class="lh-stage-eyebrow"><c:out value="${workspaceEyebrow}"/></span>
-                    <h2><c:out value="${workspaceTitle}"/></h2>
-                    <p><c:out value="${workspaceDescription}"/></p>
-                </div>
-                <div class="lh-stage-head__status">
-                    <span class="status-badge ${workspaceStatusClass}" id="lhItemStatusBadge"><c:out value="${workspaceStatusLabel}"/></span>
-                    <span class="lh-stage-access ${workspaceAccessStateClass}" id="lhAccessStatusBadge">
-                        <i class="fas fa-${workspaceAccessIcon}"></i>
-                        <c:out value="${workspaceAccessLabel}"/>
-                    </span>
-                </div>
-            </header>
-
             <div class="lh-stage-body">
                 <c:choose>
                     <c:when test="${not empty assessmentResultSubmission and not empty assessmentResultAssessment}">
@@ -611,14 +596,25 @@
                                                                         <input type="hidden" name="enrollmentId" value="${enrollment.enrollmentId}">
 
                                                                         <div class="assignment-upload-box">
-                                                                            <label for="answerFileHub"><strong>Upload Assignment File</strong></label>
-                                                                            <input id="answerFileHub" name="answerFile" type="file" required>
-                                                                            <p class="assignment-upload-note">Accepted formats include PDF, DOC, DOCX, PPT, PPTX, ZIP, and image files. Maximum file size: 50MB.</p>
+                                                                            <div class="lh-upload-zone" onclick="document.getElementById('answerFileHubRetake').click()">
+                                                                                <div class="lh-upload-zone__icon">
+                                                                                    <i class="fas fa-cloud-arrow-up"></i>
+                                                                                </div>
+                                                                                <div class="lh-upload-zone__copy">
+                                                                                    <strong>Drag &amp; drop file here or <span class="lh-upload-zone__highlight">browse</span></strong>
+                                                                                    <p class="lh-upload-zone__specs">Supports PDF, DOCX, ZIP, PPTX (Max 50MB)</p>
+                                                                                </div>
+                                                                                <input id="answerFileHubRetake" name="answerFile" type="file" required style="display: none;" onchange="updateHubFileName(this, true)">
+                                                                                <div class="lh-upload-zone__selected-file" id="selectedFileHubNameRetake" style="display: none;">
+                                                                                    <i class="fas fa-file-circle-check"></i>
+                                                                                    <span id="fileNameHubTextRetake"></span>
+                                                                                </div>
+                                                                            </div>
                                                                         </div>
 
                                                                         <div class="assessment-actions lh-assessment-actions">
                                                                             <button class="sv-btn primary" type="submit">
-                                                                                <i class="fas fa-upload"></i>&nbsp;Submit Assignment Retake
+                                                                                <i class="fas fa-upload"></i>&nbsp;Submit Retake Submission
                                                                             </button>
                                                                         </div>
                                                                     </form>
@@ -632,9 +628,20 @@
                                                                 <input type="hidden" name="enrollmentId" value="${enrollment.enrollmentId}">
 
                                                                 <div class="assignment-upload-box">
-                                                                    <label for="answerFileHub"><strong>Upload Assignment File</strong></label>
-                                                                    <input id="answerFileHub" name="answerFile" type="file" required>
-                                                                    <p class="assignment-upload-note">Accepted formats include PDF, DOC, DOCX, PPT, PPTX, ZIP, and image files. Maximum file size: 50MB.</p>
+                                                                    <div class="lh-upload-zone" onclick="document.getElementById('answerFileHubInitial').click()">
+                                                                        <div class="lh-upload-zone__icon">
+                                                                            <i class="fas fa-cloud-arrow-up"></i>
+                                                                        </div>
+                                                                        <div class="lh-upload-zone__copy">
+                                                                            <strong>Drag &amp; drop file here or <span class="lh-upload-zone__highlight">browse</span></strong>
+                                                                            <p class="lh-upload-zone__specs">Supports PDF, DOCX, ZIP, PPTX (Max 50MB)</p>
+                                                                        </div>
+                                                                        <input id="answerFileHubInitial" name="answerFile" type="file" required style="display: none;" onchange="updateHubFileName(this, false)">
+                                                                        <div class="lh-upload-zone__selected-file" id="selectedFileHubNameInitial" style="display: none;">
+                                                                            <i class="fas fa-file-circle-check"></i>
+                                                                            <span id="fileNameHubTextInitial"></span>
+                                                                        </div>
+                                                                    </div>
                                                                 </div>
 
                                                                 <div class="assessment-actions lh-assessment-actions">
@@ -1082,6 +1089,19 @@
 </div>
 
 <div class="sv-overlay" id="svOverlay"></div>
+<script>
+function updateHubFileName(input, isRetake) {
+    var suffix = isRetake ? 'Retake' : 'Initial';
+    var fileBox = document.getElementById('selectedFileHubName' + suffix);
+    var textSpan = document.getElementById('fileNameHubText' + suffix);
+    if (input.files && input.files.length > 0) {
+        textSpan.textContent = input.files[0].name;
+        fileBox.style.display = 'flex';
+    } else {
+        fileBox.style.display = 'none';
+    }
+}
+</script>
 <script src="${pageContext.request.contextPath}/js/learning-hub.js"></script>
 <script src="${pageContext.request.contextPath}/js/student-v2.js"></script>
 </body>

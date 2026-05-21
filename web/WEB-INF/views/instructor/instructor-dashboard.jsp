@@ -33,70 +33,50 @@
         <c:set var="dueSoon" value="${not empty dueSoonAssessmentCount ? dueSoonAssessmentCount : 0}"/>
 
         <%-- WELCOME BANNER --%>
-        <section class="ins-welcome-banner">
-            <div class="ins-welcome-left">
-                <div class="ins-welcome-avatar">
-                    <i class="fas fa-chalkboard-teacher"></i>
-                </div>
-                <div class="ins-welcome-copy">
-                    <h2>Welcome back, <c:out value="${not empty instructorName ? instructorName : user.fullName}"/> 👋</h2>
-                    <p>You have <strong>${pendingGrading}</strong> submission(s) awaiting grading and <strong>${dueSoon}</strong> assessment(s) due soon.</p>
-                </div>
-            </div>
-            <div class="ins-welcome-stats">
-                <div class="ins-welcome-stat">
-                    <span class="stat-val">${courseCount}</span>
-                    <span class="stat-lbl">Courses</span>
-                </div>
-                <div class="ins-welcome-stat">
-                    <span class="stat-val">${studentCount}</span>
-                    <span class="stat-lbl">Students</span>
-                </div>
-                <div class="ins-welcome-stat">
-                    <span class="stat-val">${pendingGrading}</span>
-                    <span class="stat-lbl">Pending</span>
-                </div>
+        <section class="ins-hero-section">
+            <div class="ins-hero-content">
+                <h2>Welcome back, <c:out value="${not empty instructorName ? instructorName : user.fullName}"/> 👋</h2>
+                <p>You have <strong>${pendingGrading}</strong> submission(s) awaiting grading and <strong>${dueSoon}</strong> assessment(s) due soon.</p>
             </div>
         </section>
 
         <%-- KPI CARDS --%>
         <section class="ins-kpi-section">
-            <div class="ins-kpi-grid">
-                <div class="ins-kpi-card kpi-warn">
-                    <div class="kpi-icon-box"><i class="fas fa-pen-to-square"></i></div>
-                    <div class="kpi-body">
-                        <span class="kpi-label">Action Required</span>
-                        <strong class="kpi-value">${pendingGrading}</strong>
-                        <span class="kpi-sub">Submissions awaiting grading</span>
+            <div class="ins-section-head">
+                <h3>Overview</h3>
+            </div>
+            <div class="ins-attention-grid">
+                <a href="${pageContext.request.contextPath}/instructor/assessments?view=dashboard" class="ins-attention-card ins-attention-warn" style="text-decoration: none;">
+                    <div class="ins-attention-icon"><i class="fas fa-pen-to-square"></i></div>
+                    <div class="ins-attention-content">
+                        <span class="ins-attention-label">Action Required</span>
+                        <strong>${pendingGrading}</strong>
+                        <small>Submissions awaiting grading</small>
                     </div>
-                    <a href="${pageContext.request.contextPath}/instructor/assessments?view=dashboard" class="kpi-link-arrow"><i class="fas fa-arrow-right"></i></a>
-                </div>
-                <div class="ins-kpi-card kpi-info">
-                    <div class="kpi-icon-box"><i class="fas fa-folder-open"></i></div>
-                    <div class="kpi-body">
-                        <span class="kpi-label">Course Health</span>
-                        <strong class="kpi-value">${missingMats}</strong>
-                        <span class="kpi-sub">Course(s) missing materials</span>
+                </a>
+                <a href="${pageContext.request.contextPath}/instructor/courses" class="ins-attention-card ins-attention-neutral" style="text-decoration: none;">
+                    <div class="ins-attention-icon"><i class="fas fa-layer-group"></i></div>
+                    <div class="ins-attention-content">
+                        <span class="ins-attention-label">Active Courses</span>
+                        <strong>${courseCount}</strong>
+                        <small>Currently managed by you</small>
                     </div>
-                    <a href="${pageContext.request.contextPath}/instructor/courses" class="kpi-link-arrow"><i class="fas fa-arrow-right"></i></a>
-                </div>
-                <div class="ins-kpi-card kpi-good">
-                    <div class="kpi-icon-box"><i class="fas fa-calendar-check"></i></div>
-                    <div class="kpi-body">
-                        <span class="kpi-label">Upcoming Deadlines</span>
-                        <strong class="kpi-value">${dueSoon}</strong>
-                        <span class="kpi-sub">Assessments due within 7 days</span>
+                </a>
+                <a href="${pageContext.request.contextPath}/instructor/assessments?view=dashboard" class="ins-attention-card ins-attention-good" style="text-decoration: none;">
+                    <div class="ins-attention-icon"><i class="fas fa-calendar-check"></i></div>
+                    <div class="ins-attention-content">
+                        <span class="ins-attention-label">Upcoming Deadlines</span>
+                        <strong>${dueSoon}</strong>
+                        <small>Assessments due within 7 days</small>
                     </div>
-                    <a href="${pageContext.request.contextPath}/instructor/assessments?view=dashboard" class="kpi-link-arrow"><i class="fas fa-arrow-right"></i></a>
-                </div>
-                <div class="ins-kpi-card kpi-purple">
-                    <div class="kpi-icon-box"><i class="fas fa-users"></i></div>
-                    <div class="kpi-body">
-                        <span class="kpi-label">Total Students</span>
-                        <strong class="kpi-value">${studentCount}</strong>
-                        <span class="kpi-sub">Across all your courses</span>
+                </a>
+                <div class="ins-attention-card ins-attention-neutral">
+                    <div class="ins-attention-icon"><i class="fas fa-users"></i></div>
+                    <div class="ins-attention-content">
+                        <span class="ins-attention-label">Total Students</span>
+                        <strong>${studentCount}</strong>
+                        <small>Across all your courses</small>
                     </div>
-                    <a href="${pageContext.request.contextPath}/instructor/courses" class="kpi-link-arrow"><i class="fas fa-arrow-right"></i></a>
                 </div>
             </div>
         </section>

@@ -259,6 +259,36 @@ html[data-theme='dark'] body.sv-page .assessment-table tr:hover {
   background: rgba(255, 255, 255, 0.03) !important;
 }
 
+html[data-theme='dark'] body.sv-page .lh-stage-card,
+html[data-theme='dark'] body.sv-page .lh-assignment-status-card,
+html[data-theme='dark'] body.sv-page .assignment-upload-box,
+html[data-theme='dark'] body.sv-page .lh-assignment-prompt-box__item {
+  background: var(--sv-surface) !important;
+  border-color: var(--sv-border) !important;
+}
+
+html[data-theme='dark'] body.sv-page .lh-assignment-status-card.is-pending {
+  background: linear-gradient(to right, rgba(245, 158, 11, 0.05), var(--sv-surface)) !important;
+}
+
+html[data-theme='dark'] body.sv-page .lh-assignment-status-card.is-success {
+  background: linear-gradient(to right, rgba(16, 185, 129, 0.05), var(--sv-surface)) !important;
+}
+
+html[data-theme='dark'] body.sv-page .lh-assignment-status-card.is-error {
+  background: linear-gradient(to right, rgba(239, 68, 68, 0.05), var(--sv-surface)) !important;
+}
+
+html[data-theme='dark'] body.sv-page .lh-upload-zone {
+  background: var(--sv-surface-soft) !important;
+  border-color: var(--sv-border) !important;
+}
+
+html[data-theme='dark'] body.sv-page .lh-upload-zone:hover {
+  border-color: var(--sv-accent) !important;
+  background: rgba(96, 165, 250, 0.06) !important;
+}
+
 html[data-theme='dark'] body.sv-page .sv-course-line,
 html[data-theme='dark'] body.sv-page .sv-metric p,
 html[data-theme='dark'] body.sv-page .sv-chip,
