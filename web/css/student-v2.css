@@ -49,6 +49,7 @@ body.sv-page {
   background: var(--sv-bg);
   background-image: var(--sv-bg-accent);
   min-height: 100vh;
+  overflow-x: hidden;
   transition: background-color 0.25s ease;
 }
 

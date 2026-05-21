@@ -618,6 +618,344 @@
    RESPONSIVE DESIGN
    ============================================= */
 
+/* =============================================
+   RESPONSIVE DESIGN & CUSTOM GRID LAYOUT
+   ============================================= */
+
+.sd3-widgets-container {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 28px;
+  margin-top: 10px;
+}
+
+/* widget-courses spans full width */
+.sd3-widget[data-widget-id="widget-courses"] {
+  grid-column: span 2;
+}
+
+/* widget-credentials and widget-quicknav span half width */
+.sd3-widget[data-widget-id="widget-credentials"],
+.sd3-widget[data-widget-id="widget-quicknav"] {
+  grid-column: span 1;
+}
+
+.sd3-widget {
+  position: relative;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.25s ease, opacity 0.3s ease;
+}
+
+.sd3-widget-header-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sd3-widget-drag-handle {
+  display: none;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border-radius: 8px;
+  background: var(--sv-surface-soft);
+  border: 1px solid var(--sv-border);
+  color: var(--sv-muted);
+  cursor: grab;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+  flex-shrink: 0;
+}
+
+.sd3-widget-drag-handle:hover {
+  background: var(--sv-accent-soft);
+  color: var(--sv-accent);
+  border-color: var(--sv-accent-border);
+}
+
+.sd3-widget-drag-handle:active {
+  cursor: grabbing;
+}
+
+/* Customize layout panel drawer style */
+.sd3-customizer-panel {
+  background: var(--sv-surface);
+  border: 2px dashed rgba(37, 99, 235, 0.25);
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: var(--sv-shadow-md);
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.sd3-customizer-panel__header h4 {
+  margin: 0 0 6px;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--sv-heading);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sd3-customizer-panel__header p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--sv-muted);
+}
+
+.sd3-customizer-panel__body {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.sd3-customizer-toggle-group {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.sd3-custom-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--sv-heading);
+}
+
+/* custom switch styles */
+.sd3-custom-switch input {
+  display: none;
+}
+
+.sd3-switch-slider {
+  position: relative;
+  width: 38px;
+  height: 20px;
+  background-color: var(--sv-border-strong);
+  border-radius: 99px;
+  transition: background-color 0.25s ease;
+}
+
+.sd3-switch-slider::before {
+  content: "";
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  border-radius: 50%;
+  transition: transform 0.25s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.sd3-custom-switch input:checked + .sd3-switch-slider {
+  background-color: var(--sv-accent);
+}
+
+.sd3-custom-switch input:checked + .sd3-switch-slider::before {
+  transform: translateX(18px);
+}
+
+.sd3-customizer-actions {
+  display: flex;
+  gap: 10px;
+}
+
+/* Customize active state for widgets */
+.sd3-dashboard.sd3-customize-active .sd3-widget-drag-handle {
+  display: inline-grid;
+}
+
+.sd3-dashboard.sd3-customize-active .sd3-widget {
+  outline: 2px dashed var(--sv-accent-border);
+  outline-offset: -3px;
+  background: var(--sv-surface-soft);
+  border-radius: 16px;
+  box-sizing: border-box;
+}
+
+.sd3-dashboard.sd3-customize-active .sd3-widget.widget-ghost {
+  opacity: 0.35;
+  outline: 2px dashed var(--sv-accent);
+  outline-offset: -3px;
+  background: var(--sv-accent-soft);
+}
+
+.sd3-dashboard.sd3-customize-active .sd3-widget.widget-drag-over {
+  outline-color: var(--sv-accent);
+  box-shadow: 0 0 0 4px var(--sv-accent-soft);
+  transform: scale(1.008);
+}
+
+/* Circular progress rings */
+.sd3-progress-circle-wrapper {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  display: grid;
+  place-items: center;
+  margin: 0 auto;
+}
+
+.sd3-progress-circle {
+  transform: rotate(-90deg);
+}
+
+.sd3-progress-circle-bg {
+  stroke: rgba(255, 255, 255, 0.1);
+}
+
+.sd3-progress-circle-fg {
+  stroke: #60a5fa;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.8s ease;
+}
+
+.sd3-progress-circle-text {
+  position: absolute;
+  display: grid;
+  place-items: center;
+}
+
+.sd3-progress-circle-text .sd3-progress-card__value {
+  font-size: 1.55rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.03em;
+  margin: 0;
+  line-height: 1;
+}
+
+/* Compact Course Card Circular Progress */
+.sd3-course-card__progress-wrap-circular {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 4px;
+  padding: 10px 12px;
+  background: var(--sv-surface-soft);
+  border: 1px solid var(--sv-border);
+  border-radius: 12px;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+.sd3-course-card:hover .sd3-course-card__progress-wrap-circular {
+  border-color: var(--sv-border-strong);
+  background: var(--sv-surface-strong);
+}
+
+.sd3-course-progress-circle-compact {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.sd3-compact-circle {
+  transform: rotate(-90deg);
+}
+
+.sd3-compact-circle-bg {
+  stroke: var(--sv-border);
+}
+
+.sd3-compact-circle-fg {
+  stroke: var(--sv-accent);
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.8s ease;
+}
+
+.sd3-compact-circle-text {
+  position: absolute;
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: var(--sv-heading);
+  letter-spacing: -0.03em;
+}
+
+.sd3-course-card__progress-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.sd3-course-card__progress-meta span {
+  font-size: 0.72rem;
+  color: var(--sv-muted);
+  font-weight: 500;
+}
+
+.sd3-course-card__progress-meta strong {
+  font-size: 0.76rem;
+  color: var(--sv-heading);
+  font-weight: 700;
+}
+
+/* Skeleton loaders */
+@keyframes pulse-skeleton {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+.skeleton-loader {
+  animation: pulse-skeleton 1.5s infinite ease-in-out;
+  background: linear-gradient(90deg, var(--sv-border) 25%, var(--sv-border-strong) 50%, var(--sv-border) 75%);
+  background-size: 200% 100%;
+  border-radius: 4px;
+}
+
+.table-skeleton-row td {
+  padding: 18px 12px;
+}
+
+.skeleton-text {
+  height: 14px;
+  background-color: var(--sv-border);
+  border-radius: 4px;
+  margin-bottom: 6px;
+  animation: pulse-skeleton 1.5s infinite ease-in-out;
+}
+
+.skeleton-text.short {
+  width: 40%;
+}
+
+.skeleton-text.medium {
+  width: 70%;
+}
+
+.skeleton-badge {
+  width: 64px;
+  height: 20px;
+  background-color: var(--sv-border);
+  border-radius: 99px;
+  animation: pulse-skeleton 1.5s infinite ease-in-out;
+}
+
+.skeleton-btn {
+  width: 82px;
+  height: 36px;
+  background-color: var(--sv-border);
+  border-radius: 8px;
+  animation: pulse-skeleton 1.5s infinite ease-in-out;
+}
+
 @media (max-width: 1100px) {
   .sd3-course-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -625,9 +963,20 @@
 }
 
 @media (max-width: 860px) {
-  .sd3-bottom-row {
+  .sd3-widgets-container {
     grid-template-columns: 1fr;
     gap: 20px;
+  }
+  
+  .sd3-widget[data-widget-id="widget-courses"],
+  .sd3-widget[data-widget-id="widget-credentials"],
+  .sd3-widget[data-widget-id="widget-quicknav"] {
+    grid-column: span 1;
+  }
+  
+  .sd3-customizer-panel__body {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }
 
@@ -646,4 +995,5 @@
     max-width: none;
   }
 }
+
 

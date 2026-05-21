@@ -149,7 +149,9 @@ html[data-theme='dark'] body.landing-page .landing-alert {
 html[data-theme='dark'] body.sv-page {
   --sv-bg: #0b0e13;
   --sv-text: #e8edf5;
+  --sv-heading: #f8fafc;
   --sv-muted: #96a2b3;
+  --sv-muted-strong: #cbd5e1;
   --sv-border: #252c36;
   --sv-accent: #60a5fa;
   --sv-accent-soft: rgba(96, 165, 250, 0.12);

@@ -63,40 +63,54 @@
         </section>
 
         <section class="sv-card" style="border-radius: 16px; border: 1px solid var(--sv-border); background: var(--sv-surface); padding: 24px;">
-            <div style="display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 18px;">
+            <div style="display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; align-items: center; margin-bottom: 22px;">
                 <div>
-                    <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800; color: var(--sv-foreground);">Transactions table</h3>
-                    <p style="margin: 4px 0 0; color: var(--sv-muted); font-size: 0.88rem;">Use the receipt action to print or save a clean payment record.</p>
+                    <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800; color: var(--sv-heading);">Transactions table</h3>
+                    <p style="margin: 4px 0 0; color: var(--sv-muted); font-size: 0.88rem;">Search, sort, or open the receipt action to review your payment details.</p>
                 </div>
-                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                    <a class="sv-btn ${empty statusFilter ? 'primary' : ''}" href="${pageContext.request.contextPath}/student/payments">All</a>
-                    <a class="sv-btn ${statusFilter == 'Paid' ? 'primary' : ''}" href="${pageContext.request.contextPath}/student/payments?status=paid">Paid</a>
-                    <a class="sv-btn ${statusFilter == 'Pending' ? 'primary' : ''}" href="${pageContext.request.contextPath}/student/payments?status=pending">Pending</a>
-                    <a class="sv-btn ${statusFilter == 'Failed' ? 'primary' : ''}" href="${pageContext.request.contextPath}/student/payments?status=failed">Failed</a>
+                
+                <%-- Upgraded Advanced Live Controls --%>
+                <div style="display: flex; gap: 14px; flex-wrap: wrap; align-items: center; width: 100%; max-width: 680px; justify-content: flex-end;">
+                    <%-- Live Text Search Box --%>
+                    <div style="position: relative; flex: 1 1 240px; max-width: 320px;">
+                        <input type="search" id="paymentSearchInput" 
+                               placeholder="Search by course name..." 
+                               style="width: 100%; height: 40px; padding: 0 16px 0 38px; border-radius: 10px; border: 1px solid var(--sv-border); background: var(--sv-surface-soft); color: var(--sv-heading); font-size: 0.88rem; outline: none; transition: border-color 0.2s, background-color 0.2s;"
+                               aria-label="Search transactions">
+                        <i class="fas fa-search" style="position: absolute; left: 14px; top: 13px; color: var(--sv-muted); font-size: 0.88rem;" aria-hidden="true"></i>
+                    </div>
+                    
+                    <%-- Client-Side Async Status Filters --%>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;" role="group" aria-label="Filter transactions by status">
+                        <button type="button" class="sv-btn primary" data-status-filter="all">All</button>
+                        <button type="button" class="sv-btn" data-status-filter="paid">Paid</button>
+                        <button type="button" class="sv-btn" data-status-filter="pending">Pending</button>
+                        <button type="button" class="sv-btn" data-status-filter="failed">Failed</button>
+                    </div>
                 </div>
             </div>
 
             <c:choose>
                 <c:when test="${empty payments}">
                     <div class="empty-state-box" style="padding: 44px 18px;">
-                        <i class="fas fa-receipt"></i>
+                        <i class="fas fa-receipt" aria-hidden="true"></i>
                         <h3>No payments found</h3>
                         <p>Once you complete a course payment, the transaction will appear here with a receipt link.</p>
                     </div>
                 </c:when>
                 <c:otherwise>
                     <div style="overflow-x: auto;">
-                        <table style="width: 100%; border-collapse: collapse; min-width: 760px;">
+                        <table style="width: 100%; border-collapse: collapse; min-width: 760px;" data-sortable id="paymentTable">
                             <thead>
                                 <tr style="text-align: left; color: var(--sv-muted); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em;">
-                                    <th style="padding: 14px 12px; border-bottom: 1px solid var(--sv-border);">Course</th>
-                                    <th style="padding: 14px 12px; border-bottom: 1px solid var(--sv-border);">Amount</th>
-                                    <th style="padding: 14px 12px; border-bottom: 1px solid var(--sv-border);">Status</th>
-                                    <th style="padding: 14px 12px; border-bottom: 1px solid var(--sv-border);">Date</th>
-                                    <th style="padding: 14px 12px; border-bottom: 1px solid var(--sv-border);">Receipt</th>
+                                    <th style="padding: 14px 12px; border-bottom: 1px solid var(--sv-border);" scope="col">Course</th>
+                                    <th style="padding: 14px 12px; border-bottom: 1px solid var(--sv-border);" scope="col">Amount</th>
+                                    <th style="padding: 14px 12px; border-bottom: 1px solid var(--sv-border);" scope="col">Status</th>
+                                    <th style="padding: 14px 12px; border-bottom: 1px solid var(--sv-border);" scope="col">Date</th>
+                                    <th style="padding: 14px 12px; border-bottom: 1px solid var(--sv-border);" scope="col" data-unsortable>Receipt</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody id="paymentTableBody">
                                 <c:forEach var="payment" items="${payments}">
                                     <tr style="border-bottom: 1px solid var(--sv-border);">
                                         <td style="padding: 16px 12px; vertical-align: top;">
@@ -135,7 +149,7 @@
                                                     data-payment-gateway-ref="${fn:escapeXml(not empty payment.paystackReference ? payment.paystackReference : '-') }"
                                                     data-payment-method="${fn:escapeXml(not empty payment.method ? payment.method : 'Gateway') }"
                                                     data-payment-enrollment-id="${payment.enrollmentId}">
-                                                <i class="fas fa-file-invoice"></i> Receipt
+                                                <i class="fas fa-file-invoice" aria-hidden="true"></i> Receipt
                                             </button>
                                         </td>
                                     </tr>
@@ -149,18 +163,18 @@
     </main>
 </div>
 
-<div id="paymentReceiptModal" style="display: none; position: fixed; inset: 0; z-index: 1200; align-items: center; justify-content: center; padding: 20px;">
+<div id="paymentReceiptModal" style="display: none; position: fixed; inset: 0; z-index: 1200; align-items: center; justify-content: center; padding: 20px;" role="dialog" aria-labelledby="paymentModalCourse" aria-modal="true">
     <div id="paymentReceiptBackdrop" style="position: absolute; inset: 0; background: rgba(15, 23, 42, 0.55);"></div>
     <section style="position: relative; width: min(760px, 100%); max-height: min(86vh, 820px); overflow: auto; background: var(--sv-surface); border: 1px solid var(--sv-border); border-radius: 18px; box-shadow: var(--sv-shadow-xl); padding: 24px;">
         <div style="display: flex; justify-content: space-between; gap: 16px; align-items: start; margin-bottom: 18px;">
             <div>
                 <span style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 999px; background: rgba(59, 130, 246, 0.08); color: #2563eb; font-weight: 700; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em;">
-                    <i class="fas fa-file-invoice"></i> Receipt
+                    <i class="fas fa-file-invoice" aria-hidden="true"></i> Receipt
                 </span>
                 <h3 id="paymentModalCourse" style="margin: 12px 0 4px; font-size: 1.35rem; font-weight: 800; color: var(--sv-foreground);">Payment receipt</h3>
                 <p style="margin: 0; color: var(--sv-muted);">Simple transaction summary for printing or review.</p>
             </div>
-            <button type="button" id="paymentReceiptClose" class="sv-btn" style="height: 40px; padding: 0 14px;"><i class="fas fa-xmark"></i></button>
+            <button type="button" id="paymentReceiptClose" class="sv-btn" style="height: 40px; padding: 0 14px;" aria-label="Close modal"><i class="fas fa-xmark" aria-hidden="true"></i></button>
         </div>
 
         <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-bottom: 18px;">
@@ -202,9 +216,9 @@
         </div>
 
         <div style="margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--sv-border); display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end;">
-            <button type="button" class="sv-btn" onclick="window.print()"><i class="fas fa-print"></i> Print</button>
-            <a id="paymentModalOpenCourse" class="sv-btn" href="#"><i class="fas fa-layer-group"></i> Open Course</a>
-            <button type="button" id="paymentReceiptCloseSecondary" class="sv-btn primary"><i class="fas fa-check"></i> Done</button>
+            <button type="button" class="sv-btn" onclick="window.print()"><i class="fas fa-print" aria-hidden="true"></i> Print</button>
+            <a id="paymentModalOpenCourse" class="sv-btn" href="#"><i class="fas fa-layer-group" aria-hidden="true"></i> Open Course</a>
+            <button type="button" id="paymentReceiptCloseSecondary" class="sv-btn primary"><i class="fas fa-check" aria-hidden="true"></i> Done</button>
         </div>
     </section>
 </div>
@@ -213,6 +227,7 @@
 <script src="${pageContext.request.contextPath}/js/student-v2.js"></script>
 <script>
 (function () {
+    // Modal receipt controls
     var modal = document.getElementById('paymentReceiptModal');
     var backdrop = document.getElementById('paymentReceiptBackdrop');
     var triggers = document.querySelectorAll('[data-payment-modal-trigger]');
@@ -276,10 +291,12 @@
         document.body.style.overflow = '';
     }
 
-    triggers.forEach(function (trigger) {
-        trigger.addEventListener('click', function () {
+    // Modal listeners
+    document.body.addEventListener('click', function (e) {
+        var trigger = e.target.closest('[data-payment-modal-trigger]');
+        if (trigger) {
             openModal(trigger);
-        });
+        }
     });
 
     closeButtons.forEach(function (button) {
@@ -302,6 +319,118 @@
             closeModal();
         }
     });
+
+    // =============================================
+    // ASYNCHRONOUS SEARCH & FILTERING CONTROLS
+    // =============================================
+    var tbody = document.getElementById('paymentTableBody');
+    var allRows = tbody ? Array.from(tbody.querySelectorAll('tr')) : [];
+    var searchInput = document.getElementById('paymentSearchInput');
+    var filterButtons = document.querySelectorAll('[data-status-filter]');
+    var activeStatus = 'all';
+    var searchTerm = '';
+
+    function showSkeleton() {
+        if (!tbody) return;
+        tbody.innerHTML = `
+            <tr class="table-skeleton-row">
+                <td><div class="skeleton-text medium"></div></td>
+                <td><div class="skeleton-text short"></div></td>
+                <td><div class="skeleton-badge"></div></td>
+                <td><div class="skeleton-text short"></div></td>
+                <td><div class="skeleton-btn"></div></td>
+            </tr>
+            <tr class="table-skeleton-row">
+                <td><div class="skeleton-text medium"></div></td>
+                <td><div class="skeleton-text short"></div></td>
+                <td><div class="skeleton-badge"></div></td>
+                <td><div class="skeleton-text short"></div></td>
+                <td><div class="skeleton-btn"></div></td>
+            </tr>
+            <tr class="table-skeleton-row">
+                <td><div class="skeleton-text medium"></div></td>
+                <td><div class="skeleton-text short"></div></td>
+                <td><div class="skeleton-badge"></div></td>
+                <td><div class="skeleton-text short"></div></td>
+                <td><div class="skeleton-btn"></div></td>
+            </tr>
+        `;
+    }
+
+    function performFiltering() {
+        if (!tbody) return;
+        
+        var matchingRows = allRows.filter(function (row) {
+            var courseName = (row.querySelector('strong') ? row.querySelector('strong').textContent : '').toLowerCase();
+            var btn = row.querySelector('[data-payment-status]');
+            var status = btn ? btn.getAttribute('data-payment-status').toLowerCase() : '';
+            
+            var textMatch = courseName.indexOf(searchTerm) !== -1;
+            var statusMatch = activeStatus === 'all' || status === activeStatus;
+            
+            return textMatch && statusMatch;
+        });
+
+        // Dynamic render
+        tbody.innerHTML = '';
+        if (matchingRows.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="5" style="padding: 48px 18px; text-align: center; color: var(--sv-muted);">
+                        <i class="fas fa-search-minus" style="font-size: 2.2rem; margin-bottom: 12px; display: block; opacity: 0.5;"></i>
+                        <h4 style="margin: 0 0 4px; font-weight: 700; color: var(--sv-heading);">No transactions found</h4>
+                        <p style="margin: 0; font-size: 0.84rem;">Try adjusting your keyword filter or switching status.</p>
+                    </td>
+                </tr>
+            `;
+        } else {
+            matchingRows.forEach(function (row) {
+                tbody.appendChild(row);
+            });
+        }
+    }
+
+    var filterTimeout = null;
+    function triggerFilterUpdate(instant) {
+        showSkeleton();
+        
+        if (filterTimeout) clearTimeout(filterTimeout);
+        
+        if (instant) {
+            performFiltering();
+        } else {
+            filterTimeout = setTimeout(performFiltering, 250);
+        }
+    }
+
+    // Set listeners for status filter buttons
+    filterButtons.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            filterButtons.forEach(function (b) {
+                b.classList.remove('primary');
+            });
+            btn.classList.add('primary');
+            activeStatus = btn.getAttribute('data-status-filter');
+            triggerFilterUpdate(false);
+        });
+    });
+
+    // Set search listener
+    if (searchInput) {
+        searchInput.addEventListener('input', function (e) {
+            searchTerm = e.target.value.toLowerCase().trim();
+            triggerFilterUpdate(false);
+        });
+    }
+
+    // Trigger URL status filtering if URL has query parameters
+    var urlStatus = new URLSearchParams(window.location.search).get('status');
+    if (urlStatus) {
+        var targetBtn = document.querySelector('[data-status-filter="' + urlStatus.toLowerCase() + '"]');
+        if (targetBtn) {
+            targetBtn.click();
+        }
+    }
 })();
 </script>
 </body>
