@@ -6,8 +6,11 @@ import com.psm.elearning.dao.UserDAO;
 import com.psm.elearning.dao.UserDAOImpl;
 import com.psm.elearning.dao.EnrollmentDAO;
 import com.psm.elearning.dao.EnrollmentDAOImpl;
+import com.psm.elearning.dao.MaterialDAO;
+import com.psm.elearning.dao.MaterialDAOImpl;
 import com.psm.elearning.model.Course;
 import com.psm.elearning.model.User;
+import com.psm.elearning.model.Material;
 import com.psm.elearning.util.SessionUtil;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -32,6 +35,7 @@ public class StudentCourseServlet extends HttpServlet {
     private final CourseDAO courseDAO = new CourseDAOImpl();
     private final UserDAO userDAO = new UserDAOImpl();
     private final EnrollmentDAO enrollmentDAO = new EnrollmentDAOImpl();
+    private final MaterialDAO materialDAO = new MaterialDAOImpl();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -154,6 +158,8 @@ public class StudentCourseServlet extends HttpServlet {
                 }
             }
 
+            List<Material> materials = materialDAO.findByCourse(courseId);
+            request.setAttribute("materials", materials);
             request.setAttribute("course", course);
             request.getRequestDispatcher("/WEB-INF/views/student/course-details.jsp").forward(request, response);
         } catch (NumberFormatException e) {

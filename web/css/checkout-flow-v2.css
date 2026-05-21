@@ -1,0 +1,684 @@
+/* =============================================
+   CHECKOUT FLOW V2 — Premium Modern Design
+   Enrollment Summary + Payment pages
+   ============================================= */
+
+/* ── Page wrapper ── */
+.ef-main {
+  padding: 24px 28px 48px;
+  max-width: 1140px;
+}
+
+/* ── Progress stepper ── */
+.ef-stepper {
+  display: flex;
+  gap: 0;
+  margin-bottom: 36px;
+  background: var(--sv-surface-strong);
+  border: 1px solid var(--sv-border);
+  border-radius: 14px;
+  padding: 6px;
+  box-shadow: var(--sv-shadow-sm);
+}
+
+.ef-step {
+  flex: 1;
+  border-radius: 10px;
+  padding: 11px 16px;
+  text-align: center;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--sv-muted);
+  letter-spacing: 0.01em;
+  transition: background 0.2s, color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+
+.ef-step.done {
+  color: var(--sv-accent);
+  background: var(--sv-accent-soft);
+}
+
+.ef-step.active {
+  background: var(--sv-accent);
+  color: #fff;
+  font-weight: 700;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.28);
+}
+
+.ef-step-num {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 800;
+  background: rgba(255,255,255,0.22);
+  flex-shrink: 0;
+}
+
+.ef-step.active .ef-step-num {
+  background: rgba(255,255,255,0.3);
+}
+
+.ef-step.done .ef-step-num {
+  background: var(--sv-accent);
+  color: #fff;
+}
+
+/* ── Two-column grid ── */
+.ef-checkout-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 380px;
+  gap: 28px;
+  align-items: start;
+}
+
+.ef-left-col {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ── Sticky right column ── */
+.ef-sticky-invoice {
+  position: sticky;
+  top: calc(var(--sv-topbar-height, 68px) + 24px);
+}
+
+/* ── Cards ── */
+.ef-card {
+  background: var(--sv-surface-strong);
+  border: 1px solid var(--sv-border);
+  border-radius: 18px;
+  box-shadow: var(--sv-shadow-sm);
+  overflow: hidden;
+  transition: box-shadow 0.2s;
+}
+
+.ef-card:hover {
+  box-shadow: var(--sv-shadow-md);
+}
+
+.ef-card-body {
+  padding: 26px 28px;
+}
+
+.ef-card-divider {
+  height: 1px;
+  background: var(--sv-border);
+  margin: 0;
+}
+
+/* ── Section kicker label ── */
+.ef-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--sv-accent);
+  background: var(--sv-accent-soft);
+  border: 1px solid var(--sv-accent-border);
+  border-radius: 6px;
+  padding: 4px 9px;
+  margin-bottom: 10px;
+}
+
+/* ── Course header inside card ── */
+.ef-course-header {
+  margin-bottom: 16px;
+}
+
+.ef-course-title {
+  margin: 0 0 6px;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--sv-heading);
+  letter-spacing: -0.025em;
+  line-height: 1.3;
+}
+
+.ef-course-desc {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--sv-muted);
+  line-height: 1.65;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ── Metadata chips grid ── */
+.ef-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.ef-meta-chip {
+  background: var(--sv-surface-soft);
+  border: 1px solid var(--sv-border);
+  border-radius: 12px;
+  padding: 14px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.ef-meta-chip-icon {
+  font-size: 0.95rem;
+  color: var(--sv-accent);
+  margin-bottom: 4px;
+}
+
+.ef-meta-chip-label {
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  font-weight: 700;
+  color: var(--sv-muted);
+}
+
+.ef-meta-chip-value {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--sv-heading);
+}
+
+/* ── Paystack info banner ── */
+.ef-paystack-banner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: linear-gradient(135deg, rgba(37,99,235,0.06) 0%, rgba(16,185,129,0.04) 100%);
+  border: 1px solid rgba(37,99,235,0.14);
+  border-radius: 14px;
+  padding: 16px 20px;
+}
+
+.ef-paystack-logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #2563eb, #0ea5e9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  box-shadow: 0 4px 10px rgba(37,99,235,0.25);
+}
+
+.ef-paystack-copy strong {
+  display: block;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--sv-heading);
+  margin-bottom: 2px;
+}
+
+.ef-paystack-copy span {
+  font-size: 0.78rem;
+  color: var(--sv-muted);
+}
+
+/* ── Error alert ── */
+.ef-error-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: rgba(239, 68, 68, 0.07);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-left: 4px solid #ef4444;
+  border-radius: 12px;
+  padding: 14px 18px;
+  font-size: 0.87rem;
+  color: #b91c1c;
+  margin-bottom: 18px;
+}
+
+.ef-error-alert-icon {
+  font-size: 1rem;
+  color: #ef4444;
+  margin-top: 1px;
+  flex-shrink: 0;
+}
+
+/* ── Invoice card (right column) ── */
+.ef-invoice-card {
+  background: var(--sv-surface-strong);
+  border: 1px solid var(--sv-border);
+  border-radius: 18px;
+  box-shadow: var(--sv-shadow-md);
+  overflow: hidden;
+}
+
+.ef-invoice-header {
+  padding: 20px 24px 18px;
+  border-bottom: 1px solid var(--sv-border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ef-invoice-header-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--sv-accent-soft);
+  color: var(--sv-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+}
+
+.ef-invoice-header-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--sv-heading);
+  letter-spacing: -0.01em;
+}
+
+.ef-invoice-body {
+  padding: 20px 24px;
+}
+
+/* ── Course thumbnail in invoice ── */
+.ef-invoice-course-thumb {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  background: var(--sv-surface-soft);
+  border: 1px solid var(--sv-border);
+  border-radius: 12px;
+  margin-bottom: 18px;
+}
+
+.ef-invoice-course-thumb-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--sv-accent) 0%, #7c3aed 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.ef-invoice-course-name {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: var(--sv-heading);
+  line-height: 1.35;
+}
+
+.ef-invoice-course-sub {
+  font-size: 0.72rem;
+  color: var(--sv-muted);
+  margin-top: 2px;
+}
+
+/* ── Line-item rows ── */
+.ef-invoice-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border: 1px solid var(--sv-border);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.ef-invoice-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 14px;
+  font-size: 0.85rem;
+  color: var(--sv-text);
+  border-bottom: 1px solid var(--sv-border);
+}
+
+.ef-invoice-row:last-child {
+  border-bottom: none;
+}
+
+.ef-invoice-row.total {
+  background: var(--sv-accent-soft);
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: var(--sv-heading);
+}
+
+.ef-invoice-row.total .ef-row-amount {
+  color: var(--sv-accent);
+  font-size: 1.1rem;
+}
+
+.ef-row-label {
+  color: var(--sv-muted);
+  font-weight: 500;
+}
+
+.ef-row-amount {
+  font-weight: 700;
+  color: var(--sv-heading);
+}
+
+/* ── Free badge ── */
+.ef-free-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  border-radius: 20px;
+  padding: 2px 10px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+/* ── CTA Buttons ── */
+.ef-cta-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.ef-btn-primary {
+  width: 100%;
+  height: 48px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--sv-accent) 0%, #1d4ed8 100%);
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.92rem;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.32);
+  transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+  text-decoration: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.ef-btn-primary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.ef-btn-primary:hover::before {
+  opacity: 1;
+}
+
+.ef-btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 26px rgba(37, 99, 235, 0.4);
+}
+
+.ef-btn-primary:active {
+  transform: translateY(0);
+}
+
+.ef-btn-primary.processing {
+  opacity: 0.75;
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+.ef-btn-secondary {
+  width: 100%;
+  height: 42px;
+  border: 1.5px solid var(--sv-border);
+  border-radius: 12px;
+  background: var(--sv-surface-strong);
+  color: var(--sv-muted-strong);
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background 0.15s, border-color 0.15s;
+  text-decoration: none;
+}
+
+.ef-btn-secondary:hover {
+  background: var(--sv-surface-soft);
+  border-color: var(--sv-border-strong);
+}
+
+/* ── Spinner ── */
+.ef-spinner {
+  display: none;
+  width: 17px;
+  height: 17px;
+  border: 2.5px solid rgba(255,255,255,0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: efSpin 0.7s linear infinite;
+}
+
+@keyframes efSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Trust badge ── */
+.ef-trust-strip {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-top: 1px solid var(--sv-border);
+  padding-top: 16px;
+}
+
+.ef-trust-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 0.78rem;
+  color: var(--sv-muted);
+}
+
+.ef-trust-row i {
+  color: #10b981;
+  font-size: 0.85rem;
+  width: 16px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.ef-trust-row strong {
+  font-weight: 700;
+  color: var(--sv-muted-strong);
+}
+
+/* ── Enrollment ID display ── */
+.ef-ref-block {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--sv-surface-soft);
+  border: 1px dashed var(--sv-border-strong);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  font-size: 0.8rem;
+}
+
+.ef-ref-label {
+  color: var(--sv-muted);
+  font-weight: 600;
+}
+
+.ef-ref-value {
+  font-weight: 800;
+  color: var(--sv-heading);
+  font-family: 'Courier New', monospace;
+}
+
+/* ── Status badge ── */
+.ef-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: 20px;
+  padding: 3px 10px;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.ef-status-badge.pending {
+  background: rgba(245, 158, 11, 0.1);
+  color: #d97706;
+  border: 1px solid rgba(245, 158, 11, 0.25);
+}
+
+.ef-status-badge.paid {
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+/* ── Page header section ── */
+.ef-page-header {
+  margin-bottom: 28px;
+}
+
+.ef-page-title {
+  margin: 0 0 4px;
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: var(--sv-heading);
+  letter-spacing: -0.03em;
+}
+
+.ef-page-subtitle {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--sv-muted);
+}
+
+/* ── Empty state ── */
+.ef-empty-state {
+  text-align: center;
+  padding: 60px 40px;
+  background: var(--sv-surface-strong);
+  border: 1px solid var(--sv-border);
+  border-radius: 18px;
+}
+
+.ef-empty-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--sv-accent-soft);
+  color: var(--sv-accent);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  margin-bottom: 18px;
+}
+
+.ef-empty-state h3 {
+  margin: 0 0 8px;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--sv-heading);
+}
+
+.ef-empty-state p {
+  margin: 0 0 22px;
+  color: var(--sv-muted);
+  font-size: 0.9rem;
+}
+
+/* ── Breadcrumb ── */
+.sv-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: var(--sv-muted);
+  margin-bottom: 20px;
+}
+
+.sv-breadcrumb a {
+  color: var(--sv-muted);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.sv-breadcrumb a:hover {
+  color: var(--sv-accent);
+}
+
+.sv-breadcrumb span {
+  color: var(--sv-border-strong);
+}
+
+.sv-breadcrumb span:last-child {
+  color: var(--sv-heading);
+  font-weight: 600;
+}
+
+/* ── Responsive ── */
+@media (max-width: 980px) {
+  .ef-checkout-layout {
+    grid-template-columns: 1fr;
+  }
+  .ef-sticky-invoice {
+    position: static;
+  }
+}
+
+@media (max-width: 640px) {
+  .ef-main {
+    padding: 16px 14px 40px;
+  }
+  .ef-stepper {
+    flex-direction: column;
+    gap: 6px;
+  }
+  .ef-meta-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .ef-card-body {
+    padding: 18px 16px;
+  }
+  .ef-invoice-body {
+    padding: 16px 16px;
+  }
+  .ef-invoice-header {
+    padding: 16px;
+  }
+}
