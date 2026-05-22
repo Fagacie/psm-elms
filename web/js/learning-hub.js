@@ -64,15 +64,19 @@
         if (progressPercentNode) {
             progressPercentNode.textContent = progressPercent + '%';
         }
+        // Support both old sv-progress-bar and new slim fill bar
         if (progressBar) {
             progressBar.style.width = progressPercent + '%';
-            var color = '#dc2626';
-            if (progressPercent >= 35 && progressPercent < 75) {
-                color = '#f59e0b';
-            } else if (progressPercent >= 75) {
-                color = '#10b981';
+            // legacy color update only if it's the old bar type
+            if (progressBar.classList.contains('sv-progress-bar')) {
+                var color = '#dc2626';
+                if (progressPercent >= 35 && progressPercent < 75) {
+                    color = '#f59e0b';
+                } else if (progressPercent >= 75) {
+                    color = '#10b981';
+                }
+                progressBar.style.backgroundColor = color;
             }
-            progressBar.style.backgroundColor = color;
         }
     }
 
@@ -193,8 +197,91 @@
         }
     }
 
+    // ── ACCORDION: open/close chapter groups ──────────────────
+    var chapters = Array.prototype.slice.call(document.querySelectorAll('.lh-chapter'));
+    chapters.forEach(function (chapter) {
+        var toggle = chapter.querySelector('.lh-chapter__toggle');
+        var items  = chapter.querySelector('.lh-chapter__items');
+        if (!toggle || !items) return;
+
+        // On page load: open chapters that contain the active item (driven by server-side data-has-active)
+        if (chapter.dataset.hasActive === 'true') {
+            chapter.classList.add('is-open');
+            toggle.classList.add('has-active');
+            toggle.setAttribute('aria-expanded', 'true');
+        }
+
+        toggle.addEventListener('click', function () {
+            var isOpen = chapter.classList.contains('is-open');
+            chapter.classList.toggle('is-open', !isOpen);
+            toggle.setAttribute('aria-expanded', String(!isOpen));
+        });
+    });
+
+    // ── MOBILE SIDEBAR TOGGLE ─────────────────────────────────
+    var sidebarToggle = document.getElementById('lhSidebarToggle');
+    if (sidebarToggle) {
+        sidebarToggle.addEventListener('click', function () {
+            var isOpen = body.classList.toggle('lh-sidebar-open');
+            sidebarToggle.setAttribute('aria-expanded', String(isOpen));
+        });
+
+        // Close sidebar when user clicks the dim overlay
+        body.addEventListener('click', function (e) {
+            if (body.classList.contains('lh-sidebar-open') &&
+                !e.target.closest('#svSidebar') &&
+                !e.target.closest('#lhSidebarToggle')) {
+                body.classList.remove('lh-sidebar-open');
+                sidebarToggle.setAttribute('aria-expanded', 'false');
+            }
+        });
+    }
+
+    // ── PREV / NEXT LABEL INJECTION ───────────────────────────
+    var prevLabelEl = document.getElementById('lhPrevLabel');
+    var nextLabelEl = document.getElementById('lhNextLabel');
+
+    // Collect all chapter-items (the new accordion anchors)
+    var allChapterItems = Array.prototype.slice.call(
+        document.querySelectorAll('.lh-chapter-item')
+    );
+
+    function injectNavLabels() {
+        var activeIdx = -1;
+        for (var i = 0; i < allChapterItems.length; i++) {
+            if (allChapterItems[i].classList.contains('is-active')) {
+                activeIdx = i;
+                break;
+            }
+        }
+        if (activeIdx < 0) return;
+
+        if (prevLabelEl && activeIdx > 0) {
+            var prevTitle = allChapterItems[activeIdx - 1].getAttribute('aria-label') ||
+                            (allChapterItems[activeIdx - 1].querySelector('.lh-ci-title') || {}).textContent || '';
+            prevLabelEl.textContent = prevTitle.replace(/ — (Completed|Locked)$/, '');
+        }
+        if (nextLabelEl && activeIdx < allChapterItems.length - 1) {
+            var nextTitle = allChapterItems[activeIdx + 1].getAttribute('aria-label') ||
+                            (allChapterItems[activeIdx + 1].querySelector('.lh-ci-title') || {}).textContent || '';
+            nextLabelEl.textContent = nextTitle.replace(/ — (Completed|Locked)$/, '');
+        }
+    }
+
+    // ── TOPBAR PROGRESS SYNC ──────────────────────────────────
+    var topbarPct  = document.getElementById('lhTopbarPct');
+    var topbarFill = document.getElementById('lhTopbarFill');
+
+    function syncTopbarProgress(pct) {
+        if (topbarPct)  topbarPct.textContent = pct + '%';
+        if (topbarFill) topbarFill.style.width = pct + '%';
+    }
+
     updatePager();
-    setProgress(Number(body.dataset.progressPercent || '0'));
+    var initialProgress = Number(body.dataset.progressPercent || '0');
+    setProgress(initialProgress);
+    syncTopbarProgress(initialProgress);
+    injectNavLabels();
 
     if (completeButton) {
         if (viewerState.completed) {
@@ -246,6 +333,7 @@
                 applyCompletedState('This material is now part of your course progress.');
                 if (typeof data.progressPercent === 'number') {
                     setProgress(data.progressPercent);
+                    syncTopbarProgress(data.progressPercent);
                 }
                 if (typeof data.viewedMaterials === 'number') {
                     setMaterialsViewed(data.viewedMaterials, data.totalMaterials);

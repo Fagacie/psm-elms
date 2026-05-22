@@ -143,7 +143,7 @@
                                 data-price-type="${isFree ? 'free' : 'paid'}"
                                 data-course='<c:out value="${course.courseName}"/>'
                                 data-category='<c:out value="${course.category}"/>'
-                                data-href="${pageContext.request.contextPath}/student/courses?action=details&id=${course.courseId}">
+                                data-href="${isEnrolled ? pageContext.request.contextPath.concat('/student/enrollment-details?id=').concat(enrolledCourseMap[course.courseId]) : pageContext.request.contextPath.concat('/student/courses?action=details&id=').concat(course.courseId)}">
                                 
                                 <!-- Details stacked vertically inside body container -->
                                 <div class="sv-card-body bc-card-body-tight bc-card-details-stack">
@@ -200,8 +200,8 @@
                                         
                                         <c:choose>
                                             <c:when test="${isEnrolled}">
-                                                <a href="${pageContext.request.contextPath}/student/my-enrollments" class="sv-btn bc-btn-enrolled">My Course</a>
-                                            </c:when>
+                                                 <a href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrolledCourseMap[course.courseId]}" class="sv-btn bc-btn-enrolled">Continue Learning</a>
+                                             </c:when>
                                             <c:otherwise>
                                                 <c:choose>
                                                     <c:when test="${isFree}">

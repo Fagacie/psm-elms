@@ -1,0 +1,1269 @@
+/* =======================================================
+   LEARNING HUB V2 — Focus Mode Shell
+   Loaded AFTER learning-hub.css to cleanly override.
+   Namespaced under body.lh-shell-page throughout.
+   ======================================================= */
+
+body.lh-shell-page {
+  /* Default Light Mode variables */
+  --lh-bg: #f8fafc;
+  --lh-surface: #ffffff;
+  --lh-border: rgba(148, 163, 184, 0.15);
+  --lh-text: #1e293b;
+  --lh-text-white: #ffffff;
+  --lh-muted: #64748b;
+  --lh-accent: #0284c7;
+  --lh-accent-soft: rgba(2, 132, 199, 0.08);
+  --lh-sidebar-bg: #f1f5f9;
+  --lh-chapter-bg: rgba(0, 0, 0, 0.02);
+  --lh-chapter-hover: rgba(0, 0, 0, 0.04);
+  --lh-chapter-open: rgba(0, 0, 0, 0.06);
+  --lh-topbar-bg: rgba(255, 255, 255, 0.96);
+  --lh-topbar-text: #0f172a;
+  --lh-topbar-muted: #64748b;
+  --lh-white: #ffffff;
+  --lh-shadow: 0 4px 18px rgba(15, 23, 42, 0.05);
+}
+
+html[data-theme='dark'] body.lh-shell-page {
+  /* Dark Mode overrides */
+  --lh-bg: #0f172a;
+  --lh-surface: #12161d;
+  --lh-border: rgba(148, 163, 184, 0.1);
+  --lh-text: #f1f5f9;
+  --lh-text-white: #ffffff;
+  --lh-muted: #94a3b8;
+  --lh-accent: #38bdf8;
+  --lh-accent-soft: rgba(56, 189, 248, 0.12);
+  --lh-sidebar-bg: #090d16;
+  --lh-chapter-bg: rgba(255, 255, 255, 0.02);
+  --lh-chapter-hover: rgba(255, 255, 255, 0.03);
+  --lh-chapter-open: rgba(255, 255, 255, 0.04);
+  --lh-topbar-bg: rgba(10, 15, 28, 0.96);
+  --lh-topbar-text: #f1f5f9;
+  --lh-topbar-muted: rgba(255, 255, 255, 0.55);
+  --lh-white: #0f172a;
+  --lh-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+}
+
+
+/* ── 1. HIDE GLOBAL TOPBAR / SIDEBAR IN FOCUS MODE ────── */
+body.lh-shell-page .sv-topbar {
+  display: none !important;
+}
+
+/* ── 2. FOCUS TOPBAR ──────────────────────────────────── */
+.lh-focus-topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 56px;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: var(--lh-topbar-bg);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--lh-border);
+  box-shadow: var(--lh-shadow);
+  padding: 0 16px 0 0;
+}
+
+.lh-focus-topbar__back {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 56px;
+  padding: 0 20px;
+  color: var(--lh-topbar-muted);
+  text-decoration: none;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-right: 1px solid var(--lh-border);
+  transition: color 0.2s, background 0.2s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.lh-focus-topbar__back:hover {
+  color: var(--lh-accent);
+  background: rgba(148, 163, 184, 0.08);
+}
+
+.lh-focus-topbar__back i {
+  font-size: 0.65rem;
+}
+
+.lh-focus-topbar__title {
+  flex: 1;
+  min-width: 0;
+  padding: 0 20px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--lh-topbar-text);
+  letter-spacing: -0.01em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lh-focus-topbar__progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.lh-focus-topbar__pct {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--lh-accent);
+  white-space: nowrap;
+}
+
+.lh-focus-topbar__bar {
+  width: 120px;
+  height: 5px;
+  background: rgba(148, 163, 184, 0.2);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.lh-focus-topbar__bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #2563eb, var(--lh-accent));
+  transition: width 0.5s ease;
+}
+
+/* Mobile hamburger toggle (shows sidebar on mobile) */
+.lh-focus-topbar__toggle {
+  display: none;
+  width: 40px;
+  height: 40px;
+  margin-left: 8px;
+  border: 1px solid var(--lh-border);
+  border-radius: 8px;
+  background: rgba(148, 163, 184, 0.08);
+  color: var(--lh-topbar-text);
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+
+.lh-focus-topbar__toggle:hover {
+  background: rgba(148, 163, 184, 0.15);
+}
+
+/* ── 3. LAYOUT SHIFT — Push content below focus topbar ── */
+body.lh-shell-page .sv-layout {
+  padding-top: 56px;
+}
+
+body.lh-shell-page .lh-course-sidebar {
+  position: fixed;
+  top: 56px;
+  left: 0;
+  width: 272px;
+  height: calc(100vh - 56px);
+  padding: 0 !important;
+  display: flex;
+  flex-direction: column;
+  background: var(--lh-sidebar-bg);
+  border-right: 1px solid var(--lh-border);
+  z-index: 150;
+  overflow: hidden;
+  box-shadow: 6px 0 24px rgba(2, 6, 23, 0.15);
+}
+
+body.lh-shell-page .lh-course-sidebar__scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 14px;
+}
+
+/* Custom Scrollbar for independent scrolling */
+body.lh-shell-page .lh-course-sidebar__scroll::-webkit-scrollbar {
+  width: 5px;
+}
+body.lh-shell-page .lh-course-sidebar__scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+body.lh-shell-page .lh-course-sidebar__scroll::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.15);
+  border-radius: 4px;
+}
+body.lh-shell-page .lh-course-sidebar__scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.3);
+}
+
+body.lh-shell-page .lh-main {
+  margin-left: 272px;
+  width: calc(100% - 272px);
+  padding: 0 0 0 0;
+  background: var(--lh-bg);
+  color: var(--lh-text);
+}
+
+/* ── 4. SIDEBAR — CHAPTER ACCORDION ────────────────────── */
+
+/* Section label above chapter groups */
+.lh-sidebar-section {
+  padding: 0 0 10px;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--lh-muted);
+  opacity: 0.6;
+}
+
+/* Chapter accordion wrapper */
+.lh-chapter {
+  margin-bottom: 6px;
+  border-radius: 10px;
+  background: var(--lh-chapter-bg);
+  border: 1px solid var(--lh-border);
+  overflow: hidden;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.lh-chapter:hover {
+  background: var(--lh-chapter-hover);
+  border-color: var(--lh-border);
+}
+
+.lh-chapter.is-open {
+  background: var(--lh-chapter-open);
+  border-color: var(--lh-accent-soft);
+}
+
+/* Chapter toggle button */
+.lh-chapter__toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 14px;
+  border: none;
+  background: transparent;
+  color: var(--lh-text);
+  cursor: pointer;
+  text-align: left;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  transition: color 0.15s;
+}
+
+.lh-chapter__toggle:hover {
+  color: var(--lh-accent);
+}
+
+.lh-chapter__toggle.has-active {
+  color: var(--lh-accent);
+}
+
+.lh-chapter__toggle-text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lh-chapter__toggle-meta {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--lh-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.lh-chapter__toggle.has-active .lh-chapter__toggle-meta {
+  color: var(--lh-accent);
+}
+
+.lh-chapter__chevron {
+  font-size: 0.65rem;
+  color: var(--lh-muted);
+  transition: transform 0.22s ease;
+  flex-shrink: 0;
+}
+
+.lh-chapter.is-open .lh-chapter__chevron {
+  transform: rotate(90deg);
+  color: var(--lh-accent);
+}
+
+/* Items container — animated height */
+.lh-chapter__items {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.28s ease;
+  padding: 0 8px 8px;
+}
+
+.lh-chapter.is-open .lh-chapter__items {
+  max-height: 1200px;
+}
+
+/* Individual flow items inside chapters */
+.lh-chapter-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  color: var(--lh-muted);
+  text-decoration: none;
+  font-size: 0.78rem;
+  font-weight: 500;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  border-left: 2px solid transparent;
+  margin-bottom: 2px;
+  min-height: 36px;
+}
+
+.lh-chapter-item:hover {
+  background: rgba(148, 163, 184, 0.08);
+  color: var(--lh-text);
+}
+
+.lh-chapter-item.is-active {
+  background: var(--lh-accent-soft);
+  border-left-color: var(--lh-accent);
+  color: var(--lh-accent);
+  font-weight: 700;
+}
+
+.lh-chapter-item.is-completed {
+  color: var(--lh-muted);
+  opacity: 0.85;
+}
+
+.lh-chapter-item.is-completed .lh-ci-icon {
+  color: #22c55e;
+}
+
+.lh-chapter-item.is-locked {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Item icon */
+.lh-ci-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  flex-shrink: 0;
+  background: rgba(148, 163, 184, 0.1);
+  color: var(--lh-muted);
+  transition: background 0.15s, color 0.15s;
+}
+
+/* Material icon — blue tint */
+.lh-chapter-item[data-kind="material"] .lh-ci-icon {
+  background: rgba(37, 99, 235, 0.12);
+  color: #60a5fa;
+}
+
+.lh-chapter-item.is-active[data-kind="material"] .lh-ci-icon {
+  background: rgba(56, 189, 248, 0.2);
+  color: var(--lh-accent);
+}
+
+/* Assessment icon — purple/amber tint */
+.lh-chapter-item[data-kind="assessment"] .lh-ci-icon {
+  background: rgba(139, 92, 246, 0.12);
+  color: #a78bfa;
+}
+
+.lh-chapter-item.is-active[data-kind="assessment"] .lh-ci-icon {
+  background: rgba(139, 92, 246, 0.22);
+  color: #c4b5fd;
+}
+
+/* Item text */
+.lh-ci-copy {
+  flex: 1;
+  min-width: 0;
+}
+
+.lh-ci-title {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 1.3;
+}
+
+.lh-ci-sub {
+  display: block;
+  font-size: 0.65rem;
+  color: var(--lh-muted);
+  margin-top: 1px;
+}
+
+/* Item state indicator */
+.lh-ci-state {
+  flex-shrink: 0;
+  font-size: 0.65rem;
+  color: var(--lh-muted);
+  opacity: 0.6;
+}
+
+.lh-ci-state.is-done {
+  color: #22c55e;
+}
+
+.lh-ci-state.is-active-dot {
+  color: var(--lh-accent);
+  opacity: 1;
+}
+
+/* ── 4b. SLIM SIDEBAR HEADER ────────────────────────────── */
+.lh-sidebar-header-slim {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 14px;
+  border-bottom: 1px solid var(--lh-border);
+  gap: 10px;
+  background: var(--lh-sidebar-bg);
+  flex-shrink: 0;
+}
+
+.lh-sidebar-section-label {
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--lh-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.lh-sidebar-slim-progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.lh-sidebar-slim-bar {
+  flex: 1;
+  height: 4px;
+  background: var(--lh-border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.lh-sidebar-slim-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #2563eb, var(--lh-accent));
+  transition: width 0.5s ease;
+}
+
+.lh-sidebar-slim-pct {
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: var(--lh-accent);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ── 5. MAIN CONTENT AREA ──────────────────────────────── */
+body.lh-shell-page .lh-main {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 56px);
+  padding: 0;
+}
+
+/* Content stage — replaces the old lh-workspace/lh-stage-body double-wrapper.
+   Renders flat, borderless, taking full width. */
+.lh-content-stage {
+  flex: 1;
+  padding: 24px clamp(16px, 3.5vw, 40px) 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Overriding old material card container styles to remove the generic white box/border */
+body.lh-shell-page .lh-material-stage,
+body.lh-shell-page .lh-assessment-card,
+body.lh-shell-page .lh-stage-card {
+  border: none !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  min-height: auto !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* Readable max-width for prose content */
+.lh-prose-wrap {
+  max-width: 820px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* ── 5b. MEDIA VIEWERS (Expansive & Sleek) ────────────── */
+
+.lh-video-shell {
+  width: 100%;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #020617;
+  border: 1px solid var(--lh-border);
+  box-shadow: var(--lh-shadow);
+  margin-bottom: 24px;
+}
+
+.lh-video-player,
+.lh-video-embed {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: none;
+  display: block;
+}
+
+.lh-viewer-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 18px;
+  background: var(--lh-sidebar-bg);
+  border: 1px solid var(--lh-border);
+  border-bottom: none;
+  border-radius: 12px 12px 0 0;
+  color: var(--lh-text);
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.lh-pdf-viewer {
+  width: 100%;
+  height: clamp(680px, 80vh, 1080px);
+  border: 1px solid var(--lh-border);
+  border-radius: 0 0 12px 12px;
+  background: var(--lh-bg);
+}
+
+/* ── 5c. DYNAMIC ASSESSMENTS & ACTION SHELLS ───────────── */
+
+/* Secure Assessment Focus Container */
+.lh-assessment-focus,
+.lh-link-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 56px 32px;
+  background: var(--lh-surface);
+  border: 1px solid var(--lh-border);
+  border-radius: 16px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  max-width: 720px;
+  margin: 40px auto;
+  box-shadow: var(--lh-shadow);
+  gap: 16px;
+}
+
+.lh-link-preview h3,
+.lh-assessment-focus h3 {
+  color: var(--lh-text);
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.lh-link-preview p,
+.lh-assessment-focus p {
+  color: var(--lh-muted);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  max-width: 54ch;
+  margin: 0;
+}
+
+.lh-link-preview__type,
+.lh-focus-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: rgba(56, 189, 248, 0.1);
+  border: 1px solid rgba(56, 189, 248, 0.15);
+  color: var(--lh-accent);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 6px 14px;
+  border-radius: 20px;
+}
+
+.lh-focus-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  font-size: 1.3rem;
+  padding: 0;
+  background: rgba(139, 92, 246, 0.15);
+  border-color: rgba(139, 92, 246, 0.2);
+  color: #a78bfa;
+}
+
+/* Audio Player */
+.lh-audio-player {
+  width: 100%;
+  max-width: 440px;
+  margin-top: 14px;
+  border-radius: 30px;
+}
+
+/* Modern Passed / Failed Results Viewers */
+.quiz-result-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.lh-result-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.2rem;
+  margin: 0 auto 16px;
+}
+
+.lh-result-icon.is-success {
+  background: rgba(34, 197, 94, 0.15);
+  color: #4ade80;
+}
+
+.lh-result-icon.is-error {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+}
+
+.lh-result-title {
+  font-size: 1.6rem;
+  font-weight: 800;
+  margin: 0 0 6px;
+  letter-spacing: -0.02em;
+}
+
+.lh-result-title.is-success {
+  color: #4ade80;
+}
+
+.lh-result-title.is-error {
+  color: #f87171;
+}
+
+.lh-result-copy {
+  color: #94a3b8;
+  font-size: 0.92rem;
+  margin: 0;
+}
+
+.lh-result-score-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(148, 163, 184, 0.08);
+  border-radius: 14px;
+  padding: 24px;
+  text-align: center;
+  max-width: 380px;
+  margin: 0 auto 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.lh-result-score-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.lh-result-score-value {
+  font-size: 2.6rem;
+  font-weight: 900;
+  color: #f8fafc;
+  line-height: 1;
+}
+
+.lh-result-score-value span {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.lh-result-score-pill {
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+
+.lh-result-score-pill.is-success {
+  background: rgba(34, 197, 94, 0.12);
+  color: #4ade80;
+}
+
+.lh-result-attempts {
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
+.lh-result-attempts strong {
+  color: #f1f5f9;
+}
+
+.lh-primary-action,
+.lh-success-action {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 24px !important;
+  border-radius: 10px !important;
+  font-size: 0.9rem !important;
+  font-weight: 700 !important;
+  margin: 0 auto;
+}
+
+/* ── 6. NAV BAR REDESIGN ──────────────────────────────── */
+body.lh-shell-page .lh-action-bar {
+  margin: 24px clamp(16px, 3.5vw, 40px) 32px;
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 16px 20px;
+  box-shadow: 0 10px 30px rgba(2, 6, 23, 0.2);
+  flex-shrink: 0;
+}
+
+body.lh-shell-page .lh-action-bar__actions {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Prev / Next ghost nav buttons */
+body.lh-shell-page .lh-nav-action {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  min-width: 130px;
+  height: auto;
+  padding: 8px 16px;
+  border: 1.5px solid rgba(148, 163, 184, 0.15);
+  border-radius: 10px;
+  background: transparent;
+  color: #94a3b8;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+body.lh-shell-page .lh-nav-action:hover {
+  border-color: #38bdf8;
+  background: rgba(56, 189, 248, 0.06);
+  color: #38bdf8;
+}
+
+body.lh-shell-page .lh-nav-action.is-hidden {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* nav action directional row */
+.lh-nav-action-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+/* small label beneath arrow+text */
+.lh-nav-label {
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: #64748b;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 160px;
+  display: block;
+}
+
+/* Right-aligned next button */
+#lhNextAction {
+  align-items: flex-end;
+}
+
+#lhNextAction .lh-nav-label {
+  text-align: right;
+}
+
+/* Submit / Mark Done center button — let it use existing sv-btn primary */
+#lhSubmitAction {
+  border-radius: 10px;
+}
+
+/* ── 8. FEEDBACK BANNER POSITION ───────────────────────── */
+body.lh-shell-page .lh-feedback {
+  margin: 16px clamp(16px, 3.5vw, 40px) 0;
+  border-radius: 10px;
+}
+
+/* ── 9. RESPONSIVE ─────────────────────────────────────── */
+
+@media (max-width: 900px) {
+  .lh-focus-topbar__bar {
+    width: 80px;
+  }
+  .lh-focus-topbar__toggle {
+    display: flex;
+  }
+
+  body.lh-shell-page .lh-course-sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.26s ease;
+    z-index: 250;
+  }
+
+  body.lh-shell-page.lh-sidebar-open .lh-course-sidebar {
+    transform: translateX(0);
+  }
+
+  /* Dim overlay on mobile when sidebar open */
+  body.lh-shell-page.lh-sidebar-open::after {
+    content: '';
+    position: fixed;
+    inset: 56px 0 0 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 240;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+
+  body.lh-shell-page .lh-main {
+    margin-left: 0;
+    width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  .lh-focus-topbar__title {
+    display: none;
+  }
+  .lh-focus-topbar__progress {
+    flex: 1;
+    padding-right: 8px;
+  }
+  .lh-focus-topbar__bar {
+    flex: 1;
+    width: auto;
+  }
+  body.lh-shell-page .lh-workspace {
+    margin: 10px 12px 0;
+  }
+  body.lh-shell-page .lh-action-bar {
+    margin: 10px 12px 16px;
+  }
+  body.lh-shell-page .lh-breadcrumb {
+    margin: 10px 12px 0;
+  }
+  body.lh-shell-page .lh-feedback {
+    margin: 10px 12px 0;
+  }
+  body.lh-shell-page .lh-nav-action {
+    min-width: 80px;
+    padding: 8px 10px;
+  }
+  .lh-nav-label {
+    display: none;
+  }
+}
+
+/* ── 10. PREMIUM ASSIGNMENTS & UPLOAD STATES ───────────── */
+
+.lh-assignment-prompt-box {
+  background: rgba(255, 255, 255, 0.02) !important;
+  border: 1px solid rgba(148, 163, 184, 0.08) !important;
+  border-left: 4px solid #38bdf8 !important;
+  border-radius: 12px !important;
+  padding: 24px !important;
+  margin: 24px 0 !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.lh-assignment-prompt-box__title {
+  color: #f8fafc !important;
+  font-size: 1.15rem !important;
+  font-weight: 800 !important;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px !important;
+}
+
+.lh-assignment-prompt-box__item {
+  background: rgba(255, 255, 255, 0.01) !important;
+  border: 1px solid rgba(148, 163, 184, 0.06) !important;
+  border-radius: 8px !important;
+  padding: 18px !important;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.lh-assignment-prompt-box__item:hover {
+  background: rgba(255, 255, 255, 0.02) !important;
+  border-color: rgba(148, 163, 184, 0.12) !important;
+}
+
+.lh-assignment-prompt-box__task-label {
+  color: #38bdf8 !important;
+  font-size: 0.72rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 8px !important;
+}
+
+.lh-assignment-prompt-box__text {
+  color: #cbd5e1 !important;
+  font-size: 0.95rem !important;
+  line-height: 1.6 !important;
+}
+
+/* Upload Zone */
+.lh-upload-zone {
+  border: 2px dashed rgba(148, 163, 184, 0.2) !important;
+  background: rgba(255, 255, 255, 0.01) !important;
+  border-radius: 14px !important;
+  padding: 40px 24px !important;
+  text-align: center !important;
+  cursor: pointer !important;
+  transition: border-color 0.22s, background 0.22s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.lh-upload-zone:hover {
+  border-color: #38bdf8 !important;
+  background: rgba(56, 189, 248, 0.03) !important;
+}
+
+.lh-upload-zone__icon {
+  font-size: 2.2rem !important;
+  color: rgba(148, 163, 184, 0.4) !important;
+  transition: color 0.22s, transform 0.22s;
+}
+
+.lh-upload-zone:hover .lh-upload-zone__icon {
+  color: #38bdf8 !important;
+  transform: translateY(-3px);
+}
+
+.lh-upload-zone__copy strong {
+  display: block;
+  font-size: 0.95rem !important;
+  color: #f1f5f9 !important;
+  margin-bottom: 4px;
+}
+
+.lh-upload-zone__highlight {
+  color: #38bdf8 !important;
+  text-decoration: underline;
+}
+
+.lh-upload-zone__specs {
+  font-size: 0.76rem !important;
+  color: rgba(148, 163, 184, 0.6) !important;
+  margin: 0 !important;
+}
+
+.lh-upload-zone__selected-file {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(34, 197, 94, 0.12) !important;
+  border: 1px solid rgba(34, 197, 94, 0.2) !important;
+  color: #4ade80 !important;
+  padding: 8px 16px !important;
+  border-radius: 20px !important;
+  font-size: 0.82rem !important;
+  font-weight: 700 !important;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Status Cards & Graded Strips */
+.lh-assignment-status-card {
+  display: flex;
+  gap: 20px;
+  padding: 24px;
+  border-radius: 14px;
+  margin-bottom: 24px;
+  border: 1px solid transparent;
+}
+
+.lh-assignment-status-card.is-pending {
+  background: rgba(245, 158, 11, 0.05);
+  border-color: rgba(245, 158, 11, 0.12);
+}
+
+.lh-assignment-status-card.is-pending .status-icon-wrapper {
+  color: #fbbf24;
+}
+
+.lh-assignment-status-card.is-success {
+  background: rgba(34, 197, 94, 0.05);
+  border-color: rgba(34, 197, 94, 0.12);
+}
+
+.lh-assignment-status-card.is-success .status-icon-wrapper {
+  color: #4ade80;
+}
+
+.lh-assignment-status-card.is-error {
+  background: rgba(239, 68, 68, 0.05);
+  border-color: rgba(239, 68, 68, 0.12);
+}
+
+.lh-assignment-status-card.is-error .status-icon-wrapper {
+  color: #f87171;
+}
+
+.status-icon-wrapper {
+  font-size: 1.8rem;
+  flex-shrink: 0;
+  display: flex;
+  align-items: start;
+  padding-top: 2px;
+}
+
+.status-details h4 {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #f8fafc;
+  margin: 0 0 6px;
+}
+
+.status-details p {
+  font-size: 0.88rem;
+  color: #94a3b8;
+  line-height: 1.5;
+  margin: 0 0 16px;
+}
+
+.submission-file-meta,
+.submission-date-meta {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.submission-file-meta i,
+.submission-date-meta i {
+  font-size: 0.85rem;
+}
+
+.file-download-link {
+  color: #38bdf8 !important;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.file-download-link:hover {
+  text-decoration: underline;
+}
+
+.submission-date-meta strong {
+  color: #cbd5e1;
+}
+
+/* Score Pill strip */
+.assignment-score-strip {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.score-pill {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(148, 163, 184, 0.08);
+  border-radius: 10px;
+  padding: 8px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.score-pill span {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.score-pill strong {
+  font-size: 0.95rem;
+  color: #f1f5f9;
+}
+
+.score-pill strong.status-pass {
+  color: #4ade80;
+}
+
+.score-pill strong.status-fail {
+  color: #f87171;
+}
+
+/* Instructor Feedback Box */
+.instructor-feedback-box {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(148, 163, 184, 0.06);
+  border-radius: 10px;
+  padding: 16px;
+  margin-top: 14px;
+}
+
+.instructor-feedback-box h5 {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #fbbf24;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 0 0 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.instructor-feedback-box p {
+  font-size: 0.88rem;
+  color: #cbd5e1;
+  font-style: italic;
+  margin: 0 !important;
+  line-height: 1.5;
+}
+
+/* Retry Panel Outlined */
+.lh-stage-card.is-retry {
+  background: rgba(255, 255, 255, 0.01) !important;
+  border: 1px dashed rgba(148, 163, 184, 0.15) !important;
+  border-radius: 14px !important;
+  padding: 24px !important;
+  margin-top: 24px !important;
+}
+
+.lh-card-title {
+  color: #f8fafc !important;
+  font-size: 1.15rem !important;
+  font-weight: 800 !important;
+  margin: 0 0 6px !important;
+}
+
+.lh-card-copy {
+  color: #94a3b8 !important;
+  font-size: 0.88rem !important;
+  line-height: 1.5 !important;
+  margin: 0 0 20px !important;
+}
+
+/* Performance Table Overrides */
+.lh-performance-shell {
+  background: var(--lh-surface) !important;
+  border: 1px solid var(--lh-border) !important;
+  box-shadow: var(--lh-shadow) !important;
+}
+
+.lh-performance-shell table th {
+  border-bottom: 1px solid var(--lh-border) !important;
+  color: var(--lh-text) !important;
+}
+
+.lh-performance-shell table td {
+  border-bottom: 1px solid var(--lh-border) !important;
+  color: var(--lh-muted) !important;
+}
+
+.sa-badge-flat {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: var(--lh-accent-soft);
+  color: var(--lh-accent);
+}
+
+.sa-badge-flat.success {
+  background: rgba(34, 197, 94, 0.12);
+  color: #4ade80;
+}
+
+/* Theme Toggle Button Overrides inside Focus Topbar */
+.lh-focus-topbar .theme-toggle {
+  border: 1px solid var(--lh-border) !important;
+  color: var(--lh-topbar-muted) !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.lh-focus-topbar .theme-toggle:hover {
+  border-color: var(--lh-accent) !important;
+  color: var(--lh-accent) !important;
+  background: rgba(148, 163, 184, 0.08) !important;
+}

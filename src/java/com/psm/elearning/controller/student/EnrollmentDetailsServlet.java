@@ -775,7 +775,15 @@ public class EnrollmentDetailsServlet extends HttpServlet {
             }
 
             String tab = request.getParameter("tab");
-            if (tab == null || tab.trim().isEmpty()) tab = "overview";
+            if (tab == null || tab.trim().isEmpty()) {
+                if (focusMaterial != null) {
+                    tab = "learning";
+                } else if (assessments != null && !assessments.isEmpty()) {
+                    tab = "assessments";
+                } else {
+                    tab = "overview";
+                }
+            }
             Map<Integer, String> materialStatusById = materialProgressDAO.findMaterialStatusByCourse(userId, enrollment.getCourseId());
 
             Integer currentAssessmentId = null;

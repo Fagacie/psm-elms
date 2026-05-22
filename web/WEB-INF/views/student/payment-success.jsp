@@ -49,7 +49,7 @@
                 <i class="fas fa-circle-notch fa-spin" style="font-size: 1.3rem;"></i>
                 <div>
                     <strong style="display:block; font-weight:800; color: var(--sv-foreground); margin-bottom: 2px;">Setting Up Your Curriculum Desk...</strong>
-                    <span style="color: var(--sv-muted);">Redirecting to your learning hub in <span id="countdown" style="font-weight:800; color: #2563eb;">5</span> seconds. <a href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=overview" style="color:#2563eb; text-decoration:none; font-weight:700;">Open now</a></span>
+                    <span style="color: var(--sv-muted);">Redirecting to your learning hub in <span id="countdown" style="font-weight:800; color: #2563eb;">5</span> seconds. <a href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}" style="color:#2563eb; text-decoration:none; font-weight:700;">Open now</a></span>
                 </div>
             </div>
 
@@ -82,7 +82,7 @@
             </div>
 
             <div class="ef-actions" style="display: flex; gap: 10px; flex-wrap: wrap;">
-                <a href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=learning" class="sv-btn primary" style="height: 42px; border-radius: 8px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; padding: 0 20px; gap: 8px;"><i class="fas fa-play"></i> Start Learning Workspace</a>
+                <a href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}" class="sv-btn primary" style="height: 42px; border-radius: 8px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; padding: 0 20px; gap: 8px;"><i class="fas fa-play"></i> Start Course Now</a>
                 <a href="${pageContext.request.contextPath}/student/payments?receiptPaymentId=${payment.paymentId}" class="sv-btn" style="height: 42px; border-radius: 8px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; padding: 0 16px; border: 1px solid var(--sv-border); background: var(--sv-surface); color: var(--sv-foreground);"><i class="fas fa-file-invoice"></i> View Receipt</a>
                 <a href="${pageContext.request.contextPath}/student/payments" class="sv-btn" style="height: 42px; border-radius: 8px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; padding: 0 16px; border: 1px solid var(--sv-border); background: var(--sv-surface); color: var(--sv-foreground);"><i class="fas fa-clock-rotate-left"></i> Payment History</a>
                 <a href="${pageContext.request.contextPath}/student/my-enrollments" class="sv-btn" style="height: 42px; border-radius: 8px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; padding: 0 16px; border: 1px solid var(--sv-border); background: var(--sv-surface); color: var(--sv-foreground);"><i class="fas fa-layer-group"></i> Back to My Courses</a>
@@ -95,7 +95,7 @@
     (function() {
         var count = 5;
         var countdownEl = document.getElementById('countdown');
-        var targetUrl = "${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=overview";
+        var targetUrl = "${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}";
         
         var timer = setInterval(function() {
             count--;

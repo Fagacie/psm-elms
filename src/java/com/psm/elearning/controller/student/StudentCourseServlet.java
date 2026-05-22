@@ -20,6 +20,8 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.stream.Collectors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -105,10 +107,18 @@ public class StudentCourseServlet extends HttpServlet {
             Integer userId = SessionUtil.resolveUserId(session);
 
             List<Integer> enrolledCourseIds = loadEnrolledCourseIds(userId);
+            List<com.psm.elearning.model.Enrollment> enrollments = enrollmentDAO.getEnrollmentsByStudent(userId);
+            Map<Integer, Integer> enrolledCourseMap = new HashMap<>();
+            if (enrollments != null) {
+                for (com.psm.elearning.model.Enrollment e : enrollments) {
+                    enrolledCourseMap.put(e.getCourseId(), e.getEnrollmentId());
+                }
+            }
             List<Course> courses = courseDAO.findByStatus("Approved");
 
             request.setAttribute("courses", courses);
             request.setAttribute("enrolledCourseIds", enrolledCourseIds);
+            request.setAttribute("enrolledCourseMap", enrolledCourseMap);
             request.getRequestDispatcher("/WEB-INF/views/student/available-courses.jsp").forward(request, response);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error browsing courses", e);
@@ -133,6 +143,20 @@ public class StudentCourseServlet extends HttpServlet {
                 browseCourses(request, response);
                 return;
             }
+
+            List<Integer> enrolledCourseIds = loadEnrolledCourseIds(userId);
+            if (enrolledCourseIds != null && enrolledCourseIds.contains(courseId)) {
+                List<com.psm.elearning.model.Enrollment> enrollments = enrollmentDAO.getEnrollmentsByStudent(userId);
+                if (enrollments != null) {
+                    for (com.psm.elearning.model.Enrollment e : enrollments) {
+                        if (e.getCourseId().equals(courseId)) {
+                            response.sendRedirect(request.getContextPath() + "/student/enrollment-details?id=" + e.getEnrollmentId());
+                            return;
+                        }
+                    }
+                }
+            }
+
             Course course = courseDAO.findById(courseId);
             
             if (course == null) {
@@ -142,8 +166,6 @@ public class StudentCourseServlet extends HttpServlet {
             }
             
             request.setAttribute("user", session.getAttribute("user"));
-
-            List<Integer> enrolledCourseIds = loadEnrolledCourseIds(userId);
             request.setAttribute("enrolledCourseIds", enrolledCourseIds);
 
             // Load instructor details if available
@@ -192,9 +214,17 @@ public class StudentCourseServlet extends HttpServlet {
             
             List<Course> courses = courseDAO.searchCourses(keyword.trim());
             List<Integer> enrolledCourseIds = loadEnrolledCourseIds(userId);
+            List<com.psm.elearning.model.Enrollment> enrollments = enrollmentDAO.getEnrollmentsByStudent(userId);
+            Map<Integer, Integer> enrolledCourseMap = new HashMap<>();
+            if (enrollments != null) {
+                for (com.psm.elearning.model.Enrollment e : enrollments) {
+                    enrolledCourseMap.put(e.getCourseId(), e.getEnrollmentId());
+                }
+            }
             
             request.setAttribute("courses", courses);
             request.setAttribute("enrolledCourseIds", enrolledCourseIds);
+            request.setAttribute("enrolledCourseMap", enrolledCourseMap);
             request.setAttribute("searchKeyword", keyword.trim());
             request.getRequestDispatcher("/WEB-INF/views/student/available-courses.jsp").forward(request, response);
         } catch (Exception e) {
@@ -232,9 +262,17 @@ public class StudentCourseServlet extends HttpServlet {
             
             List<Course> courses = courseDAO.filterCourses(category, level, minFee, maxFee);
             List<Integer> enrolledCourseIds = loadEnrolledCourseIds(userId);
+            List<com.psm.elearning.model.Enrollment> enrollments = enrollmentDAO.getEnrollmentsByStudent(userId);
+            Map<Integer, Integer> enrolledCourseMap = new HashMap<>();
+            if (enrollments != null) {
+                for (com.psm.elearning.model.Enrollment e : enrollments) {
+                    enrolledCourseMap.put(e.getCourseId(), e.getEnrollmentId());
+                }
+            }
             
             request.setAttribute("courses", courses);
             request.setAttribute("enrolledCourseIds", enrolledCourseIds);
+            request.setAttribute("enrolledCourseMap", enrolledCourseMap);
             request.setAttribute("filterCategory", category);
             request.setAttribute("filterLevel", level);
             request.setAttribute("filterMinFee", minFee);
