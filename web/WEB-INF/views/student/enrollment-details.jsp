@@ -974,73 +974,152 @@
                                                     <c:set var="hasPassedQuiz" value="${selectedAssessmentLatest.score >= passThreshold}"/>
                                                     <c:choose>
                                                         <c:when test="${hasPassedQuiz}">
-                                                            <div class="quiz-result-header">
-                                                                <div class="lh-result-icon is-success">
-                                                                    <i class="fas fa-circle-check"></i>
+                                                            <div class="lh-post-assessment-container">
+                                                                <div class="lh-post-assessment-card is-passed">
+                                                                    <div class="lh-post-status-icon">
+                                                                        <i class="fas fa-circle-check"></i>
+                                                                    </div>
+                                                                    <h3 class="lh-post-title">Assessment Cleared!</h3>
+                                                                    <p class="lh-post-desc">Congratulations! You achieved the required score to clear this milestone. Review your breakdown below or continue forward.</p>
+                                                                    
+                                                                    <div class="lh-post-score-section">
+                                                                        <div class="lh-post-score-dial">
+                                                                            <span class="lh-dial-score"><fmt:formatNumber value="${selectedAssessmentLatest.score}" maxFractionDigits="1"/></span>
+                                                                            <span class="lh-dial-total">/ ${selectedAssessment.totalMarks}</span>
+                                                                        </div>
+                                                                        
+                                                                        <div class="lh-post-score-meta">
+                                                                            <div class="lh-score-percentage is-success">
+                                                                                Score: <fmt:formatNumber value="${(selectedAssessmentLatest.score / selectedAssessment.totalMarks) * 100.0}" maxFractionDigits="0"/>%
+                                                                            </div>
+                                                                            <div class="lh-score-attempts">
+                                                                                Attempts Used: <strong>${selectedAssessmentUsedAttempts} / ${selectedAssessmentAllowedAttempts}</strong>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    
+                                                                    <div class="lh-post-actions">
+                                                                        <a class="sv-btn primary" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=assessments&view=result&assessmentId=${selectedAssessment.assessmentId}&submissionId=${selectedAssessmentLatest.submissionId}">
+                                                                            <i class="fas fa-chart-column"></i>
+                                                                            <span>View Results Breakdown</span>
+                                                                        </a>
+                                                                    </div>
                                                                 </div>
-                                                                <h3 class="lh-result-title is-success">Assessment Passed!</h3>
-                                                                <p class="lh-result-copy">Congratulations, you completed this course milestone successfully!</p>
                                                             </div>
-                                                            
-                                                            <div class="lh-result-score-card">
-                                                                <div class="lh-result-score-label">Your Highest Score</div>
-                                                                <div class="lh-result-score-value">
-                                                                    <fmt:formatNumber value="${selectedAssessmentLatest.score}" maxFractionDigits="1"/> <span>/ ${selectedAssessment.totalMarks}</span>
-                                                                </div>
-                                                                <div class="lh-result-score-pill is-success">
-                                                                    Score: <fmt:formatNumber value="${(selectedAssessmentLatest.score / selectedAssessment.totalMarks) * 100.0}" maxFractionDigits="0"/>%
-                                                                </div>
-                                                            </div>
-
-                                                            <a class="sv-btn primary lh-success-action" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=assessments&view=result&assessmentId=${selectedAssessment.assessmentId}&submissionId=${selectedAssessmentLatest.submissionId}">
-                                                                <i class="fas fa-chart-column"></i>
-                                                                <span>View Results Breakdown</span>
-                                                            </a>
                                                         </c:when>
                                                         <c:otherwise>
-                                                            <div class="quiz-result-header">
-                                                                <div class="lh-result-icon is-error">
-                                                                    <i class="fas fa-circle-xmark"></i>
+                                                            <div class="lh-post-assessment-container">
+                                                                <div class="lh-post-assessment-card is-failed">
+                                                                    <div class="lh-post-status-icon">
+                                                                        <i class="fas fa-circle-xmark"></i>
+                                                                    </div>
+                                                                    <h3 class="lh-post-title">Retake Required</h3>
+                                                                    <p class="lh-post-desc">Your score did not meet the required 70% passing threshold for this milestone. Review the breakdown and try again if attempts remain.</p>
+                                                                    
+                                                                    <div class="lh-post-score-section">
+                                                                        <div class="lh-post-score-dial">
+                                                                            <span class="lh-dial-score"><fmt:formatNumber value="${selectedAssessmentLatest.score}" maxFractionDigits="1"/></span>
+                                                                            <span class="lh-dial-total">/ ${selectedAssessment.totalMarks}</span>
+                                                                        </div>
+                                                                        
+                                                                        <div class="lh-post-score-meta">
+                                                                            <div class="lh-score-percentage is-error">
+                                                                                Score: <fmt:formatNumber value="${(selectedAssessmentLatest.score / selectedAssessment.totalMarks) * 100.0}" maxFractionDigits="0"/>%
+                                                                            </div>
+                                                                            <div class="lh-score-attempts">
+                                                                                Attempts Used: <strong>${selectedAssessmentUsedAttempts} / ${selectedAssessmentAllowedAttempts}</strong>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    
+                                                                    <div class="lh-post-actions">
+                                                                        <a class="sv-btn primary" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=assessments&view=result&assessmentId=${selectedAssessment.assessmentId}&submissionId=${selectedAssessmentLatest.submissionId}">
+                                                                            <i class="fas fa-chart-column"></i>
+                                                                            <span>View Results Breakdown</span>
+                                                                        </a>
+                                                                        <c:choose>
+                                                                            <c:when test="${selectedAssessmentUsedAttempts < selectedAssessmentAllowedAttempts}">
+                                                                                <a class="sv-btn" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=assessments&assessmentId=${selectedAssessment.assessmentId}&attempt=true">
+                                                                                    <i class="fas fa-rotate-left"></i>
+                                                                                    <span>Retake Assessment</span>
+                                                                                </a>
+                                                                            </c:when>
+                                                                            <c:otherwise>
+                                                                                <button class="sv-btn" disabled="disabled" title="No attempts remaining">
+                                                                                    <i class="fas fa-ban"></i>
+                                                                                    <span>No Attempts Left</span>
+                                                                                </button>
+                                                                            </c:otherwise>
+                                                                        </c:choose>
+                                                                    </div>
+                                                                    <c:if test="${selectedAssessmentUsedAttempts >= selectedAssessmentAllowedAttempts}">
+                                                                        <p class="lh-help-text">Please contact your course administrator to request an attempt reset.</p>
+                                                                    </c:if>
                                                                 </div>
-                                                                <h3 class="lh-result-title is-error">Retake Required</h3>
-                                                                <p class="lh-result-copy">Your score was below the required 70% passing threshold.</p>
                                                             </div>
-
-                                                            <div class="lh-result-score-card">
-                                                                <div class="lh-result-score-label">Last Attempt Score</div>
-                                                                <div class="lh-result-score-value">
-                                                                    <fmt:formatNumber value="${selectedAssessmentLatest.score}" maxFractionDigits="1"/> <span>/ ${selectedAssessment.totalMarks}</span>
-                                                                </div>
-                                                                <div class="lh-result-attempts">
-                                                                    Attempts used: <strong>${selectedAssessmentUsedAttempts} / ${selectedAssessmentAllowedAttempts}</strong>
-                                                                </div>
-                                                            </div>
-
-                                                            <c:choose>
-                                                                <c:when test="${selectedAssessmentUsedAttempts < selectedAssessmentAllowedAttempts}">
-                                                                    <a class="sv-btn primary lh-primary-action" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=assessments&assessmentId=${selectedAssessment.assessmentId}&attempt=true">
-                                                                        <i class="fas fa-rotate-left"></i>
-                                                                        <span>Retake Assessment</span>
-                                                                    </a>
-                                                                </c:when>
-                                                                <c:otherwise>
-                                                                    <button class="sv-btn primary lh-primary-action" disabled="disabled">
-                                                                        <i class="fas fa-ban"></i>
-                                                                        <span>No Attempts Remaining</span>
-                                                                    </button>
-                                                                    <p class="lh-help-text">Please contact your course administrator to request an attempt reset.</p>
-                                                                </c:otherwise>
-                                                            </c:choose>
                                                         </c:otherwise>
                                                     </c:choose>
                                                 </c:when>
                                                 <c:otherwise>
-                                                    <h3 class="lh-result-title">Start Assessment</h3>
-                                                    <p class="lh-result-copy">Take this objective assessment inside the secure Learning Hub workspace to satisfy your course milestones.</p>
-                                                    <a class="sv-btn primary lh-primary-action" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=assessments&assessmentId=${selectedAssessment.assessmentId}&attempt=true">
-                                                        <i class="fas fa-play"></i>
-                                                        <span>${selectedAssessmentPrimaryLabel}</span>
-                                                    </a>
+                                                    <div class="lh-pre-assessment-container">
+                                                        <div class="lh-pre-assessment-hero">
+                                                            <div class="lh-pre-assessment-badge">
+                                                                <i class="fas fa-list-check"></i>
+                                                            </div>
+                                                            <h3 class="lh-pre-assessment-title">${selectedAssessment.title}</h3>
+                                                            <p class="lh-pre-assessment-desc">
+                                                                <c:choose>
+                                                                    <c:when test="${not empty selectedAssessmentInstructions}">${selectedAssessmentInstructions}</c:when>
+                                                                    <c:otherwise>Take this objective evaluation within the secure Learning Hub interface. Once started, the timer will begin and your attempts will count toward course milestones.</c:otherwise>
+                                                                </c:choose>
+                                                            </p>
+                                                        </div>
+                                                        
+                                                        <div class="lh-pre-assessment-meta-grid">
+                                                            <div class="lh-pre-assessment-meta-card">
+                                                                <div class="lh-meta-icon"><i class="fas fa-clock"></i></div>
+                                                                <div class="lh-meta-details">
+                                                                    <span>Time Limit</span>
+                                                                    <strong>${selectedAssessment.duration != null ? selectedAssessment.duration : '30'} minutes</strong>
+                                                                </div>
+                                                            </div>
+                                                            <div class="lh-pre-assessment-meta-card">
+                                                                <div class="lh-meta-icon"><i class="fas fa-clipboard-question"></i></div>
+                                                                <div class="lh-meta-details">
+                                                                    <span>Questions</span>
+                                                                    <strong>${fn:length(selectedAssessmentQuestions)} Items</strong>
+                                                                </div>
+                                                            </div>
+                                                            <div class="lh-pre-assessment-meta-card">
+                                                                <div class="lh-meta-icon"><i class="fas fa-bullseye"></i></div>
+                                                                <div class="lh-meta-details">
+                                                                    <span>Passing Grade</span>
+                                                                    <strong>70% Score</strong>
+                                                                </div>
+                                                            </div>
+                                                            <div class="lh-pre-assessment-meta-card">
+                                                                <div class="lh-meta-icon"><i class="fas fa-arrows-spin"></i></div>
+                                                                <div class="lh-meta-details">
+                                                                    <span>Attempts</span>
+                                                                    <strong>${selectedAssessmentUsedAttempts} / ${selectedAssessmentAllowedAttempts} Used</strong>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <div class="lh-pre-assessment-alert">
+                                                            <i class="fas fa-circle-info"></i>
+                                                            <div class="lh-alert-text">
+                                                                <strong>Important Rules:</strong> Do not refresh the page, close the browser window, or switch tabs while the assessment is running. Your answers are auto-saved, but leaving the workspace unexpectedly may cause the attempt to submit immediately.
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <div class="lh-pre-assessment-actions">
+                                                            <a class="sv-btn primary" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=assessments&assessmentId=${selectedAssessment.assessmentId}&attempt=true">
+                                                                <i class="fas fa-play"></i>
+                                                                <span>${selectedAssessmentPrimaryLabel}</span>
+                                                            </a>
+                                                        </div>
+                                                    </div>
                                                 </c:otherwise>
                                             </c:choose>
                                         </c:if>

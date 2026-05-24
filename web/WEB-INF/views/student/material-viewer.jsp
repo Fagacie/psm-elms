@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Material Preview - PSM E-Learning</title>
     <jsp:include page="/WEB-INF/views/common/student-head-assets.jsp"/>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/learning-hub.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/learning-hub-modern.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/material-viewer-v2.css">
 </head>
 <body class="sv-page">
