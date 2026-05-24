@@ -1,41 +1,48 @@
 :root {
-    --ins-bg: #f6f8fb;
-    --ins-bg-accent: radial-gradient(circle at top left, rgba(15, 23, 42, 0.04), transparent 28%),
-                     radial-gradient(circle at 85% 15%, rgba(15, 23, 42, 0.03), transparent 24%);
-    --ins-surface: rgba(255, 255, 255, 0.85);
-    --ins-surface-strong: #ffffff;
-    --ins-surface-soft: #f8fafc;
-    --ins-text: #334155;
-    --ins-heading: #0f172a;
-    --ins-muted: #64748b;
-    --ins-muted-strong: #475569;
-    --ins-border: #e2e8f0;
-    --ins-border-strong: #cbd5e1;
-    --ins-input-border: #e2e8f0;
-    /* Premium Slate/Dark Accent Brand Colors (Synced with Student Side) */
-    --ins-primary: #0f172a;
-    --ins-primary-strong: #020617;
-    --ins-primary-soft: rgba(15, 23, 42, 0.05);
-    --ins-accent: #0f172a;
-    --ins-accent-soft: rgba(15, 23, 42, 0.05);
-    --ins-accent-border: rgba(15, 23, 42, 0.12);
+    /* Premium HSL Light Theme Colors (Synced with Student Side/Royal Indigo Accent) */
+    --ins-bg: hsl(220 20% 97%);
+    --ins-bg-accent: radial-gradient(circle at top left, hsla(256, 100%, 56%, 0.03), transparent 28%),
+                     radial-gradient(circle at 85% 15%, hsla(256, 100%, 56%, 0.02), transparent 24%);
+    --ins-surface: hsla(0, 0%, 100%, 0.85);
+    --ins-surface-strong: hsl(0, 0%, 100%);
+    --ins-surface-soft: hsl(220, 15%, 96%);
+    --ins-text: hsl(220, 16%, 24%);
+    --ins-heading: hsl(224, 71%, 4%);
+    --ins-muted: hsl(220, 10%, 46%);
+    --ins-muted-strong: hsl(220, 12%, 32%);
+    --ins-border: hsla(220, 15%, 20%, 0.08);
+    --ins-border-strong: hsla(220, 15%, 20%, 0.15);
+    --ins-input-border: hsla(220, 15%, 20%, 0.08);
+    
+    /* Brand Accent: Royal Indigo (Synchronized with student dashboard) */
+    --ins-primary: hsl(256, 100%, 56%);
+    --ins-primary-strong: hsl(256, 95%, 48%);
+    --ins-primary-soft: hsla(256, 100%, 56%, 0.06);
+    --ins-accent: hsl(256, 100%, 56%);
+    --ins-accent-soft: hsla(256, 100%, 56%, 0.06);
+    --ins-accent-border: hsla(256, 100%, 56%, 0.15);
     
     /* Modern Status States */
-    --ins-success: #10b981;
-    --ins-success-soft: rgba(16, 185, 129, 0.08);
-    --ins-warning: #f59e0b;
-    --ins-warning-soft: rgba(245, 158, 11, 0.08);
-    --ins-danger: #ef4444;
-    --ins-danger-soft: rgba(239, 68, 68, 0.08);
+    --ins-success: hsl(142, 72%, 29%);
+    --ins-success-soft: hsla(142, 72%, 29%, 0.08);
+    --ins-warning: hsl(38, 92%, 38%);
+    --ins-warning-soft: hsla(38, 92%, 38%, 0.08);
+    --ins-danger: hsl(0, 84%, 44%);
+    --ins-danger-soft: hsla(0, 84%, 44%, 0.08);
     
     /* Premium Spacing & Shadows */
-    --ins-shadow-sm: 0 10px 24px rgba(15, 23, 42, 0.04);
-    --ins-shadow-md: 0 16px 40px rgba(15, 23, 42, 0.06);
-    --ins-shadow-lg: 0 24px 48px rgba(15, 23, 42, 0.12);
+    --ins-shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.03);
+    --ins-shadow-md: 0 12px 32px rgba(0, 0, 0, 0.06);
+    --ins-shadow-lg: 0 24px 64px rgba(0, 0, 0, 0.1);
     
     --ins-radius-sm: 10px;
     --ins-radius-md: 16px;
     --ins-radius-lg: 20px;
+
+    /* Custom Transitions */
+    --ins-motion-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --ins-motion-base: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --ins-focus-ring: 0 0 0 3px hsla(256, 100%, 56%, 0.25);
 }
 
 body.instructor-ui {
@@ -1618,20 +1625,43 @@ body.ins-shell-collapsed .app-main {
    COMPREHENSIVE INSTRUCTOR DARK MODE THEME
    =================================================== */
 :root[data-theme="dark"] body.instructor-ui,
-:root[data-theme="dark"] .instructor-ui {
-    --ins-bg: #090f1d !important;
-    --ins-surface: #0e1726 !important;
-    --ins-surface-strong: #0e1726 !important;
-    --ins-surface-soft: #142138 !important;
-    --ins-text: #f1f5f9 !important;
-    --ins-heading: #ffffff !important;
-    --ins-muted: #94a3b8 !important;
-    --ins-muted-strong: #cbd5e1 !important;
-    --ins-border: rgba(148, 163, 184, 0.12) !important;
-    --ins-border-strong: rgba(148, 163, 184, 0.22) !important;
-    --ins-shadow-sm: 0 8px 24px rgba(2, 6, 17, 0.3) !important;
-    --ins-shadow-md: 0 14px 36px rgba(2, 6, 17, 0.45) !important;
-    --ins-shadow-lg: 0 22px 50px rgba(2, 6, 17, 0.6) !important;
+:root[data-theme="dark"] .instructor-ui,
+html[data-theme="dark"] body.instructor-ui,
+html[data-theme="dark"] .instructor-ui {
+    /* Slate Midnight HSL Premium Dark Theme Colors */
+    --ins-bg: hsl(224 71% 4%) !important;
+    --ins-surface: hsla(224 60% 10% / 0.85) !important;
+    --ins-surface-strong: hsl(224 50% 12%) !important;
+    --ins-surface-soft: hsl(224 45% 15%) !important;
+    --ins-border: hsla(0 0% 100% / 0.08) !important;
+    --ins-border-strong: hsla(0 0% 100% / 0.16) !important;
+    --ins-input-border: hsla(0 0% 100% / 0.08) !important;
+    
+    --ins-text: hsl(220 15% 76%) !important;
+    --ins-heading: hsl(220 20% 96%) !important;
+    --ins-muted: hsl(220 10% 56%) !important;
+    --ins-muted-strong: hsl(220 12% 66%) !important;
+    
+    /* Brand Accent: Royal Indigo (Brightened for Dark Mode) */
+    --ins-primary: hsl(250 100% 68%) !important;
+    --ins-primary-strong: hsl(250 100% 74%) !important;
+    --ins-primary-soft: hsla(250 100% 68% / 0.15) !important;
+    --ins-accent: hsl(250 100% 68%) !important;
+    --ins-accent-soft: hsla(250 100% 68% / 0.15) !important;
+    --ins-accent-border: hsla(250 100% 68% / 0.25) !important;
+    
+    /* Statuses */
+    --ins-success: hsl(142 76% 45%) !important;
+    --ins-success-soft: hsla(142 76% 45% / 0.16) !important;
+    --ins-warning: hsl(40 96% 54%) !important;
+    --ins-warning-soft: hsla(40 96% 54% / 0.16) !important;
+    --ins-danger: hsl(0 90% 62%) !important;
+    --ins-danger-soft: hsla(0 90% 62% / 0.16) !important;
+    
+    --ins-shadow-sm: 0 4px 16px rgba(0, 0, 0, 0.2) !important;
+    --ins-shadow-md: 0 16px 40px rgba(0, 0, 0, 0.35) !important;
+    --ins-shadow-lg: 0 32px 80px rgba(0, 0, 0, 0.5) !important;
+    --ins-focus-ring: 0 0 0 3px hsla(250 100% 68% / 0.35) !important;
 }
 
 :root[data-theme="dark"] body.instructor-ui {

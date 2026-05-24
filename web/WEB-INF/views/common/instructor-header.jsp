@@ -82,9 +82,6 @@
                 </c:choose>
             </div>
         </a>
-        <a href="${pageContext.request.contextPath}/logout" class="ins-logout-btn" title="Logout">
-            <i class="fas fa-sign-out-alt"></i>
-        </a>
     </div>
 </header>
 

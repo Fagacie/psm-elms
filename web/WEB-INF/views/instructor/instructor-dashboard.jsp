@@ -13,6 +13,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-shell.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-dashboard.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <jsp:include page="/WEB-INF/views/common/head-external-assets.jsp"/>
 </head>
 <body class="instructor-ui">
@@ -81,6 +82,26 @@
             </div>
         </section>
 
+        <%-- ANALYTICS CHART --%>
+        <section class="pm-chart-section">
+            <div class="ins-section-head-row">
+                <div class="ins-section-label-group">
+                    <h3>Teaching & Workload Analytics</h3>
+                </div>
+            </div>
+            <div class="pm-chart-card">
+                <div class="pm-chart-header">
+                    <div>
+                        <h4>Students & Grading Overview</h4>
+                        <p>Visualizing total enrollments and pending submissions per course</p>
+                    </div>
+                </div>
+                <div class="pm-chart-body">
+                    <canvas id="pmAnalyticsChart"></canvas>
+                </div>
+            </div>
+        </section>
+
         <%-- COURSE CARDS --%>
         <section class="ins-courses-section">
             <div class="ins-section-head-row">
@@ -93,553 +114,256 @@
                 </a>
             </div>
 
-            <c:choose>
-                <c:when test="${empty courses}">
-                    <div class="ins-empty-courses">
-                        <div class="ins-empty-icon"><i class="fas fa-layer-group"></i></div>
-                        <p>No courses assigned yet.</p>
-                        <span>Contact your administrator to get courses assigned.</span>
+            <%-- Premium Skeletons Placeholders --%>
+            <div id="insCoursesSkeleton" class="pm-skeleton-grid">
+                <c:forEach begin="1" end="${courseCount > 0 ? courseCount : 3}">
+                    <div class="pm-skeleton-card">
+                        <div class="pm-skeleton-banner placeholder-shimmer"></div>
+                        <div class="pm-skeleton-body">
+                            <div class="pm-skeleton-title placeholder-shimmer"></div>
+                            <div class="pm-skeleton-title short placeholder-shimmer"></div>
+                            <div class="pm-skeleton-metrics">
+                                <div class="pm-skeleton-metric placeholder-shimmer"></div>
+                                <div class="pm-skeleton-metric placeholder-shimmer"></div>
+                                <div class="pm-skeleton-metric placeholder-shimmer"></div>
+                            </div>
+                        </div>
+                        <div class="pm-skeleton-footer placeholder-shimmer"></div>
                     </div>
-                </c:when>
-                <c:otherwise>
-                    <div class="ins-course-cards-grid">
-                        <c:forEach var="course" items="${courses}">
-                            <article class="ins-course-card-v2">
-                                <%-- Banner --%>
-                                <div class="ins-card-banner">
-                                    <c:choose>
-                                        <c:when test="${not empty course.courseBanner}">
-                                            <img src="${course.courseBanner}" alt="${course.courseName} banner">
-                                        </c:when>
-                                        <c:otherwise>
-                                            <div class="ins-card-banner-placeholder">
-                                                <i class="fas fa-book-open"></i>
+                </c:forEach>
+            </div>
+
+            <%-- Actual Course Content Grid (transitions in after skeleton fades out) --%>
+            <div id="insCoursesActual" style="display: none;">
+                <c:choose>
+                    <c:when test="${empty courses}">
+                        <div class="ins-empty-courses">
+                            <div class="ins-empty-icon"><i class="fas fa-layer-group"></i></div>
+                            <p>No courses assigned yet.</p>
+                            <span>Contact your administrator to get courses assigned.</span>
+                        </div>
+                    </c:when>
+                    <c:otherwise>
+                        <div class="pm-courses-grid">
+                            <c:forEach var="course" items="${courses}">
+                                <article class="pm-course-card" onclick="window.location.href='${pageContext.request.contextPath}/instructor/courses?action=workspace&courseId=${course.courseId}'" style="cursor: pointer;">
+                                    <%-- Card Image Banner --%>
+                                    <div class="pm-card-banner">
+                                        <c:choose>
+                                            <c:when test="${not empty course.courseBanner}">
+                                                <img src="${course.courseBanner}" alt="${course.courseName} banner">
+                                            </c:when>
+                                            <c:otherwise>
+                                                <div class="ins-card-banner-placeholder" style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:2.5rem; color:rgba(255,255,255,0.15);">
+                                                    <i class="fas fa-book-open"></i>
+                                                </div>
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </div>
+
+                                    <%-- Premium Card Content --%>
+                                    <div class="pm-card-body">
+                                        <div class="pm-card-header">
+                                            <h4 class="pm-course-title"><c:out value="${course.courseName}"/></h4>
+                                            <span class="pm-status-badge pm-status-${fn:toLowerCase(course.status)}">
+                                                <c:out value="${course.status}"/>
+                                            </span>
+                                        </div>
+
+                                        <%-- Operational SVG Metrics Stack --%>
+                                        <div class="pm-metrics-stack">
+                                            <div class="pm-metric-item">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16"><path d="M12 3L1 9l11 6 9-4.91V17h2V9L12 3zM3.8 9.53l8.2 4.47 8.2-4.47-8.2-4.47-8.2 4.47zM12 16.5c-2.4 0-4.38-1.56-5.18-3.74l-1.84.84C6.12 16.64 8.8 18.5 12 18.5s5.88-1.86 7.02-4.9l-1.84-.84c-.8 2.18-2.78 3.74-5.18 3.74z"/></svg>
+                                                <span><strong><c:out value="${courseEnrollmentCountById[course.courseId]}" default="0"/></strong> Enrolled Students</span>
                                             </div>
-                                        </c:otherwise>
-                                    </c:choose>
-                                    <span class="ins-card-status-pill status-${fn:toLowerCase(course.status)}">
-                                        <c:out value="${course.status}"/>
-                                    </span>
-                                </div>
-
-                                <%-- Card Body --%>
-                                <div class="ins-card-body">
-                                    <div class="ins-card-meta-chips">
-                                        <span class="chip chip-category">
-                                            <i class="fas fa-tag"></i>
-                                            <c:out value="${empty course.category ? 'General' : course.category}"/>
-                                        </span>
-                                        <span class="chip chip-level">
-                                            <i class="fas fa-signal"></i>
-                                            <c:out value="${course.level}"/>
-                                        </span>
-                                    </div>
-                                    <h4 class="ins-card-title"><c:out value="${course.courseName}"/></h4>
-
-                                    <%-- Stats row --%>
-                                    <div class="ins-card-stats-row">
-                                        <div class="ins-card-stat">
-                                            <i class="fas fa-users"></i>
-                                            <strong><c:out value="${courseEnrollmentCountById[course.courseId]}" default="0"/></strong>
-                                            <span>Students</span>
-                                        </div>
-                                        <div class="ins-card-stat">
-                                            <i class="fas fa-clock"></i>
-                                            <strong><c:out value="${pendingSubmissionsByCourseId[course.courseId]}" default="0"/></strong>
-                                            <span>Pending</span>
-                                        </div>
-                                        <div class="ins-card-stat">
-                                            <i class="fas fa-hourglass-half"></i>
-                                            <strong><c:out value="${course.displayDuration}"/></strong>
-                                            <span>Duration</span>
+                                            <div class="pm-metric-item ${pendingSubmissionsByCourseId[course.courseId] > 0 ? 'pm-metric-warn' : ''}">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16"><path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H10v-2h4v2zm0-4H10v-4h4v4z"/></svg>
+                                                <span><strong><c:out value="${pendingSubmissionsByCourseId[course.courseId]}" default="0"/></strong> Pending Submissions</span>
+                                            </div>
+                                            <div class="pm-metric-item">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm4.2 14.2L11 13V7h1.5v5.2l4.5 2.7-.8 1.3z"/></svg>
+                                                <span>Duration: <strong><c:out value="${course.displayDuration}"/></strong></span>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
 
-                                <%-- CTA --%>
-                                <div class="ins-card-footer">
-                                    <a href="${pageContext.request.contextPath}/instructor/courses?action=workspace&courseId=${course.courseId}"
-                                       class="ins-card-cta-btn">
-                                        Open Workspace <i class="fas fa-arrow-right"></i>
-                                    </a>
-                                </div>
-                            </article>
-                        </c:forEach>
-                    </div>
-                </c:otherwise>
-            </c:choose>
+                                    <%-- Pill Shape CTA Manage Button --%>
+                                    <div class="pm-card-footer">
+                                        <a href="${pageContext.request.contextPath}/instructor/courses?action=workspace&courseId=${course.courseId}"
+                                           class="pm-manage-btn">
+                                            Manage Course <i class="fas fa-arrow-right" style="margin-left: 4px;"></i>
+                                        </a>
+                                    </div>
+                                </article>
+                            </c:forEach>
+                        </div>
+                    </c:otherwise>
+                </c:choose>
+            </div>
         </section>
     </div>
 </main>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const ctx = document.getElementById('pmAnalyticsChart');
+    if (!ctx) return;
 
-<style>
-/* Instructor Dashboard Premium Styles */
-.ins-welcome-banner {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 20px;
-    padding: 24px 28px;
-    background: linear-gradient(135deg, #0f172a 0%, #1e293b 60%, #0f172a 100%);
-    border-radius: 16px;
-    margin-bottom: 24px;
-    border: 1px solid rgba(148,163,184,0.14);
-    box-shadow: 0 8px 30px rgba(2,6,17,0.4);
-}
+    // Retrieve data arrays populated dynamically from JSP
+    const courseNames = [];
+    const studentCounts = [];
+    const pendingSubmissions = [];
 
-.ins-welcome-left {
-    display: flex;
-    align-items: center;
-    gap: 18px;
-}
+    <c:forEach var="course" items="${courses}">
+        courseNames.push("<c:out value="${course.courseName}"/>");
+        studentCounts.push(${not empty courseEnrollmentCountById[course.courseId] ? courseEnrollmentCountById[course.courseId] : 0});
+        pendingSubmissions.push(${not empty pendingSubmissionsByCourseId[course.courseId] ? pendingSubmissionsByCourseId[course.courseId] : 0});
+    </c:forEach>
 
-.ins-welcome-avatar {
-    width: 56px;
-    height: 56px;
-    border-radius: 14px;
-    background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(255,255,255,0.12);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5rem;
-    color: #94a3b8;
-    flex-shrink: 0;
-}
+    let chart = null;
 
-.ins-welcome-copy h2 {
-    margin: 0 0 4px;
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: #ffffff;
-}
+    function getThemeColors() {
+        const theme = document.documentElement.getAttribute('data-theme') || 'light';
+        const isDark = theme === 'dark';
+        return {
+            isDark: isDark,
+            text: isDark ? '#94a3b8' : '#64748b',
+            grid: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(15, 23, 42, 0.06)',
+            primary: isDark ? 'hsl(250, 100%, 68%)' : 'hsl(256, 100%, 56%)',
+            accent: isDark ? 'hsl(40, 96%, 54%)' : 'hsl(38, 92%, 38%)'
+        };
+    }
 
-.ins-welcome-copy p {
-    margin: 0;
-    color: #94a3b8;
-    font-size: 0.88rem;
-}
+    function initChart() {
+        const colors = getThemeColors();
+        const ctx2d = ctx.getContext('2d');
 
-.ins-welcome-copy strong {
-    color: #e2e8f0;
-}
+        // Create elegant, brand-colored gradients for fills
+        const gradientPrimary = ctx2d.createLinearGradient(0, 0, 0, 350);
+        gradientPrimary.addColorStop(0, colors.isDark ? 'hsla(250, 100%, 68%, 0.85)' : 'hsla(256, 100%, 56%, 0.85)');
+        gradientPrimary.addColorStop(1, colors.isDark ? 'hsla(250, 100%, 68%, 0.1)' : 'hsla(256, 100%, 56%, 0.1)');
 
-.ins-welcome-stats {
-    display: flex;
-    gap: 28px;
-}
+        const gradientAccent = ctx2d.createLinearGradient(0, 0, 0, 350);
+        gradientAccent.addColorStop(0, colors.isDark ? 'hsla(40, 96%, 54%, 0.85)' : 'hsla(38, 92%, 38%, 0.85)');
+        gradientAccent.addColorStop(1, colors.isDark ? 'hsla(40, 96%, 54%, 0.1)' : 'hsla(38, 92%, 38%, 0.1)');
+        
+        chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: courseNames,
+                datasets: [
+                    {
+                        label: 'Students Enrolled',
+                        data: studentCounts,
+                        backgroundColor: gradientPrimary,
+                        borderWidth: 0, // completely remove default ugly borders
+                        borderRadius: 8,
+                        maxBarThickness: 45
+                    },
+                    {
+                        label: 'Pending Submissions',
+                        data: pendingSubmissions,
+                        backgroundColor: gradientAccent,
+                        borderWidth: 0, // completely remove default ugly borders
+                        borderRadius: 8,
+                        maxBarThickness: 45
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            color: colors.text,
+                            font: {
+                                family: "'Inter', sans-serif",
+                                weight: '600',
+                                size: 12
+                            },
+                            padding: 18
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: colors.isDark ? '#1e293b' : '#ffffff',
+                        titleColor: colors.isDark ? '#ffffff' : '#0f172a',
+                        bodyColor: colors.isDark ? '#cbd5e1' : '#334155',
+                        borderColor: colors.isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(15, 23, 42, 0.06)',
+                        borderWidth: 1,
+                        cornerRadius: 8, // rounded tooltip corners
+                        padding: 12,
+                        boxPadding: 6,
+                        titleFont: {
+                            family: "'Inter', sans-serif",
+                            weight: '700',
+                            size: 13
+                        },
+                        bodyFont: {
+                            family: "'Inter', sans-serif",
+                            size: 13
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: colors.text,
+                            font: {
+                                family: "'Inter', sans-serif",
+                                weight: '500'
+                            }
+                        }
+                    },
+                    y: {
+                        grid: {
+                            color: colors.grid,
+                            borderDash: [5, 5], // elegant faint dashed lines
+                            drawBorder: false // hide solid vertical border lines
+                        },
+                        ticks: {
+                            color: colors.text,
+                            precision: 0,
+                            font: {
+                                family: "'Inter', sans-serif"
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
 
-.ins-welcome-stat {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2px;
-}
+    initChart();
 
-.stat-val {
-    font-size: 1.6rem;
-    font-weight: 800;
-    color: #ffffff;
-    line-height: 1;
-}
+    // Listen for theme mutations to update the chart dynamically
+    const observer = new MutationObserver(function() {
+        if (chart) {
+            chart.destroy();
+        }
+        initChart();
+    });
 
-.stat-lbl {
-    font-size: 0.72rem;
-    color: #64748b;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    font-weight: 600;
-}
+    observer.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['data-theme']
+    });
 
-/* KPI Cards */
-.ins-kpi-section { margin-bottom: 28px; }
-
-.ins-kpi-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-    gap: 16px;
-}
-
-.ins-kpi-card {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 18px 20px;
-    background: var(--ins-surface-strong, #fff);
-    border: 1px solid var(--ins-border, #e2e8f0);
-    border-radius: 14px;
-    position: relative;
-    overflow: hidden;
-    transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
-    text-decoration: none;
-    box-shadow: var(--ins-shadow-sm);
-}
-
-.ins-kpi-card:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--ins-shadow-md);
-    border-color: var(--ins-border-strong, #cbd5e1);
-}
-
-.kpi-icon-box {
-    width: 44px;
-    height: 44px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.1rem;
-    flex-shrink: 0;
-}
-
-.kpi-warn .kpi-icon-box { background: rgba(245,158,11,0.1); color: #f59e0b; }
-.kpi-info .kpi-icon-box { background: rgba(59,130,246,0.1); color: #3b82f6; }
-.kpi-good .kpi-icon-box { background: rgba(16,185,129,0.1); color: #10b981; }
-.kpi-purple .kpi-icon-box { background: rgba(139,92,246,0.1); color: #8b5cf6; }
-
-/* left accent bar */
-.ins-kpi-card::before {
-    content: '';
-    position: absolute;
-    left: 0; top: 14px; bottom: 14px;
-    width: 3px;
-    border-radius: 0 3px 3px 0;
-}
-.kpi-warn::before { background: #f59e0b; }
-.kpi-info::before { background: #3b82f6; }
-.kpi-good::before { background: #10b981; }
-.kpi-purple::before { background: #8b5cf6; }
-
-.kpi-body { flex: 1; display: flex; flex-direction: column; gap: 1px; }
-.kpi-label { font-size: 0.72rem; color: var(--ins-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
-.kpi-value { font-size: 1.8rem; font-weight: 800; color: var(--ins-heading, #0f172a); line-height: 1; }
-.kpi-sub { font-size: 0.78rem; color: var(--ins-muted); }
-
-.kpi-link-arrow {
-    color: var(--ins-muted);
-    font-size: 0.85rem;
-    transition: transform 0.2s ease, color 0.2s ease;
-    text-decoration: none;
-}
-
-.ins-kpi-card:hover .kpi-link-arrow {
-    transform: translateX(3px);
-    color: var(--ins-heading, #0f172a);
-}
-
-/* Section header row */
-.ins-courses-section { margin-bottom: 32px; }
-.ins-section-head-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 18px;
-}
-
-.ins-section-label-group {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.ins-section-label-group h3 {
-    margin: 0;
-    font-size: 1.15rem;
-    font-weight: 800;
-    color: var(--ins-heading, #0f172a);
-}
-
-.ins-course-count-badge {
-    background: var(--ins-primary-soft, rgba(15,23,42,0.05));
-    color: var(--ins-muted);
-    font-size: 0.74rem;
-    font-weight: 700;
-    padding: 3px 10px;
-    border-radius: 999px;
-    border: 1px solid var(--ins-border);
-}
-
-.ins-view-all-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 0.84rem;
-    font-weight: 700;
-    color: var(--ins-primary, #0f172a);
-    text-decoration: none;
-    padding: 7px 14px;
-    border: 1px solid var(--ins-border);
-    border-radius: 8px;
-    background: var(--ins-surface-strong, #fff);
-    transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
-}
-
-.ins-view-all-btn:hover {
-    background: var(--ins-primary-soft);
-    border-color: var(--ins-accent-border);
-    transform: translateX(2px);
-}
-
-/* Course Cards V2 */
-.ins-course-cards-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px;
-}
-
-.ins-course-card-v2 {
-    background: var(--ins-surface-strong, #fff);
-    border: 1px solid var(--ins-border, #e2e8f0);
-    border-radius: 16px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    box-shadow: var(--ins-shadow-sm);
-    transition: transform 0.25s cubic-bezier(0.4,0,0.2,1), box-shadow 0.25s ease, border-color 0.25s ease;
-}
-
-.ins-course-card-v2:hover {
-    transform: translateY(-5px);
-    box-shadow: var(--ins-shadow-md);
-    border-color: var(--ins-border-strong, #cbd5e1);
-}
-
-/* Banner */
-.ins-card-banner {
-    position: relative;
-    height: 150px;
-    overflow: hidden;
-    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-    flex-shrink: 0;
-}
-
-.ins-card-banner img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.4s ease;
-}
-
-.ins-course-card-v2:hover .ins-card-banner img {
-    transform: scale(1.04);
-}
-
-.ins-card-banner-placeholder {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 2.5rem;
-    color: rgba(255,255,255,0.15);
-}
-
-.ins-card-status-pill {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    padding: 4px 12px;
-    border-radius: 999px;
-    font-size: 0.7rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-}
-
-.ins-card-status-pill.status-approved,
-.ins-card-status-pill.status-active {
-    background: rgba(16,185,129,0.85);
-    color: #fff;
-    backdrop-filter: blur(4px);
-}
-.ins-card-status-pill.status-pending {
-    background: rgba(245,158,11,0.85);
-    color: #fff;
-    backdrop-filter: blur(4px);
-}
-.ins-card-status-pill.status-archived {
-    background: rgba(100,116,139,0.85);
-    color: #fff;
-    backdrop-filter: blur(4px);
-}
-
-/* Card Body */
-.ins-card-body {
-    padding: 18px 18px 14px;
-    flex: 1;
-}
-
-.ins-card-meta-chips {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-bottom: 10px;
-}
-
-.chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: 3px 10px;
-    border-radius: 6px;
-    font-size: 0.7rem;
-    font-weight: 600;
-}
-
-.chip-category {
-    background: rgba(59,130,246,0.08);
-    color: #3b82f6;
-}
-
-.chip-level {
-    background: rgba(139,92,246,0.08);
-    color: #8b5cf6;
-}
-
-.ins-card-title {
-    margin: 0 0 14px;
-    font-size: 1rem;
-    font-weight: 700;
-    color: var(--ins-heading, #0f172a);
-    line-height: 1.4;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-
-/* Stats row */
-.ins-card-stats-row {
-    display: flex;
-    gap: 16px;
-}
-
-.ins-card-stat {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2px;
-    flex: 1;
-    padding: 10px 8px;
-    background: var(--ins-surface-soft, #f8fafc);
-    border: 1px solid var(--ins-border, #e2e8f0);
-    border-radius: 10px;
-    text-align: center;
-}
-
-.ins-card-stat i {
-    font-size: 0.75rem;
-    color: var(--ins-muted);
-    margin-bottom: 2px;
-}
-
-.ins-card-stat strong {
-    font-size: 1.1rem;
-    font-weight: 800;
-    color: var(--ins-heading, #0f172a);
-    line-height: 1;
-}
-
-.ins-card-stat span {
-    font-size: 0.68rem;
-    color: var(--ins-muted);
-    font-weight: 600;
-}
-
-/* Footer CTA */
-.ins-card-footer {
-    padding: 14px 18px;
-    border-top: 1px solid var(--ins-border, #e2e8f0);
-}
-
-.ins-card-cta-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    width: 100%;
-    padding: 10px 18px;
-    background: var(--ins-primary, #0f172a);
-    color: #ffffff;
-    border-radius: 10px;
-    font-size: 0.86rem;
-    font-weight: 700;
-    text-decoration: none;
-    transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.ins-card-cta-btn:hover {
-    background: var(--ins-primary-strong, #020617);
-    transform: translateY(-1px);
-    box-shadow: 0 6px 18px rgba(15,23,42,0.25);
-}
-
-/* Empty courses */
-.ins-empty-courses {
-    text-align: center;
-    padding: 56px 32px;
-    background: var(--ins-surface-strong, #fff);
-    border: 1px dashed var(--ins-border-strong, #cbd5e1);
-    border-radius: 16px;
-    color: var(--ins-muted);
-}
-
-.ins-empty-icon {
-    font-size: 2.8rem;
-    color: var(--ins-primary, #0f172a);
-    opacity: 0.25;
-    margin-bottom: 14px;
-}
-
-.ins-empty-courses p {
-    margin: 0 0 4px;
-    font-size: 1rem;
-    font-weight: 700;
-    color: var(--ins-heading, #0f172a);
-}
-
-.ins-empty-courses span {
-    font-size: 0.86rem;
-}
-
-/* Dark mode card adaptation */
-:root[data-theme="dark"] .ins-welcome-banner {
-    background: linear-gradient(135deg, #090f1d 0%, #0e1726 60%, #090f1d 100%);
-    border-color: rgba(148,163,184,0.14);
-}
-
-:root[data-theme="dark"] .ins-course-card-v2 {
-    background: #0e1726;
-    border-color: rgba(148,163,184,0.12);
-}
-
-:root[data-theme="dark"] .ins-card-stat {
-    background: #111a2e;
-    border-color: rgba(148,163,184,0.1);
-}
-
-:root[data-theme="dark"] .ins-card-title {
-    color: #ffffff;
-}
-
-:root[data-theme="dark"] .ins-card-stat strong {
-    color: #ffffff;
-}
-
-:root[data-theme="dark"] .ins-card-footer {
-    border-top-color: rgba(148,163,184,0.1);
-}
-
-:root[data-theme="dark"] .ins-kpi-card {
-    background: #0e1726;
-    border-color: rgba(148,163,184,0.12);
-}
-
-:root[data-theme="dark"] .kpi-value {
-    color: #ffffff;
-}
-</style>
+    // Simulate high-end skeleton loading transition
+    setTimeout(function() {
+        const skeleton = document.getElementById('insCoursesSkeleton');
+        const actual = document.getElementById('insCoursesActual');
+        if (skeleton && actual) {
+            skeleton.style.display = 'none';
+            actual.style.display = 'block';
+            actual.classList.add('ins-fade-in');
+        }
+    }, 600);
+});
+</script>
 </main>
 </body>
 </html>

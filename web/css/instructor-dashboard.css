@@ -1,27 +1,25 @@
-:root {
-    --ins-dashboard-bg: #f6f8fb;
-    --ins-dashboard-card: rgba(255, 255, 255, 0.85);
-    --ins-hero-gradient-start: #0f172a;
-    --ins-hero-gradient-end: #1e293b;
-    --ins-card-shadow: var(--ins-shadow-sm, 0 10px 24px rgba(15, 23, 42, 0.04));
-    --ins-card-shadow-hover: var(--ins-shadow-md, 0 16px 40px rgba(15, 23, 42, 0.06));
-}
+/* ==========================================================================
+   Premium UI System — Rebuilt Instructor Dashboard Styles
+   Ensures absolute isolation from legacy styling rules.
+   ========================================================================== */
 
+/* Spacious Dashboard Shell Layout */
 .dashboard-shell {
     display: grid;
     gap: 32px;
     padding-bottom: 40px;
 }
 
-/* Hero Section */
+/* Premium Hero Section */
 .ins-hero-section {
-    background: linear-gradient(135deg, var(--ins-hero-gradient-start) 0%, var(--ins-hero-gradient-end) 100%);
+    background: linear-gradient(135deg, var(--ins-primary) 0%, var(--ins-primary-strong) 100%);
     border-radius: var(--ins-radius-lg, 20px);
     padding: 44px;
     color: #ffffff;
     box-shadow: 0 12px 30px rgba(15, 23, 42, 0.15);
     position: relative;
     overflow: hidden;
+    margin-bottom: 8px;
 }
 
 /* Subtle decorative shape in hero */
@@ -48,6 +46,7 @@
     font-weight: 800;
     letter-spacing: -0.03em;
     line-height: 1.2;
+    color: #ffffff !important;
 }
 
 .ins-hero-content p {
@@ -56,48 +55,40 @@
     opacity: 0.92;
     max-width: 600px;
     line-height: 1.6;
+    color: rgba(255, 255, 255, 0.85) !important;
 }
 
-.ins-section-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 24px;
+.ins-hero-content strong {
+    color: #ffffff !important;
+    font-weight: 700;
 }
 
-.ins-section-head h3 {
-    margin: 0;
-    font-size: 1.45rem;
-    color: var(--ins-heading, #0f172a);
-    font-weight: 800;
-    letter-spacing: -0.02em;
-}
-
-/* Attention / Actions Grid */
+/* Premium KPI Overview Grid */
 .ins-attention-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 24px;
 }
 
+/* Redesigned Metric Cards (Tactile Hover lifts) */
 .ins-attention-card {
     padding: 24px;
-    border: 1px solid var(--ins-border, #e2e8f0);
-    border-radius: var(--ins-radius-md, 16px);
-    background: var(--ins-surface-strong, #ffffff);
+    border: 1px solid var(--ins-border);
+    border-radius: var(--ins-radius-md);
+    background: var(--ins-surface-strong);
     display: flex;
     align-items: flex-start;
     gap: 16px;
-    box-shadow: var(--ins-card-shadow);
-    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    transition: transform var(--ins-motion-base), box-shadow var(--ins-motion-base), border-color var(--ins-motion-base);
     position: relative;
     overflow: hidden;
 }
 
 .ins-attention-card:hover {
     transform: translateY(-4px);
-    box-shadow: var(--ins-card-shadow-hover);
-    border-color: var(--ins-accent-border, rgba(99, 102, 241, 0.15));
+    box-shadow: 0 12px 24px -4px rgba(0, 0, 0, 0.08);
+    border-color: var(--ins-primary-soft);
 }
 
 .ins-attention-icon {
@@ -121,7 +112,7 @@
     text-transform: uppercase;
     letter-spacing: 0.08em;
     font-weight: 700;
-    color: var(--ins-muted, #64748b);
+    color: var(--ins-muted);
     margin-bottom: 6px;
 }
 
@@ -129,31 +120,30 @@
     font-size: 2.2rem;
     font-weight: 800;
     line-height: 1;
-    color: var(--ins-heading, #0f172a);
+    color: var(--ins-heading);
     margin-bottom: 6px;
     letter-spacing: -0.02em;
 }
 
 .ins-attention-card small {
     font-size: 0.9rem;
-    color: var(--ins-muted, #64748b);
+    color: var(--ins-muted);
 }
 
 /* Alert Themes */
 .ins-attention-warn .ins-attention-icon {
-    background: var(--ins-warning-soft, rgba(245, 158, 11, 0.08));
-    color: var(--ins-warning, #f59e0b);
+    background: var(--ins-warning-soft);
+    color: var(--ins-warning);
 }
 .ins-attention-neutral .ins-attention-icon {
-    background: var(--ins-surface-soft, #f8fafc);
-    color: var(--ins-muted-strong, #475569);
+    background: var(--ins-surface-soft);
+    color: var(--ins-muted-strong);
 }
 .ins-attention-good .ins-attention-icon {
-    background: var(--ins-success-soft, rgba(16, 185, 129, 0.08));
-    color: var(--ins-success, #10b981);
+    background: var(--ins-success-soft);
+    color: var(--ins-success);
 }
 
-/* Add a subtle accent border to the cards */
 .ins-attention-card::before {
     content: '';
     position: absolute;
@@ -162,133 +152,372 @@
     bottom: 0;
     width: 4px;
 }
-.ins-attention-warn::before { background: var(--ins-warning, #f59e0b); }
-.ins-attention-neutral::before { background: var(--ins-muted, #64748b); }
-.ins-attention-good::before { background: var(--ins-success, #10b981); }
+.ins-attention-warn::before { background: var(--ins-warning); }
+.ins-attention-neutral::before { background: var(--ins-muted); }
+.ins-attention-good::before { background: var(--ins-success); }
 
-/* Dashboard Course Grid */
-.ins-course-grid {
+
+/* ==========================================================================
+   Task 2 & 3: Premium Rebuilt Course Grid & Card Components
+   ========================================================================== */
+
+/* Premium Grid Container */
+.pm-courses-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 24px;
+    gap: 28px;
+    margin-top: 24px;
 }
 
-.ins-course-card {
-    border: 1px solid var(--ins-border, #e2e8f0);
-    border-radius: var(--ins-radius-md, 16px);
-    background: var(--ins-surface-strong, #ffffff);
+/* Premium Management Card */
+.pm-course-card {
+    background: var(--ins-surface-strong);
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    transition: transform var(--ins-motion-base), box-shadow var(--ins-motion-base);
+}
+
+.pm-course-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px -4px rgba(0, 0, 0, 0.08);
+}
+
+/* Banner area */
+.pm-card-banner {
+    height: 140px;
+    overflow: hidden;
+    position: relative;
+    background: linear-gradient(135deg, var(--ins-primary-soft) 0%, var(--ins-primary) 100%);
+}
+
+.pm-card-banner img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Premium Card Body */
+.pm-card-body {
     padding: 24px;
     display: flex;
     flex-direction: column;
-    gap: 18px;
-    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.25s ease;
-    box-shadow: var(--ins-card-shadow);
+    flex: 1;
 }
 
-.ins-course-card:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--ins-card-shadow-hover);
-    border-color: var(--ins-accent-border, rgba(99, 102, 241, 0.15));
-}
-
-.ins-course-card__top {
+/* Header & Badges */
+.pm-card-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
     gap: 12px;
+    margin-bottom: 12px;
 }
 
-.ins-course-card__top h4 {
+.pm-course-title {
     margin: 0;
-    font-size: 1.15rem;
-    color: var(--ins-heading, #0f172a);
-    line-height: 1.35;
-    font-weight: 800;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--ins-heading);
+    line-height: 1.4;
 }
 
-.ins-course-card__meta {
-    margin: 0;
-    color: var(--ins-muted, #64748b);
-    font-size: 0.9rem;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+.pm-status-badge {
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
 }
 
-.ins-course-card__meta i {
-    font-size: 0.8rem;
-    color: var(--ins-primary, #4f46e5);
+.pm-status-active {
+    background: var(--ins-success-soft);
+    color: var(--ins-success);
+}
+.pm-status-pending {
+    background: var(--ins-warning-soft);
+    color: var(--ins-warning);
+}
+.pm-status-archived {
+    background: var(--ins-danger-soft);
+    color: var(--ins-danger);
 }
 
-.ins-course-card__stats {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    background: var(--ins-surface-soft, #f8fafc);
-    padding: 16px;
-    border-radius: 12px;
-    margin-top: auto;
-    border: 1px solid var(--ins-border, #e2e8f0);
-}
-
-.ins-course-card__stats div {
+/* Compact Operational Metrics Stack */
+.pm-metrics-stack {
     display: flex;
     flex-direction: column;
+    gap: 10px;
+    margin: 18px 0 auto;
 }
 
-.ins-course-card__stats strong {
-    font-size: 1.25rem;
-    color: var(--ins-heading, #0f172a);
-    font-weight: 800;
+.pm-metric-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.88rem;
+    color: var(--ins-muted);
 }
 
-.ins-course-card__stats span {
-    font-size: 0.75rem;
-    color: var(--ins-muted, #64748b);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    font-weight: 600;
+.pm-metric-item svg {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+    color: var(--ins-muted-strong);
+    flex-shrink: 0;
 }
 
-.ins-course-card__cta {
-    width: 100%;
-    justify-content: center;
-    border-radius: var(--ins-radius-sm, 10px);
-    min-height: 44px;
+.pm-metric-item strong {
+    color: var(--ins-heading);
     font-weight: 700;
-    margin-top: 8px;
 }
 
-.empty-state-box {
-    text-align: center;
-    padding: 60px 20px;
-    background: var(--ins-surface-strong, #ffffff);
-    border-radius: var(--ins-radius-lg, 20px);
-    border: 1px dashed var(--ins-border-strong, #cbd5e1);
-    color: var(--ins-muted, #64748b);
-    box-shadow: var(--ins-shadow-sm);
+/* Warning highlight for pending items */
+.pm-metric-warn {
+    color: var(--ins-danger) !important;
 }
 
-.empty-state-box i {
-    font-size: 3rem;
-    color: var(--ins-primary, #4f46e5);
-    opacity: 0.8;
-    margin-bottom: 16px;
+.pm-metric-warn strong {
+    color: var(--ins-danger) !important;
 }
 
-.empty-state-box p {
-    font-size: 1.1rem;
+.pm-metric-warn svg {
+    color: var(--ins-danger) !important;
+    animation: pmPulse 2s infinite;
+}
+
+@keyframes pmPulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.1); opacity: 0.8; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* Card Action Pill Button */
+.pm-card-footer {
+    padding: 0 24px 24px;
+}
+
+.pm-manage-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 12px 24px;
+    background: var(--ins-primary);
+    color: #ffffff;
+    border-radius: 999px; /* Rounded pill appearance */
+    font-weight: 600;
+    font-size: 0.88rem;
+    text-decoration: none;
+    transition: background-color var(--ins-motion-fast), transform var(--ins-motion-fast);
+}
+
+.pm-manage-btn:hover {
+    background: var(--ins-primary-strong);
+}
+
+
+/* ==========================================================================
+   Premium Rebuilt Chart Components
+   ========================================================================== */
+
+.pm-chart-section {
+    margin-bottom: 32px;
+}
+
+.pm-chart-card {
+    background: var(--ins-surface-strong);
+    border: none;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    transition: box-shadow var(--ins-motion-base);
+}
+
+.pm-chart-card:hover {
+    box-shadow: 0 12px 24px -4px rgba(0, 0, 0, 0.08);
+}
+
+.pm-chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    border-bottom: 1px solid var(--ins-border);
+    padding-bottom: 16px;
+}
+
+.pm-chart-header h4 {
     margin: 0;
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--ins-heading);
 }
 
+.pm-chart-header p {
+    margin: 4px 0 0;
+    font-size: 0.88rem;
+    color: var(--ins-muted);
+}
+
+.pm-chart-body {
+    position: relative;
+    width: 100%;
+    height: 380px;
+}
+
+
+/* ==========================================================================
+   Premium Skeletons & Transitions
+   ========================================================================== */
+
+.pm-skeleton-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 28px;
+    margin-top: 24px;
+}
+
+.pm-skeleton-card {
+    background: var(--ins-surface-strong);
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 380px;
+}
+
+.pm-skeleton-banner {
+    height: 140px;
+    background: var(--ins-surface-soft);
+}
+
+.pm-skeleton-body {
+    padding: 24px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.pm-skeleton-title {
+    height: 20px;
+    background: var(--ins-surface-soft);
+    border-radius: 4px;
+    width: 85%;
+}
+
+.pm-skeleton-title.short {
+    width: 50%;
+}
+
+.pm-skeleton-metrics {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: auto;
+}
+
+.pm-skeleton-metric {
+    height: 20px;
+    background: var(--ins-surface-soft);
+    border-radius: 4px;
+    width: 70%;
+}
+
+.pm-skeleton-footer {
+    height: 44px;
+    margin: 14px 24px 24px;
+    background: var(--ins-surface-soft);
+    border-radius: 999px;
+}
+
+/* Pulsing Shimmer animation */
+.placeholder-shimmer {
+    background: linear-gradient(
+        90deg,
+        var(--ins-surface-soft) 25%,
+        var(--ins-border) 37%,
+        var(--ins-surface-soft) 63%
+    );
+    background-size: 400% 100%;
+    animation: pm-skeleton-shimmer 1.4s ease infinite;
+}
+
+@keyframes pm-skeleton-shimmer {
+    0% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Smooth loader switch animations */
+.ins-fade-in {
+    animation: pmFadeIn 0.4s ease forwards;
+}
+
+@keyframes pmFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+/* ==========================================================================
+   Premium Slate Dark Theme Overrides
+   ========================================================================== */
+
+:root[data-theme="dark"] .pm-course-card,
+:root[data-theme="dark"] .pm-chart-card,
+:root[data-theme="dark"] .pm-skeleton-card {
+    background: #0e1726;
+    box-shadow: 0 4px 12px rgba(2, 6, 17, 0.2);
+}
+
+:root[data-theme="dark"] .pm-skeleton-banner,
+:root[data-theme="dark"] .pm-skeleton-title,
+:root[data-theme="dark"] .pm-skeleton-metric,
+:root[data-theme="dark"] .pm-skeleton-footer {
+    background: #111a2e;
+}
+
+:root[data-theme="dark"] .placeholder-shimmer {
+    background: linear-gradient(
+        90deg,
+        #111a2e 25%,
+        rgba(148, 163, 184, 0.1) 37%,
+        #111a2e 63%
+    );
+    background-size: 400% 100%;
+}
+
+/* Mobile Grid & Hero Responsiveness */
 @media (max-width: 768px) {
     .ins-hero-section {
-        padding: 24px;
+        padding: 28px 24px;
+        margin-bottom: 0;
     }
     .ins-hero-content h2 {
-        font-size: 2rem;
+        font-size: 1.85rem !important;
     }
-    .ins-course-grid {
+    .ins-hero-content p {
+        font-size: 0.98rem !important;
+        margin-top: 10px;
+    }
+    .pm-courses-grid,
+    .pm-skeleton-grid {
         grid-template-columns: 1fr;
+        gap: 20px;
     }
 }
