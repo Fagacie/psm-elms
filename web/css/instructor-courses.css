@@ -1727,3 +1727,237 @@
     justify-content: flex-end;
     gap: 12px;
 }
+
+/* ==========================================================================
+   COURSE WORKSPACE REFURBISHED STYLES
+   ========================================================================== */
+
+/* Slim Header */
+.ws-page-head-slim {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--ws-border-glass);
+}
+
+.ws-head-left-slim {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.ws-head-left-slim h2 {
+    font-size: 1.65rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--ins-heading);
+    margin: 0;
+}
+
+/* Modern Horizontal Tab Bar */
+.ws-navbar-modern {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 28px;
+    border-bottom: 2px solid var(--ws-border-glass);
+    padding: 0 0 1px 0;
+    margin-bottom: 32px;
+    position: sticky;
+    top: 70px;
+    background: var(--ins-bg, #f8fafc);
+    z-index: 99;
+}
+
+[data-theme="dark"] .ws-navbar-modern {
+    background: #0e1726; /* Sticks seamlessly on dark layout bg */
+}
+
+.ws-nav-link-modern {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 4px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--ins-muted, #64748b);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px; /* Overlap with navbar border */
+    white-space: nowrap;
+}
+
+.ws-nav-link-modern:hover {
+    color: var(--ws-primary, #6366f1);
+}
+
+.ws-nav-link-modern.active {
+    color: var(--ws-primary, #6366f1);
+    font-weight: 700;
+    border-bottom-color: var(--ws-primary, #6366f1);
+}
+
+/* Overview Dashboard Layout */
+.overview-dashboard-container {
+    display: flex;
+    flex-direction: column;
+    gap: 36px;
+}
+
+/* Top Section: Metadata & Info */
+.overview-top-section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.overview-meta-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.meta-badge-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    background: var(--ws-bg-glass);
+    border: 1px solid var(--ws-border-glass);
+    color: var(--ins-muted-strong, #475569);
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.meta-badge-chip i {
+    color: var(--ws-primary, #6366f1);
+}
+
+.overview-course-desc {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: var(--ins-muted, #64748b);
+    max-width: 70ch;
+    margin: 0;
+}
+
+/* Middle Section: Dynamic Grid of KPI Cards */
+.overview-kpis-grid-modern {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+}
+
+.kpi-card-modern {
+    background: var(--ws-bg-glass);
+    border: 1px solid var(--ws-border-glass);
+    border-radius: 16px;
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    box-shadow: var(--ws-shadow);
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.kpi-card-modern:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--ws-shadow-hover);
+    border-color: var(--ws-primary-glow);
+}
+
+.kpi-icon-wrapper {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.kpi-icon-wrapper.students { background: rgba(99, 102, 241, 0.1); color: var(--ws-primary, #6366f1); }
+.kpi-icon-wrapper.materials { background: rgba(16, 185, 129, 0.1); color: var(--ws-success, #10b981); }
+.kpi-icon-wrapper.assessments { background: rgba(245, 158, 11, 0.1); color: var(--ws-warning, #f59e0b); }
+.kpi-icon-wrapper.pending { background: rgba(239, 68, 68, 0.1); color: var(--ws-danger, #ef4444); }
+
+.kpi-data-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.kpi-data-wrapper strong {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--ins-heading);
+    line-height: 1;
+}
+
+.kpi-data-wrapper span {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--ins-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Bottom Section: Quick Links & Actions */
+.overview-actions-section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.overview-actions-section h3 {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--ins-heading);
+    margin: 0;
+}
+
+.overview-actions-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.action-pill-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 24px;
+    background: var(--ws-bg-glass);
+    border: 1px solid var(--ws-border-glass);
+    border-radius: 12px;
+    color: var(--ins-heading);
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: var(--ws-shadow);
+}
+
+.action-pill-btn:hover {
+    background: var(--ws-primary, #6366f1);
+    border-color: var(--ws-primary, #6366f1);
+    color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.2);
+}
+
+.action-pill-btn i {
+    font-size: 1rem;
+    transition: transform 0.2s ease;
+}
+
+.action-pill-btn:hover i {
+    transform: scale(1.1);
+}
+

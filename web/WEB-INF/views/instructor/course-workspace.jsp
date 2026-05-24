@@ -45,45 +45,7 @@
         padding-top: 0px;
     }
 
-    /* Workspace navigation */
-    .ws-navbar {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        background: var(--ws-bg-glass);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border: 1px solid var(--ws-border-glass);
-        border-radius: 16px;
-        padding: 8px;
-        margin-bottom: 24px;
-        box-shadow: var(--ws-shadow);
-        position: sticky;
-        top: 76px;
-        z-index: 10;
-    }
 
-    .ws-nav-link {
-        flex: 1 1 180px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-        padding: 14px 18px;
-        font-size: 0.95rem;
-        font-weight: 700;
-        color: var(--ins-muted, #64748b);
-        border-radius: 12px;
-        text-decoration: none;
-        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    .ws-nav-link:hover,
-    .ws-nav-link.active {
-        color: #ffffff;
-        background: var(--ws-primary);
-        box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
-    }
 
     /* Tab Display and Animations */
     .ws-tab-content {
@@ -544,19 +506,13 @@
     <div class="content-wrapper course-workspace-page">
         
         <%-- HEADER --%>
-        <section class="ins-section-head ws-page-head" style="margin-bottom: 24px;">
-            <div class="ws-head-title" style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 12px;">
+        <section class="ws-page-head-slim" style="margin-bottom: 24px;">
+            <div class="ws-head-left-slim">
                 <a href="${pageContext.request.contextPath}/instructor/courses" class="btn btn-secondary btn-sm" style="height: 38px; display: inline-flex; align-items: center; gap: 8px;">
                     <i class="fas fa-arrow-left"></i> Back
                 </a>
-                <h2 style="margin: 0; font-size: 1.8rem; font-weight: 800;"><c:out value="${selectedCourse.courseName}"/></h2>
+                <h2><c:out value="${selectedCourse.courseName}"/></h2>
                 <span class="status-badge status-${selectedCourse.status}"><c:out value="${selectedCourse.status}"/></span>
-            </div>
-            <div class="workspace-meta-row" style="display: flex; gap: 16px; flex-wrap: wrap; font-size: 0.88rem; color: var(--ins-muted);">
-                <span><i class="fas fa-tag"></i> <c:out value="${empty selectedCourse.category ? 'General' : selectedCourse.category}"/></span>
-                <span><i class="fas fa-signal"></i> <c:out value="${selectedCourse.level}"/></span>
-                <span><i class="fas fa-clock"></i> <c:out value="${selectedCourse.displayDuration}"/></span>
-                <span><i class="fas fa-calendar-alt"></i> Updated: <c:out value="${not empty selectedCourse.updatedAt ? selectedCourse.updatedAt.toLocalDate() : (not empty selectedCourse.createdAt ? selectedCourse.createdAt.toLocalDate() : '-') }"/></span>
             </div>
         </section>
 
@@ -569,26 +525,119 @@
         </c:url>
 
         <%-- WORKSPACE NAVIGATION --%>
-        <nav class="ws-navbar" aria-label="Workspace navigation">
-            <a class="ws-nav-link active" href="#overview" data-section-link="overview">
+        <nav class="ws-navbar-modern" aria-label="Workspace navigation">
+            <a class="ws-nav-link-modern active" href="#overview" data-section-link="overview">
                 <i class="fas fa-chart-pie"></i> Overview
             </a>
-            <a class="ws-nav-link" href="#materials" data-section-link="materials">
+            <a class="ws-nav-link-modern" href="#materials" data-section-link="materials">
                 <i class="fas fa-book-open"></i> Materials
             </a>
-            <a class="ws-nav-link" href="#assessments" data-section-link="assessments">
+            <a class="ws-nav-link-modern" href="#assessments" data-section-link="assessments">
                 <i class="fas fa-tasks"></i> Assessments
             </a>
-            <a class="ws-nav-link" href="#students" data-section-link="students">
+            <a class="ws-nav-link-modern" href="#students" data-section-link="students">
                 <i class="fas fa-users"></i> Students
             </a>
         </nav>
 
-        <%-- SECTION 1: OVERVIEW --%>
+        <%-- SECTION 1: OVERVIEW DASHBOARD --%>
         <div id="overview" class="ws-tab-content active">
-            <div class="section-card" style="padding: 16px; border-radius: 12px; text-align: center; color: var(--ins-muted);">
-                <i class="fas fa-layer-group" style="font-size: 2rem; margin-bottom: 12px; color: var(--ins-border);"></i>
-                <p style="margin: 0;">Select a module above to manage this workspace.</p>
+            <div class="overview-dashboard-container">
+                
+                <%-- TOP SECTION: COURSE DETAILS --%>
+                <section class="overview-top-section">
+                    <div class="overview-meta-chips">
+                        <div class="meta-badge-chip">
+                            <i class="fas fa-tag"></i>
+                            <span>Category: <c:out value="${empty selectedCourse.category ? 'General' : selectedCourse.category}"/></span>
+                        </div>
+                        <div class="meta-badge-chip">
+                            <i class="fas fa-signal"></i>
+                            <span>Level: <c:out value="${selectedCourse.level}"/></span>
+                        </div>
+                        <div class="meta-badge-chip">
+                            <i class="fas fa-clock"></i>
+                            <span>Duration: <c:out value="${selectedCourse.displayDuration}"/></span>
+                        </div>
+                        <div class="meta-badge-chip">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>Updated: <c:out value="${not empty selectedCourse.updatedAt ? selectedCourse.updatedAt.toLocalDate() : (not empty selectedCourse.createdAt ? selectedCourse.createdAt.toLocalDate() : '-') }"/></span>
+                        </div>
+                    </div>
+                    
+                    <c:if test="${not empty selectedCourse.description}">
+                        <p class="overview-course-desc">
+                            <c:out value="${selectedCourse.description}"/>
+                        </p>
+                    </c:if>
+                </section>
+
+                <%-- MIDDLE SECTION: COURSE KPIS GRID --%>
+                <section class="overview-kpis-grid-modern">
+                    <%-- KPI 1: Enrolled Students --%>
+                    <div class="kpi-card-modern">
+                        <div class="kpi-icon-wrapper students">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="kpi-data-wrapper">
+                            <strong><c:out value="${totalStudents}"/></strong>
+                            <span>Total Enrolled Students</span>
+                        </div>
+                    </div>
+
+                    <%-- KPI 2: Materials Uploaded --%>
+                    <div class="kpi-card-modern">
+                        <div class="kpi-icon-wrapper materials">
+                            <i class="fas fa-book-open"></i>
+                        </div>
+                        <div class="kpi-data-wrapper">
+                            <strong><c:out value="${publishedMaterials}"/></strong>
+                            <span>Materials Uploaded</span>
+                        </div>
+                    </div>
+
+                    <%-- KPI 3: Assessments Created --%>
+                    <div class="kpi-card-modern">
+                        <div class="kpi-icon-wrapper assessments">
+                            <i class="fas fa-tasks"></i>
+                        </div>
+                        <div class="kpi-data-wrapper">
+                            <strong><c:out value="${assessmentCount}"/></strong>
+                            <span>Assessments Created</span>
+                        </div>
+                    </div>
+
+                    <%-- KPI 4: Pending Submissions --%>
+                    <div class="kpi-card-modern">
+                        <div class="kpi-icon-wrapper pending">
+                            <i class="fas fa-file-signature"></i>
+                        </div>
+                        <div class="kpi-data-wrapper">
+                            <strong style="color: ${pendingGrading > 0 ? 'var(--ws-danger, #ef4444)' : 'inherit'}"><c:out value="${pendingGrading}"/></strong>
+                            <span>Pending Submissions</span>
+                        </div>
+                    </div>
+                </section>
+
+                <%-- BOTTOM SECTION: QUICK ACTIONS --%>
+                <section class="overview-actions-section">
+                    <h3>Quick Actions</h3>
+                    <div class="overview-actions-grid">
+                        <button onclick="openUploadModal()" class="action-pill-btn" style="cursor: pointer;">
+                            <i class="fas fa-upload"></i>
+                            <span>Upload New Material</span>
+                        </button>
+                        <a href="${assessmentWorkspaceBaseUrl}&view=editor" class="action-pill-btn">
+                            <i class="fas fa-plus"></i>
+                            <span>Create Assessment</span>
+                        </a>
+                        <a href="#students" class="action-pill-btn">
+                            <i class="fas fa-users"></i>
+                            <span>View Roster</span>
+                        </a>
+                    </div>
+                </section>
+                
             </div>
         </div>
 
