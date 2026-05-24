@@ -8,10 +8,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${enrollment.courseName} - Learning Hub</title>
-    <jsp:include page="/WEB-INF/views/common/student-head-assets.jsp"/>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/learning-hub.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/student-assessment-module.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/learning-hub-v2.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <%@ include file="/WEB-INF/views/common/theme-bootstrap.jspf" %>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/learning-hub-modern.css">
+    <script defer src="${pageContext.request.contextPath}/js/theme-toggle.js"></script>
 </head>
 <body class="sv-page lh-shell-page"
       data-context-path="${pageContext.request.contextPath}"
@@ -37,7 +41,7 @@
             <div class="lh-focus-topbar__bar-fill" id="lhTopbarFill" style="width:${progressPercent}%"></div>
         </div>
     </div>
-    <button type="button" class="theme-toggle" data-theme-toggle aria-pressed="false" aria-label="Switch to dark mode" title="Switch to dark mode" style="margin-left: 20px; margin-right: 12px; height: 36px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; border: 1px solid rgba(148, 163, 184, 0.15); background: transparent; color: #94a3b8; cursor: pointer; padding: 0 12px; font-size: 0.8rem; font-weight: 700; gap: 8px; transition: border-color 0.15s, color 0.15s;">
+    <button type="button" class="theme-toggle" data-theme-toggle aria-pressed="false" aria-label="Switch to dark mode" title="Switch to dark mode">
         <i class="fas fa-moon" aria-hidden="true"></i>
         <span class="theme-toggle-label">Dark mode</span>
     </button>
@@ -117,7 +121,7 @@
                                 <c:when test="${item.completedForProgress}"><i class="fas fa-check-circle"></i></c:when>
                                 <c:when test="${item.locked}"><i class="fas fa-lock"></i></c:when>
                                 <c:when test="${item.active}"><i class="fas fa-play"></i></c:when>
-                                <c:otherwise><i class="fas fa-circle" style="font-size:0.4rem;"></i></c:otherwise>
+                                <c:otherwise><i class="fas fa-circle lh-ci-state-idle"></i></c:otherwise>
                             </c:choose>
                         </span>
                     </a>
@@ -411,30 +415,111 @@
                                     </div>
                                 </div>
                             </div>
+
+                            <%-- Certificate Claim Card in Overview --%>
+                            <c:if test="${enrollment.coursePrice > 0}">
+                                <div class="lh-overview__section">
+                                    <h3 class="lh-overview__section-title"><i class="fas fa-certificate"></i> Course Certificate</h3>
+                                    <div class="lh-cert-overview-card ${not empty userCertificate ? 'is-earned' : (progressPercent == 100 and overallPerformance >= passingGrade ? 'is-ready' : 'is-locked')}">
+                                        <div class="lh-cert-overview-card__content">
+                                            <c:choose>
+                                                <c:when test="${not empty userCertificate}">
+                                                    <div class="lh-status-icon">
+                                                        <i class="fas fa-medal"></i>
+                                                    </div>
+                                                    <div class="lh-status-copy">
+                                                        <h4>Credential Issued</h4>
+                                                        <p>Congratulations! Your official certificate has been successfully issued for this course.</p>
+                                                    </div>
+                                                </c:when>
+                                                <c:when test="${progressPercent == 100 and overallPerformance >= passingGrade}">
+                                                    <div class="lh-status-icon">
+                                                        <i class="fas fa-award"></i>
+                                                    </div>
+                                                    <div class="lh-status-copy">
+                                                        <h4>Certificate Unlocked</h4>
+                                                        <p>All checkpoints satisfied! You are now eligible to claim your completion credential.</p>
+                                                    </div>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <div class="lh-status-icon">
+                                                        <i class="fas fa-lock"></i>
+                                                    </div>
+                                                    <div class="lh-status-copy">
+                                                        <h4>Certificate Locked</h4>
+                                                        <p>Complete all lesson materials and achieve at least ${passingGrade}% average performance to unlock.</p>
+                                                    </div>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </div>
+
+                                        <div class="lh-cert-overview-card__actions">
+                                            <c:choose>
+                                                <c:when test="${not empty userCertificate}">
+                                                    <a href="${pageContext.request.contextPath}/student/certificate?enrollmentId=${enrollment.enrollmentId}" class="sv-btn primary">
+                                                        <i class="fas fa-download"></i> Download Certificate
+                                                    </a>
+                                                </c:when>
+                                                <c:when test="${progressPercent == 100 and overallPerformance >= passingGrade}">
+                                                    <form method="post" action="${pageContext.request.contextPath}/student/certificate">
+                                                        <input type="hidden" name="enrollmentId" value="${enrollment.enrollmentId}">
+                                                        <button type="submit" class="sv-btn primary">
+                                                            <i class="fas fa-bolt"></i> Generate Certificate
+                                                        </button>
+                                                    </form>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <c:set var="tooltipText" value="" />
+                                                    <c:choose>
+                                                        <c:when test="${progressPercent < 100 and overallPerformance < passingGrade}">
+                                                            <c:set var="tooltipText" value="You must complete 100% of materials (current: ${progressPercent}%) and achieve an average score of at least ${passingGrade}% (current: ${overallPerformance}%)." />
+                                                        </c:when>
+                                                        <c:when test="${progressPercent < 100}">
+                                                            <c:set var="tooltipText" value="You must complete 100% of materials (current: ${progressPercent}%)." />
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            <c:set var="tooltipText" value="You must achieve an average score of at least ${passingGrade}% (current: ${overallPerformance}%)." />
+                                                        </c:otherwise>
+                                                    </c:choose>
+
+                                                    <div class="lh-tooltip-container">
+                                                        <button class="sv-btn" disabled="disabled" title="${tooltipText}">
+                                                            <i class="fas fa-lock"></i> Generate Certificate
+                                                        </button>
+                                                        <span class="lh-tooltip-bubble">
+                                                            ${tooltipText}
+                                                        </span>
+                                                    </div>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </div>
+                                    </div>
+                                </div>
+                            </c:if>
                         </section>
                     </c:when>
 
                     <c:when test="${selectedMode == 'performance'}">
-                        <section class="sa-panel lh-performance-shell" style="padding: 24px; border-radius: 18px; border: 1px solid var(--sv-border); background: var(--sv-surface);">
-                            <div class="sa-panel-head" style="display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; align-items: start; margin-bottom: 18px;">
+                        <section class="sa-panel lh-performance-shell">
+                            <div class="sa-panel-head">
                                 <div>
-                                    <span class="sa-badge-flat success" style="margin-bottom: 10px;"><i class="fas fa-chart-column"></i> Performance</span>
-                                    <h3 style="margin: 0; font-size: 1.5rem; color: var(--sv-foreground);">${enrollment.courseName}</h3>
+                                    <span class="sa-badge-flat success"><i class="fas fa-chart-column"></i> Performance</span>
+                                    <h3>${enrollment.courseName}</h3>
                                 </div>
                             </div>
 
-                            <div style="overflow-x: auto;">
-                                <table style="width: 100%; border-collapse: collapse; min-width: 940px;">
+                            <div class="lh-table-scroll">
+                                <table class="lh-performance-table">
                                     <thead>
-                                        <tr style="text-align: left; color: var(--sv-muted); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em;">
-                                            <th style="padding: 14px 10px; border-bottom: 1px solid var(--sv-border);">Assessment</th>
-                                            <th style="padding: 14px 10px; border-bottom: 1px solid var(--sv-border);">Attempts</th>
-                                            <th style="padding: 14px 10px; border-bottom: 1px solid var(--sv-border);">Best Score</th>
-                                            <th style="padding: 14px 10px; border-bottom: 1px solid var(--sv-border);">Best %</th>
-                                            <th style="padding: 14px 10px; border-bottom: 1px solid var(--sv-border);">Mastery</th>
-                                            <th style="padding: 14px 10px; border-bottom: 1px solid var(--sv-border);">Latest Submission</th>
-                                            <th style="padding: 14px 10px; border-bottom: 1px solid var(--sv-border);">Status</th>
-                                            <th style="padding: 14px 10px; border-bottom: 1px solid var(--sv-border);">Open</th>
+                                        <tr>
+                                            <th>Assessment</th>
+                                            <th>Attempts</th>
+                                            <th>Best Score</th>
+                                            <th>Best %</th>
+                                            <th>Mastery</th>
+                                            <th>Latest Submission</th>
+                                            <th>Status</th>
+                                            <th>Open</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -446,25 +531,25 @@
                                             <c:set var="usedAttempts" value="${usedAttemptsByAssessment[assessmentId]}"/>
                                             <c:set var="allowedAttempts" value="${allowedAttemptsByAssessment[assessmentId]}"/>
                                             <c:set var="hasActiveAttempt" value="${activeAttemptByAssessment[assessmentId]}"/>
-                                            <tr style="border-bottom: 1px solid var(--sv-border);">
-                                                <td style="padding: 16px 10px; vertical-align: top;"><strong style="display: block; color: var(--sv-foreground);">${assessment.title}</strong><span style="display: block; margin-top: 4px; color: var(--sv-muted); font-size: 0.82rem;">${assessment.type}</span></td>
-                                                <td style="padding: 16px 10px; vertical-align: top; white-space: nowrap; color: var(--sv-foreground); font-weight: 600;">${usedAttempts} / ${allowedAttempts}</td>
-                                                <td style="padding: 16px 10px; vertical-align: top; white-space: nowrap; color: var(--sv-foreground); font-weight: 600;"><c:choose><c:when test="${not empty bestScore}"><fmt:formatNumber value="${bestScore}" maxFractionDigits="1"/></c:when><c:otherwise>--</c:otherwise></c:choose></td>
-                                                <td style="padding: 16px 10px; vertical-align: top; white-space: nowrap; color: var(--sv-foreground); font-weight: 600;"><c:choose><c:when test="${not empty bestPercent}"><fmt:formatNumber value="${bestPercent}" maxFractionDigits="1"/>%</c:when><c:otherwise>--</c:otherwise></c:choose></td>
-                                                <td style="padding: 16px 10px; vertical-align: top; white-space: nowrap;">
+                                            <tr>
+                                                <td><strong>${assessment.title}</strong><span class="lh-table-meta">${assessment.type}</span></td>
+                                                <td><strong>${usedAttempts} / ${allowedAttempts}</strong></td>
+                                                <td><strong><c:choose><c:when test="${not empty bestScore}"><fmt:formatNumber value="${bestScore}" maxFractionDigits="1"/></c:when><c:otherwise>--</c:otherwise></c:choose></strong></td>
+                                                <td><strong><c:choose><c:when test="${not empty bestPercent}"><fmt:formatNumber value="${bestPercent}" maxFractionDigits="1"/>%</c:when><c:otherwise>--</c:otherwise></c:choose></strong></td>
+                                                <td>
                                                     <c:choose>
-                                                        <c:when test="${not empty bestPercent and bestPercent >= 85}"><span class="sa-status status-Approved" style="min-height: 28px; font-size: 0.7rem; padding: 0 12px; border-radius: 999px;">Excellent</span></c:when>
-                                                        <c:when test="${not empty bestPercent and bestPercent >= 70}"><span class="sa-status status-Pending" style="min-height: 28px; font-size: 0.7rem; padding: 0 12px; border-radius: 999px; background: rgba(59, 130, 246, 0.1); color: #2563eb;">Strong</span></c:when>
-                                                        <c:when test="${not empty bestPercent and bestPercent >= 50}"><span class="sa-status status-Pending" style="min-height: 28px; font-size: 0.7rem; padding: 0 12px; border-radius: 999px; background: rgba(245, 158, 11, 0.12); color: #d97706;">Developing</span></c:when>
-                                                        <c:otherwise><span class="sa-status status-Archived" style="min-height: 28px; font-size: 0.7rem; padding: 0 12px; border-radius: 999px;">Needs Review</span></c:otherwise>
+                                                        <c:when test="${not empty bestPercent and bestPercent >= 85}"><span class="sa-status status-Approved">Excellent</span></c:when>
+                                                        <c:when test="${not empty bestPercent and bestPercent >= 70}"><span class="sa-status">Strong</span></c:when>
+                                                        <c:when test="${not empty bestPercent and bestPercent >= 50}"><span class="sa-status status-Pending">Developing</span></c:when>
+                                                        <c:otherwise><span class="sa-status status-Archived">Needs Review</span></c:otherwise>
                                                     </c:choose>
                                                 </td>
-                                                <td style="padding: 16px 10px; vertical-align: top; color: var(--sv-muted); white-space: nowrap;"><c:choose><c:when test="${not empty latestSubmission}">${fn:replace(latestSubmission.submitDate, 'T', ' ')}</c:when><c:otherwise>--</c:otherwise></c:choose></td>
-                                                <td style="padding: 16px 10px; vertical-align: top;"><c:choose><c:when test="${hasActiveAttempt}"><span class="sa-status status-Pending" style="min-height: 28px; font-size: 0.7rem; padding: 0 12px; border-radius: 999px;">Active</span></c:when><c:when test="${not empty latestSubmission and not empty latestSubmission.score}"><span class="sa-status status-Approved" style="min-height: 28px; font-size: 0.7rem; padding: 0 12px; border-radius: 999px;">Graded</span></c:when><c:when test="${not empty latestSubmission}"><span class="sa-status status-Pending" style="min-height: 28px; font-size: 0.7rem; padding: 0 12px; border-radius: 999px;">Awaiting Review</span></c:when><c:otherwise><span class="sa-status status-Archived" style="min-height: 28px; font-size: 0.7rem; padding: 0 12px; border-radius: 999px;">Not Started</span></c:otherwise></c:choose></td>
-                                                <td style="padding: 16px 10px; vertical-align: top; white-space: nowrap;">
+                                                <td><span class="lh-table-meta"><c:choose><c:when test="${not empty latestSubmission}">${fn:replace(latestSubmission.submitDate, 'T', ' ')}</c:when><c:otherwise>--</c:otherwise></c:choose></span></td>
+                                                <td><c:choose><c:when test="${hasActiveAttempt}"><span class="sa-status status-Pending">Active</span></c:when><c:when test="${not empty latestSubmission and not empty latestSubmission.score}"><span class="sa-status status-Approved">Graded</span></c:when><c:when test="${not empty latestSubmission}"><span class="sa-status status-Pending">Awaiting Review</span></c:when><c:otherwise><span class="sa-status status-Archived">Not Started</span></c:otherwise></c:choose></td>
+                                                <td>
                                                     <c:choose>
-                                                        <c:when test="${not empty latestSubmission}"><a class="sv-btn primary" href="${pageContext.request.contextPath}/student/assessments?view=result&enrollmentId=${enrollment.enrollmentId}&assessmentId=${assessment.assessmentId}&submissionId=${latestSubmission.submissionId}" style="height: 36px; padding: 0 14px; border-radius: 8px; display: inline-flex; align-items: center; gap: 6px; font-size: 0.85rem;"><i class="fas fa-chart-column"></i> Result</a></c:when>
-                                                        <c:otherwise><a class="sv-btn" href="${pageContext.request.contextPath}/student/assessments?view=details&enrollmentId=${enrollment.enrollmentId}&assessmentId=${assessment.assessmentId}" style="height: 36px; padding: 0 14px; border-radius: 8px; display: inline-flex; align-items: center; gap: 6px; font-size: 0.85rem; border: 1px solid var(--sv-border);"><i class="fas fa-eye"></i> Open</a></c:otherwise>
+                                                        <c:when test="${not empty latestSubmission}"><a class="sv-btn primary" href="${pageContext.request.contextPath}/student/assessments?view=result&enrollmentId=${enrollment.enrollmentId}&assessmentId=${assessment.assessmentId}&submissionId=${latestSubmission.submissionId}"><i class="fas fa-chart-column"></i> Result</a></c:when>
+                                                        <c:otherwise><a class="sv-btn" href="${pageContext.request.contextPath}/student/assessments?view=details&enrollmentId=${enrollment.enrollmentId}&assessmentId=${assessment.assessmentId}"><i class="fas fa-eye"></i> Open</a></c:otherwise>
                                                     </c:choose>
                                                 </td>
                                             </tr>
@@ -472,22 +557,217 @@
                                     </tbody>
                                 </table>
                             </div>
+
+                            <%-- Certificate Claim Card inside Performance Tab --%>
+                            <c:if test="${enrollment.coursePrice > 0}">
+                                <div class="lh-cert-performance-card ${not empty userCertificate ? 'is-earned' : (progressPercent == 100 and overallPerformance >= passingGrade ? 'is-ready' : 'is-locked')}">
+                                    <c:choose>
+                                        <c:when test="${not empty userCertificate}">
+                                            <div class="lh-status-icon">
+                                                <i class="fas fa-medal"></i>
+                                            </div>
+                                            <h4 class="lh-overview__section-title">Credential Earned!</h4>
+                                            <p>Congratulations! You have completed all syllabus requirements and earned your official certificate.</p>
+                                            <div class="lh-cert-performance-card__meta">
+                                                <div class="lh-cert-stat">
+                                                    <span>Certificate ID</span>
+                                                    <strong>${userCertificate.certificateNumber}</strong>
+                                                </div>
+                                                <div class="lh-cert-stat">
+                                                    <span>Issued On</span>
+                                                    <strong><fmt:formatDate value="${userCertificate.issueDate}" pattern="MMM dd, yyyy"/></strong>
+                                                </div>
+                                            </div>
+                                            <a href="${pageContext.request.contextPath}/student/certificate?enrollmentId=${enrollment.enrollmentId}" class="sv-btn primary">
+                                                <i class="fas fa-download"></i> Download Certificate
+                                            </a>
+                                        </c:when>
+
+                                        <c:when test="${progressPercent == 100 and overallPerformance >= passingGrade}">
+                                            <div class="lh-status-icon">
+                                                <i class="fas fa-award"></i>
+                                            </div>
+                                            <h4 class="lh-overview__section-title">Certificate Unlocked!</h4>
+                                            <p>Excellent work! You have completed all syllabus milestones and satisfied the performance requirements. You can now generate your certificate.</p>
+                                            <form method="post" action="${pageContext.request.contextPath}/student/certificate">
+                                                <input type="hidden" name="enrollmentId" value="${enrollment.enrollmentId}">
+                                                <button type="submit" class="sv-btn primary">
+                                                    <i class="fas fa-bolt"></i> Generate Certificate
+                                                </button>
+                                            </form>
+                                        </c:when>
+
+                                        <c:otherwise>
+                                            <div class="lh-status-icon">
+                                                <i class="fas fa-lock"></i>
+                                            </div>
+                                            <h4 class="lh-overview__section-title">Course Certificate</h4>
+                                            <p>Your completion certificate is currently locked. Complete 100% of course materials and maintain an average grade above ${passingGrade}% to unlock it.</p>
+                                            
+                                            <c:set var="tooltipText" value="" />
+                                            <c:choose>
+                                                <c:when test="${progressPercent < 100 and overallPerformance < passingGrade}">
+                                                    <c:set var="tooltipText" value="You must complete 100% of materials (current: ${progressPercent}%) and achieve an average score of at least ${passingGrade}% (current: ${overallPerformance}%)." />
+                                                </c:when>
+                                                <c:when test="${progressPercent < 100}">
+                                                    <c:set var="tooltipText" value="You must complete 100% of materials (current: ${progressPercent}%)." />
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <c:set var="tooltipText" value="You must achieve an average score of at least ${passingGrade}% (current: ${overallPerformance}%)." />
+                                                </c:otherwise>
+                                            </c:choose>
+
+                                            <div class="lh-tooltip-container">
+                                                <button class="sv-btn" disabled="disabled" title="${tooltipText}">
+                                                    <i class="fas fa-lock"></i> Generate Certificate
+                                                </button>
+                                                <span class="lh-tooltip-bubble">
+                                                    ${tooltipText}
+                                                </span>
+                                            </div>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </div>
+                            </c:if>
                         </section>
                     </c:when>
                     <c:when test="${selectedMode == 'assessment' and not empty selectedAssessment}">
                         <c:set var="isAttempting" value="${(param.attempt == 'true' || selectedAssessmentStatusLabel == 'Active') && selectedAssessment.type != 'Assignment'}"/>
                         <c:choose>
                             <c:when test="${isAttempting}">
-                                <section class="lh-assessment-focus">
-                                    <div class="lh-focus-icon">
-                                        <i class="fas fa-shield-halved"></i>
+                                <section class="ax-shell" data-attempt-shell>
+                                    <article class="ax-frame ax-focus__hero">
+                                        <div>
+                                            <span class="ax-overview__eyebrow"><i class="fas fa-shield-halved"></i> Active Assessment</span>
+                                            <h1 class="ax-focus__title">${selectedAssessment.title}</h1>
+                                            <p class="ax-focus__body">
+                                                <c:choose>
+                                                    <c:when test="${not empty selectedAssessmentInstructions}">${selectedAssessmentInstructions}</c:when>
+                                                    <c:otherwise>Move through each question using the stepper, keep the syllabus visible, and submit without leaving the Learning Hub.</c:otherwise>
+                                                </c:choose>
+                                            </p>
+                                        </div>
+                                        <div class="ax-timer" data-timer>
+                                            <i class="fas fa-clock"></i>
+                                            <span data-timer-text>00:00</span>
+                                        </div>
+                                    </article>
+
+                                    <div class="ax-layout">
+                                        <section class="ax-panel">
+                                            <div class="ax-progress">
+                                                <div class="ax-progress__meta">
+                                                    <span>Question <strong data-current-question>1</strong> of ${fn:length(selectedAssessmentQuestions)}</span>
+                                                    <span>Completion progress</span>
+                                                </div>
+                                                <div class="ax-progress__bar">
+                                                    <div class="ax-progress__fill" data-progress-fill></div>
+                                                </div>
+                                            </div>
+
+                                            <div class="ax-stepper">
+                                                <c:forEach var="q" items="${selectedAssessmentQuestions}" varStatus="loop">
+                                                    <button type="button" class="ax-stepper__item ${loop.first ? 'is-active' : ''}" data-step-index="${loop.index}">${loop.index + 1}</button>
+                                                </c:forEach>
+                                            </div>
+
+                                            <form method="post"
+                                                  action="${pageContext.request.contextPath}/student/assessments"
+                                                  data-attempt-form
+                                                  data-timer-start="${selectedAssessmentTimerStartTime}"
+                                                  data-timer-duration="${selectedAssessmentTimerDurationSeconds}"
+                                                  class="ax-attempt-form">
+                                                <input type="hidden" name="assessmentId" value="${selectedAssessment.assessmentId}">
+                                                <input type="hidden" name="enrollmentId" value="${enrollment.enrollmentId}">
+                                                <input type="hidden" name="timerStart" value="${selectedAssessmentTimerStartTime}">
+                                                <input type="hidden" name="timerDuration" value="${selectedAssessmentTimerDurationSeconds}">
+                                                <input type="hidden" name="exitSubmission" value="0">
+
+                                                <c:forEach var="q" items="${selectedAssessmentQuestions}" varStatus="loop">
+                                                    <article class="ax-question ${loop.first ? 'is-active' : ''}" data-question-index="${loop.index}">
+                                                        <div class="ax-question__head">
+                                                            <div class="ax-question__index">${loop.index + 1}</div>
+                                                            <h2 class="ax-question__title">${q.questionText}</h2>
+                                                        </div>
+                                                        <div class="ax-answer-grid">
+                                                            <label class="ax-answer-card">
+                                                                <input type="radio" name="q_${q.questionId}" value="A" required>
+                                                                <span class="ax-answer-card__bullet"></span>
+                                                                <span class="ax-answer-card__label">A</span>
+                                                                <span class="ax-answer-card__text">${q.optionA}</span>
+                                                            </label>
+                                                            <label class="ax-answer-card">
+                                                                <input type="radio" name="q_${q.questionId}" value="B" required>
+                                                                <span class="ax-answer-card__bullet"></span>
+                                                                <span class="ax-answer-card__label">B</span>
+                                                                <span class="ax-answer-card__text">${q.optionB}</span>
+                                                            </label>
+                                                            <label class="ax-answer-card">
+                                                                <input type="radio" name="q_${q.questionId}" value="C" required>
+                                                                <span class="ax-answer-card__bullet"></span>
+                                                                <span class="ax-answer-card__label">C</span>
+                                                                <span class="ax-answer-card__text">${q.optionC}</span>
+                                                            </label>
+                                                            <label class="ax-answer-card">
+                                                                <input type="radio" name="q_${q.questionId}" value="D" required>
+                                                                <span class="ax-answer-card__bullet"></span>
+                                                                <span class="ax-answer-card__label">D</span>
+                                                                <span class="ax-answer-card__text">${q.optionD}</span>
+                                                            </label>
+                                                        </div>
+                                                    </article>
+                                                </c:forEach>
+
+                                                <div class="ax-sticky-bar">
+                                                    <div class="ax-sticky-bar__summary">
+                                                        <strong>Submit when your answers are ready</strong>
+                                                        <span>The timer, sidebar, and Learning Hub navigation remain visible while you work.</span>
+                                                    </div>
+                                                    <div class="ax-actions">
+                                                        <button type="button" class="ax-btn ax-btn--secondary" data-prev-question>
+                                                            <i class="fas fa-arrow-left"></i>
+                                                            <span>Previous</span>
+                                                        </button>
+                                                        <button type="button" class="ax-btn ax-btn--secondary" data-next-question>
+                                                            <span>Next</span>
+                                                            <i class="fas fa-arrow-right"></i>
+                                                        </button>
+                                                        <button type="button" class="ax-btn ax-btn--danger" data-exit-attempt>
+                                                            <i class="fas fa-door-open"></i>
+                                                            <span>Save & Exit</span>
+                                                        </button>
+                                                        <button type="submit" class="ax-btn ax-btn--primary" data-submit-button>
+                                                            <i class="fas fa-paper-plane"></i>
+                                                            <span>Submit Assessment</span>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </section>
+
+                                        <aside class="ax-side-panel">
+                                            <h2 class="ax-side-panel__title">Assessment Snapshot</h2>
+                                            <p class="ax-side-panel__copy">This attempt is nested directly inside the Learning Hub main content area.</p>
+                                            <div class="ax-review-list ax-review-list--offset">
+                                                <div class="ax-inline-card">
+                                                    <i class="fas fa-clock"></i>
+                                                    <div><span>Time Limit</span><strong>${selectedAssessment.duration != null ? selectedAssessment.duration : '--'}${selectedAssessment.duration != null ? ' min' : ''}</strong></div>
+                                                </div>
+                                                <div class="ax-inline-card">
+                                                    <i class="fas fa-list-check"></i>
+                                                    <div><span>Questions</span><strong>${fn:length(selectedAssessmentQuestions)}</strong></div>
+                                                </div>
+                                                <div class="ax-inline-card">
+                                                    <i class="fas fa-repeat"></i>
+                                                    <div><span>Attempt</span><strong>${selectedAssessmentUsedAttempts + 1} of ${selectedAssessmentAllowedAttempts}</strong></div>
+                                                </div>
+                                                <div class="ax-inline-card">
+                                                    <i class="fas fa-bullseye"></i>
+                                                    <div><span>Passing Score</span><strong>70%</strong></div>
+                                                </div>
+                                            </div>
+                                        </aside>
                                     </div>
-                                    <h3>Continue in the secure assessment workspace</h3>
-                                    <p>This assessment opens as a dedicated page to keep timing, question navigation, and submission handling stable.</p>
-                                    <a class="sv-btn primary" href="${selectedAssessmentPrimaryUrl}">
-                                        <i class="fas fa-arrow-up-right-from-square"></i>
-                                        <span>Open Assessment</span>
-                                    </a>
                                 </section>
                             </c:when>
                             <c:otherwise>
@@ -603,6 +883,19 @@
                                                                 <input type="hidden" name="enrollmentId" value="${enrollment.enrollmentId}">
 
                                                                 <div class="assignment-upload-box">
+                                                                    <c:if test="${not empty selectedAssessmentQuestions}">
+                                                                        <div class="lh-assignment-prompt-box__items">
+                                                                            <c:forEach var="q" items="${selectedAssessmentQuestions}" varStatus="loop">
+                                                                                <c:if test="${not empty q.attachmentUrl}">
+                                                                                    <div class="lh-assignment-prompt-box__attachment">
+                                                                                        <a class="sv-btn" href="${q.attachmentUrl}" target="_blank" rel="noopener noreferrer">
+                                                                                            <i class="fas fa-file-pdf"></i> Open Brief for Task ${loop.index + 1}
+                                                                                        </a>
+                                                                                    </div>
+                                                                                </c:if>
+                                                                            </c:forEach>
+                                                                        </div>
+                                                                    </c:if>
                                                                     <div class="lh-upload-zone" onclick="document.getElementById('answerFileHubRetake').click()">
                                                                         <div class="lh-upload-zone__icon">
                                                                             <i class="fas fa-cloud-arrow-up"></i>
@@ -611,8 +904,8 @@
                                                                             <strong>Drag &amp; drop file here or <span class="lh-upload-zone__highlight">browse</span></strong>
                                                                             <p class="lh-upload-zone__specs">Supports PDF, DOCX, ZIP, PPTX (Max 50MB)</p>
                                                                         </div>
-                                                                        <input id="answerFileHubRetake" name="answerFile" type="file" required style="display: none;" onchange="updateHubFileName(this, true)">
-                                                                        <div class="lh-upload-zone__selected-file" id="selectedFileHubNameRetake" style="display: none;">
+                                                                        <input id="answerFileHubRetake" name="answerFile" type="file" required class="lh-visually-hidden-input" onchange="updateHubFileName(this, true)">
+                                                                        <div class="lh-upload-zone__selected-file is-hidden" id="selectedFileHubNameRetake">
                                                                             <i class="fas fa-file-circle-check"></i>
                                                                             <span id="fileNameHubTextRetake"></span>
                                                                         </div>
@@ -635,6 +928,19 @@
                                                         <input type="hidden" name="enrollmentId" value="${enrollment.enrollmentId}">
 
                                                         <div class="assignment-upload-box">
+                                                            <c:if test="${not empty selectedAssessmentQuestions}">
+                                                                <div class="lh-assignment-prompt-box__items">
+                                                                    <c:forEach var="q" items="${selectedAssessmentQuestions}" varStatus="loop">
+                                                                        <c:if test="${not empty q.attachmentUrl}">
+                                                                            <div class="lh-assignment-prompt-box__attachment">
+                                                                                <a class="sv-btn" href="${q.attachmentUrl}" target="_blank" rel="noopener noreferrer">
+                                                                                    <i class="fas fa-file-pdf"></i> Open Brief for Task ${loop.index + 1}
+                                                                                </a>
+                                                                            </div>
+                                                                        </c:if>
+                                                                    </c:forEach>
+                                                                </div>
+                                                            </c:if>
                                                             <div class="lh-upload-zone" onclick="document.getElementById('answerFileHubInitial').click()">
                                                                 <div class="lh-upload-zone__icon">
                                                                     <i class="fas fa-cloud-arrow-up"></i>
@@ -643,8 +949,8 @@
                                                                     <strong>Drag &amp; drop file here or <span class="lh-upload-zone__highlight">browse</span></strong>
                                                                     <p class="lh-upload-zone__specs">Supports PDF, DOCX, ZIP, PPTX (Max 50MB)</p>
                                                                 </div>
-                                                                <input id="answerFileHubInitial" name="answerFile" type="file" required style="display: none;" onchange="updateHubFileName(this, false)">
-                                                                <div class="lh-upload-zone__selected-file" id="selectedFileHubNameInitial" style="display: none;">
+                                                                <input id="answerFileHubInitial" name="answerFile" type="file" required class="lh-visually-hidden-input" onchange="updateHubFileName(this, false)">
+                                                                <div class="lh-upload-zone__selected-file is-hidden" id="selectedFileHubNameInitial">
                                                                     <i class="fas fa-file-circle-check"></i>
                                                                     <span id="fileNameHubTextInitial"></span>
                                                                 </div>
@@ -755,7 +1061,7 @@
                                                 class="lh-video-embed"
                                                 src="https://www.youtube.com/embed/${youtubeVideoId}"
                                                 allowfullscreen>
-                                             iframe>
+                                            </iframe>
                                         </div>
                                     </c:when>
                                     <c:otherwise>
@@ -829,6 +1135,27 @@
                                 </div>
                             </c:otherwise>
                         </c:choose>
+
+                        <%-- Manual Completion Block at the bottom of the material --%>
+                        <div class="lh-material-completion-block">
+                            <div class="lh-material-completion-block__copy">
+                                <div>
+                                    <h4>Material Progress</h4>
+                                    <p><c:out value="${workspaceActionNote}"/></p>
+                                </div>
+                            </div>
+                            <button
+                                id="edMarkCompleted"
+                                type="button"
+                                class="sv-btn primary"
+                                data-material-id="${selectedMaterial.materialId}"
+                                data-enrollment-id="${enrollment.enrollmentId}"
+                                data-completed="${selectedMaterialStatus == 'completed'}"
+                                <c:if test="${selectedMaterialStatus == 'completed' or courseExpired}">disabled="disabled"</c:if>>
+                                <i class="fas fa-check-circle"></i>
+                                <span>${materialCompletionButtonLabel}</span>
+                            </button>
+                        </div>
                     </c:when>
 
                     <c:otherwise>
@@ -1064,19 +1391,6 @@
                                 </c:otherwise>
                             </c:choose>
                         </c:when>
-                        <c:when test="${not empty selectedMaterial}">
-                            <button
-                                id="edMarkCompleted"
-                                type="button"
-                                class="sv-btn primary"
-                                data-material-id="${selectedMaterial.materialId}"
-                                data-enrollment-id="${enrollment.enrollmentId}"
-                                data-completed="${selectedMaterialStatus == 'completed'}"
-                                <c:if test="${selectedMaterialStatus == 'completed' or courseExpired}">disabled="disabled"</c:if>>
-                                <i class="fas fa-check-circle"></i>
-                                <span>${materialCompletionButtonLabel}</span>
-                            </button>
-                        </c:when>
                     </c:choose>
 
                     <a class="sv-btn lh-nav-action is-hidden" id="lhNextAction" href="#"
@@ -1107,6 +1421,6 @@ function updateHubFileName(input, isRetake) {
 }
 </script>
 <script src="${pageContext.request.contextPath}/js/learning-hub.js"></script>
-<script src="${pageContext.request.contextPath}/js/student-v2.js"></script>
+<script defer src="${pageContext.request.contextPath}/js/student-assessment-flow.js"></script>
 </body>
 </html>

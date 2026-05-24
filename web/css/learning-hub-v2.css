@@ -499,7 +499,7 @@ body.lh-shell-page .lh-main {
    Renders flat, borderless, taking full width. */
 .lh-content-stage {
   flex: 1;
-  padding: 24px clamp(16px, 3.5vw, 40px) 0;
+  padding: 24px clamp(16px, 3.5vw, 40px) 24px;
   min-height: 0;
   display: flex;
   flex-direction: column;
@@ -531,9 +531,9 @@ body.lh-shell-page .lh-stage-card {
   width: 100%;
   border-radius: 16px;
   overflow: hidden;
-  background: #020617;
-  border: 1px solid var(--lh-border);
-  box-shadow: var(--lh-shadow);
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
   margin-bottom: 24px;
 }
 
@@ -549,11 +549,9 @@ body.lh-shell-page .lh-stage-card {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 18px;
-  background: var(--lh-sidebar-bg);
-  border: 1px solid var(--lh-border);
-  border-bottom: none;
-  border-radius: 12px 12px 0 0;
+  padding: 12px 0;
+  background: transparent !important;
+  border: none !important;
   color: var(--lh-text);
   font-weight: 700;
   font-size: 0.85rem;
@@ -562,8 +560,8 @@ body.lh-shell-page .lh-stage-card {
 .lh-pdf-viewer {
   width: 100%;
   height: clamp(680px, 80vh, 1080px);
-  border: 1px solid var(--lh-border);
-  border-radius: 0 0 12px 12px;
+  border: none !important;
+  border-radius: 16px !important;
   background: var(--lh-bg);
 }
 
@@ -577,15 +575,13 @@ body.lh-shell-page .lh-stage-card {
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 56px 32px;
-  background: var(--lh-surface);
-  border: 1px solid var(--lh-border);
-  border-radius: 16px;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  padding: 40px 0;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
   max-width: 720px;
-  margin: 40px auto;
-  box-shadow: var(--lh-shadow);
+  margin: 0 auto;
+  box-shadow: none !important;
   gap: 16px;
 }
 
@@ -763,14 +759,17 @@ body.lh-shell-page .lh-stage-card {
 
 /* ── 6. NAV BAR REDESIGN ──────────────────────────────── */
 body.lh-shell-page .lh-action-bar {
-  margin: 24px clamp(16px, 3.5vw, 40px) 32px;
-  border: 1px solid rgba(148, 163, 184, 0.1);
-  border-radius: 14px;
-  background: rgba(15, 23, 42, 0.6);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  padding: 16px 20px;
-  box-shadow: 0 10px 30px rgba(2, 6, 23, 0.2);
+  position: sticky;
+  bottom: 0;
+  z-index: 120;
+  margin: 0;
+  border-top: 1px solid rgba(148, 163, 184, 0.1);
+  border-radius: 0;
+  background: var(--lh-topbar-bg);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  padding: 12px clamp(16px, 3.5vw, 40px);
+  box-shadow: 0 -4px 24px rgba(2, 6, 23, 0.12);
   flex-shrink: 0;
 }
 
@@ -779,6 +778,7 @@ body.lh-shell-page .lh-action-bar__actions {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin: 0;
 }
 
 /* Prev / Next ghost nav buttons */
@@ -905,7 +905,7 @@ body.lh-shell-page .lh-feedback {
     margin: 10px 12px 0;
   }
   body.lh-shell-page .lh-action-bar {
-    margin: 10px 12px 16px;
+    padding: 10px 16px;
   }
   body.lh-shell-page .lh-breadcrumb {
     margin: 10px 12px 0;

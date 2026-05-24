@@ -8,6 +8,9 @@ public final class AssessmentPlacementUtil {
     private static final Pattern PLACEMENT_PATTERN =
             Pattern.compile("\\[\\[placement:(final|afterMaterial=(\\d+))\\]\\]");
 
+    private static final Pattern LEGACY_PLACEMENT_PATTERN =
+            Pattern.compile("##PLACEMENT:(final|afterMaterial:(\\d+))##");
+
     private AssessmentPlacementUtil() {
     }
 
@@ -35,6 +38,17 @@ public final class AssessmentPlacementUtil {
             }
             return new Placement("final", null);
         }
+        // Try legacy ##PLACEMENT:...## format
+        Matcher legacyMatcher = LEGACY_PLACEMENT_PATTERN.matcher(instructions);
+        if (legacyMatcher.find()) {
+            String token = legacyMatcher.group(1);
+            if (token != null && token.startsWith("afterMaterial:")) {
+                String idText = legacyMatcher.group(2);
+                Integer materialId = safeParseInt(idText);
+                return new Placement("afterMaterial", materialId);
+            }
+            return new Placement("final", null);
+        }
         return new Placement("final", null);
     }
 
@@ -43,6 +57,7 @@ public final class AssessmentPlacementUtil {
             return instructions;
         }
         String cleaned = PLACEMENT_PATTERN.matcher(instructions).replaceAll("").trim();
+        cleaned = LEGACY_PLACEMENT_PATTERN.matcher(cleaned).replaceAll("").trim();
         return cleaned.isEmpty() ? null : cleaned;
     }
 

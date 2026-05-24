@@ -5,7 +5,7 @@
     }
 
     var contextPath = body.dataset.contextPath || '';
-    var flowLinks = Array.prototype.slice.call(document.querySelectorAll('.lh-flow-link'));
+    var flowLinks = Array.prototype.slice.call(document.querySelectorAll('.lh-chapter-item'));
     var prevAction = document.getElementById('lhPrevAction');
     var nextAction = document.getElementById('lhNextAction');
     var completeButton = document.getElementById('edMarkCompleted');
@@ -123,25 +123,10 @@
     }
 
     function setWaitingState() {
-        if (!completeButton || viewerState.completed || currentSelectionMode !== 'material') {
+        if (!completeButton || viewerState.completed || currentSelectionMode !== 'material' || courseExpired) {
             return;
         }
-
-        if (courseExpired) {
-            setCompletionButton(true, 'Course Expired');
-            return;
-        }
-
-        var label = 'Mark Complete';
-        if (currentMaterialType === 'Video' || currentMaterialType === 'Audio') {
-            label = 'Complete After Playback';
-        } else if (currentMaterialType === 'Link') {
-            label = 'Open Resource First';
-        } else {
-            label = 'Review In Progress';
-        }
-
-        setCompletionButton(true, label);
+        setCompletionButton(false, 'Mark Complete');
     }
 
     function unlockCompletion(note) {
@@ -156,45 +141,11 @@
     }
 
     function bindNativeMediaUnlock() {
-        if (currentSelectionMode !== 'material' || viewerState.completed || courseExpired) {
-            return;
-        }
-        var mediaNodes = Array.prototype.slice.call(document.querySelectorAll('.lh-video-player, .lh-audio-player'));
-        if (!mediaNodes.length) {
-            return;
-        }
-        mediaNodes.forEach(function (mediaNode) {
-            var unlocked = false;
-            function maybeUnlock() {
-                if (unlocked || viewerState.completed || !mediaNode.duration || isNaN(mediaNode.duration)) {
-                    return;
-                }
-                var threshold = mediaNode.duration * 0.8;
-                if (mediaNode.currentTime >= threshold || mediaNode.ended) {
-                    unlocked = true;
-                    unlockCompletion('Playback progress is sufficient. You can mark this material complete now.');
-                }
-            }
-            mediaNode.addEventListener('timeupdate', maybeUnlock);
-            mediaNode.addEventListener('ended', function () {
-                unlocked = true;
-                unlockCompletion('Playback completed. You can mark this material complete now.');
-            });
-        });
+        // Playback threshold limits bypassed for immediate manual progress tracking
     }
 
     function bindExternalResourceUnlock() {
-        if (currentSelectionMode !== 'material' || currentMaterialType !== 'Link' || viewerState.completed || courseExpired) {
-            return;
-        }
-        var resourceLink = document.querySelector('.lh-link-preview a[target="_blank"]');
-        if (resourceLink) {
-            resourceLink.addEventListener('click', function () {
-                window.setTimeout(function () {
-                    unlockCompletion('Resource opened. You can mark this material complete when finished.');
-                }, 800);
-            });
-        }
+        // External link click limits bypassed for immediate manual progress tracking
     }
 
     // ── ACCORDION: open/close chapter groups ──────────────────
@@ -259,11 +210,13 @@
         if (prevLabelEl && activeIdx > 0) {
             var prevTitle = allChapterItems[activeIdx - 1].getAttribute('aria-label') ||
                             (allChapterItems[activeIdx - 1].querySelector('.lh-ci-title') || {}).textContent || '';
+            prevTitle = String(prevTitle);
             prevLabelEl.textContent = prevTitle.replace(/ — (Completed|Locked)$/, '');
         }
         if (nextLabelEl && activeIdx < allChapterItems.length - 1) {
             var nextTitle = allChapterItems[activeIdx + 1].getAttribute('aria-label') ||
                             (allChapterItems[activeIdx + 1].querySelector('.lh-ci-title') || {}).textContent || '';
+            nextTitle = String(nextTitle);
             nextLabelEl.textContent = nextTitle.replace(/ — (Completed|Locked)$/, '');
         }
     }
@@ -290,13 +243,7 @@
             setCompletionButton(true, 'Course Expired');
         } else {
             setWaitingState();
-            if (currentMaterialType !== 'Video' && currentMaterialType !== 'Audio' && currentMaterialType !== 'Link') {
-                window.setTimeout(function () {
-                    if (!viewerState.unlocked && !viewerState.completed) {
-                        unlockCompletion('Review complete. You can mark this material complete now.');
-                    }
-                }, 5500);
-            }
+
             bindNativeMediaUnlock();
             bindExternalResourceUnlock();
         }
@@ -348,7 +295,40 @@
     }
 
     window.addEventListener('message', function (event) {
-        if (event.origin !== window.location.origin || !event.data || currentSelectionMode !== 'material') {
+        if (event.origin !== window.location.origin || !event.data) {
+            return;
+        }
+
+        // Theme sync support from secure assessment workspace
+        if (event.data.type === 'syncTheme') {
+            document.documentElement.setAttribute('data-theme', event.data.theme);
+            try {
+                localStorage.setItem('psme-theme', event.data.theme);
+            } catch (e) {}
+            
+            // Trigger visual button updates if toggle buttons exist
+            var buttons = document.querySelectorAll('[data-theme-toggle]');
+            buttons.forEach(function (button) {
+                var label = button.querySelector('.theme-toggle-label');
+                var icon = button.querySelector('i');
+                var theme = event.data.theme;
+                var nextThemeLabel = theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
+                
+                button.setAttribute('aria-pressed', String(theme === 'dark'));
+                button.setAttribute('aria-label', nextThemeLabel);
+                button.setAttribute('title', nextThemeLabel);
+                button.dataset.theme = theme;
+                if (icon) {
+                    icon.className = theme === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+                }
+                if (label) {
+                    label.textContent = nextThemeLabel;
+                }
+            });
+            return;
+        }
+
+        if (currentSelectionMode !== 'material') {
             return;
         }
 

@@ -52,6 +52,10 @@ public class StudentAssessmentServlet extends HttpServlet {
 
     private static final long MAX_ASSIGNMENT_FILE_SIZE = 50L * 1024L * 1024L;
 
+    private String buildLearningHubAssessmentUrl(HttpServletRequest request, Integer enrollmentId, Integer assessmentId) {
+        return request.getContextPath() + "/student/enrollment-details?id=" + enrollmentId + "&tab=assessments&assessmentId=" + assessmentId;
+    }
+
     private static final class RouteContext {
         private final Integer courseId;
         private final Integer assessmentId;
@@ -430,7 +434,7 @@ public class StudentAssessmentServlet extends HttpServlet {
                 Part answerFilePart = request.getPart("answerFile");
                 if (answerFilePart != null && answerFilePart.getSize() > 0) {
                     if (answerFilePart.getSize() > MAX_ASSIGNMENT_FILE_SIZE) {
-                        response.sendRedirect(request.getContextPath() + "/student/assessments?courseId=" + assessment.getCourseId() + "&assessmentId=" + assessmentId + "&enrollmentId=" + enrollmentId + "&error=assignmentFileTooLarge");
+                        response.sendRedirect(buildLearningHubAssessmentUrl(request, enrollmentId, assessmentId) + "&error=assignmentFileTooLarge");
                         return;
                     }
 
@@ -445,12 +449,12 @@ public class StudentAssessmentServlet extends HttpServlet {
                     }
 
                     if (uploadedFileUrl == null || uploadedFileUrl.trim().isEmpty()) {
-                        response.sendRedirect(request.getContextPath() + "/student/assessments?courseId=" + assessment.getCourseId() + "&assessmentId=" + assessmentId + "&enrollmentId=" + enrollmentId + "&error=assignmentUploadFailed");
+                        response.sendRedirect(buildLearningHubAssessmentUrl(request, enrollmentId, assessmentId) + "&error=assignmentUploadFailed");
                         return;
                     }
                 }
             } catch (IllegalStateException ex) {
-                response.sendRedirect(request.getContextPath() + "/student/assessments?courseId=" + assessment.getCourseId() + "&assessmentId=" + assessmentId + "&enrollmentId=" + enrollmentId + "&error=assignmentFileTooLarge");
+                response.sendRedirect(buildLearningHubAssessmentUrl(request, enrollmentId, assessmentId) + "&error=assignmentFileTooLarge");
                 return;
             } catch (ServletException ex) {
                 // Continue and fail with missing file validation below when needed.
@@ -461,11 +465,11 @@ public class StudentAssessmentServlet extends HttpServlet {
 
             if (shouldValidateContent) {
                 if (resolvedFileValue.isEmpty() && answerText.isEmpty()) {
-                    response.sendRedirect(request.getContextPath() + "/student/assessments?courseId=" + assessment.getCourseId() + "&assessmentId=" + assessmentId + "&enrollmentId=" + enrollmentId + "&error=missingAnswerFile");
+                    response.sendRedirect(buildLearningHubAssessmentUrl(request, enrollmentId, assessmentId) + "&error=missingAnswerFile");
                     return;
                 }
                 if (!answerText.isEmpty() && answerText.length() > 255) {
-                    response.sendRedirect(request.getContextPath() + "/student/assessments?courseId=" + assessment.getCourseId() + "&assessmentId=" + assessmentId + "&enrollmentId=" + enrollmentId + "&error=answerTooLong");
+                    response.sendRedirect(buildLearningHubAssessmentUrl(request, enrollmentId, assessmentId) + "&error=answerTooLong");
                     return;
                 }
             }
@@ -504,7 +508,11 @@ public class StudentAssessmentServlet extends HttpServlet {
         }
 
         String successParam = timedOut ? "timed-out" : (exitSubmission ? "exited" : "submitted");
-        response.sendRedirect(request.getContextPath() + "/student/enrollment-details?id=" + enrollmentId + "&tab=assessments&success=" + successParam + "&assessmentId=" + assessmentId);
+        response.sendRedirect(request.getContextPath()
+                + "/student/enrollment-details?id=" + enrollmentId
+                + "&tab=assessments&view=result&assessmentId=" + assessmentId
+                + "&submissionId=" + saved.getSubmissionId()
+                + "&success=" + successParam);
     }
 
     private void redirectToLearningHub(HttpServletRequest request, HttpServletResponse response) throws IOException {

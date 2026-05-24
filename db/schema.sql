@@ -290,7 +290,7 @@ CREATE TABLE IF NOT EXISTS `AssessmentSubmission` (
   `SubmissionID` INT AUTO_INCREMENT PRIMARY KEY,
   `AssessmentID` INT NOT NULL,
   `UserID` INT NOT NULL,
-  `AnswersFilePath` VARCHAR(255) NULL,
+  `AnswersFilePath` TEXT NULL,
   `Score` DECIMAL(5,2) NULL,
   `Feedback` TEXT NULL,
   `AttemptNumber` INT NOT NULL DEFAULT 1,

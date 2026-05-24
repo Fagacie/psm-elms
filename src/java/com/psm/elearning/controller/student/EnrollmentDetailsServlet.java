@@ -399,7 +399,7 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                 if (bestScore != null && assessment.getTotalMarks() != null && assessment.getTotalMarks() > 0) {
                     Double bestPercentage = computePercentage(bestScore, assessment.getTotalMarks());
                     bestPercentageByAssessment.put(assessment.getAssessmentId(), bestPercentage);
-                    performanceBestScoreTotal += bestScore;
+                    performanceBestScoreTotal += bestPercentage;
                     performanceBestScoreCount++;
                     if (performanceHighestAssessmentPercent == null || bestPercentage > performanceHighestAssessmentPercent) {
                         performanceHighestAssessmentPercent = bestPercentage;
@@ -437,6 +437,7 @@ public class EnrollmentDetailsServlet extends HttpServlet {
 
             Map<Integer, List<Assessment>> assessmentsAfterMaterial = new LinkedHashMap<>();
             List<Assessment> finalAssessments = new ArrayList<>();
+            List<Assessment> unplacedAssessments = new ArrayList<>();
 
             for (Assessment assessment : assessments) {
                 AssessmentPlacementUtil.Placement placement = resolvePlacement(assessment);
@@ -450,8 +451,37 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                             .computeIfAbsent(placement.materialId, key -> new ArrayList<>())
                             .add(assessment);
                 } else {
-                    finalAssessments.add(assessment);
+                    unplacedAssessments.add(assessment);
                 }
+            }
+
+            // Dynamically and automatically interleave unplaced assessments among the ordered materials
+            if (!orderedMaterials.isEmpty() && !unplacedAssessments.isEmpty()) {
+                // Sort unplaced assessments by creation date to maintain consistent sequential order
+                unplacedAssessments.sort((a, b) -> {
+                    if (a.getCreatedAt() == null && b.getCreatedAt() == null) return 0;
+                    if (a.getCreatedAt() == null) return 1;
+                    if (b.getCreatedAt() == null) return -1;
+                    return a.getCreatedAt().compareTo(b.getCreatedAt());
+                });
+
+                for (int i = 0; i < unplacedAssessments.size(); i++) {
+                    Assessment assessment = unplacedAssessments.get(i);
+                    // Determine which material index to place it after to distribute evenly
+                    int materialIndex = (int) Math.floor(((double) (i + 1) * orderedMaterials.size()) / unplacedAssessments.size()) - 1;
+                    if (materialIndex < 0) materialIndex = 0;
+                    if (materialIndex >= orderedMaterials.size()) materialIndex = orderedMaterials.size() - 1;
+
+                    Material targetMaterial = orderedMaterials.get(materialIndex);
+                    assessment.setPlacementType("afterMaterial");
+                    assessment.setPlacementMaterialId(targetMaterial.getMaterialId());
+
+                    assessmentsAfterMaterial
+                            .computeIfAbsent(targetMaterial.getMaterialId(), key -> new ArrayList<>())
+                            .add(assessment);
+                }
+            } else {
+                finalAssessments.addAll(unplacedAssessments);
             }
 
             for (List<Assessment> list : assessmentsAfterMaterial.values()) {
@@ -472,11 +502,17 @@ public class EnrollmentDetailsServlet extends HttpServlet {
             int orderIndex = 1;
             for (Material material : orderedMaterials) {
                 boolean viewed = viewedMaterialIds.contains(material.getMaterialId());
-                String chapterLabel = material.getDisplayOrder() != null ? "Chapter " + material.getDisplayOrder() : "Learning Material";
+                String mTitle = material.getTitle() != null ? material.getTitle().trim() : "";
+                String chapterLabel;
+                if (mTitle.isEmpty()) {
+                    chapterLabel = material.getDisplayOrder() != null ? "Chapter " + material.getDisplayOrder() : "Learning Material";
+                } else {
+                    chapterLabel = mTitle;
+                }
                 String chapterHint = "Read the material first, then continue with any linked assessments.";
                 String iconClass = resolveMaterialIcon(material.getMaterialType());
                 String badgeText = material.getMaterialType();
-                String metaPrimary = material.getDisplayOrder() != null ? "Chapter " + material.getDisplayOrder() : "Material";
+                String metaPrimary = material.getMaterialType() != null ? material.getMaterialType() : "Material";
                 String metaSecondary = material.getUploadDate() != null ? material.getUploadDate().toLocalDate().toString() : "";
                 String metaTertiary = viewed ? "Viewed" : "Not yet viewed";
                 String statusLabel = !courseAccessGranted ? "Locked" : (viewed ? "Completed" : "Ready");
@@ -558,7 +594,13 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                         assessmentStatusClass = "status-Archived";
                     }
                     String iconClassAssessment = resolveAssessmentIcon(assessment.getType());
-                    String groupLabel = material.getDisplayOrder() != null ? "Chapter " + material.getDisplayOrder() : "Learning Material";
+                    String groupLabel;
+                    String amTitle = material.getTitle() != null ? material.getTitle().trim() : "";
+                    if (amTitle.isEmpty()) {
+                        groupLabel = material.getDisplayOrder() != null ? "Chapter " + material.getDisplayOrder() : "Learning Material";
+                    } else {
+                        groupLabel = amTitle;
+                    }
                     String groupHint = "This assessment follows the chapter immediately above.";
                     String metaPrimaryAssessment = (assessment.getDuration() != null ? assessment.getDuration() : 30) + " min";
                     String metaSecondaryAssessment = "Attempts: " + used + " / " + Math.max(allowed, 1);
@@ -1030,15 +1072,16 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                     workspaceActionNote = "Start the assessment from here when you are ready to proceed.";
                 }
                 
-                if (Assessment.TYPE_ASSIGNMENT.equals(selectedAssessment.getType())) {
-                    try {
-                        List<AssessmentQuestion> assignmentQuestions = assessmentQuestionDAO.findByAssessment(selectedAssessment.getAssessmentId());
-                        request.setAttribute("selectedAssessmentQuestions", assignmentQuestions != null ? assignmentQuestions : new ArrayList<AssessmentQuestion>());
-                    } catch (Exception qEx) {
-                        LOGGER.log(Level.WARNING, "Failed to load assignment questions inside Learning Hub", qEx);
-                        request.setAttribute("selectedAssessmentQuestions", new ArrayList<AssessmentQuestion>());
-                    }
+                try {
+                    List<AssessmentQuestion> assessmentQuestions = assessmentQuestionDAO.findByAssessment(selectedAssessment.getAssessmentId());
+                    request.setAttribute("selectedAssessmentQuestions", assessmentQuestions != null ? assessmentQuestions : new ArrayList<AssessmentQuestion>());
+                } catch (Exception qEx) {
+                    LOGGER.log(Level.WARNING, "Failed to load assessment questions inside Learning Hub", qEx);
+                    request.setAttribute("selectedAssessmentQuestions", new ArrayList<AssessmentQuestion>());
                 }
+                request.setAttribute("selectedAssessmentInstructions", AssessmentPlacementUtil.stripPlacement(selectedAssessment.getInstructions()));
+                request.setAttribute("selectedAssessmentTimerStartTime", System.currentTimeMillis());
+                request.setAttribute("selectedAssessmentTimerDurationSeconds", selectedAssessment.getDuration() != null ? selectedAssessment.getDuration() * 60 : 30 * 60);
                 workspacePrimaryActionIcon = selectedAssessmentHasActiveAttempt
                         ? "play"
                         : ("View Result".equals(selectedAssessmentPrimaryLabel) ? "eye" : "paper-plane");
@@ -1073,14 +1116,14 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                     workspaceActionNote = "This material is already counted in your progress.";
                     materialCompletionButtonLabel = "Completed";
                 } else if (isYouTube) {
-                    workspaceActionNote = "Review the video material, then mark it complete from the action bar.";
+                    workspaceActionNote = "Review the video material, then mark it complete below.";
                 } else if (Material.TYPE_VIDEO.equalsIgnoreCase(selectedMaterial.getMaterialType())
                         || "Audio".equalsIgnoreCase(selectedMaterial.getMaterialType())) {
-                    workspaceActionNote = "Playback unlocks completion once you reach the required threshold.";
+                    workspaceActionNote = "Review the media material, then mark it complete below to track progress.";
                 } else if (Material.TYPE_LINK.equalsIgnoreCase(selectedMaterial.getMaterialType())) {
-                    workspaceActionNote = "Open the external resource in the viewer, then mark it complete here.";
+                    workspaceActionNote = "Open the external resource, then mark it complete below.";
                 } else {
-                    workspaceActionNote = "Review the current material, then mark it complete from the action bar.";
+                    workspaceActionNote = "Review the current material, then mark it complete below.";
                 }
                 workspacePrimaryActionIcon = "check-circle";
                 workspaceChips.add(new WorkspaceChip("fa-tag", selectedMaterial.getMaterialType()));
@@ -1249,6 +1292,12 @@ public class EnrollmentDetailsServlet extends HttpServlet {
             request.setAttribute("totalMaterialsCount", totalMaterialsCount);
             request.setAttribute("passedAssessmentsCount", passedAssessmentsCount);
             request.setAttribute("totalAssessmentsCount", totalAssessmentsCount);
+            
+            double overallPerformance = performanceBestScoreCount > 0 ? (performanceBestScoreTotal / performanceBestScoreCount) : 0.0;
+            int passingGrade = AppSettingsService.getInt(AppSettingsService.KEY_ASSESSMENT_PASS_MARK, 70, 1, 100);
+            request.setAttribute("overallPerformance", overallPerformance);
+            request.setAttribute("passingGrade", passingGrade);
+
             request.getRequestDispatcher("/WEB-INF/views/student/enrollment-details.jsp").forward(request, response);
             
         } catch (NumberFormatException e) {
@@ -1373,11 +1422,11 @@ public class EnrollmentDetailsServlet extends HttpServlet {
     }
 
     private String buildCourseAssessmentUrl(HttpServletRequest request, Integer enrollmentId, Integer courseId, Integer assessmentId, boolean assignment) {
+        String base = request.getContextPath() + "/student/enrollment-details?id=" + enrollmentId + "&tab=assessments&assessmentId=" + assessmentId;
         if (assignment) {
-            return request.getContextPath() + "/student/enrollment-details?id=" + enrollmentId + "&tab=assessments&assessmentId=" + assessmentId;
+            return base;
         }
-        String base = request.getContextPath() + "/courses/" + courseId + "/assessments/" + assessmentId;
-        return base + "/attempt";
+        return base + "&attempt=true";
     }
 
     private Material findMaterialById(List<Material> materials, Integer materialId) {
@@ -1517,6 +1566,14 @@ public class EnrollmentDetailsServlet extends HttpServlet {
             Integer placementMaterialId = assessment.getPlacementMaterialId();
             if ("afterMaterial".equals(placementType) && placementMaterialId == null) {
                 placementType = "final";
+            }
+            if ("afterMaterial".equals(placementType) && placementMaterialId != null) {
+                return new AssessmentPlacementUtil.Placement(placementType, placementMaterialId);
+            }
+            // 'final' may be the DB column default — also check instructions for legacy markers
+            AssessmentPlacementUtil.Placement fromInstructions = AssessmentPlacementUtil.parsePlacement(assessment.getInstructions());
+            if ("afterMaterial".equals(fromInstructions.type) && fromInstructions.materialId != null) {
+                return fromInstructions;
             }
             return new AssessmentPlacementUtil.Placement(placementType, placementMaterialId);
         }

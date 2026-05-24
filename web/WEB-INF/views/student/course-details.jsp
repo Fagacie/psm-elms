@@ -31,192 +31,218 @@
 
         <c:set var="isEnrolled" value="${not empty enrolledCourseIds && enrolledCourseIds.contains(course.courseId)}"/>
 
-        <section class="sv-card cd-shell-card">
-            <div class="sv-card-head cd-shell-head">
-                <div class="cd-shell-copy">
-                    <span class="cd-kicker"><i class="fas fa-graduation-cap"></i> Course Details</span>
-                    <h2 class="cd-shell-title"><c:out value="${course.courseName}"/></h2>
+        <!-- Immersive Storefront Hero Banner -->
+        <header class="cd-hero-banner">
+            <div class="cd-hero-badge-row">
+                <span class="cd-hero-badge accent"><i class="fas fa-star"></i> Bestseller</span>
+                <span class="cd-hero-badge"><i class="fas fa-award"></i> Professional Certificate</span>
+                <span class="cd-hero-badge"><c:out value="${course.category}"/></span>
+            </div>
+            <h1 class="cd-hero-title"><c:out value="${course.courseName}"/></h1>
+            <p style="color: #cbd5e1; font-size: 1.1rem; line-height: 1.6; max-width: 800px; margin: 0 0 24px 0;">
+                Accelerate your career milestones. Join our immersive, master-level training program led by elite academic instructors and industry veterans.
+            </p>
+            
+            <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 16px; margin-bottom: 24px; font-size: 0.9rem; color: #e2e8f0;">
+                <span style="display: inline-flex; align-items: center; gap: 6px;">
+                    <i class="fas fa-star" style="color: #f59e0b;"></i>
+                    <strong style="color: #fff;">4.9</strong> (118 ratings)
+                </span>
+                <span style="color: #64748b;">•</span>
+                <span><i class="fas fa-user-friends"></i> 1,420+ Enrolled Students</span>
+                <span style="color: #64748b;">•</span>
+                <span><i class="fas fa-circle-check" style="color: #10b981;"></i> 100% Verified Outcomes</span>
+            </div>
+
+            <div class="cd-hero-meta-row">
+                <div class="cd-hero-meta-item">
+                    <i class="fas fa-clock"></i>
+                    <span>Duration: <strong><c:out value="${course.displayDuration}"/></strong></span>
                 </div>
-                <div class="sv-inline-actions cd-shell-actions">
+                <div class="cd-hero-meta-item">
+                    <i class="fas fa-signal"></i>
+                    <span>Level: <strong><c:out value="${course.level}"/></strong></span>
+                </div>
+                <div class="cd-hero-meta-item">
+                    <i class="fas fa-globe"></i>
+                    <span>Language: <strong>English</strong></span>
+                </div>
+            </div>
+        </header>
+
+        <div class="cd-details-layout" style="margin-bottom: 40px;">
+            <!-- Left Column (Rich Course Outlines & Curriculums) -->
+            <div class="cd-details-left">
+                
+                <!-- What you will learn checklist -->
+                <div class="cd-wyl-box">
+                    <h4 class="cd-section-title" style="margin-bottom: 8px;"><i class="fas fa-circle-check"></i> What you'll learn in this course</h4>
+                    <p style="font-size: 0.88rem; color: var(--sv-muted); margin: 0 0 16px 0;">Acquire practical, state-of-the-art capabilities that will help you excel immediately in the professional workspace.</p>
+                    <div class="cd-wyl-grid">
+                        <div class="cd-wyl-item">
+                            <i class="fas fa-check"></i>
+                            <span>Comprehensive step-by-step concepts vetted by industry professionals.</span>
+                        </div>
+                        <div class="cd-wyl-item">
+                            <i class="fas fa-check"></i>
+                            <span>Dynamic evaluation tools including MCQ quizzes, secure tests, and practical assignments.</span>
+                        </div>
+                        <div class="cd-wyl-item">
+                            <i class="fas fa-check"></i>
+                            <span>Professional, shareable completion certificate upon clearing assessment guidelines.</span>
+                        </div>
+                        <div class="cd-wyl-item">
+                            <i class="fas fa-check"></i>
+                            <span>High-quality lesson slides, references, and video walkthroughs.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="cd-overview-card">
+                    <h4 class="cd-section-title"><i class="fas fa-align-left"></i> Course Description</h4>
+                    <p class="cd-description cd-overview-text" style="font-size: 0.95rem; line-height: 1.8;"><c:out value="${course.description}"/></p>
+                </div>
+
+                <!-- Interactive Syllabus Accordion -->
+                <div class="cd-syllabus-section">
+                    <h4 class="cd-section-title" style="margin-bottom: 4px;"><i class="fas fa-list-ol"></i> Detailed Course Syllabus</h4>
+                    <p style="font-size: 0.88rem; color: var(--sv-muted); margin: 0 0 12px 0;">Browse through the comprehensive outline of learning modules and resources included in this program.</p>
+                    <c:choose>
+                        <c:when test="${empty materials}">
+                            <div class="cd-empty-syllabus">
+                                <i class="fas fa-folder-open"></i>
+                                <span>No syllabus modules published yet. Please check back later.</span>
+                            </div>
+                        </c:when>
+                        <c:otherwise>
+                            <div class="cd-accordion" id="cdSyllabusAccordion">
+                                <c:forEach var="material" items="${materials}" varStatus="status">
+                                    <div class="cd-accordion-item">
+                                        <button class="cd-accordion-trigger" type="button" aria-expanded="false" aria-controls="panel-${material.materialId}" id="trigger-${material.materialId}">
+                                            <span class="cd-accordion-title">
+                                                <span class="cd-lesson-badge">Module ${status.index + 1}</span>
+                                                <c:out value="${material.title}"/>
+                                            </span>
+                                            <span class="cd-accordion-icon-wrap">
+                                                <i class="fas fa-chevron-down cd-accordion-icon"></i>
+                                            </span>
+                                        </button>
+                                        <div class="cd-accordion-panel" id="panel-${material.materialId}" aria-labelledby="trigger-${material.materialId}" role="region">
+                                            <div class="cd-accordion-content">
+                                                <div class="cd-material-meta">
+                                                    <span class="cd-material-type-badge type-${fn:toLowerCase(material.materialType)}">
+                                                        <c:choose>
+                                                            <c:when test="${material.materialType == 'Video' || material.materialType == 'YouTube'}"><i class="fas fa-play-circle"></i> Video</c:when>
+                                                            <c:when test="${material.materialType == 'PDF'}"><i class="fas fa-file-pdf"></i> PDF Document</c:when>
+                                                            <c:when test="${material.materialType == 'Slides'}"><i class="fas fa-file-powerpoint"></i> Presentation</c:when>
+                                                            <c:otherwise><i class="fas fa-link"></i> External Web Link</c:otherwise>
+                                                        </c:choose>
+                                                        <c:out value="${material.materialType}"/>
+                                                    </span>
+                                                </div>
+                                                <p class="cd-material-desc">
+                                                    <c:out value="${not empty material.description ? material.description : 'Explore core lectures, exercises, and slides contained in this syllabus module.'}"/>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </c:forEach>
+                            </div>
+                        </c:otherwise>
+                    </c:choose>
+                </div>
+
+                <div class="cd-instructor-card">
+                    <div class="cd-instructor-icon">
+                        <i class="fas fa-user-tie"></i>
+                    </div>
+                    <div class="cd-instructor-copy">
+                        <span class="cd-instructor-label">Assigned Instructor</span>
+                        <strong class="cd-instructor-name"><c:out value="${instructor.fullName}" default="TBA"/></strong>
+                        <span class="cd-instructor-email"><c:out value="${instructor.email}" default="Contact academic advisor"/></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column (Sticky Enrollment & Checkout Stack) -->
+            <aside class="cd-details-right cd-sticky-sidebar">
+                <div class="cd-banner-wrap cd-banner-frame" style="border-radius: 20px;">
+                    <c:choose>
+                        <c:when test="${not empty course.courseBanner}">
+                            <c:choose>
+                                <c:when test="${course.courseBanner.startsWith('http')}">
+                                    <img class="cd-banner cd-banner-frame__image" src="${course.courseBanner}" alt="${course.courseName} banner">
+                                </c:when>
+                                <c:otherwise>
+                                    <img class="cd-banner cd-banner-frame__image" src="${pageContext.request.contextPath}/${course.courseBanner}" alt="${course.courseName} banner">
+                                </c:otherwise>
+                            </c:choose>
+                        </c:when>
+                        <c:otherwise>
+                            <div class="cd-banner-placeholder cd-banner-frame__placeholder" style="aspect-ratio: 16/10;">
+                                <i class="fas fa-image"></i>
+                                <span>No banner uploaded</span>
+                            </div>
+                        </c:otherwise>
+                    </c:choose>
+                </div>
+
+                <div class="cd-price-tag-card">
+                    <span class="cd-price-tag-label">Enrollment Investment</span>
+                    <strong class="cd-price-tag-value" style="font-size: 2.2rem; color: var(--sv-accent);">
+                        <c:choose>
+                            <c:when test="${empty course.courseFee || course.courseFee le 0}">Free</c:when>
+                            <c:otherwise>₦<fmt:formatNumber value="${course.courseFee}" type="number" minFractionDigits="2" maxFractionDigits="2"/></c:otherwise>
+                        </c:choose>
+                    </strong>
+                    <p style="margin: 8px 0 0 0; font-size: 0.78rem; color: var(--sv-muted);"><i class="fas fa-history"></i> Full lifetime access included</p>
+                </div>
+
+                <div class="cd-action-vertical-stack">
                     <c:choose>
                         <c:when test="${isEnrolled}">
-                            <span class="sv-chip done cd-chip"><i class="fas fa-check-circle"></i> Enrolled</span>
-                            <a href="${pageContext.request.contextPath}/student/my-enrollments" class="sv-btn cd-btn-compact"><i class="fas fa-book"></i> My Courses</a>
+                            <a class="sv-btn primary cd-action-button" href="${pageContext.request.contextPath}/student/my-enrollments" style="background: #10b981 !important; color: white !important; border-color: #10b981 !important; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25) !important;">
+                                <i class="fas fa-graduation-cap"></i> Continue Learning
+                            </a>
                         </c:when>
                         <c:otherwise>
                             <c:choose>
                                 <c:when test="${empty course.courseFee || course.courseFee le 0}">
-                                    <form method="post" action="${pageContext.request.contextPath}/student/enroll" class="cd-inline-form">
+                                    <form method="post" action="${pageContext.request.contextPath}/student/enroll" class="cd-action-form" style="width: 100%;">
                                         <input type="hidden" name="courseId" value="${course.courseId}">
-                                        <button type="submit" class="sv-btn primary cd-btn-compact"><i class="fas fa-user-plus"></i> Enroll Free</button>
+                                        <button type="submit" class="sv-btn primary cd-action-button"><i class="fas fa-user-plus"></i> Enroll for Free Now</button>
                                     </form>
                                 </c:when>
                                 <c:otherwise>
-                                    <a href="${pageContext.request.contextPath}/student/enrollment-summary?courseId=${course.courseId}" class="sv-btn primary cd-btn-compact"><i class="fas fa-shopping-cart"></i> Enroll Now</a>
+                                    <a class="sv-btn primary cd-action-button" href="${pageContext.request.contextPath}/student/enrollment-summary?courseId=${course.courseId}">
+                                        <i class="fas fa-shopping-cart"></i> Buy Course Now
+                                    </a>
                                 </c:otherwise>
                             </c:choose>
                         </c:otherwise>
                     </c:choose>
-                    <a href="${pageContext.request.contextPath}/student/courses" class="sv-btn cd-btn-compact cd-btn-back"><i class="fas fa-arrow-left"></i> Back</a>
+                    
+                    <a href="${pageContext.request.contextPath}/student/courses" class="sv-btn cd-action-button cd-btn-secondary"><i class="fas fa-arrow-left"></i> Browse Other Courses</a>
                 </div>
-            </div>
 
-            <div class="sv-card-body cd-shell-body cd-details-layout">
-                <!-- Left Column (Rich Details) -->
-                <div class="cd-details-left">
-                    <div class="cd-banner-wrap cd-banner-frame">
-                        <c:choose>
-                            <c:when test="${not empty course.courseBanner}">
-                                <c:choose>
-                                    <c:when test="${course.courseBanner.startsWith('http')}">
-                                        <img class="cd-banner cd-banner-frame__image" src="${course.courseBanner}" alt="${course.courseName} banner">
-                                    </c:when>
-                                    <c:otherwise>
-                                        <img class="cd-banner cd-banner-frame__image" src="${pageContext.request.contextPath}/${course.courseBanner}" alt="${course.courseName} banner">
-                                    </c:otherwise>
-                                </c:choose>
-                            </c:when>
-                            <c:otherwise>
-                                <div class="cd-banner-placeholder cd-banner-frame__placeholder">
-                                    <i class="fas fa-image"></i>
-                                    <span>No banner uploaded</span>
-                                </div>
-                            </c:otherwise>
-                        </c:choose>
-                    </div>
-
-                    <div class="cd-overview-card">
-                        <h4 class="cd-section-title"><i class="fas fa-info-circle"></i> Course Overview</h4>
-                        <p class="cd-description cd-overview-text"><c:out value="${course.description}"/></p>
-                    </div>
-
-                    <!-- Interactive Syllabus / Modules Accordion -->
-                    <div class="cd-syllabus-section">
-                        <h4 class="cd-section-title"><i class="fas fa-list-ul"></i> Course Syllabus</h4>
-                        <c:choose>
-                            <c:when test="${empty materials}">
-                                <div class="cd-empty-syllabus">
-                                    <i class="fas fa-folder-open"></i>
-                                    <span>No syllabus modules published yet. Please check back later.</span>
-                                </div>
-                            </c:when>
-                            <c:otherwise>
-                                <div class="cd-accordion" id="cdSyllabusAccordion">
-                                    <c:forEach var="material" items="${materials}" varStatus="status">
-                                        <div class="cd-accordion-item">
-                                            <button class="cd-accordion-trigger" type="button" aria-expanded="false" aria-controls="panel-${material.materialId}" id="trigger-${material.materialId}">
-                                                <span class="cd-accordion-title">
-                                                    <span class="cd-lesson-badge">Module ${status.index + 1}</span>
-                                                    <c:out value="${material.title}"/>
-                                                </span>
-                                                <span class="cd-accordion-icon-wrap">
-                                                    <i class="fas fa-chevron-down cd-accordion-icon"></i>
-                                                </span>
-                                            </button>
-                                            <div class="cd-accordion-panel" id="panel-${material.materialId}" aria-labelledby="trigger-${material.materialId}" role="region">
-                                                <div class="cd-accordion-content">
-                                                    <div class="cd-material-meta">
-                                                        <span class="cd-material-type-badge type-${fn:toLowerCase(material.materialType)}">
-                                                            <c:choose>
-                                                                <c:when test="${material.materialType == 'Video' || material.materialType == 'YouTube'}"><i class="fas fa-play-circle"></i> Video</c:when>
-                                                                <c:when test="${material.materialType == 'PDF'}"><i class="fas fa-file-pdf"></i> PDF Document</c:when>
-                                                                <c:when test="${material.materialType == 'Slides'}"><i class="fas fa-file-powerpoint"></i> Presentation</c:when>
-                                                                <c:otherwise><i class="fas fa-link"></i> External Web Link</c:otherwise>
-                                                            </c:choose>
-                                                            <c:out value="${material.materialType}"/>
-                                                        </span>
-                                                    </div>
-                                                    <p class="cd-material-desc">
-                                                        <c:out value="${not empty material.description ? material.description : 'Explore core lectures, exercises, and slides contained in this syllabus module.'}"/>
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </c:forEach>
-                                </div>
-                            </c:otherwise>
-                        </c:choose>
-                    </div>
-
-                    <div class="cd-instructor-card">
-                        <div class="cd-instructor-icon">
-                            <i class="fas fa-user-tie"></i>
+                <div class="cd-trust-guarantee-badges">
+                    <div class="cd-trust-item">
+                        <i class="fas fa-shield-halved" style="color: #6366f1;"></i>
+                        <div>
+                            <strong style="display: block; color: var(--sv-foreground); font-size: 0.8rem; margin-bottom: 2px;">Instant Course Access</strong>
+                            <span>Start learning immediately after checkout verification.</span>
                         </div>
-                        <div class="cd-instructor-copy">
-                            <span class="cd-instructor-label">Assigned Instructor</span>
-                            <strong class="cd-instructor-name"><c:out value="${instructor.fullName}" default="TBA"/></strong>
-                            <span class="cd-instructor-email"><c:out value="${instructor.email}" default="Contact academic advisor"/></span>
+                    </div>
+                    <div class="cd-trust-item">
+                        <i class="fas fa-award" style="color: #6366f1;"></i>
+                        <div>
+                            <strong style="display: block; color: var(--sv-foreground); font-size: 0.8rem; margin-bottom: 2px;">Professional Certificate</strong>
+                            <span>Earn a beautiful completion credential upon passing all sequential modules.</span>
                         </div>
                     </div>
                 </div>
-
-                <!-- Right Column (Sticky Enrollment Card) -->
-                <aside class="cd-details-right cd-sticky-sidebar">
-                    <div class="cd-price-tag-card">
-                        <span class="cd-price-tag-label">Investment</span>
-                        <strong class="cd-price-tag-value">
-                            <c:choose>
-                                <c:when test="${empty course.courseFee || course.courseFee le 0}">Free</c:when>
-                                <c:otherwise>₦<fmt:formatNumber value="${course.courseFee}" type="number" minFractionDigits="2" maxFractionDigits="2"/></c:otherwise>
-                            </c:choose>
-                        </strong>
-                    </div>
-
-                    <div class="cd-meta-vertical-list">
-                        <div class="cd-meta-row">
-                            <span class="cd-meta-row-label"><i class="fas fa-folder"></i> Category</span>
-                            <strong class="cd-meta-row-value"><c:out value="${course.category}"/></strong>
-                        </div>
-                        <div class="cd-meta-row">
-                            <span class="cd-meta-row-label"><i class="fas fa-signal"></i> Level</span>
-                            <strong class="cd-meta-row-value"><c:out value="${course.level}"/></strong>
-                        </div>
-                        <div class="cd-meta-row">
-                            <span class="cd-meta-row-label"><i class="fas fa-clock"></i> Duration</span>
-                            <strong class="cd-meta-row-value"><c:out value="${course.displayDuration}"/></strong>
-                        </div>
-                    </div>
-
-                    <div class="cd-action-vertical-stack">
-                        <c:choose>
-                            <c:when test="${isEnrolled}">
-                                <a class="sv-btn primary cd-action-button" href="${pageContext.request.contextPath}/student/my-enrollments">
-                                    <i class="fas fa-book-open-reader"></i> Open My Course
-                                </a>
-                            </c:when>
-                            <c:otherwise>
-                                <c:choose>
-                                    <c:when test="${empty course.courseFee || course.courseFee le 0}">
-                                        <form method="post" action="${pageContext.request.contextPath}/student/enroll" class="cd-action-form">
-                                            <input type="hidden" name="courseId" value="${course.courseId}">
-                                            <button type="submit" class="sv-btn primary cd-action-button"><i class="fas fa-user-plus"></i> Enroll Free Now</button>
-                                        </form>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <a class="sv-btn primary cd-action-button" href="${pageContext.request.contextPath}/student/enrollment-summary?courseId=${course.courseId}">
-                                            <i class="fas fa-shopping-cart"></i> Buy Course Now
-                                        </a>
-                                    </c:otherwise>
-                                </c:choose>
-                            </c:otherwise>
-                        </c:choose>
-                        
-                        <a href="${pageContext.request.contextPath}/student/courses" class="sv-btn cd-action-button cd-btn-secondary"><i class="fas fa-compass"></i> View All Courses</a>
-                    </div>
-
-                    <div class="cd-trust-guarantee-badges">
-                        <div class="cd-trust-item">
-                            <i class="fas fa-lock"></i>
-                            <span>Secure checkout & access control</span>
-                        </div>
-                        <div class="cd-trust-item">
-                            <i class="fas fa-award"></i>
-                            <span>Earn professional completion certificate</span>
-                        </div>
-                    </div>
-                </aside>
-            </div>
-        </section>
+            </aside>
+        </div>
     </main>
 </div>
 

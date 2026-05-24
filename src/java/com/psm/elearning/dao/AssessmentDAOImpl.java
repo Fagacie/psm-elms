@@ -172,7 +172,8 @@ public class AssessmentDAOImpl implements AssessmentDAO {
         a.setDuration(rs.wasNull() ? null : duration);
         int total = rs.getInt("TotalMarks");
         a.setTotalMarks(rs.wasNull() ? null : total);
-        a.setInstructions(rs.getString("Instructions"));
+        String rawInstructions = rs.getString("Instructions");
+        a.setInstructions(com.psm.elearning.util.AssessmentPlacementUtil.stripPlacement(rawInstructions));
         if (hasColumn(rs, "Status")) {
             a.setStatus(rs.getString("Status"));
         } else {
@@ -186,6 +187,11 @@ public class AssessmentDAOImpl implements AssessmentDAO {
         if (hasColumn(rs, "PlacementMaterialID")) {
             int placementMaterialId = rs.getInt("PlacementMaterialID");
             a.setPlacementMaterialId(rs.wasNull() ? null : placementMaterialId);
+        }
+        if (a.getPlacementType() == null || a.getPlacementType().trim().isEmpty()) {
+            com.psm.elearning.util.AssessmentPlacementUtil.Placement placement = com.psm.elearning.util.AssessmentPlacementUtil.parsePlacement(rawInstructions);
+            a.setPlacementType(placement.type);
+            a.setPlacementMaterialId(placement.materialId);
         }
         Timestamp cAt = rs.getTimestamp("CreatedAt");
         a.setCreatedAt(cAt != null ? cAt.toLocalDateTime() : null);
@@ -229,7 +235,16 @@ public class AssessmentDAOImpl implements AssessmentDAO {
             ps.setString(i++, assessment.getType());
             if (assessment.getDuration() != null) ps.setInt(i++, assessment.getDuration()); else ps.setNull(i++, Types.INTEGER);
             if (assessment.getTotalMarks() != null) ps.setInt(i++, assessment.getTotalMarks()); else ps.setNull(i++, Types.INTEGER);
-            ps.setString(i++, assessment.getInstructions());
+            String instructionsText = assessment.getInstructions();
+            if (!supportsPlacement) {
+                instructionsText = com.psm.elearning.util.AssessmentPlacementUtil.applyPlacement(
+                    instructionsText,
+                    com.psm.elearning.util.AssessmentPlacementUtil.toPlacementKey(
+                        new com.psm.elearning.util.AssessmentPlacementUtil.Placement(assessment.getPlacementType(), assessment.getPlacementMaterialId())
+                    )
+                );
+            }
+            ps.setString(i++, instructionsText);
             ps.setInt(i++, assessment.getMaxAttempts() != null ? assessment.getMaxAttempts() : 1);
             ps.setInt(i++, assessment.getCreatedBy());
             if (supportsGradingMode) {
@@ -362,7 +377,16 @@ public class AssessmentDAOImpl implements AssessmentDAO {
             ps.setString(i++, assessment.getType());
             if (assessment.getDuration() != null) ps.setInt(i++, assessment.getDuration()); else ps.setNull(i++, Types.INTEGER);
             if (assessment.getTotalMarks() != null) ps.setInt(i++, assessment.getTotalMarks()); else ps.setNull(i++, Types.INTEGER);
-            ps.setString(i++, assessment.getInstructions());
+            String instructionsText = assessment.getInstructions();
+            if (!supportsPlacement) {
+                instructionsText = com.psm.elearning.util.AssessmentPlacementUtil.applyPlacement(
+                    instructionsText,
+                    com.psm.elearning.util.AssessmentPlacementUtil.toPlacementKey(
+                        new com.psm.elearning.util.AssessmentPlacementUtil.Placement(assessment.getPlacementType(), assessment.getPlacementMaterialId())
+                    )
+                );
+            }
+            ps.setString(i++, instructionsText);
             ps.setInt(i++, assessment.getMaxAttempts() != null ? assessment.getMaxAttempts() : 1);
             if (supportsGradingMode) {
                 ps.setString(i++, assessment.getGradingMode() != null ? assessment.getGradingMode() : "auto");

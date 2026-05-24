@@ -254,7 +254,7 @@ UPDATE `AssessmentQuestion`
 
 ALTER TABLE `AssessmentSubmission`
   ADD COLUMN IF NOT EXISTS `UserID` INT NOT NULL,
-  ADD COLUMN IF NOT EXISTS `AnswersFilePath` VARCHAR(255) NULL,
+  ADD COLUMN IF NOT EXISTS `AnswersFilePath` TEXT NULL,
   ADD COLUMN IF NOT EXISTS `Feedback` TEXT NULL,
   ADD COLUMN IF NOT EXISTS `AttemptNumber` INT NOT NULL DEFAULT 1,
   ADD COLUMN IF NOT EXISTS `Status` ENUM('Submitted','TimedOut','AutoSubmitted','Graded') NOT NULL DEFAULT 'Submitted',

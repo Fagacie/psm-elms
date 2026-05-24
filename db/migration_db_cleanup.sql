@@ -34,5 +34,11 @@ VALUES
   ('platform.certificateEnabled', 'true', 'Enable or disable certificate issuance for completed courses', 0);
 
 -- ============================================================
+-- 5. AssessmentSubmission — update AnswersFilePath to TEXT
+--    to support larger MCQ payload structures without truncation
+-- ============================================================
+ALTER TABLE AssessmentSubmission MODIFY COLUMN AnswersFilePath TEXT NULL;
+
+-- ============================================================
 -- Done
 -- ============================================================

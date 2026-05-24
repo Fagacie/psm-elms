@@ -13,6 +13,9 @@ import java.util.Set;
 
 public class MaterialProgressDAOImpl implements MaterialProgressDAO {
 
+    /** Cached schema detection — only runs once per JVM, schema never changes at runtime. */
+    private static volatile ProgressSchema cachedSchema = null;
+
     @Override
     public boolean markViewed(int userId, int materialId) {
         try (Connection conn = DBConnection.getConnection()) {
@@ -180,12 +183,20 @@ public class MaterialProgressDAOImpl implements MaterialProgressDAO {
     }
 
     private ProgressSchema resolveSchema(Connection conn) throws SQLException {
-        return new ProgressSchema(
-                columnExists(conn, "MaterialProgress", "CourseID"),
-                columnExists(conn, "MaterialProgress", "Status"),
-                columnExists(conn, "MaterialProgress", "CompletedAt"),
-                columnExists(conn, "MaterialProgress", "UpdatedAt")
-        );
+        if (cachedSchema != null) {
+            return cachedSchema;
+        }
+        synchronized (MaterialProgressDAOImpl.class) {
+            if (cachedSchema == null) {
+                cachedSchema = new ProgressSchema(
+                        columnExists(conn, "MaterialProgress", "CourseID"),
+                        columnExists(conn, "MaterialProgress", "Status"),
+                        columnExists(conn, "MaterialProgress", "CompletedAt"),
+                        columnExists(conn, "MaterialProgress", "UpdatedAt")
+                );
+            }
+        }
+        return cachedSchema;
     }
 
     private boolean columnExists(Connection conn, String tableName, String columnName) throws SQLException {
