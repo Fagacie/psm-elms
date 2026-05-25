@@ -927,15 +927,20 @@
                     </div>
                     <div class="field" style="display: flex; flex-direction: column; gap: 6px;">
                         <label style="font-size: 0.82rem; font-weight: 700; color: var(--ins-heading);">Chapter / Sequence Order</label>
-                        <input type="number" name="displayOrder" min="1" style="padding: 10px 14px; border: 1px solid var(--ws-border-glass); border-radius: 8px; font-family: inherit;">
+                        <input type="number" name="displayOrder" min="1" placeholder="Auto-sequence if blank" style="padding: 10px 14px; border: 1px solid var(--ws-border-glass); border-radius: 8px; font-family: inherit;">
                     </div>
                     <div class="field" id="fileFieldContainer" style="display: flex; flex-direction: column; gap: 6px; grid-column: span 2;">
                         <label style="font-size: 0.82rem; font-weight: 700; color: var(--ins-heading);">Upload Attachment File</label>
-                        <input type="file" name="materialFile" id="materialFile" accept=".pdf,.doc,.docx,.txt,.ppt,.pptx,.zip,.mp4,.webm,.mov,.m4v,.mp3" style="padding: 8px 12px; border: 1px solid var(--ws-border-glass); border-radius: 8px; font-family: inherit;">
+                        <input type="file" name="materialFile" id="materialFile" accept=".pdf,.doc,.docx,.txt,.ppt,.pptx,.zip,.mp4,.webm,.mov,.m4v,.mp3" style="display: none;">
+                        <div class="modern-drag-drop-zone" id="uploadDragDropZone">
+                            <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                            <p class="drag-drop-text">Click or drag file here to upload</p>
+                            <span class="file-name-preview" id="uploadFileNamePreview" style="display: none;"></span>
+                        </div>
                     </div>
                     <div class="field" id="urlFieldContainer" style="display: flex; flex-direction: column; gap: 6px; grid-column: span 2; display: none;">
-                        <label style="font-size: 0.82rem; font-weight: 700; color: var(--ins-heading);">External URL (For Links/YouTube)</label>
-                        <input type="url" name="externalUrl" id="externalUrl" placeholder="https://" style="padding: 10px 14px; border: 1px solid var(--ws-border-glass); border-radius: 8px; font-family: inherit; width: 100%; box-sizing: border-box;">
+                        <label style="font-size: 0.82rem; font-weight: 700; color: var(--ins-heading);">Material URL / Embed Link</label>
+                        <input type="url" name="externalUrl" id="externalUrl" placeholder="https://..." style="padding: 10px 14px; border: 1px solid var(--ws-border-glass); border-radius: 8px; font-family: inherit; width: 100%; box-sizing: border-box;">
                     </div>
                     <div class="field full" style="display: flex; flex-direction: column; gap: 6px; grid-column: span 2;">
                         <label style="font-size: 0.82rem; font-weight: 700; color: var(--ins-heading);">Curriculum Description</label>
@@ -982,15 +987,20 @@
                     </div>
                     <div class="field" style="display: flex; flex-direction: column; gap: 6px;">
                         <label style="font-size: 0.82rem; font-weight: 700; color: var(--ins-heading);">Chapter / Sequence Order</label>
-                        <input id="editOrder" type="number" name="displayOrder" min="1" style="padding: 10px 14px; border: 1px solid var(--ws-border-glass); border-radius: 8px; font-family: inherit;">
+                        <input id="editOrder" type="number" name="displayOrder" min="1" placeholder="Auto-sequence if blank" style="padding: 10px 14px; border: 1px solid var(--ws-border-glass); border-radius: 8px; font-family: inherit;">
                     </div>
                     <div class="field" id="editFileFieldContainer" style="display: flex; flex-direction: column; gap: 6px; grid-column: span 2;">
                         <label style="font-size: 0.82rem; font-weight: 700; color: var(--ins-heading);">Replace Attachment File</label>
-                        <input id="editFile" type="file" name="materialFile" accept=".pdf,.doc,.docx,.txt,.ppt,.pptx,.zip,.mp4,.webm,.mov,.m4v,.mp3" style="padding: 8px 12px; border: 1px solid var(--ws-border-glass); border-radius: 8px; font-family: inherit;">
+                        <input id="editFile" type="file" name="materialFile" accept=".pdf,.doc,.docx,.txt,.ppt,.pptx,.zip,.mp4,.webm,.mov,.m4v,.mp3" style="display: none;">
+                        <div class="modern-drag-drop-zone" id="editDragDropZone">
+                            <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                            <p class="drag-drop-text">Click or drag file here to replace</p>
+                            <span class="file-name-preview" id="editFileNamePreview" style="display: none;"></span>
+                        </div>
                     </div>
                     <div class="field" id="editUrlFieldContainer" style="display: flex; flex-direction: column; gap: 6px; grid-column: span 2; display: none;">
-                        <label style="font-size: 0.82rem; font-weight: 700; color: var(--ins-heading);">External URL (For Links/YouTube)</label>
-                        <input id="editExternalUrl" type="url" name="externalUrl" placeholder="https://" style="padding: 10px 14px; border: 1px solid var(--ws-border-glass); border-radius: 8px; font-family: inherit; width: 100%; box-sizing: border-box;">
+                        <label style="font-size: 0.82rem; font-weight: 700; color: var(--ins-heading);">Material URL / Embed Link</label>
+                        <input id="editExternalUrl" type="url" name="externalUrl" placeholder="https://..." style="padding: 10px 14px; border: 1px solid var(--ws-border-glass); border-radius: 8px; font-family: inherit; width: 100%; box-sizing: border-box;">
                     </div>
                     <div class="field full" style="display: flex; flex-direction: column; gap: 6px; grid-column: span 2;">
                         <label style="font-size: 0.82rem; font-weight: 700; color: var(--ins-heading);">Curriculum Description</label>
@@ -1069,6 +1079,12 @@
         document.getElementById('uploadForm').reset();
         document.getElementById('fileFieldContainer').style.display = 'flex';
         document.getElementById('urlFieldContainer').style.display = 'none';
+        
+        const preview = document.getElementById('uploadFileNamePreview');
+        if (preview) {
+            preview.style.display = 'none';
+            preview.textContent = '';
+        }
     }
 
     function openEditMaterialModal(button, focusFile) {
@@ -1101,6 +1117,12 @@
         document.body.style.overflow = 'auto';
         const fileInput = document.getElementById('editFile');
         if (fileInput) fileInput.value = '';
+        
+        const preview = document.getElementById('editFileNamePreview');
+        if (preview) {
+            preview.style.display = 'none';
+            preview.textContent = '';
+        }
     }
 
     window.addEventListener('click', function (event) {
@@ -1154,6 +1176,119 @@
         if (type) applyTypeRules(type.value, file, url, fileFieldContainer, urlFieldContainer);
         if (editType) applyTypeRules(editType.value, editFile, editUrl, editFileFieldContainer, editUrlFieldContainer);
     })();
+
+    // Drag and Drop Area Handler
+    function setupDragAndDropZone(zoneId, inputId, previewId) {
+        const zone = document.getElementById(zoneId);
+        const input = document.getElementById(inputId);
+        const preview = document.getElementById(previewId);
+
+        if (!zone || !input) return;
+
+        // Click zone triggers file selection
+        zone.addEventListener('click', () => input.click());
+
+        // File selection change event
+        input.addEventListener('change', () => {
+            if (input.files && input.files[0]) {
+                preview.textContent = input.files[0].name;
+                preview.style.display = 'inline-block';
+            } else {
+                preview.style.display = 'none';
+                preview.textContent = '';
+            }
+        });
+
+        // Drag events
+        ['dragenter', 'dragover'].forEach(eventName => {
+            zone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                zone.classList.add('dragover');
+            }, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            zone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                zone.classList.remove('dragover');
+            }, false);
+        });
+
+        // Drop file event
+        zone.addEventListener('drop', (e) => {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+
+            if (files && files[0]) {
+                input.files = files;
+                preview.textContent = files[0].name;
+                preview.style.display = 'inline-block';
+            }
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        setupDragAndDropZone('uploadDragDropZone', 'materialFile', 'uploadFileNamePreview');
+        setupDragAndDropZone('editDragDropZone', 'editFile', 'editFileNamePreview');
+
+        // Form Submission loading states
+        const uploadForm = document.getElementById('uploadForm');
+        if (uploadForm) {
+            uploadForm.addEventListener('submit', function() {
+                const btn = this.querySelector('button[type="submit"]');
+                if (btn) {
+                    btn.disabled = true;
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Publishing...';
+                }
+            });
+        }
+
+        const editForm = document.getElementById('editMaterialForm');
+        if (editForm) {
+            editForm.addEventListener('submit', function() {
+                const btn = this.querySelector('button[type="submit"]');
+                if (btn) {
+                    btn.disabled = true;
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+                }
+            });
+        }
+
+        // URL Query parameter Success Toast alert trigger
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('success')) {
+            const successType = urlParams.get('success');
+            let message = "Action completed successfully!";
+            if (successType === 'created') message = "New material published successfully!";
+            if (successType === 'updated') message = "Material updated successfully!";
+            if (successType === 'deleted') message = "Material deleted successfully!";
+            if (successType === 'restored') message = "Material restored successfully!";
+            
+            showSuccessToast(message);
+            // Clean URL query params to avoid repeating toast on refresh
+            window.history.replaceState({}, document.title, window.location.pathname + window.location.hash);
+        }
+    });
+
+    function showSuccessToast(message) {
+        const toast = document.getElementById('premiumSuccessToast');
+        const msgEl = document.getElementById('premiumToastMsg');
+        if (toast && msgEl) {
+            msgEl.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 4000);
+        }
+    }
 </script>
+
+<div id="premiumSuccessToast" class="premium-toast">
+    <i class="fas fa-check-circle"></i>
+    <span id="premiumToastMsg">Saved successfully!</span>
+</div>
+
 </body>
 </html>

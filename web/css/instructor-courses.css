@@ -1961,3 +1961,105 @@
     transform: scale(1.1);
 }
 
+/* --- Refurbished Dynamic Drag & Drop Upload Zone --- */
+.modern-drag-drop-zone {
+    border: 2px dashed var(--ws-border-glass);
+    border-radius: 12px;
+    padding: 24px;
+    text-align: center;
+    background: var(--ws-bg-glass);
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.modern-drag-drop-zone:hover,
+.modern-drag-drop-zone.dragover {
+    border-color: var(--ws-primary, #6366f1);
+    background: rgba(99, 102, 241, 0.05);
+}
+
+.modern-drag-drop-zone .upload-icon {
+    font-size: 2.2rem;
+    color: var(--ins-muted, #64748b);
+    transition: color 0.25s ease, transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modern-drag-drop-zone:hover .upload-icon,
+.modern-drag-drop-zone.dragover .upload-icon {
+    color: var(--ws-primary, #6366f1);
+    transform: translateY(-2px);
+}
+
+.modern-drag-drop-zone .drag-drop-text {
+    font-size: 0.9rem;
+    color: var(--ins-muted, #64748b);
+    margin: 0;
+}
+
+.modern-drag-drop-zone .file-name-preview {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--ins-heading);
+    margin-top: 4px;
+    display: inline-block;
+    word-break: break-all;
+    background: rgba(99, 102, 241, 0.08);
+    padding: 4px 10px;
+    border-radius: 6px;
+    border: 1px solid rgba(99, 102, 241, 0.15);
+}
+
+/* Modals input polish overrides */
+.upload-form-grid input,
+.upload-form-grid select,
+.upload-form-grid textarea {
+    transition: border-color 0.2s, box-shadow 0.2s !important;
+    border: 1px solid var(--ws-border-glass) !important;
+}
+
+.upload-form-grid input:focus,
+.upload-form-grid select:focus,
+.upload-form-grid textarea:focus {
+    border-color: var(--ws-primary, #6366f1) !important;
+    box-shadow: 0 0 0 3px var(--ws-primary-glow) !important;
+}
+
+/* Animated Success Toast Alert */
+.premium-toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: #10b981;
+    color: #ffffff;
+    padding: 14px 28px;
+    border-radius: 14px;
+    box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    z-index: 10000;
+    transform: translateY(120px) scale(0.9);
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    pointer-events: none;
+}
+
+.premium-toast.show {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+}
+
+.premium-toast i {
+    font-size: 1.15rem;
+}
+
+

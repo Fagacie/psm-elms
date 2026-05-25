@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -54,16 +55,7 @@
             </div>
         </section>
 
-        <c:if test="${param.success == 'reordered'}">
-            <div class="ws-alert ws-alert-success">
-                <i class="fas fa-check-circle"></i> Course content order saved successfully.
-            </div>
-        </c:if>
-        <c:if test="${param.error == 'invalid'}">
-            <div class="ws-alert ws-alert-error">
-                <i class="fas fa-exclamation-circle"></i> Unable to save the current arrangement. Please try again.
-            </div>
-        </c:if>
+
 
         <section class="section-card organizer-section">
             <div class="section-header">
@@ -91,8 +83,15 @@
                             <div class="organizer-item organizer-item-material" draggable="true" data-id="${material.materialId}">
                                 <div class="organizer-item-header">
                                     <i class="fas fa-grip-vertical organizer-drag-handle"></i>
-                                    <div class="organizer-item-icon">
-                                        <i class="fas fa-file-alt"></i>
+                                    <div class="organizer-item-icon type-${fn:toLowerCase(material.materialType)}">
+                                        <i class="fas <c:choose>
+                                            <c:when test="${material.materialType == 'PDF'}">fa-file-pdf</c:when>
+                                            <c:when test="${material.materialType == 'Video'}">fa-file-video</c:when>
+                                            <c:when test="${material.materialType == 'Slides'}">fa-file-powerpoint</c:when>
+                                            <c:when test="${material.materialType == 'Link'}">fa-link</c:when>
+                                            <c:when test="${material.materialType == 'YouTube'}">fa-play-circle</c:when>
+                                            <c:otherwise>fa-file-alt</c:otherwise>
+                                        </c:choose>"></i>
                                     </div>
                                     <div class="organizer-item-content">
                                         <div class="organizer-item-title">${material.title}</div>
@@ -393,10 +392,63 @@ function saveContentOrder() {
         form.appendChild(materialInput);
     });
 
+    // Swap button status to Loading state
+    const saveBtn = document.querySelector('button[onclick="saveContentOrder()"]');
+    if (saveBtn) {
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+    }
+
     document.body.appendChild(form);
     form.submit();
 }
+
+// Dom listeners for success toast triggered via redirected query parameters
+document.addEventListener("DOMContentLoaded", function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('success') && urlParams.get('success') === 'reordered') {
+        showSuccessToast("Course content sequence saved successfully!");
+        window.history.replaceState({}, document.title, window.location.pathname + window.location.hash);
+    } else if (urlParams.has('error') && urlParams.get('error') === 'invalid') {
+        showErrorToast("Unable to save the current arrangement. Please try again.");
+        window.history.replaceState({}, document.title, window.location.pathname + window.location.hash);
+    }
+});
+
+function showSuccessToast(message) {
+    const toast = document.getElementById('premiumSuccessToast');
+    const msgEl = document.getElementById('premiumToastMsg');
+    if (toast && msgEl) {
+        msgEl.textContent = message;
+        toast.style.background = "#10b981";
+        toast.querySelector('i').className = "fas fa-check-circle";
+        toast.classList.add('show');
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 4000);
+    }
+}
+
+function showErrorToast(message) {
+    const toast = document.getElementById('premiumSuccessToast');
+    const msgEl = document.getElementById('premiumToastMsg');
+    if (toast && msgEl) {
+        msgEl.textContent = message;
+        toast.style.background = "#ef4444";
+        toast.querySelector('i').className = "fas fa-exclamation-circle";
+        toast.classList.add('show');
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 4000);
+    }
+}
 </script>
+
+<div id="premiumSuccessToast" class="premium-toast">
+    <i class="fas fa-check-circle"></i>
+    <span id="premiumToastMsg">Saved successfully!</span>
+</div>
+
 </body>
 </html>
 

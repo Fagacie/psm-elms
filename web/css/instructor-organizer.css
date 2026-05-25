@@ -254,3 +254,40 @@
 .organizer-final-section {
     border-top: 1px dashed var(--ins-border);
 }
+
+/* Drag-and-Drop Dragging Scaling State */
+.organizer-item {
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, border-color 0.2s ease, opacity 0.2s ease !important;
+}
+
+.organizer-item.dragging {
+    opacity: 0.65;
+    transform: scale(1.02) !important;
+    box-shadow: 0 20px 40px rgba(15, 23, 42, 0.12) !important;
+    border-color: var(--ws-primary, #6366f1) !important;
+}
+
+/* Distinct Drag Handle Hover State */
+.organizer-drag-handle {
+    color: #94a3b8;
+    cursor: grab;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.organizer-drag-handle:hover {
+    color: var(--ins-heading);
+    background: var(--ins-surface-soft, #f1f5f9);
+}
+
+.organizer-drag-handle:active {
+    cursor: grabbing;
+}
+
+/* Curated Media Type Icons */
+.organizer-item-icon.type-pdf { background: rgba(239, 68, 68, 0.08) !important; color: #ef4444 !important; }
+.organizer-item-icon.type-video { background: rgba(59, 130, 246, 0.08) !important; color: #3b82f6 !important; }
+.organizer-item-icon.type-link { background: rgba(16, 185, 129, 0.08) !important; color: #10b981 !important; }
+.organizer-item-icon.type-slides { background: rgba(245, 158, 11, 0.08) !important; color: #f59e0b !important; }
+.organizer-item-icon.type-youtube { background: rgba(220, 38, 38, 0.08) !important; color: #dc2626 !important; }
