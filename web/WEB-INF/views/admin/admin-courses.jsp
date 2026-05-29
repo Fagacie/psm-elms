@@ -1,18 +1,31 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" import="com.psm.elearning.model.*,java.util.List" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Course Management - PSM E-Learning</title>
+    <title>Course Catalog Management - PSM E-Learning</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin-dashboard.css?v=2.2">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin-courses-gf.css?v=1.0">
     <jsp:include page="/WEB-INF/views/common/head-external-assets.jsp"/>
+    
+    <!-- React & ReactDOM (UMD production versions) -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    
+    <!-- Babel Standalone for JSX rendering -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Lucide Icons UMD -->
+    <script src="https://unpkg.com/lucide@0.395.0/dist/umd/lucide.min.js"></script>
+    
+    <!-- TanStack Table UMD -->
+    <script src="https://unpkg.com/@tanstack/react-table@8.17.3/build/umd/index.production.js"></script>
 </head>
 <body class="admin-page">
 <jsp:include page="/WEB-INF/views/common/admin-header.jsp">
@@ -23,799 +36,873 @@
 <jsp:include page="/WEB-INF/views/common/admin-sidebar.jsp"/>
 
 <main class="app-main">
-    <div class="content-wrapper">
-        <c:set var="totalCourses" value="${empty courses ? 0 : fn:length(courses)}"/>
-        <c:set var="pendingCount" value="0"/>
-        <c:set var="approvedCount" value="0"/>
-        <c:set var="archivedCount" value="0"/>
-        <c:set var="unassignedCount" value="0"/>
-        <c:forEach items="${courses}" var="course">
-            <c:set var="courseHasInstructor" value="false"/>
-            <c:choose>
-                <c:when test="${course.status eq 'Pending'}"><c:set var="pendingCount" value="${pendingCount + 1}"/></c:when>
-                <c:when test="${course.status eq 'Approved'}"><c:set var="approvedCount" value="${approvedCount + 1}"/></c:when>
-                <c:when test="${course.status eq 'Archived'}"><c:set var="archivedCount" value="${archivedCount + 1}"/></c:when>
-            </c:choose>
-            <c:forEach items="${instructors}" var="ins">
-                <c:if test="${ins.userId == course.createdBy}">
-                    <c:set var="courseHasInstructor" value="true"/>
-                </c:if>
-            </c:forEach>
-            <c:if test="${not courseHasInstructor}">
-                <c:set var="unassignedCount" value="${unassignedCount + 1}"/>
-            </c:if>
-        </c:forEach>
-
-        <section class="course-board-shell section-card">
-            <div class="admin-breadcrumb course-breadcrumb">
-                <a href="${pageContext.request.contextPath}/dashboard">Dashboard</a>
-                <span>&gt;</span>
-                <span>Courses</span>
-            </div>
-            <div class="course-board-header">
-                <div class="course-board-copy">
-                    <p class="admin-kicker">Course Governance</p>
-                    <h2>Professional course management dashboard</h2>
-                    <p>Keep the catalog organized, assign instructors quickly, and manage lifecycle actions from a cleaner workspace.</p>
-                </div>
-                <div class="course-board-controls">
-                    <label class="course-search-box" for="courseSearchInput">
-                        <i class="fas fa-search"></i>
-                        <input type="search" id="courseSearchInput" placeholder="Search courses, categories, instructors" aria-label="Search courses">
-                    </label>
-                    <button type="button" class="admin-btn secondary" id="toggleCourseFilters">
-                        <i class="fas fa-sliders-h"></i>&nbsp;Filter
-                    </button>
-                    <button type="button" class="admin-btn primary" data-open-course-drawer>
-                        <i class="fas fa-plus"></i>&nbsp;Create Course
-                    </button>
-                </div>
-            </div>
-            <div class="course-filter-panel" id="courseFilterPanel" style="display:none;">
-                <a href="${pageContext.request.contextPath}/admin/courses" class="admin-btn ${empty param.status ? 'primary' : 'secondary'}">All Courses</a>
-                <a href="${pageContext.request.contextPath}/admin/courses?status=Pending" class="admin-btn ${param.status == 'Pending' ? 'primary' : 'secondary'}">Pending Review</a>
-                <a href="${pageContext.request.contextPath}/admin/courses?status=Approved" class="admin-btn ${param.status == 'Approved' ? 'primary' : 'secondary'}">Approved</a>
-                <a href="${pageContext.request.contextPath}/admin/courses?status=Archived" class="admin-btn ${param.status == 'Archived' ? 'primary' : 'secondary'}">Archived</a>
-            </div>
-        </section>
-
+    <!-- JSTL Success/Error Notification Banners -->
+    <div style="max-width: 1400px; margin: 2rem auto 0 auto; padding: 0 2rem;">
         <c:if test="${param.success == 'approved'}">
-            <div class="alert alert-success">
+            <div class="alert-gf alert-success-gf" style="margin-bottom: 1.5rem;">
                 <i class="fas fa-check-circle"></i> Course approved successfully.
             </div>
         </c:if>
         <c:if test="${param.success == 'rejected'}">
-            <div class="alert alert-success">
-                <i class="fas fa-check-circle"></i> Course rejected successfully.
+            <div class="alert-gf alert-success-gf" style="margin-bottom: 1.5rem;">
+                <i class="fas fa-check-circle"></i> Course pending request rejected.
             </div>
         </c:if>
         <c:if test="${param.success == 'created'}">
-            <div class="alert alert-success">
-                <i class="fas fa-check-circle"></i> Course created successfully.
+            <div class="alert-gf alert-success-gf" style="margin-bottom: 1.5rem;">
+                <i class="fas fa-check-circle"></i> Course created and published successfully.
             </div>
         </c:if>
         <c:if test="${param.success == 'edited'}">
-            <div class="alert alert-success">
-                <i class="fas fa-check-circle"></i> Course details updated successfully.
+            <div class="alert-gf alert-success-gf" style="margin-bottom: 1.5rem;">
+                <i class="fas fa-check-circle"></i> Course catalog specifications updated successfully.
             </div>
         </c:if>
         <c:if test="${param.success == 'assigned'}">
-            <div class="alert alert-success">
-                <i class="fas fa-check-circle"></i> Instructor assignment updated successfully.
+            <div class="alert-gf alert-success-gf" style="margin-bottom: 1.5rem;">
+                <i class="fas fa-check-circle"></i> Instructor assigned to course catalog successfully.
+            </div>
+        </c:if>
+        <c:if test="${param.success == 'archived'}">
+            <div class="alert-gf alert-success-gf" style="background-color: #f1f5f9; color: #475569; border: 1px solid rgba(71, 85, 105, 0.15); margin-bottom: 1.5rem;">
+                <i class="fas fa-archive"></i> Course archived and hidden from student catalog.
+            </div>
+        </c:if>
+        <c:if test="${param.success == 'restored'}">
+            <div class="alert-gf alert-success-gf" style="margin-bottom: 1.5rem;">
+                <i class="fas fa-check-circle"></i> Course restored back to active student catalog successfully.
+            </div>
+        </c:if>
+        <c:if test="${param.success == 'deleted'}">
+            <div class="alert-gf alert-success-gf" style="background-color: #fef2f2; color: #b91c1c; border: 1px solid rgba(185, 28, 28, 0.15); margin-bottom: 1.5rem;">
+                <i class="fas fa-trash-alt"></i> Course has been completely hard-deleted from database records.
             </div>
         </c:if>
         <c:if test="${param.error != null}">
-            <div class="alert alert-error">
-                <i class="fas fa-exclamation-circle"></i> An error occurred. Please try again.
+            <div class="alert-gf alert-error-gf" style="margin-bottom: 1.5rem;">
+                <i class="fas fa-exclamation-circle"></i> An operation error occurred. Please verify and try again.
             </div>
         </c:if>
         <c:if test="${not empty errorMessage}">
-            <div class="alert alert-error">
+            <div class="alert-gf alert-error-gf" style="margin-bottom: 1.5rem;">
                 <i class="fas fa-exclamation-circle"></i> <c:out value="${errorMessage}"/>
             </div>
         </c:if>
-
-        <div class="course-stats-grid">
-            <div class="metric-card course-stat-card">
-                <div class="metric-label">Total Courses</div>
-                <div class="metric-value">${totalCourses}</div>
-                <div class="metric-meta">Complete catalog records</div>
-            </div>
-            <div class="metric-card course-stat-card">
-                <div class="metric-label">Active Courses</div>
-                <div class="metric-value">${approvedCount}</div>
-                <div class="metric-meta">Published and visible to students</div>
-            </div>
-            <div class="metric-card course-stat-card">
-                <div class="metric-label">Archived</div>
-                <div class="metric-value">${archivedCount}</div>
-                <div class="metric-meta">Hidden from the live catalog</div>
-            </div>
-            <div class="metric-card course-stat-card">
-                <div class="metric-label">Unassigned</div>
-                <div class="metric-value">${unassignedCount}</div>
-                <div class="metric-meta">Records without a valid instructor profile</div>
-            </div>
-        </div>
-
-        <section class="section-card">
-            <div class="section-header course-table-header">
-                <div>
-                    <h2>All Courses</h2>
-                </div>
-                <span class="section-caption">${totalCourses} course${totalCourses == 1 ? '' : 's'} in view</span>
-            </div>
-            <div class="table-wrapper course-table-wrapper">
-                <table id="coursesTable" class="data-table course-table">
-                    <thead>
-                        <tr>
-                            <th>Course</th>
-                            <th class="course-hidden-column">Category</th>
-                            <th>Level</th>
-                            <th class="course-hidden-column">Duration</th>
-                            <th>Fee</th>
-                            <th>Status</th>
-                            <th>Instructor</th>
-                            <th class="course-hidden-column">Created</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <c:choose>
-                            <c:when test="${empty courses}">
-                                <tr>
-                                    <td colspan="9">
-                                        <div class="empty-state empty-state-inset">
-                                            <i class="fas fa-inbox"></i>
-                                            <p>No courses found.</p>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </c:when>
-                            <c:otherwise>
-                                <c:forEach var="course" items="${courses}">
-                                    <c:set var="assignedLabel" value="Unassigned"/>
-                                    <c:set var="assignedId" value=""/>
-                                    <c:set var="courseHasInstructor" value="false"/>
-                                    <c:forEach items="${instructors}" var="ins">
-                                        <c:if test="${ins.userId == course.createdBy}">
-                                            <c:set var="assignedLabel" value="${ins.fullName}"/>
-                                            <c:set var="assignedId" value="${ins.userId}"/>
-                                            <c:set var="courseHasInstructor" value="true"/>
-                                        </c:if>
-                                    </c:forEach>
-                                    <c:set var="courseDescription" value="${not empty course.description ? course.description : ''}"/>
-                                    <c:set var="courseCreatedValue" value="${not empty course.createdAt ? course.createdAt.toString() : ''}"/>
-                                    <tr
-                                        data-course-id="${course.courseId}"
-                                        data-course-name="${fn:escapeXml(course.courseName)}"
-                                        data-course-category="${fn:escapeXml(not empty course.category ? course.category : 'Uncategorized')}"
-                                        data-course-level="${fn:escapeXml(not empty course.level ? course.level : 'Beginner')}"
-                                        data-course-duration="${fn:escapeXml(not empty course.displayDuration ? course.displayDuration : '-') }"
-                                        data-course-fee="${course.courseFee != null ? course.courseFee : 0}"
-                                        data-course-status="${fn:escapeXml(course.status)}"
-                                        data-course-instructor-id="${assignedId}"
-                                        data-course-instructor-label="${fn:escapeXml(assignedLabel)}"
-                                        data-course-created="${fn:escapeXml(courseCreatedValue)}"
-                                        data-course-description="${fn:escapeXml(courseDescription)}"
-                                        data-course-approve-url="${pageContext.request.contextPath}/admin/courses?action=approve&id=${course.courseId}"
-                                        data-course-reject-url="${pageContext.request.contextPath}/admin/courses?action=reject&id=${course.courseId}"
-                                        data-course-archive-url="${pageContext.request.contextPath}/admin/courses?action=archive&id=${course.courseId}"
-                                        data-course-restore-url="${pageContext.request.contextPath}/admin/courses?action=restore&id=${course.courseId}"
-                                        data-course-enrolled-count="${empty enrollmentCounts[course.courseId] ? 0 : enrollmentCounts[course.courseId]}"
-                                    >
-                                        <td>
-                                            <strong><c:out value="${course.courseName}"/></strong>
-                                            <c:if test="${not empty course.description}">
-                                                <div class="table-subtext">
-                                                    <c:choose>
-                                                        <c:when test="${fn:length(course.description) > 78}">${fn:substring(course.description, 0, 78)}...</c:when>
-                                                        <c:otherwise><c:out value="${course.description}"/></c:otherwise>
-                                                    </c:choose>
-                                                </div>
-                                            </c:if>
-                                        </td>
-                                        <td class="course-hidden-column"><c:out value="${not empty course.category ? course.category : 'Uncategorized'}"/></td>
-                                        <td><span class="status-badge status-${course.level eq 'Beginner' ? 'success' : course.level eq 'Intermediate' ? 'warning' : 'secondary'}"><c:out value="${not empty course.level ? course.level : 'Beginner'}"/></span></td>
-                                        <td class="course-hidden-column"><c:out value="${not empty course.displayDuration ? course.displayDuration : '-'}"/></td>
-                                        <td>
-                                            <c:choose>
-                                                <c:when test="${course.courseFee == 0}">Free</c:when>
-                                                <c:otherwise><fmt:formatNumber value="${course.courseFee}" type="number" minFractionDigits="2" maxFractionDigits="2"/></c:otherwise>
-                                            </c:choose>
-                                        </td>
-                                        <td>
-                                            <span class="status-badge status-${course.status eq 'Pending' ? 'warning' : course.status eq 'Approved' ? 'success' : 'secondary'}"><c:out value="${course.status}"/></span>
-                                        </td>
-                                        <td>
-                                            <span class="course-instructor-label ${courseHasInstructor ? '' : 'is-empty'}"><c:out value="${assignedLabel}"/></span>
-                                        </td>
-                                        <td class="course-hidden-column">
-                                            <c:choose>
-                                                <c:when test="${not empty course.createdAt}">
-                                                    <c:out value="${fn:length(course.createdAt.toString()) >= 10 ? fn:substring(course.createdAt.toString(), 0, 10) : course.createdAt.toString()}"/>
-                                                </c:when>
-                                                <c:otherwise>-</c:otherwise>
-                                            </c:choose>
-                                        </td>
-                                        <td>
-                                            <div class="course-actions">
-                                                <button type="button" class="course-actions-trigger" data-course-menu-toggle aria-label="Open course actions">
-                                                    <i class="fas fa-ellipsis-v"></i>
-                                                </button>
-                                                <div class="course-actions-menu" role="menu" aria-label="Course actions" style="display:none;">
-                                                    <button type="button" class="course-menu-item js-course-view" data-course-view>View Details</button>
-                                                    <button type="button" class="course-menu-item js-course-edit" data-course-edit>Edit Course</button>
-                                                    <button type="button" class="course-menu-item js-course-assign" data-course-assign>Assign Instructor</button>
-                                                    <c:choose>
-                                                        <c:when test="${course.status eq 'Pending'}">
-                                                            <a href="${pageContext.request.contextPath}/admin/courses?action=approve&id=${course.courseId}" class="course-menu-item" onclick="return confirm('Approve this course?');">Approve</a>
-                                                            <a href="${pageContext.request.contextPath}/admin/courses?action=reject&id=${course.courseId}" class="course-menu-item" onclick="return confirm('Reject this course?');">Reject</a>
-                                                        </c:when>
-                                                        <c:when test="${course.status eq 'Approved'}">
-                                                            <a href="${pageContext.request.contextPath}/admin/courses?action=archive&id=${course.courseId}" class="course-menu-item" onclick="return confirm('Archive this course? Students will no longer see it.');">Archive</a>
-                                                        </c:when>
-                                                        <c:when test="${course.status eq 'Archived'}">
-                                                            <a href="${pageContext.request.contextPath}/admin/courses?action=restore&id=${course.courseId}" class="course-menu-item" onclick="return confirm('Restore this course to Approved?');">Restore</a>
-                                                        </c:when>
-                                                    </c:choose>
-                                                </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </c:forEach>
-                            </c:otherwise>
-                        </c:choose>
-                    </tbody>
-                </table>
-            </div>
-            <script>
-                window.__initCoursesDashboard = function () {
-                    if (!window.jQuery) {
-                        return;
-                    }
-
-                    var $ = window.jQuery;
-                    var $table = $('#coursesTable');
-                    var dataTable = null;
-
-                    if ($table.length && $('#coursesTable tbody tr').length > 1 && $.fn.DataTable) {
-                        dataTable = $table.DataTable({
-                            order: [[7, 'desc']],
-                            pageLength: 10,
-                            lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'All']],
-                            dom: 'rtip',
-                            autoWidth: false,
-                            language: {
-                                info: 'Showing _START_ to _END_ of _TOTAL_ courses',
-                                infoEmpty: 'Showing 0 to 0 of 0 courses',
-                                infoFiltered: '(filtered from _MAX_ total courses)',
-                                zeroRecords: 'No matching courses found',
-                                emptyTable: 'No courses available',
-                                paginate: { first: 'First', last: 'Last', next: 'Next', previous: 'Previous' }
-                            },
-                            columnDefs: [
-                                { targets: [1, 3, 7], visible: false, searchable: true },
-                                { orderable: false, targets: [8] },
-                                { orderable: true, targets: [0, 2, 4, 5, 6] }
-                            ]
-                        });
-                    }
-
-                    var searchInput = document.getElementById('courseSearchInput');
-                    if (searchInput && !searchInput.dataset.bound) {
-                        searchInput.dataset.bound = '1';
-                        searchInput.addEventListener('input', function () {
-                            if (dataTable) {
-                                dataTable.search(searchInput.value).draw();
-                            }
-                        });
-                    }
-
-                    var filterToggle = document.getElementById('toggleCourseFilters');
-                    var filterPanel = document.getElementById('courseFilterPanel');
-                    if (filterToggle && filterPanel && !filterToggle.dataset.bound) {
-                        filterToggle.dataset.bound = '1';
-                        filterPanel.style.display = 'none';
-                        filterToggle.addEventListener('click', function () {
-                            filterPanel.classList.toggle('is-open');
-                            filterPanel.style.display = filterPanel.classList.contains('is-open') ? 'flex' : 'none';
-                        });
-                    }
-
-                    var createModal = document.getElementById('courseCreateModal');
-                    var editModal = document.getElementById('courseEditModal');
-                    var assignModal = document.getElementById('courseAssignModal');
-                    var detailsModal = document.getElementById('courseDetailsModal');
-                    var assignCourseIdInput = document.getElementById('courseAssignId');
-                    var assignInstructorSelect = document.getElementById('courseAssignInstructorId');
-                    var assignCourseName = document.getElementById('courseAssignCourseName');
-                    var detailsTitle = document.getElementById('courseDetailsTitle');
-                    var detailsStatus = document.getElementById('courseDetailsStatus');
-                    var detailsInstructor = document.getElementById('courseDetailsInstructor');
-                    var detailsCategory = document.getElementById('courseDetailsCategory');
-                    var detailsLevel = document.getElementById('courseDetailsLevel');
-                    var detailsDuration = document.getElementById('courseDetailsDuration');
-                    var detailsFee = document.getElementById('courseDetailsFee');
-                    var detailsCreated = document.getElementById('courseDetailsCreated');
-                    var detailsDescription = document.getElementById('courseDetailsDescription');
-                    var detailsPrimaryAction = document.getElementById('courseDetailsPrimaryAction');
-                    var detailsPrimaryActionLabel = document.getElementById('courseDetailsPrimaryActionLabel');
-                    var detailsAssignAction = document.getElementById('courseDetailsAssignAction');
-                    var detailsEnrolled = document.getElementById('courseDetailsEnrolled');
-
-                    function openModal(modal) {
-                        if (!modal) {
-                            return;
-                        }
-                        modal.classList.add('active');
-                        modal.setAttribute('aria-hidden', 'false');
-                        document.body.classList.add('admin-modal-open');
-                    }
-
-                    function closeModal(modal) {
-                        if (!modal) {
-                            return;
-                        }
-                        modal.classList.remove('active');
-                        modal.setAttribute('aria-hidden', 'true');
-                        document.body.classList.remove('admin-modal-open');
-                    }
-
-                    function formatMoney(value) {
-                        var amount = Number(value || 0);
-                        if (!isFinite(amount)) {
-                            return '-';
-                        }
-                        if (amount === 0) {
-                            return 'Free';
-                        }
-                        return amount.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                    }
-
-                    function populateDetails(row) {
-                        if (!row) {
-                            return;
-                        }
-                        var data = row.dataset;
-                        var courseName = data.courseName || 'Course details';
-                        var status = data.courseStatus || 'Unknown';
-                        var fee = formatMoney(data.courseFee);
-
-                        detailsTitle.textContent = courseName;
-                        detailsStatus.textContent = status;
-                        detailsStatus.className = 'status-badge status-' + (status === 'Pending' ? 'warning' : status === 'Approved' ? 'success' : 'secondary');
-                        detailsInstructor.textContent = data.courseInstructorLabel || 'Unassigned';
-                        detailsCategory.textContent = data.courseCategory || 'Uncategorized';
-                        detailsLevel.textContent = data.courseLevel || 'Beginner';
-                        detailsDuration.textContent = data.courseDuration || '-';
-                        detailsFee.textContent = fee;
-                        detailsCreated.textContent = data.courseCreated ? data.courseCreated.substring(0, 10) : '-';
-                        detailsDescription.textContent = data.courseDescription || 'No description provided for this course yet.';
-                        if (detailsEnrolled) {
-                            detailsEnrolled.textContent = data.courseEnrolledCount || '0';
-                        }
-
-                        var primaryUrl = '';
-                        var primaryLabel = '';
-                        if (status === 'Pending') {
-                            primaryUrl = data.courseApproveUrl || '#';
-                            primaryLabel = 'Approve';
-                        } else if (status === 'Approved') {
-                            primaryUrl = data.courseArchiveUrl || '#';
-                            primaryLabel = 'Archive';
-                        } else if (status === 'Archived') {
-                            primaryUrl = data.courseRestoreUrl || '#';
-                            primaryLabel = 'Restore';
-                        }
-
-                        detailsPrimaryAction.href = primaryUrl;
-                        detailsPrimaryActionLabel.textContent = primaryLabel || 'Status Action';
-                        detailsPrimaryAction.style.display = primaryLabel ? 'inline-flex' : 'none';
-                        detailsAssignAction.dataset.courseId = data.courseId;
-                        detailsAssignAction.dataset.courseName = courseName;
-                        detailsAssignAction.dataset.courseInstructorId = data.courseInstructorId || '';
-                        assignCourseIdInput.value = data.courseId || '';
-                        assignCourseName.textContent = courseName;
-                        if (assignInstructorSelect) {
-                            assignInstructorSelect.value = data.courseInstructorId || '';
-                        }
-                    }
-
-                    document.querySelectorAll('[data-open-course-drawer]').forEach(function (button) {
-                        if (button.dataset.bound) {
-                            return;
-                        }
-                        button.dataset.bound = '1';
-                        button.addEventListener('click', function () {
-                            openModal(createModal);
-                        });
-                    });
-
-                    document.querySelectorAll('[data-close-modal]').forEach(function (button) {
-                        if (button.dataset.bound) {
-                            return;
-                        }
-                        button.dataset.bound = '1';
-                        button.addEventListener('click', function () {
-                            closeModal(document.getElementById(button.getAttribute('data-close-modal')));
-                        });
-                    });
-
-                    document.querySelectorAll('[data-course-menu-toggle]').forEach(function (button) {
-                        if (button.dataset.bound) {
-                            return;
-                        }
-                        button.dataset.bound = '1';
-                        button.addEventListener('click', function (event) {
-                            event.stopPropagation();
-                            var actionWrap = button.closest('.course-actions');
-                            var openState = actionWrap.classList.contains('is-open');
-                            document.querySelectorAll('.course-actions.is-open').forEach(function (menu) {
-                                menu.classList.remove('is-open');
-                                var hiddenMenu = menu.querySelector('.course-actions-menu');
-                                if (hiddenMenu) {
-                                    hiddenMenu.style.display = 'none';
-                                }
-                            });
-                            if (!openState) {
-                                actionWrap.classList.add('is-open');
-                                var activeMenu = actionWrap.querySelector('.course-actions-menu');
-                                if (activeMenu) {
-                                    activeMenu.style.display = 'grid';
-                                }
-                            }
-                        });
-                    });
-
-                    document.querySelectorAll('.js-course-view').forEach(function (button) {
-                        if (button.dataset.bound) {
-                            return;
-                        }
-                        button.dataset.bound = '1';
-                        button.addEventListener('click', function (event) {
-                            event.stopPropagation();
-                            var row = button.closest('tr');
-                            populateDetails(row);
-                            openModal(detailsModal);
-                            document.querySelectorAll('.course-actions.is-open').forEach(function (menu) {
-                                menu.classList.remove('is-open');
-                                var hiddenMenu = menu.querySelector('.course-actions-menu');
-                                if (hiddenMenu) {
-                                    hiddenMenu.style.display = 'none';
-                                }
-                            });
-                        });
-                    });
-
-                    document.querySelectorAll('.js-course-assign').forEach(function (button) {
-                        if (button.dataset.bound) {
-                            return;
-                        }
-                        button.dataset.bound = '1';
-                        button.addEventListener('click', function (event) {
-                            event.stopPropagation();
-                            var row = button.closest('tr');
-                            populateDetails(row);
-                            openModal(assignModal);
-                            document.querySelectorAll('.course-actions.is-open').forEach(function (menu) {
-                                menu.classList.remove('is-open');
-                                var hiddenMenu = menu.querySelector('.course-actions-menu');
-                                if (hiddenMenu) {
-                                    hiddenMenu.style.display = 'none';
-                                }
-                            });
-                        });
-                    });
-
-                    function populateEditForm(row) {
-                        if (!row) return;
-                        var data = row.dataset;
-                        
-                        document.getElementById('courseEditId').value = data.courseId || '';
-                        document.getElementById('courseEditName').value = data.courseName || '';
-                        document.getElementById('courseEditCategory').value = data.courseCategory || '';
-                        document.getElementById('courseEditLevel').value = data.courseLevel || 'Beginner';
-                        
-                        var duration = data.courseDuration || '';
-                        if (duration && duration.indexOf(' ') !== -1) {
-                            duration = duration.split(' ')[0];
-                        }
-                        document.getElementById('courseEditDuration').value = duration;
-                        document.getElementById('courseEditFee').value = data.courseFee || '0';
-                        document.getElementById('courseEditInstructorId').value = data.courseInstructorId || '';
-                        document.getElementById('courseEditDescription').value = data.courseDescription || '';
-                    }
-
-                    document.querySelectorAll('.js-course-edit').forEach(function (button) {
-                        if (button.dataset.bound) {
-                            return;
-                        }
-                        button.dataset.bound = '1';
-                        button.addEventListener('click', function (event) {
-                            event.stopPropagation();
-                            var row = button.closest('tr');
-                            populateEditForm(row);
-                            openModal(editModal);
-                            document.querySelectorAll('.course-actions.is-open').forEach(function (menu) {
-                                menu.classList.remove('is-open');
-                                var hiddenMenu = menu.querySelector('.course-actions-menu');
-                                if (hiddenMenu) {
-                                    hiddenMenu.style.display = 'none';
-                                }
-                            });
-                        });
-                    });
-
-                    if (detailsAssignAction && !detailsAssignAction.dataset.bound) {
-                        detailsAssignAction.dataset.bound = '1';
-                        detailsAssignAction.addEventListener('click', function () {
-                            closeModal(detailsModal);
-                            openModal(assignModal);
-                        });
-                    }
-
-                    document.addEventListener('click', function (event) {
-                        if (!event.target.closest('.course-actions')) {
-                            document.querySelectorAll('.course-actions.is-open').forEach(function (menu) {
-                                menu.classList.remove('is-open');
-                                var hiddenMenu = menu.querySelector('.course-actions-menu');
-                                if (hiddenMenu) {
-                                    hiddenMenu.style.display = 'none';
-                                }
-                            });
-                        }
-                    });
-
-                    document.addEventListener('keydown', function (event) {
-                        if (event.key === 'Escape') {
-                            closeModal(createModal);
-                            closeModal(editModal);
-                            closeModal(assignModal);
-                            closeModal(detailsModal);
-                            document.querySelectorAll('.course-actions.is-open').forEach(function (menu) {
-                                menu.classList.remove('is-open');
-                                var hiddenMenu = menu.querySelector('.course-actions-menu');
-                                if (hiddenMenu) {
-                                    hiddenMenu.style.display = 'none';
-                                }
-                            });
-                        }
-                    });
-                };
-            </script>
-        </section>
     </div>
+
+    <!-- React Greenfield Mounting Entry Node -->
+    <div id="admin-react-root"></div>
 </main>
 
-<div id="courseCreateModal" class="admin-modal admin-course-drawer" aria-hidden="true">
-    <div class="admin-modal-backdrop" data-close-modal="courseCreateModal"></div>
-    <div class="admin-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="courseCreateModalTitle">
-        <div class="admin-modal-header">
-            <h3 id="courseCreateModalTitle" class="admin-modal-title">Create Course</h3>
-            <button type="button" class="admin-modal-close" data-close-modal="courseCreateModal" aria-label="Close">x</button>
-        </div>
-        <div class="course-drawer-body">
-            <form method="post" action="${pageContext.request.contextPath}/admin/courses" enctype="multipart/form-data" class="course-drawer-form">
-                <input type="hidden" name="action" value="create"/>
-                <div class="course-form-grid course-form-grid-create">
-                    <div class="form-group">
-                        <label for="courseName">Course Name</label>
-                        <input id="courseName" name="courseName" type="text" required class="form-control" placeholder="e.g. Strategic Digital Marketing"/>
-                    </div>
-                    <div class="form-group">
-                        <label for="category">Category</label>
-                        <input id="category" name="category" type="text" class="form-control" placeholder="Business, Technology, Design"/>
-                    </div>
-                    <div class="form-group">
-                        <label for="level">Level</label>
-                        <select id="level" name="level" class="form-control">
-                            <option value="Beginner">Beginner</option>
-                            <option value="Intermediate">Intermediate</option>
-                            <option value="Advanced">Advanced</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="duration">Duration</label>
-                        <input id="duration" name="duration" type="number" min="1" class="form-control" placeholder="Days"/>
-                    </div>
-                    <div class="form-group">
-                        <label for="courseFee">Fee (NGN)</label>
-                        <input id="courseFee" name="courseFee" type="number" min="0" step="0.01" required class="form-control" placeholder="0.00"/>
-                    </div>
-                    <div class="form-group">
-                        <label for="instructorId">Instructor</label>
-                        <select id="instructorId" name="instructorId" class="form-control">
-                            <option value="">No instructor assigned</option>
-                            <c:forEach items="${instructors}" var="ins">
-                                <option value="${ins.userId}"><c:out value="${ins.fullName}"/> (<c:out value="${ins.email}"/>)</option>
-                            </c:forEach>
-                        </select>
-                    </div>
-                    <div class="form-group form-group-full">
-                        <label for="courseBanner">Course Banner</label>
-                        <input id="courseBanner" name="courseBanner" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" class="form-control"/>
-                        <small class="text-muted">Recommended: 1280x720. JPG, PNG, or WEBP up to 5MB.</small>
-                    </div>
-                    <div class="form-group form-group-full course-description-group">
-                        <label for="description">Description</label>
-                        <textarea id="description" name="description" rows="5" class="form-control" placeholder="Write a concise summary of the course, its purpose, and what the learner will gain."></textarea>
-                    </div>
-                </div>
-                <div class="course-drawer-footer">
-                    <button type="button" class="admin-btn secondary" data-close-modal="courseCreateModal">Cancel</button>
-                    <button type="submit" class="admin-btn primary"><i class="fas fa-save"></i>&nbsp;Create Course</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+<%
+    List<Course> coursesList = (List<Course>) request.getAttribute("courses");
+    List<User> instructorsList = (List<User>) request.getAttribute("instructors");
+    java.util.Map<Integer, Integer> enrollmentCountsMap = (java.util.Map<Integer, Integer>) request.getAttribute("enrollmentCounts");
 
-<div id="courseEditModal" class="admin-modal admin-course-drawer" aria-hidden="true">
-    <div class="admin-modal-backdrop" data-close-modal="courseEditModal"></div>
-    <div class="admin-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="courseEditModalTitle">
-        <div class="admin-modal-header">
-            <h3 id="courseEditModalTitle" class="admin-modal-title">Edit Course Information</h3>
-            <button type="button" class="admin-modal-close" data-close-modal="courseEditModal" aria-label="Close">x</button>
-        </div>
-        <div class="course-drawer-body">
-            <form method="post" action="${pageContext.request.contextPath}/admin/courses" enctype="multipart/form-data" class="course-drawer-form">
-                <input type="hidden" name="action" value="edit"/>
-                <input type="hidden" name="courseId" id="courseEditId" value=""/>
-                <div class="course-form-grid course-form-grid-create">
-                    <div class="form-group">
-                        <label for="courseEditName">Course Name</label>
-                        <input id="courseEditName" name="courseName" type="text" required class="form-control" placeholder="Course Name"/>
-                    </div>
-                    <div class="form-group">
-                        <label for="courseEditCategory">Category</label>
-                        <input id="courseEditCategory" name="category" type="text" class="form-control" placeholder="Category"/>
-                    </div>
-                    <div class="form-group">
-                        <label for="courseEditLevel">Level</label>
-                        <select id="courseEditLevel" name="level" class="form-control">
-                            <option value="Beginner">Beginner</option>
-                            <option value="Intermediate">Intermediate</option>
-                            <option value="Advanced">Advanced</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="courseEditDuration">Duration (Days)</label>
-                        <input id="courseEditDuration" name="duration" type="number" min="1" class="form-control" placeholder="Days"/>
-                    </div>
-                    <div class="form-group">
-                        <label for="courseEditFee">Fee (NGN)</label>
-                        <input id="courseEditFee" name="courseFee" type="number" min="0" step="0.01" required class="form-control" placeholder="0.00"/>
-                    </div>
-                    <div class="form-group">
-                        <label for="courseEditInstructorId">Instructor</label>
-                        <select id="courseEditInstructorId" name="instructorId" class="form-control">
-                            <option value="">No instructor assigned</option>
-                            <c:forEach items="${instructors}" var="ins">
-                                <option value="${ins.userId}"><c:out value="${ins.fullName}"/> (<c:out value="${ins.email}"/>)</option>
-                            </c:forEach>
-                        </select>
-                    </div>
-                    <div class="form-group form-group-full">
-                        <label for="courseEditBanner">Update Course Banner</label>
-                        <input id="courseEditBanner" name="courseBanner" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" class="form-control"/>
-                        <small class="text-muted">Optional: select to change current banner.</small>
-                    </div>
-                    <div class="form-group form-group-full course-description-group">
-                        <label for="courseEditDescription">Description</label>
-                        <textarea id="courseEditDescription" name="description" rows="5" class="form-control" placeholder="Description of the course."></textarea>
-                    </div>
-                </div>
-                <div class="course-drawer-footer">
-                    <button type="button" class="admin-btn secondary" data-close-modal="courseEditModal">Cancel</button>
-                    <button type="submit" class="admin-btn primary"><i class="fas fa-save"></i>&nbsp;Save Changes</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<div id="courseAssignModal" class="admin-modal admin-course-drawer" aria-hidden="true">
-    <div class="admin-modal-backdrop" data-close-modal="courseAssignModal"></div>
-    <div class="admin-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="courseAssignModalTitle">
-        <div class="admin-modal-header">
-            <h3 id="courseAssignModalTitle" class="admin-modal-title">Assign Instructor</h3>
-            <button type="button" class="admin-modal-close" data-close-modal="courseAssignModal" aria-label="Close">x</button>
-        </div>
-        <div class="course-drawer-body">
-            <form method="post" action="${pageContext.request.contextPath}/admin/courses" class="course-drawer-form">
-                <input type="hidden" name="action" value="assign"/>
-                <input type="hidden" name="courseId" id="courseAssignId" value=""/>
-                <div class="course-inline-note">
-                    <span class="course-inline-label">Course</span>
-                    <strong id="courseAssignCourseName">Select a course</strong>
-                </div>
-                <div class="form-group">
-                    <label for="courseAssignInstructorId">Instructor</label>
-                    <select id="courseAssignInstructorId" name="instructorId" required class="form-control">
-                        <option value="">Select instructor</option>
-                        <c:forEach items="${instructors}" var="ins">
-                            <option value="${ins.userId}"><c:out value="${ins.fullName}"/> (<c:out value="${ins.email}"/>)</option>
-                        </c:forEach>
-                    </select>
-                </div>
-                <div class="course-drawer-footer">
-                    <button type="button" class="admin-btn secondary" data-close-modal="courseAssignModal">Cancel</button>
-                    <button type="submit" class="admin-btn primary"><i class="fas fa-link"></i>&nbsp;Assign Instructor</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<div id="courseDetailsModal" class="admin-modal admin-course-details-modal" aria-hidden="true">
-    <div class="admin-modal-backdrop" data-close-modal="courseDetailsModal"></div>
-    <div class="admin-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="courseDetailsModalTitle">
-        <div class="admin-modal-header">
-            <h3 id="courseDetailsModalTitle" class="admin-modal-title">Course Details</h3>
-            <button type="button" class="admin-modal-close" data-close-modal="courseDetailsModal" aria-label="Close">x</button>
-        </div>
-        <div class="course-details-shell">
-            <div class="course-details-main">
-                <div class="detail-status-row">
-                    <div>
-                        <p class="detail-label">Course</p>
-                        <h4 id="courseDetailsTitle">Course title</h4>
-                    </div>
-                    <span id="courseDetailsStatus" class="status-badge status-secondary">Status</span>
-                </div>
-                <p id="courseDetailsDescription" class="course-details-description">Course description appears here.</p>
-                <div class="course-detail-grid">
-                    <div class="course-detail-card">
-                        <span>Instructor</span>
-                        <strong id="courseDetailsInstructor">Unassigned</strong>
-                    </div>
-                    <div class="course-detail-card">
-                        <span>Category</span>
-                        <strong id="courseDetailsCategory">Uncategorized</strong>
-                    </div>
-                    <div class="course-detail-card">
-                        <span>Level</span>
-                        <strong id="courseDetailsLevel">Beginner</strong>
-                    </div>
-                    <div class="course-detail-card">
-                        <span>Duration</span>
-                        <strong id="courseDetailsDuration">-</strong>
-                    </div>
-                    <div class="course-detail-card">
-                        <span>Fee</span>
-                        <strong id="courseDetailsFee">-</strong>
-                    </div>
-                    <div class="course-detail-card">
-                        <span>Created</span>
-                        <strong id="courseDetailsCreated">-</strong>
-                    </div>
-                    <div class="course-detail-card" style="grid-column: span 2;">
-                        <span>Enrolled Students</span>
-                        <strong id="courseDetailsEnrolled" style="color: var(--primary); font-size: 16px;">0</strong>
-                    </div>
-                </div>
-            </div>
-            <div class="course-details-aside">
-                <div class="course-details-panel">
-                    <h4>Quick Actions</h4>
-                    <p>Open the assignment drawer or apply the next lifecycle step for this course.</p>
-                    <div class="course-details-actions">
-                        <a id="courseDetailsPrimaryAction" class="admin-btn primary" href="#"><span id="courseDetailsPrimaryActionLabel">Status Action</span></a>
-                        <button type="button" id="courseDetailsAssignAction" class="admin-btn secondary">Assign Instructor</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
-<script>
-    if (typeof window.__initCoursesDashboard === 'function') {
-        window.__initCoursesDashboard();
+    // Map active instructor details
+    java.util.Map<Integer, String> instructorLabels = new java.util.HashMap<>();
+    if (instructorsList != null) {
+        for (User ins : instructorsList) {
+            instructorLabels.put(ins.getUserId(), ins.getFullName());
+        }
     }
+
+    org.json.JSONArray coursesJsonArray = new org.json.JSONArray();
+    if (coursesList != null) {
+        for (Course c : coursesList) {
+            org.json.JSONObject courseObj = new org.json.JSONObject();
+            int cid = c.getCourseId();
+            courseObj.put("courseId", cid);
+            courseObj.put("courseName", c.getCourseName() != null ? c.getCourseName() : "");
+            courseObj.put("description", c.getDescription() != null ? c.getDescription() : "");
+            courseObj.put("category", c.getCategory() != null ? c.getCategory() : "Uncategorized");
+            courseObj.put("duration", c.getDuration() != null ? c.getDuration() : 0);
+            courseObj.put("level", c.getLevel() != null ? c.getLevel() : "Beginner");
+            courseObj.put("courseFee", c.getCourseFee() != null ? c.getCourseFee() : java.math.BigDecimal.ZERO);
+            courseObj.put("status", c.getStatus() != null ? c.getStatus() : "Pending");
+            courseObj.put("courseBanner", c.getCourseBanner() != null ? c.getCourseBanner() : "");
+            courseObj.put("createdBy", c.getCreatedBy() != null ? c.getCreatedBy() : 0);
+            courseObj.put("createdAt", c.getCreatedAt() != null ? c.getCreatedAt().toString() : "");
+            courseObj.put("enrolledCount", (enrollmentCountsMap != null && enrollmentCountsMap.get(cid) != null) ? enrollmentCountsMap.get(cid) : 0);
+            
+            // Instructor label
+            String insLabel = "Unassigned";
+            if (c.getCreatedBy() != null && instructorLabels.containsKey(c.getCreatedBy())) {
+                insLabel = instructorLabels.get(c.getCreatedBy());
+            }
+            courseObj.put("instructorLabel", insLabel);
+            
+            coursesJsonArray.put(courseObj);
+        }
+    }
+
+    org.json.JSONArray instructorsJsonArray = new org.json.JSONArray();
+    if (instructorsList != null) {
+        for (User ins : instructorsList) {
+            org.json.JSONObject insObj = new org.json.JSONObject();
+            insObj.put("userId", ins.getUserId());
+            insObj.put("fullName", ins.getFullName() != null ? ins.getFullName() : "");
+            insObj.put("email", ins.getEmail() != null ? ins.getEmail() : "");
+            instructorsJsonArray.put(insObj);
+        }
+    }
+
+    pageContext.setAttribute("serializedCoursesJson", coursesJsonArray.toString());
+    pageContext.setAttribute("serializedInstructorsJson", instructorsJsonArray.toString());
+%>
+
+<!-- Serialize JSTL variables securely to window scope -->
+<script type="text/javascript">
+    window.__CONTEXT_PATH__ = "${pageContext.request.contextPath}";
+    window.__COURSES__ = ${serializedCoursesJson};
+    window.__INSTRUCTORS__ = ${serializedInstructorsJson};
+</script>
+
+<!-- Interactive React Command Center Application -->
+<script type="text/babel">
+    const { useState, useEffect } = React;
+    const { 
+        useReactTable, getCoreRowModel, getPaginationRowModel, getSortedRowModel, flexRender 
+    } = window.ReactTable || {};
+
+    // Custom Autocomplete Searchable Select component for Instructor Assignments
+    function AutocompleteSelect({ options, value, onChange, placeholder }) {
+        const [search, setSearch] = useState('');
+        const [isOpen, setIsOpen] = useState(false);
+        
+        // Find active label for current value
+        const selectedOption = options.find(opt => opt.userId === Number(value));
+        const displayLabel = selectedOption ? selectedOption.fullName : '';
+
+        // Filter options based on search query
+        const filteredOptions = options.filter(opt => 
+            opt.fullName.toLowerCase().includes(search.toLowerCase()) ||
+            opt.email.toLowerCase().includes(search.toLowerCase())
+        );
+
+        return (
+            <div className="autocomplete-container-gf">
+                <div className="autocomplete-input-wrapper-gf">
+                    <input 
+                        type="text" 
+                        placeholder={placeholder || "Search and select instructor..."}
+                        value={isOpen ? search : displayLabel}
+                        onFocus={() => {
+                            setSearch('');
+                            setIsOpen(true);
+                        }}
+                        onChange={e => setSearch(e.target.value)}
+                        onBlur={() => {
+                            // Short delay to allow items click to fire
+                            setTimeout(() => setIsOpen(false), 200);
+                        }}
+                    />
+                    <i className="fas fa-chevron-down"></i>
+                </div>
+                {isOpen && (
+                    <div className="autocomplete-dropdown-gf">
+                        <button 
+                            type="button"
+                            className={"autocomplete-item-gf " + (!value ? "selected" : "")}
+                            onClick={() => {
+                                onChange('');
+                                setIsOpen(false);
+                            }}
+                        >
+                            No instructor assigned
+                        </button>
+                        {filteredOptions.map(opt => (
+                            <button
+                                key={opt.userId}
+                                type="button"
+                                className={"autocomplete-item-gf " + (Number(value) === opt.userId ? "selected" : "")}
+                                onClick={() => {
+                                    onChange(opt.userId);
+                                    setIsOpen(false);
+                                }}
+                            >
+                                {opt.fullName}
+                                <span className="subtext">{opt.email}</span>
+                            </button>
+                        ))}
+                        {filteredOptions.length === 0 && (
+                            <div style={{ padding: '0.6rem 1rem', fontSize: '0.85rem', color: 'var(--gf-text-muted)', textAlign: 'center' }}>
+                                No active instructors found.
+                            </div>
+                        )}
+                    </div>
+                )}
+            </div>
+        );
+    }
+
+    function CoursesManagement() {
+        const [courses, setCourses] = useState(window.__COURSES__ || []);
+        const [instructors] = useState(window.__INSTRUCTORS__ || []);
+        const [globalFilter, setGlobalFilter] = useState('');
+        const [statusFilter, setStatusFilter] = useState('All');
+        
+        // Pagination state
+        const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
+        
+        // Sorting state
+        const [sorting, setSorting] = useState([{ id: 'courseId', desc: true }]);
+
+        // Dropdown tracking
+        const [activeDropdownCourseId, setActiveDropdownCourseId] = useState(null);
+
+        // Drawer states
+        const [drawerOpen, setDrawerOpen] = useState(false);
+        const [drawerMode, setDrawerMode] = useState('create'); // 'create', 'edit', 'view'
+        const [selectedCourse, setSelectedCourse] = useState(null);
+
+        // Delete Confirmation Modal states
+        const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+        const [courseToDelete, setCourseToDelete] = useState(null);
+
+        // Form Fields State
+        const [courseName, setCourseName] = useState('');
+        const [category, setCategory] = useState('');
+        const [description, setDescription] = useState('');
+        const [level, setLevel] = useState('Beginner');
+        const [duration, setDuration] = useState('');
+        const [courseFee, setCourseFee] = useState('0');
+        const [instructorId, setInstructorId] = useState('');
+
+        const [isSubmitting, setIsSubmitting] = useState(false);
+
+        useEffect(() => {
+            if (window.lucide) {
+                window.lucide.createIcons();
+            }
+        }, [courses, pagination, globalFilter, statusFilter, sorting, drawerOpen, deleteModalOpen]);
+
+        // Close dropdown on click outside
+        useEffect(() => {
+            const handleOutsideClick = (e) => {
+                if (activeDropdownCourseId && !e.target.closest('.actions-cell-gf')) {
+                    setActiveDropdownCourseId(null);
+                }
+            };
+            window.addEventListener('click', handleOutsideClick);
+            return () => window.removeEventListener('click', handleOutsideClick);
+        }, [activeDropdownCourseId]);
+
+        // Metrics calculations
+        const totalCourses = courses.length;
+        const pendingCount = courses.filter(c => c.status === 'Pending').length;
+        const approvedCount = courses.filter(c => c.status === 'Approved').length;
+        const archivedCount = courses.filter(c => c.status === 'Archived').length;
+        const unassignedCount = courses.filter(c => !c.createdBy || c.instructorLabel === 'Unassigned').length;
+
+        // Custom filtering based on status filter tabs & search queries
+        const filteredData = React.useMemo(() => {
+            return courses.filter(course => {
+                // Status tab filter
+                if (statusFilter !== 'All' && course.status !== statusFilter) return false;
+                
+                // Search query filter
+                if (globalFilter.trim()) {
+                    const query = globalFilter.toLowerCase();
+                    return (
+                        course.courseName.toLowerCase().includes(query) ||
+                        course.category.toLowerCase().includes(query) ||
+                        course.instructorLabel.toLowerCase().includes(query)
+                    );
+                }
+                return true;
+            });
+        }, [courses, globalFilter, statusFilter]);
+
+        // Reset drawer form state
+        const resetForm = () => {
+            setCourseName('');
+            setCategory('');
+            setDescription('');
+            setLevel('Beginner');
+            setDuration('');
+            setCourseFee('0');
+            setInstructorId('');
+            setSelectedCourse(null);
+            
+            const fileInput = document.getElementById('courseBannerFile');
+            if (fileInput) fileInput.value = '';
+        };
+
+        // Open drawer in Create mode
+        const handleOpenCreate = () => {
+            resetForm();
+            setDrawerMode('create');
+            setDrawerOpen(true);
+        };
+
+        // Open drawer in Edit mode
+        const handleOpenEdit = (course) => {
+            resetForm();
+            setSelectedCourse(course);
+            setCourseName(course.courseName || '');
+            setCategory(course.category || '');
+            setDescription(course.description || '');
+            setLevel(course.level || 'Beginner');
+            setDuration(course.duration || '');
+            setCourseFee(course.courseFee || '0');
+            setInstructorId(course.createdBy || '');
+            setDrawerMode('edit');
+            setDrawerOpen(true);
+        };
+
+        // Open drawer in View details mode
+        const handleOpenView = (course) => {
+            resetForm();
+            setSelectedCourse(course);
+            setDrawerMode('view');
+            setDrawerOpen(true);
+        };
+
+        // Open deletion warning modal
+        const handleOpenDelete = (course) => {
+            setCourseToDelete(course);
+            setDeleteModalOpen(true);
+        };
+
+        // Execute asynchronous Hard Deletion GET call
+        const handleDeleteConfirm = () => {
+            if (!courseToDelete) return;
+            fetch(window.__CONTEXT_PATH__ + '/admin/courses?action=delete&id=' + courseToDelete.courseId)
+                .then(() => window.location.reload())
+                .catch(err => console.error("Delete course error:", err));
+        };
+
+        // Execute asynchronous Multi-part Form Submit (Create & Edit POST)
+        const handleSubmit = (e) => {
+            e.preventDefault();
+            setIsSubmitting(true);
+
+            const formData = new FormData();
+            formData.append('action', drawerMode === 'edit' ? 'edit' : 'create');
+            if (drawerMode === 'edit') {
+                formData.append('courseId', selectedCourse.courseId);
+            }
+            formData.append('courseName', courseName);
+            formData.append('courseFee', courseFee);
+            formData.append('instructorId', instructorId);
+            formData.append('description', description);
+            formData.append('category', category);
+            formData.append('level', level);
+            formData.append('duration', duration);
+
+            const bannerInput = document.getElementById('courseBannerFile');
+            if (bannerInput && bannerInput.files && bannerInput.files[0]) {
+                formData.append('courseBanner', bannerInput.files[0]);
+            }
+
+            fetch(window.__CONTEXT_PATH__ + '/admin/courses', {
+                method: 'POST',
+                body: formData
+            })
+            .then(() => window.location.reload())
+            .catch(err => {
+                console.error("Submit error:", err);
+                setIsSubmitting(false);
+            });
+        };
+
+        // Setup headless React Table column cells
+        const columns = React.useMemo(() => [
+            {
+                accessorKey: 'courseId',
+                header: 'ID',
+                cell: info => <span style={{ fontWeight: '500' }}>{info.getValue()}</span>
+            },
+            {
+                accessorKey: 'courseName',
+                header: 'Course details',
+                cell: info => {
+                    const row = info.row.original;
+                    const banner = row.courseBanner;
+                    return (
+                        <div className="course-cell-gf">
+                            <div className="course-thumbnail-gf">
+                                {banner ? (
+                                    <img src={banner} alt={row.courseName} />
+                                ) : (
+                                    <i className="fas fa-graduation-cap"></i>
+                                )}
+                            </div>
+                            <div className="course-meta-gf">
+                                <span className="course-title-gf">{row.courseName}</span>
+                                <span className="course-category-gf">{row.category}</span>
+                            </div>
+                        </div>
+                    );
+                }
+            },
+            {
+                accessorKey: 'instructorLabel',
+                header: 'Assigned Instructor',
+                cell: info => {
+                    const row = info.row.original;
+                    const label = info.getValue() || 'Unassigned';
+                    const hasInstructor = row.createdBy > 0 && label !== 'Unassigned';
+                    
+                    if (hasInstructor) {
+                        const initials = label.split(' ').map(n => n[0]).join('').substring(0, 2);
+                        return (
+                            <div className="instructor-cell-gf">
+                                <div className="instructor-avatar-gf">{initials}</div>
+                                <span className="instructor-name-gf">{label}</span>
+                            </div>
+                        );
+                    } else {
+                        return <span className="badge-unassigned-gf">Unassigned</span>;
+                    }
+                }
+            },
+            {
+                accessorKey: 'level',
+                header: 'Level',
+                cell: info => <span>{info.getValue() || 'Beginner'}</span>
+            },
+            {
+                accessorKey: 'courseFee',
+                header: 'Price / Tuition',
+                cell: info => {
+                    const val = Number(info.getValue() || 0);
+                    if (val === 0) {
+                        return <span style={{ fontWeight: '600', color: '#10b981' }}>Free</span>;
+                    }
+                    return <span style={{ fontWeight: '500' }}>₦{val.toLocaleString('en-NG', { minimumFractionDigits: 2 })}</span>;
+                }
+            },
+            {
+                accessorKey: 'status',
+                header: 'Status',
+                cell: info => {
+                    const val = info.getValue() || 'Pending';
+                    const badgeClass = val === 'Approved' ? 'badge-published-gf' : val === 'Pending' ? 'badge-pending-gf' : 'badge-archived-gf';
+                    return <span className={"badge-gf " + badgeClass}>{val === 'Approved' ? 'Published' : val}</span>;
+                }
+            },
+            {
+                accessorKey: 'enrolledCount',
+                header: 'Students',
+                cell: info => <span style={{ fontWeight: '600' }}>{info.getValue() || 0}</span>
+            },
+            {
+                id: 'actions',
+                header: '',
+                cell: info => {
+                    const row = info.row.original;
+                    const isOpen = activeDropdownCourseId === row.courseId;
+                    return (
+                        <div className="actions-cell-gf">
+                            <button 
+                                className="actions-btn-gf"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setActiveDropdownCourseId(isOpen ? null : row.courseId);
+                                }}
+                            >
+                                <i className="fas fa-ellipsis-v"></i>
+                            </button>
+                            {isOpen && (
+                                <div className="actions-dropdown-gf">
+                                    <button className="dropdown-item-gf" onClick={() => handleOpenView(row)}>
+                                        <i className="fas fa-info-circle"></i> View Details
+                                    </button>
+                                    <button className="dropdown-item-gf" onClick={() => handleOpenEdit(row)}>
+                                        <i className="fas fa-edit"></i> Edit Course
+                                    </button>
+                                    {row.status === 'Pending' && (
+                                        <React.Fragment>
+                                            <a href={window.__CONTEXT_PATH__ + "/admin/courses?action=approve&id=" + row.courseId} className="dropdown-item-gf" style={{ textDecoration: 'none' }} onClick={() => setIsSubmitting(true)}>
+                                                <i className="fas fa-check-circle" style={{ color: '#10b981' }}></i> Approve Course
+                                            </a>
+                                            <a href={window.__CONTEXT_PATH__ + "/admin/courses?action=reject&id=" + row.courseId} className="dropdown-item-gf" style={{ textDecoration: 'none' }} onClick={() => setIsSubmitting(true)}>
+                                                <i className="fas fa-times-circle" style={{ color: '#ef4444' }}></i> Reject Course
+                                            </a>
+                                        </React.Fragment>
+                                    )}
+                                    {row.status === 'Approved' && (
+                                        <a href={window.__CONTEXT_PATH__ + "/admin/courses?action=archive&id=" + row.courseId} className="dropdown-item-gf" style={{ textDecoration: 'none' }} onClick={() => setIsSubmitting(true)}>
+                                            <i className="fas fa-archive"></i> Archive Course
+                                        </a>
+                                    )}
+                                    {row.status === 'Archived' && (
+                                        <a href={window.__CONTEXT_PATH__ + "/admin/courses?action=restore&id=" + row.courseId} className="dropdown-item-gf" style={{ textDecoration: 'none' }} onClick={() => setIsSubmitting(true)}>
+                                            <i className="fas fa-sync-alt"></i> Restore Course
+                                        </a>
+                                    )}
+                                    <button className="dropdown-item-gf danger" onClick={() => handleOpenDelete(row)}>
+                                        <i className="fas fa-trash-alt"></i> Delete Course
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    );
+                }
+            }
+        ], [activeDropdownCourseId]);
+
+        // Mount TanStack React Table
+        const table = useReactTable({
+            data: filteredData,
+            columns,
+            state: {
+                pagination,
+                sorting
+            },
+            onPaginationChange: setPagination,
+            onSortingChange: setSorting,
+            getCoreRowModel: getCoreRowModel ? getCoreRowModel() : null,
+            getPaginationRowModel: getPaginationRowModel ? getPaginationRowModel() : null,
+            getSortedRowModel: getSortedRowModel ? getSortedRowModel() : null
+        });
+
+        return (
+            <div className="admin-container-gf">
+                {/* Header Section */}
+                <header className="dashboard-header-gf">
+                    <h1>Course Catalog</h1>
+                    <p>Keep the platform curriculum catalog organized, assign professional instructors dynamically, review course approval requests, and verify syllabus specifications.</p>
+                </header>
+
+                {/* Metrics Cards row */}
+                <section className="metrics-grid-gf">
+                    <div className="metric-card-gf">
+                        <span className="label">Total Courses</span>
+                        <span className="value">{totalCourses}</span>
+                        <span className="meta">Total registered records</span>
+                    </div>
+                    <div className="metric-card-gf">
+                        <span className="label">Published</span>
+                        <span className="value" style={{ color: '#047857' }}>{approvedCount}</span>
+                        <span className="meta">Visible to student catalog</span>
+                    </div>
+                    <div className="metric-card-gf">
+                        <span className="label">Pending Review</span>
+                        <span className="value" style={{ color: '#b45309' }}>{pendingCount}</span>
+                        <span className="meta">Requires admin evaluation</span>
+                    </div>
+                    <div className="metric-card-gf">
+                        <span className="label">Unassigned</span>
+                        <span className="value" style={{ color: '#ef4444' }}>{unassignedCount}</span>
+                        <span className="meta">Instructors missing</span>
+                    </div>
+                </section>
+
+                {/* Data Table Shell */}
+                <section className="table-card-gf">
+                    <div className="table-controls-gf">
+                        <div className="controls-left-gf">
+                            {/* Search Box */}
+                            <div className="search-box-gf">
+                                <i className="fas fa-search"></i>
+                                <input 
+                                    type="text" 
+                                    placeholder="Search courses..." 
+                                    value={globalFilter}
+                                    onChange={e => setGlobalFilter(e.target.value)}
+                                />
+                            </div>
+
+                            {/* Status Tabs toggles */}
+                            <div className="filter-tabs-gf">
+                                <button className={"tab-btn-gf " + (statusFilter === 'All' ? 'active' : '')} onClick={() => setStatusFilter('All')}>All</button>
+                                <button className={"tab-btn-gf " + (statusFilter === 'Approved' ? 'active' : '')} onClick={() => setStatusFilter('Approved')}>Published</button>
+                                <button className={"tab-btn-gf " + (statusFilter === 'Pending' ? 'active' : '')} onClick={() => setStatusFilter('Pending')}>Pending</button>
+                                <button className={"tab-btn-gf " + (statusFilter === 'Archived' ? 'active' : '')} onClick={() => setStatusFilter('Archived')}>Archived</button>
+                            </div>
+                        </div>
+
+                        {/* Create Primary CTA */}
+                        <button className="btn-primary-gf" onClick={handleOpenCreate}>
+                            <i className="fas fa-plus"></i> + Create Course
+                        </button>
+                    </div>
+
+                    {/* Table Render */}
+                    {table && table.getRowModel && table.getRowModel().rows.length === 0 ? (
+                        <div className="empty-state-gf">
+                            <i className="fas fa-folder-open"></i>
+                            <p>No courses matched the requested filter requirements.</p>
+                        </div>
+                    ) : (
+                        <div style={{ overflowX: 'auto' }}>
+                            <table className="courses-table-gf">
+                                <thead>
+                                    {table && table.getHeaderGroups().map(headerGroup => (
+                                        <tr key={headerGroup.id}>
+                                            {headerGroup.headers.map(header => (
+                                                <th 
+                                                    key={header.id}
+                                                    onClick={header.column.getCanSort() ? header.column.getToggleSortingHandler() : undefined}
+                                                    style={{ cursor: header.column.getCanSort() ? 'pointer' : 'default' }}
+                                                >
+                                                    {flexRender(header.column.columnDef.header, header.getContext())}
+                                                    {header.column.getIsSorted() === 'asc' && ' 🔼'}
+                                                    {header.column.getIsSorted() === 'desc' && ' 🔽'}
+                                                </th>
+                                            ))}
+                                        </tr>
+                                    ))}
+                                </thead>
+                                <tbody>
+                                    {table && table.getRowModel().rows.map(row => (
+                                        <tr key={row.id}>
+                                            {row.getVisibleCells().map(cell => (
+                                                <td key={cell.id}>
+                                                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                                </td>
+                                            ))}
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+
+                    {/* Pagination controls */}
+                    {table && table.getPageCount && table.getPageCount() > 1 && (
+                        <div className="pagination-bar-gf">
+                            <span>
+                                Page <strong>{table.getState().pagination.pageIndex + 1}</strong> of <strong>{table.getPageCount()}</strong>
+                            </span>
+                            <div className="pagination-controls-gf">
+                                <button 
+                                    className="btn-page-gf"
+                                    onClick={() => table.previousPage()}
+                                    disabled={!table.getCanPreviousPage()}
+                                >
+                                    Previous
+                                </button>
+                                <button 
+                                    className="btn-page-gf"
+                                    onClick={() => table.nextPage()}
+                                    disabled={!table.getCanNextPage()}
+                                >
+                                    Next
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </section>
+
+                {/* Right Slide-out Drawer */}
+                {drawerOpen && (
+                    <div className="drawer-overlay-gf" onClick={() => setDrawerOpen(false)}>
+                        <div className="drawer-container-gf" onClick={e => e.stopPropagation()}>
+                            <header className="drawer-header-gf">
+                                <h2>
+                                    {drawerMode === 'create' ? 'Create New Course' : drawerMode === 'edit' ? 'Update Course details' : 'Course Details Profile'}
+                                </h2>
+                                <button className="drawer-close-gf" onClick={() => setDrawerOpen(false)}>×</button>
+                            </header>
+
+                            <div className="drawer-body-gf">
+                                {drawerMode === 'view' ? (
+                                    /* Course Details View mode */
+                                    <div className="details-section-gf">
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', borderBottom: '1px solid var(--gf-border)', paddingBottom: '1.5rem', marginBottom: '0.5rem' }}>
+                                            <div className="course-thumbnail-gf" style={{ width: '6rem', height: '4rem' }}>
+                                                {selectedCourse.courseBanner ? (
+                                                    <img src={selectedCourse.courseBanner} alt={selectedCourse.courseName} />
+                                                ) : (
+                                                    <i className="fas fa-graduation-cap" style={{ fontSize: '2rem' }}></i>
+                                                )}
+                                            </div>
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                                                <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: '700', color: 'var(--gf-text-primary)' }}>{selectedCourse.courseName}</h3>
+                                                <span style={{ fontSize: '0.85rem', color: 'var(--gf-text-muted)' }}>{selectedCourse.category}</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="details-grid-gf">
+                                            <div className="details-item-gf">
+                                                <span>Course ID</span>
+                                                <strong>{selectedCourse.courseId}</strong>
+                                            </div>
+                                            <div className="details-item-gf">
+                                                <span>Status</span>
+                                                <strong>{selectedCourse.status}</strong>
+                                            </div>
+                                            <div className="details-item-gf">
+                                                <span>Course Level</span>
+                                                <strong>{selectedCourse.level}</strong>
+                                            </div>
+                                            <div className="details-item-gf">
+                                                <span>Duration (Days)</span>
+                                                <strong>{selectedCourse.duration ? selectedCourse.duration + ' Days' : '-'}</strong>
+                                            </div>
+                                            <div className="details-item-gf">
+                                                <span>Enrollments</span>
+                                                <strong>{selectedCourse.enrolledCount || '0'} Students</strong>
+                                            </div>
+                                            <div className="details-item-gf">
+                                                <span>Course Price</span>
+                                                <strong>
+                                                    {Number(selectedCourse.courseFee) === 0 ? 'Free' : '₦' + Number(selectedCourse.courseFee).toLocaleString('en-NG', { minimumFractionDigits: 2 })}
+                                                </strong>
+                                            </div>
+                                            <div className="details-item-gf span-2">
+                                                <span>Assigned Instructor</span>
+                                                <strong>{selectedCourse.instructorLabel}</strong>
+                                            </div>
+                                            <div className="details-item-gf span-2">
+                                                <span>Course Description</span>
+                                                <strong style={{ display: 'block', fontSize: '0.85rem', color: 'var(--gf-text-secondary)', lineHeight: '1.4', marginTop: '0.25rem' }}>
+                                                    {selectedCourse.description || 'No description provided.'}
+                                                </strong>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    /* Course CRUD Form (Create / Edit) */
+                                    <form id="drawerForm" onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                                        <div className="form-group-gf">
+                                            <label>Course Title *</label>
+                                            <input 
+                                                type="text" 
+                                                required 
+                                                value={courseName}
+                                                onChange={e => setCourseName(e.target.value)}
+                                                placeholder="e.g. Strategic Digital Marketing"
+                                            />
+                                        </div>
+
+                                        <div className="form-group-gf">
+                                            <label>Category *</label>
+                                            <input 
+                                                type="text" 
+                                                required 
+                                                value={category}
+                                                onChange={e => setCategory(e.target.value)}
+                                                placeholder="e.g. Business, Technology, Design"
+                                            />
+                                        </div>
+
+                                        <div className="form-row-gf">
+                                            <div className="form-group-gf">
+                                                <label>Syllabus Level</label>
+                                                <select value={level} onChange={e => setLevel(e.target.value)}>
+                                                    <option value="Beginner">Beginner</option>
+                                                    <option value="Intermediate">Intermediate</option>
+                                                    <option value="Advanced">Advanced</option>
+                                                </select>
+                                            </div>
+                                            <div className="form-group-gf">
+                                                <label>Duration (Days)</label>
+                                                <input 
+                                                    type="number" 
+                                                    min="1" 
+                                                    value={duration}
+                                                    onChange={e => setDuration(e.target.value)}
+                                                    placeholder="e.g. 30"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="form-group-gf">
+                                            <label>Tuition Fee (NGN) *</label>
+                                            <input 
+                                                type="number" 
+                                                min="0" 
+                                                step="0.01" 
+                                                required 
+                                                value={courseFee}
+                                                onChange={e => setCourseFee(e.target.value)}
+                                                placeholder="0.00"
+                                            />
+                                        </div>
+
+                                        {/* Autocomplete Instructor search select dropdown */}
+                                        <div className="form-group-gf">
+                                            <label>Assigned Instructor</label>
+                                            <AutocompleteSelect 
+                                                options={instructors}
+                                                value={instructorId}
+                                                onChange={setInstructorId}
+                                                placeholder="Type to search instructors..."
+                                            />
+                                        </div>
+
+                                        <div className="form-group-gf">
+                                            <label>Course Banner File</label>
+                                            <input 
+                                                type="file" 
+                                                id="courseBannerFile" 
+                                                accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                                            />
+                                            <small style={{ fontSize: '0.75rem', color: 'var(--gf-text-muted)' }}>
+                                                Upload banner banner (JPG, PNG, WEBP up to 5MB).
+                                            </small>
+                                        </div>
+
+                                        <div className="form-group-gf">
+                                            <label>Syllabus Description Summary</label>
+                                            <textarea 
+                                                value={description}
+                                                onChange={e => setDescription(e.target.value)}
+                                                placeholder="Concise course syllabus overview..."
+                                                rows="5"
+                                            ></textarea>
+                                        </div>
+                                    </form>
+                                )}
+                            </div>
+
+                            <footer className="drawer-footer-gf">
+                                <button className="btn-secondary-gf" onClick={() => setDrawerOpen(false)}>
+                                    {drawerMode === 'view' ? 'Close' : 'Cancel'}
+                                </button>
+                                {drawerMode !== 'view' && (
+                                    <button 
+                                        type="submit" 
+                                        form="drawerForm" 
+                                        className="btn-primary-gf"
+                                        disabled={isSubmitting}
+                                    >
+                                        {isSubmitting ? 'Saving...' : drawerMode === 'edit' ? 'Update Course' : 'Create Course'}
+                                    </button>
+                                )}
+                            </footer>
+                        </div>
+                    </div>
+                )}
+
+                {/* Centered Safe Deletion Modal Overlay */}
+                {deleteModalOpen && courseToDelete && (
+                    <div className="modal-overlay-gf" onClick={() => setDeleteModalOpen(false)}>
+                        <div className="modal-box-gf" onClick={e => e.stopPropagation()}>
+                            <h3 className="modal-title-gf">
+                                <i className="fas fa-exclamation-triangle"></i> Safe Deletion Warning
+                            </h3>
+                            <div className="modal-body-gf">
+                                <p>
+                                    Are you absolutely sure you want to delete <strong>{courseToDelete.courseName}</strong>?
+                                </p>
+                                <p style={{ marginTop: '0.5rem', fontSize: '0.85rem', color: 'var(--gf-red)' }}>
+                                    This action is database-safe but will fail if the course currently holds active student enrollments, grading histories, or syllabus materials.
+                                </p>
+                            </div>
+                            <footer className="modal-footer-gf">
+                                <button className="btn-secondary-gf" onClick={() => setDeleteModalOpen(false)}>
+                                    Cancel
+                                </button>
+                                <button className="btn-danger-gf" onClick={handleDeleteConfirm}>
+                                    Confirm Deletion
+                                </button>
+                            </footer>
+                        </div>
+                    </div>
+                )}
+            </div>
+        );
+    }
+
+    const container = document.getElementById('admin-react-root');
+    const root = ReactDOM.createRoot(container);
+    root.render(<CoursesManagement />);
 </script>
 </body>
 </html>

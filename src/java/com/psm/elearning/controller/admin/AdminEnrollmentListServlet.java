@@ -49,6 +49,12 @@ public class AdminEnrollmentListServlet extends HttpServlet {
             return;
         }
         
+        String action = request.getParameter("action");
+        if ("revoke".equals(action)) {
+            revokeAccess(request, response);
+            return;
+        }
+
         try {
             List<Enrollment> enrollments = enrollmentDAO.getAllEnrollments();
             String successCode = request.getParameter("success");
@@ -150,6 +156,9 @@ public class AdminEnrollmentListServlet extends HttpServlet {
         if ("expiryUpdated".equalsIgnoreCase(code)) {
             return "Enrollment expiry date was updated successfully.";
         }
+        if ("revoked".equalsIgnoreCase(code)) {
+            return "Access to the course has been successfully revoked.";
+        }
         return null;
     }
 
@@ -180,6 +189,25 @@ public class AdminEnrollmentListServlet extends HttpServlet {
             return Integer.valueOf(raw.trim());
         } catch (NumberFormatException ex) {
             return null;
+        }
+    }
+
+    private void revokeAccess(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        try {
+            Integer enrollmentId = parseInteger(request.getParameter("id"));
+            if (enrollmentId == null) {
+                response.sendRedirect(request.getContextPath() + "/admin/enrollments?error=invalid");
+                return;
+            }
+            boolean revoked = enrollmentDAO.updateStatus(enrollmentId, Enrollment.STATUS_CANCELLED);
+            if (revoked) {
+                response.sendRedirect(request.getContextPath() + "/admin/enrollments?success=revoked");
+            } else {
+                response.sendRedirect(request.getContextPath() + "/admin/enrollments?error=exception");
+            }
+        } catch (Exception e) {
+            response.sendRedirect(request.getContextPath() + "/admin/enrollments?error=exception");
         }
     }
 

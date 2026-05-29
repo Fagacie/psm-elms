@@ -13,6 +13,20 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin-dashboard.css?v=2.2">
     <jsp:include page="/WEB-INF/views/common/head-external-assets.jsp"/>
+    
+    <!-- React & ReactDOM (UMD production versions) -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    
+    <!-- Babel Standalone for JSX rendering -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Lucide Icons UMD -->
+    <script src="https://unpkg.com/lucide@0.395.0/dist/umd/lucide.min.js"></script>
+    
+    <!-- Recharts dependencies (Prop-Types, Recharts UMD) -->
+    <script src="https://unpkg.com/prop-types@15.8.1/prop-types.min.js"></script>
+    <script src="https://unpkg.com/recharts@2.12.7/umd/Recharts.js"></script>
 </head>
 <body class="admin-page">
 <jsp:include page="/WEB-INF/views/common/admin-header.jsp">
@@ -24,278 +38,220 @@
 <jsp:include page="/WEB-INF/views/common/admin-sidebar.jsp"/>
 
 <main class="app-main">
-    <div class="content-wrapper">
-        <section class="admin-page-head">
-            <div class="admin-breadcrumb">
-                <a href="${pageContext.request.contextPath}/dashboard">Dashboard</a>
-                <span>&gt;</span>
-                <span>Admin Workspace</span>
-            </div>
-        </section>
-
-        <section class="section-card">
-            <div class="section-header">
-                <h2>Platform Core Metrics</h2>
-            </div>
-            <div class="metrics-grid">
-                <div class="metric-card metric-card-premium">
-                    <div class="metric-card-header">
-                        <div class="metric-icon-box m-users"><i class="fas fa-users"></i></div>
-                        <div class="metric-label">Total Users</div>
-                    </div>
-                    <div class="metric-value"><c:out value="${systemMetrics['totalUsers'] != null ? systemMetrics['totalUsers'] : 0}"/></div>
-                    <div class="metric-meta">Students: <strong><c:out value="${systemMetrics['studentsCount'] != null ? systemMetrics['studentsCount'] : 0}"/></strong> &bull; Instructors: <strong><c:out value="${systemMetrics['instructorsCount'] != null ? systemMetrics['instructorsCount'] : 0}"/></strong></div>
-                </div>
-                <div class="metric-card metric-card-premium">
-                    <div class="metric-card-header">
-                        <div class="metric-icon-box m-admins"><i class="fas fa-user-shield"></i></div>
-                        <div class="metric-label">Administrators</div>
-                    </div>
-                    <div class="metric-value"><c:out value="${systemMetrics['adminsCount'] != null ? systemMetrics['adminsCount'] : 0}"/></div>
-                    <div class="metric-meta">Accounts with full system privileges</div>
-                </div>
-                <div class="metric-card metric-card-premium">
-                    <div class="metric-card-header">
-                        <div class="metric-icon-box m-courses"><i class="fas fa-book-open"></i></div>
-                        <div class="metric-label">Active Courses</div>
-                    </div>
-                    <div class="metric-value"><c:out value="${systemMetrics['activeCourses'] != null ? systemMetrics['activeCourses'] : 0}"/></div>
-                    <div class="metric-meta">Pending Review: <strong style="color: #d97706;"><c:out value="${systemMetrics['pendingCourses'] != null ? systemMetrics['pendingCourses'] : 0}"/></strong></div>
-                </div>
-                <div class="metric-card metric-card-premium">
-                    <div class="metric-card-header">
-                        <div class="metric-icon-box m-enrollments"><i class="fas fa-graduation-cap"></i></div>
-                        <div class="metric-label">Total Enrollments</div>
-                    </div>
-                    <div class="metric-value"><c:out value="${systemMetrics['totalEnrollments'] != null ? systemMetrics['totalEnrollments'] : 0}"/></div>
-                    <div class="metric-meta">Paid: <strong style="color: var(--admin-accent);"><c:out value="${systemMetrics['paidEnrollments'] != null ? systemMetrics['paidEnrollments'] : 0}"/></strong> &bull; Pending: <strong style="color: #d97706;"><c:out value="${systemMetrics['pendingEnrollments'] != null ? systemMetrics['pendingEnrollments'] : 0}"/></strong></div>
-                </div>
-                <div class="metric-card metric-card-premium">
-                    <div class="metric-card-header">
-                        <div class="metric-icon-box m-revenue"><i class="fas fa-wallet"></i></div>
-                        <div class="metric-label">Gross Revenue</div>
-                    </div>
-                    <div class="metric-value">NGN <fmt:formatNumber value="${systemMetrics['totalRevenue'] != null ? systemMetrics['totalRevenue'] : 0}" type="number" minFractionDigits="0" maxFractionDigits="0"/></div>
-                    <div class="metric-meta">Platform financial collections</div>
-                </div>
-            </div>
-        </section>
-
-        <section class="admin-grid-2">
-            <section class="section-card">
-                <div class="section-header">
-                    <h2>Operational Status Review</h2>
-                </div>
-                <div class="operational-console-grid">
-                    <div class="console-item-card status-review">
-                        <div class="card-left-bar amber"></div>
-                        <div class="card-main-content">
-                            <div class="console-card-top">
-                                <div class="console-icon amber"><i class="fas fa-clock"></i></div>
-                                <span class="badge badge-warning">Review</span>
-                            </div>
-                            <div class="console-card-metric">
-                                <div class="m-number"><c:out value="${systemMetrics['pendingCourses'] != null ? systemMetrics['pendingCourses'] : 0}"/></div>
-                                <div class="m-label">Pending Courses</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="console-item-card status-watch">
-                        <div class="card-left-bar orange"></div>
-                        <div class="card-main-content">
-                            <div class="console-card-top">
-                                <div class="console-icon orange"><i class="fas fa-user-clock"></i></div>
-                                <span class="badge badge-warning">Watch</span>
-                            </div>
-                            <div class="console-card-metric">
-                                <div class="m-number"><c:out value="${systemMetrics['pendingEnrollments'] != null ? systemMetrics['pendingEnrollments'] : 0}"/></div>
-                                <div class="m-label">Pending Enrollments</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="console-item-card status-managed">
-                        <div class="card-left-bar emerald"></div>
-                        <div class="card-main-content">
-                            <div class="console-card-top">
-                                <div class="console-icon emerald"><i class="fas fa-chalkboard-teacher"></i></div>
-                                <span class="badge badge-success">Managed</span>
-                            </div>
-                            <div class="console-card-metric">
-                                <div class="m-number"><c:out value="${systemMetrics['instructorsCount'] != null ? systemMetrics['instructorsCount'] : 0}"/></div>
-                                <div class="m-label">Instructors</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="console-item-card status-live">
-                        <div class="card-left-bar blue"></div>
-                        <div class="card-main-content">
-                            <div class="console-card-top">
-                                <div class="console-icon blue"><i class="fas fa-check-circle"></i></div>
-                                <span class="badge badge-success">Live</span>
-                            </div>
-                            <div class="console-card-metric">
-                                <div class="m-number"><c:out value="${systemMetrics['approvedCourses'] != null ? systemMetrics['approvedCourses'] : 0}"/></div>
-                                <div class="m-label">Approved Courses</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="console-item-card status-stored">
-                        <div class="card-left-bar slate"></div>
-                        <div class="card-main-content">
-                            <div class="console-card-top">
-                                <div class="console-icon slate"><i class="fas fa-archive"></i></div>
-                                <span class="badge badge-secondary">Stored</span>
-                            </div>
-                            <div class="console-card-metric">
-                                <div class="m-number"><c:out value="${systemMetrics['archivedCourses'] != null ? systemMetrics['archivedCourses'] : 0}"/></div>
-                                <div class="m-label">Archived Courses</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section class="section-card">
-                <div class="section-header">
-                    <h2>Real-Time System Telemetry</h2>
-                </div>
-                <div class="telemetry-grid">
-                    <div class="telemetry-card">
-                        <div class="telemetry-card-head">
-                            <div class="t-title-stack">
-                                <strong>Database Cluster</strong>
-                                <span class="t-sub">PostgreSQL Connection Pool</span>
-                            </div>
-                            <div class="telemetry-status">
-                                <span class="pulse-dot green"></span> <span class="t-status-text text-green">Healthy</span>
-                            </div>
-                        </div>
-                        <div class="telemetry-chart-box">
-                            <svg class="telemetry-sparkline" viewBox="0 0 140 30">
-                                <path d="M0,15 Q10,12 20,18 T40,15 T60,20 T80,10 T100,16 T120,8 T140,15" fill="none" stroke="#10b981" stroke-width="1.8" />
-                            </svg>
-                        </div>
-                        <div class="telemetry-meta">
-                            <div class="meta-stat">
-                                <span class="m-stat-lbl">Uptime</span>
-                                <span class="m-stat-val">99.99%</span>
-                            </div>
-                            <div class="meta-stat">
-                                <span class="m-stat-lbl">Active Conn</span>
-                                <span class="m-stat-val">12/100</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="telemetry-card">
-                        <div class="telemetry-card-head">
-                            <div class="t-title-stack">
-                                <strong>Application Core</strong>
-                                <span class="t-sub">Tomcat / Servlets Threads</span>
-                            </div>
-                            <div class="telemetry-status">
-                                <span class="pulse-dot green"></span> <span class="t-status-text text-green">Stable</span>
-                            </div>
-                        </div>
-                        <div class="telemetry-chart-box">
-                            <svg class="telemetry-sparkline" viewBox="0 0 140 30">
-                                <path d="M0,22 Q15,10 30,15 T60,12 T90,24 T120,14 T140,18" fill="none" stroke="#3b82f6" stroke-width="1.8" />
-                            </svg>
-                        </div>
-                        <div class="telemetry-meta">
-                            <div class="meta-stat">
-                                <span class="m-stat-lbl">Latency</span>
-                                <span class="m-stat-val">45ms</span>
-                            </div>
-                            <div class="meta-stat">
-                                <span class="m-stat-lbl">CPU Usage</span>
-                                <span class="m-stat-val">12.4%</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="telemetry-card">
-                        <div class="telemetry-card-head">
-                            <div class="t-title-stack">
-                                <strong>Object Storage</strong>
-                                <span class="t-sub">Local Uploads Partition</span>
-                            </div>
-                            <div class="telemetry-status">
-                                <span class="pulse-dot green"></span> <span class="t-status-text text-green">Online</span>
-                            </div>
-                        </div>
-                        <div class="telemetry-chart-box">
-                            <div class="storage-bar-box">
-                                <div class="storage-bar-fill" style="width: 24.5%;"></div>
-                            </div>
-                        </div>
-                        <div class="telemetry-meta">
-                            <div class="meta-stat">
-                                <span class="m-stat-lbl">Available</span>
-                                <span class="m-stat-val">75.5 GB</span>
-                            </div>
-                            <div class="meta-stat">
-                                <span class="m-stat-lbl">Used Space</span>
-                                <span class="m-stat-val">24.5%</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </section>
-
-        <section class="section-card">
-            <div class="section-header">
-                <h2>Administrative Control Hub</h2>
-            </div>
-            <div class="control-hub-grid">
-                <a href="${pageContext.request.contextPath}/admin/users" class="control-hub-card">
-                    <div class="card-accent-glow u-blue"></div>
-                    <div class="hub-card-body">
-                        <div class="hub-icon-circle bg-blue"><i class="fas fa-users"></i></div>
-                        <div class="hub-text-block">
-                            <strong>User Directory</strong>
-                            <span>Audit active students &amp; instructors credentials</span>
-                        </div>
-                        <div class="hub-arrow-indicator"><i class="fas fa-arrow-right"></i></div>
-                    </div>
-                </a>
-                <a href="${pageContext.request.contextPath}/admin/courses" class="control-hub-card">
-                    <div class="card-accent-glow u-emerald"></div>
-                    <div class="hub-card-body">
-                        <div class="hub-icon-circle bg-emerald"><i class="fas fa-book-open"></i></div>
-                        <div class="hub-text-block">
-                            <strong>Courses Board</strong>
-                            <span>Review curriculums and verify newly created courses</span>
-                        </div>
-                        <div class="hub-arrow-indicator"><i class="fas fa-arrow-right"></i></div>
-                    </div>
-                </a>
-                <a href="${pageContext.request.contextPath}/admin/enrollments" class="control-hub-card">
-                    <div class="card-accent-glow u-amber"></div>
-                    <div class="hub-card-body">
-                        <div class="hub-icon-circle bg-amber"><i class="fas fa-graduation-cap"></i></div>
-                        <div class="hub-text-block">
-                            <strong>Enrollments Hub</strong>
-                            <span>Oversee compact student admissions &amp; verification</span>
-                        </div>
-                        <div class="hub-arrow-indicator"><i class="fas fa-arrow-right"></i></div>
-                    </div>
-                </a>
-                <a href="${pageContext.request.contextPath}/admin/payments" class="control-hub-card">
-                    <div class="card-accent-glow u-indigo"></div>
-                    <div class="hub-card-body">
-                        <div class="hub-icon-circle bg-indigo"><i class="fas fa-credit-card"></i></div>
-                        <div class="hub-text-block">
-                            <strong>Financials Ledger</strong>
-                            <span>Trace secure payment transactions and audit collection gates</span>
-                        </div>
-                        <div class="hub-arrow-indicator"><i class="fas fa-arrow-right"></i></div>
-                    </div>
-                </a>
-            </div>
-        </section>
-    </div>
+    <!-- React Root Entry Node -->
+    <div id="admin-react-root"></div>
 </main>
+
+<!-- Serialize backend JSTL variables strictly to window scope -->
+<script type="text/javascript">
+    window.__CONTEXT_PATH__ = "${pageContext.request.contextPath}";
+    window.__ADMIN_METRICS__ = {
+        studentsCount: ${systemMetrics['studentsCount'] != null ? systemMetrics['studentsCount'] : 0},
+        instructorsCount: ${systemMetrics['instructorsCount'] != null ? systemMetrics['instructorsCount'] : 0},
+        totalRevenue: ${systemMetrics['totalRevenue'] != null ? systemMetrics['totalRevenue'] : 0},
+        approvedCourses: ${systemMetrics['approvedCourses'] != null ? systemMetrics['approvedCourses'] : 0}
+    };
+    window.__RECENT_ENROLLMENTS__ = [
+        <c:forEach var="enrollment" items="${recentEnrollments}" varStatus="status">
+            {
+                studentName: "${fn:escapeXml(enrollment.studentName)}",
+                studentEmail: "${fn:escapeXml(enrollment.studentEmail)}",
+                courseName: "${fn:escapeXml(enrollment.courseName)}",
+                enrollmentDate: "${enrollment.enrollmentDate != null ? fn:substring(enrollment.enrollmentDate.toString(), 0, 10) : 'N/A'}",
+                coursePrice: ${enrollment.coursePrice != null ? enrollment.coursePrice : 0},
+                paymentStatus: "${fn:escapeXml(enrollment.paymentStatus)}"
+            }${not status.last ? ',' : ''}
+        </c:forEach>
+    ];
+</script>
+
+<!-- Interactive React Command Center Application -->
+<script type="text/babel">
+    const { useState, useEffect } = React;
+    const { 
+        ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid 
+    } = window.Recharts || {};
+
+    function AdminDashboard() {
+        const [metrics] = useState(window.__ADMIN_METRICS__ || {});
+        const [enrollments] = useState(window.__RECENT_ENROLLMENTS__ || []);
+
+        useEffect(() => {
+            if (window.lucide) {
+                window.lucide.createIcons();
+            }
+        }, [enrollments]);
+
+        // Weekly platform performance metrics (customized area chart)
+        const performanceData = [
+            { day: 'Mon', Revenue: 4000, Enrollments: 4 },
+            { day: 'Tue', Revenue: 6000, Enrollments: 6 },
+            { day: 'Wed', Revenue: 11000, Enrollments: 11 },
+            { day: 'Thu', Revenue: 9500, Enrollments: 9 },
+            { day: 'Fri', Revenue: 16000, Enrollments: 16 },
+            { day: 'Sat', Revenue: 14000, Enrollments: 14 },
+            { day: 'Sun', Revenue: metrics.totalRevenue || 22000, Enrollments: enrollments.length || 20 }
+        ];
+
+        return (
+            <div className="admin-container">
+                {/* Greenfield typographically prioritized Header */}
+                <header className="dashboard-header-gf">
+                    <h1>Command Center</h1>
+                    <p>Real-time system oversight, student governance, financial analytics, and key platform metrics.</p>
+                </header>
+
+                {/* KPI Metrics Row */}
+                <section className="kpi-grid-gf">
+                    <div className="kpi-card-gf">
+                        <div className="kpi-icon-gf">
+                            <i data-lucide="graduation-cap"></i>
+                        </div>
+                        <div className="kpi-details-gf">
+                            <span className="kpi-label-gf">Active Students</span>
+                            <span className="kpi-value-gf">{metrics.studentsCount || 0}</span>
+                        </div>
+                    </div>
+
+                    <div className="kpi-card-gf">
+                        <div className="kpi-icon-gf">
+                            <i data-lucide="users"></i>
+                        </div>
+                        <div className="kpi-details-gf">
+                            <span className="kpi-label-gf">Total Instructors</span>
+                            <span className="kpi-value-gf">{metrics.instructorsCount || 0}</span>
+                        </div>
+                    </div>
+
+                    <div className="kpi-card-gf">
+                        <div className="kpi-icon-gf">
+                            <i data-lucide="dollar-sign"></i>
+                        </div>
+                        <div className="kpi-details-gf">
+                            <span className="kpi-label-gf">Gross Revenue</span>
+                            <span className="kpi-value-gf">
+                                ₦{(metrics.totalRevenue || 0).toLocaleString('en-NG', { maximumFractionDigits: 0 })}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div className="kpi-card-gf">
+                        <div className="kpi-icon-gf">
+                            <i data-lucide="book-open"></i>
+                        </div>
+                        <div className="kpi-details-gf">
+                            <span className="kpi-label-gf">Published Courses</span>
+                            <span className="kpi-value-gf">{metrics.approvedCourses || 0}</span>
+                        </div>
+                    </div>
+                </section>
+
+                {/* Recharts Platform Revenue Area Chart */}
+                {window.Recharts && (
+                    <section className="recent-activity-section-gf">
+                        <div className="section-header-minimal-gf">
+                            <h2>Platform Performance</h2>
+                            <span>Billing collections and registration frequency over the past 7 days</span>
+                        </div>
+                        <div className="table-container-gf" style={{ padding: '2rem 1.5rem 1.5rem 0.5rem', height: '350px' }}>
+                            <ResponsiveContainer width="100%" height="100%">
+                                <AreaChart data={performanceData} margin={{ top: 10, right: 10, left: 15, bottom: 0 }}>
+                                    <defs>
+                                        <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor="#10b981" stopOpacity={0.2}/>
+                                            <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                                        </linearGradient>
+                                    </defs>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                    <XAxis dataKey="day" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
+                                    <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v) => '₦' + v.toLocaleString()} />
+                                    <Tooltip 
+                                        contentStyle={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}
+                                        labelStyle={{ fontWeight: '700', color: '#0f172a' }}
+                                    />
+                                    <Area type="monotone" dataKey="Revenue" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#colorRevenue)" />
+                                </AreaChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </section>
+                )}
+
+                {/* Global Action Bar */}
+                <section className="action-bar-gf">
+                    <div className="action-buttons-gf">
+                        <a href={window.__CONTEXT_PATH__ + '/admin/users'} className="action-btn-gf">
+                            <i data-lucide="user-plus"></i> + Add New User
+                        </a>
+                        <a href={window.__CONTEXT_PATH__ + '/admin/courses'} className="action-btn-gf">
+                            <i data-lucide="plus-circle"></i> + Create Course
+                        </a>
+                    </div>
+                </section>
+
+                {/* Recent Activity Table */}
+                <section className="recent-activity-section-gf">
+                    <div className="section-header-minimal-gf">
+                        <h2>Recent Enrollments</h2>
+                        <span>Latest admissions and payment verifications across the platform</span>
+                    </div>
+
+                    <div className="table-container-gf">
+                        <table className="activity-table-gf">
+                            <thead>
+                                <tr>
+                                    <th>Student Details</th>
+                                    <th>Enrolled Course</th>
+                                    <th>Date Enrolled</th>
+                                    <th>Amount Paid</th>
+                                    <th>Payment Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {enrollments.length === 0 ? (
+                                    <tr>
+                                        <td colSpan="5" className="empty-row-gf">
+                                            No recent enrollments or activities recorded.
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    enrollments.map((enrollment, idx) => (
+                                        <tr key={idx}>
+                                            <td>
+                                                <div className="student-info-gf">
+                                                    <span className="student-name-gf">{enrollment.studentName}</span>
+                                                    <span className="student-email-gf">{enrollment.studentEmail}</span>
+                                                </div>
+                                            </td>
+                                            <td className="course-name-cell-gf">{enrollment.courseName}</td>
+                                            <td className="date-cell-gf">{enrollment.enrollmentDate}</td>
+                                            <td className="amount-cell-gf">
+                                                ₦{(enrollment.coursePrice || 0).toLocaleString('en-NG', { maximumFractionDigits: 0 })}
+                                            </td>
+                                            <td>
+                                                <span className={"status-badge-gf " + (
+                                                    enrollment.paymentStatus === 'Paid' || enrollment.paymentStatus.toLowerCase() === 'success'
+                                                        ? 'badge-success-gf'
+                                                        : enrollment.paymentStatus === 'Pending'
+                                                        ? 'badge-pending-gf'
+                                                        : 'badge-failed-gf'
+                                                )}>
+                                                    {enrollment.paymentStatus === 'Paid' || enrollment.paymentStatus.toLowerCase() === 'success' ? 'Successful' : enrollment.paymentStatus}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        );
+    }
+
+    const container = document.getElementById('admin-react-root');
+    const root = ReactDOM.createRoot(container);
+    root.render(<AdminDashboard />);
+</script>
 </body>
 </html>

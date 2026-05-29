@@ -1,413 +1,636 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" import="com.psm.elearning.model.*,java.util.List" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enrollment Management | Admin</title>
+    <title>Enrollment Control Command Center - PSM E-Learning</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin-dashboard.css?v=2.2">
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin-enrollments-gf.css?v=1.0">
     <jsp:include page="/WEB-INF/views/common/head-external-assets.jsp"/>
-    <style>
-        /* Modern Details Modal Specific Styling */
-        .details-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 16px;
-            margin-bottom: 8px;
-        }
-        .details-item {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            padding: 12px 16px;
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-        }
-        .details-item-full {
-            grid-column: span 2;
-        }
-        .details-label {
-            font-size: 0.7rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: #64748b;
-        }
-        .details-value {
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: #0f172a;
-        }
-        .details-value strong {
-            font-weight: 700;
-        }
-        .expiry-form {
-            margin-top: 20px;
-            padding-top: 18px;
-            border-top: 1px solid #e2e8f0;
-            display: grid;
-            gap: 12px;
-        }
-        .expiry-form__head h4 {
-            margin: 0;
-            font-size: 0.95rem;
-            font-weight: 800;
-            color: #0f172a;
-        }
-        .expiry-form__head p {
-            margin: 4px 0 0;
-            font-size: 0.84rem;
-            color: #64748b;
-            line-height: 1.5;
-        }
-        .expiry-form__row {
-            display: grid;
-            grid-template-columns: minmax(0, 1fr) auto auto;
-            gap: 10px;
-            align-items: end;
-        }
-        .expiry-form__field {
-            display: grid;
-            gap: 6px;
-        }
-        .expiry-form__field label {
-            font-size: 0.72rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: #64748b;
-        }
-        .expiry-form__field input {
-            min-height: 40px;
-            padding: 0 12px;
-            border: 1px solid #cbd5e1;
-            border-radius: 8px;
-            font: inherit;
-            color: #0f172a;
-            background: #fff;
-        }
-        .expiry-form__hint {
-            font-size: 0.8rem;
-            color: #64748b;
-        }
-    </style>
+    
+    <!-- React & ReactDOM (UMD production versions) -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    
+    <!-- Babel Standalone for JSX rendering -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Lucide Icons UMD -->
+    <script src="https://unpkg.com/lucide@0.395.0/dist/umd/lucide.min.js"></script>
+    
+    <!-- TanStack Table UMD -->
+    <script src="https://unpkg.com/@tanstack/react-table@8.17.3/build/umd/index.production.js"></script>
 </head>
 <body class="admin-page">
 <jsp:include page="/WEB-INF/views/common/admin-header.jsp">
     <jsp:param name="pageTitle" value="Enrollments"/>
-    <jsp:param name="pageSubtitle" value="Track payments, access, and learner completion across enrollments"/>
+    <jsp:param name="pageSubtitle" value="Track payments, course progress, and custom access lifecycles"/>
 </jsp:include>
 
 <jsp:include page="/WEB-INF/views/common/admin-sidebar.jsp"/>
 
 <main class="app-main">
-    <div class="content-wrapper">
-        <c:set var="totalCount" value="${empty enrollments ? 0 : fn:length(enrollments)}"/>
-        <c:set var="paidCount" value="0"/>
-        <c:set var="pendingCount" value="0"/>
-        <c:set var="totalRevenue" value="0"/>
-        <c:forEach items="${enrollments}" var="e">
-            <c:set var="ps" value="${e.paymentStatus}"/>
-            <c:choose>
-                <c:when test="${ps eq 'success' or ps eq 'Success' or ps eq 'SUCCESS' or ps eq 'paid' or ps eq 'Paid' or ps eq 'PAID'}">
-                    <c:set var="paidCount" value="${paidCount + 1}"/>
-                    <c:if test="${e.coursePrice != null}">
-                        <c:set var="totalRevenue" value="${totalRevenue + e.coursePrice}"/>
-                    </c:if>
-                </c:when>
-                <c:when test="${ps eq 'pending' or ps eq 'Pending' or ps eq 'PENDING'}">
-                    <c:set var="pendingCount" value="${pendingCount + 1}"/>
-                </c:when>
-            </c:choose>
-        </c:forEach>
-
-        <section class="admin-page-head">
-            <div class="admin-breadcrumb">
-                <a href="${pageContext.request.contextPath}/dashboard">Dashboard</a>
-                <span>&gt;</span>
-                <span>Enrollments</span>
-            </div>
-        </section>
-
+    <!-- Success/Error JSTL Notification Banners -->
+    <div style="max-width: 1400px; margin: 2rem auto 0 auto; padding: 0 2rem;">
         <c:if test="${not empty successMessage}">
-            <div class="alert alert-success">
+            <div class="alert-gf alert-success-gf" style="margin-bottom: 1.5rem;">
                 <i class="fas fa-check-circle"></i> <c:out value="${successMessage}"/>
             </div>
         </c:if>
         <c:if test="${not empty errorMessage}">
-            <div class="alert alert-error">
+            <div class="alert-gf alert-error-gf" style="margin-bottom: 1.5rem;">
                 <i class="fas fa-exclamation-circle"></i> <c:out value="${errorMessage}"/>
             </div>
         </c:if>
-
-        <section class="section-card">
-            <div class="section-header">
-                <h2>Enrollment Overview</h2>
-            </div>
-            <div class="metrics-grid">
-                <div class="metric-card">
-                    <div class="metric-label">Total Enrollments</div>
-                    <div class="metric-value">${totalCount}</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-label">Paid Enrollments</div>
-                    <div class="metric-value">${paidCount}</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-label">Pending Payment</div>
-                    <div class="metric-value">${pendingCount}</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-label">Total Revenue</div>
-                    <div class="metric-value">NGN <fmt:formatNumber value="${totalRevenue}" type="number" minFractionDigits="2" maxFractionDigits="2"/></div>
-                </div>
-            </div>
-        </section>
-
-        <section class="section-card">
-            <div class="section-header">
-                <h2>All Enrollments</h2>
-            </div>
-            <c:choose>
-                <c:when test="${empty enrollments}">
-                    <div class="empty-state empty-state-inset">
-                        <i class="fas fa-inbox"></i>
-                        <p>No enrollments found.</p>
-                    </div>
-                </c:when>
-                <c:otherwise>
-                    <div class="table-wrapper">
-                        <table id="enrollmentsTable" class="data-table display nowrap" style="width:100%">
-                            <thead>
-                                <tr>
-                                    <th>Student Email</th>
-                                    <th>Course Enrolled</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <c:forEach items="${enrollments}" var="enrollment">
-                                    <tr 
-                                        data-id="${enrollment.enrollmentId}"
-                                        data-student-name="${fn:escapeXml(enrollment.studentName)}"
-                                        data-student-email="${fn:escapeXml(enrollment.studentEmail)}"
-                                        data-course-name="${fn:escapeXml(enrollment.courseName)}"
-                                        data-course-price="${enrollment.coursePrice != null ? enrollment.coursePrice : '0.00'}"
-                                        data-status="${enrollment.status}"
-                                        data-payment-status="${enrollment.paymentStatus}"
-                                        data-payment-ref="${enrollment.paymentRef}"
-                                        data-completion="${not empty enrollment.completionStatus ? enrollment.completionStatus : 'Not Started'}"
-                                        data-date="${enrollment.enrollmentDate != null ? fn:substring(enrollment.enrollmentDate.toString(), 0, 10) : 'N/A'}"
-                                        data-duration="${enrollment.displayDuration}"
-                                        data-expiry-date="${enrollment.effectiveEndDate != null ? fn:substring(enrollment.effectiveEndDate.toString(), 0, 10) : ''}"
-                                        data-expiry-override="${enrollment.expiryDateOverride != null ? fn:substring(enrollment.expiryDateOverride.toString(), 0, 10) : ''}"
-                                    >
-                                        <td><c:out value="${enrollment.studentEmail}"/></td>
-                                        <td><strong><c:out value="${enrollment.courseName}"/></strong></td>
-                                        <td>
-                                            <c:choose>
-                                                <c:when test="${enrollment.status == 'Enrolled' or enrollment.status == 'enrolled' or enrollment.status == 'Active' or enrollment.status == 'active'}"><span class="status-badge status-success">Active</span></c:when>
-                                                <c:when test="${enrollment.status == 'Completed' or enrollment.status == 'completed'}"><span class="status-badge status-success">Completed</span></c:when>
-                                                <c:when test="${enrollment.status == 'Pending' or enrollment.status == 'pending'}"><span class="status-badge status-warning">Pending</span></c:when>
-                                                <c:when test="${enrollment.status == 'Cancelled' or enrollment.status == 'cancelled'}"><span class="status-badge status-danger">Cancelled</span></c:when>
-                                                <c:otherwise><span class="status-badge status-secondary"><c:out value="${enrollment.status}"/></span></c:otherwise>
-                                            </c:choose>
-                                        </td>
-                                        <td>
-                                            <div class="admin-table-actions">
-                                                <button type="button" class="admin-btn secondary js-view-receipt">View</button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </c:forEach>
-                            </tbody>
-                        </table>
-                    </div>
-                </c:otherwise>
-            </c:choose>
-        </section>
     </div>
+
+    <!-- React Greenfield Mounting Entry Node -->
+    <div id="admin-react-root"></div>
 </main>
 
-<div id="enrollmentReceiptModal" class="admin-modal" aria-hidden="true">
-    <div class="admin-modal-backdrop" data-close-modal="enrollmentReceiptModal"></div>
-    <div class="admin-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="receiptModalTitle" style="max-width: 600px; margin: 40px auto;">
-        <div class="admin-modal-header">
-            <h3 id="receiptModalTitle" class="admin-modal-title">Enrollment Information</h3>
-            <button type="button" class="admin-modal-close" data-close-modal="enrollmentReceiptModal" aria-label="Close">x</button>
-        </div>
-        <div class="admin-modal-body" style="padding: 24px;">
-            <div class="details-grid">
-                <div class="details-item">
-                    <span class="details-label">Enrollment ID</span>
-                    <span class="details-value" id="rcpEnrollmentId">-</span>
-                </div>
-                <div class="details-item">
-                    <span class="details-label">Registration Date</span>
-                    <span class="details-value" id="rcpEnrollmentDate">-</span>
-                </div>
-                <div class="details-item">
-                    <span class="details-label">Course Duration</span>
-                    <span class="details-value" id="rcpCourseDuration">-</span>
-                </div>
-                <div class="details-item">
-                    <span class="details-label">Access Ends</span>
-                    <span class="details-value" id="rcpExpiryDate">-</span>
-                </div>
-                <div class="details-item">
-                    <span class="details-label">Student Name</span>
-                    <span class="details-value" id="rcpStudentName">-</span>
-                </div>
-                <div class="details-item">
-                    <span class="details-label">Student Email</span>
-                    <span class="details-value" id="rcpStudentEmail">-</span>
-                </div>
-                <div class="details-item details-item-full">
-                    <span class="details-label">Course Enrolled</span>
-                    <span class="details-value" id="rcpCourseName">-</span>
-                </div>
-                <div class="details-item">
-                    <span class="details-label">Course Price</span>
-                    <span class="details-value" id="rcpCoursePrice">-</span>
-                </div>
-                <div class="details-item">
-                    <span class="details-label">Completion Status</span>
-                    <span class="details-value" id="rcpCompletionStatus">-</span>
-                </div>
-                <div class="details-item">
-                    <span class="details-label">Enrollment Status</span>
-                    <span class="details-value" id="rcpStatus">-</span>
-                </div>
-                <div class="details-item">
-                    <span class="details-label">Payment Status</span>
-                    <span class="details-value" id="rcpPaymentStatus">-</span>
-                </div>
-                <div class="details-item details-item-full">
-                    <span class="details-label">Payment Reference</span>
-                    <span class="details-value" id="rcpPaymentRef" style="font-family: monospace; font-size: 0.85rem;">-</span>
-                </div>
-            </div>
+<%
+    List<Enrollment> enrollmentsList = (List<Enrollment>) request.getAttribute("enrollments");
+    org.json.JSONArray enrollmentsJsonArray = new org.json.JSONArray();
+    if (enrollmentsList != null) {
+        for (Enrollment e : enrollmentsList) {
+            org.json.JSONObject obj = new org.json.JSONObject();
+            obj.put("enrollmentId", e.getEnrollmentId());
+            obj.put("userId", e.getUserId());
+            obj.put("courseId", e.getCourseId());
+            obj.put("status", e.getStatus() != null ? e.getStatus() : "Pending");
+            obj.put("paymentStatus", e.getPaymentStatus() != null ? e.getPaymentStatus() : "Pending");
+            obj.put("paymentRef", e.getPaymentRef() != null ? e.getPaymentRef() : "N/A");
+            obj.put("enrollmentDate", e.getEnrollmentDate() != null ? e.getEnrollmentDate().toString().substring(0, 10) : "");
+            obj.put("expiryDateOverride", e.getExpiryDateOverride() != null ? e.getExpiryDateOverride().toString().substring(0, 10) : "");
+            obj.put("effectiveEndDate", e.getEffectiveEndDate() != null ? e.getEffectiveEndDate().toString().substring(0, 10) : "");
+            obj.put("completionStatus", e.getCompletionStatus() != null ? e.getCompletionStatus() : "Not Started");
+            obj.put("progress", e.getProgress() != null ? e.getProgress() : 0);
+            obj.put("courseName", e.getCourseName() != null ? e.getCourseName() : "");
+            obj.put("coursePrice", e.getCoursePrice() != null ? e.getCoursePrice() : 0.0);
+            obj.put("studentName", e.getStudentName() != null ? e.getStudentName() : "");
+            obj.put("studentEmail", e.getStudentEmail() != null ? e.getStudentEmail() : "");
+            obj.put("instructorName", e.getInstructorName() != null ? e.getInstructorName() : "N/A");
+            obj.put("displayDuration", e.getDisplayDuration() != null ? e.getDisplayDuration() : "-");
+            obj.put("daysRemaining", e.getDaysRemaining());
+            enrollmentsJsonArray.put(obj);
+        }
+    }
+    pageContext.setAttribute("serializedEnrollmentsJson", enrollmentsJsonArray.toString());
+%>
 
-            <form class="expiry-form" method="post" action="${pageContext.request.contextPath}/admin/enrollments">
-                <div class="expiry-form__head">
-                    <h4>Manage Course Expiry</h4>
-                    <p>Set a custom access end date for this enrollment. Leave it blank to fall back to the normal course-duration expiry.</p>
-                </div>
-                <input type="hidden" name="enrollmentId" id="expiryEnrollmentId" value="">
-                <div class="expiry-form__row">
-                    <div class="expiry-form__field">
-                        <label for="expiryDateOverride">Expiry Date Override</label>
-                        <input type="date" id="expiryDateOverride" name="expiryDateOverride">
-                    </div>
-                    <button type="submit" class="admin-btn primary">Save Expiry</button>
-                    <button type="button" class="admin-btn secondary" id="clearExpiryOverride">Clear Override</button>
-                </div>
-                <div class="expiry-form__hint">This is the simplest admin extension flow: update one date and the student learning hub will honor it automatically.</div>
-            </form>
-        </div>
-        <div class="admin-modal-footer" style="display: flex; justify-content: flex-end; gap: 10px; padding: 15px 20px; border-top: 1px solid var(--admin-border);">
-            <button type="button" class="admin-btn primary" data-close-modal="enrollmentReceiptModal">Close</button>
-        </div>
-    </div>
-</div>
+<!-- Serialize JSTL variables securely to window scope -->
+<script type="text/javascript">
+    window.__CONTEXT_PATH__ = "${pageContext.request.contextPath}";
+    window.__ENROLLMENTS__ = ${serializedEnrollmentsJson};
+</script>
 
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
-<script>
-    $(function() {
-        if ($('#enrollmentsTable').length) {
-            $('#enrollmentsTable').DataTable({
-                order: [[1, 'asc']],
-                pageLength: 25,
-                lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'All']],
-                language: {
-                    search: 'Search enrollments:',
-                    lengthMenu: 'Show _MENU_ entries',
-                    info: 'Showing _START_ to _END_ of _TOTAL_ enrollments',
-                    infoEmpty: 'Showing 0 to 0 of 0 enrollments',
-                    infoFiltered: '(filtered from _MAX_ total enrollments)',
-                    zeroRecords: 'No matching enrollments found',
-                    emptyTable: 'No enrollments available',
-                    paginate: { first: 'First', last: 'Last', next: 'Next', previous: 'Previous' }
-                },
-                columnDefs: [
-                    { orderable: true, targets: [0, 1, 2] },
-                    { orderable: false, targets: [3] }
-                ]
+<!-- Interactive React Command Center Application -->
+<script type="text/babel">
+    const { useState, useEffect } = React;
+    const { 
+        useReactTable, getCoreRowModel, getPaginationRowModel, getSortedRowModel, flexRender 
+    } = window.ReactTable || {};
+
+    function EnrollmentsControl() {
+        const [enrollments, setEnrollments] = useState(window.__ENROLLMENTS__ || []);
+        const [globalFilter, setGlobalFilter] = useState('');
+        const [statusFilter, setStatusFilter] = useState('All');
+        const [courseFilter, setCourseFilter] = useState('All');
+        
+        // Pagination state
+        const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
+        
+        // Sorting state
+        const [sorting, setSorting] = useState([{ id: 'enrollmentId', desc: true }]);
+
+        // Dropdown tracking
+        const [activeDropdownId, setActiveDropdownId] = useState(null);
+
+        // Drawer states
+        const [drawerOpen, setDrawerOpen] = useState(false);
+        const [drawerMode, setDrawerMode] = useState('view'); // 'view', 'expiry'
+        const [selectedEnrollment, setSelectedEnrollment] = useState(null);
+
+        // Revoke Confirmation Modal states
+        const [revokeModalOpen, setRevokeModalOpen] = useState(false);
+        const [enrollmentToRevoke, setEnrollmentToRevoke] = useState(null);
+
+        // Expiry Form fields
+        const [expiryOverride, setExpiryOverride] = useState('');
+
+        const [isSubmitting, setIsSubmitting] = useState(false);
+
+        useEffect(() => {
+            if (window.lucide) {
+                window.lucide.createIcons();
+            }
+        }, [enrollments, pagination, globalFilter, statusFilter, courseFilter, sorting, drawerOpen, revokeModalOpen]);
+
+        // Close dropdown on click outside
+        useEffect(() => {
+            const handleOutsideClick = (e) => {
+                if (activeDropdownId && !e.target.closest('.actions-cell-gf')) {
+                    setActiveDropdownId(null);
+                }
+            };
+            window.addEventListener('click', handleOutsideClick);
+            return () => window.removeEventListener('click', handleOutsideClick);
+        }, [activeDropdownId]);
+
+        // Calculate unique courses for dropdown filter
+        const uniqueCourses = React.useMemo(() => {
+            const set = new Set();
+            enrollments.forEach(e => {
+                if (e.courseName) set.add(e.courseName);
             });
-        }
+            return Array.from(set).sort();
+        }, [enrollments]);
 
-        var receiptModal = $('#enrollmentReceiptModal');
-        
-        function openModal(modal) {
-            modal.addClass('active').attr('aria-hidden', 'false');
-            $('body').addClass('admin-modal-open');
-        }
-        
-        function closeModal(modal) {
-            modal.removeClass('active').attr('aria-hidden', 'true');
-            $('body').removeClass('admin-modal-open');
-        }
-        
-        $(document).on('click', '[data-close-modal]', function() {
-            var targetId = $(this).attr('data-close-modal');
-            closeModal($('#' + targetId));
-        });
-        
-        $(document).on('click', '.js-view-receipt', function(e) {
-            e.preventDefault();
-            var row = $(this).closest('tr');
-            
-            $('#rcpEnrollmentId').text('#' + (row.data('id') || '-'));
-            $('#rcpEnrollmentDate').text(row.data('date') || '-');
-            $('#rcpCourseDuration').text(row.data('duration') || '-');
-            $('#rcpExpiryDate').text(row.data('expiry-date') || '-');
-            $('#rcpStudentName').text(row.data('student-name') || '-');
-            $('#rcpStudentEmail').text(row.data('student-email') || '-');
-            $('#rcpCourseName').text(row.data('course-name') || '-');
-            $('#expiryEnrollmentId').val(row.data('id') || '');
-            $('#expiryDateOverride').val(row.data('expiry-override') || '');
-            
-            var price = row.data('course-price');
-            if (price) {
-                var amt = parseFloat(price);
-                if (!isNaN(amt)) {
-                    price = 'NGN ' + amt.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        // Metrics calculations
+        const totalCount = enrollments.length;
+        const activeCount = enrollments.filter(e => e.status === 'Active' || e.status === 'Enrolled').length;
+        const completedCount = enrollments.filter(e => e.status === 'Completed').length;
+        const revokedCount = enrollments.filter(e => e.status === 'Cancelled' || e.status === 'Revoked').length;
+        const totalRevenue = enrollments
+            .filter(e => e.paymentStatus === 'Paid' || e.paymentStatus === 'Paid' || e.paymentStatus === 'success')
+            .reduce((sum, e) => sum + Number(e.coursePrice || 0), 0);
+
+        // Custom filtering based on status filters, course filters, and search queries
+        const filteredData = React.useMemo(() => {
+            return enrollments.filter(item => {
+                // Status filter
+                if (statusFilter !== 'All') {
+                    if (statusFilter === 'Active' && item.status !== 'Active' && item.status !== 'Enrolled') return false;
+                    if (statusFilter === 'Completed' && item.status !== 'Completed') return false;
+                    if (statusFilter === 'Revoked' && item.status !== 'Cancelled' && item.status !== 'Revoked') return false;
+                }
+                
+                // Course filter
+                if (courseFilter !== 'All' && item.courseName !== courseFilter) return false;
+                
+                // Search query filter
+                if (globalFilter.trim()) {
+                    const query = globalFilter.toLowerCase();
+                    return (
+                        item.studentName.toLowerCase().includes(query) ||
+                        item.studentEmail.toLowerCase().includes(query) ||
+                        item.courseName.toLowerCase().includes(query) ||
+                        item.paymentRef.toLowerCase().includes(query)
+                    );
+                }
+                return true;
+            });
+        }, [enrollments, globalFilter, statusFilter, courseFilter]);
+
+        // Open drawer in View details mode
+        const handleOpenView = (enrollment) => {
+            setSelectedEnrollment(enrollment);
+            setDrawerMode('view');
+            setDrawerOpen(true);
+        };
+
+        // Open drawer in Manage Expiry mode
+        const handleOpenExpiry = (enrollment) => {
+            setSelectedEnrollment(enrollment);
+            setExpiryOverride(enrollment.expiryDateOverride || '');
+            setDrawerMode('expiry');
+            setDrawerOpen(true);
+        };
+
+        // Open revoke confirmation modal
+        const handleOpenRevoke = (enrollment) => {
+            setEnrollmentToRevoke(enrollment);
+            setRevokeModalOpen(true);
+        };
+
+        // Execute asynchronous Access Revocation
+        const handleRevokeConfirm = () => {
+            if (!enrollmentToRevoke) return;
+            setIsSubmitting(true);
+            fetch(window.__CONTEXT_PATH__ + '/admin/enrollments?action=revoke&id=' + enrollmentToRevoke.enrollmentId)
+                .then(() => window.location.reload())
+                .catch(err => {
+                    console.error("Revoke access error:", err);
+                    setIsSubmitting(false);
+                });
+        };
+
+        // Setup headless React Table column cells
+        const columns = React.useMemo(() => [
+            {
+                accessorKey: 'enrollmentId',
+                header: 'ID',
+                cell: info => <span style={{ fontWeight: '500' }}>{"#" + info.getValue()}</span>
+            },
+            {
+                accessorKey: 'studentName',
+                header: 'Student',
+                cell: info => {
+                    const row = info.row.original;
+                    const initials = row.studentName.split(' ').map(n => n[0]).join('').substring(0, 2);
+                    return (
+                        <div className="student-cell-gf">
+                            <div className="student-avatar-gf">{initials}</div>
+                            <div className="student-meta-gf">
+                                <span className="student-name-gf">{row.studentName}</span>
+                                <span className="student-email-gf">{row.studentEmail}</span>
+                            </div>
+                        </div>
+                    );
+                }
+            },
+            {
+                accessorKey: 'courseName',
+                header: 'Course',
+                cell: info => {
+                    const row = info.row.original;
+                    return (
+                        <div className="course-cell-gf">
+                            <span className="course-title-gf">{row.courseName}</span>
+                            <span className="course-category-gf">Instructor: {row.instructorName}</span>
+                        </div>
+                    );
+                }
+            },
+            {
+                accessorKey: 'enrollmentDate',
+                header: 'Enrollment Date',
+                cell: info => {
+                    const val = info.getValue();
+                    if (!val) return 'N/A';
+                    const d = new Date(val);
+                    return <span>{d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>;
+                }
+            },
+            {
+                accessorKey: 'progress',
+                header: 'Status & Progress',
+                cell: info => {
+                    const row = info.row.original;
+                    const prog = info.getValue() || 0;
+                    
+                    // Resolve status class
+                    let badgeClass = 'badge-pending-gf';
+                    let displayStatus = row.status;
+                    if (row.status === 'Active' || row.status === 'Enrolled') {
+                        badgeClass = 'badge-active-gf';
+                        displayStatus = 'Active';
+                    } else if (row.status === 'Completed') {
+                        badgeClass = 'badge-completed-gf';
+                    } else if (row.status === 'Cancelled' || row.status === 'Revoked') {
+                        badgeClass = 'badge-cancelled-gf';
+                        displayStatus = 'Revoked';
+                    }
+
+                    return (
+                        <div className="progress-container-gf">
+                            <div className="progress-header-gf">
+                                <span className={"badge-gf " + badgeClass}>{displayStatus}</span>
+                                <span className="progress-val-gf">{prog}%</span>
+                            </div>
+                            <div className="progress-track-gf">
+                                <div className="progress-bar-gf" style={{ width: prog + '%' }}></div>
+                            </div>
+                        </div>
+                    );
+                }
+            },
+            {
+                id: 'actions',
+                header: '',
+                cell: info => {
+                    const row = info.row.original;
+                    const isOpen = activeDropdownId === row.enrollmentId;
+                    return (
+                        <div className="actions-cell-gf">
+                            <button 
+                                className="actions-btn-gf"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setActiveDropdownId(isOpen ? null : row.enrollmentId);
+                                }}
+                            >
+                                <i className="fas fa-ellipsis-v"></i>
+                            </button>
+                            {isOpen && (
+                                <div className="actions-dropdown-gf">
+                                    <button className="dropdown-item-gf" onClick={() => handleOpenView(row)}>
+                                        <i className="fas fa-user-graduate"></i> View Progress
+                                    </button>
+                                    <button className="dropdown-item-gf" onClick={() => handleOpenExpiry(row)}>
+                                        <i className="fas fa-calendar-alt"></i> Manage Expiry
+                                    </button>
+                                    {row.status !== 'Cancelled' && row.status !== 'Revoked' && (
+                                        <button className="dropdown-item-gf danger" onClick={() => handleOpenRevoke(row)}>
+                                            <i className="fas fa-user-slash"></i> Revoke Access
+                                        </button>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    );
                 }
             }
-            $('#rcpCoursePrice').text(price || 'Free');
-            
-            var status = row.data('status') || '-';
-            $('#rcpStatus').text(status.charAt(0).toUpperCase() + status.slice(1));
-            
-            var pStatus = row.data('payment-status') || '-';
-            $('#rcpPaymentStatus').text(pStatus.charAt(0).toUpperCase() + pStatus.slice(1));
-            
-            $('#rcpPaymentRef').text(row.data('payment-ref') || 'N/A');
-            $('#rcpCompletionStatus').text(row.data('completion') || 'Not Started');
-            
-            openModal(receiptModal);
-        });
-        
-        $(document).on('keydown', function(e) {
-            if (e.key === 'Escape') {
-                closeModal(receiptModal);
-            }
+        ], [activeDropdownId]);
+
+        // Mount TanStack React Table
+        const table = useReactTable({
+            data: filteredData,
+            columns,
+            state: {
+                pagination,
+                sorting
+            },
+            onPaginationChange: setPagination,
+            onSortingChange: setSorting,
+            getCoreRowModel: getCoreRowModel ? getCoreRowModel() : null,
+            getPaginationRowModel: getPaginationRowModel ? getPaginationRowModel() : null,
+            getSortedRowModel: getSortedRowModel ? getSortedRowModel() : null
         });
 
-        $('#clearExpiryOverride').on('click', function() {
-            $('#expiryDateOverride').val('');
-        });
-    });
+        return (
+            <div className="admin-container-gf">
+                {/* Header Section */}
+                <header className="dashboard-header-gf">
+                    <h1>Enrollments</h1>
+                    <p>Track learner material completion ratios, sync payment clearances, re-configure lifecycle access parameters, and manage course access.</p>
+                </header>
+
+                {/* Metrics Cards row */}
+                <section className="metrics-grid-gf">
+                    <div className="metric-card-gf">
+                        <span className="label">Total Enrollments</span>
+                        <span className="value">{totalCount}</span>
+                    </div>
+                    <div className="metric-card-gf">
+                        <span className="label">Active Access</span>
+                        <span className="value" style={{ color: '#10b981' }}>{activeCount}</span>
+                    </div>
+                    <div className="metric-card-gf">
+                        <span className="label">Completed</span>
+                        <span className="value" style={{ color: '#1d4ed8' }}>{completedCount}</span>
+                    </div>
+                    <div className="metric-card-gf">
+                        <span className="label">Total Tuition Revenue</span>
+                        <span className="value" style={{ color: '#0f172a' }}>₦{totalRevenue.toLocaleString('en-NG', { minimumFractionDigits: 2 })}</span>
+                    </div>
+                </section>
+
+                {/* Data Table Shell */}
+                <section className="table-card-gf">
+                    <div className="table-controls-gf">
+                        <div className="controls-left-gf">
+                            {/* Search Box */}
+                            <div className="search-box-gf">
+                                <i className="fas fa-search"></i>
+                                <input 
+                                    type="text" 
+                                    placeholder="Search student or course..." 
+                                    value={globalFilter}
+                                    onChange={e => setGlobalFilter(e.target.value)}
+                                />
+                            </div>
+
+                            {/* Course dropdown filter */}
+                            <select 
+                                className="select-filter-gf" 
+                                value={courseFilter}
+                                onChange={e => setCourseFilter(e.target.value)}
+                            >
+                                <option value="All">All Courses</option>
+                                {uniqueCourses.map(c => (
+                                    <option key={c} value={c}>{c}</option>
+                                ))}
+                            </select>
+
+                            {/* Status Tabs toggles */}
+                            <div className="filter-tabs-gf">
+                                <button className={"tab-btn-gf " + (statusFilter === 'All' ? 'active' : '')} onClick={() => setStatusFilter('All')}>All</button>
+                                <button className={"tab-btn-gf " + (statusFilter === 'Active' ? 'active' : '')} onClick={() => setStatusFilter('Active')}>Active</button>
+                                <button className={"tab-btn-gf " + (statusFilter === 'Completed' ? 'active' : '')} onClick={() => setStatusFilter('Completed')}>Completed</button>
+                                <button className={"tab-btn-gf " + (statusFilter === 'Revoked' ? 'active' : '')} onClick={() => setStatusFilter('Revoked')}>Revoked</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Table Render */}
+                    {table && table.getRowModel && table.getRowModel().rows.length === 0 ? (
+                        <div className="empty-state-gf">
+                            <i className="fas fa-folder-open"></i>
+                            <p>No enrollment records matching requested criteria.</p>
+                        </div>
+                    ) : (
+                        <div style={{ overflowX: 'auto' }}>
+                            <table className="enrollments-table-gf">
+                                <thead>
+                                    {table && table.getHeaderGroups().map(headerGroup => (
+                                        <tr key={headerGroup.id}>
+                                            {headerGroup.headers.map(header => (
+                                                <th 
+                                                    key={header.id}
+                                                    onClick={header.column.getCanSort() ? header.column.getToggleSortingHandler() : undefined}
+                                                    style={{ cursor: header.column.getCanSort() ? 'pointer' : 'default' }}
+                                                >
+                                                    {flexRender(header.column.columnDef.header, header.getContext())}
+                                                    {header.column.getIsSorted() === 'asc' && ' 🔼'}
+                                                    {header.column.getIsSorted() === 'desc' && ' 🔽'}
+                                                </th>
+                                            ))}
+                                        </tr>
+                                    ))}
+                                </thead>
+                                <tbody>
+                                    {table && table.getRowModel().rows.map(row => (
+                                        <tr key={row.id}>
+                                            {row.getVisibleCells().map(cell => (
+                                                <td key={cell.id}>
+                                                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                                </td>
+                                            ))}
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+
+                    {/* Pagination controls */}
+                    {table && table.getPageCount && table.getPageCount() > 1 && (
+                        <div className="pagination-bar-gf">
+                            <span>
+                                Page <strong>{table.getState().pagination.pageIndex + 1}</strong> of <strong>{table.getPageCount()}</strong>
+                            </span>
+                            <div className="pagination-controls-gf">
+                                <button 
+                                    className="btn-page-gf"
+                                    onClick={() => table.previousPage()}
+                                    disabled={!table.getCanPreviousPage()}
+                                >
+                                    Previous
+                                </button>
+                                <button 
+                                    className="btn-page-gf"
+                                    onClick={() => table.nextPage()}
+                                    disabled={!table.getCanNextPage()}
+                                >
+                                    Next
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </section>
+
+                {/* Right Slide-out Drawer */}
+                {drawerOpen && selectedEnrollment && (
+                    <div className="drawer-overlay-gf" onClick={() => setDrawerOpen(false)}>
+                        <div className="drawer-container-gf" onClick={e => e.stopPropagation()}>
+                            <header className="drawer-header-gf">
+                                <h2>
+                                    {drawerMode === 'view' ? 'Student Learning Progress' : 'Manage Access Expiration'}
+                                </h2>
+                                <button className="drawer-close-gf" onClick={() => setDrawerOpen(false)}>×</button>
+                            </header>
+
+                            <div className="drawer-body-gf">
+                                {drawerMode === 'view' ? (
+                                    /* Enrollment detailed view */
+                                    <div className="details-section-gf">
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', borderBottom: '1px solid var(--gf-border)', paddingBottom: '1.5rem', marginBottom: '0.5rem' }}>
+                                            <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: '700', color: 'var(--gf-text-primary)' }}>{selectedEnrollment.studentName}</h3>
+                                            <span style={{ fontSize: '0.85rem', color: 'var(--gf-text-muted)' }}>{selectedEnrollment.studentEmail}</span>
+                                        </div>
+
+                                        <div className="details-grid-gf">
+                                            <div className="details-item-gf">
+                                                <span>Enrollment ID</span>
+                                                <strong>{"#" + selectedEnrollment.enrollmentId}</strong>
+                                            </div>
+                                            <div className="details-item-gf">
+                                                <span>Payment Status</span>
+                                                <strong style={{ color: selectedEnrollment.paymentStatus === 'Paid' ? '#10b981' : '#b45309' }}>
+                                                    {selectedEnrollment.paymentStatus}
+                                                </strong>
+                                            </div>
+                                            <div className="details-item-gf span-2">
+                                                <span>Course Enrolled</span>
+                                                <strong>{selectedEnrollment.courseName}</strong>
+                                            </div>
+                                            <div className="details-item-gf">
+                                                <span>Enrolled On</span>
+                                                <strong>{selectedEnrollment.enrollmentDate || '-'}</strong>
+                                            </div>
+                                            <div className="details-item-gf">
+                                                <span>Access Duration</span>
+                                                <strong>{selectedEnrollment.displayDuration}</strong>
+                                            </div>
+                                            <div className="details-item-gf">
+                                                <span>Access Status</span>
+                                                <strong>{selectedEnrollment.status}</strong>
+                                            </div>
+                                            <div className="details-item-gf">
+                                                <span>Progress / Completion</span>
+                                                <strong>{selectedEnrollment.progress}% ({selectedEnrollment.completionStatus})</strong>
+                                            </div>
+                                            <div className="details-item-gf span-2">
+                                                <span>Gateway Reference</span>
+                                                <strong style={{ fontFamily: 'monospace', fontSize: '0.85rem' }}>{selectedEnrollment.paymentRef}</strong>
+                                            </div>
+                                            <div className="details-item-gf">
+                                                <span>Syllabus End Date</span>
+                                                <strong>{selectedEnrollment.effectiveEndDate || '-'}</strong>
+                                            </div>
+                                            <div className="details-item-gf">
+                                                <span>Days Remaining</span>
+                                                <strong style={{ color: selectedEnrollment.daysRemaining >= 0 && selectedEnrollment.daysRemaining <= 7 ? 'var(--gf-red)' : 'inherit' }}>
+                                                    {selectedEnrollment.daysRemaining >= 0 ? selectedEnrollment.daysRemaining + ' Days' : 'Expired'}
+                                                </strong>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    /* Manage Course Expiry form */
+                                    <div className="details-section-gf">
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', marginBottom: '1rem' }}>
+                                            <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: '700', color: 'var(--gf-text-primary)' }}>{selectedEnrollment.courseName}</h3>
+                                            <span style={{ fontSize: '0.85rem', color: 'var(--gf-text-muted)' }}>Student: {selectedEnrollment.studentName} ({selectedEnrollment.studentEmail})</span>
+                                        </div>
+
+                                        <form id="expiryForm" className="expiry-form-gf" method="post" action={window.__CONTEXT_PATH__ + "/admin/enrollments"}>
+                                            <p>Set a custom learning hub access end date for this learner. Leave empty to clear overrides and fall back to the standard course duration parameters.</p>
+                                            <input type="hidden" name="enrollmentId" value={selectedEnrollment.enrollmentId} />
+                                            <div className="form-group-gf">
+                                                <label>Expiry Date Override</label>
+                                                <input 
+                                                    type="date" 
+                                                    id="expiryDateOverride" 
+                                                    name="expiryDateOverride"
+                                                    value={expiryOverride}
+                                                    onChange={e => setExpiryOverride(e.target.value)}
+                                                />
+                                            </div>
+                                        </form>
+                                    </div>
+                                )}
+                            </div>
+
+                            <footer className="drawer-footer-gf">
+                                <button className="btn-secondary-gf" onClick={() => setDrawerOpen(false)}>
+                                    {drawerMode === 'view' ? 'Close' : 'Cancel'}
+                                </button>
+                                {drawerMode === 'expiry' && (
+                                    <button 
+                                        type="submit" 
+                                        form="expiryForm" 
+                                        className="btn-primary-gf"
+                                        disabled={isSubmitting}
+                                    >
+                                        Save Expiry Date
+                                    </button>
+                                )}
+                            </footer>
+                        </div>
+                    </div>
+                )}
+
+                {/* Centered Revocation Confirmation Modal */}
+                {revokeModalOpen && enrollmentToRevoke && (
+                    <div className="modal-overlay-gf" onClick={() => setRevokeModalOpen(false)}>
+                        <div className="modal-box-gf" onClick={e => e.stopPropagation()}>
+                            <h3 className="modal-title-gf">
+                                <i className="fas fa-exclamation-triangle"></i> Revoke Course Access
+                            </h3>
+                            <div className="modal-body-gf">
+                                <p>
+                                    Are you absolutely sure you want to revoke <strong>{enrollmentToRevoke.studentName}</strong>'s access to the course <strong>{enrollmentToRevoke.courseName}</strong>?
+                                </p>
+                                <p style={{ marginTop: '0.5rem', fontSize: '0.85rem', color: 'var(--gf-red)', lineHeight: '1.4' }}>
+                                    This will cancel the enrollment, disable learning hub content navigation, and suspend their material progression status.
+                                </p>
+                            </div>
+                            <footer className="modal-footer-gf">
+                                <button className="btn-secondary-gf" onClick={() => setRevokeModalOpen(false)} disabled={isSubmitting}>
+                                    Cancel
+                                </button>
+                                <button className="btn-danger-gf" onClick={handleRevokeConfirm} disabled={isSubmitting}>
+                                    {isSubmitting ? 'Revoking...' : 'Confirm Revocation'}
+                                </button>
+                            </footer>
+                        </div>
+                    </div>
+                )}
+            </div>
+        );
+    }
+
+    const container = document.getElementById('admin-react-root');
+    const root = ReactDOM.createRoot(container);
+    root.render(<EnrollmentsControl />);
 </script>
 </body>
 </html>

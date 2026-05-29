@@ -71,6 +71,9 @@ public class AdminCourseServlet extends HttpServlet {
             case "restore":
                 restoreCourse(request, response);
                 break;
+            case "delete":
+                deleteCourse(request, response);
+                break;
             default:
                 listCourses(request, response);
                 break;
@@ -326,6 +329,34 @@ public class AdminCourseServlet extends HttpServlet {
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error restoring course", e);
             response.sendRedirect(request.getContextPath() + "/admin/courses?error=exception");
+        }
+    }
+
+    /**
+     * Hard delete a course
+     */
+    private void deleteCourse(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        
+        try {
+            Integer courseId = parsePositiveInt(request.getParameter("id"));
+            if (courseId == null) {
+                response.sendRedirect(request.getContextPath() + "/admin/courses?error=invalid");
+                return;
+            }
+            
+            boolean deleted = courseDAO.delete(courseId);
+            
+            if (deleted) {
+                LOGGER.log(Level.INFO, "[ADMIN] Course {0} deleted", courseId);
+                response.sendRedirect(request.getContextPath() + "/admin/courses?success=deleted");
+            } else {
+                response.sendRedirect(request.getContextPath() + "/admin/courses?error=deletefailed");
+            }
+            
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error deleting course", e);
+            response.sendRedirect(request.getContextPath() + "/admin/courses?error=deletefailed");
         }
     }
 

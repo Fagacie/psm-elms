@@ -176,6 +176,84 @@ public class ReportDAOImpl implements ReportDAO {
     }
 
     @Override
+    public List<Map<String, Object>> getUserRoleBreakdown() {
+        return loadBreakdown("SELECT Role AS label, COUNT(*) AS count FROM User GROUP BY Role ORDER BY FIELD(Role, 'Admin', 'Instructor', 'Student')");
+    }
+
+    @Override
+    public List<Map<String, Object>> getUserStatusBreakdown() {
+        return loadBreakdown("SELECT Status AS label, COUNT(*) AS count FROM User GROUP BY Status ORDER BY FIELD(Status, 'Active', 'Pending', 'Suspended')");
+    }
+
+    @Override
+    public List<Map<String, Object>> getCourseStatusBreakdown() {
+        return loadBreakdown("SELECT Status AS label, COUNT(*) AS count FROM Course GROUP BY Status ORDER BY FIELD(Status, 'Approved', 'Pending', 'Archived')");
+    }
+
+    @Override
+    public List<Map<String, Object>> getEnrollmentStatusBreakdown() {
+        return loadBreakdown("SELECT Status AS label, COUNT(*) AS count FROM Enrollment GROUP BY Status ORDER BY FIELD(Status, 'Active', 'Enrolled', 'Completed', 'Pending', 'Cancelled')");
+    }
+
+    @Override
+    public List<Map<String, Object>> getPaymentStatusBreakdown() {
+        return loadBreakdown("SELECT PaymentStatus AS label, COUNT(*) AS count FROM Payment GROUP BY PaymentStatus ORDER BY FIELD(PaymentStatus, 'Paid', 'Pending', 'Failed', 'Abandoned')");
+    }
+
+    @Override
+    public List<Map<String, Object>> getCertificateStatusBreakdown() {
+        return loadBreakdown("SELECT Status AS label, COUNT(*) AS count FROM Certificate GROUP BY Status ORDER BY FIELD(Status, 'Active', 'Revoked')");
+    }
+
+    @Override
+    public Map<String, Object> getAssessmentSummary() {
+        String sql = "SELECT " +
+                "(SELECT COUNT(*) FROM Assessment) AS totalAssessments, " +
+                "(SELECT COUNT(*) FROM Assessment WHERE IsDeleted = 0) AS activeAssessments, " +
+                "(SELECT COUNT(*) FROM Assessment WHERE IsDeleted = 1) AS deletedAssessments, " +
+                "(SELECT COUNT(*) FROM AssessmentQuestion) AS totalQuestions, " +
+                "(SELECT COUNT(*) FROM AssessmentSubmission) AS totalSubmissions, " +
+                "(SELECT COUNT(*) FROM AssessmentSubmission WHERE Status = 'Graded') AS gradedSubmissions, " +
+                "(SELECT COUNT(*) FROM AssessmentSubmission WHERE Status IN ('Submitted', 'TimedOut', 'AutoSubmitted')) AS pendingSubmissions, " +
+                "(SELECT COUNT(*) FROM AssessmentRetakeRequest WHERE Status = 'Pending') AS pendingRetakeRequests";
+
+        Map<String, Object> row = new HashMap<>();
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            if (rs.next()) {
+                row.put("totalAssessments", rs.getInt("totalAssessments"));
+                row.put("activeAssessments", rs.getInt("activeAssessments"));
+                row.put("deletedAssessments", rs.getInt("deletedAssessments"));
+                row.put("totalQuestions", rs.getInt("totalQuestions"));
+                row.put("totalSubmissions", rs.getInt("totalSubmissions"));
+                row.put("gradedSubmissions", rs.getInt("gradedSubmissions"));
+                row.put("pendingSubmissions", rs.getInt("pendingSubmissions"));
+                row.put("pendingRetakeRequests", rs.getInt("pendingRetakeRequests"));
+            }
+        } catch (SQLException e) {
+            System.err.println("Report getAssessmentSummary failed: " + e.getMessage());
+        }
+        return row;
+    }
+
+    @Override
+    public List<Map<String, Object>> getAssessmentGradingModeBreakdown() {
+        return loadBreakdown("SELECT GradingMode AS label, COUNT(*) AS count FROM Assessment GROUP BY GradingMode ORDER BY FIELD(GradingMode, 'auto', 'manual')");
+    }
+
+    @Override
+    public List<Map<String, Object>> getAssessmentSubmissionModeBreakdown() {
+        return loadBreakdown("SELECT SubmissionMode AS label, COUNT(*) AS count FROM Assessment GROUP BY SubmissionMode ORDER BY FIELD(SubmissionMode, 'both', 'file', 'text')");
+    }
+
+    @Override
+    public List<Map<String, Object>> getReportAccessStatusBreakdown() {
+        return loadBreakdown("SELECT AccessStatus AS label, COUNT(*) AS count FROM ReportAccessLog GROUP BY AccessStatus ORDER BY FIELD(AccessStatus, 'Success', 'Failed', 'Denied')");
+    }
+
+    @Override
     public Map<String, Object> getInstructorSummary(int instructorId) {
         String sql = "SELECT " +
                 "COUNT(DISTINCT c.CourseID) AS totalCourses, " +
@@ -348,6 +426,24 @@ public class ReportDAOImpl implements ReportDAO {
 
     private boolean isDateRangeProvided(String startDate, String endDate) {
         return startDate != null && endDate != null && !startDate.trim().isEmpty() && !endDate.trim().isEmpty();
+    }
+
+    private List<Map<String, Object>> loadBreakdown(String sql) {
+        List<Map<String, Object>> rows = new ArrayList<>();
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                Map<String, Object> row = new HashMap<>();
+                row.put("label", rs.getString("label"));
+                row.put("count", rs.getInt("count"));
+                rows.add(row);
+            }
+        } catch (SQLException e) {
+            System.err.println("Report breakdown query failed: " + e.getMessage());
+        }
+        return rows;
     }
 
     private int countByDateRange(Connection conn, String sql, String startDate, String endDate) throws SQLException {

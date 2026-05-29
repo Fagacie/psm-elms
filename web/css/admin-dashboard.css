@@ -2879,6 +2879,26 @@ html[data-theme="dark"] body.admin-page,
   align-items: center;
 }
 
+.empty-row-gf {
+  text-align: center;
+  padding: 4rem !important;
+  color: var(--admin-gf-text-secondary);
+  font-style: italic;
+}
+
+/* Lucide SVG sizing styles */
+.kpi-icon-gf svg {
+  width: 1.5rem;
+  height: 1.5rem;
+  stroke-width: 2px;
+}
+
+.action-btn-gf svg {
+  width: 1.1rem;
+  height: 1.1rem;
+  stroke-width: 2px;
+}
+
 .telemetry-sparkline {
   width: 100%;
   height: 100%;
@@ -3057,10 +3077,354 @@ html[data-theme="dark"] body.admin-page,
   color: #ffffff !important;
 }
 
-:root[data-theme="dark"] .hub-icon-circle.bg-blue { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
-:root[data-theme="dark"] .hub-icon-circle.bg-emerald { background: rgba(16, 185, 129, 0.15); color: #34d399; }
-:root[data-theme="dark"] .hub-icon-circle.bg-amber { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
 :root[data-theme="dark"] .hub-icon-circle.bg-indigo { background: rgba(99, 102, 241, 0.15); color: #818cf8; }
+
+/* ==========================================================================
+   GREENFIELD ADMIN COMMAND CENTER STYLES
+   ========================================================================== */
+
+:root {
+  --admin-gf-bg: #f8fafc;
+  --admin-gf-dark-sidebar: #0f172a;
+  --admin-gf-sidebar-text: #94a3b8;
+  --admin-gf-sidebar-active: #ffffff;
+  --admin-gf-sidebar-active-bg: #1e293b;
+  
+  --admin-gf-text-primary: #0f172a;
+  --admin-gf-text-secondary: #475569;
+  --admin-gf-text-muted: #94a3b8;
+  
+  --admin-gf-accent: #10b981; /* minimalist emerald */
+  --admin-gf-accent-dark: #065f46;
+  --admin-gf-accent-light: #d1fae5;
+  
+  --admin-gf-warning-bg: #fef3c7;
+  --admin-gf-warning-text: #92400e;
+  
+  --admin-gf-danger-bg: #fee2e2;
+  --admin-gf-danger-text: #991b1b;
+  
+  --gf-card-bg: #ffffff;
+  --gf-card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.025);
+  --gf-card-border: 1px solid #f1f5f9;
+}
+
+/* Sidebar Overrides - Dark-themed, sleek layout */
+.app-sidebar {
+  background-color: var(--admin-gf-dark-sidebar) !important;
+  color: var(--admin-gf-sidebar-text) !important;
+  border-right: none !important;
+  box-shadow: 4px 0 24px rgba(15, 23, 42, 0.03) !important;
+}
+
+.sidebar-section-label {
+  color: #64748b !important;
+  font-weight: 700 !important;
+  margin: 8px 12px 14px !important;
+  letter-spacing: 0.1em !important;
+}
+
+.sidebar-nav {
+  gap: 8px !important;
+}
+
+.nav-item {
+  color: var(--admin-gf-sidebar-text) !important;
+  border: 1px solid transparent !important;
+  border-radius: 10px !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.nav-item i {
+  color: inherit !important;
+  opacity: 0.8 !important;
+}
+
+.nav-item:hover {
+  background-color: var(--admin-gf-sidebar-active-bg) !important;
+  color: var(--admin-gf-sidebar-active) !important;
+  transform: translateX(3px) !important;
+}
+
+.nav-item.active {
+  background-color: var(--admin-gf-sidebar-active-bg) !important;
+  color: var(--admin-gf-sidebar-active) !important;
+  border-color: rgba(255, 255, 255, 0.05) !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+}
+
+.nav-item.active::before {
+  background-color: var(--admin-gf-accent) !important;
+  width: 4px !important;
+}
+
+/* Header tweaks to align with dark sidebar */
+.admin-light-header {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.02) !important;
+}
+
+/* Single-Column Command Center Architecture */
+.admin-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 3rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+
+/* Typography & Whitespace Header */
+.dashboard-header-gf {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
+.dashboard-header-gf h1 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin: 0;
+  color: var(--admin-gf-text-primary);
+}
+
+.dashboard-header-gf p {
+  font-size: 1.15rem;
+  color: var(--admin-gf-text-secondary);
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* Task 3: KPI Metrics Grid */
+.kpi-grid-gf {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+}
+
+.kpi-card-gf {
+  background-color: var(--gf-card-bg);
+  border: var(--gf-card-border);
+  border-radius: 16px;
+  padding: 2rem 1.75rem;
+  box-shadow: var(--gf-card-shadow);
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s ease;
+}
+
+.kpi-card-gf:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 20px -3px rgba(15, 23, 42, 0.06), 0 4px 6px -2px rgba(15, 23, 42, 0.03);
+}
+
+.kpi-icon-gf {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 12px;
+  background-color: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--admin-gf-accent);
+  font-size: 1.5rem;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.kpi-card-gf:hover .kpi-icon-gf {
+  background-color: var(--admin-gf-accent-light);
+  color: var(--admin-gf-accent-dark);
+}
+
+.kpi-details-gf {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.kpi-label-gf {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--admin-gf-text-secondary);
+}
+
+.kpi-value-gf {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--admin-gf-text-primary);
+  letter-spacing: -0.02em;
+}
+
+/* Task 4: Global Action Bar */
+.action-bar-gf {
+  display: flex;
+  justify-content: flex-end;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 2rem;
+}
+
+.action-buttons-gf {
+  display: flex;
+  gap: 1.25rem;
+}
+
+.action-btn-gf {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  background-color: var(--admin-gf-text-primary);
+  color: #ffffff !important;
+  padding: 0.85rem 1.75rem;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.08);
+}
+
+.action-btn-gf:hover {
+  background-color: #1e293b;
+  transform: translateY(-1px);
+  box-shadow: 0 10px 15px -3px rgba(15, 23, 42, 0.12);
+}
+
+.action-btn-gf i {
+  font-size: 0.85rem;
+}
+
+/* Task 5: Recent Enrollments Breathable Table */
+.recent-activity-section-gf {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+.section-header-minimal-gf {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.section-header-minimal-gf h2 {
+  font-size: 1.75rem;
+  font-weight: 800;
+  margin: 0;
+  color: var(--admin-gf-text-primary);
+  letter-spacing: -0.025em;
+}
+
+.section-header-minimal-gf span {
+  font-size: 1.05rem;
+  color: var(--admin-gf-text-secondary);
+}
+
+.table-container-gf {
+  background-color: var(--gf-card-bg);
+  border-radius: 16px;
+  box-shadow: var(--gf-card-shadow);
+  overflow-x: auto;
+  border: var(--gf-card-border);
+}
+
+.activity-table-gf {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.activity-table-gf th {
+  padding: 1.25rem 1.75rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--admin-gf-text-secondary);
+  border-bottom: 1px solid #f1f5f9;
+  background-color: #f8fafc;
+}
+
+.activity-table-gf td {
+  padding: 1.5rem 1.75rem; /* Generous 16px+ vertical row padding for breathability */
+  font-size: 0.98rem;
+  color: var(--admin-gf-text-primary);
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+}
+
+.activity-table-gf tr:last-child td {
+  border-bottom: none;
+}
+
+.student-info-gf {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.student-name-gf {
+  font-weight: 700;
+  color: var(--admin-gf-text-primary);
+}
+
+.student-email-gf {
+  font-size: 0.85rem;
+  color: var(--admin-gf-text-secondary);
+}
+
+.course-name-cell-gf {
+  font-weight: 600;
+}
+
+.date-cell-gf {
+  color: var(--admin-gf-text-secondary);
+}
+
+.amount-cell-gf {
+  font-weight: 700;
+  color: var(--admin-gf-text-primary);
+}
+
+/* Airy Badges */
+.status-badge-gf {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.badge-success-gf {
+  background-color: var(--admin-gf-accent-light);
+  color: var(--admin-gf-accent-dark);
+}
+
+.badge-pending-gf {
+  background-color: var(--admin-gf-warning-bg);
+  color: var(--admin-gf-warning-text);
+}
+
+.badge-failed-gf {
+  background-color: var(--admin-gf-danger-bg);
+  color: var(--admin-gf-danger-text);
+}
+
+.empty-row-gf {
+  text-align: center;
+  padding: 4rem !important;
+  color: var(--admin-gf-text-secondary);
+  font-style: italic;
+}
+
 
 
 

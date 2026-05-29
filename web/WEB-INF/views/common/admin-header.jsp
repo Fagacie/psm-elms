@@ -58,16 +58,6 @@
             <span class="dashboard-brand-main">PSM</span>
             <span class="dashboard-brand-sub">E-Learning</span>
         </a>
-        <div class="dashboard-title-copy">
-            <h1 class="page-title"><c:out value="${resolvedAdminTitle}"/></h1>
-            <p><c:out value="${resolvedAdminSubtitle}"/></p>
-            <c:if test="${not empty adminContextCourse or not empty adminContextAssessment}">
-                <div class="header-context-row">
-                    <c:if test="${not empty adminContextCourse}"><span class="header-context-chip"><i class="fas fa-book-open"></i><c:out value="${adminContextCourse}"/></span></c:if>
-                    <c:if test="${not empty adminContextAssessment}"><span class="header-context-chip"><i class="fas fa-clipboard-check"></i><c:out value="${adminContextAssessment}"/></span></c:if>
-                </div>
-            </c:if>
-        </div>
     </div>
     <div class="header-right">
         <c:if test="${param.showNotifications == 'true' and not empty notificationCount and notificationCount > 0}">
@@ -105,8 +95,12 @@
     </div>
 </header>
 
+<script src="https://unpkg.com/lucide@0.395.0/dist/umd/lucide.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        if (window.lucide) {
+            window.lucide.createIcons();
+        }
         const toggleBtn = document.getElementById('sidebarToggle');
         if (toggleBtn) {
             const sidebarState = localStorage.getItem('adminSidebarCollapsed');

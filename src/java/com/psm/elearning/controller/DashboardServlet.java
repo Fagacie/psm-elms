@@ -212,6 +212,21 @@ public class DashboardServlet extends HttpServlet {
                 request.setAttribute("systemMetrics", systemMetrics);
                 request.setAttribute("adminName", user.getFullName());
 
+                List<Enrollment> recentEnrollments = new ArrayList<>();
+                if (allEnrollments != null) {
+                    recentEnrollments = new ArrayList<>(allEnrollments);
+                    recentEnrollments.sort((e1, e2) -> {
+                        if (e1.getEnrollmentDate() == null && e2.getEnrollmentDate() == null) return 0;
+                        if (e1.getEnrollmentDate() == null) return 1;
+                        if (e2.getEnrollmentDate() == null) return -1;
+                        return e2.getEnrollmentDate().compareTo(e1.getEnrollmentDate());
+                    });
+                    if (recentEnrollments.size() > 5) {
+                        recentEnrollments = recentEnrollments.subList(0, 5);
+                    }
+                }
+                request.setAttribute("recentEnrollments", recentEnrollments);
+
             } catch (Exception e) {
                 LOGGER.log(Level.SEVERE, "Failed to load admin dashboard metrics", e);
             }

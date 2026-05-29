@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" import="com.psm.elearning.model.*,java.util.List" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!DOCTYPE html>
@@ -11,54 +11,21 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin-dashboard.css?v=2.2">
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin-users-gf.css?v=1.0">
     <jsp:include page="/WEB-INF/views/common/head-external-assets.jsp"/>
-    <style>
-        .user-filter-panel-premium {
-            background: #f8fafc !important;
-            border: 1px solid #e2e8f0 !important;
-            border-radius: 12px !important;
-            padding: 14px 20px !important;
-            margin: 16px 0 !important;
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            transition: all 0.3s ease;
-            box-shadow: inset 0 1px 2px rgba(0,0,0,0.02);
-        }
-        .user-filter-panel-premium .filter-group {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .user-filter-panel-premium label {
-            font-size: 0.85rem !important;
-            font-weight: 600 !important;
-            color: #475569 !important;
-        }
-        .user-filter-panel-premium select {
-            background-color: #ffffff !important;
-            border: 1px solid #cbd5e1 !important;
-            border-radius: 8px !important;
-            padding: 8px 16px !important;
-            font-size: 0.85rem !important;
-            font-weight: 500 !important;
-            color: #1e293b !important;
-            min-width: 160px !important;
-            cursor: pointer;
-            outline: none;
-            transition: all 0.2s ease;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-        }
-        .user-filter-panel-premium select:hover {
-            border-color: #94a3b8 !important;
-            background-color: #f8fafc !important;
-        }
-        .user-filter-panel-premium select:focus {
-            border-color: #1e293b !important;
-            box-shadow: 0 0 0 3px rgba(30, 41, 59, 0.1) !important;
-        }
-    </style>
+    
+    <!-- React & ReactDOM (UMD production versions) -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    
+    <!-- Babel Standalone for JSX rendering -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Lucide Icons UMD -->
+    <script src="https://unpkg.com/lucide@0.395.0/dist/umd/lucide.min.js"></script>
+    
+    <!-- TanStack Table UMD -->
+    <script src="https://unpkg.com/@tanstack/react-table@8.17.3/build/umd/index.production.js"></script>
 </head>
 <body class="admin-page">
 <jsp:include page="/WEB-INF/views/common/admin-header.jsp">
@@ -69,568 +36,1007 @@
 <jsp:include page="/WEB-INF/views/common/admin-sidebar.jsp"/>
 
 <main class="app-main">
-    <div class="content-wrapper">
-        <c:set var="totalUsers" value="${fn:length(users)}"/>
-        <c:set var="studentsCount" value="0"/>
-        <c:set var="instructorsCount" value="0"/>
-        <c:set var="adminsCount" value="0"/>
-        <c:set var="activeCount" value="0"/>
-        <c:set var="suspendedCount" value="0"/>
-        <c:forEach items="${users}" var="u">
-            <c:choose>
-                <c:when test="${u.role eq 'Student'}"><c:set var="studentsCount" value="${studentsCount + 1}"/></c:when>
-                <c:when test="${u.role eq 'Instructor'}"><c:set var="instructorsCount" value="${instructorsCount + 1}"/></c:when>
-                <c:when test="${u.role eq 'Admin'}"><c:set var="adminsCount" value="${adminsCount + 1}"/></c:when>
-            </c:choose>
-            <c:choose>
-                <c:when test="${u.status eq 'Active' or u.status eq 'active'}"><c:set var="activeCount" value="${activeCount + 1}"/></c:when>
-                <c:when test="${u.status eq 'Suspended' or u.status eq 'suspended'}"><c:set var="suspendedCount" value="${suspendedCount + 1}"/></c:when>
-            </c:choose>
-        </c:forEach>
-
-        <section class="admin-page-head">
-            <div class="admin-breadcrumb">
-                <a href="${pageContext.request.contextPath}/dashboard">Dashboard</a>
-                <span>&gt;</span>
-                <span>Users</span>
-            </div>
-        </section>
-
-        <section class="section-card">
-            <div class="section-header">
-                <h2>User Overview</h2>
-                <button type="button" class="admin-btn primary js-open-user-modal" data-user-url="${pageContext.request.contextPath}/admin/users?action=create&modal=1" data-modal-title="Create User"><i class="fas fa-plus"></i>&nbsp;Create User</button>
-            </div>
-            <div class="metrics-grid">
-                <div class="metric-card">
-                    <div class="metric-label">Total Users</div>
-                    <div class="metric-value">${totalUsers}</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-label">Students</div>
-                    <div class="metric-value">${studentsCount}</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-label">Instructors</div>
-                    <div class="metric-value">${instructorsCount}</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-label">Admins</div>
-                    <div class="metric-value">${adminsCount}</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-label">Active</div>
-                    <div class="metric-value">${activeCount}</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-label">Suspended</div>
-                    <div class="metric-value">${suspendedCount}</div>
-                </div>
-            </div>
-        </section>
-
+    <!-- JSTL Success/Warning/Error Notifications -->
+    <div style="max-width: 1400px; margin: 2rem auto 0 auto; padding: 0 2rem;">
         <c:if test="${not empty sessionScope.success}">
-            <div class="alert alert-success">
+            <div class="alert-gf alert-success-gf" style="margin-bottom: 1.5rem;">
                 <i class="fas fa-check-circle"></i> <c:out value="${sessionScope.success}"/>
             </div>
             <c:remove var="success" scope="session"/>
         </c:if>
         <c:if test="${not empty sessionScope.error}">
-            <div class="alert alert-error">
+            <div class="alert-gf alert-error-gf" style="margin-bottom: 1.5rem;">
                 <i class="fas fa-exclamation-circle"></i> <c:out value="${sessionScope.error}"/>
             </div>
             <c:remove var="error" scope="session"/>
         </c:if>
         <c:if test="${not empty sessionScope.warning}">
-            <div class="alert alert-warning">
+            <div class="alert-gf alert-success-gf" style="background-color: #fef3c7; color: #b45309; border: 1px solid rgba(180, 83, 9, 0.15); margin-bottom: 1.5rem;">
                 <i class="fas fa-info-circle"></i> <c:out value="${sessionScope.warning}"/>
             </div>
             <c:remove var="warning" scope="session"/>
         </c:if>
-
-        <section class="course-board-shell section-card">
-            <div class="course-board-header">
-                <div class="course-board-copy">
-                    <p class="admin-kicker">User Governance</p>
-                    <h2>User Directory</h2>
-                    <p>Manage, audit, and inspect student, instructor, and admin profiles from a modern directory.</p>
-                </div>
-                <div class="course-board-controls">
-                    <label class="course-search-box" for="userSearchInput">
-                        <i class="fas fa-search"></i>
-                        <input type="search" id="userSearchInput" placeholder="Search by name, email, phone, role" aria-label="Search users">
-                    </label>
-                    <button type="button" class="admin-btn secondary" id="toggleUserFilters">
-                        <i class="fas fa-sliders-h"></i>&nbsp;Filter
-                    </button>
-                    <button type="button" class="admin-btn primary js-open-user-modal" data-user-url="${pageContext.request.contextPath}/admin/users?action=create&modal=1" data-modal-title="Create User">
-                        <i class="fas fa-plus"></i>&nbsp;Create User
-                    </button>
-                </div>
-            </div>
-            <div class="user-filter-panel-premium" id="userFilterPanel" style="display:none;">
-                <div class="filter-group">
-                    <label for="roleFilter">Role</label>
-                    <select id="roleFilter">
-                        <option value="">All Roles</option>
-                        <option value="Student">Student</option>
-                        <option value="Instructor">Instructor</option>
-                        <option value="Admin">Admin</option>
-                    </select>
-                </div>
-                <div class="filter-group">
-                    <label for="statusFilter">Status</label>
-                    <select id="statusFilter">
-                        <option value="">All Statuses</option>
-                        <option value="Active">Active</option>
-                        <option value="Suspended">Suspended</option>
-                    </select>
-                </div>
-            </div>
-            <div class="table-wrapper">
-                <table id="usersTable" class="data-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Full Name</th>
-                            <th>Email</th>
-                            <th>Phone</th>
-                            <th>Role</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <c:choose>
-                            <c:when test="${empty users}">
-                                <tr>
-                                    <td colspan="7">
-                                        <div class="empty-state empty-state-inset">
-                                            <i class="fas fa-inbox"></i>
-                                            <p>No users found.</p>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </c:when>
-                            <c:otherwise>
-                                <c:forEach items="${users}" var="user">
-                                    <c:set var="uid" value="${user.userId}"/>
-                                    <tr
-                                        data-user-id="${uid}"
-                                        data-user-fullname="${fn:escapeXml(user.fullName)}"
-                                        data-user-email="${fn:escapeXml(user.email)}"
-                                        data-user-phone="${fn:escapeXml(not empty user.phone ? user.phone : '-')}"
-                                        data-user-role="${fn:escapeXml(user.role)}"
-                                        data-user-status="${fn:escapeXml(user.status)}"
-                                        
-                                        <%-- Student details --%>
-                                        data-student-reg="${fn:escapeXml(studentDetailsMap[uid].regNumber)}"
-                                        data-student-qualification="${fn:escapeXml(studentDetailsMap[uid].qualification)}"
-                                        data-student-country="${fn:escapeXml(studentDetailsMap[uid].country)}"
-                                        data-student-state="${fn:escapeXml(studentDetailsMap[uid].state)}"
-                                        data-student-gender="${fn:escapeXml(studentDetailsMap[uid].gender)}"
-                                        data-student-emergency="${fn:escapeXml(studentDetailsMap[uid].emergencyContact)}"
-                                        data-student-enrollments="${fn:escapeXml(studentEnrollmentsMap[uid])}"
-                                        
-                                        <%-- Instructor details --%>
-                                        data-instructor-specialization="${fn:escapeXml(instructorDetailsMap[uid].specialization)}"
-                                        data-instructor-certification="${fn:escapeXml(instructorDetailsMap[uid].certification)}"
-                                        data-instructor-experience="${fn:escapeXml(instructorDetailsMap[uid].yearsOfExperience)}"
-                                        data-instructor-bio="${fn:escapeXml(instructorDetailsMap[uid].bio)}"
-                                        data-instructor-courses="${fn:escapeXml(instructorCoursesMap[uid])}"
-                                        data-instructor-materials="${empty instructorMaterialsCountMap[uid] ? 0 : instructorMaterialsCountMap[uid]}"
-                                        data-instructor-assessments="${empty instructorAssessmentsCountMap[uid] ? 0 : instructorAssessmentsCountMap[uid]}"
-                                    >
-                                        <td>${user.userId}</td>
-                                        <td><strong>${user.fullName}</strong></td>
-                                        <td>${user.email}</td>
-                                        <td><c:out value="${not empty user.phone ? user.phone : '-'}"/></td>
-                                        <td><span class="status-badge status-${user.role eq 'Student' ? 'success' : user.role eq 'Instructor' ? 'warning' : 'secondary'}">${user.role}</span></td>
-                                        <td><span class="status-badge status-${user.status eq 'Active' or user.status eq 'active' ? 'success' : 'danger'}">${user.status}</span></td>
-                                        <td>
-                                            <div class="admin-table-actions">
-                                                <button type="button" class="admin-btn secondary js-view-user-details">Details</button>
-                                                <button type="button" class="admin-btn secondary js-open-user-modal" data-user-url="${pageContext.request.contextPath}/admin/users?action=edit&userId=${user.userId}&modal=1" data-modal-title="Edit User">Edit</button>
-                                                <c:if test="${user.userId != sessionScope.user.userId}">
-                                                    <a href="${pageContext.request.contextPath}/admin/users?action=delete&userId=${user.userId}" class="admin-btn danger" onclick="return confirm('Are you sure you want to delete ${user.fullName}?');">Delete</a>
-                                                </c:if>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </c:forEach>
-                            </c:otherwise>
-                        </c:choose>
-                    </tbody>
-                </table>
-            </div>
-             <script>
-                window.__initUsersTable = function () {
-                    if (!window.jQuery) {
-                        return;
-                    }
-                    var $table = window.jQuery('#usersTable');
-                    if ($table.length) {
-                        var table = $table.DataTable({
-                            order: [[0, 'desc']],
-                            pageLength: 25,
-                            lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'All']],
-                            dom: 'rtip',
-                            language: {
-                                info: 'Showing _START_ to _END_ of _TOTAL_ users',
-                                infoEmpty: 'Showing 0 to 0 of 0 users',
-                                infoFiltered: '(filtered from _MAX_ total users)',
-                                zeroRecords: 'No matching users found',
-                                emptyTable: 'No users available',
-                                paginate: { first: 'First', last: 'Last', next: 'Next', previous: 'Previous' }
-                            },
-                            columnDefs: [
-                                { orderable: true, targets: [0, 1, 2, 3] },
-                                { orderable: false, targets: [4, 5, 6] }
-                            ]
-                        });
-
-                        // Custom search input binding
-                        var searchInput = document.getElementById('userSearchInput');
-                        if (searchInput) {
-                            searchInput.addEventListener('input', function () {
-                                table.search(searchInput.value).draw();
-                            });
-                        }
-
-                        // Custom filter binding
-                        var roleFilter = document.getElementById('roleFilter');
-                        var statusFilter = document.getElementById('statusFilter');
-
-                        function applyFilters() {
-                            var rVal = roleFilter.value;
-                            var sVal = statusFilter.value;
-
-                            // Apply custom filters on columns
-                            if (rVal) {
-                                table.column(4).search('^' + rVal + '$', true, false).draw();
-                            } else {
-                                table.column(4).search('').draw();
-                            }
-
-                            if (sVal) {
-                                table.column(5).search('^' + sVal + '$', true, false).draw();
-                            } else {
-                                table.column(5).search('').draw();
-                            }
-                        }
-
-                        if (roleFilter) {
-                            roleFilter.addEventListener('change', applyFilters);
-                        }
-                        if (statusFilter) {
-                            statusFilter.addEventListener('change', applyFilters);
-                        }
-
-                        // Toggle filter panel animation
-                        var filterToggle = document.getElementById('toggleUserFilters');
-                        var filterPanel = document.getElementById('userFilterPanel');
-                        if (filterToggle && filterPanel) {
-                            filterPanel.style.display = 'none';
-                            filterToggle.addEventListener('click', function () {
-                                filterPanel.classList.toggle('is-open');
-                                filterPanel.style.display = filterPanel.classList.contains('is-open') ? 'flex' : 'none';
-                            });
-                        }
-                    }
-                };
-            </script>
-        </section>
     </div>
+
+    <!-- React Greenfield Root Mounting Element -->
+    <div id="admin-react-root"></div>
 </main>
 
-<div id="userActionModal" class="admin-modal" aria-hidden="true">
-    <div class="admin-modal-backdrop" data-close-modal="userActionModal"></div>
-    <div class="admin-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="userActionModalTitle">
-        <div class="admin-modal-header">
-            <h3 id="userActionModalTitle" class="admin-modal-title">User Action</h3>
-            <button type="button" class="admin-modal-close" data-close-modal="userActionModal" aria-label="Close">x</button>
-        </div>
-        <iframe id="userActionModalFrame" class="admin-modal-iframe" title="User Action"></iframe>
-    </div>
-</div>
+<%
+    List<User> usersList = (List<User>) request.getAttribute("users");
+    java.util.Map<Integer, Student> studentDetailsMap = (java.util.Map<Integer, Student>) request.getAttribute("studentDetailsMap");
+    java.util.Map<Integer, Instructor> instructorDetailsMap = (java.util.Map<Integer, Instructor>) request.getAttribute("instructorDetailsMap");
+    java.util.Map<Integer, String> studentEnrollmentsMap = (java.util.Map<Integer, String>) request.getAttribute("studentEnrollmentsMap");
+    java.util.Map<Integer, String> instructorCoursesMap = (java.util.Map<Integer, String>) request.getAttribute("instructorCoursesMap");
+    java.util.Map<Integer, Integer> instructorMaterialsCountMap = (java.util.Map<Integer, Integer>) request.getAttribute("instructorMaterialsCountMap");
+    java.util.Map<Integer, Integer> instructorAssessmentsCountMap = (java.util.Map<Integer, Integer>) request.getAttribute("instructorAssessmentsCountMap");
 
-<div id="userDetailsModal" class="admin-modal" aria-hidden="true">
-    <div class="admin-modal-backdrop" data-close-modal="userDetailsModal"></div>
-    <div class="admin-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="userDetailsModalTitle" style="max-width: 650px;">
-        <div class="admin-modal-header">
-            <h3 id="userDetailsModalTitle" class="admin-modal-title">User Profile Details</h3>
-            <button type="button" class="admin-modal-close" data-close-modal="userDetailsModal" aria-label="Close">x</button>
-        </div>
-        <div class="course-details-shell" style="padding: 20px; display: flex; flex-direction: column; gap: 18px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 12px;">
-                <div>
-                    <h4 id="detailUserFullName" style="font-size: 20px; font-weight: 700; margin: 0; color: var(--text);">John Doe</h4>
-                    <span id="detailUserEmail" style="font-size: 13px; color: var(--text-muted); display: block; margin-top: 2px;">john@example.com</span>
-                </div>
-                <span id="detailUserRoleBadge" class="status-badge status-primary">Student</span>
-            </div>
-
-            <!-- Student specific details -->
-            <div id="studentDetailsSection" style="display: none; flex-direction: column; gap: 16px;">
-                <div class="course-detail-grid">
-                    <div class="course-detail-card">
-                        <span>Reg Number</span>
-                        <strong id="detailStudentReg">-</strong>
-                    </div>
-                    <div class="course-detail-card">
-                        <span>Qualification</span>
-                        <strong id="detailStudentQual">-</strong>
-                    </div>
-                    <div class="course-detail-card">
-                        <span>Country</span>
-                        <strong id="detailStudentCountry">-</strong>
-                    </div>
-                    <div class="course-detail-card">
-                        <span>State</span>
-                        <strong id="detailStudentState">-</strong>
-                    </div>
-                    <div class="course-detail-card">
-                        <span>Gender</span>
-                        <strong id="detailStudentGender">-</strong>
-                    </div>
-                    <div class="course-detail-card">
-                        <span>Emergency Contact</span>
-                        <strong id="detailStudentEmergency">-</strong>
-                    </div>
-                </div>
-                <div>
-                    <h5 style="margin: 0 0 10px; font-size: 14px; font-weight: 600; color: var(--text); border-bottom: 1px solid var(--border); padding-bottom: 6px;">Course Enrollments & Status</h5>
-                    <div id="detailStudentEnrollments" class="panel-stack" style="gap: 8px; display: flex; flex-direction: column;">
-                        <!-- Dynamic content -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- Instructor specific details -->
-            <div id="instructorDetailsSection" style="display: none; flex-direction: column; gap: 16px;">
-                <div class="course-detail-grid">
-                    <div class="course-detail-card">
-                        <span>Specialization</span>
-                        <strong id="detailInstructorSpec">-</strong>
-                    </div>
-                    <div class="course-detail-card">
-                        <span>Certification</span>
-                        <strong id="detailInstructorCert">-</strong>
-                    </div>
-                    <div class="course-detail-card">
-                        <span>Experience</span>
-                        <strong id="detailInstructorExp">-</strong>
-                    </div>
-                    <div class="course-detail-card">
-                        <span>Materials Uploaded</span>
-                        <strong id="detailInstructorMaterials">0</strong>
-                    </div>
-                    <div class="course-detail-card" style="grid-column: span 2;">
-                        <span>Assessments Created</span>
-                        <strong id="detailInstructorAssessments">0</strong>
-                    </div>
-                </div>
-                <div>
-                    <h5 style="margin: 0 0 6px; font-size: 14px; font-weight: 600; color: var(--text);">Bio / Executive Summary</h5>
-                    <p id="detailInstructorBio" style="margin: 0; font-size: 13px; color: var(--text-muted); line-height: 1.6; background: var(--panel-bg); padding: 12px; border-radius: 8px; border: 1px solid var(--border);">Instructor biography goes here.</p>
-                </div>
-                <div>
-                    <h5 style="margin: 0 0 8px; font-size: 14px; font-weight: 600; color: var(--text); border-bottom: 1px solid var(--border); padding-bottom: 6px;">Assigned Courses</h5>
-                    <div id="detailInstructorCourses" style="font-size: 13px; color: var(--text); padding: 12px; background: var(--panel-bg); border-radius: 8px; border: 1px solid var(--border); line-height: 1.5;">
-                        None
-                    </div>
-                </div>
-            </div>
-
-            <!-- Admin specific details -->
-            <div id="adminDetailsSection" style="display: none; flex-direction: column; gap: 12px;">
-                <p style="margin: 0; font-size: 13px; color: var(--text-muted); line-height: 1.5; background: var(--panel-bg); padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
-                    Administrative accounts have unrestricted global access. Permission details and positions can be modified via the account editor.
-                </p>
-            </div>
+    org.json.JSONArray usersJsonArray = new org.json.JSONArray();
+    if (usersList != null) {
+        for (User u : usersList) {
+            org.json.JSONObject userObj = new org.json.JSONObject();
+            int uid = u.getUserId();
+            userObj.put("userId", uid);
+            userObj.put("fullName", u.getFullName() != null ? u.getFullName() : "");
+            userObj.put("email", u.getEmail() != null ? u.getEmail() : "");
+            userObj.put("phone", u.getPhone() != null ? u.getPhone() : "");
+            userObj.put("role", u.getRole() != null ? u.getRole() : "");
+            userObj.put("status", u.getStatus() != null ? u.getStatus() : "");
             
-            <div style="display: flex; gap: 10px; margin-top: 10px; border-top: 1px solid var(--border); padding-top: 14px; justify-content: flex-end;">
-                <button type="button" class="admin-btn secondary" data-close-modal="userDetailsModal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-    (function() {
-        var detailModal = document.getElementById('userDetailsModal');
-        var closeDetailButtons = document.querySelectorAll('[data-close-modal="userDetailsModal"]');
-
-        function openDetailModal(row) {
-            if (!row) return;
-            var data = row.dataset;
+            // Student specific details
+            if (studentDetailsMap != null && studentDetailsMap.containsKey(uid)) {
+                Student s = studentDetailsMap.get(uid);
+                userObj.put("studentReg", s.getRegNumber() != null ? s.getRegNumber() : "");
+                userObj.put("studentQualification", s.getQualification() != null ? s.getQualification() : "");
+                userObj.put("studentCountry", s.getCountry() != null ? s.getCountry() : "");
+                userObj.put("studentState", s.getState() != null ? s.getState() : "");
+                userObj.put("studentGender", s.getGender() != null ? s.getGender() : "");
+                userObj.put("studentEmergency", s.getEmergencyContact() != null ? s.getEmergencyContact() : "");
+            } else {
+                userObj.put("studentReg", "");
+                userObj.put("studentQualification", "");
+                userObj.put("studentCountry", "");
+                userObj.put("studentState", "");
+                userObj.put("studentGender", "");
+                userObj.put("studentEmergency", "");
+            }
+            userObj.put("studentEnrollments", (studentEnrollmentsMap != null && studentEnrollmentsMap.get(uid) != null) ? studentEnrollmentsMap.get(uid) : "");
             
-            document.getElementById('detailUserFullName').textContent = data.userFullname || '';
-            document.getElementById('detailUserEmail').textContent = data.userEmail || '';
+            // Instructor specific details
+            if (instructorDetailsMap != null && instructorDetailsMap.containsKey(uid)) {
+                Instructor ins = instructorDetailsMap.get(uid);
+                userObj.put("instructorSpecialization", ins.getSpecialization() != null ? ins.getSpecialization() : "");
+                userObj.put("instructorCertification", ins.getCertification() != null ? ins.getCertification() : "");
+                userObj.put("instructorExperience", ins.getYearsOfExperience() != null ? ins.getYearsOfExperience().toString() : "");
+                userObj.put("instructorBio", ins.getBio() != null ? ins.getBio() : "");
+            } else {
+                userObj.put("instructorSpecialization", "");
+                userObj.put("instructorCertification", "");
+                userObj.put("instructorExperience", "");
+                userObj.put("instructorBio", "");
+            }
+            userObj.put("instructorCourses", (instructorCoursesMap != null && instructorCoursesMap.get(uid) != null) ? instructorCoursesMap.get(uid) : "");
+            userObj.put("instructorMaterials", (instructorMaterialsCountMap != null && instructorMaterialsCountMap.get(uid) != null) ? instructorMaterialsCountMap.get(uid) : 0);
+            userObj.put("instructorAssessments", (instructorAssessmentsCountMap != null && instructorAssessmentsCountMap.get(uid) != null) ? instructorAssessmentsCountMap.get(uid) : 0);
             
-            var role = data.userRole || '';
-            var rBadge = document.getElementById('detailUserRoleBadge');
-            rBadge.textContent = role;
-            rBadge.className = 'status-badge status-' + (role === 'Student' ? 'success' : role === 'Instructor' ? 'warning' : 'secondary');
-
-            // Hide all first
-            document.getElementById('studentDetailsSection').style.display = 'none';
-            document.getElementById('instructorDetailsSection').style.display = 'none';
-            document.getElementById('adminDetailsSection').style.display = 'none';
-
-            if (role === 'Student') {
-                document.getElementById('studentDetailsSection').style.display = 'flex';
-                document.getElementById('detailStudentReg').textContent = data.studentReg || '-';
-                document.getElementById('detailStudentQual').textContent = data.studentQualification || '-';
-                document.getElementById('detailStudentCountry').textContent = data.studentCountry || '-';
-                document.getElementById('detailStudentState').textContent = data.studentState || '-';
-                document.getElementById('detailStudentGender').textContent = data.studentGender || '-';
-                document.getElementById('detailStudentEmergency').textContent = data.studentEmergency || '-';
-
-                var enrollWrap = document.getElementById('detailStudentEnrollments');
-                enrollWrap.innerHTML = '';
-                var enrolls = data.studentEnrollments || '';
-                if (enrolls && enrolls !== 'None') {
-                    enrolls.split('; ').forEach(function(item) {
-                        var div = document.createElement('div');
-                        div.style.padding = '10px 14px';
-                        div.style.background = 'var(--panel-bg)';
-                        div.style.borderRadius = '8px';
-                        div.style.border = '1px solid var(--border)';
-                        div.style.display = 'flex';
-                        div.style.justifyContent = 'space-between';
-                        div.style.alignItems = 'center';
-                        
-                        // Parse status for styling
-                        var statusClass = 'status-badge status-secondary';
-                        var cleanStatus = 'Not Started';
-                        if (item.indexOf('Completed') !== -1) {
-                            statusClass = 'status-badge status-success';
-                            cleanStatus = 'Completed';
-                        } else if (item.indexOf('In Progress') !== -1) {
-                            statusClass = 'status-badge status-warning';
-                            cleanStatus = 'In Progress';
-                        } else if (item.indexOf('Not Started') !== -1) {
-                            statusClass = 'status-badge status-secondary';
-                            cleanStatus = 'Not Started';
-                        }
-
-                        var courseTitle = item.substring(0, item.lastIndexOf('(')).trim();
-                        var percentInfo = item.substring(item.lastIndexOf('(')); // e.g. (In Progress, 45%)
-                        
-                        div.innerHTML = '<div style="display:flex; flex-direction:column; gap:2px;"><strong style="font-size:13px; color:var(--text);">' + courseTitle + '</strong><span style="font-size:11px; color:var(--text-muted);">' + percentInfo + '</span></div><span class="' + statusClass + '">' + cleanStatus + '</span>';
-                        enrollWrap.appendChild(div);
-                    });
-                } else {
-                    enrollWrap.innerHTML = '<div style="font-size:13px; color:var(--text-muted); padding:10px 14px; background:var(--panel-bg); border-radius:8px; border:1px solid var(--border);">No active enrollments for this student.</div>';
-                }
-            } else if (role === 'Instructor') {
-                document.getElementById('instructorDetailsSection').style.display = 'flex';
-                document.getElementById('detailInstructorSpec').textContent = data.instructorSpecialization || '-';
-                document.getElementById('detailInstructorCert').textContent = data.instructorCertification || '-';
-                document.getElementById('detailInstructorExp').textContent = (data.instructorExperience && data.instructorExperience !== 'null' ? data.instructorExperience + ' years' : '-');
-                document.getElementById('detailInstructorMaterials').textContent = data.instructorMaterials || '0';
-                document.getElementById('detailInstructorAssessments').textContent = data.instructorAssessments || '0';
-                document.getElementById('detailInstructorBio').textContent = (data.instructorBio && data.instructorBio !== 'null' ? data.instructorBio : 'No biography details provided.');
-                
-                var courses = data.instructorCourses || '';
-                document.getElementById('detailInstructorCourses').textContent = (courses && courses !== 'None') ? courses : 'No courses currently assigned.';
-            } else if (role === 'Admin') {
-                document.getElementById('adminDetailsSection').style.display = 'flex';
-            }
-
-            detailModal.classList.add('active');
-            detailModal.setAttribute('aria-hidden', 'false');
-            document.body.classList.add('admin-modal-open');
+            usersJsonArray.put(userObj);
         }
-
-        function closeDetailModal() {
-            detailModal.classList.remove('active');
-            detailModal.setAttribute('aria-hidden', 'true');
-            document.body.classList.remove('admin-modal-open');
-        }
-
-        // Delegate click for Details button in table
-        document.addEventListener('click', function(evt) {
-            var btn = evt.target.closest('.js-view-user-details');
-            if (btn) {
-                var row = btn.closest('tr');
-                openDetailModal(row);
-            }
-        });
-
-        closeDetailButtons.forEach(function(btn) {
-            btn.addEventListener('click', closeDetailModal);
-        });
-
-        document.addEventListener('keydown', function(evt) {
-            if (evt.key === 'Escape' && detailModal.classList.contains('active')) {
-                closeDetailModal();
-            }
-        });
-    })();
-</script>
-
-<script>
-    (function() {
-        var contextPath = '${pageContext.request.contextPath}';
-        var modal = document.getElementById('userActionModal');
-        var modalTitle = document.getElementById('userActionModalTitle');
-        var frame = document.getElementById('userActionModalFrame');
-        var openButtons = document.querySelectorAll('.js-open-user-modal');
-        var closeButtons = document.querySelectorAll('[data-close-modal="userActionModal"]');
-
-        function openModal(url, title) {
-            frame.src = url;
-            modalTitle.textContent = title || 'User Action';
-            modal.classList.add('active');
-            modal.setAttribute('aria-hidden', 'false');
-            document.body.classList.add('admin-modal-open');
-        }
-
-        function closeModal() {
-            modal.classList.remove('active');
-            modal.setAttribute('aria-hidden', 'true');
-            document.body.classList.remove('admin-modal-open');
-            frame.src = 'about:blank';
-        }
-
-        openButtons.forEach(function(btn) {
-            btn.addEventListener('click', function() {
-                openModal(btn.getAttribute('data-user-url'), btn.getAttribute('data-modal-title'));
-            });
-        });
-
-        closeButtons.forEach(function(btn) {
-            btn.addEventListener('click', closeModal);
-        });
-
-        document.addEventListener('keydown', function(evt) {
-            if (evt.key === 'Escape' && modal.classList.contains('active')) {
-                closeModal();
-            }
-        });
-
-        frame.addEventListener('load', function() {
-            try {
-                var currentPath = frame.contentWindow.location.pathname;
-                var currentSearch = frame.contentWindow.location.search || '';
-                var isFormAction = currentSearch.indexOf('action=create') !== -1 || currentSearch.indexOf('action=edit') !== -1;
-                if (currentPath === contextPath + '/admin/users' && !isFormAction) {
-                    window.location.href = contextPath + '/admin/users';
-                }
-            } catch (e) {
-                // ignore cross-context access errors
-            }
-        });
-    })();
-</script>
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
-<script>
-    if (typeof window.__initUsersTable === 'function') {
-        window.__initUsersTable();
     }
+    pageContext.setAttribute("serializedUsersJson", usersJsonArray.toString());
+%>
+
+<!-- Serialize backend variables strictly to window scope -->
+<script type="text/javascript">
+    window.__CONTEXT_PATH__ = "${pageContext.request.contextPath}";
+    window.__CURRENT_USER_ID__ = ${sessionScope.user.userId};
+    window.__USERS__ = ${serializedUsersJson};
+</script>
+
+<!-- Interactive React Command Center Application -->
+<script type="text/babel">
+    const { useState, useEffect } = React;
+    const { 
+        useReactTable, getCoreRowModel, getPaginationRowModel, getSortedRowModel, flexRender 
+    } = window.ReactTable || {};
+
+    function UsersManagement() {
+        const [users, setUsers] = useState(window.__USERS__ || []);
+        const [globalFilter, setGlobalFilter] = useState('');
+        const [roleFilter, setRoleFilter] = useState('All');
+        
+        // Pagination state
+        const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
+        
+        // Sorting state
+        const [sorting, setSorting] = useState([{ id: 'userId', desc: true }]);
+
+        // Dropdown tracking
+        const [activeDropdownUserId, setActiveDropdownUserId] = useState(null);
+
+        // Drawer states
+        const [drawerOpen, setDrawerOpen] = useState(false);
+        const [drawerMode, setDrawerMode] = useState('create'); // 'create', 'edit', 'view'
+        const [selectedUser, setSelectedUser] = useState(null);
+
+        // Delete Confirmation Modal states
+        const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+        const [userToDelete, setUserToDelete] = useState(null);
+
+        // Form Fields State
+        const [fullName, setFullName] = useState('');
+        const [email, setEmail] = useState('');
+        const [phone, setPhone] = useState('');
+        const [password, setPassword] = useState('');
+        const [role, setRole] = useState('Student');
+
+        // Student Role Fields State
+        const [qualification, setQualification] = useState('');
+        const [country, setCountry] = useState('');
+        const [state, setState] = useState('');
+        const [gender, setGender] = useState('Male');
+        const [emergencyContact, setEmergencyContact] = useState('');
+        const [dob, setDob] = useState('');
+
+        // Instructor Role Fields State
+        const [specialization, setSpecialization] = useState('');
+        const [certification, setCertification] = useState('');
+        const [yearsOfExperience, setYearsOfExperience] = useState('');
+        const [bio, setBio] = useState('');
+        const [hireDate, setHireDate] = useState('');
+
+        // Admin Role Fields State
+        const [position, setPosition] = useState('');
+        const [permissionLevel, setPermissionLevel] = useState('Standard');
+        const [assignedDepartment, setAssignedDepartment] = useState('');
+
+        const [isSubmitting, setIsSubmitting] = useState(false);
+
+        useEffect(() => {
+            if (window.lucide) {
+                window.lucide.createIcons();
+            }
+        }, [users, pagination, globalFilter, roleFilter, sorting, drawerOpen, deleteModalOpen]);
+
+        // Close dropdown on click outside
+        useEffect(() => {
+            const handleOutsideClick = (e) => {
+                if (activeDropdownUserId && !e.target.closest('.actions-cell-gf')) {
+                    setActiveDropdownUserId(null);
+                }
+            };
+            window.addEventListener('click', handleOutsideClick);
+            return () => window.removeEventListener('click', handleOutsideClick);
+        }, [activeDropdownUserId]);
+
+        // Metrics calculations
+        const studentsCount = users.filter(u => u.role === 'Student').length;
+        const instructorsCount = users.filter(u => u.role === 'Instructor').length;
+        const adminsCount = users.filter(u => u.role === 'Admin').length;
+        const activeCount = users.filter(u => u.status === 'Active' || u.status === 'active').length;
+        const suspendedCount = users.filter(u => u.status === 'Suspended' || u.status === 'suspended').length;
+
+        // Custom filtering based on role tabs & search queries
+        const filteredData = React.useMemo(() => {
+            return users.filter(user => {
+                // Role filter
+                if (roleFilter !== 'All' && user.role !== roleFilter) return false;
+                
+                // Search query filter
+                if (globalFilter.trim()) {
+                    const query = globalFilter.toLowerCase();
+                    return (
+                        user.fullName.toLowerCase().includes(query) ||
+                        user.email.toLowerCase().includes(query) ||
+                        user.phone.toLowerCase().includes(query) ||
+                        (user.studentReg && user.studentReg.toLowerCase().includes(query))
+                    );
+                }
+                return true;
+            });
+        }, [users, globalFilter, roleFilter]);
+
+        // Reset drawer form state
+        const resetForm = () => {
+            setFullName('');
+            setEmail('');
+            setPhone('');
+            setPassword('');
+            setRole('Student');
+            
+            // Student
+            setQualification('');
+            setCountry('');
+            setState('');
+            setGender('Male');
+            setEmergencyContact('');
+            setDob('');
+
+            // Instructor
+            setSpecialization('');
+            setCertification('');
+            setYearsOfExperience('');
+            setBio('');
+            setHireDate('');
+
+            // Admin
+            setPosition('');
+            setPermissionLevel('Standard');
+            setAssignedDepartment('');
+
+            setSelectedUser(null);
+        };
+
+        // Open drawer in Create mode
+        const handleOpenCreate = () => {
+            resetForm();
+            setDrawerMode('create');
+            setDrawerOpen(true);
+        };
+
+        // Open drawer in Edit mode
+        const handleOpenEdit = (user) => {
+            resetForm();
+            setSelectedUser(user);
+            setFullName(user.fullName || '');
+            setEmail(user.email || '');
+            setPhone(user.phone || '');
+            setPassword(''); // Never pre-fill passwords
+            setRole(user.role || 'Student');
+
+            // Pre-fill role specific items
+            if (user.role === 'Student') {
+                setQualification(user.studentQualification || '');
+                setCountry(user.studentCountry || '');
+                setState(user.studentState || '');
+                setGender(user.studentGender || 'Male');
+                setEmergencyContact(user.studentEmergency || '');
+                setDob(''); // Optional date fields can be left blank for update
+            } else if (user.role === 'Instructor') {
+                setSpecialization(user.instructorSpecialization || '');
+                setCertification(user.instructorCertification || '');
+                setYearsOfExperience(user.instructorExperience || '');
+                setBio(user.instructorBio || '');
+                setHireDate('');
+            } else if (user.role === 'Admin') {
+                setPosition('');
+                setPermissionLevel('Standard');
+                setAssignedDepartment('');
+            }
+
+            setDrawerMode('edit');
+            setDrawerOpen(true);
+        };
+
+        // Open drawer in View Profile details mode
+        const handleOpenView = (user) => {
+            resetForm();
+            setSelectedUser(user);
+            setDrawerMode('view');
+            setDrawerOpen(true);
+        };
+
+        // Open deletion warning dialog
+        const handleOpenDelete = (user) => {
+            setUserToDelete(user);
+            setDeleteModalOpen(true);
+        };
+
+        // Execute asynchronous Toggle Status GET call
+        const handleToggleStatus = (userId) => {
+            fetch(window.__CONTEXT_PATH__ + '/admin/users?action=toggle-status&userId=' + userId)
+                .then(() => window.location.reload())
+                .catch(err => console.error("Toggle status error:", err));
+        };
+
+        // Execute asynchronous Delete User GET call
+        const handleDeleteConfirm = () => {
+            if (!userToDelete) return;
+            fetch(window.__CONTEXT_PATH__ + '/admin/users?action=delete&userId=' + userToDelete.userId)
+                .then(() => window.location.reload())
+                .catch(err => console.error("Delete user error:", err));
+        };
+
+        // Execute asynchronous Form Submit (Create & Update POST)
+        const handleSubmit = (e) => {
+            e.preventDefault();
+            setIsSubmitting(true);
+
+            const formData = new URLSearchParams();
+            formData.append('action', drawerMode === 'edit' ? 'edit' : 'create');
+            if (drawerMode === 'edit') {
+                formData.append('userId', selectedUser.userId);
+            }
+            formData.append('fullName', fullName);
+            formData.append('email', email);
+            formData.append('phone', phone);
+            formData.append('password', password);
+            formData.append('role', role);
+
+            // Append role specific parameters
+            if (role === 'Student') {
+                formData.append('qualification', qualification);
+                formData.append('country', country);
+                formData.append('state', state);
+                formData.append('gender', gender);
+                formData.append('emergencyContact', emergencyContact);
+                formData.append('dob', dob);
+            } else if (role === 'Instructor') {
+                formData.append('specialization', specialization);
+                formData.append('certification', certification);
+                formData.append('yearsOfExperience', yearsOfExperience);
+                formData.append('bio', bio);
+                formData.append('hireDate', hireDate);
+            } else if (role === 'Admin') {
+                formData.append('position', position);
+                formData.append('permissionLevel', permissionLevel);
+                formData.append('assignedDepartment', assignedDepartment);
+            }
+
+            fetch(window.__CONTEXT_PATH__ + '/admin/users', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: formData.toString()
+            })
+            .then(() => window.location.reload())
+            .catch(err => {
+                console.error("Submit error:", err);
+                setIsSubmitting(false);
+            });
+        };
+
+        // Setup headless React Table column cells
+        const columns = React.useMemo(() => [
+            {
+                accessorKey: 'userId',
+                header: 'ID',
+                cell: info => <span style={{ fontWeight: '500' }}>{info.getValue()}</span>
+            },
+            {
+                accessorKey: 'fullName',
+                header: 'User details',
+                cell: info => {
+                    const row = info.row.original;
+                    const initials = row.fullName ? row.fullName.split(' ').map(n => n[0]).join('').substring(0,2) : 'U';
+                    return (
+                        <div className="user-info-cell-gf">
+                            <div className="user-avatar-circle-gf">{initials}</div>
+                            <div className="user-meta-gf">
+                                <span className="user-name-gf">{row.fullName}</span>
+                                <span className="user-email-gf">{row.email}</span>
+                            </div>
+                        </div>
+                    );
+                }
+            },
+            {
+                accessorKey: 'phone',
+                header: 'Phone Number',
+                cell: info => <span>{info.getValue() || '-'}</span>
+            },
+            {
+                accessorKey: 'role',
+                header: 'System Role',
+                cell: info => {
+                    const val = info.getValue();
+                    const badgeClass = val === 'Admin' ? 'badge-admin-gf' : val === 'Instructor' ? 'badge-instructor-gf' : 'badge-student-gf';
+                    return <span className={"badge-gf " + badgeClass}>{val}</span>;
+                }
+            },
+            {
+                accessorKey: 'status',
+                header: 'Account Status',
+                cell: info => {
+                    const val = info.getValue() || 'Active';
+                    const isActive = val.toLowerCase() === 'active';
+                    const badgeClass = isActive ? 'badge-active-gf' : 'badge-suspended-gf';
+                    return <span className={"badge-gf " + badgeClass}>{isActive ? 'Active' : 'Suspended'}</span>;
+                }
+            },
+            {
+                id: 'actions',
+                header: '',
+                cell: info => {
+                    const row = info.row.original;
+                    const isOpen = activeDropdownUserId === row.userId;
+                    return (
+                        <div className="actions-cell-gf">
+                            <button 
+                                className="actions-btn-gf"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setActiveDropdownUserId(isOpen ? null : row.userId);
+                                }}
+                            >
+                                <i className="fas fa-ellipsis-v"></i>
+                            </button>
+                            {isOpen && (
+                                <div className="actions-dropdown-gf">
+                                    <button className="dropdown-item-gf" onClick={() => handleOpenView(row)}>
+                                        <i className="fas fa-id-card"></i> View Details
+                                    </button>
+                                    <button className="dropdown-item-gf" onClick={() => handleOpenEdit(row)}>
+                                        <i className="fas fa-edit"></i> Edit User
+                                    </button>
+                                    <button className="dropdown-item-gf" onClick={() => handleToggleStatus(row.userId)}>
+                                        <i className="fas fa-sync-alt"></i> Toggle Status
+                                    </button>
+                                    {row.userId !== window.__CURRENT_USER_ID__ && (
+                                        <button className="dropdown-item-gf danger" onClick={() => handleOpenDelete(row)}>
+                                            <i className="fas fa-trash-alt"></i> Delete User
+                                        </button>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    );
+                }
+            }
+        ], [activeDropdownUserId]);
+
+        // Mount TanStack React Table
+        const table = useReactTable({
+            data: filteredData,
+            columns,
+            state: {
+                pagination,
+                sorting
+            },
+            onPaginationChange: setPagination,
+            onSortingChange: setSorting,
+            getCoreRowModel: getCoreRowModel ? getCoreRowModel() : null,
+            getPaginationRowModel: getPaginationRowModel ? getPaginationRowModel() : null,
+            getSortedRowModel: getSortedRowModel ? getSortedRowModel() : null
+        });
+
+        return (
+            <div className="admin-container-gf">
+                {/* Modern Greenfield typographic Header */}
+                <header className="dashboard-header-gf">
+                    <h1>User Directory</h1>
+                    <p>Govern platform membership accounts, inspect user academic credentials, update specializations, and manage administrative credentials.</p>
+                </header>
+
+                {/* Metrics Cards row */}
+                <section className="metrics-grid-gf">
+                    <div className="metric-card-gf">
+                        <span className="label">Total Members</span>
+                        <span className="value">{users.length}</span>
+                    </div>
+                    <div className="metric-card-gf">
+                        <span className="label">Active Students</span>
+                        <span className="value">{studentsCount}</span>
+                    </div>
+                    <div className="metric-card-gf">
+                        <span className="label">Active Instructors</span>
+                        <span className="value">{instructorsCount}</span>
+                    </div>
+                    <div className="metric-card-gf">
+                        <span className="label">Administrators</span>
+                        <span className="value">{adminsCount}</span>
+                    </div>
+                    <div className="metric-card-gf" style={{ borderLeft: '3px solid #10b981' }}>
+                        <span className="label">Status Active</span>
+                        <span className="value" style={{ color: '#047857' }}>{activeCount}</span>
+                    </div>
+                    <div className="metric-card-gf" style={{ borderLeft: '3px solid #ef4444' }}>
+                        <span className="label">Status Suspended</span>
+                        <span className="value" style={{ color: '#b91c1c' }}>{suspendedCount}</span>
+                    </div>
+                </section>
+
+                {/* Headless Data Table Shell */}
+                <section className="table-card-gf">
+                    <div className="table-controls-gf">
+                        <div className="controls-left-gf">
+                            {/* Search bar */}
+                            <div className="search-box-gf">
+                                <i className="fas fa-search"></i>
+                                <input 
+                                    type="text" 
+                                    placeholder="Search users..." 
+                                    value={globalFilter}
+                                    onChange={e => setGlobalFilter(e.target.value)}
+                                />
+                            </div>
+
+                            {/* Tabs toggles */}
+                            <div className="filter-tabs-gf">
+                                <button className={"tab-btn-gf " + (roleFilter === 'All' ? 'active' : '')} onClick={() => setRoleFilter('All')}>All</button>
+                                <button className={"tab-btn-gf " + (roleFilter === 'Student' ? 'active' : '')} onClick={() => setRoleFilter('Student')}>Students</button>
+                                <button className={"tab-btn-gf " + (roleFilter === 'Instructor' ? 'active' : '')} onClick={() => setRoleFilter('Instructor')}>Instructors</button>
+                                <button className={"tab-btn-gf " + (roleFilter === 'Admin' ? 'active' : '')} onClick={() => setRoleFilter('Admin')}>Admins</button>
+                            </div>
+                        </div>
+
+                        {/* Add button */}
+                        <button className="btn-primary-gf" onClick={handleOpenCreate}>
+                            <i className="fas fa-plus"></i> + Add New User
+                        </button>
+                    </div>
+
+                    {/* Headless table render */}
+                    {table && table.getRowModel && table.getRowModel().rows.length === 0 ? (
+                        <div className="empty-state-gf">
+                            <i className="fas fa-folder-open"></i>
+                            <p>No records found matching current query criteria.</p>
+                        </div>
+                    ) : (
+                        <div style={{ overflowX: 'auto' }}>
+                            <table className="users-table-gf">
+                                <thead>
+                                    {table && table.getHeaderGroups().map(headerGroup => (
+                                        <tr key={headerGroup.id}>
+                                            {headerGroup.headers.map(header => (
+                                                <th 
+                                                    key={header.id}
+                                                    onClick={header.column.getCanSort() ? header.column.getToggleSortingHandler() : undefined}
+                                                    style={{ cursor: header.column.getCanSort() ? 'pointer' : 'default' }}
+                                                >
+                                                    {flexRender(header.column.columnDef.header, header.getContext())}
+                                                    {header.column.getIsSorted() === 'asc' && ' 🔼'}
+                                                    {header.column.getIsSorted() === 'desc' && ' 🔽'}
+                                                </th>
+                                            ))}
+                                        </tr>
+                                    ))}
+                                </thead>
+                                <tbody>
+                                    {table && table.getRowModel().rows.map(row => (
+                                        <tr key={row.id}>
+                                            {row.getVisibleCells().map(cell => (
+                                                <td key={cell.id}>
+                                                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                                </td>
+                                            ))}
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+
+                    {/* Pagination controller */}
+                    {table && table.getPageCount && table.getPageCount() > 1 && (
+                        <div className="pagination-bar-gf">
+                            <span>
+                                Page <strong>{table.getState().pagination.pageIndex + 1}</strong> of <strong>{table.getPageCount()}</strong>
+                            </span>
+                            <div className="pagination-controls-gf">
+                                <button 
+                                    className="btn-page-gf"
+                                    onClick={() => table.previousPage()}
+                                    disabled={!table.getCanPreviousPage()}
+                                >
+                                    Previous
+                                </button>
+                                <button 
+                                    className="btn-page-gf"
+                                    onClick={() => table.nextPage()}
+                                    disabled={!table.getCanNextPage()}
+                                >
+                                    Next
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </section>
+
+                {/* Greenfield Slide-out CRUD & Details Drawer */}
+                {drawerOpen && (
+                    <div className="drawer-overlay-gf" onClick={() => setDrawerOpen(false)}>
+                        <div className="drawer-container-gf" onClick={e => e.stopPropagation()}>
+                            <header className="drawer-header-gf">
+                                <h2>
+                                    {drawerMode === 'create' ? 'Create New User' : drawerMode === 'edit' ? 'Update User Details' : 'Member Details Profile'}
+                                </h2>
+                                <button className="drawer-close-gf" onClick={() => setDrawerOpen(false)}>×</button>
+                            </header>
+
+                            <div className="drawer-body-gf">
+                                {drawerMode === 'view' ? (
+                                    /* User Profile Details Viewer Section */
+                                    <div className="details-section-gf">
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', borderBottom: '1px solid var(--gf-border)', paddingBottom: '1.5rem', marginBottom: '0.5rem' }}>
+                                            <div className="user-avatar-circle-gf" style={{ width: '4rem', height: '4rem', fontSize: '1.5rem' }}>
+                                                {selectedUser.fullName ? selectedUser.fullName.split(' ').map(n => n[0]).join('').substring(0,2) : 'U'}
+                                            </div>
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                                                <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: '700', color: 'var(--gf-text-primary)' }}>{selectedUser.fullName}</h3>
+                                                <span style={{ fontSize: '0.85rem', color: 'var(--gf-text-muted)' }}>{selectedUser.email}</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="details-grid-gf">
+                                            <div className="details-item-gf">
+                                                <span>Member ID</span>
+                                                <strong>{selectedUser.userId}</strong>
+                                            </div>
+                                            <div className="details-item-gf">
+                                                <span>System Role</span>
+                                                <strong>{selectedUser.role}</strong>
+                                            </div>
+                                            <div className="details-item-gf">
+                                                <span>Phone Number</span>
+                                                <strong>{selectedUser.phone || '-'}</strong>
+                                            </div>
+                                            <div className="details-item-gf">
+                                                <span>Account Status</span>
+                                                <strong>{selectedUser.status || 'Active'}</strong>
+                                            </div>
+
+                                            {/* Role Specific Details - Student */}
+                                            {selectedUser.role === 'Student' && (
+                                                <React.Fragment>
+                                                    <div className="details-item-gf span-2" style={{ marginTop: '0.5rem' }}>
+                                                        <span className="section-subtitle-gf">Student Qualifications</span>
+                                                    </div>
+                                                    <div className="details-item-gf">
+                                                        <span>Registration No.</span>
+                                                        <strong>{selectedUser.studentReg || '-'}</strong>
+                                                    </div>
+                                                    <div className="details-item-gf">
+                                                        <span>Academic Level</span>
+                                                        <strong>{selectedUser.studentQualification || '-'}</strong>
+                                                    </div>
+                                                    <div className="details-item-gf">
+                                                        <span>Nationality</span>
+                                                        <strong>{selectedUser.studentCountry || '-'}</strong>
+                                                    </div>
+                                                    <div className="details-item-gf">
+                                                        <span>State Residency</span>
+                                                        <strong>{selectedUser.studentState || '-'}</strong>
+                                                    </div>
+                                                    <div className="details-item-gf">
+                                                        <span>Emergency Contact</span>
+                                                        <strong>{selectedUser.studentEmergency || '-'}</strong>
+                                                    </div>
+                                                    <div className="details-item-gf">
+                                                        <span>Gender Identity</span>
+                                                        <strong>{selectedUser.studentGender || '-'}</strong>
+                                                    </div>
+                                                    <div className="details-item-gf span-2">
+                                                        <span>Enrolled Courses</span>
+                                                        <strong style={{ display: 'block', fontSize: '0.85rem', color: 'var(--gf-text-secondary)', lineHeight: '1.4', marginTop: '0.25rem', whiteSpace: 'pre-line' }}>
+                                                            {selectedUser.studentEnrollments && selectedUser.studentEnrollments !== 'None' 
+                                                                ? selectedUser.studentEnrollments.replace(/; /g, '\n')
+                                                                : 'No course enrollments recorded.'
+                                                            }
+                                                        </strong>
+                                                    </div>
+                                                </React.Fragment>
+                                            )}
+
+                                            {/* Role Specific Details - Instructor */}
+                                            {selectedUser.role === 'Instructor' && (
+                                                <React.Fragment>
+                                                    <div className="details-item-gf span-2" style={{ marginTop: '0.5rem' }}>
+                                                        <span className="section-subtitle-gf">Academic Specialization</span>
+                                                    </div>
+                                                    <div className="details-item-gf">
+                                                        <span>Discipline Focus</span>
+                                                        <strong>{selectedUser.instructorSpecialization || '-'}</strong>
+                                                    </div>
+                                                    <div className="details-item-gf">
+                                                        <span>Professional Cert.</span>
+                                                        <strong>{selectedUser.instructorCertification || '-'}</strong>
+                                                    </div>
+                                                    <div className="details-item-gf">
+                                                        <span>Years Experience</span>
+                                                        <strong>{selectedUser.instructorExperience || '0'} years</strong>
+                                                    </div>
+                                                    <div className="details-item-gf">
+                                                        <span>Uploaded Materials</span>
+                                                        <strong>{selectedUser.instructorMaterials || '0'} modules</strong>
+                                                    </div>
+                                                    <div className="details-item-gf span-2">
+                                                        <span>Biography Summary</span>
+                                                        <strong style={{ display: 'block', fontSize: '0.85rem', color: 'var(--gf-text-secondary)', lineHeight: '1.4', marginTop: '0.25rem' }}>
+                                                            {selectedUser.instructorBio || 'No biography text uploaded.'}
+                                                        </strong>
+                                                    </div>
+                                                    <div className="details-item-gf span-2">
+                                                        <span>Assigned Courses</span>
+                                                        <strong style={{ display: 'block', fontSize: '0.85rem', color: 'var(--gf-text-secondary)', lineHeight: '1.4', marginTop: '0.25rem' }}>
+                                                            {selectedUser.instructorCourses && selectedUser.instructorCourses !== 'None' 
+                                                                ? selectedUser.instructorCourses 
+                                                                : 'None assigned.'
+                                                            }
+                                                        </strong>
+                                                    </div>
+                                                </React.Fragment>
+                                            )}
+
+                                            {/* Role Specific Details - Admin */}
+                                            {selectedUser.role === 'Admin' && (
+                                                <div className="details-item-gf span-2">
+                                                    <span>Admin Operations</span>
+                                                    <strong style={{ display: 'block', fontSize: '0.85rem', color: 'var(--gf-text-secondary)', lineHeight: '1.4', marginTop: '0.25rem' }}>
+                                                        Unrestricted platform governance privilege. All database objects can be fully inspected, updated, or removed by this administrative user.
+                                                    </strong>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                ) : (
+                                    /* User Form Component (Create & Edit Mode) */
+                                    <form id="drawerForm" onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                                        <div className="form-group-gf">
+                                            <label>Full Name *</label>
+                                            <input 
+                                                type="text" 
+                                                required 
+                                                value={fullName}
+                                                onChange={e => setFullName(e.target.value)}
+                                                placeholder="e.g. John Doe"
+                                            />
+                                        </div>
+
+                                        <div className="form-group-gf">
+                                            <label>Email Address *</label>
+                                            <input 
+                                                type="email" 
+                                                required 
+                                                disabled={drawerMode === 'edit'}
+                                                value={email}
+                                                onChange={e => setEmail(e.target.value)}
+                                                placeholder="e.g. johndoe@example.com"
+                                            />
+                                        </div>
+
+                                        <div className="form-group-gf">
+                                            <label>Phone Number</label>
+                                            <input 
+                                                type="text" 
+                                                value={phone}
+                                                onChange={e => setPhone(e.target.value)}
+                                                placeholder="e.g. +234 803 123 4567"
+                                            />
+                                        </div>
+
+                                        <div className="form-group-gf">
+                                            <label>{drawerMode === 'edit' ? 'Password (leave empty to keep unchanged)' : 'Password *'}</label>
+                                            <input 
+                                                type="password" 
+                                                required={drawerMode === 'create'}
+                                                value={password}
+                                                onChange={e => setPassword(e.target.value)}
+                                                placeholder="••••••••"
+                                            />
+                                        </div>
+
+                                        <div className="form-group-gf">
+                                            <label>System Role *</label>
+                                            <select 
+                                                value={role}
+                                                disabled={drawerMode === 'edit'}
+                                                onChange={e => setRole(e.target.value)}
+                                            >
+                                                <option value="Student">Student</option>
+                                                <option value="Instructor">Instructor</option>
+                                                <option value="Admin">Administrator</option>
+                                            </select>
+                                        </div>
+
+                                        <div className="section-divider-gf"></div>
+
+                                        {/* Dynamic Role-specific Form Fields */}
+                                        {role === 'Student' && (
+                                            <React.Fragment>
+                                                <span className="section-subtitle-gf">Student Profile</span>
+                                                
+                                                <div className="form-group-gf">
+                                                    <label>Highest Qualification</label>
+                                                    <input 
+                                                        type="text" 
+                                                        value={qualification}
+                                                        onChange={e => setQualification(e.target.value)}
+                                                        placeholder="e.g. B.Sc. Computer Science"
+                                                    />
+                                                </div>
+
+                                                <div className="form-row-gf">
+                                                    <div className="form-group-gf">
+                                                        <label>Country</label>
+                                                        <input 
+                                                            type="text" 
+                                                            value={country}
+                                                            onChange={e => setCountry(e.target.value)}
+                                                            placeholder="e.g. Nigeria"
+                                                        />
+                                                    </div>
+                                                    <div className="form-group-gf">
+                                                        <label>State</label>
+                                                        <input 
+                                                            type="text" 
+                                                            value={state}
+                                                            onChange={e => setState(e.target.value)}
+                                                            placeholder="e.g. Lagos"
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                <div className="form-row-gf">
+                                                    <div className="form-group-gf">
+                                                        <label>Gender Identity</label>
+                                                        <select value={gender} onChange={e => setGender(e.target.value)}>
+                                                            <option value="Male">Male</option>
+                                                            <option value="Female">Female</option>
+                                                            <option value="Other">Other</option>
+                                                        </select>
+                                                    </div>
+                                                    <div className="form-group-gf">
+                                                        <label>Date of Birth</label>
+                                                        <input 
+                                                            type="date" 
+                                                            value={dob}
+                                                            onChange={e => setDob(e.target.value)}
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                <div className="form-group-gf">
+                                                    <label>Emergency Contact Phone</label>
+                                                    <input 
+                                                        type="text" 
+                                                        value={emergencyContact}
+                                                        onChange={e => setEmergencyContact(e.target.value)}
+                                                        placeholder="e.g. +234 803 987 6543"
+                                                    />
+                                                </div>
+                                            </React.Fragment>
+                                        )}
+
+                                        {role === 'Instructor' && (
+                                            <React.Fragment>
+                                                <span className="section-subtitle-gf">Instructor Qualifications</span>
+                                                
+                                                <div className="form-row-gf">
+                                                    <div className="form-group-gf">
+                                                        <label>Specialization Discipline</label>
+                                                        <input 
+                                                            type="text" 
+                                                            value={specialization}
+                                                            onChange={e => setSpecialization(e.target.value)}
+                                                            placeholder="e.g. Java Development"
+                                                        />
+                                                    </div>
+                                                    <div className="form-group-gf">
+                                                        <label>Certification Title</label>
+                                                        <input 
+                                                            type="text" 
+                                                            value={certification}
+                                                            onChange={e => setCertification(e.target.value)}
+                                                            placeholder="e.g. Oracle Certified Professional"
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                <div className="form-row-gf">
+                                                    <div className="form-group-gf">
+                                                        <label>Years of Experience</label>
+                                                        <input 
+                                                            type="number" 
+                                                            value={yearsOfExperience}
+                                                            onChange={e => setYearsOfExperience(e.target.value)}
+                                                            placeholder="e.g. 5"
+                                                            min="0"
+                                                        />
+                                                    </div>
+                                                    <div className="form-group-gf">
+                                                        <label>Date Hired</label>
+                                                        <input 
+                                                            type="date" 
+                                                            value={hireDate}
+                                                            onChange={e => setHireDate(e.target.value)}
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                <div className="form-group-gf">
+                                                    <label>Biography Summary</label>
+                                                    <textarea 
+                                                        value={bio}
+                                                        onChange={e => setBio(e.target.value)}
+                                                        placeholder="Write a brief professional summary of the instructor..."
+                                                        rows="3"
+                                                    ></textarea>
+                                                </div>
+                                            </React.Fragment>
+                                        )}
+
+                                        {role === 'Admin' && (
+                                            <React.Fragment>
+                                                <span className="section-subtitle-gf">Administrative Details</span>
+                                                
+                                                <div className="form-group-gf">
+                                                    <label>Administrative Position</label>
+                                                    <input 
+                                                        type="text" 
+                                                        value={position}
+                                                        onChange={e => setPosition(e.target.value)}
+                                                        placeholder="e.g. Systems Operator"
+                                                    />
+                                                </div>
+
+                                                <div className="form-row-gf">
+                                                    <div className="form-group-gf">
+                                                        <label>Permission Level</label>
+                                                        <select value={permissionLevel} onChange={e => setPermissionLevel(e.target.value)}>
+                                                            <option value="Super">Super Administrator</option>
+                                                            <option value="Standard">Standard Administrator</option>
+                                                            <option value="Audit">Audit Only</option>
+                                                        </select>
+                                                    </div>
+                                                    <div className="form-group-gf">
+                                                        <label>Assigned Department</label>
+                                                        <input 
+                                                            type="text" 
+                                                            value={assignedDepartment}
+                                                            onChange={e => setAssignedDepartment(e.target.value)}
+                                                            placeholder="e.g. IT Operations"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </React.Fragment>
+                                        )}
+                                    </form>
+                                )}
+                            </div>
+
+                            <footer className="drawer-footer-gf">
+                                <button className="btn-secondary-gf" onClick={() => setDrawerOpen(false)}>
+                                    {drawerMode === 'view' ? 'Close' : 'Cancel'}
+                                </button>
+                                {drawerMode !== 'view' && (
+                                    <button 
+                                        type="submit" 
+                                        form="drawerForm" 
+                                        className="btn-primary-gf"
+                                        disabled={isSubmitting}
+                                    >
+                                        {isSubmitting ? 'Saving...' : drawerMode === 'edit' ? 'Update User' : 'Save User'}
+                                    </button>
+                                )}
+                            </footer>
+                        </div>
+                    </div>
+                )}
+
+                {/* Centered Deletion Confirmation Modal Overlay */}
+                {deleteModalOpen && userToDelete && (
+                    <div className="modal-overlay-gf" onClick={() => setDeleteModalOpen(false)}>
+                        <div className="modal-box-gf" onClick={e => e.stopPropagation()}>
+                            <h3 className="modal-title-gf">
+                                <i className="fas fa-exclamation-triangle"></i> Safe Deletion Warning
+                            </h3>
+                            <div className="modal-body-gf">
+                                <p>
+                                    Are you absolutely sure you want to delete <strong>{userToDelete.fullName}</strong> ({userToDelete.email})?
+                                </p>
+                                <p style={{ marginTop: '0.5rem', fontSize: '0.85rem', color: 'var(--gf-red)' }}>
+                                    This action is irreversible and will purge all core user qualifications, grades, submissions, and course enrollments.
+                                </p>
+                            </div>
+                            <footer className="modal-footer-gf">
+                                <button className="btn-secondary-gf" onClick={() => setDeleteModalOpen(false)}>
+                                    Cancel
+                                </button>
+                                <button className="btn-danger-gf" onClick={handleDeleteConfirm}>
+                                    Confirm Deletion
+                                </button>
+                            </footer>
+                        </div>
+                    </div>
+                )}
+            </div>
+        );
+    }
+
+    const container = document.getElementById('admin-react-root');
+    const root = ReactDOM.createRoot(container);
+    root.render(<UsersManagement />);
 </script>
 </body>
 </html>

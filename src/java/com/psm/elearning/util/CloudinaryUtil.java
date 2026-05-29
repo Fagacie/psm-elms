@@ -20,6 +20,55 @@ public class CloudinaryUtil {
     private static Properties props;
 
     static {
+        loadConfigDynamic();
+    }
+
+    private static void loadConfigDynamic() {
+        try {
+            com.psm.elearning.dao.AppSettingDAO dao = new com.psm.elearning.dao.AppSettingDAOImpl();
+            Map<String, String> dbSettings = dao.findAllAsMap();
+            if (dbSettings != null) {
+                String dbCloudName = dbSettings.get("cloudinary.cloudName");
+                String dbApiKey = dbSettings.get("cloudinary.apiKey");
+                String dbApiSecret = dbSettings.get("cloudinary.apiSecret");
+                if (dbCloudName != null && !dbCloudName.trim().isEmpty() &&
+                    dbApiKey != null && !dbApiKey.trim().isEmpty() &&
+                    dbApiSecret != null && !dbApiSecret.trim().isEmpty()) {
+                    cloudName = dbCloudName.trim();
+                    apiKey = dbApiKey.trim();
+                    apiSecret = dbApiSecret.trim();
+                    
+                    props = new Properties();
+                    props.put("cloudinary.folder_passports", dbSettings.getOrDefault("cloudinary.folderPassports", "psm/passports"));
+                    props.put("cloudinary.folder_materials", dbSettings.getOrDefault("cloudinary.folderMaterials", "psm/materials"));
+                    props.put("cloudinary.folder_certificates", dbSettings.getOrDefault("cloudinary.folderCertificates", "psm/certificates"));
+                    props.put("cloudinary.folder_course_banners", dbSettings.getOrDefault("cloudinary.folderCourseBanners", "psm/course-banners"));
+                    return;
+                }
+            }
+        } catch (Throwable t) {
+            System.err.println("Could not load Cloudinary settings from database: " + t.getMessage());
+        }
+
+        // Environment Variables fallback
+        String envCloudName = System.getenv("CLOUDINARY_CLOUD_NAME");
+        String envApiKey = System.getenv("CLOUDINARY_API_KEY");
+        String envApiSecret = System.getenv("CLOUDINARY_API_SECRET");
+        if (envCloudName != null && !envCloudName.trim().isEmpty() &&
+            envApiKey != null && !envApiKey.trim().isEmpty() &&
+            envApiSecret != null && !envApiSecret.trim().isEmpty()) {
+            cloudName = envCloudName.trim();
+            apiKey = envApiKey.trim();
+            apiSecret = envApiSecret.trim();
+            
+            props = new Properties();
+            props.put("cloudinary.folder_passports", System.getenv("CLOUDINARY_FOLDER_PASSPORTS") != null ? System.getenv("CLOUDINARY_FOLDER_PASSPORTS") : "psm/passports");
+            props.put("cloudinary.folder_materials", System.getenv("CLOUDINARY_FOLDER_MATERIALS") != null ? System.getenv("CLOUDINARY_FOLDER_MATERIALS") : "psm/materials");
+            props.put("cloudinary.folder_certificates", System.getenv("CLOUDINARY_FOLDER_CERTIFICATES") != null ? System.getenv("CLOUDINARY_FOLDER_CERTIFICATES") : "psm/certificates");
+            props.put("cloudinary.folder_course_banners", System.getenv("CLOUDINARY_FOLDER_COURSE_BANNERS") != null ? System.getenv("CLOUDINARY_FOLDER_COURSE_BANNERS") : "psm/course-banners");
+            return;
+        }
+
         loadConfig();
     }
 
@@ -46,6 +95,7 @@ public class CloudinaryUtil {
      * @return Cloudinary URL of uploaded file, or null if failed
      */
     public static String uploadFile(byte[] fileBytes, String fileName, String folder, String resourceType) {
+        loadConfigDynamic();
         if (cloudName == null || apiKey == null || apiSecret == null) {
             System.err.println("Cloudinary credentials not configured");
             return null;
@@ -166,6 +216,7 @@ public class CloudinaryUtil {
      * Delete a file from Cloudinary by public ID
      */
     public static boolean deleteFile(String publicId, String resourceType) {
+        loadConfigDynamic();
         if (cloudName == null || apiKey == null || apiSecret == null) {
             return false;
         }
@@ -203,26 +254,32 @@ public class CloudinaryUtil {
     }
 
     public static String getPassportFolder() {
+        loadConfigDynamic();
         return props.getProperty("cloudinary.folder_passports", "psm/passports");
     }
 
     public static String getMaterialsFolder() {
+        loadConfigDynamic();
         return props.getProperty("cloudinary.folder_materials", "psm/materials");
     }
 
     public static String getCertificatesFolder() {
+        loadConfigDynamic();
         return props.getProperty("cloudinary.folder_certificates", "psm/certificates");
     }
 
     public static String getAssessmentAnswersFolder() {
+        loadConfigDynamic();
         return props.getProperty("cloudinary.folder_assessment_answers", "psm/assessment-answers");
     }
 
     public static String getAssessmentAttachmentsFolder() {
+        loadConfigDynamic();
         return props.getProperty("cloudinary.folder_assessment_attachments", "psm/assessment-attachments");
     }
 
     public static String getCourseBannersFolder() {
+        loadConfigDynamic();
         return props.getProperty("cloudinary.folder_course_banners", "psm/course-banners");
     }
 

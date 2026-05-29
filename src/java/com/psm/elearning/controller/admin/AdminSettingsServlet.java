@@ -15,6 +15,7 @@ import javax.mail.MessagingException;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import javax.mail.Transport;
+import org.json.JSONObject;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -50,6 +51,20 @@ public class AdminSettingsServlet extends HttpServlet {
     private static final String KEY_YOUTUBE_API_KEY = "platform.youtubeApiKey";
     private static final String KEY_MAX_FILE_UPLOAD_MB = "platform.maxFileUploadMB";
     private static final String KEY_CERTIFICATE_ENABLED = "platform.certificateEnabled";
+    private static final String KEY_PAYMENT_PAYSTACK_ENABLED = "payment.paystack.enabled";
+    private static final String KEY_PAYMENT_MONIEPOINT_ENABLED = "payment.moniepoint.enabled";
+    private static final String KEY_PAYMENT_MONIEPOINT_CLIENT_ID = "payment.moniepointClientId";
+    private static final String KEY_PAYMENT_MONIEPOINT_SECRET = "payment.moniepointSecretKey";
+    private static final String KEY_CLOUDINARY_CLOUD_NAME = "cloudinary.cloudName";
+    private static final String KEY_CLOUDINARY_API_KEY = "cloudinary.apiKey";
+    private static final String KEY_CLOUDINARY_API_SECRET = "cloudinary.apiSecret";
+    private static final String KEY_CLOUDINARY_FOLDER_PASSPORTS = "cloudinary.folderPassports";
+    private static final String KEY_CLOUDINARY_FOLDER_MATERIALS = "cloudinary.folderMaterials";
+    private static final String KEY_CLOUDINARY_FOLDER_CERTIFICATES = "cloudinary.folderCertificates";
+    private static final String KEY_CLOUDINARY_FOLDER_COURSE_BANNERS = "cloudinary.folderCourseBanners";
+    private static final String KEY_PLATFORM_DEFAULT_INSTRUCTOR_COMMISSION = "platform.defaultInstructorCommission";
+    private static final String KEY_PLATFORM_AUTO_APPROVE_COURSES = "platform.autoApproveCourses";
+
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -70,65 +85,153 @@ public class AdminSettingsServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         HttpSession session = ensureAdminSession(request);
+        boolean isJson = request.getContentType() != null && request.getContentType().contains("application/json");
+
         if (session == null) {
-            response.sendRedirect(request.getContextPath() + "/login");
+            if (isJson) {
+                response.setContentType("application/json");
+                response.setCharacterEncoding("UTF-8");
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("{\"success\":false,\"message\":\"Session expired. Please log in again.\"}");
+            } else {
+                response.sendRedirect(request.getContextPath() + "/login");
+            }
             return;
         }
 
+        JSONObject json = null;
+        if (isJson) {
+            StringBuilder sb = new StringBuilder();
+            String line;
+            try (java.io.BufferedReader reader = request.getReader()) {
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line);
+                }
+            } catch (Exception e) {
+                // ignore
+            }
+            try {
+                json = new JSONObject(sb.toString());
+            } catch (Exception e) {
+                response.setContentType("application/json");
+                response.setCharacterEncoding("UTF-8");
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().write("{\"success\":false,\"message\":\"Invalid JSON payload.\"}");
+                return;
+            }
+        }
+
         Map<String, String> existing = mergeWithDefaults(appSettingDAO.findAllAsMap());
-        Map<String, String> input = buildInput(request, existing);
-        String action = normalize(request.getParameter("action")).toLowerCase();
+        Map<String, String> input = buildInput(request, json, existing);
+        String action = getVal(request, json, "action", "action").toLowerCase();
 
         String validationError = validate(input);
         if (validationError != null) {
-            renderPage(request, response, mergeWithDefaults(input), null, validationError, null);
+            if (isJson) {
+                response.setContentType("application/json");
+                response.setCharacterEncoding("UTF-8");
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                JSONObject respObj = new JSONObject();
+                respObj.put("success", false);
+                respObj.put("message", validationError);
+                response.getWriter().write(respObj.toString());
+            } else {
+                renderPage(request, response, mergeWithDefaults(input), null, validationError, null);
+            }
             return;
         }
 
         if ("testsmtp".equals(action)) {
             String smtpError = validateSmtp(input);
             if (smtpError != null) {
-                renderPage(request, response, mergeWithDefaults(input), null, smtpError, null);
+                if (isJson) {
+                    response.setContentType("application/json");
+                    response.setCharacterEncoding("UTF-8");
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    JSONObject respObj = new JSONObject();
+                    respObj.put("success", false);
+                    respObj.put("message", smtpError);
+                    response.getWriter().write(respObj.toString());
+                } else {
+                    renderPage(request, response, mergeWithDefaults(input), null, smtpError, null);
+                }
                 return;
             }
 
-            String smtpResult = testSmtpConnection(input)
+            boolean success = testSmtpConnection(input);
+            String smtpResult = success
                     ? "SMTP connection test passed. The server accepted your credentials."
                     : "SMTP connection test failed. Check host/port/credentials and try again.";
-            if (smtpResult.startsWith("SMTP connection test passed")) {
-                renderPage(request, response, mergeWithDefaults(input), smtpResult, null, null);
+            
+            if (isJson) {
+                response.setContentType("application/json");
+                response.setCharacterEncoding("UTF-8");
+                if (!success) {
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                }
+                JSONObject respObj = new JSONObject();
+                respObj.put("success", success);
+                respObj.put("message", smtpResult);
+                response.getWriter().write(respObj.toString());
             } else {
-                renderPage(request, response, mergeWithDefaults(input), null, smtpResult, null);
+                if (success) {
+                    renderPage(request, response, mergeWithDefaults(input), smtpResult, null, null);
+                } else {
+                    renderPage(request, response, mergeWithDefaults(input), null, smtpResult, null);
+                }
             }
             return;
         }
 
         Integer userId = resolveUserId(session);
         if (userId == null) {
-            renderPage(request, response, mergeWithDefaults(input), null, "Session error: invalid user context.", null);
-            return;
-        }
-        boolean saved = appSettingDAO.upsertAll(input, userId);
-        if (!saved) {
-            renderPage(request, response, mergeWithDefaults(input), null, "Unable to save settings right now. Please try again.", null);
+            if (isJson) {
+                response.setContentType("application/json");
+                response.setCharacterEncoding("UTF-8");
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("{\"success\":false,\"message\":\"Session error: invalid user context.\"}");
+            } else {
+                renderPage(request, response, mergeWithDefaults(input), null, "Session error: invalid user context.", null);
+            }
             return;
         }
 
-        response.sendRedirect(request.getContextPath() + "/admin/settings?status=saved");
+        boolean saved = appSettingDAO.upsertAll(input, userId);
+        if (!saved) {
+            if (isJson) {
+                response.setContentType("application/json");
+                response.setCharacterEncoding("UTF-8");
+                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                response.getWriter().write("{\"success\":false,\"message\":\"Unable to save settings right now. Please try again.\"}");
+            } else {
+                renderPage(request, response, mergeWithDefaults(input), null, "Unable to save settings right now. Please try again.", null);
+            }
+            return;
+        }
+
+        if (isJson) {
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
+            response.getWriter().write("{\"success\":true,\"message\":\"Settings were saved successfully.\"}");
+        } else {
+            response.sendRedirect(request.getContextPath() + "/admin/settings?status=saved");
+        }
     }
 
     private void renderPage(HttpServletRequest request,
-                            HttpServletResponse response,
-                            Map<String, String> settings,
-                            String successMessage,
-                            String errorMessage,
-                            String infoMessage) throws ServletException, IOException {
+                             HttpServletResponse response,
+                             Map<String, String> settings,
+                             String successMessage,
+                             String errorMessage,
+                             String infoMessage) throws ServletException, IOException {
         List<AppSettingAuditEntry> audits = appSettingDAO.findRecentAudits(20);
         request.setAttribute("settings", settings);
         request.setAttribute("audits", audits);
         request.setAttribute("hasPaystackSecret", !normalize(settings.get(KEY_PAYMENT_PAYSTACK_SECRET)).isEmpty());
         request.setAttribute("hasWebhookSecret", !normalize(settings.get(KEY_PAYMENT_PAYSTACK_WEBHOOK)).isEmpty());
         request.setAttribute("hasSmtpPassword", !normalize(settings.get(KEY_SMTP_PASSWORD)).isEmpty());
+        request.setAttribute("hasCloudinarySecret", !normalize(settings.get(KEY_CLOUDINARY_API_SECRET)).isEmpty());
+        request.setAttribute("hasMoniepointSecret", !normalize(settings.get(KEY_PAYMENT_MONIEPOINT_SECRET)).isEmpty());
         if (successMessage != null) {
             request.setAttribute("successMessage", successMessage);
         }
@@ -141,33 +244,63 @@ public class AdminSettingsServlet extends HttpServlet {
         request.getRequestDispatcher("/WEB-INF/views/admin/admin-settings.jsp").forward(request, response);
     }
 
-    private Map<String, String> buildInput(HttpServletRequest request, Map<String, String> existing) {
+    private String getVal(HttpServletRequest request, JSONObject json, String jsonKey, String paramName) {
+        if (json != null && json.has(jsonKey)) {
+            Object val = json.get(jsonKey);
+            if (val == null) {
+                return "";
+            }
+            if (val instanceof Boolean) {
+                return String.valueOf(val);
+            }
+            return val.toString().trim();
+        }
+        return normalize(request.getParameter(paramName));
+    }
+
+    private Map<String, String> buildInput(HttpServletRequest request, JSONObject json, Map<String, String> existing) {
         Map<String, String> input = new LinkedHashMap<>();
-        input.put(KEY_PLATFORM_NAME, normalize(request.getParameter("platformName")));
-        input.put(KEY_PLATFORM_SUPPORT_EMAIL, normalize(request.getParameter("supportEmail")));
-        input.put(KEY_PLATFORM_TIMEZONE, normalize(request.getParameter("timezone")));
-        input.put(KEY_SECURITY_SESSION_TIMEOUT, normalize(request.getParameter("sessionTimeoutMinutes")));
-        input.put(KEY_SECURITY_MIN_PASSWORD_LENGTH, normalize(request.getParameter("minPasswordLength")));
-        input.put(KEY_PAYMENT_MODE, normalize(request.getParameter("paymentMode")).toUpperCase());
-        input.put(KEY_PAYMENT_CURRENCY, normalize(request.getParameter("paymentCurrency")).toUpperCase());
-        input.put(KEY_PAYMENT_PAYSTACK_PUBLIC, normalize(request.getParameter("paystackPublicKey")));
-        input.put(KEY_PAYMENT_PAYSTACK_SECRET, preserveSecretIfBlank(request.getParameter("paystackSecretKey"), existing.get(KEY_PAYMENT_PAYSTACK_SECRET)));
-        input.put(KEY_PAYMENT_PAYSTACK_WEBHOOK, preserveSecretIfBlank(request.getParameter("paystackWebhookSecret"), existing.get(KEY_PAYMENT_PAYSTACK_WEBHOOK)));
-        input.put(KEY_PAYMENT_CALLBACK_URL, normalize(request.getParameter("paymentCallbackUrl")));
-        input.put(KEY_SMTP_HOST, normalize(request.getParameter("smtpHost")));
-        input.put(KEY_SMTP_PORT, normalize(request.getParameter("smtpPort")));
-        input.put(KEY_SMTP_USERNAME, normalize(request.getParameter("smtpUsername")));
-        input.put(KEY_SMTP_PASSWORD, preserveSecretIfBlank(request.getParameter("smtpPassword"), existing.get(KEY_SMTP_PASSWORD)));
-        input.put(KEY_SMTP_FROM_EMAIL, normalize(request.getParameter("smtpFromEmail")));
-        input.put(KEY_SMTP_FROM_NAME, normalize(request.getParameter("smtpFromName")));
-        input.put(KEY_SMTP_STARTTLS, "true".equalsIgnoreCase(normalize(request.getParameter("smtpStartTls"))) ? "true" : "false");
-        input.put(KEY_ENROLLMENT_AUTO_ACTIVATE, "true".equalsIgnoreCase(normalize(request.getParameter("autoActivateEnrollment"))) ? "true" : "false");
-        input.put(KEY_LEARNING_COMPLETION_PERCENT, normalize(request.getParameter("completionMaterialPercent")));
-        input.put(KEY_ASSESSMENT_PASS_MARK, normalize(request.getParameter("defaultPassMark")));
-        input.put(KEY_ASSESSMENT_MAX_ATTEMPTS, normalize(request.getParameter("defaultMaxAttempts")));
-        input.put(KEY_YOUTUBE_API_KEY, normalize(request.getParameter("youtubeApiKey")));
-        input.put(KEY_MAX_FILE_UPLOAD_MB, normalize(request.getParameter("maxFileUploadMB")));
-        input.put(KEY_CERTIFICATE_ENABLED, "true".equalsIgnoreCase(normalize(request.getParameter("certificateEnabled"))) ? "true" : "false");
+        input.put(KEY_PLATFORM_NAME, getVal(request, json, "platformName", "platformName"));
+        input.put(KEY_PLATFORM_SUPPORT_EMAIL, getVal(request, json, "supportEmail", "supportEmail"));
+        input.put(KEY_PLATFORM_TIMEZONE, getVal(request, json, "timezone", "timezone"));
+        input.put(KEY_SECURITY_SESSION_TIMEOUT, getVal(request, json, "sessionTimeoutMinutes", "sessionTimeoutMinutes"));
+        input.put(KEY_SECURITY_MIN_PASSWORD_LENGTH, getVal(request, json, "minPasswordLength", "minPasswordLength"));
+        input.put(KEY_PAYMENT_MODE, getVal(request, json, "paymentMode", "paymentMode").toUpperCase());
+        input.put(KEY_PAYMENT_CURRENCY, getVal(request, json, "paymentCurrency", "paymentCurrency").toUpperCase());
+        input.put(KEY_PAYMENT_PAYSTACK_PUBLIC, getVal(request, json, "paystackPublicKey", "paystackPublicKey"));
+        input.put(KEY_PAYMENT_PAYSTACK_SECRET, preserveSecretIfBlank(getVal(request, json, "paystackSecretKey", "paystackSecretKey"), existing.get(KEY_PAYMENT_PAYSTACK_SECRET)));
+        input.put(KEY_PAYMENT_PAYSTACK_WEBHOOK, preserveSecretIfBlank(getVal(request, json, "paystackWebhookSecret", "paystackWebhookSecret"), existing.get(KEY_PAYMENT_PAYSTACK_WEBHOOK)));
+        input.put(KEY_PAYMENT_CALLBACK_URL, getVal(request, json, "paymentCallbackUrl", "paymentCallbackUrl"));
+        input.put(KEY_SMTP_HOST, getVal(request, json, "smtpHost", "smtpHost"));
+        input.put(KEY_SMTP_PORT, getVal(request, json, "smtpPort", "smtpPort"));
+        input.put(KEY_SMTP_USERNAME, getVal(request, json, "smtpUsername", "smtpUsername"));
+        input.put(KEY_SMTP_PASSWORD, preserveSecretIfBlank(getVal(request, json, "smtpPassword", "smtpPassword"), existing.get(KEY_SMTP_PASSWORD)));
+        input.put(KEY_SMTP_FROM_EMAIL, getVal(request, json, "smtpFromEmail", "smtpFromEmail"));
+        input.put(KEY_SMTP_FROM_NAME, getVal(request, json, "smtpFromName", "smtpFromName"));
+        input.put(KEY_SMTP_STARTTLS, "true".equalsIgnoreCase(getVal(request, json, "smtpStartTls", "smtpStartTls")) ? "true" : "false");
+        input.put(KEY_ENROLLMENT_AUTO_ACTIVATE, "true".equalsIgnoreCase(getVal(request, json, "autoActivateEnrollment", "autoActivateEnrollment")) ? "true" : "false");
+        input.put(KEY_LEARNING_COMPLETION_PERCENT, getVal(request, json, "completionMaterialPercent", "completionMaterialPercent"));
+        input.put(KEY_ASSESSMENT_PASS_MARK, getVal(request, json, "defaultPassMark", "defaultPassMark"));
+        input.put(KEY_ASSESSMENT_MAX_ATTEMPTS, getVal(request, json, "defaultMaxAttempts", "defaultMaxAttempts"));
+        input.put(KEY_YOUTUBE_API_KEY, getVal(request, json, "youtubeApiKey", "youtubeApiKey"));
+        input.put(KEY_MAX_FILE_UPLOAD_MB, getVal(request, json, "maxFileUploadMB", "maxFileUploadMB"));
+        input.put(KEY_CERTIFICATE_ENABLED, "true".equalsIgnoreCase(getVal(request, json, "certificateEnabled", "certificateEnabled")) ? "true" : "false");
+        
+        input.put(KEY_PAYMENT_PAYSTACK_ENABLED, "true".equalsIgnoreCase(getVal(request, json, "paystackEnabled", "paystackEnabled")) ? "true" : "false");
+        input.put(KEY_PAYMENT_MONIEPOINT_ENABLED, "true".equalsIgnoreCase(getVal(request, json, "moniepointEnabled", "moniepointEnabled")) ? "true" : "false");
+        input.put(KEY_PAYMENT_MONIEPOINT_CLIENT_ID, getVal(request, json, "moniepointClientId", "moniepointClientId"));
+        input.put(KEY_PAYMENT_MONIEPOINT_SECRET, preserveSecretIfBlank(getVal(request, json, "moniepointSecretKey", "moniepointSecretKey"), existing.get(KEY_PAYMENT_MONIEPOINT_SECRET)));
+        
+        input.put(KEY_CLOUDINARY_CLOUD_NAME, getVal(request, json, "cloudinaryCloudName", "cloudinaryCloudName"));
+        input.put(KEY_CLOUDINARY_API_KEY, getVal(request, json, "cloudinaryApiKey", "cloudinaryApiKey"));
+        input.put(KEY_CLOUDINARY_API_SECRET, preserveSecretIfBlank(getVal(request, json, "cloudinaryApiSecret", "cloudinaryApiSecret"), existing.get(KEY_CLOUDINARY_API_SECRET)));
+        input.put(KEY_CLOUDINARY_FOLDER_PASSPORTS, getVal(request, json, "cloudinaryFolderPassports", "cloudinaryFolderPassports"));
+        input.put(KEY_CLOUDINARY_FOLDER_MATERIALS, getVal(request, json, "cloudinaryFolderMaterials", "cloudinaryFolderMaterials"));
+        input.put(KEY_CLOUDINARY_FOLDER_CERTIFICATES, getVal(request, json, "cloudinaryFolderCertificates", "cloudinaryFolderCertificates"));
+        input.put(KEY_CLOUDINARY_FOLDER_COURSE_BANNERS, getVal(request, json, "cloudinaryFolderCourseBanners", "cloudinaryFolderCourseBanners"));
+        
+        input.put(KEY_PLATFORM_DEFAULT_INSTRUCTOR_COMMISSION, getVal(request, json, "defaultInstructorCommission", "defaultInstructorCommission"));
+        input.put(KEY_PLATFORM_AUTO_APPROVE_COURSES, "true".equalsIgnoreCase(getVal(request, json, "autoApproveCourses", "autoApproveCourses")) ? "true" : "false");
         return input;
     }
 
@@ -189,31 +322,44 @@ public class AdminSettingsServlet extends HttpServlet {
 
     private Map<String, String> defaults() {
         Map<String, String> defaults = new LinkedHashMap<>();
-        defaults.put(KEY_PLATFORM_NAME, "PSM E-Learning Platform");
-        defaults.put(KEY_PLATFORM_SUPPORT_EMAIL, "support@psm-elearning.com");
-        defaults.put(KEY_PLATFORM_TIMEZONE, "Africa/Lagos");
-        defaults.put(KEY_SECURITY_SESSION_TIMEOUT, "30");
-        defaults.put(KEY_SECURITY_MIN_PASSWORD_LENGTH, "8");
-        defaults.put(KEY_PAYMENT_MODE, "LIVE");
-        defaults.put(KEY_PAYMENT_CURRENCY, "NGN");
-        defaults.put(KEY_PAYMENT_PAYSTACK_PUBLIC, "");
-        defaults.put(KEY_PAYMENT_PAYSTACK_SECRET, "");
-        defaults.put(KEY_PAYMENT_PAYSTACK_WEBHOOK, "");
-        defaults.put(KEY_PAYMENT_CALLBACK_URL, "");
-        defaults.put(KEY_SMTP_HOST, "");
-        defaults.put(KEY_SMTP_PORT, "587");
-        defaults.put(KEY_SMTP_USERNAME, "");
-        defaults.put(KEY_SMTP_PASSWORD, "");
-        defaults.put(KEY_SMTP_FROM_EMAIL, "");
-        defaults.put(KEY_SMTP_FROM_NAME, "PSM E-Learning Platform");
-        defaults.put(KEY_SMTP_STARTTLS, "true");
+        defaults.put(KEY_PLATFORM_NAME, System.getenv("PLATFORM_NAME") != null ? System.getenv("PLATFORM_NAME") : "PSM E-Learning Platform");
+        defaults.put(KEY_PLATFORM_SUPPORT_EMAIL, System.getenv("PLATFORM_SUPPORT_EMAIL") != null ? System.getenv("PLATFORM_SUPPORT_EMAIL") : "support@psm-elearning.com");
+        defaults.put(KEY_PLATFORM_TIMEZONE, System.getenv("PLATFORM_TIMEZONE") != null ? System.getenv("PLATFORM_TIMEZONE") : "Africa/Lagos");
+        defaults.put(KEY_SECURITY_SESSION_TIMEOUT, System.getenv("SECURITY_SESSION_TIMEOUT") != null ? System.getenv("SECURITY_SESSION_TIMEOUT") : "30");
+        defaults.put(KEY_SECURITY_MIN_PASSWORD_LENGTH, System.getenv("SECURITY_MIN_PASSWORD_LENGTH") != null ? System.getenv("SECURITY_MIN_PASSWORD_LENGTH") : "8");
+        defaults.put(KEY_PAYMENT_MODE, System.getenv("PAYMENT_MODE") != null ? System.getenv("PAYMENT_MODE") : "LIVE");
+        defaults.put(KEY_PAYMENT_CURRENCY, System.getenv("PAYSTACK_CURRENCY") != null ? System.getenv("PAYSTACK_CURRENCY") : "NGN");
+        defaults.put(KEY_PAYMENT_PAYSTACK_PUBLIC, System.getenv("PAYSTACK_PUBLIC_KEY") != null ? System.getenv("PAYSTACK_PUBLIC_KEY") : "");
+        defaults.put(KEY_PAYMENT_PAYSTACK_SECRET, System.getenv("PAYSTACK_SECRET_KEY") != null ? System.getenv("PAYSTACK_SECRET_KEY") : "");
+        defaults.put(KEY_PAYMENT_PAYSTACK_WEBHOOK, System.getenv("PAYSTACK_WEBHOOK_SECRET") != null ? System.getenv("PAYSTACK_WEBHOOK_SECRET") : "");
+        defaults.put(KEY_PAYMENT_CALLBACK_URL, System.getenv("PAYSTACK_CALLBACK_URL") != null ? System.getenv("PAYSTACK_CALLBACK_URL") : "");
+        defaults.put(KEY_SMTP_HOST, System.getenv("SMTP_HOST") != null ? System.getenv("SMTP_HOST") : "");
+        defaults.put(KEY_SMTP_PORT, System.getenv("SMTP_PORT") != null ? System.getenv("SMTP_PORT") : "587");
+        defaults.put(KEY_SMTP_USERNAME, System.getenv("SMTP_USERNAME") != null ? System.getenv("SMTP_USERNAME") : "");
+        defaults.put(KEY_SMTP_PASSWORD, System.getenv("SMTP_PASSWORD") != null ? System.getenv("SMTP_PASSWORD") : "");
+        defaults.put(KEY_SMTP_FROM_EMAIL, System.getenv("SMTP_FROM_EMAIL") != null ? System.getenv("SMTP_FROM_EMAIL") : "");
+        defaults.put(KEY_SMTP_FROM_NAME, System.getenv("SMTP_FROM_NAME") != null ? System.getenv("SMTP_FROM_NAME") : "PSM E-Learning Platform");
+        defaults.put(KEY_SMTP_STARTTLS, System.getenv("SMTP_STARTTLS") != null ? System.getenv("SMTP_STARTTLS") : "true");
         defaults.put(KEY_ENROLLMENT_AUTO_ACTIVATE, "true");
         defaults.put(KEY_LEARNING_COMPLETION_PERCENT, "100");
         defaults.put(KEY_ASSESSMENT_PASS_MARK, "70");
         defaults.put(KEY_ASSESSMENT_MAX_ATTEMPTS, "3");
-        defaults.put(KEY_YOUTUBE_API_KEY, "");
+        defaults.put(KEY_YOUTUBE_API_KEY, System.getenv("YOUTUBE_API_KEY") != null ? System.getenv("YOUTUBE_API_KEY") : "");
         defaults.put(KEY_MAX_FILE_UPLOAD_MB, "50");
         defaults.put(KEY_CERTIFICATE_ENABLED, "true");
+        defaults.put(KEY_PAYMENT_PAYSTACK_ENABLED, "true");
+        defaults.put(KEY_PAYMENT_MONIEPOINT_ENABLED, "false");
+        defaults.put(KEY_PAYMENT_MONIEPOINT_CLIENT_ID, System.getenv("MONIEPOINT_CLIENT_ID") != null ? System.getenv("MONIEPOINT_CLIENT_ID") : "");
+        defaults.put(KEY_PAYMENT_MONIEPOINT_SECRET, System.getenv("MONIEPOINT_SECRET_KEY") != null ? System.getenv("MONIEPOINT_SECRET_KEY") : "");
+        defaults.put(KEY_CLOUDINARY_CLOUD_NAME, System.getenv("CLOUDINARY_CLOUD_NAME") != null ? System.getenv("CLOUDINARY_CLOUD_NAME") : "");
+        defaults.put(KEY_CLOUDINARY_API_KEY, System.getenv("CLOUDINARY_API_KEY") != null ? System.getenv("CLOUDINARY_API_KEY") : "");
+        defaults.put(KEY_CLOUDINARY_API_SECRET, System.getenv("CLOUDINARY_API_SECRET") != null ? System.getenv("CLOUDINARY_API_SECRET") : "");
+        defaults.put(KEY_CLOUDINARY_FOLDER_PASSPORTS, System.getenv("CLOUDINARY_FOLDER_PASSPORTS") != null ? System.getenv("CLOUDINARY_FOLDER_PASSPORTS") : "psm/passports");
+        defaults.put(KEY_CLOUDINARY_FOLDER_MATERIALS, System.getenv("CLOUDINARY_FOLDER_MATERIALS") != null ? System.getenv("CLOUDINARY_FOLDER_MATERIALS") : "psm/materials");
+        defaults.put(KEY_CLOUDINARY_FOLDER_CERTIFICATES, System.getenv("CLOUDINARY_FOLDER_CERTIFICATES") != null ? System.getenv("CLOUDINARY_FOLDER_CERTIFICATES") : "psm/certificates");
+        defaults.put(KEY_CLOUDINARY_FOLDER_COURSE_BANNERS, System.getenv("CLOUDINARY_FOLDER_COURSE_BANNERS") != null ? System.getenv("CLOUDINARY_FOLDER_COURSE_BANNERS") : "psm/course-banners");
+        defaults.put(KEY_PLATFORM_DEFAULT_INSTRUCTOR_COMMISSION, System.getenv("DEFAULT_INSTRUCTOR_COMMISSION") != null ? System.getenv("DEFAULT_INSTRUCTOR_COMMISSION") : "20");
+        defaults.put(KEY_PLATFORM_AUTO_APPROVE_COURSES, "false");
         return defaults;
     }
 
@@ -288,6 +434,28 @@ public class AdminSettingsServlet extends HttpServlet {
         Integer attempts = parseInteger(input.get(KEY_ASSESSMENT_MAX_ATTEMPTS));
         if (attempts == null || attempts < 1 || attempts > 10) {
             return "Default max attempts must be between 1 and 10.";
+        }
+
+        String cloudNameVal = input.get(KEY_CLOUDINARY_CLOUD_NAME);
+        String apiKeyVal = input.get(KEY_CLOUDINARY_API_KEY);
+        String apiSecretVal = input.get(KEY_CLOUDINARY_API_SECRET);
+        boolean anyCloudinary = !cloudNameVal.isEmpty() || !apiKeyVal.isEmpty() || !apiSecretVal.isEmpty();
+        if (anyCloudinary) {
+            if (cloudNameVal.isEmpty()) {
+                return "Cloudinary Cloud Name is required when configuring Cloudinary.";
+            }
+            if (apiKeyVal.isEmpty()) {
+                return "Cloudinary API Key is required when configuring Cloudinary.";
+            }
+            if (apiSecretVal.isEmpty()) {
+                return "Cloudinary API Secret is required when configuring Cloudinary.";
+            }
+        }
+
+
+        Integer commission = parseInteger(input.get(KEY_PLATFORM_DEFAULT_INSTRUCTOR_COMMISSION));
+        if (commission == null || commission < 0 || commission > 100) {
+            return "Default instructor commission must be a valid percentage between 0 and 100.";
         }
 
         String smtpValidation = validateSmtp(input);

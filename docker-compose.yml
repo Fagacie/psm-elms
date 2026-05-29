@@ -27,6 +27,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    env_file:
+      - .env
     environment:
       DB_DRIVER: com.mysql.cj.jdbc.Driver
       DB_URL: jdbc:mysql://db:3306/${MYSQL_DATABASE:-psm_elearning}?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
