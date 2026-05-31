@@ -1,0 +1,758 @@
+/* ==========================================================================
+   PREMIUM STUDENT DASHBOARD — Scoped CSS Module (Dashboard.module.css)
+   Prefix: db_  |  Zero global bleed
+   ========================================================================== */
+
+/* ── Layout Shell ── */
+.db_pageWrapper {
+    min-height: 100vh;
+    width: 100%;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #1e293b;
+    box-sizing: border-box;
+}
+
+.db_container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 24px 60px;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    box-sizing: border-box;
+}
+
+
+/* ── Hero Greeting ── */
+.db_hero {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+}
+
+.db_heroText {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.db_welcomeTitle {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: -0.03em;
+    margin: 0;
+    line-height: 1.2;
+}
+
+.db_subtitle {
+    font-size: 0.9rem;
+    color: #64748b;
+    margin: 0;
+    font-weight: 400;
+    line-height: 1.5;
+}
+
+.db_dateChip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    background: #ffffff;
+    border: 1px solid rgba(15,23,42,0.06);
+    font-size: 0.76rem;
+    font-weight: 600;
+    color: #64748b;
+    white-space: nowrap;
+    flex-shrink: 0;
+    box-shadow: 0 1px 3px rgba(15,23,42,0.03);
+}
+
+
+/* ── Overall Progress Ring (Hero) ── */
+.db_heroProgress {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 24px;
+    background: #ffffff;
+    border-radius: 14px;
+    border: 1px solid rgba(15,23,42,0.06);
+    box-shadow: 0 2px 8px rgba(15,23,42,0.03);
+    flex-shrink: 0;
+}
+
+.db_overallRingWrap {
+    position: relative;
+    width: 56px;
+    height: 56px;
+    flex-shrink: 0;
+}
+
+.db_overallRingSvg {
+    transform: rotate(-90deg);
+}
+
+.db_overallRingBg {
+    stroke: #f1f5f9;
+}
+
+.db_overallRingFg {
+    stroke: #3b82f6;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.db_overallRingText {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.db_overallLabel {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.db_overallTitle {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.db_overallSub {
+    font-size: 0.7rem;
+    color: #94a3b8;
+    font-weight: 500;
+}
+
+
+/* ── KPI Summary Grid ── */
+.db_kpiGrid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+}
+
+.db_kpiBlock {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 22px 20px;
+    border: 1px solid rgba(15,23,42,0.04);
+    box-shadow: 0 2px 8px rgba(15,23,42,0.03);
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.db_kpiBlock:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(15,23,42,0.06);
+}
+
+.db_kpiIcon {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.db_kpiIcon.blue {
+    background: rgba(59,130,246,0.08);
+    color: #3b82f6;
+}
+
+.db_kpiIcon.green {
+    background: rgba(16,185,129,0.08);
+    color: #10b981;
+}
+
+.db_kpiIcon.violet {
+    background: rgba(139,92,246,0.08);
+    color: #8b5cf6;
+}
+
+.db_kpiIcon.amber {
+    background: rgba(245,158,11,0.08);
+    color: #f59e0b;
+}
+
+.db_kpiContent {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.db_kpiNum {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1;
+    letter-spacing: -0.02em;
+}
+
+.db_kpiLabel {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+
+/* ── Section Headings ── */
+.db_section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.db_sectionHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.db_sectionTitle {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #0f172a;
+    letter-spacing: -0.02em;
+    margin: 0;
+}
+
+.db_sectionAction {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #3b82f6;
+    text-decoration: none;
+    transition: gap 0.2s ease;
+}
+
+.db_sectionAction:hover {
+    gap: 8px;
+}
+
+
+/* ── Course Cards Grid ── */
+.db_courseGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.db_courseCard {
+    background: #ffffff;
+    border-radius: 14px;
+    border: 1px solid rgba(15,23,42,0.04);
+    box-shadow: 0 2px 8px rgba(15,23,42,0.03);
+    transition: transform 0.22s ease, box-shadow 0.22s ease;
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    overflow: hidden;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+.db_courseCard:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px rgba(15,23,42,0.08);
+}
+
+.db_courseBannerWrap {
+    height: 150px;
+    position: relative;
+    background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+    overflow: hidden;
+}
+
+.db_courseBanner {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.35s ease;
+}
+
+.db_courseCard:hover .db_courseBanner {
+    transform: scale(1.05);
+}
+
+.db_courseBannerEmpty {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #cbd5e1;
+}
+
+.db_courseStatus {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.62rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.db_courseStatus.live {
+    background: rgba(16,185,129,0.9);
+    color: #ffffff;
+}
+
+.db_courseStatus.done {
+    background: rgba(79,70,229,0.9);
+    color: #ffffff;
+}
+
+.db_courseStatus.hold {
+    background: rgba(245,158,11,0.9);
+    color: #ffffff;
+}
+
+.db_courseBody {
+    padding: 18px 20px 20px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    gap: 14px;
+}
+
+.db_courseInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex-grow: 1;
+}
+
+.db_courseTitle {
+    font-size: 0.98rem;
+    font-weight: 700;
+    color: #0f172a;
+    line-height: 1.4;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.db_courseInstructor {
+    font-size: 0.78rem;
+    color: #94a3b8;
+    margin: 0;
+}
+
+.db_courseInstructor strong {
+    color: #64748b;
+    font-weight: 600;
+}
+
+/* Course card footer */
+.db_courseFooter {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 14px;
+    margin-top: auto;
+}
+
+.db_progressBarWrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-right: 16px;
+}
+
+.db_progressLabel {
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: #64748b;
+}
+
+.db_progressTrack {
+    width: 100%;
+    height: 5px;
+    border-radius: 999px;
+    background: #f1f5f9;
+    overflow: hidden;
+}
+
+.db_progressFill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #3b82f6, #6366f1);
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.db_resumeHint {
+    font-size: 0.76rem;
+    font-weight: 600;
+    color: #3b82f6;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+    transition: gap 0.2s ease;
+}
+
+.db_courseCard:hover .db_resumeHint {
+    gap: 8px;
+}
+
+
+/* ── Empty State ── */
+.db_emptyStrip {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 32px 28px;
+    border: 1px solid rgba(15,23,42,0.04);
+    box-shadow: 0 2px 8px rgba(15,23,42,0.03);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.db_emptyText {
+    font-size: 0.88rem;
+    color: #64748b;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    line-height: 1.6;
+}
+
+.db_exploreBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #3b82f6;
+    color: #ffffff;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-size: 0.84rem;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+    white-space: nowrap;
+}
+
+.db_exploreBtn:hover {
+    background: #2563eb;
+    transform: translateY(-1px);
+}
+
+
+/* ── Quick Actions Row ── */
+.db_quickActions {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+
+.db_quickAction {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 20px;
+    background: #ffffff;
+    border-radius: 14px;
+    border: 1px solid rgba(15,23,42,0.04);
+    box-shadow: 0 2px 8px rgba(15,23,42,0.03);
+    text-decoration: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.db_quickAction:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(15,23,42,0.06);
+    border-color: rgba(59,130,246,0.15);
+}
+
+.db_quickActionIcon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    font-size: 0.92rem;
+    flex-shrink: 0;
+    background: rgba(59,130,246,0.08);
+    color: #3b82f6;
+}
+
+.db_quickActionText {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.db_quickActionTitle {
+    font-size: 0.84rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.db_quickActionSub {
+    font-size: 0.72rem;
+    color: #94a3b8;
+    font-weight: 500;
+}
+
+
+/* ── Activity Chart Card ── */
+.db_chartCard {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 24px;
+    border: 1px solid rgba(15,23,42,0.04);
+    box-shadow: 0 2px 8px rgba(15,23,42,0.03);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.db_chartHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.db_chartTitleWrap {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.db_customTooltip {
+    background: #ffffff;
+    border-radius: 10px;
+    border: 1px solid rgba(15,23,42,0.06);
+    box-shadow: 0 4px 16px rgba(15,23,42,0.08);
+    padding: 10px 14px;
+}
+
+.db_tooltipLabel {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #94a3b8;
+    margin: 0 0 2px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.db_tooltipValue {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #3b82f6;
+    margin: 0;
+}
+
+
+/* ── Bottom Stats Row ── */
+.db_bottomRow {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.db_statCard {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 24px;
+    border: 1px solid rgba(15,23,42,0.04);
+    box-shadow: 0 2px 8px rgba(15,23,42,0.03);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.db_statRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #f8fafc;
+}
+
+.db_statRow:last-child {
+    border-bottom: none;
+}
+
+.db_statLabel {
+    font-size: 0.82rem;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.db_statValue {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+
+/* ── Animations ── */
+.db_fadeIn {
+    opacity: 0;
+    animation: db_fadeInKey 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes db_fadeInKey {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.db_stagger1 { animation-delay: 0.05s; }
+.db_stagger2 { animation-delay: 0.1s; }
+.db_stagger3 { animation-delay: 0.15s; }
+.db_stagger4 { animation-delay: 0.2s; }
+
+
+/* ── Responsive ── */
+@media (max-width: 1024px) {
+    .db_kpiGrid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .db_quickActions {
+        grid-template-columns: 1fr;
+    }
+    .db_bottomRow {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .db_container {
+        padding: 24px 16px 48px;
+        gap: 24px;
+    }
+    .db_hero {
+        flex-direction: column;
+        gap: 16px;
+    }
+    .db_heroProgress {
+        width: 100%;
+    }
+    .db_welcomeTitle {
+        font-size: 1.5rem;
+    }
+    .db_kpiGrid {
+        grid-template-columns: 1fr 1fr;
+    }
+    .db_courseGrid {
+        grid-template-columns: 1fr;
+    }
+    .db_emptyStrip {
+        flex-direction: column;
+        text-align: center;
+    }
+    .db_chartCard {
+        padding: 18px 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .db_kpiGrid {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* ── Dark Mode ── */
+html[data-theme='dark'] .db_pageWrapper {
+    color: #e2e8f0;
+}
+
+html[data-theme='dark'] .db_welcomeTitle {
+    color: #f1f5f9;
+}
+
+html[data-theme='dark'] .db_subtitle,
+html[data-theme='dark'] .db_kpiLabel,
+html[data-theme='dark'] .db_courseInstructor,
+html[data-theme='dark'] .db_progressLabel,
+html[data-theme='dark'] .db_emptyText,
+html[data-theme='dark'] .db_statLabel,
+html[data-theme='dark'] .db_quickActionSub,
+html[data-theme='dark'] .db_overallSub,
+html[data-theme='dark'] .db_dateChip,
+html[data-theme='dark'] .db_tooltipLabel {
+    color: #94a3b8;
+}
+
+html[data-theme='dark'] .db_kpiBlock,
+html[data-theme='dark'] .db_courseCard,
+html[data-theme='dark'] .db_emptyStrip,
+html[data-theme='dark'] .db_chartCard,
+html[data-theme='dark'] .db_quickAction,
+html[data-theme='dark'] .db_statCard,
+html[data-theme='dark'] .db_heroProgress,
+html[data-theme='dark'] .db_dateChip,
+html[data-theme='dark'] .db_customTooltip {
+    background: #1e293b;
+    border-color: rgba(148,163,184,0.1);
+}
+
+html[data-theme='dark'] .db_kpiNum,
+html[data-theme='dark'] .db_courseTitle,
+html[data-theme='dark'] .db_sectionTitle,
+html[data-theme='dark'] .db_statValue,
+html[data-theme='dark'] .db_quickActionTitle,
+html[data-theme='dark'] .db_overallTitle,
+html[data-theme='dark'] .db_overallRingText,
+html[data-theme='dark'] .db_ringText {
+    color: #f1f5f9;
+}
+
+html[data-theme='dark'] .db_courseBannerWrap {
+    background: linear-gradient(135deg, #1e293b, #0f172a);
+}
+
+html[data-theme='dark'] .db_courseFooter,
+html[data-theme='dark'] .db_statRow {
+    border-color: rgba(148,163,184,0.08);
+}
+
+html[data-theme='dark'] .db_progressTrack {
+    background: #334155;
+}
+
+html[data-theme='dark'] .db_overallRingBg {
+    stroke: #334155;
+}
+
+html[data-theme='dark'] .db_kpiIcon.blue { background: rgba(59,130,246,0.12); }
+html[data-theme='dark'] .db_kpiIcon.green { background: rgba(16,185,129,0.12); }
+html[data-theme='dark'] .db_kpiIcon.violet { background: rgba(139,92,246,0.12); }
+html[data-theme='dark'] .db_kpiIcon.amber { background: rgba(245,158,11,0.12); }
+html[data-theme='dark'] .db_quickActionIcon { background: rgba(59,130,246,0.12); }

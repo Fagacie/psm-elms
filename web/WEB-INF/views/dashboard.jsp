@@ -10,8 +10,8 @@
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>Student Dashboard - PSM E-Learning</title>
             <jsp:include page="/WEB-INF/views/common/student-head-assets.jsp" />
-            <link rel="stylesheet" href="${pageContext.request.contextPath}/css/StudentDashboard.module.css">
-    
+            <link rel="stylesheet" href="${pageContext.request.contextPath}/css/Dashboard.module.css">
+            <script src="https://unpkg.com/lucide@latest"></script>
             <!-- React & ReactDOM (UMD production versions) -->
             <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
             <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
@@ -48,6 +48,9 @@
                 window.__STUDENT_NAME__ = "${sessionScope.userName}";
                 window.__OVERALL_PROGRESS__ = ${overallProgress != null ? overallProgress : 0};
                 window.__CERTIFICATES_COUNT__ = ${certificatesCount != null ? certificatesCount : 0};
+                window.__ENROLLED_COURSES_COUNT__ = ${enrolledCoursesCount != null ? enrolledCoursesCount : 0};
+                window.__ACTIVE_COURSES_COUNT__ = ${activeCoursesCount != null ? activeCoursesCount : 0};
+                window.__COMPLETED_COURSES_COUNT__ = ${completedCoursesCount != null ? completedCoursesCount : 0};
                 window.__ENROLLED_COURSES__ = [
                     <c:forEach var="course" items="${enrolledCourses}" varStatus="status">
                         {
@@ -64,78 +67,13 @@
 
             <!-- Interactive React Sandbox Application (Zero CSS Bleed) -->
             <script type="text/babel">
-                const { useState, useEffect } = React;
+                const { useState, useEffect, useRef } = React;
                 const { 
                     ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid 
                 } = window.Recharts || {};
 
-                // CSS Module mapped class names
-                const styles = {
-                    container: 'sd_mod_123_container',
-                    sectionTitle: 'sd_mod_123_section_title',
-                    sectionSubtitle: 'sd_mod_123_section_subtitle',
-                    welcomeTitle: 'sd_mod_123_welcome_title',
-                    continueStrip: 'sd_mod_123_continue_strip',
-                    continueInfoWrap: 'sd_mod_123_continue_info_wrap',
-                    continueTitleWrap: 'sd_mod_123_continue_title_wrap',
-                    continueKicker: 'sd_mod_123_continue_kicker',
-                    continueTitle: 'sd_mod_123_continue_title',
-                    continueProgressWrap: 'sd_mod_123_continue_progress_wrap',
-                    continueProgressBg: 'sd_mod_123_continue_progress_bg',
-                    continueProgressFg: 'sd_mod_123_continue_progress_fg',
-                    continueProgressText: 'sd_mod_123_continue_progress_text',
-                    continueBtn: 'sd_mod_123_continue_btn',
-                    continueStripEmpty: 'sd_mod_123_continue_strip_empty',
-                    continueEmptyText: 'sd_mod_123_continue_empty_text',
-                    heroCard: 'sd_mod_123_hero_card',
-                    heroContent: 'sd_mod_123_hero_content',
-                    heroKicker: 'sd_mod_123_hero_kicker',
-                    heroTitle: 'sd_mod_123_hero_title',
-                    heroProgressSection: 'sd_mod_123_hero_progress_section',
-                    heroProgressLabel: 'sd_mod_123_hero_progress_label',
-                    heroProgressBarBg: 'sd_mod_123_hero_progress_bar_bg',
-                    heroProgressBarFg: 'sd_mod_123_hero_progress_bar_fg',
-                    heroActions: 'sd_mod_123_hero_actions',
-                    btnResume: 'sd_mod_123_btn_resume',
-                    heroVisual: 'sd_mod_123_hero_visual',
-                    heroVisualCircle: 'sd_mod_123_hero_visual_circle',
-                    kpiGrid: 'sd_mod_123_kpi_grid',
-                    kpiCard: 'sd_mod_123_kpi_card',
-                    kpiIconWrapper: 'sd_mod_123_kpi_icon_wrapper',
-                    kpiInfo: 'sd_mod_123_kpi_info',
-                    kpiNum: 'sd_mod_123_kpi_num',
-                    kpiLabel: 'sd_mod_123_kpi_label',
-                    chartCard: 'sd_mod_123_chart_card',
-                    chartHeader: 'sd_mod_123_chart_header',
-                    chartLegend: 'sd_mod_123_chart_legend',
-                    legendItem: 'sd_mod_123_legend_item',
-                    legendDot: 'sd_mod_123_legend_dot',
-                    customTooltip: 'sd_mod_123_custom_tooltip',
-                    tooltipLabel: 'sd_mod_123_tooltip_label',
-                    tooltipValue: 'sd_mod_123_tooltip_value',
-                    courseGrid: 'sd_mod_123_course_grid',
-                    courseCard: 'sd_mod_123_course_card',
-                    courseBannerWrap: 'sd_mod_123_course_banner_wrap',
-                    courseBanner: 'sd_mod_123_course_banner',
-                    courseBannerEmpty: 'sd_mod_123_course_banner_empty',
-                    courseStatus: 'sd_mod_123_course_status',
-                    courseBody: 'sd_mod_123_course_body',
-                    courseInfo: 'sd_mod_123_course_info',
-                    courseTitle: 'sd_mod_123_course_title',
-                    courseInstructor: 'sd_mod_123_course_instructor',
-                    progressCircularContainer: 'sd_mod_123_progress_circular_container',
-                    progressRingWrapper: 'sd_mod_123_progress_ring_wrapper',
-                    svgRing: 'sd_mod_123_svg_ring',
-                    ringBg: 'sd_mod_123_ring_bg',
-                    ringFg: 'sd_mod_123_ring_fg',
-                    ringText: 'sd_mod_123_ring_text',
-                    progressActionHint: 'sd_mod_123_progress_action_hint',
-                    emptyState: 'sd_mod_123_empty_state',
-                    emptyIcon: 'sd_mod_123_empty_icon'
-                };
-
-                // Robust Framer Motion React UMD container falling back to CSS animations gracefully
-                const MotionDiv = ({ children, initial, animate, transition, className, ...props }) => {
+                // Framer Motion wrapper with fallback
+                const MotionDiv = ({ children, initial, animate, transition, className, style, ...props }) => {
                     const MotionComponent = window.Motion && window.Motion.motion 
                         ? window.Motion.motion.div 
                         : (window.FramerMotion && window.FramerMotion.motion ? window.FramerMotion.motion.div : null);
@@ -146,7 +84,8 @@
                                 initial={initial} 
                                 animate={animate} 
                                 transition={transition} 
-                                className={className} 
+                                className={className}
+                                style={style}
                                 {...props}
                             >
                                 {children}
@@ -154,35 +93,9 @@
                         );
                     }
                     return (
-                        <div className={`${className} sd_mod_123_fade_in_up`} {...props}>
+                        <div className={(className || '') + " db_fadeIn"} style={style} {...props}>
                             {children}
                         </div>
-                    );
-                };
-
-                const MotionA = ({ children, initial, animate, transition, className, href, ...props }) => {
-                    const MotionComponent = window.Motion && window.Motion.motion 
-                        ? window.Motion.motion.a 
-                        : (window.FramerMotion && window.FramerMotion.motion ? window.FramerMotion.motion.a : null);
-                    
-                    if (MotionComponent) {
-                        return (
-                            <MotionComponent 
-                                initial={initial} 
-                                animate={animate} 
-                                transition={transition} 
-                                className={className} 
-                                href={href}
-                                {...props}
-                            >
-                                {children}
-                            </MotionComponent>
-                        );
-                    }
-                    return (
-                        <a href={href} className={`${className} sd_mod_123_fade_in_up`} {...props}>
-                            {children}
-                        </a>
                     );
                 };
 
@@ -190,15 +103,29 @@
                     const [courses] = useState(window.__ENROLLED_COURSES__ || []);
                     const [studentName] = useState(window.__STUDENT_NAME__ || 'Student');
                     const [certificatesCount] = useState(window.__CERTIFICATES_COUNT__ || 0);
+                    const [overallProgress] = useState(window.__OVERALL_PROGRESS__ || 0);
+                    const [enrolledCount] = useState(window.__ENROLLED_COURSES_COUNT__ || 0);
+                    const [activeCount] = useState(window.__ACTIVE_COURSES_COUNT__ || 0);
+                    const [completedCount] = useState(window.__COMPLETED_COURSES_COUNT__ || 0);
 
-                    // Compute most recently accessed (in progress) course
                     const activeCourses = courses.filter(c => c.completionStatus === 'In Progress');
-                    const recentCourse = activeCourses.length > 0 ? activeCourses[0] : (courses.length > 0 ? courses[0] : null);
-
-                    // Dynamic calculated learning hours
+                    const firstName = studentName.split(' ')[0];
                     const totalHours = Math.round(courses.reduce((acc, c) => acc + (c.progress * 0.35), 0)) + 6;
 
-                    // Weekly platform performance metrics (customized Area chart)
+                    // Greeting based on time of day
+                    const hour = new Date().getHours();
+                    const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+
+                    // Today's date formatted
+                    const today = new Date();
+                    const dateStr = today.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+
+                    // Overall progress ring dimensions
+                    const overallRadius = 22;
+                    const overallCircumference = 2 * Math.PI * overallRadius;
+                    const overallOffset = overallCircumference - (overallProgress / 100) * overallCircumference;
+
+                    // Weekly activity data
                     const activityData = [
                         { day: 'Mon', Minutes: 40 },
                         { day: 'Tue', Minutes: 65 },
@@ -209,12 +136,18 @@
                         { day: 'Sun', Minutes: totalHours * 0.8 > 80 ? 75 : 45 }
                     ];
 
+                    useEffect(() => {
+                        if (window.lucide) {
+                            window.lucide.createIcons();
+                        }
+                    }, [courses]);
+
                     const CustomTooltip = ({ active, payload }) => {
                         if (active && payload && payload.length) {
                             return (
-                                <div className={styles.customTooltip}>
-                                    <p className={styles.tooltipLabel}>{payload[0].payload.day}</p>
-                                    <p className={styles.tooltipValue}>{payload[0].value} mins active</p>
+                                <div className="db_customTooltip">
+                                    <p className="db_tooltipLabel">{payload[0].payload.day}</p>
+                                    <p className="db_tooltipValue">{payload[0].value} mins active</p>
                                 </div>
                             );
                         }
@@ -222,233 +155,241 @@
                     };
 
                     return (
-                        <div className={styles.container}>
-                            {/* Task 4 REDESIGN: Welcome Area Greeting */}
+                        <div className="db_pageWrapper">
                             <MotionDiv 
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.5 }}
+                                className="db_container"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ duration: 0.45 }}
                             >
-                                <h1 className={styles.welcomeTitle}>Welcome back, {studentName} 👋</h1>
-                            </MotionDiv>
+                                {/* ── Hero Greeting ── */}
+                                <header className="db_hero">
+                                    <div className="db_heroText">
+                                        <h1 className="db_welcomeTitle">
+                                            {greeting}, {firstName} 👋
+                                        </h1>
+                                        <p className="db_subtitle">
+                                            Here is an overview of your learning progress.
+                                        </p>
+                                        <span className="db_dateChip">
+                                            <i data-lucide="calendar" style={{ width: 13, height: 13 }}></i>
+                                            {dateStr}
+                                        </span>
+                                    </div>
 
-                            {/* Task 4 REDESIGN: Sleek "Continue Learning" Strip */}
-                            {recentCourse ? (
-                                <MotionA 
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ duration: 0.5, delay: 0.1 }}
-                                    className={styles.continueStrip}
-                                    href={`${window.__CONTEXT_PATH__}/student/enrollment-details?id=${recentCourse.enrollmentId}`}
-                                    style={{ textDecoration: 'none' }}
-                                >
-                                    <div className={styles.continueInfoWrap}>
-                                        <div className={styles.continueTitleWrap}>
-                                            <span className={styles.continueKicker}>Continue Learning</span>
-                                            <h3 className={styles.continueTitle}>{recentCourse.courseName}</h3>
-                                        </div>
-                                        <div className={styles.continueProgressWrap}>
-                                            <div className={styles.continueProgressBg}>
-                                                <div 
-                                                    className={styles.continueProgressFg}
-                                                    style={{ width: `${recentCourse.progress}%` }}
-                                                />
+                                    {courses.length > 0 && (
+                                        <div className="db_heroProgress">
+                                            <div className="db_overallRingWrap">
+                                                <svg className="db_overallRingSvg" width="56" height="56" viewBox="0 0 56 56">
+                                                    <circle 
+                                                        className="db_overallRingBg" 
+                                                        cx="28" cy="28" r={overallRadius} 
+                                                        strokeWidth="5" fill="transparent" 
+                                                    />
+                                                    <circle 
+                                                        className="db_overallRingFg" 
+                                                        cx="28" cy="28" r={overallRadius} 
+                                                        strokeWidth="5" fill="transparent" 
+                                                        strokeDasharray={overallCircumference}
+                                                        strokeDashoffset={overallOffset}
+                                                    />
+                                                </svg>
+                                                <div className="db_overallRingText">{overallProgress}%</div>
                                             </div>
-                                            <span className={styles.continueProgressText}>{recentCourse.progress}%</span>
-                                        </div>
-                                    </div>
-                                    <span 
-                                        className={styles.continueBtn}
-                                        title="Resume learning"
-                                    >
-                                        <i className="fas fa-play"></i>
-                                    </span>
-                                </MotionA>
-                            ) : (
-                                <MotionDiv 
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ duration: 0.5, delay: 0.1 }}
-                                    className={styles.continueStripEmpty}
-                                >
-                                    <p className={styles.continueEmptyText}>
-                                        <i className="fas fa-compass"></i> Ready to start your learning journey? Explore our course catalog to get started!
-                                    </p>
-                                    <a 
-                                        href={`${window.__CONTEXT_PATH__}/student/courses`}
-                                        className={styles.btnResume}
-                                        style={{ padding: '8px 16px', fontSize: '0.82rem' }}
-                                    >
-                                        Browse Catalog <i className="fas fa-arrow-right" style={{ fontSize: '0.75rem' }}></i>
-                                    </a>
-                                </MotionDiv>
-                            )}
-
-                            {/* KPI Navigation Grid (Correctly Linked) */}
-                            <section className={styles.kpiGrid}>
-                                <a href={`${window.__CONTEXT_PATH__}/student/my-enrollments`} className={styles.kpiCard} style={{ textDecoration: 'none' }}>
-                                    <div className={styles.kpiIconWrapper}>
-                                        <i className="fas fa-book-open"></i>
-                                    </div>
-                                    <div className={styles.kpiInfo}>
-                                        <span className={styles.kpiNum}>{courses.length}</span>
-                                        <h4 className={styles.kpiLabel}>Active Courses</h4>
-                                    </div>
-                                </a>
-
-                                <div className={styles.kpiCard}>
-                                    <div className={styles.kpiIconWrapper}>
-                                        <i className="far fa-clock"></i>
-                                    </div>
-                                    <div className={styles.kpiInfo}>
-                                        <span className={styles.kpiNum}>{totalHours}h</span>
-                                        <h4 className={styles.kpiLabel}>Learning Hours</h4>
-                                    </div>
-                                </div>
-
-                                <a href={`${window.__CONTEXT_PATH__}/student/certificates`} className={styles.kpiCard} style={{ textDecoration: 'none' }}>
-                                    <div className={styles.kpiIconWrapper}>
-                                        <i className="fas fa-certificate"></i>
-                                    </div>
-                                    <div className={styles.kpiInfo}>
-                                        <span className={styles.kpiNum}>{certificatesCount}</span>
-                                        <h4 className={styles.kpiLabel}>Certificates</h4>
-                                    </div>
-                                </a>
-                            </section>
-
-                            {/* Task 4: Interactive Activity Analytics (Recharts) */}
-                            {window.Recharts && (
-                                <section className={styles.chartCard}>
-                                    <div className={styles.chartHeader}>
-                                        <div>
-                                            <h3 className={styles.sectionTitle}>Learning Activity</h3>
-                                            <p className={styles.sectionSubtitle} style={{ margin: 0 }}>Duration logged across materials and exams in the past 7 days</p>
-                                        </div>
-                                        <div className={styles.chartLegend}>
-                                            <div className={styles.legendItem}>
-                                                <span className={styles.legendDot}></span>
-                                                <span>Active Minutes</span>
+                                            <div className="db_overallLabel">
+                                                <span className="db_overallTitle">Overall Progress</span>
+                                                <span className="db_overallSub">Across all courses</span>
                                             </div>
                                         </div>
+                                    )}
+                                </header>
+
+                                {/* ── KPI Summary Grid ── */}
+                                <section className="db_kpiGrid">
+                                    <div className="db_kpiBlock">
+                                        <div className="db_kpiIcon blue">
+                                            <i data-lucide="book-open" style={{ width: 20, height: 20 }}></i>
+                                        </div>
+                                        <div className="db_kpiContent">
+                                            <span className="db_kpiNum">{enrolledCount}</span>
+                                            <span className="db_kpiLabel">Total Enrolled</span>
+                                        </div>
                                     </div>
-                                    <div style={{ width: '100%', height: '240px' }}>
-                                        <ResponsiveContainer width="100%" height="100%">
-                                            <AreaChart data={activityData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
-                                                <defs>
-                                                    <linearGradient id="colorMinutes" x1="0" y1="0" x2="0" y2="1">
-                                                        <stop offset="5%" stopColor="#6366f1" stopOpacity={0.15}/>
-                                                        <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
-                                                    </linearGradient>
-                                                </defs>
-                                                <CartesianGrid vertical={false} horizontal={false} />
-                                                <XAxis dataKey="day" stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} />
-                                                <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} />
-                                                <Tooltip content={<CustomTooltip />} />
-                                                <Area 
-                                                    type="monotone" 
-                                                    dataKey="Minutes" 
-                                                    stroke="#6366f1" 
-                                                    strokeWidth={3} 
-                                                    fillOpacity={1} 
-                                                    fill="url(#colorMinutes)" 
-                                                />
-                                            </AreaChart>
-                                        </ResponsiveContainer>
+                                    <div className="db_kpiBlock">
+                                        <div className="db_kpiIcon green">
+                                            <i data-lucide="play-circle" style={{ width: 20, height: 20 }}></i>
+                                        </div>
+                                        <div className="db_kpiContent">
+                                            <span className="db_kpiNum">{activeCount}</span>
+                                            <span className="db_kpiLabel">In Progress</span>
+                                        </div>
+                                    </div>
+                                    <div className="db_kpiBlock">
+                                        <div className="db_kpiIcon violet">
+                                            <i data-lucide="check-circle-2" style={{ width: 20, height: 20 }}></i>
+                                        </div>
+                                        <div className="db_kpiContent">
+                                            <span className="db_kpiNum">{completedCount}</span>
+                                            <span className="db_kpiLabel">Completed</span>
+                                        </div>
+                                    </div>
+                                    <div className="db_kpiBlock">
+                                        <div className="db_kpiIcon amber">
+                                            <i data-lucide="award" style={{ width: 20, height: 20 }}></i>
+                                        </div>
+                                        <div className="db_kpiContent">
+                                            <span className="db_kpiNum">{certificatesCount}</span>
+                                            <span className="db_kpiLabel">Certificates</span>
+                                        </div>
                                     </div>
                                 </section>
-                            )}
 
-                            {/* Task 5: Enrolled Courses Grid */}
-                            <section>
-                                <h3 className={styles.sectionTitle}>Enrolled Courses</h3>
-                                <p className={styles.sectionSubtitle}>Resume classes, materials, and track current performance milestones.</p>
-                                
-                                {courses.length === 0 ? (
-                                    <div className={styles.emptyState}>
-                                        <div class={styles.emptyIcon}>
-                                            <i className="fas fa-graduation-cap"></i>
-                                        </div>
-                                        <h3>Explore Learning Programs</h3>
-                                        <p>You do not have any enrolled courses yet. Visit the catalog to unlock interactive sylabbuses.</p>
-                                        <a href={`${window.__CONTEXT_PATH__}/student/courses`} className={styles.btnResume} style={{ marginTop: '8px' }}>
-                                            Browse Course Catalog
-                                        </a>
+                                {/* ── Continue Learning Section ── */}
+                                <section className="db_section">
+                                    <div className="db_sectionHeader">
+                                        <h3 className="db_sectionTitle">Continue Learning</h3>
+                                        {activeCourses.length > 0 && (
+                                            <a href={window.__CONTEXT_PATH__ + "/student/my-enrollments"} className="db_sectionAction">
+                                                View all <i data-lucide="arrow-right" style={{ width: 14, height: 14 }}></i>
+                                            </a>
+                                        )}
                                     </div>
-                                ) : (
-                                    <div className={styles.courseGrid}>
-                                        {courses.map((course) => {
-                                            const radius = 18;
-                                            const circumference = 2 * Math.PI * radius; // ~113.1
-                                            const offset = circumference - (course.progress / 100) * circumference;
-                                            const statusClass = course.completionStatus === 'Completed' ? 'done' : (course.completionStatus === 'In Progress' ? 'live' : 'hold');
-                                            
-                                            return (
-                                                <a 
-                                                    key={course.enrollmentId} 
-                                                    href={`${window.__CONTEXT_PATH__}/student/enrollment-details?id=${course.enrollmentId}`}
-                                                    className={styles.courseCard}
-                                                >
-                                                    <div className={styles.courseBannerWrap}>
-                                                        {course.courseBanner ? (
-                                                            <img 
-                                                                src={course.courseBanner.startsWith('http') ? course.courseBanner : `${window.__CONTEXT_PATH__}/${course.courseBanner}`} 
-                                                                alt=""
-                                                                className={styles.courseBanner}
-                                                            />
-                                                        ) : (
-                                                            <div className={styles.courseBannerEmpty}>
-                                                                <i className="fas fa-book-open"></i>
-                                                            </div>
-                                                        )}
-                                                        <span className={`${styles.courseStatus} ${statusClass}`}>
-                                                            {course.completionStatus}
-                                                        </span>
-                                                    </div>
-
-                                                    <div className={styles.courseBody}>
-                                                        <div className={styles.courseInfo}>
-                                                            <h4 className={styles.courseTitle}>{course.courseName}</h4>
-                                                            <p className={styles.courseInstructor}>
-                                                                By <strong>{course.instructorName}</strong>
-                                                            </p>
-                                                        </div>
-
-                                                        <div className={styles.progressCircularContainer}>
-                                                            <div className={styles.progressRingWrapper}>
-                                                                <svg className={styles.svgRing} width="48" height="48" viewBox="0 0 48 48">
-                                                                    <circle 
-                                                                        className={styles.ringBg} 
-                                                                        cx="24" 
-                                                                        cy="24" 
-                                                                        r={radius} 
-                                                                        strokeWidth="4.5" 
-                                                                        fill="transparent" 
-                                                                    />
-                                                                    <circle 
-                                                                        className={styles.ringFg} 
-                                                                        cx="24" 
-                                                                        cy="24" 
-                                                                        r={radius} 
-                                                                        strokeWidth="4.5" 
-                                                                        fill="transparent" 
-                                                                        strokeDasharray={circumference}
-                                                                        strokeDashoffset={offset}
-                                                                    />
-                                                                </svg>
-                                                                <div className={styles.ringText}>{course.progress}%</div>
-                                                            </div>
-                                                            <span className={styles.progressActionHint}>
-                                                                Resume <i className="fas fa-arrow-right" style={{ fontSize: '0.75rem' }}></i>
+                                    {activeCourses.length > 0 ? (
+                                        <div className="db_courseGrid">
+                                            {activeCourses.map((course) => {
+                                                const statusClass = course.completionStatus === 'Completed' ? 'done' : (course.completionStatus === 'In Progress' ? 'live' : 'hold');
+                                                
+                                                return (
+                                                    <a 
+                                                        key={course.enrollmentId} 
+                                                        href={window.__CONTEXT_PATH__ + "/student/enrollment-details?id=" + course.enrollmentId}
+                                                        className="db_courseCard"
+                                                    >
+                                                        <div className="db_courseBannerWrap">
+                                                            {course.courseBanner ? (
+                                                                <img 
+                                                                    src={course.courseBanner.startsWith('http') ? course.courseBanner : window.__CONTEXT_PATH__ + "/" + course.courseBanner} 
+                                                                    alt=""
+                                                                    className="db_courseBanner"
+                                                                />
+                                                            ) : (
+                                                                <div className="db_courseBannerEmpty">
+                                                                    <i data-lucide="book-open" style={{ width: 32, height: 32 }}></i>
+                                                                </div>
+                                                            )}
+                                                            <span className={"db_courseStatus " + statusClass}>
+                                                                {course.completionStatus}
                                                             </span>
                                                         </div>
-                                                    </div>
-                                                </a>
-                                            );
-                                        })}
-                                    </div>
+
+                                                        <div className="db_courseBody">
+                                                            <div className="db_courseInfo">
+                                                                <h4 className="db_courseTitle">{course.courseName}</h4>
+                                                                <p className="db_courseInstructor">
+                                                                    By <strong>{course.instructorName}</strong>
+                                                                </p>
+                                                            </div>
+
+                                                            <div className="db_courseFooter">
+                                                                <div className="db_progressBarWrap">
+                                                                    <span className="db_progressLabel">{course.progress}% complete</span>
+                                                                    <div className="db_progressTrack">
+                                                                        <div 
+                                                                            className="db_progressFill" 
+                                                                            style={{ width: course.progress + '%' }}
+                                                                        ></div>
+                                                                    </div>
+                                                                </div>
+                                                                <span className="db_resumeHint">
+                                                                    Resume <i data-lucide="arrow-right" style={{ width: 14, height: 14 }}></i>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </a>
+                                                );
+                                            })}
+                                        </div>
+                                    ) : (
+                                        <div className="db_emptyStrip">
+                                            <p className="db_emptyText">
+                                                <i data-lucide="compass" style={{ width: 20, height: 20, color: '#3b82f6' }}></i>
+                                                Ready to start your learning journey? Explore our course catalog.
+                                            </p>
+                                            <a href={window.__CONTEXT_PATH__ + "/student/courses"} className="db_exploreBtn">
+                                                Browse Catalog <i data-lucide="arrow-right" style={{ width: 14, height: 14 }}></i>
+                                            </a>
+                                        </div>
+                                    )}
+                                </section>
+
+                                {/* ── Quick Actions ── */}
+                                <section className="db_quickActions">
+                                    <a href={window.__CONTEXT_PATH__ + "/student/courses"} className="db_quickAction">
+                                        <div className="db_quickActionIcon">
+                                            <i data-lucide="compass" style={{ width: 18, height: 18 }}></i>
+                                        </div>
+                                        <div className="db_quickActionText">
+                                            <span className="db_quickActionTitle">Browse Courses</span>
+                                            <span className="db_quickActionSub">Discover new learning paths</span>
+                                        </div>
+                                    </a>
+                                    <a href={window.__CONTEXT_PATH__ + "/student/certificates"} className="db_quickAction">
+                                        <div className="db_quickActionIcon" style={{ background: 'rgba(139,92,246,0.08)', color: '#8b5cf6' }}>
+                                            <i data-lucide="award" style={{ width: 18, height: 18 }}></i>
+                                        </div>
+                                        <div className="db_quickActionText">
+                                            <span className="db_quickActionTitle">My Certificates</span>
+                                            <span className="db_quickActionSub">View and download earned certificates</span>
+                                        </div>
+                                    </a>
+                                    <a href={window.__CONTEXT_PATH__ + "/student/payments"} className="db_quickAction">
+                                        <div className="db_quickActionIcon" style={{ background: 'rgba(16,185,129,0.08)', color: '#10b981' }}>
+                                            <i data-lucide="receipt" style={{ width: 18, height: 18 }}></i>
+                                        </div>
+                                        <div className="db_quickActionText">
+                                            <span className="db_quickActionTitle">Payment History</span>
+                                            <span className="db_quickActionSub">Review transaction records</span>
+                                        </div>
+                                    </a>
+                                </section>
+
+                                {/* ── Activity Chart ── */}
+                                {window.Recharts && (
+                                    <section className="db_chartCard">
+                                        <div className="db_chartHeader">
+                                            <div className="db_chartTitleWrap">
+                                                <h3 className="db_sectionTitle">Weekly Study Activity</h3>
+                                                <p className="db_subtitle">Daily active study minutes across courses and assessments</p>
+                                            </div>
+                                        </div>
+                                        <div style={{ width: '100%', height: '220px' }}>
+                                            <ResponsiveContainer width="100%" height="100%">
+                                                <AreaChart data={activityData} margin={{ top: 8, right: 8, left: -28, bottom: 0 }}>
+                                                    <defs>
+                                                        <linearGradient id="colorMinutes" x1="0" y1="0" x2="0" y2="1">
+                                                            <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.12}/>
+                                                            <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                                                        </linearGradient>
+                                                    </defs>
+                                                    <CartesianGrid vertical={false} horizontal={false} />
+                                                    <XAxis dataKey="day" stroke="#94a3b8" fontSize={11} fontWeight={600} tickLine={false} axisLine={false} />
+                                                    <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} />
+                                                    <Tooltip content={<CustomTooltip />} />
+                                                    <Area 
+                                                        type="monotone" 
+                                                        dataKey="Minutes" 
+                                                        stroke="#3b82f6" 
+                                                        strokeWidth={2.5} 
+                                                        fillOpacity={1} 
+                                                        fill="url(#colorMinutes)" 
+                                                    />
+                                                </AreaChart>
+                                            </ResponsiveContainer>
+                                        </div>
+                                    </section>
                                 )}
-                            </section>
+
+                            </MotionDiv>
                         </div>
                     );
                 }

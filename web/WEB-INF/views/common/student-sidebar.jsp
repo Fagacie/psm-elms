@@ -94,113 +94,113 @@
     </c:otherwise>
 </c:choose>
 
-<aside class="sv-sidebar" id="svSidebar" aria-label="Sidebar navigation">
-    <div class="sv-sidebar-shell">
-        <nav class="sv-nav" aria-label="Primary navigation">
+<aside class="nav_mod_sidebar" id="svSidebar" aria-label="Sidebar navigation">
+    <div class="nav_mod_sidebar_shell">
+        <nav class="nav_mod_nav" aria-label="Primary navigation">
             <c:choose>
                 <c:when test="${resolvedNavContext == 'course' and not empty resolvedCourseEnrollmentId}">
-                    <div class="sv-nav-group" aria-label="Course section tabs">
+                    <div class="nav_mod_nav_group" aria-label="Course section tabs">
                         <a href="${pageContext.request.contextPath}/student/enrollment-details?id=${resolvedCourseEnrollmentId}&tab=overview"
-                           class="sv-nav-link ${resolvedNavContextPage == 'overview' ? 'active' : ''}"
+                           class="nav_mod_link ${resolvedNavContextPage == 'overview' ? 'active' : ''}"
                            title="Course Overview">
                             <i class="fas fa-table-columns" aria-hidden="true"></i>
-                            <span class="sv-nav-label">Overview</span>
+                            <span class="nav_mod_label">Overview</span>
                         </a>
                         <a href="${pageContext.request.contextPath}/student/enrollment-details?id=${resolvedCourseEnrollmentId}&tab=performance"
-                           class="sv-nav-link ${resolvedNavContextPage == 'performance' ? 'active' : ''}"
+                           class="nav_mod_link ${resolvedNavContextPage == 'performance' ? 'active' : ''}"
                            title="Performance">
                             <i class="fas fa-chart-column" aria-hidden="true"></i>
-                            <span class="sv-nav-label">Performance</span>
+                            <span class="nav_mod_label">Performance</span>
                         </a>
                     </div>
                     <a href="${pageContext.request.contextPath}/dashboard"
-                       class="sv-nav-link"
+                       class="nav_mod_link"
                        title="Back to Dashboard">
                         <i class="fas fa-arrow-left" aria-hidden="true"></i>
-                        <span class="sv-nav-label">Back to Dashboard</span>
+                        <span class="nav_mod_label">Back to Dashboard</span>
                     </a>
                 </c:when>
 
                 <c:when test="${resolvedNavContext == 'assessment'}">
                     <a href="#assQuestionPanel"
-                       class="sv-nav-link ${resolvedNavContextPage == 'questions' ? 'active' : ''}"
+                       class="nav_mod_link ${resolvedNavContextPage == 'questions' ? 'active' : ''}"
                        title="Questions">
                         <i class="fas fa-list-check" aria-hidden="true"></i>
-                        <span class="sv-nav-label">Questions</span>
+                        <span class="nav_mod_label">Questions</span>
                     </a>
                     <a href="#assTimerPanel"
-                       class="sv-nav-link ${resolvedNavContextPage == 'timer' ? 'active' : ''}"
+                       class="nav_mod_link ${resolvedNavContextPage == 'timer' ? 'active' : ''}"
                        title="Timer">
                         <i class="fas fa-stopwatch" aria-hidden="true"></i>
-                        <span class="sv-nav-label">Timer</span>
+                        <span class="nav_mod_label">Timer</span>
                     </a>
                     <a href="#assessmentPrimaryAction"
-                       class="sv-nav-link ${resolvedNavContextPage == 'submit' ? 'active' : ''}"
+                       class="nav_mod_link ${resolvedNavContextPage == 'submit' ? 'active' : ''}"
                        title="Submit">
                         <i class="fas fa-paper-plane" aria-hidden="true"></i>
-                        <span class="sv-nav-label">Submit</span>
+                        <span class="nav_mod_label">Submit</span>
                     </a>
                     <a href="${assessmentExitUrl}"
-                       class="sv-nav-link"
+                       class="nav_mod_link"
                        title="Exit">
                         <i class="fas fa-xmark" aria-hidden="true"></i>
-                        <span class="sv-nav-label">Exit</span>
+                        <span class="nav_mod_label">Exit</span>
                     </a>
                 </c:when>
 
                 <c:otherwise>
                     <%-- Learning Section --%>
-                    <span class="sv-nav-section-label">Learning</span>
+                    <span class="nav_mod_section_label">Learning</span>
                     <a href="${pageContext.request.contextPath}/dashboard"
-                       class="sv-nav-link ${resolvedActivePage == 'dashboard' ? 'active' : ''}"
+                       class="nav_mod_link ${resolvedActivePage == 'dashboard' ? 'active' : ''}"
                        title="Dashboard">
                         <i class="fas fa-table-columns" aria-hidden="true"></i>
-                        <span class="sv-nav-label">Dashboard</span>
+                        <span class="nav_mod_label">Dashboard</span>
                     </a>
                     <a href="${pageContext.request.contextPath}/student/my-enrollments"
-                       class="sv-nav-link ${resolvedActivePage == 'my-courses' ? 'active' : ''}"
+                       class="nav_mod_link ${resolvedActivePage == 'my-courses' ? 'active' : ''}"
                        title="My Courses">
                         <i class="fas fa-book-open-reader" aria-hidden="true"></i>
-                        <span class="sv-nav-label">My Courses</span>
+                        <span class="nav_mod_label">My Courses</span>
                     </a>
                     <a href="${pageContext.request.contextPath}/student/courses"
-                       class="sv-nav-link ${resolvedActivePage == 'browse-courses' ? 'active' : ''}"
+                       class="nav_mod_link ${resolvedActivePage == 'browse-courses' ? 'active' : ''}"
                        title="Browse Courses">
                         <i class="fas fa-compass" aria-hidden="true"></i>
-                        <span class="sv-nav-label">Browse Courses</span>
+                        <span class="nav_mod_label">Browse Courses</span>
                     </a>
 
                     <%-- Resources Section --%>
-                    <div class="sv-nav-divider" aria-hidden="true"></div>
-                    <span class="sv-nav-section-label">Resources</span>
+                    <div class="nav_mod_divider" aria-hidden="true"></div>
+                    <span class="nav_mod_section_label">Resources</span>
                     <a href="${pageContext.request.contextPath}/student/payments"
-                       class="sv-nav-link ${resolvedActivePage == 'payments' ? 'active' : ''}"
+                       class="nav_mod_link ${resolvedActivePage == 'payments' ? 'active' : ''}"
                        title="Payments">
                         <i class="fas fa-receipt" aria-hidden="true"></i>
-                        <span class="sv-nav-label">Payments</span>
+                        <span class="nav_mod_label">Payments</span>
                     </a>
                     <a href="${pageContext.request.contextPath}/student/certificates"
-                       class="sv-nav-link ${resolvedActivePage == 'certificates' ? 'active' : ''}"
+                       class="nav_mod_link ${resolvedActivePage == 'certificates' ? 'active' : ''}"
                        title="Certificates">
                         <i class="fas fa-certificate" aria-hidden="true"></i>
-                        <span class="sv-nav-label">Certificates</span>
+                        <span class="nav_mod_label">Certificates</span>
                     </a>
 
                     <%-- Account Section --%>
-                    <div class="sv-nav-divider" aria-hidden="true"></div>
-                    <span class="sv-nav-section-label">Account</span>
+                    <div class="nav_mod_divider" aria-hidden="true"></div>
+                    <span class="nav_mod_section_label">Account</span>
                     <a href="${pageContext.request.contextPath}/profile"
-                       class="sv-nav-link ${resolvedActivePage == 'profile' ? 'active' : ''}"
+                       class="nav_mod_link ${resolvedActivePage == 'profile' ? 'active' : ''}"
                        title="Profile">
                         <i class="fas fa-user-gear" aria-hidden="true"></i>
-                        <span class="sv-nav-label">Profile</span>
+                        <span class="nav_mod_label">Profile</span>
                     </a>
-                    <div class="sv-nav-spacer" aria-hidden="true"></div>
+                    <div class="nav_mod_spacer" aria-hidden="true"></div>
                     <a href="${pageContext.request.contextPath}/logout"
-                       class="sv-nav-link sv-nav-link-danger sv-nav-link-logout"
+                       class="nav_mod_link nav_mod_link_danger"
                        title="Logout">
                         <i class="fas fa-right-from-bracket" aria-hidden="true"></i>
-                        <span class="sv-nav-label">Logout</span>
+                        <span class="nav_mod_label">Logout</span>
                     </a>
                 </c:otherwise>
             </c:choose>

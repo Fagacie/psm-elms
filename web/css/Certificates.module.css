@@ -1,0 +1,634 @@
+/* Scoped CSS Module for the rewarding Certificates Trophy Room redesign */
+
+.trophy_viewport {
+    background-color: #f8fafc;
+    min-height: 100vh;
+    padding-bottom: 60px;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+.trophy_pageWrapper {
+    min-height: 100vh;
+    width: 100%;
+    background-color: #f8fafc !important;
+    padding: 0 !important;
+    box-sizing: border-box;
+}
+
+.trophy_container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 24px;
+    box-sizing: border-box;
+}
+
+.trophy_header {
+    margin-bottom: 36px;
+}
+
+.trophy_title {
+    font-size: 2.25rem;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: -0.03em;
+    margin: 0 0 8px 0;
+}
+
+.trophy_subtitle {
+    font-size: 1rem;
+    color: #64748b;
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* Trophy CSS Grid (Task 3) */
+.trophy_grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 2.5rem;
+    margin-bottom: 48px;
+}
+
+/* Trophy Premium Certificate Card (Task 4) */
+.trophy_card {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05) !important;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.trophy_card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Framed Landscape Thumbnail Preview */
+.trophy_thumbnailArea {
+    aspect-ratio: 16/9;
+    width: 100%;
+    border-bottom: 1px solid #f1f5f9;
+    background: linear-gradient(135deg, #f8fafc 0%, #edf2f7 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+.trophy_thumbnailFrame {
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    padding: 16px;
+    background: #ffffff;
+    width: 72%;
+    aspect-ratio: 16/9;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 6px 12px -2px rgba(0, 0, 0, 0.06);
+    box-sizing: border-box;
+    position: relative;
+}
+
+/* Mock Completion Certificate Visual Design inside Frame */
+.trophy_mockHeader {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.trophy_mockGoldSeal {
+    width: 20px;
+    height: 20px;
+    background: #eab308;
+    border-radius: 50%;
+    margin-bottom: 2px;
+}
+
+.trophy_mockCertTitle {
+    font-size: 0.45rem;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.trophy_mockBody {
+    text-align: center;
+}
+
+.trophy_mockStudentName {
+    font-size: 0.55rem;
+    font-weight: 700;
+    color: #2563eb;
+    margin-bottom: 2px;
+}
+
+.trophy_mockText {
+    font-size: 0.3rem;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.trophy_mockFooter {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 4px;
+}
+
+.trophy_mockSignature {
+    width: 25px;
+    height: 6px;
+    background: #e2e8f0;
+    border-radius: 2px;
+}
+
+.trophy_mockCode {
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    font-size: 0.35rem;
+    color: #94a3b8;
+}
+
+/* Card content body */
+.trophy_cardBody {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    flex-grow: 1;
+    box-sizing: border-box;
+}
+
+.trophy_courseTitle {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0;
+    line-height: 1.45;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: 3.3rem;
+}
+
+.trophy_detailsRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.82rem;
+}
+
+.trophy_issuedDate {
+    color: #64748b;
+    font-weight: 500;
+}
+
+.trophy_credentialId {
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    color: #0f172a;
+    font-weight: 600;
+    background: #f1f5f9;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.78rem;
+}
+
+/* Actions footer */
+.trophy_actionFooter {
+    border-top: 1px solid #f1f5f9;
+    padding: 16px 24px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    background: #fafafa;
+    box-sizing: border-box;
+}
+
+.trophy_actionBtn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.trophy_actionBtn:hover {
+    color: #0f172a;
+    background: #f1f5f9;
+}
+
+.trophy_actionBtnPrimary {
+    color: #2563eb;
+}
+
+.trophy_actionBtnPrimary:hover {
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
+/* Rewarding Empty State Layout (Task 2) */
+.trophy_emptyState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 80px 24px;
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #f1f5f9;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+    max-width: 600px;
+    margin: 40px auto;
+    box-sizing: border-box;
+}
+
+.trophy_emptyIcon {
+    color: #e2e8f0;
+    margin-bottom: 24px;
+}
+
+.trophy_emptyTitle {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 8px 0;
+}
+
+.trophy_emptyText {
+    font-size: 0.95rem;
+    color: #64748b;
+    margin: 0 0 24px 0;
+    max-width: 320px;
+    line-height: 1.5;
+}
+
+.trophy_primaryBtn {
+    background: #0f172a;
+    color: #ffffff;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.15s ease;
+}
+
+.trophy_primaryBtn:hover {
+    background: #1e293b;
+}
+
+/* Secondary Panels: Completed & Blocked */
+.trophy_sectionsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
+    gap: 2rem;
+    margin-top: 48px;
+}
+
+@media (max-width: 768px) {
+    .trophy_sectionsGrid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.trophy_sectionCard {
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #f1f5f9;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    box-sizing: border-box;
+}
+
+.trophy_sectionTitle {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0;
+}
+
+.trophy_sectionDesc {
+    font-size: 0.88rem;
+    color: #64748b;
+    margin: 4px 0 0 0;
+    line-height: 1.5;
+}
+
+.trophy_tableWrap {
+    overflow-x: auto;
+}
+
+.trophy_table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.trophy_table th {
+    padding: 12px;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    color: #64748b;
+    border-bottom: 1px solid #f1f5f9;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+}
+
+.trophy_table td {
+    padding: 16px 12px;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+}
+
+.trophy_table tr:last-child td {
+    border-bottom: none;
+}
+
+.trophy_tableCourse {
+    font-weight: 600;
+    color: #0f172a;
+    font-size: 0.95rem;
+}
+
+.trophy_generateBtn {
+    background: #2563eb;
+    color: #ffffff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: background-color 0.15s ease;
+    text-decoration: none;
+}
+
+.trophy_generateBtn:hover {
+    background-color: #1d4ed8;
+}
+
+.trophy_chipGroup {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.trophy_chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 600;
+}
+
+.trophy_chipSuccess {
+    background: #ecfdf5;
+    color: #059669;
+}
+
+.trophy_chipPending {
+    background: #fffbeb;
+    color: #d97706;
+}
+
+/* Toast banner */
+.trophy_toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #0f172a;
+    color: #ffffff;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Scoped Ready to Generate Dashboard Widget */
+.trophy_readySection {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 36px;
+    width: 100%;
+}
+
+.trophy_readyCard {
+    background: transparent !important;
+    border: none !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+    border-radius: 0 !important;
+    padding: 16px 0 !important;
+    box-shadow: none !important;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    box-sizing: border-box;
+}
+
+.trophy_readyCard:last-child {
+    border-bottom: none !important;
+}
+
+@media (max-width: 768px) {
+    .trophy_readyCard {
+        flex-direction: row;
+        align-items: center;
+        gap: 16px;
+    }
+}
+
+.trophy_readyLeft {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.trophy_readyBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    width: fit-content;
+}
+
+.trophy_readyCourseTitle {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0;
+}
+
+.trophy_readyRight {
+    display: flex;
+    align-items: center;
+}
+
+/* Premium Download Icon Action Buttons */
+.trophy_primaryViewBtn {
+    background: #0f172a !important;
+    color: #ffffff !important;
+    border: 1px solid #0f172a !important;
+    border-radius: 8px !important;
+    padding: 10px 16px;
+    font-size: 0.84rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.15s ease;
+    text-decoration: none;
+    width: 100%;
+    box-sizing: border-box;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+.trophy_primaryViewBtn:hover {
+    background: #1e293b !important;
+    border-color: #1e293b !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+}
+
+.trophy_iconBtn {
+    background: #f8fafc !important;
+    color: #475569 !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 8px !important;
+    width: 40px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+    cursor: pointer;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.trophy_iconBtn:hover {
+    background: #f1f5f9 !important;
+    color: #0f172a !important;
+    border-color: #cbd5e1 !important;
+}
+
+/* Search and Filters */
+.trophy_filterBar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 32px;
+}
+
+.trophy_searchContainer {
+    position: relative;
+    width: 100%;
+    max-width: 320px;
+}
+
+.trophy_searchInput {
+    width: 100%;
+    height: 40px;
+    padding: 0 16px 0 38px;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+    color: #0f172a;
+    font-size: 0.88rem;
+    outline: none;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+}
+
+.trophy_searchInput:focus {
+    border-color: #0f172a;
+    box-shadow: 0 0 0 2px rgba(15, 23, 42, 0.05);
+}
+
+.trophy_searchIcon {
+    position: absolute;
+    left: 12px;
+    top: 11px;
+    color: #94a3b8;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.trophy_filterGroup {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.trophy_filterBtn {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    color: #475569;
+    font-size: 0.88rem;
+    font-weight: 500;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.trophy_filterBtn:hover {
+    background: #f8fafc;
+    color: #0f172a;
+    border-color: #cbd5e1;
+}
+
+.trophy_filterBtnActive {
+    background: #0f172a !important;
+    color: #ffffff !important;
+    border-color: #0f172a !important;
+}
+

@@ -1,0 +1,212 @@
+/* Isolated CSS Module for receipt modal simulating narrow physical thermal ticket */
+
+.history_rm_backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(6px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 24px;
+    box-sizing: border-box;
+}
+
+.history_rm_paper {
+    width: 400px;
+    max-width: 95vw;
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    position: relative;
+    overflow: hidden;
+    padding: 36px 32px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    page-break-inside: avoid;
+}
+
+.history_rm_closeBtn {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: #94a3b8;
+    padding: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.15s ease;
+    z-index: 10;
+}
+
+.history_rm_closeBtn:hover {
+    color: #0f172a;
+    background: #f1f5f9;
+}
+
+/* Printable content targeted by React ref */
+.history_rm_printableArea {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    background: #ffffff;
+}
+
+.history_rm_header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-bottom: 6px;
+}
+
+.history_rm_thermalIcon {
+    color: #0f172a;
+    margin-bottom: 12px;
+}
+
+.history_rm_platformName {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: 0.05em;
+    margin: 0;
+}
+
+.history_rm_subtitle {
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    font-size: 0.72rem;
+    color: #64748b;
+    margin-top: 4px;
+    letter-spacing: 0.08em;
+}
+
+.history_rm_totalBox {
+    border-top: 2px dashed #cbd5e1;
+    border-bottom: 2px dashed #cbd5e1;
+    padding: 16px 0;
+    margin: 20px 0;
+    text-align: center;
+    width: 100%;
+}
+
+.history_rm_totalLabel {
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    font-size: 0.78rem;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.history_rm_totalAmount {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 4px 0 0 0;
+    letter-spacing: -0.02em;
+}
+
+.history_rm_dashedDivider {
+    border-bottom: 2px dashed #cbd5e1;
+    margin: 20px 0;
+    width: 100%;
+}
+
+.history_rm_lineItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    font-size: 0.88rem;
+    margin-bottom: 12px;
+    width: 100%;
+}
+
+.history_rm_lineItem:last-child {
+    margin-bottom: 0;
+}
+
+.history_rm_label {
+    color: #64748b;
+    font-weight: 500;
+}
+
+.history_rm_monospace {
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    color: #0f172a;
+    font-weight: 600;
+    text-align: right;
+    max-width: 220px;
+    word-break: break-word;
+}
+
+/* Mock Barcode stripes */
+.history_rm_barcodeContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 28px;
+    gap: 6px;
+}
+
+.history_rm_barcodeStripes {
+    height: 40px;
+    width: 100%;
+    max-width: 220px;
+    background: repeating-linear-gradient(
+        90deg,
+        #0f172a,
+        #0f172a 2px,
+        #ffffff 2px,
+        #ffffff 6px,
+        #0f172a 6px,
+        #0f172a 9px
+    );
+    opacity: 0.85;
+}
+
+.history_rm_barcodeText {
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    font-size: 0.72rem;
+    color: #64748b;
+    letter-spacing: 0.15em;
+}
+
+/* Receipt Footer Message */
+.history_rm_footer {
+    margin-top: 24px;
+    text-align: center;
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    font-size: 0.75rem;
+    color: #64748b;
+    line-height: 1.5;
+}
+
+.history_rm_downloadBtn {
+    background: #0f172a;
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    padding: 14px 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 28px;
+    transition: background-color 0.15s ease;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.history_rm_downloadBtn:hover {
+    background-color: #1e293b;
+}

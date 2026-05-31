@@ -31,71 +31,71 @@
     </c:choose>
 </c:if>
 
-<header class="sv-topbar">
-    <div class="sv-top-left">
+<header class="nav_mod_topbar">
+    <div class="nav_mod_top_left">
         <c:if test="${topbarShowMenu != false}">
-            <button class="sv-shell-toggle" id="svShellToggle" type="button" aria-label="Toggle navigation" aria-expanded="false">
-                <i class="fas fa-bars-staggered" aria-hidden="true"></i>
+            <button class="nav_mod_toggle" id="svShellToggle" type="button" aria-label="Toggle navigation" aria-expanded="false">
+                <i class="fas fa-bars" aria-hidden="true"></i>
             </button>
         </c:if>
 
-        <a href="${pageContext.request.contextPath}/dashboard" class="sv-brand" aria-label="PSM E-Learning home">
-            <span class="sv-brand-main">PSM</span>
-            <span class="sv-brand-sub">E-Learning</span>
+        <a href="${pageContext.request.contextPath}/dashboard" class="nav_mod_brand" aria-label="PSM E-Learning home">
+            <span class="nav_mod_brand_main">PSM</span>
+            <span class="nav_mod_brand_sub">E-Learning</span>
         </a>
 
-        <div class="sv-page-title">
+        <div class="nav_mod_page_title">
             <h1><c:out value="${resolvedStudentTitle}"/></h1>
         </div>
     </div>
 
-    <div class="sv-top-right">
-        <div class="sv-popover sv-notification-wrap" id="svNotificationWrap">
-            <button type="button" class="sv-top-icon-btn" id="svNotificationBtn" aria-haspopup="true" aria-expanded="false" aria-label="Notifications">
+    <div class="nav_mod_top_right">
+        <div class="nav_mod_popover" id="svNotificationWrap">
+            <button type="button" class="nav_mod_icon_btn" id="svNotificationBtn" aria-haspopup="true" aria-expanded="false" aria-label="Notifications">
                 <i class="fas fa-bell" aria-hidden="true"></i>
                 <c:if test="${topbarNotificationCount > 0}">
-                    <span class="sv-top-badge">${topbarNotificationCount}</span>
+                    <span class="nav_mod_badge">${topbarNotificationCount}</span>
                 </c:if>
             </button>
-            <div class="sv-popover-panel sv-notification-panel" id="svNotificationPanel" role="menu" aria-label="Notifications">
-                <div class="sv-popover-head">
+            <div class="nav_mod_popover_panel" id="svNotificationPanel" role="menu" aria-label="Notifications">
+                <div class="nav_mod_popover_head">
                     <strong>Notifications</strong>
                     <small><c:out value="${topbarNotificationCount > 0 ? 'Unread updates available' : 'You are all caught up'}"/></small>
                 </div>
-                <div class="sv-popover-body">
+                <div class="nav_mod_popover_body">
                     <p><c:out value="${topbarNotificationCount > 0 ? 'New course and progress notifications will appear here.' : 'No new alerts right now. Keep learning.'}"/></p>
                 </div>
             </div>
         </div>
 
-        <button type="button" class="theme-toggle" data-theme-toggle aria-pressed="false" aria-label="Switch to dark mode" title="Switch to dark mode">
+        <button type="button" class="nav_mod_theme_toggle" data-theme-toggle aria-pressed="false" aria-label="Switch to dark mode" title="Switch to dark mode">
             <i class="fas fa-moon" aria-hidden="true"></i>
             <span class="theme-toggle-label">Dark mode</span>
         </button>
 
-        <div class="sv-profile-dropdown" id="svProfileDropdown">
-            <button type="button" class="sv-profile-trigger" id="svProfileMenuBtn" aria-haspopup="true" aria-expanded="false">
-                <span class="sv-profile-copy">
-                    <span class="sv-profile-name"><c:out value="${topbarUserName}"/></span>
-                </span>
-                <span class="sv-avatar-shell">
+        <div class="nav_mod_profile_dropdown" id="svProfileDropdown">
+            <button type="button" class="nav_mod_profile_trigger" id="svProfileMenuBtn" aria-haspopup="true" aria-expanded="false">
+                <span class="nav_mod_avatar">
                     <c:choose>
                         <c:when test="${not empty topbarProfilePicture}">
                             <c:choose>
-                                <c:when test="${fn:startsWith(topbarProfilePicture, 'http')}"><img src="${topbarProfilePicture}" alt="Profile" class="sv-avatar-img"></c:when>
-                                <c:otherwise><img src="${pageContext.request.contextPath}${topbarProfilePicture}" alt="Profile" class="sv-avatar-img"></c:otherwise>
+                                <c:when test="${fn:startsWith(topbarProfilePicture, 'http')}"><img src="${topbarProfilePicture}" alt="Profile"></c:when>
+                                <c:otherwise><img src="${pageContext.request.contextPath}${topbarProfilePicture}" alt="Profile"></c:otherwise>
                             </c:choose>
                         </c:when>
-                        <c:otherwise><span class="sv-avatar-fallback"><c:out value="${topbarInitials}"/></span></c:otherwise>
+                        <c:otherwise><span class="nav_mod_avatar_fallback"><c:out value="${topbarInitials}"/></span></c:otherwise>
                     </c:choose>
+                </span>
+                <span class="nav_mod_profile_copy">
+                    <span class="nav_mod_profile_name"><c:out value="${topbarUserName}"/></span>
                 </span>
                 <i class="fas fa-angle-down" aria-hidden="true"></i>
             </button>
 
-            <div class="sv-profile-menu" id="svProfileMenu" role="menu" aria-label="Profile menu">
+            <div class="nav_mod_profile_menu" id="svProfileMenu" role="menu" aria-label="Profile menu">
                 <a href="${pageContext.request.contextPath}/profile" role="menuitem"><i class="fas fa-user"></i> Profile</a>
                 <a href="${pageContext.request.contextPath}/student/my-enrollments" role="menuitem"><i class="fas fa-book-open"></i> My Courses</a>
-                <a href="${pageContext.request.contextPath}/logout" role="menuitem" class="sv-logout"><i class="fas fa-right-from-bracket"></i> Logout</a>
+                <a href="${pageContext.request.contextPath}/logout" role="menuitem" class="nav_mod_logout_link"><i class="fas fa-right-from-bracket"></i> Logout</a>
             </div>
         </div>
     </div>

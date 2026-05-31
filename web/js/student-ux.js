@@ -281,7 +281,7 @@ const StudentUX = (function() {
 
     function initMicroAnimations() {
         // Soft scale-up / pulse on sidebar nav hover/click
-        const navLinks = document.querySelectorAll('.sv-nav-link');
+        const navLinks = document.querySelectorAll('.sv-nav-link, .nav_mod_link');
         navLinks.forEach(link => {
             link.addEventListener('click', function(e) {
                 // Play a brief click scale effect

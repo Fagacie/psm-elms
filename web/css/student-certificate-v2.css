@@ -186,7 +186,7 @@ body.sc-immersive-body::-webkit-scrollbar-thumb {
   content: "";
   position: absolute;
   inset: 22px;
-  border: 2px solid #1e293b !important; /* Thick main border */
+  border: 3px solid #1e293b !important; /* Thick main border */
   pointer-events: none;
   z-index: 5;
 }
@@ -257,7 +257,7 @@ body.sc-immersive-body::-webkit-scrollbar-thumb {
 }
 
 .sc-recipient-name {
-  font-family: 'Playfair Display', Georgia, "Times New Roman", serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 2.35rem;
   font-weight: 700;
   color: #0f172a !important;
