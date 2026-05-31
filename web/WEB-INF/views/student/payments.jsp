@@ -9,18 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Payment History - PSM E-Learning</title>
     <jsp:include page="/WEB-INF/views/common/student-head-assets.jsp"/>
-    
-    <!-- CSS Modules Isolated Stylesheets -->
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/PaymentHistory.module.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/ReceiptModal.module.css">
-    
-    <!-- React, Animation & html2pdf CDNs -->
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/enrollment-flow-v2.css">
 </head>
 <body class="sv-page">
 <c:set var="topbarTitle" value="Payment History"/>
@@ -41,303 +30,408 @@
             <span>Payments</span>
         </div>
 
-        <!-- React Root Mounting Target -->
-        <div id="payment-history-react-root"></div>
+        <section class="sv-card" style="border-radius: 16px; border: 1px solid var(--sv-border); background: var(--sv-surface); padding: 24px; margin-bottom: 20px;">
+            <div style="display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; align-items: start; margin-bottom: 20px;">
+                <div style="max-width: 760px;">
+                    <h2 style="margin: 0 0 8px; font-size: 1.5rem; font-weight: 800; letter-spacing: -0.03em; color: var(--sv-foreground);">Payment history</h2>
+                    <p style="margin: 0; color: var(--sv-muted); line-height: 1.6;">Track every transaction linked to your enrollments, then open a simple receipt modal for the full record.</p>
+                </div>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <a class="sv-btn" href="${pageContext.request.contextPath}/student/courses"><i class="fas fa-compass"></i> Browse Courses</a>
+                    <a class="sv-btn primary" href="${pageContext.request.contextPath}/student/my-enrollments"><i class="fas fa-book-open-reader"></i> My Courses</a>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px;">
+                <div style="border: 1px solid var(--sv-border); border-radius: 12px; background: var(--sv-surface-soft); padding: 16px;">
+                    <span style="display: block; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sv-muted); margin-bottom: 6px;">Transactions</span>
+                    <strong style="font-size: 1.4rem; color: var(--sv-foreground);">${allPaymentCount}</strong>
+                </div>
+                <div style="border: 1px solid var(--sv-border); border-radius: 12px; background: rgba(16, 185, 129, 0.06); padding: 16px;">
+                    <span style="display: block; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sv-muted); margin-bottom: 6px;">Successful</span>
+                    <strong style="font-size: 1.4rem; color: #10b981;">${paidCount}</strong>
+                </div>
+                <div style="border: 1px solid var(--sv-border); border-radius: 12px; background: rgba(245, 158, 11, 0.08); padding: 16px;">
+                    <span style="display: block; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sv-muted); margin-bottom: 6px;">Pending</span>
+                    <strong style="font-size: 1.4rem; color: #d97706;">${pendingCount}</strong>
+                </div>
+                <div style="border: 1px solid var(--sv-border); border-radius: 12px; background: rgba(239, 68, 68, 0.06); padding: 16px;">
+                    <span style="display: block; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sv-muted); margin-bottom: 6px;">Failed</span>
+                    <strong style="font-size: 1.4rem; color: #ef4444;">${failedCount}</strong>
+                </div>
+            </div>
+        </section>
+
+        <section class="sv-card" style="border-radius: 16px; border: 1px solid var(--sv-border); background: var(--sv-surface); padding: 24px;">
+            <div style="display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; align-items: center; margin-bottom: 22px;">
+                <div>
+                    <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800; color: var(--sv-heading);">Transactions table</h3>
+                    <p style="margin: 4px 0 0; color: var(--sv-muted); font-size: 0.88rem;">Search, sort, or open the receipt action to review your payment details.</p>
+                </div>
+                
+                <%-- Upgraded Advanced Live Controls --%>
+                <div style="display: flex; gap: 14px; flex-wrap: wrap; align-items: center; width: 100%; max-width: 680px; justify-content: flex-end;">
+                    <%-- Live Text Search Box --%>
+                    <div style="position: relative; flex: 1 1 240px; max-width: 320px;">
+                        <input type="search" id="paymentSearchInput" 
+                               placeholder="Search by course name..." 
+                               style="width: 100%; height: 40px; padding: 0 16px 0 38px; border-radius: 10px; border: 1px solid var(--sv-border); background: var(--sv-surface-soft); color: var(--sv-heading); font-size: 0.88rem; outline: none; transition: border-color 0.2s, background-color 0.2s;"
+                               aria-label="Search transactions">
+                        <i class="fas fa-search" style="position: absolute; left: 14px; top: 13px; color: var(--sv-muted); font-size: 0.88rem;" aria-hidden="true"></i>
+                    </div>
+                    
+                    <%-- Client-Side Async Status Filters --%>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;" role="group" aria-label="Filter transactions by status">
+                        <button type="button" class="sv-btn primary" data-status-filter="all">All</button>
+                        <button type="button" class="sv-btn" data-status-filter="paid">Paid</button>
+                        <button type="button" class="sv-btn" data-status-filter="pending">Pending</button>
+                        <button type="button" class="sv-btn" data-status-filter="failed">Failed</button>
+                    </div>
+                </div>
+            </div>
+
+            <c:choose>
+                <c:when test="${empty payments}">
+                    <div class="empty-state-box" style="padding: 44px 18px;">
+                        <i class="fas fa-receipt" aria-hidden="true"></i>
+                        <h3>No payments found</h3>
+                        <p>Once you complete a course payment, the transaction will appear here with a receipt link.</p>
+                    </div>
+                </c:when>
+                <c:otherwise>
+                    <div style="overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: collapse; min-width: 760px;" data-sortable id="paymentTable">
+                            <thead>
+                                <tr style="text-align: left; color: var(--sv-muted); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em;">
+                                    <th style="padding: 14px 12px; border-bottom: 1px solid var(--sv-border);" scope="col">Course</th>
+                                    <th style="padding: 14px 12px; border-bottom: 1px solid var(--sv-border);" scope="col">Amount</th>
+                                    <th style="padding: 14px 12px; border-bottom: 1px solid var(--sv-border);" scope="col">Status</th>
+                                    <th style="padding: 14px 12px; border-bottom: 1px solid var(--sv-border);" scope="col">Date</th>
+                                    <th style="padding: 14px 12px; border-bottom: 1px solid var(--sv-border);" scope="col" data-unsortable>Receipt</th>
+                                </tr>
+                            </thead>
+                            <tbody id="paymentTableBody">
+                                <c:forEach var="payment" items="${payments}">
+                                    <tr style="border-bottom: 1px solid var(--sv-border);">
+                                        <td style="padding: 16px 12px; vertical-align: top;">
+                                            <strong style="display: block; color: var(--sv-foreground);">${payment.courseName}</strong>
+                                        </td>
+                                        <td style="padding: 16px 12px; vertical-align: top; white-space: nowrap;">
+                                            <strong style="color: var(--sv-foreground);">₦<fmt:formatNumber value="${payment.amount}" type="number" minFractionDigits="2" maxFractionDigits="2"/></strong>
+                                        </td>
+                                        <td style="padding: 16px 12px; vertical-align: top;">
+                                            <c:choose>
+                                                <c:when test="${payment.status == 'Paid'}"><span class="sa-status status-Approved">Paid</span></c:when>
+                                                <c:when test="${payment.status == 'Pending'}"><span class="sa-status status-Pending">Pending</span></c:when>
+                                                <c:when test="${payment.status == 'Failed'}"><span class="sa-status status-Archived">Failed</span></c:when>
+                                                <c:otherwise><span class="sa-status status-Pending">${payment.status}</span></c:otherwise>
+                                            </c:choose>
+                                            <div style="margin-top: 6px; color: var(--sv-muted); font-size: 0.8rem;">${not empty payment.method ? payment.method : 'Gateway'}</div>
+                                        </td>
+                                        <td style="padding: 16px 12px; vertical-align: top; white-space: nowrap; color: var(--sv-muted);">
+                                            <c:choose>
+                                                <c:when test="${not empty payment.paymentDate}">${fn:replace(payment.paymentDate, 'T', ' ')}</c:when>
+                                                <c:otherwise>-</c:otherwise>
+                                            </c:choose>
+                                        </td>
+                                        <td style="padding: 16px 12px; vertical-align: top; white-space: nowrap;">
+                                            <button type="button"
+                                                    class="sv-btn primary"
+                                                    style="height: 36px; display: inline-flex; align-items: center; gap: 6px; padding: 0 14px; border-radius: 8px;"
+                                                    data-payment-modal-trigger
+                                                    data-payment-id="${payment.paymentId}"
+                                                    data-payment-course="${fn:escapeXml(payment.courseName)}"
+                                                    data-payment-student="${fn:escapeXml(payment.studentName)}"
+                                                    data-payment-amount="${payment.amount}"
+                                                    data-payment-status="${fn:escapeXml(payment.status)}"
+                                                    data-payment-date="${not empty payment.paymentDate ? fn:replace(payment.paymentDate, 'T', ' ') : '-'}"
+                                                    data-payment-ref="${fn:escapeXml(not empty payment.paymentRef ? payment.paymentRef : '-') }"
+                                                    data-payment-gateway-ref="${fn:escapeXml(not empty payment.paystackReference ? payment.paystackReference : '-') }"
+                                                    data-payment-method="${fn:escapeXml(not empty payment.method ? payment.method : 'Gateway') }"
+                                                    data-payment-enrollment-id="${payment.enrollmentId}">
+                                                <i class="fas fa-file-invoice" aria-hidden="true"></i> Receipt
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </c:forEach>
+                            </tbody>
+                        </table>
+                    </div>
+                </c:otherwise>
+            </c:choose>
+        </section>
     </main>
+</div>
+
+<div id="paymentReceiptModal" style="display: none; position: fixed; inset: 0; z-index: 1200; align-items: center; justify-content: center; padding: 20px;" role="dialog" aria-labelledby="paymentModalCourse" aria-modal="true">
+    <div id="paymentReceiptBackdrop" style="position: absolute; inset: 0; background: rgba(15, 23, 42, 0.55);"></div>
+    <section style="position: relative; width: min(760px, 100%); max-height: min(86vh, 820px); overflow: auto; background: var(--sv-surface); border: 1px solid var(--sv-border); border-radius: 18px; box-shadow: var(--sv-shadow-xl); padding: 24px;">
+        <div style="display: flex; justify-content: space-between; gap: 16px; align-items: start; margin-bottom: 18px;">
+            <div>
+                <span style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 999px; background: rgba(59, 130, 246, 0.08); color: #2563eb; font-weight: 700; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em;">
+                    <i class="fas fa-file-invoice" aria-hidden="true"></i> Receipt
+                </span>
+                <h3 id="paymentModalCourse" style="margin: 12px 0 4px; font-size: 1.35rem; font-weight: 800; color: var(--sv-foreground);">Payment receipt</h3>
+                <p style="margin: 0; color: var(--sv-muted);">Simple transaction summary for printing or review.</p>
+            </div>
+            <button type="button" id="paymentReceiptClose" class="sv-btn" style="height: 40px; padding: 0 14px;" aria-label="Close modal"><i class="fas fa-xmark" aria-hidden="true"></i></button>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-bottom: 18px;">
+            <div style="border: 1px solid var(--sv-border); border-radius: 12px; background: var(--sv-surface-soft); padding: 14px;">
+                <span style="display: block; color: var(--sv-muted); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px;">Student</span>
+                <strong id="paymentModalStudent" style="color: var(--sv-foreground);"></strong>
+            </div>
+            <div style="border: 1px solid var(--sv-border); border-radius: 12px; background: var(--sv-surface-soft); padding: 14px;">
+                <span style="display: block; color: var(--sv-muted); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px;">Status</span>
+                <strong id="paymentModalStatus" style="color: var(--sv-foreground);"></strong>
+            </div>
+            <div style="border: 1px solid var(--sv-border); border-radius: 12px; background: var(--sv-surface-soft); padding: 14px;">
+                <span style="display: block; color: var(--sv-muted); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px;">Amount</span>
+                <strong id="paymentModalAmount" style="color: var(--sv-foreground);"></strong>
+            </div>
+            <div style="border: 1px solid var(--sv-border); border-radius: 12px; background: var(--sv-surface-soft); padding: 14px;">
+                <span style="display: block; color: var(--sv-muted); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px;">Date</span>
+                <strong id="paymentModalDate" style="color: var(--sv-foreground);"></strong>
+            </div>
+        </div>
+
+        <div style="border-top: 1px solid var(--sv-border); padding-top: 18px; display: grid; gap: 12px;">
+            <div style="display: grid; grid-template-columns: 180px 1fr; gap: 12px; align-items: start;">
+                <span style="color: var(--sv-muted); font-size: 0.82rem;">Payment reference</span>
+                <strong id="paymentModalRef" style="color: var(--sv-foreground); word-break: break-word;"></strong>
+            </div>
+            <div style="display: grid; grid-template-columns: 180px 1fr; gap: 12px; align-items: start;">
+                <span style="color: var(--sv-muted); font-size: 0.82rem;">Gateway reference</span>
+                <strong id="paymentModalGatewayRef" style="color: var(--sv-foreground); word-break: break-word;"></strong>
+            </div>
+            <div style="display: grid; grid-template-columns: 180px 1fr; gap: 12px; align-items: start;">
+                <span style="color: var(--sv-muted); font-size: 0.82rem;">Payment method</span>
+                <strong id="paymentModalMethod" style="color: var(--sv-foreground);"></strong>
+            </div>
+            <div style="display: grid; grid-template-columns: 180px 1fr; gap: 12px; align-items: start;">
+                <span style="color: var(--sv-muted); font-size: 0.82rem;">Enrollment ID</span>
+                <strong id="paymentModalEnrollmentId" style="color: var(--sv-foreground);"></strong>
+            </div>
+        </div>
+
+        <div style="margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--sv-border); display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end;">
+            <button type="button" class="sv-btn" onclick="window.print()"><i class="fas fa-print" aria-hidden="true"></i> Print</button>
+            <a id="paymentModalOpenCourse" class="sv-btn" href="#"><i class="fas fa-layer-group" aria-hidden="true"></i> Open Course</a>
+            <button type="button" id="paymentReceiptCloseSecondary" class="sv-btn primary"><i class="fas fa-check" aria-hidden="true"></i> Done</button>
+        </div>
+    </section>
 </div>
 
 <div class="sv-overlay" id="svOverlay"></div>
 <script src="${pageContext.request.contextPath}/js/student-v2.js"></script>
-
-<!-- Server-to-Client JSTL Data Bridge -->
 <script>
-    window.paymentsData = [
-        <c:forEach var="payment" items="${payments}" varStatus="status">
-            {
-                paymentId: "${payment.paymentId}",
-                courseName: `${fn:escapeXml(payment.courseName)}`,
-                studentName: `${fn:escapeXml(payment.studentName)}`,
-                amount: ${payment.amount},
-                status: "${payment.status}",
-                paymentDate: "${not empty payment.paymentDate ? fn:replace(payment.paymentDate, 'T', ' ') : '-'}",
-                paymentRef: "${fn:escapeXml(not empty payment.paymentRef ? payment.paymentRef : '-')}",
-                paystackReference: "${fn:escapeXml(not empty payment.paystackReference ? payment.paystackReference : '-')}",
-                method: "${fn:escapeXml(not empty payment.method ? payment.method : 'Gateway')}",
-                enrollmentId: "${payment.enrollmentId}"
-            }${not status.last ? ',' : ''}
-        </c:forEach>
-    ];
-</script>
+(function () {
+    // Modal receipt controls
+    var modal = document.getElementById('paymentReceiptModal');
+    var backdrop = document.getElementById('paymentReceiptBackdrop');
+    var triggers = document.querySelectorAll('[data-payment-modal-trigger]');
+    var closeButtons = [document.getElementById('paymentReceiptClose'), document.getElementById('paymentReceiptCloseSecondary')];
+    var modalCourse = document.getElementById('paymentModalCourse');
+    var modalStudent = document.getElementById('paymentModalStudent');
+    var modalStatus = document.getElementById('paymentModalStatus');
+    var modalAmount = document.getElementById('paymentModalAmount');
+    var modalDate = document.getElementById('paymentModalDate');
+    var modalRef = document.getElementById('paymentModalRef');
+    var modalGatewayRef = document.getElementById('paymentModalGatewayRef');
+    var modalMethod = document.getElementById('paymentModalMethod');
+    var modalEnrollmentId = document.getElementById('paymentModalEnrollmentId');
+    var modalCourseLink = document.getElementById('paymentModalOpenCourse');
 
-<!-- React Application Script Compiling with Babel in Browser -->
-<script type="text/babel">
-    const PaymentHistoryApp = () => {
-        const [payments, setPayments] = React.useState(window.paymentsData || []);
-        const [searchTerm, setSearchTerm] = React.useState('');
-        const [activeStatus, setActiveStatus] = React.useState('all');
-        const [selectedPayment, setSelectedPayment] = React.useState(null);
-        const [isFiltering, setIsFiltering] = React.useState(false);
-        const [filteredPayments, setFilteredPayments] = React.useState(payments);
+    function formatAmount(rawAmount) {
+        var number = Number(rawAmount);
+        if (!isFinite(number)) {
+            return rawAmount || '-';
+        }
+        return '₦' + number.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function openModal(trigger) {
+        if (!trigger || !modal || !backdrop) {
+            return;
+        }
+        modalCourse.textContent = trigger.getAttribute('data-payment-course') || 'Payment receipt';
+        modalStudent.textContent = trigger.getAttribute('data-payment-student') || '-';
+        modalStatus.textContent = trigger.getAttribute('data-payment-status') || '-';
+        modalAmount.textContent = formatAmount(trigger.getAttribute('data-payment-amount'));
+        modalDate.textContent = trigger.getAttribute('data-payment-date') || '-';
+        modalRef.textContent = trigger.getAttribute('data-payment-ref') || '-';
+        modalGatewayRef.textContent = trigger.getAttribute('data-payment-gateway-ref') || '-';
+        modalMethod.textContent = trigger.getAttribute('data-payment-method') || '-';
+        modalEnrollmentId.textContent = trigger.getAttribute('data-payment-enrollment-id') ? '#' + trigger.getAttribute('data-payment-enrollment-id') : '-';
+        modalCourseLink.href = '${pageContext.request.contextPath}/student/enrollment-details?id=' + (trigger.getAttribute('data-payment-enrollment-id') || '');
+        modal.style.display = 'flex';
+        backdrop.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function openModalFromPaymentId(paymentId) {
+        if (!paymentId) {
+            return;
+        }
+        var selector = '[data-payment-modal-trigger][data-payment-id="' + paymentId + '"]';
+        var trigger = document.querySelector(selector);
+        if (trigger) {
+            openModal(trigger);
+        }
+    }
+
+    function closeModal() {
+        if (modal) {
+            modal.style.display = 'none';
+        }
+        if (backdrop) {
+            backdrop.style.display = 'none';
+        }
+        document.body.style.overflow = '';
+    }
+
+    // Modal listeners
+    document.body.addEventListener('click', function (e) {
+        var trigger = e.target.closest('[data-payment-modal-trigger]');
+        if (trigger) {
+            openModal(trigger);
+        }
+    });
+
+    closeButtons.forEach(function (button) {
+        if (button) {
+            button.addEventListener('click', closeModal);
+        }
+    });
+
+    if (backdrop) {
+        backdrop.addEventListener('click', closeModal);
+    }
+
+    var receiptPaymentId = new URLSearchParams(window.location.search).get('receiptPaymentId');
+    if (receiptPaymentId) {
+        openModalFromPaymentId(receiptPaymentId);
+    }
+
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') {
+            closeModal();
+        }
+    });
+
+    // =============================================
+    // ASYNCHRONOUS SEARCH & FILTERING CONTROLS
+    // =============================================
+    var tbody = document.getElementById('paymentTableBody');
+    var allRows = tbody ? Array.from(tbody.querySelectorAll('tr')) : [];
+    var searchInput = document.getElementById('paymentSearchInput');
+    var filterButtons = document.querySelectorAll('[data-status-filter]');
+    var activeStatus = 'all';
+    var searchTerm = '';
+
+    function showSkeleton() {
+        if (!tbody) return;
+        tbody.innerHTML = `
+            <tr class="table-skeleton-row">
+                <td><div class="skeleton-text medium"></div></td>
+                <td><div class="skeleton-text short"></div></td>
+                <td><div class="skeleton-badge"></div></td>
+                <td><div class="skeleton-text short"></div></td>
+                <td><div class="skeleton-btn"></div></td>
+            </tr>
+            <tr class="table-skeleton-row">
+                <td><div class="skeleton-text medium"></div></td>
+                <td><div class="skeleton-text short"></div></td>
+                <td><div class="skeleton-badge"></div></td>
+                <td><div class="skeleton-text short"></div></td>
+                <td><div class="skeleton-btn"></div></td>
+            </tr>
+            <tr class="table-skeleton-row">
+                <td><div class="skeleton-text medium"></div></td>
+                <td><div class="skeleton-text short"></div></td>
+                <td><div class="skeleton-badge"></div></td>
+                <td><div class="skeleton-text short"></div></td>
+                <td><div class="skeleton-btn"></div></td>
+            </tr>
+        `;
+    }
+
+    function performFiltering() {
+        if (!tbody) return;
         
-        // Target Ref for clean PDF generation
-        const receiptRef = React.useRef(null);
-
-        // Parse query params for receipt ID or status filter
-        React.useEffect(() => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const statusParam = urlParams.get('status');
-            if (statusParam) {
-                setActiveStatus(statusParam.toLowerCase());
-            }
+        var matchingRows = allRows.filter(function (row) {
+            var courseName = (row.querySelector('strong') ? row.querySelector('strong').textContent : '').toLowerCase();
+            var btn = row.querySelector('[data-payment-status]');
+            var status = btn ? btn.getAttribute('data-payment-status').toLowerCase() : '';
             
-            const receiptParam = urlParams.get('receiptPaymentId');
-            if (receiptParam) {
-                const found = payments.find(p => p.paymentId === receiptParam);
-                if (found) {
-                    setSelectedPayment(found);
-                }
-            }
-        }, [payments]);
-
-        // Live text and status filtering
-        React.useEffect(() => {
-            setIsFiltering(true);
-            const timer = setTimeout(() => {
-                const result = payments.filter(p => {
-                    const courseMatch = p.courseName.toLowerCase().includes(searchTerm.toLowerCase());
-                    const statusMatch = activeStatus === 'all' || p.status.toLowerCase() === activeStatus;
-                    return courseMatch && statusMatch;
-                });
-                setFilteredPayments(result);
-                setIsFiltering(false);
-            }, 200);
-
-            return () => clearTimeout(timer);
-        }, [searchTerm, activeStatus, payments]);
-
-        // Re-draw Lucide icons on view changes
-        React.useEffect(() => {
-            if (window.lucide) {
-                window.lucide.createIcons();
-            }
-        }, [filteredPayments, selectedPayment, isFiltering]);
-
-        const formatCurrency = (amount) => {
-            return '₦' + Number(amount).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        };
-
-        // Single-Page PDF Download Handler
-        const handleDownload = () => {
-            const element = receiptRef.current;
-            if (!element) return;
+            var textMatch = courseName.indexOf(searchTerm) !== -1;
+            var statusMatch = activeStatus === 'all' || status === activeStatus;
             
-            const opt = {
-                margin: 0.5,
-                filename: 'transaction-receipt.pdf',
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true },
-                jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
-            };
-            
-            // Execute HTML to PDF rendering
-            html2pdf().set(opt).from(element).save();
-        };
+            return textMatch && statusMatch;
+        });
 
-        const { motion, AnimatePresence } = window.Motion || {};
+        // Dynamic render
+        tbody.innerHTML = '';
+        if (matchingRows.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="5" style="padding: 48px 18px; text-align: center; color: var(--sv-muted);">
+                        <i class="fas fa-search-minus" style="font-size: 2.2rem; margin-bottom: 12px; display: block; opacity: 0.5;"></i>
+                        <h4 style="margin: 0 0 4px; font-weight: 700; color: var(--sv-heading);">No transactions found</h4>
+                        <p style="margin: 0; font-size: 0.84rem;">Try adjusting your keyword filter or switching status.</p>
+                    </td>
+                </tr>
+            `;
+        } else {
+            matchingRows.forEach(function (row) {
+                tbody.appendChild(row);
+            });
+        }
+    }
 
-        return (
-            <div className="history_ph_ledgerContainer">
-                <h2 className="history_ph_ledgerTitle">Payment History</h2>
+    var filterTimeout = null;
+    function triggerFilterUpdate(instant) {
+        showSkeleton();
+        
+        if (filterTimeout) clearTimeout(filterTimeout);
+        
+        if (instant) {
+            performFiltering();
+        } else {
+            filterTimeout = setTimeout(performFiltering, 250);
+        }
+    }
 
-                {/* Task 1: Filter & Search Controls */}
-                <div className="history_ph_filterBar">
-                    <div className="history_ph_searchContainer">
-                        <input 
-                            type="search" 
-                            className="history_ph_searchInput" 
-                            placeholder="Search by course name..." 
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            aria-label="Search transactions"
-                        />
-                        <div className="history_ph_searchIcon">
-                            <i data-lucide="search" style={{ width: 16, height: 16 }}></i>
-                        </div>
-                    </div>
+    // Set listeners for status filter buttons
+    filterButtons.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            filterButtons.forEach(function (b) {
+                b.classList.remove('primary');
+            });
+            btn.classList.add('primary');
+            activeStatus = btn.getAttribute('data-status-filter');
+            triggerFilterUpdate(false);
+        });
+    });
 
-                    <div className="history_ph_filterGroup" role="group" aria-label="Filter transactions by status">
-                        {['all', 'paid', 'pending', 'failed'].map((status) => (
-                            <button
-                                key={status}
-                                type="button"
-                                className={"history_ph_filterBtn " + (activeStatus === status ? "history_ph_filterBtnActive" : "")}
-                                onClick={() => setActiveStatus(status)}
-                            >
-                                {status.charAt(0).toUpperCase() + status.slice(1)}
-                            </button>
-                        ))}
-                    </div>
-                </div>
+    // Set search listener
+    if (searchInput) {
+        searchInput.addEventListener('input', function (e) {
+            searchTerm = e.target.value.toLowerCase().trim();
+            triggerFilterUpdate(false);
+        });
+    }
 
-                {/* Task 1: Clean, Borderless Ledger List */}
-                {isFiltering ? (
-                    <div className="history_ph_ledgerList">
-                        {[1, 2, 3].map(i => (
-                            <div key={i} className="history_ph_skeletonRow">
-                                <div className="history_ph_rowLeft">
-                                    <div className="history_ph_skeletonText medium"></div>
-                                    <div className="history_ph_skeletonText short" style={{ marginTop: 8 }}></div>
-                                </div>
-                                <div className="history_ph_rowRight">
-                                    <div className="history_ph_skeletonText short"></div>
-                                    <div className="history_ph_skeletonBtn"></div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                ) : filteredPayments.length === 0 ? (
-                    <div className="history_ph_ledgerList" style={{ background: '#ffffff', borderRadius: 8, border: '1px solid #f1f5f9' }}>
-                        <div className="history_ph_emptyState">
-                            <i data-lucide="receipt" style={{ width: 48, height: 48, color: '#94a3b8', strokeWidth: 1.5 }}></i>
-                            <h3>No payments found</h3>
-                            <p>Try adjusting your search criteria or filter options.</p>
-                        </div>
-                    </div>
-                ) : (
-                    <div className="history_ph_ledgerList">
-                        {filteredPayments.map((payment) => (
-                            <div key={payment.paymentId} className="history_ph_ledgerRow">
-                                <div className="history_ph_rowLeft">
-                                    <h4 className="history_ph_courseTitle">{payment.courseName}</h4>
-                                    <span className="history_ph_rowDate">{payment.paymentDate}</span>
-                                </div>
-                                <div className="history_ph_rowRight">
-                                    <span className="history_ph_amount">{formatCurrency(payment.amount)}</span>
-                                    <button 
-                                        type="button" 
-                                        className="history_ph_viewBtn"
-                                        onClick={() => setSelectedPayment(payment)}
-                                    >
-                                        View Receipt
-                                    </button>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
-
-                {/* Task 2 & 3: iOS-style Elastic Receipt Modal */}
-                {AnimatePresence && (
-                    <AnimatePresence>
-                        {selectedPayment && (
-                            <motion.div 
-                                className="history_rm_backdrop"
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
-                                onClick={() => setSelectedPayment(null)}
-                            >
-                                <motion.section 
-                                    className="history_rm_paper"
-                                    initial={{ scale: 0.9, y: 15, opacity: 0 }}
-                                    animate={{ scale: 1, y: 0, opacity: 1 }}
-                                    exit={{ scale: 0.92, y: 10, opacity: 0 }}
-                                    transition={{ type: "spring", damping: 25, stiffness: 350 }}
-                                    onClick={(e) => e.stopPropagation()}
-                                >
-                                    {/* Close Button: Positioned absolute (OUTSIDE printable target ref) */}
-                                    <button 
-                                        type="button" 
-                                        className="history_rm_closeBtn"
-                                        onClick={() => setSelectedPayment(null)}
-                                        aria-label="Close modal"
-                                    >
-                                        <i data-lucide="x" style={{ width: 16, height: 16, strokeWidth: 2.5 }}></i>
-                                    </button>
-
-                                    {/* Inner Thermal printable document targeted by React Ref */}
-                                    <div ref={receiptRef} className="history_rm_printableArea">
-                                        
-                                        {/* Thermal Header Platform Name */}
-                                        <div className="history_rm_header">
-                                            <i data-lucide="qr-code" className="history_rm_thermalIcon" style={{ width: 44, height: 44, strokeWidth: 1.5 }}></i>
-                                            <h3 className="history_rm_platformName">PSM E-LEARNING</h3>
-                                            <span className="history_rm_subtitle">CASHIER: AUTOMATED SYSTEM</span>
-                                            <span className="history_rm_subtitle">*** TRANSACTION RECORD ***</span>
-                                        </div>
-
-                                        {/* Massive Bold Total Boxed with dashed borders */}
-                                        <div className="history_rm_totalBox">
-                                            <span className="history_rm_totalLabel">TOTAL AMOUNT</span>
-                                            <div className="history_rm_totalAmount">
-                                                {formatCurrency(selectedPayment.amount)}
-                                            </div>
-                                        </div>
-
-                                        {/* Monospace Metadata Detail Fields */}
-                                        <div className="history_rm_lineItem">
-                                            <span className="history_rm_label">DATE PAID</span>
-                                            <span className="history_rm_monospace">{selectedPayment.paymentDate}</span>
-                                        </div>
-
-                                        <div className="history_rm_lineItem">
-                                            <span className="history_rm_label">TRANSACTION ID</span>
-                                            <span className="history_rm_monospace">{selectedPayment.paymentRef}</span>
-                                        </div>
-
-                                        <div className="history_rm_lineItem">
-                                            <span className="history_rm_label">GATEWAY REF</span>
-                                            <span className="history_rm_monospace">{selectedPayment.paystackReference}</span>
-                                        </div>
-
-                                        <div className="history_rm_lineItem">
-                                            <span className="history_rm_label">METHOD</span>
-                                            <span className="history_rm_monospace">{selectedPayment.method.toUpperCase()}</span>
-                                        </div>
-
-                                        <div className="history_rm_dashedDivider"></div>
-
-                                        <div className="history_rm_lineItem">
-                                            <span className="history_rm_label">ITEM</span>
-                                            <span className="history_rm_monospace" style={{ textAlign: 'right', display: 'block' }}>
-                                                {selectedPayment.courseName.toUpperCase()}
-                                            </span>
-                                        </div>
-
-                                        {/* Stylized Mock Barcode */}
-                                        <div className="history_rm_barcodeContainer">
-                                            <div className="history_rm_barcodeStripes"></div>
-                                            <span className="history_rm_barcodeText">*{selectedPayment.paymentId}*</span>
-                                        </div>
-
-                                        {/* Receipt Footer Message */}
-                                        <div className="history_rm_footer">
-                                            *** THANK YOU FOR ENROLLING ***<br />
-                                            SUPPORT: SUPPORT@USYYTECH.COM
-                                        </div>
-                                    </div>
-
-                                    {/* Action Download Button: Bottom (OUTSIDE printable target ref) */}
-                                    <button 
-                                        type="button" 
-                                        className="history_rm_downloadBtn"
-                                        onClick={handleDownload}
-                                    >
-                                        <i data-lucide="download" style={{ width: 18, height: 18, strokeWidth: 2.5 }}></i>
-                                        <span>Download PDF</span>
-                                    </button>
-                                </motion.section>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-                )}
-            </div>
-        );
-    };
-
-    const container = document.getElementById('payment-history-react-root');
-    const root = ReactDOM.createRoot(container);
-    root.render(<PaymentHistoryApp />);
+    // Trigger URL status filtering if URL has query parameters
+    var urlStatus = new URLSearchParams(window.location.search).get('status');
+    if (urlStatus) {
+        var targetBtn = document.querySelector('[data-status-filter="' + urlStatus.toLowerCase() + '"]');
+        if (targetBtn) {
+            targetBtn.click();
+        }
+    }
+})();
 </script>
 </body>
 </html>
