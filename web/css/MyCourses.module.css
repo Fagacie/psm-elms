@@ -1,0 +1,700 @@
+/* ==========================================================================
+   MY COURSES SCOPED CSS MODULES STYLE SHEET (IMMUNE TO GLOBAL BLEED)
+   Universal card design matching StudentDashboard
+   ========================================================================== */
+
+/* ---- GLOBAL BLEED RESETS (Neutralize student-v2.css overrides) ---- */
+.mc_mod_999_container select.mc_mod_999_sort_select,
+.mc_mod_999_container input[type="text"].mc_mod_999_search_input {
+    width: auto;
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    color: #334155;
+    font-family: inherit;
+    font-size: 0.82rem;
+    box-shadow: none;
+}
+
+.mc_mod_999_container select.mc_mod_999_sort_select:focus,
+.mc_mod_999_container input[type="text"].mc_mod_999_search_input:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.mc_mod_999_container button.mc_mod_999_filter_pill {
+    font-family: inherit;
+    line-height: 1.4;
+    letter-spacing: normal;
+    appearance: none;
+    -webkit-appearance: none;
+    background-color: #f1f5f9;
+    color: #64748b;
+}
+
+.mc_mod_999_container a.mc_mod_999_course_card,
+.mc_mod_999_container a.mc_mod_999_course_card:hover,
+.mc_mod_999_container a.mc_mod_999_course_card:visited,
+.mc_mod_999_container a.mc_mod_999_course_card:focus {
+    color: inherit;
+    text-decoration: none;
+    border: none;
+    outline: none;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+}
+
+.mc_mod_999_container a.mc_mod_999_course_card:hover {
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08);
+}
+
+.mc_mod_999_container h1,
+.mc_mod_999_container h2,
+.mc_mod_999_container h3,
+.mc_mod_999_container h4,
+.mc_mod_999_container p {
+    margin: 0;
+    padding: 0;
+}
+
+/* ---- END GLOBAL BLEED RESETS ---- */
+
+/* Layout Shell and Page Base */
+.mc_mod_999_container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px;
+    background-color: #f8fafc;
+    min-height: 100vh;
+    box-sizing: border-box;
+    font-family: 'Inter', 'Manrope', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+/* Header Typography */
+.mc_mod_999_header_wrap {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+}
+
+.mc_mod_999_title {
+    font-size: 2.2rem !important;
+    font-weight: 800 !important;
+    color: #0f172a !important;
+    letter-spacing: -0.03em !important;
+    margin: 0 0 4px 0 !important;
+    line-height: 1.2 !important;
+}
+
+.mc_mod_999_subtitle {
+    font-size: 0.95rem;
+    color: #64748b;
+    margin: 0;
+}
+
+.mc_mod_999_header_actions {
+    display: flex;
+    gap: 12px;
+}
+
+/* Base Breadcrumbs */
+.mc_mod_999_breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: #64748b;
+    margin-bottom: -0.5rem;
+}
+
+.mc_mod_999_breadcrumb a {
+    color: #64748b;
+    text-decoration: none;
+    transition: color 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.mc_mod_999_breadcrumb a:hover {
+    color: #6366f1;
+}
+
+/* ==========================================================================
+   UNIFIED FILTER BAR — Clean horizontal layout
+   ========================================================================== */
+.mc_mod_999_controls_row {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 14px 20px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    box-sizing: border-box;
+}
+
+/* Status Filter Pills — grouped left */
+.mc_mod_999_filter_group {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.mc_mod_999_filter_pill {
+    padding: 7px 16px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    border-radius: 999px !important;
+    border: none !important;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    white-space: nowrap;
+    font-family: inherit;
+    line-height: 1.4;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+.mc_mod_999_filter_pill_active {
+    background-color: #0f172a !important;
+    color: #ffffff !important;
+}
+
+.mc_mod_999_filter_pill_inactive {
+    background-color: #f1f5f9 !important;
+    color: #64748b !important;
+}
+
+.mc_mod_999_filter_pill_inactive:hover {
+    background-color: #e2e8f0 !important;
+    color: #0f172a !important;
+}
+
+/* Separator between filter pills and sort/search */
+.mc_mod_999_controls_separator {
+    width: 1px;
+    height: 24px;
+    background: #e2e8f0;
+    flex-shrink: 0;
+}
+
+/* Dropdown Sort Box */
+.mc_mod_999_sort_select {
+    padding: 8px 12px !important;
+    border-radius: 8px !important;
+    border: 1px solid #cbd5e1 !important;
+    font-size: 0.82rem !important;
+    color: #334155 !important;
+    background-color: #ffffff !important;
+    outline: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    width: auto !important;
+    min-height: auto !important;
+    box-shadow: none !important;
+}
+
+.mc_mod_999_sort_select:focus {
+    border-color: #6366f1 !important;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1) !important;
+}
+
+/* Modern Client-Side Search — pushed to far right */
+.mc_mod_999_search_wrapper {
+    position: relative;
+    max-width: 240px;
+    width: 100%;
+    margin-left: auto;
+}
+
+.mc_mod_999_search_icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    pointer-events: none;
+    font-size: 0.82rem;
+    z-index: 1;
+}
+
+.mc_mod_999_search_input {
+    width: 100% !important;
+    padding: 8px 12px 8px 34px !important;
+    font-size: 0.82rem !important;
+    border-radius: 8px !important;
+    border: 1px solid #cbd5e1 !important;
+    outline: none;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+    min-height: auto !important;
+    box-shadow: none !important;
+}
+
+.mc_mod_999_search_input:focus {
+    border-color: #6366f1 !important;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1) !important;
+}
+
+/* Results count badge */
+.mc_mod_999_results_count {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #94a3b8;
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+/* ==========================================================================
+   UNIVERSAL COURSE CARD — Matching dashboard design exactly
+   Banner + Status Badge + Body (Title/Instructor) + SVG Ring + Resume hint
+   ========================================================================== */
+.mc_mod_999_course_grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 2rem;
+    box-sizing: border-box;
+}
+
+/* Card is an <a> link — whole card clickable */
+.mc_mod_999_course_card {
+    background: #ffffff;
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    display: flex;
+    flex-direction: column;
+    text-decoration: none !important;
+    overflow: hidden;
+    box-sizing: border-box;
+    height: 100%;
+    color: inherit !important;
+}
+
+.mc_mod_999_course_card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08);
+}
+
+/* Banner Area */
+.mc_mod_999_course_banner_wrap {
+    height: 150px;
+    position: relative;
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.mc_mod_999_course_banner {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+    display: block;
+}
+
+.mc_mod_999_course_card:hover .mc_mod_999_course_banner {
+    transform: scale(1.03);
+}
+
+.mc_mod_999_course_banner_empty {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    color: rgba(255, 255, 255, 0.15);
+}
+
+/* Status Badge on Banner */
+.mc_mod_999_course_status {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    z-index: 2;
+}
+
+.mc_mod_999_course_status.live {
+    background: rgba(16, 185, 129, 0.9);
+    color: #ffffff;
+}
+
+.mc_mod_999_course_status.done {
+    background: rgba(99, 102, 241, 0.9);
+    color: #ffffff;
+}
+
+.mc_mod_999_course_status.hold {
+    background: rgba(245, 158, 11, 0.9);
+    color: #ffffff;
+}
+
+/* Card Body — Title, Instructor, and Progress Ring row */
+.mc_mod_999_course_body {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    gap: 16px;
+    justify-content: space-between;
+}
+
+.mc_mod_999_course_info {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.mc_mod_999_course_title {
+    font-size: 1.05rem !important;
+    font-weight: 700 !important;
+    color: #0f172a !important;
+    line-height: 1.4 !important;
+    margin: 0 !important;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    letter-spacing: normal !important;
+}
+
+.mc_mod_999_course_instructor {
+    font-size: 0.8rem;
+    color: #64748b;
+    margin: 0;
+}
+
+.mc_mod_999_course_instructor strong {
+    color: #475569;
+    font-weight: 600;
+}
+
+/* Compact SVG Circular Progress (matching dashboard exactly) */
+.mc_mod_999_progress_circular_container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 16px;
+    margin-top: auto;
+}
+
+.mc_mod_999_progress_ring_wrapper {
+    position: relative;
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+}
+
+.mc_mod_999_svg_ring {
+    transform: rotate(-90deg);
+    display: block;
+}
+
+.mc_mod_999_ring_bg {
+    stroke: #f1f5f9;
+}
+
+.mc_mod_999_ring_fg {
+    stroke: #6366f1;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.8s ease;
+}
+
+.mc_mod_999_ring_text {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.mc_mod_999_progress_action_hint {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #6366f1;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: transform 0.2s ease;
+}
+
+.mc_mod_999_course_card:hover .mc_mod_999_progress_action_hint {
+    transform: translateX(4px);
+}
+
+/* Empty Library State */
+.mc_mod_999_empty_state {
+    background-color: #ffffff;
+    border-radius: 16px;
+    padding: 64px 32px;
+    text-align: center;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    max-width: 500px;
+    margin: 40px auto;
+    box-sizing: border-box;
+}
+
+.mc_mod_999_empty_icon {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background-color: rgba(99, 102, 241, 0.05);
+    color: #6366f1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+}
+
+.mc_mod_999_empty_state h3 {
+    margin: 0;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.mc_mod_999_empty_state p {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #64748b;
+    line-height: 1.6;
+}
+
+/* Header action button (Explore Catalog only) */
+.mc_mod_999_sv_btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border: none;
+    min-height: auto;
+    box-shadow: none;
+}
+
+.mc_mod_999_sv_btn_primary {
+    background: #6366f1 !important;
+    color: #ffffff !important;
+}
+
+.mc_mod_999_sv_btn_primary:hover {
+    background: #4f46e5 !important;
+    box-shadow: 0 4px 10px rgba(99, 102, 241, 0.2) !important;
+    transform: translateY(-1px);
+}
+
+/* Fade In Animation Keyframes for framer-motion fallback */
+@keyframes mc_fade_in_up {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.mc_mod_999_fade_in_up {
+    animation: mc_fade_in_up 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ==========================================================================
+   RESPONSIVE BREAKPOINTS
+   ========================================================================== */
+@media (max-width: 768px) {
+    .mc_mod_999_container {
+        padding: 20px 16px;
+        gap: 1.5rem;
+    }
+
+    .mc_mod_999_title {
+        font-size: 1.6rem !important;
+    }
+
+    .mc_mod_999_header_wrap {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .mc_mod_999_controls_row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+        padding: 16px;
+    }
+
+    .mc_mod_999_controls_separator {
+        display: none;
+    }
+
+    .mc_mod_999_filter_group {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    .mc_mod_999_search_wrapper {
+        max-width: 100%;
+        margin-left: 0;
+    }
+
+    .mc_mod_999_sort_select {
+        width: 100% !important;
+    }
+
+    .mc_mod_999_course_grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .mc_mod_999_results_count {
+        text-align: center;
+    }
+}
+
+/* ==========================================================================
+   DARK MODE OVERRIDES (Scoped, bleed-proof)
+   ========================================================================== */
+[data-theme="dark"] .mc_mod_999_container {
+    background-color: #0f172a;
+}
+
+[data-theme="dark"] .mc_mod_999_controls_row,
+[data-theme="dark"] .mc_mod_999_course_card,
+[data-theme="dark"] .mc_mod_999_empty_state {
+    background-color: #1e293b;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="dark"] .mc_mod_999_title,
+[data-theme="dark"] .mc_mod_999_course_title,
+[data-theme="dark"] .mc_mod_999_ring_text,
+[data-theme="dark"] .mc_mod_999_empty_state h3 {
+    color: #f8fafc !important;
+}
+
+[data-theme="dark"] .mc_mod_999_subtitle,
+[data-theme="dark"] .mc_mod_999_course_instructor,
+[data-theme="dark"] .mc_mod_999_course_instructor strong,
+[data-theme="dark"] .mc_mod_999_empty_state p {
+    color: #94a3b8;
+}
+
+[data-theme="dark"] .mc_mod_999_filter_pill_inactive {
+    background-color: #334155 !important;
+    color: #cbd5e1 !important;
+}
+
+[data-theme="dark"] .mc_mod_999_filter_pill_inactive:hover {
+    background-color: #475569 !important;
+    color: #ffffff !important;
+}
+
+[data-theme="dark"] .mc_mod_999_filter_pill_active {
+    background-color: #6366f1 !important;
+    color: #ffffff !important;
+}
+
+[data-theme="dark"] .mc_mod_999_container select.mc_mod_999_sort_select,
+[data-theme="dark"] .mc_mod_999_search_input,
+[data-theme="dark"] .mc_mod_999_sort_select {
+    background-color: #334155 !important;
+    border-color: #475569 !important;
+    color: #ffffff !important;
+}
+
+[data-theme="dark"] .mc_mod_999_container input[type="text"].mc_mod_999_search_input {
+    background-color: #334155 !important;
+    border-color: #475569 !important;
+    color: #ffffff !important;
+}
+
+[data-theme="dark"] .mc_mod_999_search_input:focus,
+[data-theme="dark"] .mc_mod_999_sort_select:focus {
+    border-color: #818cf8 !important;
+}
+
+[data-theme="dark"] .mc_mod_999_ring_bg {
+    stroke: #334155;
+}
+
+[data-theme="dark"] .mc_mod_999_progress_circular_container {
+    border-color: #334155;
+}
+
+[data-theme="dark"] .mc_mod_999_ring_fg {
+    stroke: #818cf8;
+}
+
+[data-theme="dark"] .mc_mod_999_progress_action_hint {
+    color: #818cf8;
+}
+
+[data-theme="dark"] .mc_mod_999_controls_separator {
+    background: #475569;
+}
+
+[data-theme="dark"] .mc_mod_999_results_count {
+    color: #64748b;
+}
+
+[data-theme="dark"] .mc_mod_999_sv_btn_primary {
+    background-color: #6366f1 !important;
+    color: #ffffff !important;
+}
+
+[data-theme="dark"] .mc_mod_999_sv_btn_primary:hover {
+    background-color: #818cf8 !important;
+}
+
+[data-theme="dark"] .mc_mod_999_course_card {
+    color: inherit !important;
+}
+
+[data-theme="dark"] a.mc_mod_999_course_card,
+[data-theme="dark"] a.mc_mod_999_course_card:hover,
+[data-theme="dark"] a.mc_mod_999_course_card:visited {
+    color: inherit !important;
+    text-decoration: none !important;
+}
+
+[data-theme="dark"] .mc_mod_999_breadcrumb a {
+    color: #94a3b8;
+}
+
+[data-theme="dark"] .mc_mod_999_breadcrumb {
+    color: #64748b;
+}

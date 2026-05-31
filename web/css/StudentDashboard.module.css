@@ -1,0 +1,750 @@
+/* ==========================================================================
+   STUDENT DASHBOARD SCOPED CSS MODULES STYLE SHEET (IMMUNE TO BLEED)
+   ========================================================================== */
+
+/* Layout Shell and Background */
+.sd_mod_123_container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px;
+    background-color: #f8fafc;
+    min-height: 100vh;
+    box-sizing: border-box;
+    font-family: 'Inter', 'Manrope', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+}
+
+/* Common Section Typography */
+.sd_mod_123_section_title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #0f172a;
+    letter-spacing: -0.02em;
+    margin: 0 0 0.5rem 0;
+}
+
+.sd_mod_123_section_subtitle {
+    font-size: 0.9rem;
+    color: #64748b;
+    margin: 0 0 1.5rem 0;
+}
+
+/* Fade In Animation Keyframes for framer-motion fallback */
+@keyframes sd_fade_in_up {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.sd_mod_123_fade_in_up {
+    animation: sd_fade_in_up 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* --- Task 2: Resume Learning Hero Banner --- */
+.sd_mod_123_hero_card {
+    background: #ffffff;
+    border-radius: 16px;
+    border: none;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+    padding: 36px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 32px;
+    position: relative;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+/* Background gradient blur inside banner for high-end look */
+.sd_mod_123_hero_card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(99, 102, 241, 0.08) 0%, rgba(99, 102, 241, 0) 70%);
+    z-index: 1;
+    pointer-events: none;
+}
+
+.sd_mod_123_hero_content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    z-index: 2;
+}
+
+.sd_mod_123_hero_kicker {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #6366f1;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.sd_mod_123_hero_title {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1.3;
+    margin: 0;
+    letter-spacing: -0.02em;
+}
+
+.sd_mod_123_hero_progress_section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-width: 480px;
+    width: 100%;
+}
+
+.sd_mod_123_hero_progress_label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #475569;
+}
+
+.sd_mod_123_hero_progress_bar_bg {
+    height: 8px;
+    background: #f1f5f9;
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.sd_mod_123_hero_progress_bar_fg {
+    height: 100%;
+    background: linear-gradient(90deg, #6366f1 0%, #4f46e5 100%);
+    border-radius: 999px;
+    transition: width 1s ease-in-out;
+}
+
+.sd_mod_123_hero_actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 4px;
+}
+
+.sd_mod_123_btn_resume {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #6366f1;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s ease-in-out;
+}
+
+.sd_mod_123_btn_resume:hover {
+    background: #4f46e5;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+    transform: translateY(-1px);
+}
+
+.sd_mod_123_btn_resume:active {
+    transform: translateY(1px);
+}
+
+.sd_mod_123_hero_visual {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+}
+
+.sd_mod_123_hero_visual_circle {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(79, 70, 229, 0.05) 100%);
+    border: 1px solid rgba(99, 102, 241, 0.1);
+    border-radius: 50%;
+    padding: 16px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.01);
+}
+
+/* --- Task 3: KPI Command Row --- */
+.sd_mod_123_kpi_grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+}
+
+.sd_mod_123_kpi_card {
+    background: #ffffff;
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    box-sizing: border-box;
+}
+
+.sd_mod_123_kpi_icon_wrapper {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    background: rgba(99, 102, 241, 0.05);
+    color: #6366f1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+}
+
+.sd_mod_123_kpi_info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.sd_mod_123_kpi_num {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1;
+}
+
+.sd_mod_123_kpi_label {
+    font-size: 0.78rem;
+    color: #64748b;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0;
+}
+
+/* --- Task 4: Interactive Activity Analytics --- */
+.sd_mod_123_chart_card {
+    background: #ffffff;
+    border-radius: 16px;
+    border: none;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+    padding: 28px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}
+
+.sd_mod_123_chart_header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.sd_mod_123_chart_legend {
+    display: flex;
+    gap: 12px;
+    font-size: 0.8rem;
+    color: #64748b;
+}
+
+.sd_mod_123_legend_item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.sd_mod_123_legend_dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #6366f1;
+}
+
+/* Custom Tooltip for Recharts */
+.sd_mod_123_custom_tooltip {
+    background: #ffffff;
+    border-radius: 10px;
+    border: 1px solid #f1f5f9;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+    padding: 10px 14px;
+}
+
+.sd_mod_123_tooltip_label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 4px;
+}
+
+.sd_mod_123_tooltip_value {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #6366f1;
+}
+
+/* --- Task 5: Enrolled Courses Grid (Progress Rings) --- */
+.sd_mod_123_course_grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 2rem;
+}
+
+.sd_mod_123_course_card {
+    background: #ffffff;
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    overflow: hidden;
+    box-sizing: border-box;
+    height: 100%;
+}
+
+.sd_mod_123_course_card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08);
+}
+
+.sd_mod_123_course_banner_wrap {
+    height: 150px;
+    position: relative;
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    overflow: hidden;
+}
+
+.sd_mod_123_course_banner {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.sd_mod_123_course_card:hover .sd_mod_123_course_banner {
+    transform: scale(1.03);
+}
+
+.sd_mod_123_course_banner_empty {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    color: rgba(255, 255, 255, 0.15);
+}
+
+.sd_mod_123_course_status {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.sd_mod_123_course_status.live {
+    background: rgba(16, 185, 129, 0.9);
+    color: #ffffff;
+}
+
+.sd_mod_123_course_status.done {
+    background: rgba(99, 102, 241, 0.9);
+    color: #ffffff;
+}
+
+.sd_mod_123_course_status.hold {
+    background: rgba(245, 158, 11, 0.9);
+    color: #ffffff;
+}
+
+.sd_mod_123_course_body {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    gap: 16px;
+    justify-content: space-between;
+}
+
+.sd_mod_123_course_info {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.sd_mod_123_course_title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #0f172a;
+    line-height: 1.4;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.sd_mod_123_course_instructor {
+    font-size: 0.8rem;
+    color: #64748b;
+    margin: 0;
+}
+
+.sd_mod_123_course_instructor strong {
+    color: #475569;
+    font-weight: 600;
+}
+
+/* Compact SVG Circular Progress */
+.sd_mod_123_progress_circular_container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 16px;
+    margin-top: auto;
+}
+
+.sd_mod_123_progress_ring_wrapper {
+    position: relative;
+    width: 48px;
+    height: 48px;
+}
+
+.sd_mod_123_svg_ring {
+    transform: rotate(-90deg);
+}
+
+.sd_mod_123_ring_bg {
+    stroke: #f1f5f9;
+}
+
+.sd_mod_123_ring_fg {
+    stroke: #6366f1;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.8s ease;
+}
+
+.sd_mod_123_ring_text {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.sd_mod_123_progress_action_hint {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #6366f1;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: transform 0.2s ease;
+}
+
+.sd_mod_123_course_card:hover .sd_mod_123_progress_action_hint {
+    transform: translateX(4px);
+}
+
+/* --- Empty state banner --- */
+.sd_mod_123_empty_state {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 48px;
+    text-align: center;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.sd_mod_123_empty_icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: rgba(99, 102, 241, 0.05);
+    color: #6366f1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+}
+
+.sd_mod_123_empty_state h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.sd_mod_123_empty_state p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #64748b;
+    max-width: 320px;
+    line-height: 1.5;
+}
+
+/* Dark Mode Overrides */
+[data-theme="dark"] .sd_mod_123_container {
+    background-color: #0f172a;
+}
+
+[data-theme="dark"] .sd_mod_123_hero_card,
+[data-theme="dark"] .sd_mod_123_kpi_card,
+[data-theme="dark"] .sd_mod_123_chart_card,
+[data-theme="dark"] .sd_mod_123_course_card,
+[data-theme="dark"] .sd_mod_123_empty_state {
+    background-color: #1e293b;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="dark"] .sd_mod_123_hero_card::before {
+    background: radial-gradient(circle, rgba(129, 140, 248, 0.15) 0%, rgba(129, 140, 248, 0) 70%);
+}
+
+[data-theme="dark"] .sd_mod_123_section_title,
+[data-theme="dark"] .sd_mod_123_hero_title,
+[data-theme="dark"] .sd_mod_123_kpi_num,
+[data-theme="dark"] .sd_mod_123_course_title,
+[data-theme="dark"] .sd_mod_123_ring_text,
+[data-theme="dark"] .sd_mod_123_empty_state h3 {
+    color: #f8fafc;
+}
+
+[data-theme="dark"] .sd_mod_123_section_subtitle,
+[data-theme="dark"] .sd_mod_123_kpi_label,
+[data-theme="dark"] .sd_mod_123_course_instructor,
+[data-theme="dark"] .sd_mod_123_course_instructor strong,
+[data-theme="dark"] .sd_mod_123_empty_state p {
+    color: #94a3b8;
+}
+
+[data-theme="dark"] .sd_mod_123_hero_progress_bar_bg,
+[data-theme="dark"] .sd_mod_123_ring_bg,
+[data-theme="dark"] .sd_mod_123_progress_circular_container {
+    background-color: #334155;
+    stroke: #334155;
+    border-color: #334155;
+}
+
+[data-theme="dark"] .sd_mod_123_btn_resume,
+[data-theme="dark"] .sd_mod_123_progress_action_hint {
+    color: #818cf8;
+}
+
+[data-theme="dark"] .sd_mod_123_btn_resume {
+    background: #6366f1;
+    color: #ffffff;
+}
+
+[data-theme="dark"] .sd_mod_123_btn_resume:hover {
+    background: #818cf8;
+}
+
+[data-theme="dark"] .sd_mod_123_ring_fg {
+    stroke: #818cf8;
+}
+
+/* --- Personalized welcome header and Continue Learning horizontal strip --- */
+.sd_mod_123_welcome_title {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: -0.03em;
+    margin: 0;
+    line-height: 1.2;
+}
+
+.sd_mod_123_continue_strip {
+    background: #ffffff;
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    box-sizing: border-box;
+    margin-top: -12px;
+    transition: all 0.2s ease-in-out;
+}
+
+.sd_mod_123_continue_strip:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+}
+
+.sd_mod_123_continue_info_wrap {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex: 1;
+}
+
+.sd_mod_123_continue_title_wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 200px;
+    max-width: 450px;
+}
+
+.sd_mod_123_continue_kicker {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #6366f1;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.sd_mod_123_continue_title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sd_mod_123_continue_progress_wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    max-width: 320px;
+}
+
+.sd_mod_123_continue_progress_bg {
+    height: 6px;
+    background: #e2e8f0;
+    border-radius: 999px;
+    overflow: hidden;
+    flex: 1;
+}
+
+.sd_mod_123_continue_progress_fg {
+    height: 100%;
+    background: linear-gradient(90deg, #6366f1 0%, #4f46e5 100%);
+    border-radius: 999px;
+}
+
+.sd_mod_123_continue_progress_text {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #475569;
+    min-width: 35px;
+    text-align: right;
+}
+
+.sd_mod_123_continue_btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    background: #6366f1;
+    color: #ffffff !important;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    box-shadow: 0 4px 6px rgba(99, 102, 241, 0.2);
+}
+
+.sd_mod_123_continue_btn:hover {
+    background: #4f46e5;
+    transform: scale(1.05);
+    box-shadow: 0 6px 12px rgba(99, 102, 241, 0.3);
+}
+
+.sd_mod_123_continue_btn i {
+    font-size: 0.95rem;
+    margin-left: 2px;
+}
+
+/* Empty Catalog Strip */
+.sd_mod_123_continue_strip_empty {
+    background: #ffffff;
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    box-sizing: border-box;
+    margin-top: -12px;
+}
+
+.sd_mod_123_continue_empty_text {
+    font-size: 0.9rem;
+    color: #475569;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sd_mod_123_continue_empty_text i {
+    color: #6366f1;
+    font-size: 1.1rem;
+}
+
+/* Dark Mode Overrides */
+[data-theme="dark"] .sd_mod_123_welcome_title {
+    color: #f8fafc;
+}
+
+[data-theme="dark"] .sd_mod_123_continue_strip,
+[data-theme="dark"] .sd_mod_123_continue_strip_empty {
+    background-color: #1e293b;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="dark"] .sd_mod_123_continue_title {
+    color: #f8fafc;
+}
+
+[data-theme="dark"] .sd_mod_123_continue_progress_bg {
+    background: #334155;
+}
+
+[data-theme="dark"] .sd_mod_123_continue_progress_text {
+    color: #94a3b8;
+}
+
+[data-theme="dark"] .sd_mod_123_continue_empty_text {
+    color: #cbd5e1;
+}

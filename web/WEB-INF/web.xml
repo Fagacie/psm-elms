@@ -254,6 +254,7 @@
     <servlet-mapping>
         <servlet-name>StudentMaterialServlet</servlet-name>
         <url-pattern>/student/materials</url-pattern>
+        <url-pattern>/instructor/materials-preview</url-pattern>
     </servlet-mapping>
 
     <servlet>

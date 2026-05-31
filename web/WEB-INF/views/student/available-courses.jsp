@@ -1,270 +1,517 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" import="com.psm.elearning.model.*,java.util.List,java.util.Map" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Browse Courses - PSM E-Learning</title>
     <jsp:include page="/WEB-INF/views/common/student-head-assets.jsp" />
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/browse-courses-v2.css">
-</head>
+    
+    <!-- Scoped isolated styles for the Discovery Experience -->
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/BrowseCourses.module.css">
 
+    <!-- React & ReactDOM (UMD production versions) -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    
+    <!-- Babel Standalone for browser JSX compilation -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Framer Motion for premium staggered layout animations -->
+    <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
+</head>
 <body class="sv-page">
     <c:set var="topbarTitle" value="Browse Courses" />
-    <c:set var="topbarSubtitle" value="Find courses and start enrollment" />
+    <c:set var="topbarSubtitle" value="Explore available learning catalog and enroll" />
     <jsp:include page="/WEB-INF/views/common/student-topbar.jsp" />
 
     <div class="sv-layout">
         <c:set var="activePage" value="browse-courses" />
         <jsp:include page="/WEB-INF/views/common/student-sidebar.jsp" />
 
-        <main class="sv-main bc-main">
-            <div class="sv-breadcrumb">
-                <a href="${pageContext.request.contextPath}/dashboard"><i class="fas fa-house"></i> Dashboard</a>
-                <span>/</span>
-                <span>Browse Courses</span>
-            </div>
-
-            <!-- Premium Discovery Hero section -->
-            <section class="bc-hero sv-card bc-hero-card">
-                <div class="sv-card-body bc-hero-card__body">
-                    <div class="bc-hero-copy bc-hero-card__copy">
-                        <span class="bc-hero-card__kicker">
-                            <i class="fas fa-compass bc-hero-card__kicker-icon"></i> Course Catalog
-                        </span>
-                        <h2 class="bc-hero-card__title">Browse available courses</h2>
-                        <p class="bc-hero-card__text">Filter by difficulty, category, or price. Open a course to review the details before enrolling.</p>
-                        <div class="bc-hero-card__actions">
-                            <a href="${pageContext.request.contextPath}/student/my-enrollments" class="sv-btn primary"><i class="fas fa-book-open-reader"></i> My Learning</a>
-                            <a href="${pageContext.request.contextPath}/student/payments" class="sv-btn"><i class="fas fa-receipt"></i> Billing history</a>
-                        </div>
-                    </div>
-
-                    <div class="bc-hero-card__stats">
-                        <div class="bc-hero-card__stat">
-                            <i class="fas fa-graduation-cap bc-hero-card__stat-icon"></i>
-                            <div class="bc-hero-card__stat-copy">
-                                <strong class="bc-count bc-hero-card__stat-value" data-counter="${not empty courses ? fn:length(courses) : 0}">${not empty courses ? fn:length(courses) : 0}</strong>
-                                <span class="bc-hero-card__stat-label">Available Catalog</span>
-                            </div>
-                        </div>
-                        <div class="bc-hero-card__stat">
-                            <i class="fas fa-book-bookmark bc-hero-card__stat-icon is-success"></i>
-                            <div class="bc-hero-card__stat-copy">
-                                <strong class="bc-count bc-hero-card__stat-value" data-counter="${not empty enrolledCourseIds ? fn:length(enrolledCourseIds) : 0}">${not empty enrolledCourseIds ? fn:length(enrolledCourseIds) : 0}</strong>
-                                <span class="bc-hero-card__stat-label">Active Courses</span>
-                            </div>
-                        </div>
-                        <div class="bc-hero-card__stat">
-                            <i class="fas fa-tags bc-hero-card__stat-icon is-warning"></i>
-                            <div class="bc-hero-card__stat-copy">
-                                <strong class="bc-count bc-hero-card__stat-value" data-counter="${freeCourseCount}">${freeCourseCount}</strong>
-                                <span class="bc-hero-card__stat-label">Free Classes</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <c:if test="${not empty param.success}">
-                <div class="alert alert-success">Course enrollment action completed successfully.</div>
-            </c:if>
-            <c:if test="${not empty param.error}">
-                <div class="alert alert-error">Action failed. Please retry.</div>
-            </c:if>
-
-            <!-- 1. Horizontal Control bar (Instant filters bar) -->
-            <section class="sv-card">
-                <div class="sv-card-body bc-controlbar" aria-label="Quick browser controls">
-                    <div class="bc-filter-group">
-                        <button type="button" class="bc-filter active" data-filter="all">All</button>
-                        <button type="button" class="bc-filter" data-filter="free">Free</button>
-                        <button type="button" class="bc-filter" data-filter="paid">Paid</button>
-                        <button type="button" class="bc-filter" data-filter="beginner">Beginner</button>
-                        <button type="button" class="bc-filter" data-filter="intermediate">Intermediate</button>
-                        <button type="button" class="bc-filter" data-filter="advanced">Advanced</button>
-                        <button type="button" class="bc-filter" data-filter="enrolled">Enrolled</button>
-                    </div>
-                    <div class="bc-search-wrap">
-                        <label for="bcQuickSearch" class="bc-sr-only">Quick search courses</label>
-                        <input id="bcQuickSearch" type="text" placeholder="Search courses or categories..." autocomplete="off" data-search-target="#bcGrid" data-search-item=".bc-card">
-                        <i class="fas fa-magnifying-glass bc-search-icon"></i>
-                    </div>
-                </div>
-            </section>
-
-            <c:choose>
-                <c:when test="${empty courses}">
-                    <section class="sv-card">
-                        <div class="sv-card-body">
-                            <div class="empty-state-box">
-                                <i class="fas fa-book-open"></i>
-                                <h3>No Courses Found</h3>
-                                <p>No courses match your current search/filter criteria.</p>
-                                <a href="${pageContext.request.contextPath}/student/courses" class="sv-btn primary">View Full Catalog</a>
-                            </div>
-                        </div>
-                    </section>
-                </c:when>
-                <c:otherwise>
-
-
-                    <!-- Pulsing Skeleton Loader Grid -->
-                    <div class="bc-skeleton-grid" id="bcSkeletonGrid">
-                        <c:forEach begin="1" end="3">
-                            <div class="bc-skeleton-card">
-                                <div class="bc-skeleton-banner"></div>
-                                <div class="bc-skeleton-title"></div>
-                                <div class="bc-skeleton-meta"></div>
-                                <div class="bc-skeleton-button"></div>
-                            </div>
-                        </c:forEach>
-                    </div>
-
-                    <!-- Spacious 3-Column Spanning Grid -->
-                    <section class="bc-course-grid is-hidden" id="bcGrid">
-                        <c:forEach var="course" items="${courses}">
-                            <c:set var="isEnrolled" value="${not empty enrolledCourseIds && enrolledCourseIds.contains(course.courseId)}" />
-                            <c:set var="isFree" value="${empty course.courseFee || course.courseFee le 0}" />
-                            
-                            <c:set var="lowercasedLevel" value="all" />
-                            <c:if test="${not empty course.level}">
-                                <c:set var="lowercasedLevel" value="${fn:toLowerCase(course.level)}" />
-                            </c:if>
-                            
-                            <article class="bc-card sv-card bc-tilt"
-                                tabindex="0"
-                                data-level="${lowercasedLevel}"
-                                data-enrolled="${isEnrolled ? 'yes' : 'no'}"
-                                data-price-type="${isFree ? 'free' : 'paid'}"
-                                data-course='<c:out value="${course.courseName}"/>'
-                                data-category='<c:out value="${course.category}"/>'
-                                data-href="${isEnrolled ? pageContext.request.contextPath.concat('/student/enrollment-details?id=').concat(enrolledCourseMap[course.courseId]) : pageContext.request.contextPath.concat('/student/courses?action=details&id=').concat(course.courseId)}">
-                                
-                                <!-- Details stacked vertically inside body container -->
-                                <div class="sv-card-body bc-card-body-tight bc-card-details-stack">
-                                    
-                                    <!-- Banner image area (clean graphic banner) -->
-                                    <div class="bc-banner-wrap">
-                                        <c:choose>
-                                            <c:when test="${not empty course.courseBanner}">
-                                                <c:choose>
-                                                    <c:when test="${course.courseBanner.startsWith('http')}">
-                                                        <img class="bc-banner" src="${course.courseBanner}" alt="${course.courseName} banner">
-                                                    </c:when>
-                                                    <c:otherwise>
-                                                        <img class="bc-banner" src="${pageContext.request.contextPath}/${course.courseBanner}" alt="${course.courseName} banner">
-                                                    </c:otherwise>
-                                                </c:choose>
-                                            </c:when>
-                                            <c:otherwise>
-                                                <div class="bc-banner bc-banner-placeholder">
-                                                    <i class="fas fa-image"></i>
-                                                    <span>Course Banner</span>
-                                                </div>
-                                            </c:otherwise>
-                                        </c:choose>
-
-                                        <!-- floating overlaid taxonomic chips -->
-                                        <span class="bc-level-badge level-${lowercasedLevel}">${course.level}</span>
-                                        <span class="bc-cat"><c:out value="${course.category}"/></span>
-                                    </div>
-
-                                    <h3 data-search-text class="bc-course-title">
-                                        <c:out value="${course.courseName}" />
-                                    </h3>
-
-                                    <!-- Elegant Metadata Row (Duration, Price, and active Enrolled Status) -->
-                                    <div class="bc-meta">
-                                        <span><i class="fas fa-clock bc-meta-icon"></i> ${course.displayDuration}</span>
-                                        <span><i class="fas fa-wallet bc-meta-icon is-success"></i>
-                                            <c:choose>
-                                                <c:when test="${isFree}">Free</c:when>
-                                                <c:otherwise>
-                                                    <fmt:formatNumber value="${course.courseFee}" type="number" minFractionDigits="2" maxFractionDigits="2" />
-                                                </c:otherwise>
-                                            </c:choose>
-                                        </span>
-                                        <c:if test="${isEnrolled}">
-                                            <span class="bc-enrolled-pill"><i class="fas fa-circle-check"></i> Enrolled</span>
-                                        </c:if>
-                                    </div>
-
-                                    <!-- Action panel (original links and form definitions perfectly preserved) -->
-                                    <div class="bc-actions">
-                                        <a href="${pageContext.request.contextPath}/student/courses?action=details&id=${course.courseId}" class="sv-btn bc-details-btn">View Details</a>
-                                        
-                                        <c:choose>
-                                            <c:when test="${isEnrolled}">
-                                                 <a href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrolledCourseMap[course.courseId]}" class="sv-btn bc-btn-enrolled">Continue Learning</a>
-                                             </c:when>
-                                            <c:otherwise>
-                                                <c:choose>
-                                                    <c:when test="${isFree}">
-                                                        <form method="post" action="${pageContext.request.contextPath}/student/enroll" style="display:inline;" class="bc-free-enroll-form">
-                                                            <input type="hidden" name="courseId" value="${course.courseId}">
-                                                            <button type="submit" class="sv-btn primary bc-free-enroll-btn">
-                                                                <span class="btn-text">Enroll Free</span>
-                                                                <span class="btn-spinner"><i class="fas fa-spinner fa-spin"></i></span>
-                                                            </button>
-                                                        </form>
-                                                    </c:when>
-                                                    <c:otherwise>
-                                                        <a href="${pageContext.request.contextPath}/student/enrollment-summary?courseId=${course.courseId}" class="sv-btn primary bc-paid-enroll-btn">
-                                                            <span class="btn-text">Enroll</span>
-                                                            <span class="btn-spinner"><i class="fas fa-spinner fa-spin"></i></span>
-                                                        </a>
-                                                    </c:otherwise>
-                                                </c:choose>
-                                            </c:otherwise>
-                                        </c:choose>
-                                    </div>
-                                </div>
-                            </article>
-                        </c:forEach>
-                    </section>
-
-                    <section class="sv-card bc-empty-hidden" id="bcNoRows">
-                        <div class="sv-card-body">
-                            <div class="empty-state-box">
-                                <i class="fas fa-magnifying-glass"></i>
-                                <h3>No Courses Match</h3>
-                                <p>Try another quick filter or search term.</p>
-                            </div>
-                        </div>
-                    </section>
-                </c:otherwise>
-            </c:choose>
+        <main class="sv-main">
+            <!-- Scoped React Sandbox Root node -->
+            <div id="student-react-root"></div>
         </main>
     </div>
 
+    <%
+        List<Course> coursesList = (List<Course>) request.getAttribute("courses");
+        List<Integer> enrolledIdsList = (List<Integer>) request.getAttribute("enrolledCourseIds");
+        Map<Integer, Integer> enrolledMapObj = (Map<Integer, Integer>) request.getAttribute("enrolledCourseMap");
+        
+        com.psm.elearning.dao.UserDAO userDAO = new com.psm.elearning.dao.UserDAOImpl();
+        org.json.JSONArray coursesJson = new org.json.JSONArray();
+        if (coursesList != null) {
+            for (Course c : coursesList) {
+                org.json.JSONObject obj = new org.json.JSONObject();
+                obj.put("courseId", c.getCourseId() != null ? c.getCourseId() : 0);
+                obj.put("courseName", c.getCourseName() != null ? c.getCourseName() : "");
+                obj.put("category", c.getCategory() != null ? c.getCategory() : "General");
+                obj.put("level", c.getLevel() != null ? c.getLevel() : "All Levels");
+                obj.put("courseFee", c.getCourseFee() != null ? c.getCourseFee() : 0.0);
+                obj.put("displayDuration", c.getDisplayDuration() != null ? c.getDisplayDuration() : "Self-paced");
+                obj.put("courseBanner", c.getCourseBanner() != null ? c.getCourseBanner() : "");
+                obj.put("createdBy", c.getCreatedBy() != null ? c.getCreatedBy() : 0);
+                
+                String instructorName = "Instructor";
+                if (c.getCreatedBy() != null) {
+                    try {
+                        com.psm.elearning.model.User instructor = userDAO.findById(c.getCreatedBy());
+                        if (instructor != null && instructor.getFullName() != null) {
+                            instructorName = instructor.getFullName();
+                        }
+                    } catch (Exception ex) {
+                        // Keep fallback
+                    }
+                }
+                obj.put("instructorName", instructorName);
+                coursesJson.put(obj);
+            }
+        }
+        
+        org.json.JSONArray enrolledIdsJson = new org.json.JSONArray();
+        if (enrolledIdsList != null) {
+            for (Integer id : enrolledIdsList) {
+                enrolledIdsJson.put(id);
+            }
+        }
+        
+        org.json.JSONObject enrolledMapJson = new org.json.JSONObject();
+        if (enrolledMapObj != null) {
+            for (Map.Entry<Integer, Integer> entry : enrolledMapObj.entrySet()) {
+                enrolledMapJson.put(String.valueOf(entry.getKey()), entry.getValue());
+            }
+        }
+        
+        pageContext.setAttribute("serializedCourses", coursesJson.toString());
+        pageContext.setAttribute("serializedEnrolledIds", enrolledIdsJson.toString());
+        pageContext.setAttribute("serializedEnrolledMap", enrolledMapJson.toString());
+    %>
 
+    <script type="text/javascript">
+        window.__CONTEXT_PATH__ = "${pageContext.request.contextPath}";
+        window.__COURSES__ = ${serializedCourses};
+        window.__ENROLLED_COURSE_IDS__ = ${serializedEnrolledIds};
+        window.__ENROLLED_COURSE_MAP__ = ${serializedEnrolledMap};
+    </script>
 
-    <!-- 2. Interactive Free Enrollment Glassmorphic Modal Overlay -->
-    <div class="bc-enroll-overlay" id="bcEnrollOverlay">
-        <div class="bc-enroll-modal">
-            <div class="bc-modal-loader" id="bcModalLoader">
-                <div class="bc-spinner"></div>
-                <h3>Securing Your Spot...</h3>
-                <p>We are initializing your workspace resources and enrolling you into the course.</p>
-            </div>
-            <div class="bc-modal-success is-hidden" id="bcModalSuccess">
-                <div class="bc-success-checkmark">
-                    <i class="fas fa-circle-check"></i>
+    <!-- React App Engine -->
+    <script type="text/babel">
+        const { useState, useEffect, useMemo } = React;
+
+        // Isolated CSS class name mappings — universal premium discovery design
+        const styles = {
+            container: 'bc_mod_456_container',
+            breadcrumb: 'bc_mod_456_breadcrumb',
+            headerWrap: 'bc_mod_456_header_wrap',
+            title: 'bc_mod_456_title',
+            subtitle: 'bc_mod_456_subtitle',
+            headerActions: 'bc_mod_456_header_actions',
+            controlsRow: 'bc_mod_456_controls_row',
+            topRow: 'bc_mod_456_top_row',
+            searchWrapper: 'bc_mod_456_search_wrapper',
+            searchIcon: 'bc_mod_456_search_icon',
+            searchInput: 'bc_mod_456_search_input',
+            sortSelect: 'bc_mod_456_sort_select',
+            filterBar: 'bc_mod_456_filter_bar',
+            filterGroup: 'bc_mod_456_filter_group',
+            filterPill: 'bc_mod_456_filter_pill',
+            filterPillActive: 'bc_mod_456_filter_pill_active',
+            filterPillInactive: 'bc_mod_456_filter_pill_inactive',
+            resultsCount: 'bc_mod_456_results_count',
+            courseGrid: 'bc_mod_456_course_grid',
+            courseCard: 'bc_mod_456_course_card',
+            courseBannerWrap: 'bc_mod_456_course_banner_wrap',
+            courseBanner: 'bc_mod_456_course_banner',
+            courseBannerEmpty: 'bc_mod_456_course_banner_empty',
+            categoryBadge: 'bc_mod_456_category_badge',
+            levelBadge: 'bc_mod_456_level_badge',
+            courseBody: 'bc_mod_456_course_body',
+            courseInfo: 'bc_mod_456_course_info',
+            courseTitle: 'bc_mod_456_course_title',
+            courseInstructor: 'bc_mod_456_course_instructor',
+            courseMeta: 'bc_mod_456_course_meta',
+            metaItem: 'bc_mod_456_meta_item',
+            priceFree: 'bc_mod_456_price_free',
+            priceValue: 'bc_mod_456_price_value',
+            enrolledPill: 'bc_mod_456_enrolled_pill',
+            cardAction: 'bc_mod_456_card_action',
+            svBtn: 'bc_mod_456_sv_btn',
+            svBtnPrimary: 'bc_mod_456_sv_btn_primary',
+            svBtnSecondary: 'bc_mod_456_sv_btn_secondary',
+            svBtnSuccess: 'bc_mod_456_sv_btn_success',
+            emptyState: 'bc_mod_456_empty_state',
+            emptyIcon: 'bc_mod_456_empty_icon',
+            modalOverlay: 'bc_mod_456_modal_overlay',
+            modalContainer: 'bc_mod_456_modal_container',
+            spinner: 'bc_mod_456_spinner',
+            successIcon: 'bc_mod_456_success_icon',
+            fadeInUp: 'bc_mod_456_fade_in_up'
+        };
+
+        // Robust Framer Motion React UMD container falling back to CSS animations gracefully
+        const MotionDiv = ({ children, initial, animate, transition, variants, className, ...props }) => {
+            const MotionComponent = window.Motion && window.Motion.motion 
+                ? window.Motion.motion.div 
+                : (window.FramerMotion && window.FramerMotion.motion ? window.FramerMotion.motion.div : null);
+            
+            if (MotionComponent) {
+                return (
+                    <MotionComponent 
+                        initial={initial} 
+                        animate={animate} 
+                        transition={transition} 
+                        variants={variants}
+                        className={className} 
+                        {...props}
+                    >
+                        {children}
+                    </MotionComponent>
+                );
+            }
+            return (
+                <div className={(className || '') + ' ' + styles.fadeInUp} {...props}>
+                    {children}
                 </div>
-                <h3>Enrollment Successful!</h3>
-                <p>Welcome aboard! Redirecting you directly to your My Courses list...</p>
-            </div>
-        </div>
-    </div>
+            );
+        };
 
-    <div class="sv-overlay" id="svOverlay"></div>
-    <script src="${pageContext.request.contextPath}/js/student-v2.js"></script>
-    <script src="${pageContext.request.contextPath}/js/browse-courses-v2.js"></script>
+        const gridContainerVariants = {
+            hidden: { opacity: 0 },
+            show: {
+                opacity: 1,
+                transition: {
+                    staggerChildren: 0.08
+                }
+            }
+        };
+
+        const cardVariants = {
+            hidden: { opacity: 0, y: 15 },
+            show: { 
+                opacity: 1, 
+                y: 0,
+                transition: {
+                    type: "spring",
+                    stiffness: 100,
+                    damping: 15
+                }
+            }
+        };
+
+        function StudentCoursesApp() {
+            const [courses] = useState(window.__COURSES__ || []);
+            const [enrolledIds] = useState(window.__ENROLLED_COURSE_IDS__ || []);
+            const [enrolledMap] = useState(window.__ENROLLED_COURSE_MAP__ || {});
+            
+            const [searchQuery, setSearchQuery] = useState('');
+            const [selectedCategory, setSelectedCategory] = useState('All');
+            const [sortOption, setSortOption] = useState('default');
+
+            // Enrollment loaders
+            const [isEnrolling, setIsEnrolling] = useState(false);
+            const [enrollSuccess, setEnrollSuccess] = useState(false);
+            const [enrollingCourseName, setEnrollingCourseName] = useState('');
+
+            // Extract unique categories dynamically
+            const categories = useMemo(() => {
+                const unique = new Set(courses.map(c => c.category).filter(Boolean));
+                return ['All', ...Array.from(unique)];
+            }, [courses]);
+
+            // Filter & Sort Course list in real-time
+            const sortedCourses = useMemo(() => {
+                let items = [...courses];
+                
+                // 1. Category Filter
+                if (selectedCategory !== 'All') {
+                    items = items.filter(c => c.category === selectedCategory);
+                }
+                
+                // 2. Search Query filter
+                if (searchQuery.trim().length > 0) {
+                    const q = searchQuery.toLowerCase().trim();
+                    items = items.filter(c => 
+                        c.courseName.toLowerCase().includes(q) || 
+                        c.instructorName.toLowerCase().includes(q) ||
+                        c.category.toLowerCase().includes(q)
+                    );
+                }
+                
+                // 3. Sorting Algorithms
+                if (sortOption === 'price-low') {
+                    items.sort((a, b) => a.courseFee - b.courseFee);
+                } else if (sortOption === 'price-high') {
+                    items.sort((a, b) => b.courseFee - a.courseFee);
+                } else if (sortOption === 'title-asc') {
+                    items.sort((a, b) => a.courseName.localeCompare(b.courseName));
+                }
+                
+                return items;
+            }, [courses, selectedCategory, searchQuery, sortOption]);
+
+            const ctxPath = window.__CONTEXT_PATH__;
+
+            const handleEnrollFree = (courseId, courseName) => {
+                setEnrollingCourseName(courseName);
+                setIsEnrolling(true);
+                
+                // Premium micro-interaction loader for 1.2s before redirecting
+                setTimeout(() => {
+                    setEnrollSuccess(true);
+                    setTimeout(() => {
+                        const form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = ctxPath + "/student/enroll";
+                        
+                        const input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = 'courseId';
+                        input.value = courseId;
+                        
+                        form.appendChild(input);
+                        document.body.appendChild(form);
+                        form.submit();
+                    }, 1000);
+                }, 1200);
+            };
+
+            const handleEnrollPaid = (courseId) => {
+                window.location.href = ctxPath + "/student/enrollment-summary?courseId=" + courseId;
+            };
+
+            return (
+                <div className={styles.container}>
+                    {/* Visual breadcrumbs */}
+                    <div className={styles.breadcrumb}>
+                        <a href={ctxPath + "/dashboard"}><i className="fas fa-house"></i> Dashboard</a>
+                        <span>/</span>
+                        <span>Browse Courses</span>
+                    </div>
+
+                    {/* Header bar section */}
+                    <header className={styles.headerWrap}>
+                        <div>
+                            <p className={styles.subtitle} style={{ fontSize: '0.98rem', color: '#64748b', fontWeight: '500', margin: 0 }}>
+                                Find courses, start enrollment, and launch your academic learning journey.
+                            </p>
+                        </div>
+                        <div className={styles.headerActions}>
+                            <a href={ctxPath + "/student/my-enrollments"} className={styles.svBtn + ' ' + styles.svBtnSecondary} style={{ width: 'auto' }}>
+                                <i className="fas fa-book-open"></i> My Learning
+                            </a>
+                        </div>
+                    </header>
+
+                    {/* Unified Command Center — Search, Sort & Pills */}
+                    <section className={styles.controlsRow}>
+                        {/* Top controls: Search input & Sort dropdown */}
+                        <div className={styles.topRow}>
+                            <div className={styles.searchWrapper}>
+                                <i className={"fas fa-search " + styles.searchIcon} />
+                                <input 
+                                    type="text" 
+                                    placeholder="Search by course name, category, or instructor..." 
+                                    className={styles.searchInput}
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                />
+                            </div>
+
+                            <select 
+                                className={styles.sortSelect} 
+                                value={sortOption} 
+                                onChange={(e) => setSortOption(e.target.value)}
+                            >
+                                <option value="default">Default Sorting</option>
+                                <option value="price-low">Price: Low to High</option>
+                                <option value="price-high">Price: High to Low</option>
+                                <option value="title-asc">Title: A to Z</option>
+                            </select>
+                        </div>
+
+                        {/* Filter Bar: Category Scroll Pills & Results Counter */}
+                        <div className={styles.filterBar}>
+                            <div className={styles.filterGroup}>
+                                {categories.map((cat, idx) => (
+                                    <button
+                                        key={idx}
+                                        className={styles.filterPill + ' ' + (selectedCategory === cat ? styles.filterPillActive : styles.filterPillInactive)}
+                                        onClick={() => setSelectedCategory(cat)}
+                                    >
+                                        {cat}
+                                    </button>
+                                ))}
+                            </div>
+
+                            <span className={styles.resultsCount}>
+                                {sortedCourses.length + ' course' + (sortedCourses.length !== 1 ? 's' : '') + ' available'}
+                            </span>
+                        </div>
+                    </section>
+
+                    {/* Discovery Course Grid with framer-motion stagger animations */}
+                    {sortedCourses.length === 0 ? (
+                        <div className={styles.emptyState}>
+                            <div className={styles.emptyIcon}>
+                                <i className="fas fa-compass" />
+                            </div>
+                            <h3>No Courses Match</h3>
+                            <p>We could not find any courses matching your keywords or selected category filters. Try adjusting your search query.</p>
+                            <button onClick={() => { setSearchQuery(''); setSelectedCategory('All'); }} className={styles.svBtn + ' ' + styles.svBtnPrimary} style={{ marginTop: '12px', width: 'auto' }}>
+                                Reset Filters
+                            </button>
+                        </div>
+                    ) : (
+                        <MotionDiv
+                            variants={gridContainerVariants}
+                            initial="hidden"
+                            animate="show"
+                            className={styles.courseGrid}
+                        >
+                            {sortedCourses.map((course) => {
+                                const isEnrolled = enrolledIds.includes(course.courseId);
+                                const isFree = course.courseFee <= 0.0;
+                                const formattedPrice = isFree ? "Free" : course.courseFee.toFixed(2);
+                                
+                                const bannerSrc = course.courseBanner 
+                                    ? (course.courseBanner.startsWith('http') ? course.courseBanner : ctxPath + '/' + course.courseBanner)
+                                    : '';
+
+                                return (
+                                    <MotionDiv
+                                        key={course.courseId}
+                                        variants={cardVariants}
+                                    >
+                                        <article className={styles.courseCard}>
+                                            {/* Thumbnail & Floating Badges */}
+                                            <div className={styles.courseBannerWrap}>
+                                                {course.courseBanner ? (
+                                                    <img 
+                                                        src={bannerSrc}
+                                                        alt=""
+                                                        className={styles.courseBanner}
+                                                    />
+                                                ) : (
+                                                    <div className={styles.courseBannerEmpty}>
+                                                        <i className="fas fa-image"></i>
+                                                        <span>No Image</span>
+                                                    </div>
+                                                )}
+                                                <span className={styles.categoryBadge}>{course.category}</span>
+                                                <span className={styles.levelBadge}>{course.level}</span>
+                                            </div>
+
+                                            {/* Body Stack */}
+                                            <div className={styles.courseBody}>
+                                                <div className={styles.courseInfo}>
+                                                    <h3 className={styles.courseTitle}>{course.courseName}</h3>
+                                                    <p className={styles.courseInstructor}>
+                                                        <i className="far fa-user"></i> By <strong>{course.instructorName}</strong>
+                                                    </p>
+                                                </div>
+
+                                                {/* Meta & Price Info */}
+                                                <div className={styles.courseMeta}>
+                                                    <span className={styles.metaItem}>
+                                                        <i className="far fa-clock"></i> {course.displayDuration}
+                                                    </span>
+                                                    
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                        {isEnrolled ? (
+                                                            <span className={styles.enrolledPill}>
+                                                                <i className="fas fa-circle-check"></i> Enrolled
+                                                            </span>
+                                                        ) : (
+                                                            <span className={styles.metaItem + ' ' + (isFree ? styles.priceFree : styles.priceValue)}>
+                                                                {isFree ? 'Free' : '₦' + formattedPrice}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </div>
+
+                                                {/* Action Buttons */}
+                                                <div className={styles.cardAction}>
+                                                    {isEnrolled ? (
+                                                        <a 
+                                                            href={ctxPath + "/student/enrollment-details?id=" + enrolledMap[course.courseId]} 
+                                                            className={styles.svBtn + ' ' + styles.svBtnSuccess}
+                                                        >
+                                                            Continue Learning <i className="fas fa-arrow-right" style={{ fontSize: '0.75rem' }}></i>
+                                                        </a>
+                                                    ) : (
+                                                        <div style={{ display: 'flex', gap: '8px', width: '100%' }}>
+                                                            <a 
+                                                                href={ctxPath + "/student/courses?action=details&id=" + course.courseId} 
+                                                                className={styles.svBtn + ' ' + styles.svBtnSecondary}
+                                                                style={{ width: '40%' }}
+                                                            >
+                                                                Details
+                                                            </a>
+                                                            {isFree ? (
+                                                                <button 
+                                                                    onClick={() => handleEnrollFree(course.courseId, course.courseName)} 
+                                                                    className={styles.svBtn + ' ' + styles.svBtnPrimary}
+                                                                    style={{ width: '60%' }}
+                                                                >
+                                                                    Enroll Free <i className="fas fa-graduation-cap" style={{ fontSize: '0.85rem' }}></i>
+                                                                </button>
+                                                            ) : (
+                                                                <button 
+                                                                    onClick={() => handleEnrollPaid(course.courseId)} 
+                                                                    className={styles.svBtn + ' ' + styles.svBtnPrimary}
+                                                                    style={{ width: '60%' }}
+                                                                >
+                                                                    Enroll Now <i className="fas fa-credit-card" style={{ fontSize: '0.85rem' }}></i>
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </article>
+                                    </MotionDiv>
+                                );
+                            })}
+                        </MotionDiv>
+                    )}
+
+                    {/* Premium Glassmorphic Modal Loader */}
+                    {isEnrolling && (
+                        <div className={styles.modalOverlay}>
+                            <div className={styles.modalContainer}>
+                                {!enrollSuccess ? (
+                                    <React.Fragment>
+                                        <div className={styles.spinner} />
+                                        <h3>Securing Your Spot...</h3>
+                                        <p>Enrolling you in <strong>{enrollingCourseName}</strong>. Preparing syllabus and setting up your workspace resources...</p>
+                                    </React.Fragment>
+                                ) : (
+                                    <React.Fragment>
+                                        <div className={styles.successIcon}>
+                                            <i className="fas fa-circle-check" />
+                                        </div>
+                                        <h3>Enrollment Successful!</h3>
+                                        <p>Redirecting you directly to your learning workspace catalog. Get ready to launch your study modules!</p>
+                                    </React.Fragment>
+                                )}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        // Mount Sandbox Application
+        const containerNode = document.getElementById('student-react-root');
+        if (containerNode) {
+            const root = ReactDOM.createRoot(containerNode);
+            root.render(<StudentCoursesApp />);
+        }
+    </script>
 </body>
-
 </html>

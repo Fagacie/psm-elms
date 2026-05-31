@@ -339,7 +339,7 @@ public class EnrollmentDetailsServlet extends HttpServlet {
             boolean courseAccessGranted = paidAccess || !paymentRequired;
             boolean activeCourseAccess = courseAccessGranted && !courseExpired;
             if (paymentRequired && !paidAccess) {
-                response.sendRedirect(request.getContextPath() + "/student/payment?enrollmentId=" + enrollment.getEnrollmentId() + "&error=required");
+                response.sendRedirect(request.getContextPath() + "/student/enrollment-summary?courseId=" + enrollment.getCourseId());
                 return;
             }
 
@@ -1243,7 +1243,7 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                 readinessHint = "Free courses do not include certificates. Continue learning materials and assessments directly.";
             } else if (!paid) {
                 readinessPrimaryLabel = "Complete Payment";
-                readinessPrimaryUrl = request.getContextPath() + "/student/payment?enrollmentId=" + enrollment.getEnrollmentId();
+                readinessPrimaryUrl = request.getContextPath() + "/student/enrollment-summary?courseId=" + enrollment.getCourseId();
                 readinessPrimaryIcon = "fa-credit-card";
                 readinessHint = "Payment must be successful before the system can unlock certificate generation.";
             } else if (remainingMaterials > 0) {

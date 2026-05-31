@@ -1318,7 +1318,7 @@
                                                             <span class="lh-milestone-badge is-completed">Paid</span>
                                                         </c:when>
                                                         <c:otherwise>
-                                                            <a href="${pageContext.request.contextPath}/student/payment?enrollmentId=${enrollment.enrollmentId}" class="sv-btn primary btn-sm">Pay Now</a>
+                                                            <a href="${pageContext.request.contextPath}/student/enrollment-summary?courseId=${enrollment.courseId}" class="sv-btn primary btn-sm">Pay Now</a>
                                                         </c:otherwise>
                                                     </c:choose>
                                                 </div>

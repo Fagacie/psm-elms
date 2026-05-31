@@ -1,0 +1,420 @@
+/* ==========================================================================
+   INSTRUCTOR DASHBOARD SCOPED CSS MODULES STYLE SHEET (IMMUNE TO BLEED)
+   ========================================================================== */
+
+/* Layout Shell and Background */
+.ins_mod_123_container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 40px;
+    background-color: #f8fafc;
+    min-height: 100vh;
+    box-sizing: border-box;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+}
+
+/* Common Section Typography */
+.ins_mod_123_section_title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #0f172a;
+    letter-spacing: -0.02em;
+    margin: 0 0 0.5rem 0;
+}
+
+.ins_mod_123_section_subtitle {
+    font-size: 0.9rem;
+    color: #64748b;
+    margin: 0 0 1.5rem 0;
+}
+
+/* Fade In Animation Keyframes for framer-motion fallback */
+@keyframes ins_fade_in_up {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.ins_mod_123_fade_in_up {
+    animation: ins_fade_in_up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* --- Task 2: KPI Command Row --- */
+.ins_mod_123_kpi_row {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    width: 100%;
+}
+
+.ins_mod_123_kpi_card {
+    flex: 1;
+    min-width: 280px;
+    background: #ffffff;
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    padding: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    position: relative;
+    box-sizing: border-box;
+}
+
+.ins_mod_123_kpi_content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.ins_mod_123_kpi_num {
+    font-size: 2.25rem;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1;
+}
+
+.ins_mod_123_kpi_label {
+    font-size: 0.85rem;
+    color: #64748b;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0;
+}
+
+.ins_mod_123_kpi_desc {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    margin: 0;
+}
+
+.ins_mod_123_kpi_icon {
+    color: #6366f1;
+    opacity: 0.8;
+    background: rgba(99, 102, 241, 0.05);
+    padding: 10px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* --- Task 3: Interactive Analytics --- */
+.ins_mod_123_chart_card {
+    background: #ffffff;
+    border-radius: 16px;
+    border: none;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    padding: 32px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}
+
+.ins_mod_123_chart_header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.ins_mod_123_chart_legend {
+    display: flex;
+    gap: 16px;
+    font-size: 0.8rem;
+    color: #64748b;
+}
+
+.ins_mod_123_legend_item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.ins_mod_123_legend_dot_primary {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #6366f1;
+}
+
+.ins_mod_123_legend_dot_accent {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #f59e0b;
+}
+
+/* Custom Tooltip for Recharts */
+.ins_mod_123_custom_tooltip {
+    background: #ffffff;
+    border-radius: 10px;
+    border: 1px solid #f1f5f9;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+    padding: 12px;
+}
+
+.ins_mod_123_tooltip_label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 6px;
+}
+
+.ins_mod_123_tooltip_row {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #475569;
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.ins_mod_123_tooltip_val {
+    font-weight: 700;
+}
+
+/* --- Task 4: Assigned Courses (STRICT LIST VIEW) --- */
+.ins_mod_123_courses_section {
+    display: flex;
+    flex-direction: column;
+}
+
+.ins_mod_123_courses_head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.ins_mod_123_course_list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+}
+
+.ins_mod_123_course_row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #ffffff;
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    padding: 18px 24px;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+    box-sizing: border-box;
+    text-decoration: none;
+    gap: 20px;
+}
+
+.ins_mod_123_course_row:hover {
+    background-color: #f1f5f9;
+    transform: translateY(-1px);
+}
+
+.ins_mod_123_course_left {
+    color: #6366f1;
+    background: rgba(99, 102, 241, 0.05);
+    padding: 10px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.ins_mod_123_course_middle {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+
+.ins_mod_123_course_title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0;
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ins_mod_123_course_status_pill {
+    display: inline-flex;
+    align-items: center;
+    align-self: flex-start;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.ins_mod_123_course_status_pill.published,
+.ins_mod_123_course_status_pill.approved,
+.ins_mod_123_course_status_pill.active {
+    background: rgba(16, 185, 129, 0.08);
+    color: #10b981;
+}
+
+.ins_mod_123_course_status_pill.draft,
+.ins_mod_123_course_status_pill.pending {
+    background: rgba(245, 158, 11, 0.08);
+    color: #f59e0b;
+}
+
+.ins_mod_123_course_status_pill.archived,
+.ins_mod_123_course_status_pill.inactive {
+    background: rgba(239, 68, 68, 0.08);
+    color: #ef4444;
+}
+
+.ins_mod_123_course_right {
+    flex-shrink: 0;
+}
+
+.ins_mod_123_btn_manage {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: transparent;
+    border: 1px solid #6366f1;
+    color: #6366f1;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s ease-in-out;
+}
+
+.ins_mod_123_course_row:hover .ins_mod_123_btn_manage {
+    background: #6366f1;
+    color: #ffffff;
+    box-shadow: 0 4px 10px rgba(99, 102, 241, 0.15);
+}
+
+.ins_mod_123_view_all_link {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #6366f1;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.ins_mod_123_view_all_link:hover {
+    color: #4f46e5;
+}
+
+/* --- Empty state banner --- */
+.ins_mod_123_empty_state {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 48px;
+    text-align: center;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.ins_mod_123_empty_icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: rgba(99, 102, 241, 0.05);
+    color: #6366f1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+}
+
+.ins_mod_123_empty_state h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.ins_mod_123_empty_state p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #64748b;
+    max-width: 340px;
+    line-height: 1.5;
+}
+
+/* Dark Mode Overrides */
+[data-theme="dark"] .ins_mod_123_container {
+    background-color: #0f172a;
+}
+
+[data-theme="dark"] .ins_mod_123_kpi_card,
+[data-theme="dark"] .ins_mod_123_chart_card,
+[data-theme="dark"] .ins_mod_123_course_row,
+[data-theme="dark"] .ins_mod_123_empty_state {
+    background-color: #1e293b;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="dark"] .ins_mod_123_section_title,
+[data-theme="dark"] .ins_mod_123_kpi_num,
+[data-theme="dark"] .ins_mod_123_course_title,
+[data-theme="dark"] .ins_mod_123_empty_state h3 {
+    color: #f8fafc;
+}
+
+[data-theme="dark"] .ins_mod_123_section_subtitle,
+[data-theme="dark"] .ins_mod_123_kpi_label,
+[data-theme="dark"] .ins_mod_123_empty_state p {
+    color: #94a3b8;
+}
+
+[data-theme="dark"] .ins_mod_123_course_row:hover {
+    background-color: #334155;
+}
+
+[data-theme="dark"] .ins_mod_123_btn_manage {
+    border-color: #818cf8;
+    color: #818cf8;
+}
+
+[data-theme="dark"] .ins_mod_123_course_row:hover .ins_mod_123_btn_manage {
+    background: #818cf8;
+    color: #1e293b;
+}
+
+[data-theme="dark"] .ins_mod_123_view_all_link {
+    color: #818cf8;
+}
+
+[data-theme="dark"] .ins_mod_123_view_all_link:hover {
+    color: #a5b4fc;
+}
+
+[data-theme="dark"] .ins_mod_123_kpi_icon,
+[data-theme="dark"] .ins_mod_123_course_left {
+    color: #818cf8;
+    background: rgba(129, 140, 248, 0.08);
+}

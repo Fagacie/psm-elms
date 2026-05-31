@@ -52,8 +52,20 @@ public class StudentMaterialServlet extends HttpServlet {
 
         HttpSession session = request.getSession(false);
         Integer userId = SessionUtil.resolveUserId(session);
-        if (userId == null || !studentAccessService.isStudentSession(session)) {
+        String role = SessionUtil.resolveRole(session);
+        if (userId == null || role == null) {
             response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
+        // Ensure user is authorized for the current route path
+        String servletPath = request.getServletPath();
+        if (servletPath.startsWith("/student/") && !"Student".equals(role)) {
+            response.sendRedirect(request.getContextPath() + "/dashboard");
+            return;
+        }
+        if (servletPath.startsWith("/instructor/") && !"Instructor".equals(role)) {
+            response.sendRedirect(request.getContextPath() + "/dashboard");
             return;
         }
         String action = request.getParameter("action");
@@ -197,12 +209,14 @@ public class StudentMaterialServlet extends HttpServlet {
             return;
         }
 
-        if (!hasCourseAccess(userId, material.getCourseId())) {
+        HttpSession session = request.getSession(false);
+        String role = SessionUtil.resolveRole(session);
+        if (!hasCourseAccess(userId, role, material.getCourseId())) {
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "You are not authorized to access this file.");
             return;
         }
 
-        if (markViewed) {
+        if (markViewed && "Student".equals(role)) {
             progressDAO.markInProgress(userId, materialId, material.getCourseId());
         }
 
@@ -274,6 +288,9 @@ public class StudentMaterialServlet extends HttpServlet {
                                      Integer userId)
             throws IOException, ServletException {
 
+        HttpSession session = request.getSession(false);
+        String role = SessionUtil.resolveRole(session);
+
         Integer materialId = parseInt(request.getParameter("id"));
         if (materialId == null) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid material ID.");
@@ -286,25 +303,33 @@ public class StudentMaterialServlet extends HttpServlet {
             return;
         }
 
-        if (!hasCourseAccess(userId, material.getCourseId())) {
+        if (!hasCourseAccess(userId, role, material.getCourseId())) {
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "You are not authorized to preview this material.");
             return;
         }
 
-        Enrollment previewEnrollment = resolvePreviewEnrollment(request, userId, material.getCourseId());
-        progressDAO.markInProgress(userId, materialId, material.getCourseId());
+        Enrollment previewEnrollment = null;
+        if ("Student".equals(role)) {
+            previewEnrollment = resolvePreviewEnrollment(request, userId, material.getCourseId());
+            progressDAO.markInProgress(userId, materialId, material.getCourseId());
+        }
 
         String filePath = normalize(material.getFilePath());
         String extension = extractFileExtension(filePath);
+        String servletPath = "Instructor".equals(role) ? "/instructor/materials-preview" : "/student/materials";
         String streamUrl = isExternalHttpUrl(filePath)
             ? filePath
-            : request.getContextPath() + "/student/materials?action=view&id=" + materialId;
+            : request.getContextPath() + servletPath + "?action=view&id=" + materialId;
         List<Material> courseMaterials = materialDAO.findByCourse(material.getCourseId());
         if (courseMaterials == null) {
             courseMaterials = new ArrayList<>();
         }
         List<Material> orderedMaterials = sortMaterials(courseMaterials, "sequence");
-        Map<Integer, String> statusById = progressDAO.findMaterialStatusByCourse(userId, material.getCourseId());
+        
+        Map<Integer, String> statusById = "Student".equals(role)
+            ? progressDAO.findMaterialStatusByCourse(userId, material.getCourseId())
+            : new java.util.HashMap<>();
+            
         Material previousMaterial = null;
         Material nextMaterial = null;
         int materialPosition = 0;
@@ -330,10 +355,10 @@ public class StudentMaterialServlet extends HttpServlet {
         boolean isLink = Material.TYPE_LINK.equalsIgnoreCase(material.getMaterialType()) && !isYouTube;
         boolean isPdf = "pdf".equals(extension);
         boolean isVideo = ("mp4".equals(extension)
-                || "webm".equals(extension)
-                || "mov".equals(extension)
-                || "m4v".equals(extension)
-                || Material.TYPE_VIDEO.equalsIgnoreCase(material.getMaterialType())) && !isYouTube;
+                 || "webm".equals(extension)
+                 || "mov".equals(extension)
+                 || "m4v".equals(extension)
+                 || Material.TYPE_VIDEO.equalsIgnoreCase(material.getMaterialType())) && !isYouTube;
         boolean isAudio = "mp3".equals(extension);
         boolean canInlinePreview = isPdf || isVideo || isAudio;
         boolean isExternalPdf = isPdf && isExternalHttpUrl(filePath);
@@ -343,7 +368,7 @@ public class StudentMaterialServlet extends HttpServlet {
             youtubeVideoId = extractYouTubeVideoId(filePath);
         }
         String completionRule = resolveCompletionRule(material, extension, isPdf, isVideo, isAudio, isLink, isYouTube);
-        String materialStatus = normalize(statusById.get(materialId));
+        String materialStatus = "Student".equals(role) ? normalize(statusById.get(materialId)) : "";
         if (materialStatus.isEmpty()) {
             materialStatus = "in_progress";
         }
@@ -351,10 +376,11 @@ public class StudentMaterialServlet extends HttpServlet {
                 ? "Completed"
                 : ("in_progress".equalsIgnoreCase(materialStatus) ? "In Progress" : "Ready");
         String statusClass = "completed".equalsIgnoreCase(materialStatus) ? "status-Approved" : "status-Pending";
+        
         String backToHubUrl = previewEnrollment != null
                 ? request.getContextPath() + "/student/enrollment-details?id=" + previewEnrollment.getEnrollmentId() + "&tab=learning&materialId=" + material.getMaterialId()
-                : request.getContextPath() + "/student/materials?courseId=" + material.getCourseId();
-        String backToHubLabel = previewEnrollment != null ? "Back to Learning Hub" : "Back to My Materials";
+                : request.getContextPath() + "/instructor/courses?action=workspace&courseId=" + material.getCourseId() + "#materials";
+        String backToHubLabel = "Student".equals(role) ? "Back to Learning Hub" : "Back to Course Workspace";
 
         request.setAttribute("material", material);
         request.setAttribute("streamUrl", streamUrl);
@@ -421,8 +447,16 @@ public class StudentMaterialServlet extends HttpServlet {
         return materials.stream().sorted(comparator).collect(Collectors.toList());
     }
 
-    private boolean hasCourseAccess(Integer userId, Integer courseId) {
+    private boolean hasCourseAccess(Integer userId, String role, Integer courseId) {
         if (userId == null || courseId == null) return false;
+        if ("Admin".equals(role)) {
+            return true;
+        }
+        if ("Instructor".equals(role)) {
+            Course course = courseDAO.findById(courseId);
+            return course != null && userId.equals(course.getCreatedBy());
+        }
+        
         List<Enrollment> enrollments = enrollmentDAO.getEnrollmentsByStudent(userId);
         if (enrollments == null) return false;
 

@@ -1,0 +1,433 @@
+/* ==========================================================================
+   COURSE DETAILS SCOPED CSS MODULES (PREVENTS GLOBAL BLUE & BLEED)
+   Ultra-minimalist, typography-driven layout with custom prefix cd_mod_789_
+   ========================================================================== */
+
+/* ---- GLOBAL BLEED RESETS ---- */
+.cd_mod_789_container h1,
+.cd_mod_789_container h2,
+.cd_mod_789_container h3,
+.cd_mod_789_container h4,
+.cd_mod_789_container p,
+.cd_mod_789_container ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.cd_mod_789_container a {
+    color: inherit;
+    text-decoration: none;
+}
+
+/* Base shell & White Canvas background */
+.cd_mod_789_container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 60px 24px;
+    background-color: #ffffff;
+    min-height: 100vh;
+    box-sizing: border-box;
+    font-family: 'Inter', 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: #334155;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* Clean breadcrumbs path */
+.cd_mod_789_breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: #64748b;
+    margin-bottom: 0.5rem;
+}
+
+.cd_mod_789_breadcrumb a {
+    color: #64748b;
+    transition: color 0.15s ease;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.cd_mod_789_breadcrumb a:hover {
+    color: #6366f1;
+}
+
+/* Typography-Driven Hero (Flat on background, zero boxes) */
+.cd_mod_789_hero {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1rem;
+}
+
+.cd_mod_789_title {
+    font-size: 3rem !important;
+    font-weight: 800 !important;
+    line-height: 1.1 !important;
+    letter-spacing: -0.03em !important;
+    color: #0f172a !important;
+    margin: 0 0 16px 0 !important;
+    max-width: 900px;
+}
+
+.cd_mod_789_meta {
+    font-size: 0.88rem;
+    color: #64748b;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.cd_mod_789_meta_dot {
+    color: #cbd5e1;
+}
+
+/* Asymmetrical Layout Grid */
+.cd_mod_789_grid {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 4rem;
+    align-items: start;
+    margin-top: 3rem;
+    box-sizing: border-box;
+}
+
+/* Reading Column (Left) */
+.cd_mod_789_left_col {
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
+}
+
+.cd_mod_789_section {
+    display: flex;
+    flex-direction: column;
+}
+
+.cd_mod_789_section_title {
+    font-size: 1.25rem !important;
+    font-weight: 700 !important;
+    color: #0f172a !important;
+    margin-bottom: 20px !important;
+    letter-spacing: -0.01em !important;
+}
+
+.cd_mod_789_description {
+    font-size: 1rem;
+    line-height: 1.8;
+    color: #334155;
+    white-space: pre-line;
+}
+
+/* Syllabus Text List layout (No boxes, no accordions) */
+.cd_mod_789_syllabus_list {
+    display: flex;
+    flex-direction: column;
+}
+
+.cd_mod_789_syllabus_item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 0;
+    border-bottom: 1px solid #f1f5f9;
+    gap: 16px;
+}
+
+.cd_mod_789_syllabus_item:last-child {
+    border-bottom: none;
+}
+
+.cd_mod_789_syllabus_left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.cd_mod_789_syllabus_icon {
+    color: #94a3b8;
+    stroke-width: 1.5px;
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cd_mod_789_syllabus_text {
+    font-size: 0.95rem;
+    color: #334155;
+    font-weight: 500;
+}
+
+.cd_mod_789_syllabus_badge {
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background-color: #f1f5f9;
+    color: #64748b;
+    flex-shrink: 0;
+}
+
+/* Floating Action Column (Right, Sticky, Borderless) */
+.cd_mod_789_right_col {
+    position: sticky;
+    top: 100px;
+    display: flex;
+    flex-direction: column;
+    gap: 2.2rem;
+}
+
+/* Banner Wrap (Rounded Corners 12px) */
+.cd_mod_789_banner_wrap {
+    width: 100%;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #0f172a;
+    aspect-ratio: 16/10;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+}
+
+.cd_mod_789_banner {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.cd_mod_789_banner_placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.3);
+    font-size: 2rem;
+    gap: 8px;
+}
+
+.cd_mod_789_banner_placeholder span {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Borderless Flat Price display */
+.cd_mod_789_price_wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.cd_mod_789_price_label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.cd_mod_789_price_val {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: -0.02em;
+}
+
+.cd_mod_789_price_free {
+    color: #10b981;
+}
+
+/* High Conversion Buttons */
+.cd_mod_789_btn_stack {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+}
+
+.cd_mod_789_action_btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 24px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.cd_mod_789_action_btn_primary {
+    background-color: #6366f1 !important;
+    color: #ffffff !important;
+}
+
+.cd_mod_789_action_btn_primary:hover {
+    background-color: #4f46e5 !important;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2) !important;
+    transform: translateY(-1px);
+}
+
+.cd_mod_789_action_btn_success {
+    background-color: #10b981 !important;
+    color: #ffffff !important;
+    cursor: default;
+}
+
+.cd_mod_789_action_btn_secondary {
+    background-color: transparent !important;
+    color: #64748b !important;
+    border: 1px solid #e2e8f0 !important;
+}
+
+.cd_mod_789_action_btn_secondary:hover {
+    background-color: #f8fafc !important;
+    color: #0f172a !important;
+    border-color: #cbd5e1 !important;
+}
+
+/* Action button minimal loading spinner */
+.cd_mod_789_spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top: 2px solid #ffffff;
+    border-radius: 50%;
+    animation: cd_spin 0.8s linear infinite;
+    display: inline-block;
+}
+
+@keyframes cd_spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Secure trust icons section */
+.cd_mod_789_trust_badges {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 1.5rem;
+}
+
+.cd_mod_789_trust_item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 0.8rem;
+    line-height: 1.4;
+    color: #64748b;
+}
+
+.cd_mod_789_trust_icon {
+    color: #94a3b8;
+    stroke-width: 1.5px;
+    width: 14px;
+    height: 14px;
+    margin-top: 2px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ==========================================================================
+   RESPONSIVE BREAKPOINTS (Mobile Collapse)
+   ========================================================================== */
+@media (max-width: 868px) {
+    .cd_mod_789_container {
+        padding: 40px 16px;
+    }
+
+    .cd_mod_789_title {
+        font-size: 2.2rem !important;
+    }
+
+    .cd_mod_789_grid {
+        grid-template-columns: 1fr;
+        gap: 3rem;
+        margin-top: 2rem;
+    }
+
+    .cd_mod_789_right_col {
+        position: static;
+        width: 100%;
+    }
+}
+
+/* ==========================================================================
+   DARK THEME COMPATIBILITY (Flat slate blocks)
+   ========================================================================== */
+[data-theme="dark"] .cd_mod_789_container {
+    background-color: #0f172a;
+    color: #cbd5e1;
+}
+
+[data-theme="dark"] .cd_mod_789_title {
+    color: #f8fafc !important;
+}
+
+[data-theme="dark"] .cd_mod_789_meta {
+    color: #94a3b8;
+}
+
+[data-theme="dark"] .cd_mod_789_section_title {
+    color: #f8fafc !important;
+}
+
+[data-theme="dark"] .cd_mod_789_description {
+    color: #94a3b8;
+}
+
+[data-theme="dark"] .cd_mod_789_syllabus_item {
+    border-color: #1e293b;
+}
+
+[data-theme="dark"] .cd_mod_789_syllabus_text {
+    color: #cbd5e1;
+}
+
+[data-theme="dark"] .cd_mod_789_syllabus_badge {
+    background-color: #1e293b;
+    color: #94a3b8;
+}
+
+[data-theme="dark"] .cd_mod_789_price_val {
+    color: #f8fafc;
+}
+
+[data-theme="dark"] .cd_mod_789_action_btn_secondary {
+    color: #cbd5e1 !important;
+    border-color: #334155 !important;
+}
+
+[data-theme="dark"] .cd_mod_789_action_btn_secondary:hover {
+    background-color: #1e293b !important;
+    color: #ffffff !important;
+    border-color: #475569 !important;
+}
+
+[data-theme="dark"] .cd_mod_789_trust_badges {
+    border-color: #1e293b;
+}
+
+[data-theme="dark"] .cd_mod_789_breadcrumb a {
+    color: #94a3b8;
+}

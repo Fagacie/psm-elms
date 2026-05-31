@@ -115,6 +115,8 @@ public class MyEnrollmentsServlet extends HttpServlet {
             request.getRequestDispatcher("/WEB-INF/views/student/my-enrollments.jsp").forward(request, response);
 
         } catch (Exception e) {
+            System.err.println("=== MYENROLLMENTS SERVLET EXCEPTION DIAGNOSTICS ===");
+            e.printStackTrace();
             LOGGER.log(Level.SEVERE, "MyEnrollmentsServlet failed to load enrollments", e);
             response.sendRedirect(request.getContextPath() + "/dashboard?error=exception");
         }

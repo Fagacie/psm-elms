@@ -17,6 +17,7 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/theme-toggle.css">
     <script defer src="${pageContext.request.contextPath}/js/theme-toggle.js"></script>
     <script defer src="${pageContext.request.contextPath}/js/instructor-shell.js"></script>
+    <script defer src="${pageContext.request.contextPath}/js/instructor-ux.js"></script>
 </head>
 <body class="instructor-ui">
     <jsp:include page="/WEB-INF/views/common/instructor-header.jsp">
@@ -27,20 +28,29 @@
     <jsp:include page="/WEB-INF/views/common/instructor-sidebar.jsp"/>
 
     <main class="app-main">
-        <div class="content-wrapper">
-            <nav class="breadcrumb" aria-label="Breadcrumb">
+        <div class="assigned-courses-page">
+            <nav class="breadcrumb" aria-label="Breadcrumb" style="margin-bottom: 2rem;">
                 <a href="${pageContext.request.contextPath}/instructor/dashboard">Dashboard</a>
                 <span>&gt;</span>
                 <span>My Courses</span>
             </nav>
 
-            <section class="ins-page-head">
-                <div>
-                    <p class="ins-page-kicker">Course Portfolio</p>
-                    <h2>Manage your courses and student workspaces</h2>
-                    <p>Access workspaces to grade assessments, arrange materials, and track student progress. You have ${courses != null ? courses.size() : 0} courses assigned.</p>
+            <div class="assigned-courses-header">
+                <div class="assigned-courses-title-area">
+                    <h2>My Assigned Courses</h2>
+                    <p>Manage your curriculum portfolio and access student learning workspaces.</p>
                 </div>
-            </section>
+                
+                <c:if test="${not empty courses}">
+                    <div class="assigned-search-wrapper">
+                        <i class="fas fa-search assigned-search-icon"></i>
+                        <input type="text" placeholder="Search courses by name or status..." 
+                               data-search-target="#course-list-container" 
+                               data-search-item=".premium-course-card"
+                               class="assigned-search-input">
+                    </div>
+                </c:if>
+            </div>
 
             <c:if test="${param.success == 'updated'}">
                 <div class="ws-alert ws-alert-success">
@@ -67,66 +77,40 @@
                     </div>
                 </c:when>
                 <c:otherwise>
-                    <div style="margin-bottom: 24px;">
-                        <div style="position: relative; max-width: 400px;">
-                            <i class="fas fa-search" style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--ins-muted);"></i>
-                            <input type="text" placeholder="Search courses by name or status..." 
-                                   data-search-target="#course-list-container" 
-                                   data-search-item=".ins-course-card-v2"
-                                   style="width: 100%; padding: 12px 16px 12px 42px; border: 1px solid var(--ins-border); border-radius: 8px; font-family: inherit;">
-                        </div>
-                    </div>
-                    <section class="ins-course-grid" id="course-list-container" aria-label="Assigned courses">
+                    <section class="assigned-courses-grid" id="course-list-container" aria-label="Assigned courses">
                         <c:forEach var="course" items="${courses}">
-                            <article class="ins-course-card-v2">
-                                <div class="ins-card-banner-wrap">
+                            <article class="premium-course-card">
+                                <div class="card-thumbnail-wrapper">
                                     <c:choose>
                                         <c:when test="${not empty course.courseBanner}">
-                                            <img src="${course.courseBanner}" alt="Banner" class="ins-card-banner">
+                                            <img src="${course.courseBanner}" alt="<c:out value='${course.courseName}'/> Banner" class="card-thumbnail-image">
                                         </c:when>
                                         <c:otherwise>
-                                            <div class="ins-card-banner-placeholder">
+                                            <div class="card-thumbnail-fallback">
                                                 <i class="fas fa-graduation-cap"></i>
                                             </div>
                                         </c:otherwise>
                                     </c:choose>
-                                    <div class="ins-card-badges">
-                                        <span class="chip chip-category"><c:out value="${empty course.category ? 'General' : course.category}"/></span>
-                                        <span class="chip chip-level"><c:out value="${course.level}"/></span>
-                                    </div>
+                                    <span class="card-category-badge"><c:out value="${empty course.category ? 'General' : course.category}"/></span>
                                 </div>
-                                <div class="ins-card-body">
-                                    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 4px;">
-                                        <h4 class="ins-card-title" data-search-text><c:out value="${course.courseName}"/></h4>
-                                        <span class="status-badge status-${fn:toLowerCase(course.status)}" style="flex-shrink: 0;" data-search-text><c:out value="${course.status}"/></span>
-                                    </div>
-                                    <p class="ins-card-desc"><c:out value="${course.description}" default="No course summary description has been written for this curriculum yet."/></p>
+                                <div class="card-body-section">
+                                    <h4 class="card-title-text" data-search-text><c:out value="${course.courseName}"/></h4>
+                                    <span class="card-status-pill status-${fn:toLowerCase(course.status)}" data-search-text><c:out value="${course.status}"/></span>
                                     
-                                    <div class="ins-card-metrics-row">
-                                        <div class="ins-metric-item">
-                                            <i class="fas fa-users icon-blue"></i>
-                                            <div class="ins-metric-details">
-                                                <span class="ins-metric-label">Enrolled</span>
-                                                <span class="ins-metric-val"><c:out value="${courseStudentCounts[course.courseId] != null ? courseStudentCounts[course.courseId] : 0}"/></span>
-                                            </div>
+                                    <div class="card-metrics-row">
+                                        <div class="card-metric-item" title="Enrolled Students">
+                                            <i class="fas fa-users card-metric-icon"></i>
+                                            <span><c:out value="${courseStudentCounts[course.courseId] != null ? courseStudentCounts[course.courseId] : 0}"/> Students</span>
                                         </div>
-                                        <div class="ins-metric-item">
-                                            <i class="fas fa-history icon-green"></i>
-                                            <div class="ins-metric-details">
-                                                <span class="ins-metric-label">Duration</span>
-                                                <span class="ins-metric-val" style="font-size: 0.78rem;"><c:out value="${course.displayDuration}"/></span>
-                                            </div>
+                                        <div class="card-metric-item" title="Course Duration">
+                                            <i class="far fa-clock card-metric-icon"></i>
+                                            <span><c:out value="${course.displayDuration}"/></span>
                                         </div>
-                                    </div>
-
-                                    <div class="ins-card-meta-footer">
-                                        <span><i class="far fa-calendar-alt"></i> Updated: <c:out value="${not empty course.updatedAt ? course.updatedAt.toLocalDate() : '-'}"/></span>
-                                        <span><i class="fas fa-code-branch"></i> ID: #${course.courseId}</span>
                                     </div>
                                 </div>
-                                <div class="ins-card-action">
-                                    <a href="${pageContext.request.contextPath}/instructor/courses?action=workspace&courseId=${course.courseId}" class="sv-btn primary btn-workspace-cta">
-                                        Open Course Workspace <i class="fas fa-arrow-right arrow-icon"></i>
+                                <div class="card-action-layer">
+                                    <a href="${pageContext.request.contextPath}/instructor/courses?action=workspace&courseId=${course.courseId}" class="card-action-button">
+                                        Enter Workspace <i class="fas fa-arrow-right"></i>
                                     </a>
                                 </div>
                             </article>

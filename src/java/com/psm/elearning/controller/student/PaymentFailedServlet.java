@@ -52,7 +52,7 @@ public class PaymentFailedServlet extends HttpServlet {
                 Enrollment enrollment = enrollmentDAO.getEnrollment(enrollmentId);
                 if (studentAccessService.belongsToStudent(enrollment, userId)) {
                     safeEnrollmentId = enrollmentId;
-                    retryPaymentUrl = request.getContextPath() + "/student/payment?enrollmentId=" + enrollmentId;
+                    retryPaymentUrl = request.getContextPath() + "/student/enrollment-summary?courseId=" + enrollment.getCourseId();
                     detailsUrl = request.getContextPath() + "/student/enrollment-details?id=" + enrollmentId;
                 }
             }

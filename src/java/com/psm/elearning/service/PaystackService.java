@@ -54,10 +54,17 @@ public class PaystackService {
      * Load Paystack configuration from properties file
      */
     private void loadConfiguration() {
-        try {
-            Properties props = new Properties();
-            InputStream input = null;
+        // Set defaults first
+        this.secretKey = "sk_test_YOUR_SECRET_KEY_HERE";
+        this.publicKey = "pk_test_YOUR_PUBLIC_KEY_HERE";
+        this.apiUrl = "https://api.paystack.co";
+        this.currency = "NGN";
+        this.callbackUrl = "http://localhost:8080/PSME/student/payment-callback";
+        this.paymentMode = "LIVE";
 
+        Properties props = new Properties();
+        try {
+            InputStream input = null;
             // Preferred: load from classpath root (src/conf/paystack.properties -> WEB-INF/classes/paystack.properties)
             ClassLoader cl = Thread.currentThread().getContextClassLoader();
             if (cl != null) {
@@ -67,38 +74,26 @@ public class PaystackService {
                 // Fallback: legacy location kept for backward compatibility
                 input = getClass().getClassLoader().getResourceAsStream("com/psm/elearning/config/paystack.properties");
             }
-            if (input == null) {
-                LOGGER.warning("Unable to find paystack.properties on classpath. Using defaults.");
-                this.secretKey = "sk_test_YOUR_SECRET_KEY_HERE";
-                this.publicKey = "pk_test_YOUR_PUBLIC_KEY_HERE";
-                this.apiUrl = "https://api.paystack.co";
-                this.currency = "NGN";
-                this.callbackUrl = "http://localhost:8080/PSME/student/payment-callback";
-                return;
+            if (input != null) {
+                props.load(input);
+                LOGGER.info("Loaded configuration properties from paystack.properties");
+            } else {
+                LOGGER.warning("paystack.properties not found on classpath. Relying on environment variables.");
             }
-
-            props.load(input);
-            this.secretKey = readConfig(props, "paystack.secret.key", "PAYSTACK_SECRET_KEY", "");
-            this.publicKey = readConfig(props, "paystack.public.key", "PAYSTACK_PUBLIC_KEY", "");
-            this.apiUrl = readConfig(props, "paystack.api.url", "PAYSTACK_API_URL", "https://api.paystack.co");
-            this.currency = readConfig(props, "paystack.currency", "PAYSTACK_CURRENCY", "NGN");
-            this.callbackUrl = readConfig(props, "paystack.callback.url", "PAYSTACK_CALLBACK_URL", "");
-            this.paymentMode = readConfig(props, "paystack.mode", "PAYSTACK_MODE", "LIVE");
-            applyAdminOverrides();
-
-            LOGGER.info("Paystack configuration loaded successfully. API URL=" + this.apiUrl + ", currency=" + this.currency);
-            
         } catch (IOException ex) {
-            LOGGER.log(Level.SEVERE, "Error loading Paystack configuration", ex);
-            // Set defaults in case of error
-            this.secretKey = "sk_test_YOUR_SECRET_KEY_HERE";
-            this.publicKey = "pk_test_YOUR_PUBLIC_KEY_HERE";
-            this.apiUrl = "https://api.paystack.co";
-            this.currency = "NGN";
-            this.callbackUrl = "http://localhost:8080/PSME/student/payment-callback";
-            this.paymentMode = "LIVE";
-            applyAdminOverrides();
+            LOGGER.log(Level.SEVERE, "Error loading paystack.properties from classpath", ex);
         }
+
+        // Environment variables override properties, which override defaults
+        this.secretKey = readConfig(props, "paystack.secret.key", "PAYSTACK_SECRET_KEY", this.secretKey);
+        this.publicKey = readConfig(props, "paystack.public.key", "PAYSTACK_PUBLIC_KEY", this.publicKey);
+        this.apiUrl = readConfig(props, "paystack.api.url", "PAYSTACK_API_URL", this.apiUrl);
+        this.currency = readConfig(props, "paystack.currency", "PAYSTACK_CURRENCY", this.currency);
+        this.callbackUrl = readConfig(props, "paystack.callback.url", "PAYSTACK_CALLBACK_URL", this.callbackUrl);
+        this.paymentMode = readConfig(props, "paystack.mode", "PAYSTACK_MODE", this.paymentMode);
+
+        applyAdminOverrides();
+        LOGGER.info("Paystack configuration initialized successfully. Mode=" + this.paymentMode + ", API URL=" + this.apiUrl + ", currency=" + this.currency);
     }
 
     private void applyAdminOverrides() {

@@ -1,301 +1,477 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
-    <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-        <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
-            <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
-                <!DOCTYPE html>
-                <html lang="en">
+<%@ page contentType="text/html;charset=UTF-8" language="java" import="com.psm.elearning.model.*,java.util.List" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Courses - PSM E-Learning</title>
+    <jsp:include page="/WEB-INF/views/common/student-head-assets.jsp" />
+    
+    <!-- Scoped isolated styles for the learning library -->
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/MyCourses.module.css">
 
-                <head>
-                    <meta charset="UTF-8">
-                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <title>My Courses - PSM E-Learning</title>
-                    <jsp:include page="/WEB-INF/views/common/student-head-assets.jsp" />
-                    <!-- Link the advanced interactive My Courses layout stylesheet -->
-                    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/my-enrollments-v3.css">
-                </head>
+    <!-- React & ReactDOM (UMD production versions) -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    
+    <!-- Babel Standalone for browser JSX compilation -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Framer Motion for premium staggered layout animations -->
+    <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
+</head>
+<body class="sv-page">
+    <c:set var="topbarTitle" value="My Learning" />
+    <c:set var="topbarSubtitle" value="Track active courses and continue learning" />
+    <jsp:include page="/WEB-INF/views/common/student-topbar.jsp" />
 
-                <body class="sv-page">
-                    <c:set var="topbarTitle" value="My Courses" />
-                    <c:set var="topbarSubtitle" value="Track active courses and continue learning" />
-                    <jsp:include page="/WEB-INF/views/common/student-topbar.jsp" />
+    <div class="sv-layout">
+        <c:set var="activePage" value="my-courses" />
+        <jsp:include page="/WEB-INF/views/common/student-sidebar.jsp" />
 
-                    <div class="sv-layout">
-                        <c:set var="activePage" value="my-courses" />
-                        <jsp:include page="/WEB-INF/views/common/student-sidebar.jsp" />
+        <main class="sv-main">
+            <!-- Scoped React Sandbox Root node -->
+            <div id="student-react-root"></div>
+        </main>
+    </div>
 
-                        <main class="sv-main me-page">
-                            <div class="sv-breadcrumb">
-                                <a href="${pageContext.request.contextPath}/dashboard"><i class="fas fa-house"></i>
-                                    Dashboard</a>
-                                <span>/</span>
-                                <span>My Courses</span>
-                            </div>
+    <!-- Background Notification Banners for alerts -->
+    <div style="display:none;">
+        <c:if test="${param.message == 'alreadypaid'}">
+            <div id="alertMessagePaid" data-message="This enrollment has already been paid and is ready in your learning workspace."></div>
+        </c:if>
+        <c:if test="${param.error == 'notfound' || param.error == 'invalid'}">
+            <div id="alertMessageError" data-message="We could not find that enrollment. Please open it again from your course list."></div>
+        </c:if>
+        <c:if test="${param.error == 'unauthorized' || param.error == 'permission'}">
+            <div id="alertMessageAuth" data-message="You do not have permission to access that enrollment."></div>
+        </c:if>
+        <c:if test="${param.error == 'exception'}">
+            <div id="alertMessageExcept" data-message="Something interrupted the enrollment flow. Please try again."></div>
+        </c:if>
+    </div>
 
-                            <c:if test="${param.message == 'alreadypaid'}">
-                                <div class="alert alert-success">
-                                    <i class="fas fa-circle-check"></i> This enrollment has already been paid and is
-                                    ready in your learning workspace.
-                                </div>
-                            </c:if>
-                            <c:if test="${param.error == 'notfound' || param.error == 'invalid'}">
-                                <div class="alert alert-error">
-                                    <i class="fas fa-triangle-exclamation"></i> We could not find that enrollment.
-                                    Please open it again from your course list.
-                                </div>
-                            </c:if>
-                            <c:if test="${param.error == 'unauthorized' || param.error == 'permission'}">
-                                <div class="alert alert-error">
-                                    <i class="fas fa-shield-halved"></i> You do not have permission to access that
-                                    enrollment.
-                                </div>
-                            </c:if>
-                            <c:if test="${param.error == 'exception'}">
-                                <div class="alert alert-error">
-                                    <i class="fas fa-circle-exclamation"></i> Something interrupted the enrollment flow.
-                                    Please try again.
-                                </div>
-                            </c:if>
+    <%
+        List<Enrollment> enrollmentsList = (List<Enrollment>) request.getAttribute("enrollments");
+        
+        org.json.JSONArray enrollmentsJsonArray = new org.json.JSONArray();
+        if (enrollmentsList != null) {
+            for (Enrollment e : enrollmentsList) {
+                org.json.JSONObject obj = new org.json.JSONObject();
+                
+                int eid = e.getEnrollmentId() != null ? e.getEnrollmentId() : 0;
+                int cid = e.getCourseId() != null ? e.getCourseId() : 0;
+                String cName = e.getCourseName() != null ? e.getCourseName() : "";
+                String instructorName = e.getInstructorName() != null ? e.getInstructorName() : "Instructor";
+                String banner = e.getCourseBanner() != null ? e.getCourseBanner() : "";
+                int progress = e.getProgress() != null ? e.getProgress() : 0;
+                String completionStatus = e.getCompletionStatus() != null ? e.getCompletionStatus() : "Not Started";
+                String paymentStatus = e.getPaymentStatus() != null ? e.getPaymentStatus() : "Pending";
+                double price = e.getCoursePrice() != null ? e.getCoursePrice() : 0.0;
+                long daysLeft = e.getDaysRemaining();
+                
+                boolean paid = "Paid".equalsIgnoreCase(paymentStatus) 
+                            || "Completed".equalsIgnoreCase(paymentStatus) 
+                            || "SUCCESS".equalsIgnoreCase(paymentStatus);
+                boolean granted = paid || price <= 0.0;
+                
+                obj.put("enrollmentId", eid);
+                obj.put("courseId", cid);
+                obj.put("courseName", cName);
+                obj.put("instructorName", instructorName);
+                obj.put("courseBanner", banner);
+                obj.put("progress", progress);
+                obj.put("completionStatus", completionStatus);
+                obj.put("paymentStatus", paymentStatus);
+                obj.put("coursePrice", price);
+                obj.put("daysRemaining", daysLeft);
+                obj.put("courseAccessGranted", granted);
+                
+                enrollmentsJsonArray.put(obj);
+            }
+        }
+        
+        pageContext.setAttribute("serializedEnrollmentsJson", enrollmentsJsonArray.toString());
+    %>
 
-                            <!-- Main Page Header Row (No Outer Section Card!) -->
-                            <div class="me-header-row">
-                                <div>
-                                    <h1>My Courses</h1>
-                                    <p class="me-card-intro">Track your courses, review progress, and resume learning.
-                                    </p>
-                                </div>
-                                <div class="me-head-actions">
-                                    <a href="${pageContext.request.contextPath}/student/payments" class="sv-btn"><i
-                                            class="fas fa-receipt"></i>&nbsp;Payments</a>
-                                    <a href="${pageContext.request.contextPath}/student/courses"
-                                        class="sv-btn primary"><i class="fas fa-search"></i>&nbsp;Browse Courses</a>
-                                </div>
-                            </div>
+    <script type="text/javascript">
+        window.__CONTEXT_PATH__ = "${pageContext.request.contextPath}";
+        window.__ENROLLED_COURSES__ = ${serializedEnrollmentsJson};
+    </script>
 
-                            <!-- Horizontal "Second Header" Summary Strip -->
-                            <div class="me-metrics-strip">
-                                <div class="me-metric-tile">
-                                    <div class="me-metric-icon-wrap"><i class="fas fa-book-open"></i></div>
-                                    <div class="me-metric-body">
-                                        <span class="me-metric-label">Total Courses</span>
-                                        <strong class="me-metric-value">${not empty enrollments ? enrollments.size() :
-                                            0}</strong>
-                                    </div>
-                                </div>
-                                <div class="me-metric-tile me-metric-tile--blue">
-                                    <div class="me-metric-icon-wrap"><i class="fas fa-circle-play"></i></div>
-                                    <div class="me-metric-body">
-                                        <span class="me-metric-label">In Progress</span>
-                                        <strong class="me-metric-value">${inProgressCount}</strong>
-                                    </div>
-                                </div>
-                                <div class="me-metric-tile me-metric-tile--green">
-                                    <div class="me-metric-icon-wrap"><i class="fas fa-circle-check"></i></div>
-                                    <div class="me-metric-body">
-                                        <span class="me-metric-label">Completed</span>
-                                        <strong class="me-metric-value">${completedCount}</strong>
-                                    </div>
-                                </div>
-                                <div class="me-metric-tile me-metric-tile--amber">
-                                    <div class="me-metric-icon-wrap"><i class="fas fa-wallet"></i></div>
-                                    <div class="me-metric-body">
-                                        <span class="me-metric-label">Paid Courses</span>
-                                        <strong class="me-metric-value">${paidCount}</strong>
-                                    </div>
-                                </div>
-                            </div>
+    <!-- React App Engine -->
+    <script type="text/babel">
+        const { useState, useEffect, useMemo } = React;
 
-                            <!-- Premium Sticky Full-Width Controls Bar -->
-                            <div class="me-sticky-bar" id="meStickyBar">
-                                <div class="me-controls-left">
-                                    <!-- Layout Toggle buttons with A11y attributes -->
-                                    <div class="me-view-toggles" role="group" aria-label="Layout view switcher">
-                                        <button type="button" id="toggleGridBtn" class="me-toggle-btn active"
-                                            aria-pressed="true" aria-label="Switch to grid view" title="Grid View">
-                                            <i class="fas fa-th-large"></i>
-                                        </button>
-                                        <button type="button" id="toggleListBtn" class="me-toggle-btn"
-                                            aria-pressed="false" aria-label="Switch to list view" title="List View">
-                                            <i class="fas fa-list"></i>
-                                        </button>
-                                    </div>
+        // Isolated CSS class name mappings — universal design matching dashboard
+        const styles = {
+            container: 'mc_mod_999_container',
+            headerWrap: 'mc_mod_999_header_wrap',
+            title: 'mc_mod_999_title',
+            subtitle: 'mc_mod_999_subtitle',
+            headerActions: 'mc_mod_999_header_actions',
+            breadcrumb: 'mc_mod_999_breadcrumb',
+            controlsRow: 'mc_mod_999_controls_row',
+            filterGroup: 'mc_mod_999_filter_group',
+            filterPill: 'mc_mod_999_filter_pill',
+            filterPillActive: 'mc_mod_999_filter_pill_active',
+            filterPillInactive: 'mc_mod_999_filter_pill_inactive',
+            controlsSeparator: 'mc_mod_999_controls_separator',
+            sortSelect: 'mc_mod_999_sort_select',
+            searchWrapper: 'mc_mod_999_search_wrapper',
+            searchIcon: 'mc_mod_999_search_icon',
+            searchInput: 'mc_mod_999_search_input',
+            resultsCount: 'mc_mod_999_results_count',
+            courseGrid: 'mc_mod_999_course_grid',
+            courseCard: 'mc_mod_999_course_card',
+            courseBannerWrap: 'mc_mod_999_course_banner_wrap',
+            courseBanner: 'mc_mod_999_course_banner',
+            courseBannerEmpty: 'mc_mod_999_course_banner_empty',
+            courseStatus: 'mc_mod_999_course_status',
+            courseBody: 'mc_mod_999_course_body',
+            courseInfo: 'mc_mod_999_course_info',
+            courseTitle: 'mc_mod_999_course_title',
+            courseInstructor: 'mc_mod_999_course_instructor',
+            progressCircularContainer: 'mc_mod_999_progress_circular_container',
+            progressRingWrapper: 'mc_mod_999_progress_ring_wrapper',
+            svgRing: 'mc_mod_999_svg_ring',
+            ringBg: 'mc_mod_999_ring_bg',
+            ringFg: 'mc_mod_999_ring_fg',
+            ringText: 'mc_mod_999_ring_text',
+            progressActionHint: 'mc_mod_999_progress_action_hint',
+            emptyState: 'mc_mod_999_empty_state',
+            emptyIcon: 'mc_mod_999_empty_icon',
+            svBtn: 'mc_mod_999_sv_btn',
+            svBtnPrimary: 'mc_mod_999_sv_btn_primary',
+            fadeInUp: 'mc_mod_999_fade_in_up'
+        };
 
-                                    <!-- Asynchronous Status Filter Chips -->
-                                    <div class="me-filter-chips" role="group" aria-label="Filter courses by status">
-                                        <button type="button" class="me-filter-chip active" data-status="all"
-                                            aria-pressed="true">All</button>
-                                        <button type="button" class="me-filter-chip" data-status="live"
-                                            aria-pressed="false">In Progress</button>
-                                        <button type="button" class="me-filter-chip" data-status="done"
-                                            aria-pressed="false">Completed</button>
-                                        <button type="button" class="me-filter-chip" data-status="hold"
-                                            aria-pressed="false">Not Started</button>
-                                    </div>
-                                </div>
+        // Robust Framer Motion React UMD container falling back to CSS animations gracefully
+        const MotionDiv = ({ children, initial, animate, transition, variants, className, ...props }) => {
+            const MotionComponent = window.Motion && window.Motion.motion 
+                ? window.Motion.motion.div 
+                : (window.FramerMotion && window.FramerMotion.motion ? window.FramerMotion.motion.div : null);
+            
+            if (MotionComponent) {
+                return (
+                    <MotionComponent 
+                        initial={initial} 
+                        animate={animate} 
+                        transition={transition} 
+                        variants={variants}
+                        className={className} 
+                        {...props}
+                    >
+                        {children}
+                    </MotionComponent>
+                );
+            }
+            return (
+                <div className={(className || '') + ' ' + styles.fadeInUp} {...props}>
+                    {children}
+                </div>
+            );
+        };
 
-                                <div class="me-controls-right">
-                                    <!-- Client-side Sorting Select -->
-                                    <div class="me-sort-box">
-                                        <select id="meLibrarySort" aria-label="Sort courses">
-                                            <option value="default">Default Order</option>
-                                            <option value="progress-desc">Highest Progress</option>
-                                            <option value="progress-asc">Lowest Progress</option>
-                                            <option value="title-asc">Title (A-Z)</option>
-                                        </select>
-                                    </div>
+        const gridContainerVariants = {
+            hidden: { opacity: 0 },
+            show: {
+                opacity: 1,
+                transition: {
+                    staggerChildren: 0.08
+                }
+            }
+        };
 
-                                    <!-- Instant client-side course search input -->
-                                    <div class="me-search-box">
-                                        <i class="fas fa-search search-icon"></i>
-                                        <input type="text" id="meLibrarySearch" placeholder="Search course..."
-                                            aria-label="Search courses" autocomplete="off">
-                                        <button type="button" id="clearSearchBtn" class="me-clear-btn"
-                                            aria-label="Clear search input">
-                                            <i class="fas fa-times"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
+        const cardVariants = {
+            hidden: { opacity: 0, y: 15 },
+            show: { 
+                opacity: 1, 
+                y: 0,
+                transition: {
+                    type: "spring",
+                    stiffness: 100,
+                    damping: 15
+                }
+            }
+        };
 
-                            <!-- A11y Live region target for screen reader notifications -->
-                            <div id="meA11yLive" class="me-sr-only" aria-live="polite"></div>
+        function StudentCoursesApp() {
+            const [enrollments] = useState(window.__ENROLLED_COURSES__ || []);
+            const [filterStatus, setFilterStatus] = useState('all');
+            const [searchQuery, setSearchQuery] = useState('');
+            const [sortOption, setSortOption] = useState('default');
+            const [notifications, setNotifications] = useState([]);
 
-                            <c:choose>
-                                <c:when test="${empty enrollments}">
-                                    <div class="empty-state-box">
-                                        <i class="fas fa-graduation-cap"></i>
-                                        <p>Start your learning journey by enrolling in your first course.</p>
-                                        <a href="${pageContext.request.contextPath}/student/courses"
-                                            class="sv-btn primary">Browse Courses</a>
-                                    </div>
-                                </c:when>
-                                <c:otherwise>
-                                    <!-- Main Library Container (Full width, single column, responsive visual grid) -->
-                                    <div class="me-library-container me-view-grid" id="meLibrary">
-                                        <c:forEach var="enrollment" items="${enrollments}">
-                                            <c:set var="lifecycleStatus"
-                                                value="${not empty enrollment.completionStatus ? enrollment.completionStatus : (enrollment.status == 'Completed' ? 'Completed' : (enrollment.status == 'Active' || enrollment.status == 'Enrolled' ? 'In Progress' : 'Not Started'))}" />
-                                            <c:set var="progress"
-                                                value="${not empty enrollment.progress ? enrollment.progress : (lifecycleStatus == 'Completed' ? 100 : 0)}" />
-                                            <c:set var="enrollmentPaid"
-                                                value="${enrollment.paymentStatus == 'Paid' || enrollment.paymentStatus == 'Completed' || enrollment.paymentStatus == 'COMPLETED' || enrollment.paymentStatus == 'Success' || enrollment.paymentStatus == 'SUCCESS'}" />
-                                            <c:set var="courseAccessGranted"
-                                                value="${enrollmentPaid || enrollment.coursePrice == null || enrollment.coursePrice <= 0}" />
-                                            <c:set var="progressTone"
-                                                value="${progress < 35 ? 'is-low' : (progress < 75 ? 'is-mid' : 'is-high')}" />
-                                            <c:set var="daysLeft" value="${enrollment.daysRemaining}" />
-                                            <c:set var="continueUrl"
-                                                value="${courseAccessGranted ? pageContext.request.contextPath.concat('/student/enrollment-details?id=').concat(enrollment.enrollmentId) : pageContext.request.contextPath.concat('/student/payment?enrollmentId=').concat(enrollment.enrollmentId).concat('&error=required')}" />
+            // Parse any JSTL notification alert attributes in page
+            useEffect(() => {
+                const alerts = [];
+                const p1 = document.getElementById("alertMessagePaid");
+                const p2 = document.getElementById("alertMessageError");
+                const p3 = document.getElementById("alertMessageAuth");
+                const p4 = document.getElementById("alertMessageExcept");
+                
+                if (p1) alerts.push({ type: 'success', text: p1.getAttribute("data-message") });
+                if (p2) alerts.push({ type: 'error', text: p2.getAttribute("data-message") });
+                if (p3) alerts.push({ type: 'error', text: p3.getAttribute("data-message") });
+                if (p4) alerts.push({ type: 'error', text: p4.getAttribute("data-message") });
+                
+                if (alerts.length > 0) {
+                    setNotifications(alerts);
+                }
+            }, []);
 
-                                            <!-- Sleek, Compact, Fully-Clickable Course Item Card -->
-                                            <a class="me-course-item" href="${continueUrl}"
-                                                data-status="${lifecycleStatus == 'Completed' ? 'done' : (lifecycleStatus == 'In Progress' ? 'live' : 'hold')}"
-                                                data-title="${fn:toLowerCase(enrollment.courseName)}"
-                                                data-instructor="${fn:toLowerCase(enrollment.instructorName)}"
-                                                data-progress="${progress}"
-                                                data-enrollment-id="${enrollment.enrollmentId}"
-                                                aria-label="Continue course: ${enrollment.courseName}">
+            // Client side filter and sorting
+            const processedCourses = useMemo(() => {
+                let items = [...enrollments];
 
-                                                <!-- 1. Sleek, Low-Profile Visual Banner Area -->
-                                                <div class="me-item-visual">
-                                                    <c:choose>
-                                                        <c:when test="${not empty enrollment.courseBanner}">
-                                                            <c:choose>
-                                                                <c:when
-                                                                    test="${enrollment.courseBanner.startsWith('http')}">
-                                                                    <img class="me-item-banner"
-                                                                        src="${enrollment.courseBanner}" alt="">
-                                                                </c:when>
-                                                                <c:otherwise>
-                                                                    <img class="me-item-banner"
-                                                                        src="${pageContext.request.contextPath}/${enrollment.courseBanner}"
-                                                                        alt="">
-                                                                </c:otherwise>
-                                                            </c:choose>
-                                                        </c:when>
-                                                        <c:otherwise>
-                                                            <div class="me-item-banner-placeholder">
-                                                                <i class="fas fa-book-open"></i>
-                                                            </div>
-                                                        </c:otherwise>
-                                                    </c:choose>
+                // 1. Status Filter Mapping
+                if (filterStatus === 'live') {
+                    items = items.filter(c => c.completionStatus === 'In Progress' || c.completionStatus === 'Not Started');
+                } else if (filterStatus === 'done') {
+                    items = items.filter(c => c.completionStatus === 'Completed');
+                }
 
-                                                    <!-- Floating Translucent Expiry Badge -->
-                                                    <c:if test="${daysLeft >= 0}">
-                                                        <span
-                                                            class="me-expiry-pill ${daysLeft <= 2 ? 'is-urgent' : 'is-healthy'}">
-                                                            ${daysLeft}d left
-                                                        </span>
-                                                    </c:if>
-                                                    <c:if
-                                                        test="${daysLeft < 0 && not empty enrollment.courseDuration && enrollment.courseDuration > 0}">
-                                                        <span class="me-expiry-pill is-expired">
-                                                            Expired
-                                                        </span>
-                                                    </c:if>
+                // 2. Search Keyword filter
+                if (searchQuery.trim().length > 0) {
+                    const q = searchQuery.toLowerCase().trim();
+                    items = items.filter(c => 
+                        c.courseName.toLowerCase().includes(q) || 
+                        c.instructorName.toLowerCase().includes(q)
+                    );
+                }
 
-                                                    <!-- Floating Certified Gold Badge for Completed Items -->
-                                                    <c:if test="${lifecycleStatus == 'Completed'}">
-                                                        <span class="me-certified-badge">
-                                                            <i class="fas fa-certificate"></i> Certified
-                                                        </span>
-                                                    </c:if>
+                // 3. Sorting Algorithms
+                if (sortOption === 'progress-desc') {
+                    items.sort((a, b) => b.progress - a.progress);
+                } else if (sortOption === 'progress-asc') {
+                    items.sort((a, b) => a.progress - b.progress);
+                } else if (sortOption === 'title-asc') {
+                    items.sort((a, b) => a.courseName.localeCompare(b.courseName));
+                }
 
-                                                    <!-- Glassmorphic Hover Play Overlay -->
-                                                    <div class="me-play-overlay">
-                                                        <span class="me-play-btn">
-                                                            <i class="fas fa-circle-play"></i> ${courseAccessGranted ?
-                                                            'Resume' : 'Pay Now'}
-                                                        </span>
-                                                    </div>
-                                                </div>
+                return items;
+            }, [enrollments, filterStatus, searchQuery, sortOption]);
 
-                                                <!-- 2. Integrated Horizontal Meta + SVG Progress -->
-                                                <div class="me-item-body">
-                                                    <div class="me-item-details">
-                                                        <h3 class="me-item-title">
-                                                            <c:out value="${enrollment.courseName}" />
-                                                        </h3>
-                                                        <p class="me-item-instructor">By <strong>
-                                                                <c:out value="${enrollment.instructorName}" />
-                                                            </strong></p>
-                                                    </div>
+            const ctxPath = window.__CONTEXT_PATH__;
+            const RING_RADIUS = 18;
+            const CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
 
-                                                    <div class="me-item-progress">
-                                                        <div class="me-svg-circle-wrap">
-                                                            <!-- Reduced footprint: 48px visual SVG Progress Ring -->
-                                                            <svg class="me-progress-svg" width="48" height="48"
-                                                                viewBox="0 0 48 48">
-                                                                <circle class="me-svg-circle-bg" cx="24" cy="24" r="20"
-                                                                    stroke-width="4.5" fill="none" />
-                                                                <circle class="me-svg-circle-fg ${progressTone}" cx="24"
-                                                                    cy="24" r="20" stroke-width="4.5" fill="none"
-                                                                    stroke-dasharray="125.66" stroke-dashoffset="125.66"
-                                                                    data-progress="${progress}" />
-                                                            </svg>
-                                                            <div class="me-progress-svg-text">
-                                                                <strong>${progress}%</strong>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </a>
-                                        </c:forEach>
-                                    </div>
-
-                                    <!-- Client-Side Search Fallback Container -->
-                                    <div class="empty-state-box me-empty-hidden" id="meNoRows">
-                                        <i class="fas fa-magnifying-glass"></i>
-                                        <p>No courses match your filter or search term.</p>
-                                    </div>
-                                </c:otherwise>
-                            </c:choose>
-                        </main>
+            return (
+                <div className={styles.container}>
+                    {/* Visual breadcrumbs */}
+                    <div className={styles.breadcrumb}>
+                        <a href={ctxPath + "/dashboard"}><i className="fas fa-house"></i> Dashboard</a>
+                        <span>/</span>
+                        <span>My Courses</span>
                     </div>
 
-                    <div class="sv-overlay" id="svOverlay"></div>
-                    <script src="${pageContext.request.contextPath}/js/student-v2.js"></script>
-                    <!-- Link the new advanced interactive course listing engine -->
-                    <script src="${pageContext.request.contextPath}/js/my-enrollments-v3.js"></script>
-                </body>
+                    {/* Alert banners if present */}
+                    {notifications.map((n, idx) => (
+                        <div 
+                            key={idx} 
+                            style={{
+                                padding: '14px 20px',
+                                borderRadius: '10px',
+                                borderLeft: n.type === 'success' ? '4px solid #10b981' : '4px solid #ef4444',
+                                backgroundColor: n.type === 'success' ? 'rgba(16, 185, 129, 0.05)' : 'rgba(239, 68, 68, 0.05)',
+                                color: n.type === 'success' ? '#065f46' : '#991b1b',
+                                fontSize: '0.88rem',
+                                fontWeight: '600',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '10px',
+                                boxSizing: 'border-box'
+                            }}
+                        >
+                            <i className={n.type === 'success' ? 'fas fa-circle-check' : 'fas fa-circle-exclamation'} />
+                            {n.text}
+                        </div>
+                    ))}
 
-                </html>
+                    {/* Header bar section */}
+                    <header className={styles.headerWrap}>
+                        <div>
+                            <p className={styles.subtitle} style={{ fontSize: '0.98rem', color: '#64748b', fontWeight: '500', margin: 0 }}>
+                                Resume your classes, review syllabus topics, and unlock milestones.
+                            </p>
+                        </div>
+                        <div className={styles.headerActions}>
+                            <a href={ctxPath + "/student/courses"} className={styles.svBtn + ' ' + styles.svBtnPrimary}>
+                                <i className="fas fa-compass"></i> Explore Catalog
+                            </a>
+                        </div>
+                    </header>
+
+                    {/* Unified Filter Bar — clean single-row layout */}
+                    <section className={styles.controlsRow}>
+                        {/* Status filter pills */}
+                        <div className={styles.filterGroup}>
+                            <button 
+                                className={styles.filterPill + ' ' + (filterStatus === 'all' ? styles.filterPillActive : styles.filterPillInactive)}
+                                onClick={() => setFilterStatus('all')}
+                            >
+                                All Courses
+                            </button>
+                            <button 
+                                className={styles.filterPill + ' ' + (filterStatus === 'live' ? styles.filterPillActive : styles.filterPillInactive)}
+                                onClick={() => setFilterStatus('live')}
+                            >
+                                In Progress
+                            </button>
+                            <button 
+                                className={styles.filterPill + ' ' + (filterStatus === 'done' ? styles.filterPillActive : styles.filterPillInactive)}
+                                onClick={() => setFilterStatus('done')}
+                            >
+                                Completed
+                            </button>
+                        </div>
+
+                        {/* Vertical separator */}
+                        <div className={styles.controlsSeparator}></div>
+
+                        {/* Sort dropdown */}
+                        <select 
+                            className={styles.sortSelect} 
+                            value={sortOption} 
+                            onChange={(e) => setSortOption(e.target.value)}
+                        >
+                            <option value="default">Default Order</option>
+                            <option value="progress-desc">Highest Progress</option>
+                            <option value="progress-asc">Lowest Progress</option>
+                            <option value="title-asc">Title (A-Z)</option>
+                        </select>
+
+                        {/* Search input */}
+                        <div className={styles.searchWrapper}>
+                            <i className={"fas fa-search " + styles.searchIcon} />
+                            <input 
+                                type="text" 
+                                placeholder="Search courses..." 
+                                className={styles.searchInput}
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                            />
+                        </div>
+
+                        {/* Results count */}
+                        <span className={styles.resultsCount}>
+                            {processedCourses.length + ' course' + (processedCourses.length !== 1 ? 's' : '')}
+                        </span>
+                    </section>
+
+                    {/* Main Course Grid — UNIVERSAL CARD DESIGN matching dashboard */}
+                    {processedCourses.length === 0 ? (
+                        <div className={styles.emptyState}>
+                            <div className={styles.emptyIcon}>
+                                <i className="fas fa-graduation-cap" />
+                            </div>
+                            <h3>No Courses Found</h3>
+                            <p>We could not find any learning programs matching your filters. Browse the catalog to start studying.</p>
+                            <a href={ctxPath + "/student/courses"} className={styles.svBtn + ' ' + styles.svBtnPrimary} style={{ marginTop: '12px' }}>
+                                Browse Course Catalog
+                            </a>
+                        </div>
+                    ) : (
+                        <MotionDiv
+                            variants={gridContainerVariants}
+                            initial="hidden"
+                            animate="show"
+                            className={styles.courseGrid}
+                        >
+                            {processedCourses.map((course) => {
+                                const detailUrl = ctxPath + "/student/enrollment-details?id=" + course.enrollmentId;
+                                const statusClass = course.completionStatus === 'Completed' ? 'done' : (course.completionStatus === 'In Progress' ? 'live' : 'hold');
+                                const offset = CIRCUMFERENCE - (course.progress / 100) * CIRCUMFERENCE;
+
+                                const bannerSrc = course.courseBanner 
+                                    ? (course.courseBanner.startsWith('http') ? course.courseBanner : ctxPath + '/' + course.courseBanner)
+                                    : '';
+
+                                const actionLabel = course.completionStatus === 'Completed' ? 'Review' : 'Resume';
+
+                                return (
+                                    <MotionDiv
+                                        key={course.enrollmentId}
+                                        variants={cardVariants}
+                                    >
+                                        <a
+                                            href={detailUrl}
+                                            className={styles.courseCard}
+                                        >
+                                            <div className={styles.courseBannerWrap}>
+                                                {course.courseBanner ? (
+                                                    <img 
+                                                        src={bannerSrc}
+                                                        alt=""
+                                                        className={styles.courseBanner}
+                                                    />
+                                                ) : (
+                                                    <div className={styles.courseBannerEmpty}>
+                                                        <i className="fas fa-book-open"></i>
+                                                    </div>
+                                                )}
+                                                <span className={styles.courseStatus + ' ' + statusClass}>
+                                                    {course.completionStatus}
+                                                </span>
+                                            </div>
+
+                                            <div className={styles.courseBody}>
+                                                <div className={styles.courseInfo}>
+                                                    <h4 className={styles.courseTitle}>{course.courseName}</h4>
+                                                    <p className={styles.courseInstructor}>
+                                                        By <strong>{course.instructorName}</strong>
+                                                    </p>
+                                                </div>
+
+                                                <div className={styles.progressCircularContainer}>
+                                                    <div className={styles.progressRingWrapper}>
+                                                        <svg className={styles.svgRing} width="48" height="48" viewBox="0 0 48 48">
+                                                            <circle 
+                                                                className={styles.ringBg} 
+                                                                cx="24" 
+                                                                cy="24" 
+                                                                r={RING_RADIUS} 
+                                                                strokeWidth="4.5" 
+                                                                fill="transparent" 
+                                                            />
+                                                            <circle 
+                                                                className={styles.ringFg} 
+                                                                cx="24" 
+                                                                cy="24" 
+                                                                r={RING_RADIUS} 
+                                                                strokeWidth="4.5" 
+                                                                fill="transparent" 
+                                                                strokeDasharray={CIRCUMFERENCE}
+                                                                strokeDashoffset={offset}
+                                                            />
+                                                        </svg>
+                                                        <div className={styles.ringText}>{course.progress}%</div>
+                                                    </div>
+                                                    <span className={styles.progressActionHint}>
+                                                        {actionLabel} <i className="fas fa-arrow-right" style={{ fontSize: '0.75rem' }}></i>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </MotionDiv>
+                                );
+                            })}
+                        </MotionDiv>
+                    )}
+                </div>
+            );
+        }
+
+        // Mount Sandbox Application
+        const containerNode = document.getElementById('student-react-root');
+        if (containerNode) {
+            const root = ReactDOM.createRoot(containerNode);
+            root.render(<StudentCoursesApp />);
+        }
+    </script>
+</body>
+</html>

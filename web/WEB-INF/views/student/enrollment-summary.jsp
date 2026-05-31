@@ -1,255 +1,237 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" import="com.psm.elearning.model.*" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Enrollment Summary - PSM E-Learning</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - PSM E-Learning</title>
     <jsp:include page="/WEB-INF/views/common/student-head-assets.jsp"/>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/enrollment-flow-v2.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/checkout-flow-v2.css">
+    
+    <!-- Isolated CSS Module targeting a narrow, high-whitespace document style -->
+    <link class="cf-styles-link" rel="stylesheet" href="${pageContext.request.contextPath}/css/CheckoutFlow.module.css">
+
+    <!-- Lucide Core for clean thin icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body class="sv-page">
-<c:set var="topbarTitle" value="Enrollment Summary"/>
-<c:set var="topbarSubtitle" value="Review your order before proceeding"/>
-<jsp:include page="/WEB-INF/views/common/student-topbar.jsp"/>
-
-<div class="sv-layout">
-    <c:set var="activePage" value="browse-courses"/>
-    <jsp:include page="/WEB-INF/views/common/student-sidebar.jsp"/>
-
-    <main class="sv-main ef-main">
-
-        <%-- Breadcrumb --%>
-        <nav class="sv-breadcrumb" aria-label="breadcrumb">
-            <a href="${pageContext.request.contextPath}/dashboard"><i class="fas fa-house"></i> Dashboard</a>
-            <span>/</span>
-            <a href="${pageContext.request.contextPath}/student/courses">Browse Courses</a>
-            <span>/</span>
-            <span>Enrollment Summary</span>
-        </nav>
-
-        <%-- Progress Stepper --%>
-        <div class="ef-stepper" role="list" aria-label="Checkout steps">
+<body style="margin: 0; padding: 0; min-height: 100vh; background-color: #ffffff;">
+    
+    <c:if test="${not empty course}">
+        <!-- Step 1: Review Enrollment -->
+        <div class="flow_cf_container" id="checkout-step-1">
+            <h1 class="flow_cf_header">Review Enrollment</h1>
+            
+            <c:if test="${not empty param.error}">
+                <div class="flow_cf_alert">
+                    <i data-lucide="alert-triangle" style="width: 20px; height: 20px; flex-shrink: 0;"></i>
+                    <span>
+                        <c:choose>
+                            <c:when test="${param.error == 'paystackconfig'}">Payment gateway keys are not configured. Please contact the administrator.</c:when>
+                            <c:when test="${param.error == 'initstore'}">Failed to persist payment transaction. Please try again.</c:when>
+                            <c:when test="${param.error == 'paystack'}">Failed to initialize transaction with Paystack. Please try again.</c:when>
+                            <c:when test="${param.error == 'exception'}">An unexpected system error occurred. Please try again.</c:when>
+                            <c:otherwise>An error occurred during payment processing: <c:out value="${param.error}"/></c:otherwise>
+                        </c:choose>
+                    </span>
+                </div>
+            </c:if>
+            
             <c:choose>
-                <c:when test="${empty course.courseFee || course.courseFee le 0}">
-                    <div class="ef-step active" role="listitem" aria-current="step">
-                        <span class="ef-step-num">1</span> Enrollment Summary
-                    </div>
-                    <div class="ef-step" role="listitem">
-                        <span class="ef-step-num">2</span> Access Learning Hub
-                    </div>
+                <c:when test="${not empty course.courseBanner}">
+                    <c:choose>
+                        <c:when test="${fn:startsWith(course.courseBanner, 'http')}">
+                            <img src="${course.courseBanner}" alt="" class="flow_cf_thumbnail" />
+                        </c:when>
+                        <c:otherwise>
+                            <img src="${pageContext.request.contextPath}/${course.courseBanner}" alt="" class="flow_cf_thumbnail" />
+                        </c:otherwise>
+                    </c:choose>
                 </c:when>
                 <c:otherwise>
-                    <div class="ef-step active" role="listitem" aria-current="step">
-                        <span class="ef-step-num">1</span> Enrollment Summary
-                    </div>
-                    <div class="ef-step" role="listitem">
-                        <span class="ef-step-num">2</span> Secure Payment
-                    </div>
-                    <div class="ef-step" role="listitem">
-                        <span class="ef-step-num">3</span> Access Learning Hub
+                    <div class="flow_cf_thumbnail" style="background: #f1f5f9; display: flex; align-items: center; justify-content: center; color: #94a3b8;">
+                        <i data-lucide="image" style="width: 48px; height: 48px;"></i>
                     </div>
                 </c:otherwise>
             </c:choose>
+            
+            <h2 class="flow_cf_courseTitle"><c:out value="${course.courseName}"/></h2>
+            <p class="flow_cf_instructor">By <c:out value="${instructorName}" default="Course Instructor"/></p>
+            
+            <div class="flow_cf_benefitsList">
+                <div class="flow_cf_benefitItem">
+                    <i data-lucide="check" class="flow_cf_checkIcon"></i>
+                    <span>Full Lifetime Access to all course resources</span>
+                </div>
+                <div class="flow_cf_benefitItem">
+                    <i data-lucide="check" class="flow_cf_checkIcon"></i>
+                    <span>Premium Digital Certificate upon successful completion</span>
+                </div>
+                <div class="flow_cf_benefitItem">
+                    <i data-lucide="check" class="flow_cf_checkIcon"></i>
+                    <span>Self-paced learning with expert instructor feedback</span>
+                </div>
+            </div>
+            
+            <button 
+                type="button" 
+                class="flow_cf_actionBtn"
+                onclick="showStep(2)"
+            >
+                <span>Continue to Payment</span>
+                <i data-lucide="arrow-right" style="width: 16px; height: 16px;"></i>
+            </button>
+            
+            <a href="${pageContext.request.contextPath}/student/courses" class="flow_cf_backBtn" style="text-decoration: none;">
+                <i data-lucide="arrow-left" style="width: 14px; height: 14px;"></i>
+                <span>Cancel and Back to Catalog</span>
+            </a>
         </div>
 
-        <%-- Empty state --%>
-        <c:if test="${empty course}">
-            <div class="ef-empty-state">
-                <div class="ef-empty-icon"><i class="fas fa-folder-open" aria-hidden="true"></i></div>
-                <h3>Course not found</h3>
-                <p>We couldn't load the course details. Return to the catalog and pick a course to enroll.</p>
-                <a href="${pageContext.request.contextPath}/student/courses" class="sv-btn primary" style="border-radius:10px;">
-                    <i class="fas fa-compass"></i> Browse Courses
-                </a>
+        <!-- Step 2: Payment Summary -->
+        <div class="flow_cf_container" id="checkout-step-2" style="display: none;">
+            <h1 class="flow_cf_header">Payment Summary</h1>
+            
+            <c:if test="${not empty param.error}">
+                <div class="flow_cf_alert">
+                    <i data-lucide="alert-triangle" style="width: 20px; height: 20px; flex-shrink: 0;"></i>
+                    <span>
+                        <c:choose>
+                            <c:when test="${param.error == 'paystackconfig'}">Payment gateway keys are not configured. Please contact the administrator.</c:when>
+                            <c:when test="${param.error == 'initstore'}">Failed to persist payment transaction. Please try again.</c:when>
+                            <c:when test="${param.error == 'paystack'}">Failed to initialize transaction with Paystack. Please try again.</c:when>
+                            <c:when test="${param.error == 'exception'}">An unexpected system error occurred. Please try again.</c:when>
+                            <c:otherwise>An error occurred during payment processing: <c:out value="${param.error}"/></c:otherwise>
+                        </c:choose>
+                    </span>
+                </div>
+            </c:if>
+            
+            <div class="flow_cf_breakdown">
+                <div class="flow_cf_row">
+                    <span class="flow_cf_rowLabel">Course Fee</span>
+                    <span class="flow_cf_rowValue">
+                        <c:choose>
+                            <c:when test="${course.courseFee le 0}">Free</c:when>
+                            <c:otherwise>₦<fmt:formatNumber value="${course.courseFee}" type="number" minFractionDigits="2" maxFractionDigits="2"/></c:otherwise>
+                        </c:choose>
+                    </span>
+                </div>
+                <div class="flow_cf_row">
+                    <span class="flow_cf_rowLabel">Gateway Processing</span>
+                    <span class="flow_cf_rowValue" style="color: #10b981;">₦0.00</span>
+                </div>
+                
+                <div class="flow_cf_divider"></div>
+                
+                <div class="flow_cf_row flow_cf_rowTotal">
+                    <span>Total to Pay</span>
+                    <span>
+                        <c:choose>
+                            <c:when test="${course.courseFee le 0}">Free</c:when>
+                            <c:otherwise>₦<fmt:formatNumber value="${course.courseFee}" type="number" minFractionDigits="2" maxFractionDigits="2"/></c:otherwise>
+                        </c:choose>
+                    </span>
+                </div>
             </div>
-        </c:if>
+            
+            <form 
+                id="checkoutFormNative" 
+                method="POST" 
+                action="${pageContext.request.contextPath}/student/enroll"
+                style="width: 100%;"
+            >
+                <input type="hidden" name="courseId" value="${course.courseId}" />
+                
+                <button 
+                    type="submit" 
+                    id="payButton"
+                    class="flow_cf_actionBtn"
+                    style="height: 56px;"
+                >
+                    <i data-lucide="lock" id="payButtonIcon" style="width: 16px; height: 16px;"></i>
+                    <span id="payButtonSpinner" class="flow_cf_spinner" style="display: none;"></span>
+                    <span id="payButtonText">${course.courseFee le 0 ? 'Confirm Free Enrollment' : 'Proceed to Payment Gateway'}</span>
+                </button>
+            </form>
+            
+            <button 
+                type="button" 
+                class="flow_cf_backBtn"
+                onclick="showStep(1)"
+                id="backToReviewBtn"
+            >
+                <i data-lucide="arrow-left" style="width: 14px; height: 14px;"></i>
+                <span>Back to Review</span>
+            </button>
+        </div>
+    </c:if>
 
-        <%-- Main checkout grid --%>
-        <c:if test="${not empty course}">
-            <div class="ef-checkout-layout">
-
-                <%-- ── LEFT COLUMN ── --%>
-                <section class="ef-left-col" aria-label="Order details">
-
-                    <%-- Course Summary Card --%>
-                    <article class="ef-card">
-                        <div class="ef-card-body">
-                            <span class="ef-kicker"><i class="fas fa-graduation-cap" aria-hidden="true"></i> Course Overview</span>
-                            <div class="ef-course-header">
-                                <h2 class="ef-course-title">${course.courseName}</h2>
-                                <p class="ef-course-desc"><c:out value="${course.description}" default="No description available."/></p>
-                            </div>
-
-                            <div class="ef-meta-grid">
-                                <div class="ef-meta-chip">
-                                    <i class="fas fa-tag ef-meta-chip-icon" aria-hidden="true"></i>
-                                    <span class="ef-meta-chip-label">Category</span>
-                                    <span class="ef-meta-chip-value"><c:out value="${course.category}" default="General"/></span>
-                                </div>
-                                <div class="ef-meta-chip">
-                                    <i class="fas fa-signal ef-meta-chip-icon" aria-hidden="true"></i>
-                                    <span class="ef-meta-chip-label">Level</span>
-                                    <span class="ef-meta-chip-value"><c:out value="${course.level}" default="All Levels"/></span>
-                                </div>
-                                <div class="ef-meta-chip">
-                                    <i class="fas fa-clock ef-meta-chip-icon" aria-hidden="true"></i>
-                                    <span class="ef-meta-chip-label">Duration</span>
-                                    <span class="ef-meta-chip-value"><c:out value="${course.displayDuration}" default="—"/></span>
-                                </div>
-                            </div>
-                        </div>
-                    </article>
-
-                    <%-- Paystack Info Card (paid courses only) --%>
-                    <c:if test="${not empty course.courseFee && course.courseFee gt 0}">
-                        <article class="ef-card">
-                            <div class="ef-card-body">
-                                <span class="ef-kicker"><i class="fas fa-shield-halved" aria-hidden="true"></i> Payment Gateway</span>
-                                <div class="ef-paystack-banner">
-                                    <div class="ef-paystack-logo" aria-hidden="true"><i class="fas fa-bolt"></i></div>
-                                    <div class="ef-paystack-copy">
-                                        <strong>Secured by Paystack</strong>
-                                        <span>All major cards, bank transfers &amp; USSD accepted. No extra fees.</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </article>
-                    </c:if>
-
-                </section>
-
-                <%-- ── RIGHT COLUMN — Sticky Invoice ── --%>
-                <aside class="ef-sticky-invoice" aria-label="Order invoice">
-                    <div class="ef-invoice-card">
-
-                        <div class="ef-invoice-header">
-                            <div class="ef-invoice-header-icon" aria-hidden="true"><i class="fas fa-receipt"></i></div>
-                            <h3 class="ef-invoice-header-title">Order Summary</h3>
-                        </div>
-
-                        <div class="ef-invoice-body">
-
-                            <%-- Mini course thumb --%>
-                            <div class="ef-invoice-course-thumb">
-                                <div class="ef-invoice-course-thumb-icon" aria-hidden="true"><i class="fas fa-book-open"></i></div>
-                                <div>
-                                    <div class="ef-invoice-course-name">${course.courseName}</div>
-                                    <div class="ef-invoice-course-sub">
-                                        <c:out value="${course.category}" default="General"/> &bull; <c:out value="${course.level}" default="All Levels"/>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <%-- Line items --%>
-                            <div class="ef-invoice-rows">
-                                <div class="ef-invoice-row">
-                                    <span class="ef-row-label">Enrollment Fee</span>
-                                    <span class="ef-row-amount">
-                                        <c:choose>
-                                            <c:when test="${empty course.courseFee || course.courseFee le 0}">
-                                                <span class="ef-free-badge"><i class="fas fa-gift" aria-hidden="true"></i> FREE</span>
-                                            </c:when>
-                                            <c:otherwise>₦<fmt:formatNumber value="${course.courseFee}" type="number" minFractionDigits="2" maxFractionDigits="2"/></c:otherwise>
-                                        </c:choose>
-                                    </span>
-                                </div>
-                                <div class="ef-invoice-row">
-                                    <span class="ef-row-label">Processing Fee</span>
-                                    <span class="ef-row-amount" style="color: #10b981;">₦0.00</span>
-                                </div>
-                                <div class="ef-invoice-row total">
-                                    <span>Total Due</span>
-                                    <span class="ef-row-amount">
-                                        <c:choose>
-                                            <c:when test="${empty course.courseFee || course.courseFee le 0}">
-                                                <span class="ef-free-badge"><i class="fas fa-gift" aria-hidden="true"></i> FREE</span>
-                                            </c:when>
-                                            <c:otherwise>₦<fmt:formatNumber value="${course.courseFee}" type="number" minFractionDigits="2" maxFractionDigits="2"/></c:otherwise>
-                                        </c:choose>
-                                    </span>
-                                </div>
-                            </div>
-
-                            <%-- CTA form --%>
-                            <form method="post" action="${pageContext.request.contextPath}/student/enroll" id="checkoutForm" novalidate>
-                                <input type="hidden" name="courseId" value="${course.courseId}" />
-                                <div class="ef-cta-stack">
-                                    <button type="submit"
-                                            class="ef-btn-primary"
-                                            id="payButton"
-                                            aria-label="${empty course.courseFee || course.courseFee le 0 ? 'Confirm free enrollment' : 'Confirm and pay securely'}">
-                                        <i class="fas fa-check-circle" id="payBtnIcon" aria-hidden="true"></i>
-                                        <span id="payBtnText">
-                                            <c:choose>
-                                                <c:when test="${empty course.courseFee || course.courseFee le 0}">Confirm Free Enrollment</c:when>
-                                                <c:otherwise>Confirm &amp; Pay Securely</c:otherwise>
-                                            </c:choose>
-                                        </span>
-                                        <span class="ef-spinner" id="paySpinner" aria-hidden="true"></span>
-                                    </button>
-                                    <a class="ef-btn-secondary"
-                                       href="${pageContext.request.contextPath}/student/courses"
-                                       aria-label="Cancel and return to course catalog">
-                                        <i class="fas fa-arrow-left" aria-hidden="true"></i> Back to Courses
-                                    </a>
-                                </div>
-                            </form>
-
-                            <%-- Trust strip --%>
-                            <div class="ef-trust-strip" role="list" aria-label="Security guarantees">
-                                <div class="ef-trust-row" role="listitem">
-                                    <i class="fas fa-lock" aria-hidden="true"></i>
-                                    <span><strong>256-bit SSL Encrypted</strong> — your data is always protected</span>
-                                </div>
-                                <div class="ef-trust-row" role="listitem">
-                                    <i class="fas fa-shield-halved" aria-hidden="true"></i>
-                                    <span><strong>Secured by Paystack</strong> — PCI-DSS Level 1 compliant</span>
-                                </div>
-                                <div class="ef-trust-row" role="listitem">
-                                    <i class="fas fa-rotate-left" aria-hidden="true"></i>
-                                    <span>Cancel anytime before payment completes</span>
-                                </div>
-                            </div>
-
-                        </div><%-- /invoice-body --%>
-                    </div><%-- /invoice-card --%>
-                </aside>
-
-            </div><%-- /checkout-layout --%>
-        </c:if>
-
-    </main>
-</div>
-
-<div class="sv-overlay" id="svOverlay"></div>
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    const form   = document.getElementById("checkoutForm");
-    const btn    = document.getElementById("payButton");
-    const icon   = document.getElementById("payBtnIcon");
-    const text   = document.getElementById("payBtnText");
-    const spinner = document.getElementById("paySpinner");
-
-    if (form && btn) {
-        form.addEventListener("submit", function () {
-            // Prevent double-submit
-            btn.disabled = true;
-            btn.classList.add("processing");
-            btn.setAttribute("aria-busy", "true");
-
-            // Swap to loading state
-            if (icon)    { icon.className = ""; icon.style.display = "none"; }
-            if (spinner) { spinner.style.display = "block"; }
-            if (text)    { text.textContent = "Processing…"; }
+    <script type="text/javascript">
+        function showStep(stepNum) {
+            const step1 = document.getElementById('checkout-step-1');
+            const step2 = document.getElementById('checkout-step-2');
+            
+            if (stepNum === 1) {
+                if (step2) step2.style.display = 'none';
+                if (step1) step1.style.display = 'block';
+            } else if (stepNum === 2) {
+                if (step1) step1.style.display = 'none';
+                if (step2) step2.style.display = 'block';
+            }
+            
+            if (window.lucide) {
+                window.lucide.createIcons();
+            }
+        }
+        
+        // Initial setup
+        document.addEventListener("DOMContentLoaded", function() {
+            if (window.lucide) {
+                window.lucide.createIcons();
+            }
+            
+            // If there is an error parameter in the URL, go directly to Step 2 so they see the error in the payment context!
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('error')) {
+                showStep(2);
+            }
+            
+            const form = document.getElementById('checkoutFormNative');
+            const btn = document.getElementById('payButton');
+            const icon = document.getElementById('payButtonIcon');
+            const spinner = document.getElementById('payButtonSpinner');
+            const text = document.getElementById('payButtonText');
+            const backBtn = document.getElementById('backToReviewBtn');
+            
+            if (form && btn) {
+                form.addEventListener('submit', function(e) {
+                    // Prevent double click actions during processing
+                    if (btn.hasAttribute('data-processing')) {
+                        e.preventDefault();
+                        return;
+                    }
+                    btn.setAttribute('data-processing', 'true');
+                    
+                    // Show processing UI immediately
+                    if (icon) icon.style.display = 'none';
+                    if (spinner) spinner.style.display = 'inline-block';
+                    if (text) text.textContent = 'Connecting to Gateway...';
+                    
+                    if (backBtn) {
+                        backBtn.disabled = true;
+                        backBtn.style.opacity = '0.5';
+                        backBtn.style.cursor = 'not-allowed';
+                    }
+                    
+                    // Disable submit button on a microtask delay so the browser initiates natural submit on this tick
+                    setTimeout(function() {
+                        btn.disabled = true;
+                    }, 20);
+                });
+            }
         });
-    }
-});
-</script>
-<script src="${pageContext.request.contextPath}/js/student-v2.js"></script>
+    </script>
 </body>
 </html>

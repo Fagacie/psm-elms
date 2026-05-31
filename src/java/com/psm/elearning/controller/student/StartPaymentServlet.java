@@ -66,22 +66,12 @@ public class StartPaymentServlet extends HttpServlet {
 
         try {
             String userEmail = (String) session.getAttribute("email");
-            if (!paystackService.isConfiguredForPayments()) {
-                LOGGER.severe("Payment start blocked: Paystack keys are not configured");
-                response.sendRedirect(request.getContextPath() + "/student/payment?enrollmentId=" + request.getParameter("enrollmentId") + "&error=paystackconfig");
-                return;
-            }
-            if (userEmail == null || userEmail.trim().isEmpty()) {
-                response.sendRedirect(request.getContextPath() + "/student/payment?enrollmentId=" + request.getParameter("enrollmentId") + "&error=noemail");
-                return;
-            }
             Integer enrollmentId = parseEnrollmentId(request.getParameter("enrollmentId"));
             if (enrollmentId == null) {
                 LOGGER.warning("Payment start failed: invalid enrollmentId parameter");
                 response.sendRedirect(request.getContextPath() + "/student/my-enrollments?error=invalid");
                 return;
             }
-            LOGGER.info("Payment start requested for enrollmentId=" + enrollmentId + ", userId=" + userId);
 
             // Get enrollment to verify ownership and get course fee
             Enrollment enrollment = enrollmentDAO.getEnrollment(enrollmentId);
@@ -97,6 +87,17 @@ public class StartPaymentServlet extends HttpServlet {
                 response.sendRedirect(request.getContextPath() + "/student/my-enrollments?error=unauthorized");
                 return;
             }
+
+            if (!paystackService.isConfiguredForPayments()) {
+                LOGGER.severe("Payment start blocked: Paystack keys are not configured");
+                response.sendRedirect(request.getContextPath() + "/student/enrollment-summary?courseId=" + enrollment.getCourseId() + "&error=paystackconfig");
+                return;
+            }
+            if (userEmail == null || userEmail.trim().isEmpty()) {
+                response.sendRedirect(request.getContextPath() + "/student/enrollment-summary?courseId=" + enrollment.getCourseId() + "&error=noemail");
+                return;
+            }
+            LOGGER.info("Payment start requested for enrollmentId=" + enrollmentId + ", userId=" + userId);
 
             // Fetch course to get fee
             Course course = courseDAO.findById(enrollment.getCourseId());
@@ -173,7 +174,7 @@ public class StartPaymentServlet extends HttpServlet {
                 }
                 if (!paymentStored) {
                     LOGGER.severe("Failed to persist payment record for enrollmentId=" + enrollmentId);
-                    response.sendRedirect(request.getContextPath() + "/student/payment?enrollmentId=" + enrollmentId + "&error=initstore");
+                    response.sendRedirect(request.getContextPath() + "/student/enrollment-summary?courseId=" + enrollment.getCourseId() + "&error=initstore");
                     return;
                 }
 
@@ -186,7 +187,7 @@ public class StartPaymentServlet extends HttpServlet {
 
             } else {
                 LOGGER.severe("Paystack initialization returned null result");
-                response.sendRedirect(request.getContextPath() + "/student/payment?enrollmentId=" + enrollmentId + "&error=paystack");
+                response.sendRedirect(request.getContextPath() + "/student/enrollment-summary?courseId=" + enrollment.getCourseId() + "&error=paystack");
             }
 
         } catch (NumberFormatException e) {

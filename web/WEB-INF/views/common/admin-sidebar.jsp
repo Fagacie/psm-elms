@@ -25,6 +25,9 @@
         <a href="${pageContext.request.contextPath}/reports" class="nav-item ${fn:contains(currentPath, 'reports') ? 'active' : ''}">
             <i data-lucide="bar-chart-2"></i><span>Reports</span>
         </a>
+        <a href="${pageContext.request.contextPath}/profile" class="nav-item ${fn:contains(currentPath, '/profile') ? 'active' : ''}">
+            <i data-lucide="user-circle"></i><span>Profile</span>
+        </a>
         <a href="${pageContext.request.contextPath}/admin/settings" class="nav-item ${fn:contains(currentPath, 'admin/settings') ? 'active' : ''}">
             <i data-lucide="settings"></i><span>Settings</span>
         </a>

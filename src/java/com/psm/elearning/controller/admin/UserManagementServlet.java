@@ -370,6 +370,20 @@ public class UserManagementServlet extends HttpServlet {
                         student.setGender(request.getParameter("gender"));
                         student.setEmergencyContact(request.getParameter("emergencyContact"));
                         roleUpdated = studentDAO.updateProfile(student);
+                    } else {
+                        student = new Student();
+                        student.setUserId(userId);
+                        student.setRegNumber(studentDAO.getNextRegNumber());
+                        student.setQualification(request.getParameter("qualification"));
+                        student.setCountry(request.getParameter("country"));
+                        student.setState(request.getParameter("state"));
+                        String dobStr = request.getParameter("dob");
+                        if (dobStr != null && !dobStr.isEmpty()) {
+                            student.setDob(LocalDate.parse(dobStr));
+                        }
+                        student.setGender(request.getParameter("gender"));
+                        student.setEmergencyContact(request.getParameter("emergencyContact"));
+                        roleUpdated = studentDAO.create(student);
                     }
                     break;
                     
@@ -388,6 +402,23 @@ public class UserManagementServlet extends HttpServlet {
                             instructor.setHireDate(LocalDate.parse(hireDateStr));
                         }
                         roleUpdated = instructorDAO.update(instructor);
+                    } else {
+                        instructor = new Instructor();
+                        instructor.setUserId(userId);
+                        instructor.setSpecialization(request.getParameter("specialization"));
+                        instructor.setCertification(request.getParameter("certification"));
+                        String yearsExpStr = request.getParameter("yearsOfExperience");
+                        if (yearsExpStr != null && !yearsExpStr.isEmpty()) {
+                            instructor.setYearsOfExperience(Integer.parseInt(yearsExpStr));
+                        }
+                        instructor.setBio(request.getParameter("bio"));
+                        String hireDateStr = request.getParameter("hireDate");
+                        if (hireDateStr != null && !hireDateStr.isEmpty()) {
+                            instructor.setHireDate(LocalDate.parse(hireDateStr));
+                        } else {
+                            instructor.setHireDate(LocalDate.now());
+                        }
+                        roleUpdated = instructorDAO.create(instructor);
                     }
                     break;
                     
@@ -398,6 +429,13 @@ public class UserManagementServlet extends HttpServlet {
                         admin.setPermissionLevel(request.getParameter("permissionLevel"));
                         admin.setAssignedDepartment(request.getParameter("assignedDepartment"));
                         roleUpdated = adminDAO.update(admin);
+                    } else {
+                        admin = new Admin();
+                        admin.setUserId(userId);
+                        admin.setPosition(request.getParameter("position"));
+                        admin.setPermissionLevel(request.getParameter("permissionLevel"));
+                        admin.setAssignedDepartment(request.getParameter("assignedDepartment"));
+                        roleUpdated = adminDAO.create(admin);
                     }
                     break;
             }

@@ -22,6 +22,7 @@ import javax.servlet.http.Part;
 import java.io.InputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -600,11 +601,32 @@ public class AdminCourseServlet extends HttpServlet {
 
     private List<User> resolveActiveInstructors() {
         List<User> instructors = new ArrayList<>();
-        for (Instructor instructor : instructorDAO.findAll()) {
-            User user = userDAO.findById(instructor.getUserId());
-            if (user != null && "Instructor".equals(user.getRole()) && "Active".equals(user.getStatus())) {
-                instructors.add(user);
+        try {
+            for (User user : userDAO.findAll()) {
+                if (user != null && "Instructor".equals(user.getRole()) && "Active".equals(user.getStatus())) {
+                    // Self-healing check: Ensure record exists in Instructor table
+                    Instructor instructor = instructorDAO.findByUserId(user.getUserId());
+                    if (instructor == null) {
+                        instructor = new Instructor();
+                        instructor.setUserId(user.getUserId());
+                        instructor.setSpecialization("General Education");
+                        instructor.setYearsOfExperience(1);
+                        instructor.setBio("Verified instructor on PSM E-Learning Platform.");
+                        instructor.setCertification("Verified");
+                        instructor.setHireDate(LocalDate.now());
+                        
+                        boolean created = instructorDAO.create(instructor);
+                        if (created) {
+                            LOGGER.log(Level.INFO, "[SELF-HEALING] Created missing 1:1 Instructor record for UserID: {0}", user.getUserId());
+                        } else {
+                            LOGGER.log(Level.WARNING, "[SELF-HEALING] Failed to create Instructor record for UserID: {0}", user.getUserId());
+                        }
+                    }
+                    instructors.add(user);
+                }
             }
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error resolving active instructors", e);
         }
         return instructors;
     }

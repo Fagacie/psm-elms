@@ -137,11 +137,11 @@ public class EmailUtil {
             com.psm.elearning.dao.AppSettingDAO dao = new com.psm.elearning.dao.AppSettingDAOImpl();
             java.util.Map<String, String> dbSettings = dao.findAllAsMap();
             if (dbSettings != null) {
-                if (dbSettings.get("email.smtp.host") != null && !dbSettings.get("email.smtp.host").isEmpty()) host = dbSettings.get("email.smtp.host");
-                if (dbSettings.get("email.smtp.port") != null && !dbSettings.get("email.smtp.port").isEmpty()) port = dbSettings.get("email.smtp.port");
-                if (dbSettings.get("email.smtp.username") != null && !dbSettings.get("email.smtp.username").isEmpty()) username = dbSettings.get("email.smtp.username");
-                if (dbSettings.get("email.smtp.password") != null && !dbSettings.get("email.smtp.password").isEmpty()) password = dbSettings.get("email.smtp.password");
-                if (dbSettings.get("email.smtp.starttls") != null && !dbSettings.get("email.smtp.starttls").isEmpty()) startTls = dbSettings.get("email.smtp.starttls");
+                if (dbSettings.get("email.smtp.host") != null && !dbSettings.get("email.smtp.host").trim().isEmpty()) host = dbSettings.get("email.smtp.host").trim();
+                if (dbSettings.get("email.smtp.port") != null && !dbSettings.get("email.smtp.port").trim().isEmpty()) port = dbSettings.get("email.smtp.port").trim();
+                if (dbSettings.get("email.smtp.username") != null && !dbSettings.get("email.smtp.username").trim().isEmpty()) username = dbSettings.get("email.smtp.username").trim();
+                if (dbSettings.get("email.smtp.password") != null && !dbSettings.get("email.smtp.password").trim().isEmpty()) password = dbSettings.get("email.smtp.password").trim();
+                if (dbSettings.get("email.smtp.starttls") != null && !dbSettings.get("email.smtp.starttls").trim().isEmpty()) startTls = dbSettings.get("email.smtp.starttls").trim();
             }
         } catch (Throwable t) {
             // Safe fallback
@@ -174,7 +174,8 @@ public class EmailUtil {
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.starttls.enable", startTls != null ? startTls : "true");
         props.put("mail.smtp.starttls.required", startTls != null ? startTls : "true");
-        props.put("mail.smtp.ssl.protocols", "TLSv1.2 TLSv1.3");
+        props.put("mail.smtp.ssl.protocols", "TLSv1.2");
+        props.put("mail.smtp.ssl.trust", host);
         
         final String authUser = username;
         final String authPass = password;
@@ -215,9 +216,11 @@ public class EmailUtil {
 
         } catch (MessagingException e) {
             System.err.println("Failed to send email to " + toEmail + ": " + e.getMessage());
+            e.printStackTrace();
             return false;
         } catch (java.io.UnsupportedEncodingException e) {
             System.err.println("Email encoding error: " + e.getMessage());
+            e.printStackTrace();
             return false;
         }
     }

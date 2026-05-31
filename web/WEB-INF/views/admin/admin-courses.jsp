@@ -169,6 +169,7 @@
     function AutocompleteSelect({ options, value, onChange, placeholder }) {
         const [search, setSearch] = useState('');
         const [isOpen, setIsOpen] = useState(false);
+        const containerRef = React.useRef(null);
         
         // Find active label for current value
         const selectedOption = options.find(opt => opt.userId === Number(value));
@@ -180,8 +181,18 @@
             opt.email.toLowerCase().includes(search.toLowerCase())
         );
 
+        useEffect(() => {
+            const handleOutsideClick = (e) => {
+                if (containerRef.current && !containerRef.current.contains(e.target)) {
+                    setIsOpen(false);
+                }
+            };
+            document.addEventListener('mousedown', handleOutsideClick);
+            return () => document.removeEventListener('mousedown', handleOutsideClick);
+        }, []);
+
         return (
-            <div className="autocomplete-container-gf">
+            <div ref={containerRef} className="autocomplete-container-gf">
                 <div className="autocomplete-input-wrapper-gf">
                     <input 
                         type="text" 
@@ -192,12 +203,8 @@
                             setIsOpen(true);
                         }}
                         onChange={e => setSearch(e.target.value)}
-                        onBlur={() => {
-                            // Short delay to allow items click to fire
-                            setTimeout(() => setIsOpen(false), 200);
-                        }}
                     />
-                    <i className="fas fa-chevron-down"></i>
+                    <i className="fas fa-chevron-down" onClick={() => setIsOpen(!isOpen)} style={{ cursor: 'pointer' }}></i>
                 </div>
                 {isOpen && (
                     <div className="autocomplete-dropdown-gf">

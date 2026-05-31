@@ -10,6 +10,8 @@ import com.psm.elearning.model.Course;
 import com.psm.elearning.model.Enrollment;
 import com.psm.elearning.model.Payment;
 import com.psm.elearning.service.StudentAccessService;
+import com.psm.elearning.service.PaystackService;
+import com.psm.elearning.service.AppSettingsService;
 import com.psm.elearning.util.SessionUtil;
 
 import javax.servlet.ServletException;
@@ -19,16 +21,22 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.UUID;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 /**
  * Servlet to process course enrollment and route the student to payment (or auto-complete free enrollments).
  */
 public class ProcessEnrollmentServlet extends HttpServlet {
     
+    private static final Logger LOGGER = Logger.getLogger(ProcessEnrollmentServlet.class.getName());
+    
     private EnrollmentDAO enrollmentDAO;
     private CourseDAO courseDAO;
     private PaymentDAO paymentDAO;
+    private PaystackService paystackService;
     private StudentAccessService studentAccessService;
     
     @Override
@@ -36,6 +44,7 @@ public class ProcessEnrollmentServlet extends HttpServlet {
         enrollmentDAO = new EnrollmentDAOImpl();
         courseDAO = new CourseDAOImpl();
         paymentDAO = new PaymentDAOImpl();
+        paystackService = new PaystackService();
         studentAccessService = new StudentAccessService();
     }
     
@@ -88,7 +97,7 @@ public class ProcessEnrollmentServlet extends HttpServlet {
 
                         response.sendRedirect(request.getContextPath() + "/student/enrollment-details?id=" + existingEnrollment.getEnrollmentId() + "&message=freeenrolled");
                     } else {
-                        response.sendRedirect(request.getContextPath() + "/student/payment?enrollmentId=" + existingEnrollment.getEnrollmentId());
+                        triggerDirectPayment(request, response, existingEnrollment, existingCourse, userEmail);
                     }
                 }
                 return;
@@ -126,7 +135,7 @@ public class ProcessEnrollmentServlet extends HttpServlet {
                     return;
                 }
 
-                response.sendRedirect(request.getContextPath() + "/student/payment?enrollmentId=" + enrollment.getEnrollmentId());
+                triggerDirectPayment(request, response, enrollment, course, userEmail);
             } else {
                 response.sendRedirect(request.getContextPath() + "/student/courses?error=failed");
             }
@@ -136,6 +145,114 @@ public class ProcessEnrollmentServlet extends HttpServlet {
         } catch (Exception e) {
             response.sendRedirect(request.getContextPath() + "/student/courses?error=exception");
         }
+    }
+
+    private void triggerDirectPayment(HttpServletRequest request, HttpServletResponse response, 
+                                     Enrollment enrollment, Course course, String userEmail) 
+            throws IOException {
+        int enrollmentId = enrollment.getEnrollmentId();
+        try {
+            if (!paystackService.isConfiguredForPayments()) {
+                LOGGER.severe("Payment start blocked in ProcessEnrollmentServlet: Paystack keys are not configured");
+                response.sendRedirect(request.getContextPath() + "/student/enrollment-summary?courseId=" + course.getCourseId() + "&error=paystackconfig");
+                return;
+            }
+            
+            BigDecimal amount = course.getCourseFee();
+            if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
+                response.sendRedirect(request.getContextPath() + "/student/enrollment-details?id=" + enrollmentId + "&message=freeenrolled");
+                return;
+            }
+            
+            // Generate external reference
+            String externalReference = "PSME_" + enrollmentId + "_" + UUID.randomUUID().toString();
+            LOGGER.info("Generated payment reference=" + maskReference(externalReference));
+            
+            String callbackUrl = buildCallbackUrl(request);
+            Payment initResult = paystackService.initializeTransaction(
+                    userEmail,
+                    amount.doubleValue(),
+                    enrollmentId,
+                    externalReference,
+                    callbackUrl
+            );
+            
+            if (initResult != null) {
+                String authorizationUrl = initResult.getAuthorizationUrl();
+                String accessCode = initResult.getAccessCode();
+                String paystackReference = initResult.getPaystackReference();
+                if (paystackReference == null || paystackReference.trim().isEmpty()) {
+                    paystackReference = externalReference;
+                }
+                
+                Payment existingPayment = paymentDAO.getPaymentByEnrollmentId(enrollmentId);
+                boolean paymentStored;
+                if (existingPayment != null && !studentAccessService.isPaymentComplete(existingPayment.getStatus())) {
+                    paymentStored = paymentDAO.refreshPaymentInitialization(
+                            existingPayment.getPaymentId(),
+                            amount.doubleValue(),
+                            "Paystack",
+                            paystackReference,
+                            accessCode,
+                            authorizationUrl,
+                            "pending"
+                    );
+                } else {
+                    Payment payment = new Payment();
+                    payment.setEnrollmentId(enrollmentId);
+                    payment.setAmount(amount.doubleValue());
+                    payment.setStatus("Pending");
+                    payment.setMethod("Paystack");
+                    payment.setPaymentRef(paystackReference);
+                    payment.setPaystackReference(paystackReference);
+                    payment.setAccessCode(accessCode);
+                    payment.setAuthorizationUrl(authorizationUrl);
+                    payment.setPaystackStatus("pending");
+                    payment.setPaymentDate(LocalDateTime.now());
+                    paymentStored = paymentDAO.createPayment(payment) != null;
+                }
+                
+                if (!paymentStored) {
+                    LOGGER.severe("Failed to persist payment record in ProcessEnrollmentServlet for enrollmentId=" + enrollmentId);
+                    response.sendRedirect(request.getContextPath() + "/student/enrollment-summary?courseId=" + course.getCourseId() + "&error=initstore");
+                    return;
+                }
+                
+                enrollmentDAO.updatePaymentStatus(enrollmentId, "Pending", paystackReference);
+                LOGGER.info("Redirecting directly to Paystack authorization URL: " + authorizationUrl);
+                response.sendRedirect(authorizationUrl);
+            } else {
+                LOGGER.severe("Paystack initialization returned null in ProcessEnrollmentServlet");
+                response.sendRedirect(request.getContextPath() + "/student/enrollment-summary?courseId=" + course.getCourseId() + "&error=paystack");
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error initiating direct payment in ProcessEnrollmentServlet", e);
+            response.sendRedirect(request.getContextPath() + "/student/enrollment-summary?courseId=" + course.getCourseId() + "&error=exception");
+        }
+    }
+
+    private String buildCallbackUrl(HttpServletRequest request) {
+        String configured = AppSettingsService.getString(AppSettingsService.KEY_PAYMENT_CALLBACK_URL, "");
+        if (!configured.isEmpty()) {
+            return configured;
+        }
+        String scheme = request.getScheme();
+        String server = request.getServerName();
+        int port = request.getServerPort();
+        boolean defaultPort = ("http".equalsIgnoreCase(scheme) && port == 80)
+                || ("https".equalsIgnoreCase(scheme) && port == 443);
+        String host = defaultPort ? (scheme + "://" + server) : (scheme + "://" + server + ":" + port);
+        return host + request.getContextPath() + "/student/payment-callback";
+    }
+
+    private String maskReference(String reference) {
+        if (reference == null || reference.isEmpty()) {
+            return "-";
+        }
+        if (reference.length() <= 8) {
+            return "****";
+        }
+        return reference.substring(0, 4) + "..." + reference.substring(reference.length() - 4);
     }
 
     private Integer parseCourseId(String value) {

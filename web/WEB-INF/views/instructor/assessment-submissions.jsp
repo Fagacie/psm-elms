@@ -1,6 +1,11 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%
+    response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); // HTTP 1.1
+    response.setHeader("Pragma", "no-cache"); // HTTP 1.0
+    response.setDateHeader("Expires", 0); // Proxies
+%>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -15,6 +20,636 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-assessments.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-assessment-flow.css">
     <jsp:include page="/WEB-INF/views/common/head-external-assets.jsp"/>
+    
+    <style>
+    /* ==========================================================================
+       Grading Command Center Split-Screen Layout
+       ========================================================================== */
+    :root {
+        --ws-primary: #6366f1;
+        --ws-primary-glow: rgba(99, 102, 241, 0.12);
+        --ws-success: #10b981;
+        --ws-warning: #f59e0b;
+        --ws-danger: #ef4444;
+    }
+
+    .ia-submissions-split-layout {
+        display: grid;
+        grid-template-columns: 320px 1fr 380px;
+        height: calc(100vh - 340px);
+        min-height: 580px;
+        overflow: hidden;
+        gap: 0;
+        background-color: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02);
+        margin-top: 1.5rem;
+    }
+
+    /* Left Sidebar: Student Queue */
+    .grading-roster-sidebar {
+        background-color: #ffffff;
+        border-right: 1px solid #e2e8f0;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    .roster-header {
+        padding: 24px;
+        border-bottom: 1px solid #f1f5f9;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .roster-header h3 {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0;
+        letter-spacing: -0.01em;
+    }
+
+    .roster-count {
+        font-size: 0.75rem;
+        font-weight: 700;
+        background: var(--ws-primary-glow);
+        color: var(--ws-primary);
+        padding: 4px 10px;
+        border-radius: 20px;
+    }
+
+    .roster-search-box {
+        padding: 16px 24px;
+        border-bottom: 1px solid #f1f5f9;
+        background-color: #fafbfc;
+    }
+
+    .roster-search-input {
+        width: 100%;
+        padding: 10px 14px 10px 36px;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        font-size: 0.85rem;
+        outline: none;
+        box-sizing: border-box;
+        background-color: #ffffff;
+        color: #0f172a;
+        transition: all 0.2s ease;
+    }
+    
+    .roster-search-input:focus {
+        border-color: var(--ws-primary);
+        box-shadow: 0 0 0 3px var(--ws-primary-glow);
+    }
+
+    .roster-search-wrap {
+        position: relative;
+    }
+
+    .roster-search-wrap i {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        font-size: 0.85rem;
+    }
+
+    .roster-list {
+        flex-grow: 1;
+        overflow-y: auto;
+        padding: 12px 0;
+    }
+
+    .roster-item {
+        margin: 4px 12px;
+        padding: 12px 16px;
+        border-radius: 12px;
+        border: 1px solid transparent;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        user-select: none;
+    }
+
+    .roster-item:hover {
+        background-color: #f1f5f9;
+        border-color: #e2e8f0;
+    }
+
+    .roster-item.active {
+        background-color: var(--ws-primary-glow);
+        border-color: var(--ws-primary, #6366f1);
+        box-shadow: 0 0 0 3px var(--ws-primary-glow);
+    }
+
+    .roster-item.disabled-roster-item {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .roster-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        color: #475569;
+        font-size: 0.9rem;
+        flex-shrink: 0;
+        box-shadow: inset 0 1px 2px rgba(255,255,255,0.2);
+        transition: all 0.2s ease;
+    }
+
+    .roster-item.active .roster-avatar {
+        background: linear-gradient(135deg, var(--ws-primary) 0%, #4f46e5 100%);
+        color: #ffffff;
+        box-shadow: 0 4px 10px rgba(99, 102, 241, 0.25);
+    }
+
+    .roster-meta {
+        flex-grow: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .roster-name {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #0f172a;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .roster-item.active .roster-name {
+        color: #4f46e5;
+    }
+
+    .roster-status-badge {
+        font-size: 0.65rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        width: fit-content;
+        padding: 3px 8px;
+        border-radius: 8px;
+        display: inline-block;
+    }
+    
+    /* Elegant tag styling override */
+    .status-badge.status-submitted, .status-badge.status-autosubmitted {
+        background-color: #eff6ff;
+        color: #2563eb;
+        border: 1px solid #dbeafe;
+    }
+    
+    .status-badge.status-graded, .status-badge.status-approved {
+        background-color: #ecfdf5;
+        color: #059669;
+        border: 1px solid #d1fae5;
+    }
+    
+    .status-badge.status-pending {
+        background-color: #fffbeb;
+        color: #d97706;
+        border: 1px solid #fef3c7;
+    }
+    
+    .status-badge.status-timedout, .status-badge.status-rejected {
+        background-color: #fef2f2;
+        color: #dc2626;
+        border: 1px solid #fee2e2;
+    }
+
+    .roster-score-badge {
+        font-size: 0.825rem;
+        font-weight: 700;
+        color: #64748b;
+        flex-shrink: 0;
+        font-variant-numeric: tabular-nums;
+    }
+
+    /* Center Pane: Document Viewer */
+    .grading-document-viewer {
+        background-color: #f8fafc;
+        padding: 32px;
+        overflow-y: hidden;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        height: 100%;
+        box-sizing: border-box;
+    }
+
+    .grading-doc-card {
+        background: #ffffff;
+        border-radius: 14px;
+        box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.04), 0 8px 16px -6px rgba(0, 0, 0, 0.03);
+        border: 1px solid #e2e8f0;
+        width: 100%;
+        max-width: 850px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        box-sizing: border-box;
+        overflow: hidden;
+    }
+
+    .grading-doc-header {
+        padding: 16px 24px;
+        border-bottom: 1px solid #e2e8f0;
+        background-color: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .grading-doc-title {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: #334155;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .grading-iframe-viewer {
+        width: 100%;
+        flex-grow: 1;
+        border: none;
+        background: #ffffff;
+    }
+
+    .grading-text-viewer {
+        padding: 40px;
+        font-family: 'Inter', sans-serif;
+        font-size: 0.95rem;
+        line-height: 1.65;
+        color: #334155;
+        overflow-y: auto;
+        flex-grow: 1;
+        white-space: pre-wrap;
+    }
+
+    /* Right Sidebar: Scoring & Feedback */
+    .grading-panel-sidebar {
+        background: #ffffff;
+        border-left: 1px solid #e2e8f0;
+        padding: 32px 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+        height: 100%;
+        overflow-y: auto;
+        box-sizing: border-box;
+    }
+
+    .grading-panel-student {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        border-bottom: 1px solid #f1f5f9;
+        padding-bottom: 20px;
+    }
+
+    .grading-panel-avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, var(--ws-primary-glow) 0%, rgba(99, 102, 241, 0.05) 100%);
+        color: var(--ws-primary);
+        font-size: 1.25rem;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid rgba(99, 102, 241, 0.1);
+    }
+
+    .grading-panel-meta {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        min-width: 0;
+    }
+
+    .grading-panel-name {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: #0f172a;
+        letter-spacing: -0.01em;
+    }
+
+    .grading-panel-email {
+        font-size: 0.8rem;
+        color: #64748b;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* Scoring Number Inputs */
+    .grading-score-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .grading-score-label {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #475569;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .grading-score-input-group {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .grading-score-input {
+        width: 120px;
+        border: 1.5px solid #cbd5e1 !important;
+        border-radius: 10px !important;
+        padding: 12px 16px !important;
+        font-size: 1.25rem !important;
+        font-weight: 700 !important;
+        color: #0f172a !important;
+        outline: none !important;
+        transition: all 0.2s ease !important;
+        box-shadow: inset 0 1px 2px rgba(0,0,0,0.02) !important;
+        text-align: center;
+        background-color: #fafbfc !important;
+    }
+
+    .grading-score-input:focus {
+        border-color: var(--ws-primary, #6366f1) !important;
+        background-color: #ffffff !important;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12) !important;
+    }
+
+    .grading-score-total {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #64748b;
+    }
+
+    /* Feedback Textarea */
+    .grading-feedback-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        flex-grow: 1;
+    }
+
+    .grading-feedback-label {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #475569;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .grading-feedback-textarea {
+        width: 100%;
+        border: 1.5px solid #cbd5e1 !important;
+        border-radius: 10px !important;
+        padding: 14px !important;
+        font-size: 0.9rem !important;
+        color: #0f172a !important;
+        outline: none !important;
+        transition: all 0.2s ease !important;
+        resize: none !important;
+        flex-grow: 1;
+        box-sizing: border-box;
+        background-color: #fafbfc !important;
+    }
+
+    .grading-feedback-textarea:focus {
+        border-color: var(--ws-primary, #6366f1) !important;
+        background-color: #ffffff !important;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12) !important;
+    }
+
+    .grading-submit-btn {
+        width: 100%;
+        padding: 14px !important;
+        font-size: 0.95rem !important;
+        border-radius: 10px !important;
+        margin-top: auto;
+        background: linear-gradient(135deg, var(--ws-primary, #6366f1) 0%, #4f46e5 100%);
+        color: #ffffff;
+        border: none;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+    }
+    
+    .grading-submit-btn:hover:not(:disabled) {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(99, 102, 241, 0.25);
+    }
+    
+    .grading-submit-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    /* Empty state */
+    .grading-empty-selection {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 48px 24px;
+        color: #64748b;
+        gap: 16px;
+        width: 100%;
+    }
+
+    .grading-empty-selection i {
+        font-size: 3rem;
+        color: var(--ws-primary);
+        opacity: 0.8;
+    }
+
+    /* Scoped premium buttons */
+    .ws-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        font-family: inherit;
+        font-size: 0.875rem;
+        font-weight: 600;
+        padding: 10px 20px;
+        border-radius: 8px;
+        border: 1px solid transparent;
+        cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        text-decoration: none;
+    }
+
+    .ws-btn-primary {
+        background-color: var(--ws-primary, #6366f1);
+        color: #ffffff;
+    }
+
+    .ws-btn-primary:hover {
+        background-color: #4f46e5;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+    }
+
+    .ws-btn-secondary {
+        background-color: #ffffff;
+        border-color: #cbd5e1;
+        color: #334155;
+    }
+
+    .ws-btn-secondary:hover {
+        background-color: #f8fafc;
+        border-color: #94a3b8;
+        color: #0f172a;
+    }
+
+    .ws-btn-xs {
+        padding: 4px 8px;
+        font-size: 0.75rem;
+        border-radius: 4px;
+    }
+
+    /* Dark Mode split view */
+    :root[data-theme="dark"] .ia-submissions-split-layout {
+        border-color: rgba(255, 255, 255, 0.08);
+        background-color: #0b0f19;
+        box-shadow: none;
+    }
+
+    :root[data-theme="dark"] .grading-roster-sidebar {
+        background-color: #0f172a;
+        border-right-color: rgba(255, 255, 255, 0.08);
+    }
+
+    :root[data-theme="dark"] .roster-header {
+        border-bottom-color: rgba(255, 255, 255, 0.08);
+    }
+
+    :root[data-theme="dark"] .roster-header h3 {
+        color: #ffffff;
+    }
+
+    :root[data-theme="dark"] .roster-search-box {
+        border-bottom-color: rgba(255, 255, 255, 0.08);
+        background-color: #0b0f19;
+    }
+
+    :root[data-theme="dark"] .roster-search-input {
+        background-color: #1e293b;
+        border-color: rgba(255, 255, 255, 0.1);
+        color: #ffffff;
+    }
+    
+    :root[data-theme="dark"] .roster-search-input:focus {
+        border-color: var(--ws-primary);
+    }
+
+    :root[data-theme="dark"] .roster-item:hover {
+        background-color: #1e293b;
+        border-color: rgba(255, 255, 255, 0.05);
+    }
+
+    :root[data-theme="dark"] .roster-item.active {
+        background-color: rgba(99, 102, 241, 0.15);
+        border-color: var(--ws-primary, #6366f1);
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+    }
+
+    :root[data-theme="dark"] .roster-name {
+        color: #ffffff;
+    }
+    
+    :root[data-theme="dark"] .roster-item.active .roster-name {
+        color: #818cf8;
+    }
+
+    :root[data-theme="dark"] .roster-avatar {
+        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        color: #94a3b8;
+    }
+
+    :root[data-theme="dark"] .grading-document-viewer {
+        background-color: #0b0f19;
+    }
+
+    :root[data-theme="dark"] .grading-doc-card {
+        background-color: #0f172a;
+        border-color: rgba(255, 255, 255, 0.08);
+    }
+
+    :root[data-theme="dark"] .grading-doc-header {
+        background-color: #0f172a;
+        border-bottom-color: rgba(255, 255, 255, 0.08);
+    }
+
+    :root[data-theme="dark"] .grading-doc-title {
+        color: #cbd5e1;
+    }
+
+    :root[data-theme="dark"] .grading-text-viewer {
+        color: #cbd5e1;
+        background-color: #0f172a;
+    }
+
+    :root[data-theme="dark"] .grading-panel-sidebar {
+        background-color: #0f172a;
+        border-left-color: rgba(255, 255, 255, 0.08);
+    }
+
+    :root[data-theme="dark"] .grading-panel-student {
+        border-bottom-color: rgba(255, 255, 255, 0.08);
+    }
+
+    :root[data-theme="dark"] .grading-panel-name {
+        color: #ffffff;
+    }
+
+    :root[data-theme="dark"] .grading-score-label,
+    :root[data-theme="dark"] .grading-feedback-label {
+        color: #94a3b8;
+    }
+
+    :root[data-theme="dark"] .grading-score-input,
+    :root[data-theme="dark"] .grading-feedback-textarea {
+        background-color: #1e293b !important;
+        border-color: rgba(255, 255, 255, 0.1) !important;
+        color: #ffffff !important;
+    }
+
+    :root[data-theme="dark"] .grading-score-input:focus,
+    :root[data-theme="dark"] .grading-feedback-textarea:focus {
+        border-color: var(--ws-primary, #6366f1) !important;
+        background-color: #0f172a !important;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2) !important;
+    }
+    </style>
 </head>
 <body class="instructor-ui">
 <jsp:include page="/WEB-INF/views/common/instructor-header.jsp">
@@ -63,257 +698,154 @@
         <c:if test="${param.error == 'graderange'}"><div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> Invalid score. Must be between 0 and ${selectedAssessment.totalMarks}.</div></c:if>
         <c:if test="${not empty errorMessage}"><div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> ${errorMessage}</div></c:if>
 
-        <div class="ia-flow-grid-single">
-            <!-- Modern Submissions Table with Inline Grading -->
-            <div class="section-card" style="padding: 0; overflow: hidden;">
-                <div class="ia-roster-head">
-                    <h3>
-                        <c:choose>
-                            <c:when test="${selectedAssessment.type == 'Assignment'}">
-                                <i class="fas fa-file-pen"></i> Assignment Submissions
-                            </c:when>
-                            <c:otherwise>
-                                <i class="fas fa-chart-column"></i> Assessment Results
-                            </c:otherwise>
-                        </c:choose>
-                    </h3>
-                    <span class="ia-roster-count">
-                        <strong>${fn:length(assessmentRosterRows)}</strong> Enrolled
-                    </span>
-                    <div style="display:flex; gap:8px; align-items:center;">
-                        <button id="ia-fullview-toggle" type="button" class="btn btn-sm btn-secondary" title="Toggle full view">
-                            <i class="fas fa-expand"></i> Full View
-                        </button>
+        <div class="ia-submissions-split-layout">
+            <!-- Left Pane: Student Roster Queue -->
+            <aside class="grading-roster-sidebar">
+                <div class="roster-header">
+                    <h3>Submissions Queue</h3>
+                    <span class="roster-count">${fn:length(assessmentRosterRows)} Students</span>
+                </div>
+                <div class="roster-search-box">
+                    <div class="roster-search-wrap">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="rosterSearch" class="roster-search-input" placeholder="Search student name..." oninput="filterGradingRoster()">
                     </div>
                 </div>
-                
-                <c:choose>
-                    <c:when test="${empty assessmentRosterRows}">
-                        <div class="ia-empty-state" style="padding: 60px 24px;">
-                            <div class="ia-empty-icon"><i class="fas fa-users-slash"></i></div>
-                            <h3>No Students</h3>
-                            <p>There are currently no students enrolled in this course.</p>
+                <div class="roster-list" id="gradingRosterList">
+                    <c:forEach var="row" items="${assessmentRosterRows}">
+                        <c:set var="submission" value="${row.latestSubmission}"/>
+                        <div class="roster-item <c:if test='${empty submission}'>disabled-roster-item</c:if>" 
+                             id="roster-item-${not empty submission ? submission.submissionId : 'none'}" 
+                             data-submission-id="${not empty submission ? submission.submissionId : ''}"
+                             data-student-name="${row.studentName}"
+                             <c:if test="${not empty submission}">onclick="activateSubmission('${submission.submissionId}')"</c:if>>
+                            <div class="roster-avatar">
+                                ${fn:substring(row.studentName, 0, 1)}
+                            </div>
+                            <div class="roster-meta">
+                                <strong class="roster-name">${row.studentName}</strong>
+                                <span class="status-badge status-${fn:toLowerCase(fn:replace(row.studentStatusLabel, ' ', '-'))} roster-status-badge">
+                                    ${row.studentStatusLabel}
+                                </span>
+                            </div>
+                            <div class="roster-score">
+                                <c:choose>
+                                    <c:when test="${not empty submission and submission.score != null}">
+                                        <span class="roster-score-badge">${submission.score}/${selectedAssessment.totalMarks}</span>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <span class="roster-score-badge" style="color: var(--ins-muted);">--</span>
+                                    </c:otherwise>
+                                </c:choose>
+                            </div>
                         </div>
-                    </c:when>
-                    <c:otherwise>
-                        <div class="table-responsive">
-                            <table class="ia-submissions-table">
-                                <thead>
-                                    <tr>
-                                        <th class="col-expand"></th>
-                                        <th class="col-student">Student</th>
-                                        <th class="col-status">Status</th>
-                                        <th class="col-date">Submitted</th>
-                                        <th class="col-attempt">Attempt</th>
-                                        <th class="col-score">Score</th>
-                                        <th class="col-actions">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <c:forEach var="row" items="${assessmentRosterRows}">
-                                        <c:set var="submission" value="${row.latestSubmission}"/>
-                                        <tr class="ia-submission-row ${not empty selectedSubmission and submission.submissionId == selectedSubmission.submissionId ? 'ia-expanded' : ''}" data-submission-id="${not empty submission ? submission.submissionId : ''}">
-                                            <td class="col-expand">
-                                                <c:if test="${not empty submission}">
-                                                    <button type="button" class="ia-expand-btn" data-submission-id="${submission.submissionId}" title="Toggle grading panel">
-                                                        <i class="fas fa-chevron-down"></i>
-                                                    </button>
-                                                </c:if>
-                                            </td>
-                                            <td class="col-student">
-                                                <div class="ia-student-meta">
-                                                    <strong>${row.studentName}</strong>
-                                                    <span>${row.studentEmail}</span>
-                                                </div>
-                                            </td>
-                                            <td class="col-status">
-                                                <c:if test="${not empty submission}">
-                                                    <span class="status-badge status-${fn:toLowerCase(fn:replace(row.studentStatusLabel, ' ', '-'))}" style="font-size: 0.75rem;">
-                                                        ${row.studentStatusLabel}
-                                                    </span>
-                                                </c:if>
-                                                <c:if test="${empty submission}">
-                                                    <span class="status-badge status-not-submitted" style="font-size: 0.75rem;">Not Submitted</span>
-                                                </c:if>
-                                            </td>
-                                            <td class="col-date">
-                                                <c:choose>
-                                                    <c:when test="${not empty submission and not empty submission.submitDate}">
-                                                        <span class="ia-date-cell">${fn:replace(submission.submitDate, 'T', ' ')}</span>
-                                                    </c:when>
-                                                    <c:otherwise>
-                                                        <span class="ia-muted-dash">--</span>
-                                                    </c:otherwise>
-                                                </c:choose>
-                                            </td>
-                                            <td class="col-attempt">
-                                                <c:choose>
-                                                    <c:when test="${not empty submission}">
-                                                        <span class="ia-attempt-chip">#${submission.attemptNumber}</span>
-                                                    </c:when>
-                                                    <c:otherwise>
-                                                        <span class="ia-muted-dash">--</span>
-                                                    </c:otherwise>
-                                                </c:choose>
-                                            </td>
-                                            <td class="col-score">
-                                                <c:choose>
-                                                    <c:when test="${not empty submission and submission.score != null}">
-                                                        <strong class="ia-score-value">${submission.score}</strong>
-                                                        <span class="ia-score-total">/ ${selectedAssessment.totalMarks}</span>
-                                                    </c:when>
-                                                    <c:otherwise>
-                                                        <span class="ia-muted-dash">--</span>
-                                                    </c:otherwise>
-                                                </c:choose>
-                                            </td>
-                                            <td class="col-actions">
-                                                <c:if test="${not empty submission}">
-                                                    <div class="ia-action-buttons">
-                                                        <button type="button" class="btn btn-sm btn-secondary ia-grade-btn" data-submission-id="${submission.submissionId}" title="Open grading panel">
-                                                            <i class="fas fa-pen-to-square"></i>
-                                                        </button>
-                                                        <a href="#" class="btn btn-sm btn-secondary ia-view-btn" data-submission-id="${submission.submissionId}" title="View full details">
-                                                            <c:choose>
-                                                                <c:when test="${selectedAssessment.type == 'Assignment'}">
-                                                                    <i class="fas fa-file"></i>
-                                                                </c:when>
-                                                                <c:otherwise>
-                                                                    <i class="fas fa-eye"></i>
-                                                                </c:otherwise>
-                                                            </c:choose>
-                                                        </a>
-                                                    </div>
-                                                </c:if>
-                                                <c:if test="${empty submission}">
-                                                    <span class="ia-no-work">No submission</span>
-                                                </c:if>
-                                            </td>
-                                        </tr>
+                    </c:forEach>
+                </div>
+            </aside>
 
-                                        <!-- Grading Detail Row (Hidden by default, shown on expand) -->
-                                        <c:if test="${not empty submission}">
-                                            <tr class="ia-detail-row" id="detail-${submission.submissionId}" style="display: none;">
-                                                <td colspan="7">
-                                                    <div class="ia-grading-detail">
-                                                        <c:set var="submissionPayload" value="${submission.answersFilePath}"/>
-                                                        <c:set var="submissionIsUrl" value="${not empty submissionPayload and (fn:startsWith(submissionPayload, 'http://') or fn:startsWith(submissionPayload, 'https://'))}"/>
+            <!-- Center Pane: Document Viewer -->
+            <section class="grading-document-viewer" id="documentViewerPane">
+                <div class="grading-doc-card" id="docCardViewer" style="display: none;">
+                    <div class="grading-doc-header">
+                        <span class="grading-doc-title" id="viewerDocTitle">
+                            <i class="fas fa-file-pdf"></i> Student Submission Payload
+                        </span>
+                        <a id="viewerExternalLink" href="" target="_blank" class="ws-btn ws-btn-secondary ws-btn-xs" style="padding: 6px 12px;">
+                            Open in New Tab <i class="fas fa-external-link-alt"></i>
+                        </a>
+                    </div>
+                    <!-- Frame for PDFs -->
+                    <iframe id="pdfViewerFrame" class="grading-iframe-viewer" src="" style="display: none;"></iframe>
+                    <!-- Fallback panel for Text answers -->
+                    <div id="textAnswersViewer" class="grading-text-viewer" style="display: none;"></div>
+                </div>
 
-                                                        <!-- Submission Content Preview -->
-                                                        <div class="ia-detail-section">
-                                                            <h4 class="ia-detail-title">Submission Content</h4>
-                                                            
-                                                            <c:if test="${selectedAssessment.type == 'Assignment' and not empty submissionPayload}">
-                                                                <div class="ia-submission-file-box">
-                                                                    <div style="width: 40px; height: 40px; border-radius: 10px; background: var(--ins-accent-soft); display: flex; align-items: center; justify-content: center; color: var(--ins-primary); flex-shrink: 0;">
-                                                                        <i class="fas fa-file-arrow-up" style="font-size: 1.2rem;"></i>
-                                                                    </div>
-                                                                    <div style="flex: 1;">
-                                                                        <strong style="display: block; font-size: 0.9rem; color: var(--ins-text);">Submitted File</strong>
-                                                                        <a href="${submissionIsUrl ? submissionPayload : pageContext.request.contextPath.concat('/uploads/').concat(submissionPayload)}" target="_blank" rel="noopener noreferrer" style="font-size: 0.85rem; color: var(--ins-primary); font-weight: 600; text-decoration: none;">
-                                                                            Open File <i class="fas fa-up-right-from-square" style="font-size: 0.65rem; margin-left: 4px;"></i>
-                                                                        </a>
-                                                                    </div>
-                                                                </div>
-                                                            </c:if>
+                <div class="grading-empty-selection" id="viewerEmptyState">
+                    <i class="fas fa-file-signature"></i>
+                    <h3>No Submission Selected</h3>
+                    <p>Select a student from the sidebar queue on the left to begin grading their work.</p>
+                </div>
+            </section>
 
-                                                            <c:if test="${(selectedAssessment.type == 'Quiz' or selectedAssessment.type == 'Exam') and not empty submissionPayload}">
-                                                                <div class="ia-submission-file-box">
-                                                                    <div style="width: 40px; height: 40px; border-radius: 10px; background: var(--ins-accent-soft); display: flex; align-items: center; justify-content: center; color: var(--ins-primary); flex-shrink: 0;">
-                                                                        <i class="fas fa-list-check" style="font-size: 1.2rem;"></i>
-                                                                    </div>
-                                                                    <div style="flex: 1;">
-                                                                        <strong style="display: block; font-size: 0.9rem; color: var(--ins-text); margin-bottom: 8px;">Submitted Answers</strong>
-                                                                        <div class="ia-answer-chip-wrap">
-                                                                            <c:forEach var="entry" items="${fn:split(submissionPayload, ';')}">
-                                                                                <c:if test="${not empty entry}">
-                                                                                    <span class="ia-answer-chip">${entry}</span>
-                                                                                </c:if>
-                                                                            </c:forEach>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </c:if>
-
-                                                            <c:if test="${empty submissionPayload}">
-                                                                <div class="ia-submission-file-box" style="background: #fef8f8; border-color: #fecaca;">
-                                                                    <div style="width: 40px; height: 40px; border-radius: 10px; background: #fee2e2; display: flex; align-items: center; justify-content: center; color: #991b1b; flex-shrink: 0;">
-                                                                        <i class="fas fa-exclamation-circle" style="font-size: 1.2rem;"></i>
-                                                                    </div>
-                                                                    <div style="flex: 1;">
-                                                                        <strong style="display: block; font-size: 0.9rem; color: var(--ins-text);">No submission content</strong>
-                                                                        <span style="font-size: 0.85rem; color: var(--ins-muted);">Score/status recorded, no file or answers stored.</span>
-                                                                    </div>
-                                                                </div>
-                                                            </c:if>
-                                                        </div>
-
-                                                        <!-- Grading Form -->
-                                                        <form method="post" action="${pageContext.request.contextPath}/instructor/assessments" class="ia-detail-section ia-grading-form">
-                                                            <h4 class="ia-detail-title">Grade & Feedback</h4>
-                                                            
-                                                            <input type="hidden" name="action" value="gradeSubmission" />
-                                                            <input type="hidden" name="courseId" value="${selectedCourse.courseId}" />
-                                                            <input type="hidden" name="assessmentId" value="${selectedAssessment.assessmentId}" />
-                                                            <input type="hidden" name="submissionId" value="${submission.submissionId}" />
-                                                            <input type="hidden" name="workflowAction" value="submissions" />
-
-                                                            <div class="ia-form-grid">
-                                                                <div style="flex: 1;">
-                                                                    <label for="score-${submission.submissionId}" class="ia-form-label">Final Score <span style="color: #dc2626;">*</span></label>
-                                                                    <div style="position: relative; display: flex; gap: 8px; align-items: center;">
-                                                                        <input 
-                                                                            id="score-${submission.submissionId}" 
-                                                                            name="score" 
-                                                                            type="number" 
-                                                                            min="0" 
-                                                                            max="${selectedAssessment.totalMarks}" 
-                                                                            step="0.5" 
-                                                                            value="${submission.score}" 
-                                                                            class="ia-score-input"
-                                                                            required />
-                                                                        <span class="ia-score-max">/ ${selectedAssessment.totalMarks}</span>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-
-                                                            <div>
-                                                                <label for="feedback-${submission.submissionId}" class="ia-form-label">Feedback for Student</label>
-                                                                <textarea 
-                                                                    id="feedback-${submission.submissionId}" 
-                                                                    name="feedback" 
-                                                                    rows="3" 
-                                                                    class="ia-feedback-textarea"
-                                                                    placeholder="Provide constructive feedback on the student's work...">${submission.feedback}</textarea>
-                                                            </div>
-
-                                                            <div class="ia-form-actions">
-                                                                <button class="btn btn-primary" type="submit">
-                                                                    <i class="fas fa-check-double"></i> Save Grade
-                                                                </button>
-                                                                
-                                                                <c:if test="${selectedAssessment.type == 'Quiz' or selectedAssessment.type == 'Exam'}">
-                                                                    <button 
-                                                                        type="submit" 
-                                                                        formaction="${pageContext.request.contextPath}/instructor/assessments?action=autoRegradeSubmission&courseId=${selectedCourse.courseId}&assessmentId=${selectedAssessment.assessmentId}&submissionId=${submission.submissionId}" 
-                                                                        class="btn btn-secondary"
-                                                                        onclick="return confirm('Recalculate score based on current MCQ bank answers?');">
-                                                                        <i class="fas fa-wand-sparkles"></i> Auto-Regrade
-                                                                    </button>
-                                                                </c:if>
-                                                            </div>
-                                                        </form>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        </c:if>
-                                    </c:forEach>
-                                </tbody>
-                            </table>
+            <!-- Right Pane: Scoring & Feedback Panel -->
+            <aside class="grading-panel-sidebar">
+                <div id="gradingSidebarActive" style="display: none; height: 100%; flex-direction: column; gap: 24px;">
+                    <div class="grading-panel-student">
+                        <div class="grading-panel-avatar" id="sidebarAvatar">A</div>
+                        <div class="grading-panel-meta">
+                            <span class="grading-panel-name" id="sidebarStudentName">Student Name</span>
+                            <span class="grading-panel-email" id="sidebarStudentEmail">email@domain.com</span>
                         </div>
-                    </c:otherwise>
-                </c:choose>
-            </div>
+                    </div>
+
+                    <!-- AJAX Grading Form -->
+                    <form id="gradingDashboardForm" method="post" action="${pageContext.request.contextPath}/instructor/assessments" style="display: flex; flex-direction: column; gap: 24px; flex-grow: 1;">
+                        <input type="hidden" name="action" value="gradeSubmission" />
+                        <input type="hidden" name="courseId" value="${selectedCourse.courseId}" />
+                        <input type="hidden" name="assessmentId" value="${selectedAssessment.assessmentId}" />
+                        <input type="hidden" name="submissionId" id="formSubmissionId" value="" />
+                        <input type="hidden" name="workflowAction" value="submissions" />
+
+                        <div class="grading-score-wrapper">
+                            <label class="grading-score-label">Final Score *</label>
+                            <div class="grading-score-input-group">
+                                <input 
+                                    id="formScoreInput" 
+                                    name="score" 
+                                    type="number" 
+                                    min="0" 
+                                    max="${selectedAssessment.totalMarks}" 
+                                    step="0.5" 
+                                    class="grading-score-input"
+                                    required />
+                                <span class="grading-score-total">/ ${selectedAssessment.totalMarks} Marks</span>
+                            </div>
+                        </div>
+
+                        <div class="grading-feedback-wrapper">
+                            <label class="grading-feedback-label">Constructive Feedback</label>
+                            <textarea 
+                                id="formFeedbackInput" 
+                                name="feedback" 
+                                class="grading-feedback-textarea"
+                                placeholder="Enter feedback details..."></textarea>
+                        </div>
+
+                        <button type="submit" class="ws-btn ws-btn-primary grading-submit-btn" id="gradingFormSubmitBtn">
+                            <i class="fas fa-check-double"></i> Submit Grade & Next Student
+                        </button>
+                    </form>
+                </div>
+
+                <div class="grading-empty-selection" id="sidebarEmptyState" style="height: 100%;">
+                    <i class="fas fa-user-check"></i>
+                    <h3>Select Student</h3>
+                    <p>Student metadata and score settings will load here.</p>
+                </div>
+            </aside>
+        </div>
+
+        <!-- Rendered Hidden Data Blocks for zero-latency client switching -->
+        <div style="display: none;" id="hiddenSubmissionDataBlocks">
+            <c:forEach var="row" items="${assessmentRosterRows}">
+                <c:set var="submission" value="${row.latestSubmission}"/>
+                <c:if test="${not empty submission}">
+                    <c:set var="submissionPayload" value="${submission.answersFilePath}"/>
+                    <c:set var="submissionIsUrl" value="${not empty submissionPayload and (fn:startsWith(submissionPayload, 'http://') or fn:startsWith(submissionPayload, 'https://'))}"/>
+                    
+                    <div id="data-block-${submission.submissionId}"
+                         data-submission-id="${submission.submissionId}"
+                         data-student-name="<c:out value='${row.studentName}'/>"
+                         data-student-email="<c:out value='${row.studentEmail}'/>"
+                         data-score="${submission.score != null ? submission.score : ''}"
+                         data-feedback="<c:out value='${submission.feedback}'/>"
+                         data-payload="<c:out value='${submissionPayload}'/>"
+                         data-file-url="${submissionIsUrl ? submissionPayload : pageContext.request.contextPath.concat('/uploads/').concat(submissionPayload)}"
+                         data-is-pdf="${fn:endsWith(fn:toLowerCase(submissionPayload), '.pdf')}"
+                         data-type="${selectedAssessment.type}">
+                    </div>
+                </c:if>
+            </c:forEach>
         </div>
     </div>
 </main>
@@ -321,217 +853,238 @@
 
 
 <script>
-    function toggleGradingPanel(button, submissionId) {
-        let row = button.closest('.ia-submission-row');
-        if (!row) return;
-        const detailRow = document.getElementById('detail-' + submissionId);
-        if (!detailRow) return;
+    function filterGradingRoster() {
+        const query = document.getElementById("rosterSearch").value.toLowerCase();
+        const items = document.querySelectorAll("#gradingRosterList .roster-item");
+        items.forEach(item => {
+            const name = item.dataset.studentName.toLowerCase();
+            item.style.display = name.includes(query) ? "flex" : "none";
+        });
+    }
 
-        const isExpanded = row.classList.contains('ia-expanded');
-
-        // close others
-        document.querySelectorAll('.ia-submission-row.ia-expanded').forEach(r => {
-            if (r !== row) {
-                r.classList.remove('ia-expanded');
-                const otherId = r.getAttribute('data-submission-id');
-                const otherDetail = document.getElementById('detail-' + otherId);
-                if (otherDetail) otherDetail.style.display = 'none';
-            }
+    function activateSubmission(submissionId) {
+        // Toggle roster active class
+        document.querySelectorAll("#gradingRosterList .roster-item").forEach(item => {
+            item.classList.toggle("active", item.dataset.submissionId === submissionId);
         });
 
-        if (isExpanded) {
-            row.classList.remove('ia-expanded');
-            detailRow.style.display = 'none';
+        const block = document.getElementById("data-block-" + submissionId);
+        if (!block) return;
+
+        // Hide empty states
+        document.getElementById("viewerEmptyState").style.display = "none";
+        document.getElementById("sidebarEmptyState").style.display = "none";
+
+        // Show active blocks
+        document.getElementById("docCardViewer").style.display = "flex";
+        document.getElementById("gradingSidebarActive").style.display = "flex";
+
+        // Extract attributes
+        const studentName = block.getAttribute("data-student-name");
+        const studentEmail = block.getAttribute("data-student-email");
+        const score = block.getAttribute("data-score");
+        const feedback = block.getAttribute("data-feedback");
+        const fileUrl = block.getAttribute("data-file-url");
+        const isPdf = block.getAttribute("data-is-pdf") === "true";
+        const payload = block.getAttribute("data-payload");
+
+        // Fill sidebar metadata
+        document.getElementById("sidebarStudentName").textContent = studentName;
+        document.getElementById("sidebarStudentEmail").textContent = studentEmail;
+        document.getElementById("sidebarAvatar").textContent = studentName.substring(0, 1).toUpperCase();
+
+        // Fill form fields
+        document.getElementById("formSubmissionId").value = submissionId;
+        document.getElementById("formScoreInput").value = score;
+        document.getElementById("formFeedbackInput").value = feedback;
+
+        // Reset submit button state
+        const submitBtn = document.getElementById("gradingFormSubmitBtn");
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-check-double"></i> Submit Grade & Next Student';
+
+        // Load document preview
+        const pdfFrame = document.getElementById("pdfViewerFrame");
+        const textViewer = document.getElementById("textAnswersViewer");
+        const extLink = document.getElementById("viewerExternalLink");
+
+        if (payload && payload.trim() !== "") {
+            extLink.style.display = "inline-flex";
+            extLink.href = fileUrl;
+            
+            if (isPdf) {
+                pdfFrame.style.display = "block";
+                textViewer.style.display = "none";
+                pdfFrame.src = fileUrl;
+            } else {
+                pdfFrame.style.display = "none";
+                textViewer.style.display = "block";
+                pdfFrame.src = "";
+                textViewer.textContent = payload;
+            }
         } else {
-            row.classList.add('ia-expanded');
-            detailRow.style.display = 'table-row';
-            setTimeout(() => {
-                const scoreInput = document.getElementById('score-' + submissionId);
-                if (scoreInput) { scoreInput.focus(); scoreInput.select(); }
-            }, 50);
+            extLink.style.display = "none";
+            pdfFrame.style.display = "none";
+            textViewer.style.display = "block";
+            pdfFrame.src = "";
+            textViewer.innerHTML = `<div style="text-align: center; padding: 48px; color: #94a3b8;">
+                <i class="fas fa-exclamation-circle" style="font-size: 2rem; margin-bottom: 12px; display: block; color: var(--ws-primary);"></i>
+                No submission file or text payload available for this student.
+            </div>`;
         }
     }
 
-    // Submit grading forms via AJAX so UI updates and table resets cleanly
-    async function submitGradingForm(form, submitBtn) {
-        const action = (submitBtn && submitBtn.formAction) ? submitBtn.formAction : form.action;
-        const fd = new FormData(form);
-        try {
-            const resp = await fetch(action, {
-                method: 'POST',
-                body: fd,
-                credentials: 'same-origin'
-            });
+    // Dynamic queueing logic
+    document.addEventListener("DOMContentLoaded", function() {
+        const form = document.getElementById("gradingDashboardForm");
+        if (form) {
+            form.addEventListener("submit", async function(e) {
+                e.preventDefault();
+                
+                const submitBtn = document.getElementById("gradingFormSubmitBtn");
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving Grade...';
 
-            if (resp.redirected) {
-                // follow server redirect (e.g., to same page with success params)
-                window.location.href = resp.url;
-                return;
-            }
+                const fd = new FormData(form);
+                const params = new URLSearchParams();
+                for (const pair of fd.entries()) {
+                    params.append(pair[0], pair[1]);
+                }
+                const submissionId = document.getElementById("formSubmissionId").value;
+                const scoreValue = document.getElementById("formScoreInput").value;
+                const feedbackValue = document.getElementById("formFeedbackInput").value;
 
-            // Prefer JSON responses so we can update the row in-place.
-            const ct = resp.headers.get('content-type') || '';
-            if (ct.indexOf('application/json') !== -1) {
-                const data = await resp.json();
-                if (data && data.success) {
-                    const subId = data.submissionId || form.querySelector('input[name=submissionId]')?.value;
-                    if (subId) {
-                        const row = document.querySelector('.ia-submission-row[data-submission-id="' + subId + '"]');
-                        if (row) {
-                            // update score
-                            const scoreEl = row.querySelector('.ia-score-value');
-                            if (scoreEl && data.score !== undefined && data.score !== null) scoreEl.textContent = data.score;
-                            // update total if provided
-                            const totalEl = row.querySelector('.ia-score-total');
-                            if (totalEl && data.totalMarks) totalEl.textContent = '/ ' + data.totalMarks;
-                            // update submitted date
-                            const dateEl = row.querySelector('.col-date .ia-date-cell');
-                            if (dateEl && data.submitDate) dateEl.textContent = data.submitDate.replace('T',' ');
-                            // update status badge
-                            const statusEl = row.querySelector('.col-status .status-badge');
-                            if (statusEl && data.statusLabel) statusEl.textContent = data.statusLabel;
+                try {
+                    const response = await fetch(form.action, {
+                        method: "POST",
+                        body: params,
+                        credentials: "same-origin"
+                    });
+
+                    // If redirected to login or error, fallback to native form submission
+                    if (response.ok && response.url && response.url.includes("success=graded")) {
+                        // Success toast
+                        showSuccessToast("Submission graded successfully!");
+
+                        // Update Left Sidebar roster UI details
+                        const rosterItem = document.getElementById("roster-item-" + submissionId);
+                        if (rosterItem) {
+                            const scoreBadge = rosterItem.querySelector(".roster-score-badge");
+                            if (scoreBadge) {
+                                scoreBadge.textContent = scoreValue + "/" + "${selectedAssessment.totalMarks}";
+                                scoreBadge.style.color = "var(--ws-success, #10b981)";
+                            }
+                            const statusBadge = rosterItem.querySelector(".roster-status-badge");
+                            if (statusBadge) {
+                                statusBadge.className = "status-badge status-graded roster-status-badge";
+                                statusBadge.textContent = "Graded";
+                            }
                         }
+
+                        // Update local hidden block attributes
+                        const block = document.getElementById("data-block-" + submissionId);
+                        if (block) {
+                            block.setAttribute("data-score", scoreValue);
+                            block.setAttribute("data-feedback", feedbackValue);
+                        }
+
+                        // Switch to NEXT ungraded student in the queue automatically!
+                        setTimeout(() => {
+                            loadNextStudentSubmission(submissionId);
+                        }, 500);
+                    } else {
+                        console.warn("AJAX save redirected or returned unexpected result. Falling back to native submit.", response.url);
+                        form.submit();
                     }
+                } catch (err) {
+                    console.error("Error submitting grade via AJAX, falling back to native form submission:", err);
+                    form.submit();
+                }
+            });
+        }
 
-                    // close modal if open
-                    try { closeModal(); } catch (e) {}
+        // Auto-activate the first student submission on page load!
+        const firstRosterItem = document.querySelector("#gradingRosterList .roster-item:not(.disabled-roster-item)");
+        if (firstRosterItem) {
+            const firstSubId = firstRosterItem.dataset.submissionId;
+            if (firstSubId) activateSubmission(firstSubId);
+        }
+    });
 
-                    // re-enable buttons
-                    form.querySelectorAll('button, input[type=submit]').forEach(b => b.disabled = false);
+    function loadNextStudentSubmission(currentSubId) {
+        const listItems = Array.from(document.querySelectorAll("#gradingRosterList .roster-item:not(.disabled-roster-item)"));
+        const currentIndex = listItems.findIndex(item => item.dataset.submissionId === currentSubId);
 
-                    // show transient success (optional)
-                    // You could show an inline toast here; for now use a simple alert if requested by server
-                    if (data.message) console.log('Grade saved:', data.message);
-                    return;
-                } else {
-                    alert(data.message || 'Failed to save grade.');
-                    form.querySelectorAll('button, input[type=submit]').forEach(b => b.disabled = false);
-                    return;
+        // Find the next student submission that is NOT graded (i.e. status is "submitted" or similar, or just next in order)
+        let nextIndex = -1;
+        for (let i = currentIndex + 1; i < listItems.length; i++) {
+            const statusBadge = listItems[i].querySelector(".roster-status-badge");
+            if (statusBadge && !statusBadge.textContent.toLowerCase().includes("graded")) {
+                nextIndex = i;
+                break;
+            }
+        }
+
+        // If none found after, wrap-around search from beginning
+        if (nextIndex === -1) {
+            for (let i = 0; i < currentIndex; i++) {
+                const statusBadge = listItems[i].querySelector(".roster-status-badge");
+                if (statusBadge && !statusBadge.textContent.toLowerCase().includes("graded")) {
+                    nextIndex = i;
+                    break;
                 }
             }
+        }
 
-            if (resp.ok) {
-                // Fallback: refresh page to ensure data integrity
-                window.location.reload();
-            } else {
-                const txt = await resp.text();
-                console.error('Grading save failed:', txt);
-                alert('Failed to save grade. See console for details.');
-            }
-        } catch (err) {
-            console.error('Network error saving grade', err);
-            alert('Network error while saving grade.');
+        // If there's still an ungraded student, activate them!
+        if (nextIndex !== -1) {
+            activateSubmission(listItems[nextIndex].dataset.submissionId);
+        } else {
+            // Victory state: All submissions fully graded!
+            showSuccessToast("All student submissions graded!");
+            document.getElementById("pdfViewerFrame").src = "";
+            document.getElementById("pdfViewerFrame").style.display = "none";
+            document.getElementById("textAnswersViewer").style.display = "block";
+            document.getElementById("textAnswersViewer").innerHTML = `<div style="text-align: center; padding: 120px 40px; color: #94a3b8;">
+                <i class="fas fa-trophy" style="font-size: 4rem; margin-bottom: 20px; display: block; color: var(--ws-warning);"></i>
+                <h3 style="color: #0f172a; margin-bottom: 12px; font-weight: 800;">Roster Grading Completed!</h3>
+                <p style="margin: 0; font-size: 0.95rem; color: #64748b;">Every student submission in this queue has been evaluated and scored.</p>
+            </div>`;
+
+            // Reset active card states
+            document.querySelectorAll("#gradingRosterList .roster-item").forEach(item => {
+                item.classList.remove("active");
+            });
+            document.getElementById("gradingSidebarActive").style.display = "none";
+            document.getElementById("sidebarEmptyState").style.display = "flex";
+            document.getElementById("sidebarEmptyState").innerHTML = `<i class="fas fa-check-circle" style="color: var(--ws-success); font-size: 2.5rem; margin-bottom: 12px;"></i>
+                <h3>Grading Complete</h3>
+                <p>All queue actions finished.</p>`;
         }
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-        // bind grade and expand buttons
-        // Grade buttons open modal with grading detail
-        document.querySelectorAll('.ia-grade-btn').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                e.preventDefault();
-                const submissionId = this.getAttribute('data-submission-id') || (this.closest('.ia-submission-row') && this.closest('.ia-submission-row').getAttribute('data-submission-id'));
-                if (submissionId) openModal(submissionId);
-            });
-        });
-
-        // Expand inline detail rows remain available
-        document.querySelectorAll('.ia-expand-btn').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                e.preventDefault();
-                const submissionId = this.getAttribute('data-submission-id') || (this.closest('.ia-submission-row') && this.closest('.ia-submission-row').getAttribute('data-submission-id'));
-                if (submissionId) toggleGradingPanel(this, submissionId);
-            });
-        });
-
-        // View buttons open modal too
-        document.querySelectorAll('.ia-view-btn').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                e.preventDefault();
-                const submissionId = this.getAttribute('data-submission-id');
-                if (submissionId) openModal(submissionId);
-            });
-        });
-
-        // Intercept grading form submissions (handles Save Grade and Auto-Regrade)
-        // Handles forms both inside modal and inline detail rows
-        function bindGradingForms(root) {
-            root.querySelectorAll('.ia-grading-form').forEach(form => {
-                // ensure not bound twice
-                if (form.__iaBound) return; form.__iaBound = true;
-                form.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    const submitBtn = e.submitter || form.querySelector('button[type=submit]');
-                    // disable buttons to prevent double submits
-                    form.querySelectorAll('button, input[type=submit]').forEach(b => b.disabled = true);
-                    submitGradingForm(form, submitBtn);
-                });
-            });
+    function showSuccessToast(message) {
+        const toast = document.getElementById('premiumSuccessToast');
+        const msgEl = document.getElementById('premiumToastMsg');
+        if (toast && msgEl) {
+            msgEl.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 4000);
         }
-
-        bindGradingForms(document);
-
-        // Full view toggle
-        const fv = document.getElementById('ia-fullview-toggle');
-        if (fv) fv.addEventListener('click', function() {
-            document.body.classList.toggle('ia-fullview-active');
-            this.classList.toggle('active');
-        });
-    });
-
-    // Modal handling: clone detail content into modal and bind form handlers
-    function openModal(submissionId) {
-        const modal = document.getElementById('ia-modal');
-        const contentWrap = modal.querySelector('.ia-modal-content-body');
-        contentWrap.innerHTML = '';
-        const detail = document.getElementById('detail-' + submissionId);
-        if (!detail) return alert('Submission details not available.');
-
-        // clone grading detail and strip duplicate ids
-        const node = detail.querySelector('.ia-grading-detail');
-        if (!node) return alert('Submission details not available.');
-        const clone = node.cloneNode(true);
-        // remove id attributes to avoid duplicates
-        clone.querySelectorAll('[id]').forEach(el => el.removeAttribute('id'));
-
-        contentWrap.appendChild(clone);
-
-        // bind forms inside cloned content
-        clone.querySelectorAll('.ia-grading-form').forEach(f => {
-            f.addEventListener('submit', function(e) {
-                e.preventDefault();
-                const submitBtn = e.submitter || f.querySelector('button[type=submit]');
-                f.querySelectorAll('button, input[type=submit]').forEach(b => b.disabled = true);
-                submitGradingForm(f, submitBtn);
-            });
-        });
-
-        modal.classList.add('is-open');
     }
-
-    function closeModal() {
-        const modal = document.getElementById('ia-modal');
-        if (!modal) return;
-        modal.classList.remove('is-open');
-        modal.querySelector('.ia-modal-content-body').innerHTML = '';
-    }
-
-    // close modal on backdrop click or escape
-    document.addEventListener('click', function(e) {
-        const modal = document.getElementById('ia-modal');
-        if (!modal || !modal.classList.contains('is-open')) return;
-        if (e.target.classList && e.target.classList.contains('ia-modal-backdrop')) closeModal();
-    });
-    document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeModal(); });
 </script>
 
-<!-- Modal Markup -->
-<div id="ia-modal" class="ia-modal" aria-hidden="true">
-    <div class="ia-modal-backdrop"></div>
-    <div class="ia-modal-content" role="dialog" aria-modal="true">
-        <button type="button" class="ia-modal-close btn btn-sm" aria-label="Close" onclick="closeModal()"><i class="fas fa-xmark"></i></button>
-        <div class="ia-modal-content-body" style="padding-top:8px;"></div>
-    </div>
+<div id="premiumSuccessToast" class="premium-toast" style="position: fixed; bottom: 24px; right: 24px; background: var(--ws-success, #10b981); color: white; padding: 16px 24px; border-radius: 8px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 10px; z-index: 9999; transform: translateY(100px); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); pointer-events: none;">
+    <i class="fas fa-check-circle"></i>
+    <span id="premiumToastMsg">Saved successfully!</span>
 </div>
+
+<style>
+    .premium-toast.show {
+        transform: translateY(0) !important;
+    }
+</style>
 </body>
 </html>

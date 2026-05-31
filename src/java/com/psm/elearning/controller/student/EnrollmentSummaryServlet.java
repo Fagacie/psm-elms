@@ -6,9 +6,12 @@ import com.psm.elearning.dao.EnrollmentDAO;
 import com.psm.elearning.dao.EnrollmentDAOImpl;
 import com.psm.elearning.dao.PaymentDAO;
 import com.psm.elearning.dao.PaymentDAOImpl;
+import com.psm.elearning.dao.UserDAO;
+import com.psm.elearning.dao.UserDAOImpl;
 import com.psm.elearning.model.Course;
 import com.psm.elearning.model.Enrollment;
 import com.psm.elearning.model.Payment;
+import com.psm.elearning.model.User;
 import com.psm.elearning.util.SessionUtil;
 
 import javax.servlet.ServletException;
@@ -30,12 +33,14 @@ public class EnrollmentSummaryServlet extends HttpServlet {
     private CourseDAO courseDAO;
     private EnrollmentDAO enrollmentDAO;
     private PaymentDAO paymentDAO;
+    private UserDAO userDAO;
 
     @Override
     public void init() {
         courseDAO = new CourseDAOImpl();
         enrollmentDAO = new EnrollmentDAOImpl();
         paymentDAO = new PaymentDAOImpl();
+        userDAO = new UserDAOImpl();
     }
 
     @Override
@@ -58,6 +63,17 @@ public class EnrollmentSummaryServlet extends HttpServlet {
                 response.sendRedirect(request.getContextPath() + "/student/courses?error=notfound");
                 return;
             }
+
+            // Load real instructor name from user database
+            String instructorName = "Course Instructor";
+            if (course.getCreatedBy() != null) {
+                User instructor = userDAO.findById(course.getCreatedBy());
+                if (instructor != null) {
+                    instructorName = instructor.getFullName();
+                }
+            }
+            request.setAttribute("instructorName", instructorName);
+
             Enrollment latestEnrollment = enrollmentDAO.findLatestEnrollmentByUserAndCourse(userId, courseId);
             if (latestEnrollment != null) {
                 Payment payment = paymentDAO.getPaymentByEnrollmentId(latestEnrollment.getEnrollmentId());
@@ -65,7 +81,8 @@ public class EnrollmentSummaryServlet extends HttpServlet {
                 if (isPaid(paymentStatus)) {
                     response.sendRedirect(request.getContextPath() + "/student/my-enrollments?error=already");
                 } else {
-                    response.sendRedirect(request.getContextPath() + "/student/payment?enrollmentId=" + latestEnrollment.getEnrollmentId());
+                    request.setAttribute("course", course);
+                    request.getRequestDispatcher("/WEB-INF/views/student/enrollment-summary.jsp").forward(request, response);
                 }
                 return;
             }
