@@ -1,19 +1,21 @@
+/* ==========================================================================
+   PSME Cryptographic Verification Hub Design System
+   ========================================================================== */
+
 :root {
-  --cv-bg: #f8f9fa; /* Flat institutional grey background */
-  --cv-panel: #ffffff;
-  --cv-border: #ced4da; /* Medium grey border */
-  --cv-text: #2c3e50; /* Institutional text color */
-  --cv-muted: #6c757d; /* Muted text color */
-  --cv-accent: #2b5a8e; /* Institutional primary blue */
-  --cv-accent-dark: #1e3f5f;
-  --cv-good: #2d9a66;
-  --cv-danger: #c94654;
-  --cv-neutral: #5c7a99;
+  --cv-bg: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+  --cv-panel: rgba(30, 41, 59, 0.7);
+  --cv-border: rgba(255, 255, 255, 0.08);
+  --cv-text: #f1f5f9;
+  --cv-muted: #94a3b8;
+  --cv-accent: #3b82f6;
+  --cv-good: #10b981;
+  --cv-danger: #ef4444;
+  --cv-neutral: #64748b;
 }
 
 * { 
   box-sizing: border-box; 
-  border-radius: 0 !important; /* STRICT SHARP-EDGE RULES */
 }
 
 html, body { 
@@ -22,101 +24,109 @@ html, body {
 }
 
 body.cv-page {
-  font-family: "Inter", "Segoe UI", sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   color: var(--cv-text);
-  background-color: var(--cv-bg);
+  background: var(--cv-bg);
   min-height: 100vh;
 }
 
 .cv-wrap {
   width: min(840px, calc(100vw - 32px));
   margin: 0 auto;
-  padding: 40px 0 60px;
+  padding: 50px 0 80px;
   display: grid;
-  gap: 16px;
+  gap: 20px;
 }
 
+/* Glassmorphism Credentials Panel */
 .cv-card {
   border: 1px solid var(--cv-border);
   background: var(--cv-panel);
-  padding: 24px;
-  box-shadow: none; /* Flat design */
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  padding: 32px;
+  border-radius: 16px !important;
+  box-shadow: 0 20px 50px -15px rgba(0, 0, 0, 0.4);
 }
 
 .cv-hero {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 20px;
-  background-color: var(--cv-accent);
+  gap: 24px;
+  background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%);
   color: #ffffff;
-  border-color: var(--cv-accent-dark);
+  border: 1px solid rgba(223, 179, 81, 0.25);
+  box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.35);
 }
 
 .cv-kicker {
   margin: 0;
-  color: #e9ecef;
+  color: #dfb351; /* Elegant gold kicker */
   text-transform: uppercase;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.14em;
   font-size: 0.72rem;
-  font-weight: 700;
+  font-weight: 800;
 }
 
 .cv-hero h1 {
-  margin: 6px 0 0;
-  font-family: "Inter", "Segoe UI", sans-serif;
-  font-size: clamp(1.4rem, 2.5vw, 2.2rem);
-  font-weight: 800;
+  margin: 8px 0 0;
+  font-size: clamp(1.6rem, 3vw, 2.30rem);
+  font-weight: 850;
   letter-spacing: -0.02em;
   color: #ffffff;
 }
 
 .cv-sub {
-  margin: 8px 0 0;
-  color: #e9ecef;
+  margin: 10px 0 0;
+  color: #cbd5e1;
   max-width: 62ch;
-  font-size: 0.9rem;
+  font-size: 0.92rem;
   line-height: 1.6;
 }
 
 .cv-hero-actions {
-  margin-top: 14px;
+  margin-top: 18px;
 }
 
 .cv-hero-actions a {
-  color: #ffffff;
+  color: #94a3b8;
   text-decoration: none;
-  border-bottom: 1px solid #ffffff;
   font-weight: 600;
   font-size: 0.86rem;
-  transition: opacity 0.2s ease;
+  transition: color 0.2s ease, transform 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .cv-hero-actions a:hover {
-  opacity: 0.8;
+  color: #ffffff;
 }
 
 .cv-badge {
-  border: 1px solid var(--cv-accent-dark);
-  background: rgba(255, 255, 255, 0.1);
-  color: #ffffff;
-  padding: 8px 14px;
+  border: 1px solid rgba(223, 179, 81, 0.35);
+  background: rgba(223, 179, 81, 0.08);
+  color: #dfb351;
+  padding: 8px 16px;
   display: inline-flex;
   align-items: center;
   gap: 8px;
   font-size: 0.76rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
+  border-radius: 99px !important;
+  box-shadow: 0 0 15px rgba(223, 179, 81, 0.1);
 }
 
 .cv-form {
   display: grid;
-  gap: 12px;
+  gap: 14px;
 }
 
 .cv-form label {
-  color: var(--cv-text);
+  color: #ffffff;
   font-size: 0.76rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -130,27 +140,29 @@ body.cv-page {
 }
 
 .cv-form-row input {
-  border: 1px solid var(--cv-border);
-  background: #ffffff;
-  color: var(--cv-text);
-  min-height: 44px;
-  padding: 0 14px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(15, 23, 42, 0.4);
+  color: #ffffff;
+  min-height: 46px;
+  padding: 0 16px;
   font-size: 0.92rem;
+  border-radius: 8px !important;
+  outline: none;
+  transition: all 0.2s ease;
 }
 
 .cv-form-row input:focus {
-  outline: 1px solid var(--cv-accent);
-  outline-offset: -1px;
   border-color: var(--cv-accent);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
 }
 
 .cv-form-row button {
-  border: 1px solid var(--cv-accent-dark);
-  background-color: var(--cv-accent);
+  border: none;
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
   color: #ffffff;
-  min-height: 44px;
-  padding: 0 20px;
-  font-size: 0.8rem;
+  min-height: 46px;
+  padding: 0 24px;
+  font-size: 0.82rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -158,65 +170,86 @@ body.cv-page {
   align-items: center;
   gap: 8px;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  border-radius: 8px !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
 }
 
 .cv-form-row button:hover {
-  background-color: var(--cv-accent-dark);
+  background: linear-gradient(135deg, #60a5fa 0%, #2563eb 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
 }
 
 .cv-form small {
   color: var(--cv-muted);
-  font-size: 0.8rem;
+  font-size: 0.82rem;
 }
 
 .cv-status {
-  border-left: 4px solid var(--cv-accent);
-  padding: 16px;
+  padding: 20px;
   display: grid;
-  grid-template-columns: 22px 1fr;
-  gap: 12px;
+  grid-template-columns: 24px 1fr;
+  gap: 14px;
   align-items: start;
+  border-radius: 8px !important;
+}
+
+.cv-status i {
+  font-size: 1.25rem;
 }
 
 .cv-status h3 {
   margin: 0;
-  font-size: 0.95rem;
-  font-weight: 700;
+  font-size: 1rem;
+  font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.04em;
 }
 
 .cv-status p {
-  margin: 4px 0 0;
-  font-size: 0.86rem;
+  margin: 6px 0 0;
+  font-size: 0.88rem;
+  line-height: 1.5;
 }
 
 .cv-ok {
-  border-color: var(--cv-good);
-  background: #f0fdf4;
-  color: #166534;
+  border-left: 4px solid var(--cv-good);
+  background: rgba(16, 185, 129, 0.08);
+  color: #34d399;
+}
+
+.cv-ok h3 {
+  color: #10b981;
 }
 
 .cv-bad {
-  border-color: var(--cv-danger);
-  background: #fef2f2;
-  color: #991b1b;
+  border-left: 4px solid var(--cv-danger);
+  background: rgba(239, 68, 68, 0.08);
+  color: #fca5a5;
+}
+
+.cv-bad h3 {
+  color: #ef4444;
 }
 
 .cv-neutral {
-  border-color: var(--cv-neutral);
-  background: #f8fafc;
-  color: #334155;
+  border-left: 4px solid var(--cv-neutral);
+  background: rgba(100, 116, 139, 0.08);
+  color: #cbd5e1;
+}
+
+.cv-neutral h3 {
+  color: #94a3b8;
 }
 
 .cv-grid {
-  margin-top: 18px;
+  margin-top: 24px;
   display: grid;
   grid-template-columns: 220px 1fr;
-  gap: 12px 16px;
-  border-top: 1px solid var(--cv-border);
-  padding-top: 16px;
+  gap: 16px 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 24px;
 }
 
 .cv-label {
@@ -224,13 +257,13 @@ body.cv-page {
   font-size: 0.82rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
 }
 
 .cv-value {
   color: var(--cv-text);
   font-weight: 600;
-  font-size: 0.88rem;
+  font-size: 0.9rem;
 }
 
 .cv-footnote {
@@ -246,7 +279,7 @@ body.cv-page {
   .cv-hero {
     flex-direction: column;
     align-items: flex-start;
-    padding: 20px;
+    padding: 24px;
   }
 
   .cv-badge {
@@ -259,6 +292,6 @@ body.cv-page {
 
   .cv-grid {
     grid-template-columns: 1fr;
-    gap: 10px;
+    gap: 12px;
   }
 }

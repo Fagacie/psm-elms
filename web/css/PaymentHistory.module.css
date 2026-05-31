@@ -313,15 +313,13 @@
     height: 40px;
     width: 100%;
     max-width: 220px;
-    background: repeating-linear-gradient(
-        90deg,
-        #0f172a,
-        #0f172a 2px,
-        #ffffff 2px,
-        #ffffff 6px,
-        #0f172a 6px,
-        #0f172a 9px
-    );
+    background: repeating-linear-gradient(90deg,
+            #0f172a,
+            #0f172a 2px,
+            #ffffff 2px,
+            #ffffff 6px,
+            #0f172a 6px,
+            #0f172a 9px);
     opacity: 0.85;
 }
 
@@ -434,9 +432,11 @@
     0% {
         opacity: 0.6;
     }
+
     50% {
         opacity: 0.3;
     }
+
     100% {
         opacity: 0.6;
     }
@@ -446,13 +446,15 @@
    Strict Printer Media Query for Centered PDF
    ============================================= */
 @media print {
+
     /* Hide everything on the page completely */
     body * {
         visibility: hidden !important;
     }
-    
+
     /* Reveal and format backdrop as a transparent print viewport wrapper */
-    .history_ph_backdrop, .history_ph_backdrop * {
+    .history_ph_backdrop,
+    .history_ph_backdrop * {
         visibility: visible !important;
         background: transparent !important;
         backdrop-filter: none !important;
@@ -464,7 +466,7 @@
         padding: 0 !important;
         display: block !important;
     }
-    
+
     /* Format the physical receipt as the absolute single-page center document */
     .history_ph_thermalPaper {
         visibility: visible !important;
@@ -481,9 +483,10 @@
         margin: 0 auto !important;
         page-break-inside: avoid !important;
     }
-    
+
     /* Hide non-printable items inside the receipt card */
-    .history_ph_modalClose, .history_ph_downloadBtn {
+    .history_ph_modalClose,
+    .history_ph_downloadBtn {
         display: none !important;
         visibility: hidden !important;
     }

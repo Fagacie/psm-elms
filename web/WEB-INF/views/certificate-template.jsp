@@ -30,6 +30,10 @@
     <!-- A4 locked container with heavy dropshadow placed flat on a slate desk -->
     <div class="vc_certificateWrapper">
         <section class="sc-sheet">
+            <div class="sc-corner-tl"></div>
+            <div class="sc-corner-tr"></div>
+            <div class="sc-corner-bl"></div>
+            <div class="sc-corner-br"></div>
             <div class="sc-inner-border"></div>
 
             <!-- Top Platform Crest -->
@@ -75,12 +79,12 @@
 
                 <!-- Center Block: Structured QR Security Stamp -->
                 <div class="sc-footer-col center">
-                    <c:if test="${not empty certificate.qrCodePath}">
-                        <div class="sc-qr-stamp">
-                            <div class="sc-verify-text">
-                                Scan QR to verify<br>
-                                <strong>Official Stamp</strong>
-                            </div>
+                    <div class="sc-qr-stamp">
+                        <div class="sc-verify-text">
+                            Scan QR to verify<br>
+                            <strong>Official Stamp</strong>
+                        </div>
+                        <c:if test="${not empty certificate.qrCodePath}">
                             <c:choose>
                                 <c:when test="${certificate.qrCodePath.startsWith('http')}">
                                     <img class="sc-qr-image" src="${certificate.qrCodePath}" alt="Verification QR Code">
@@ -89,13 +93,26 @@
                                     <img class="sc-qr-image" src="${pageContext.request.contextPath}/${certificate.qrCodePath}" alt="Verification QR Code">
                                 </c:otherwise>
                             </c:choose>
-                        </div>
-                    </c:if>
+                        </c:if>
+                    </div>
                 </div>
 
                 <!-- Right Block: Signature Representation -->
-                <div class="sc-footer-col">
+                <div class="sc-footer-col" style="position: relative;">
                     <img class="sc-sig-image" src="${pageContext.request.contextPath}/img/registrar-sig.png" alt="Sulaiman Sani Signature">
+                    <div class="sc-verify-stamp">
+                        <svg viewBox="0 0 100 100" width="56" height="56">
+                            <circle cx="50" cy="50" r="40" fill="none" stroke="rgba(37, 99, 235, 0.65)" stroke-width="2" stroke-dasharray="3 1.5" />
+                            <circle cx="50" cy="50" r="34" fill="none" stroke="rgba(37, 99, 235, 0.65)" stroke-width="0.8" />
+                            <path id="stampTextPathTemp" d="M18 50 A32 32 0 1 1 82 50" fill="none" stroke="none" />
+                            <text fill="rgba(37, 99, 235, 0.65)" font-size="6" font-weight="bold" letter-spacing="0.8">
+                                <textPath href="#stampTextPathTemp" startOffset="50%" text-anchor="middle">OFFICIAL VERIFICATION</textPath>
+                            </text>
+                            <text x="50" y="46" fill="rgba(37, 99, 235, 0.75)" font-size="9" font-weight="900" text-anchor="middle">PSM</text>
+                            <text x="50" y="58" fill="rgba(37, 99, 235, 0.75)" font-size="7" font-weight="bold" text-anchor="middle">APPROVED</text>
+                            <text x="50" y="66" fill="rgba(37, 99, 235, 0.65)" font-size="4.5" font-weight="bold" text-anchor="middle">REGISTRAR</text>
+                        </svg>
+                    </div>
                     <div class="sc-sig-line">
                         <h4 class="sc-sig-title">Sulaiman Sani</h4>
                         <span class="sc-sig-sub">Registrar Office</span>

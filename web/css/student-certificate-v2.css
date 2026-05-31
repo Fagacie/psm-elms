@@ -1,14 +1,14 @@
 /* ==========================================================================
-   PSME Certificate Design System (Institutional Academic Theme)
+   PSME Premium Academic Certificate Design System
    ========================================================================== */
 
 /* Immersive Dark Mode Body for Centered Cinema Viewer */
 body.sc-immersive-body {
   margin: 0;
   padding: 0;
-  background-color: #0f172a !important; /* Deep charcoal dark background */
+  background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%) !important;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  color: #f1f5f9;
+  color: #f8fafc;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -23,7 +23,7 @@ body.sc-immersive-body::-webkit-scrollbar-track {
 }
 body.sc-immersive-body::-webkit-scrollbar-thumb {
   background: #334155;
-  border-radius: 0;
+  border-radius: 4px;
 }
 
 /* Immersive View Container */
@@ -31,10 +31,10 @@ body.sc-immersive-body::-webkit-scrollbar-thumb {
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 24px 20px 48px;
+  padding: 32px 24px 60px;
   display: flex;
   flex-direction: column;
-  gap: 28px;
+  gap: 32px;
   flex-grow: 1;
   box-sizing: border-box;
 }
@@ -44,9 +44,9 @@ body.sc-immersive-body::-webkit-scrollbar-thumb {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  padding-bottom: 16px;
-  gap: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 20px;
+  gap: 20px;
 }
 
 .sc-header-left {
@@ -62,12 +62,12 @@ body.sc-immersive-body::-webkit-scrollbar-thumb {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  transition: color 0.2s ease, transform 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .sc-back-link:hover {
   color: #ffffff;
-  transform: translateX(-2px);
+  transform: translateX(-3px);
 }
 
 .sc-header-center {
@@ -85,8 +85,10 @@ body.sc-immersive-body::-webkit-scrollbar-thumb {
   letter-spacing: 0.08em;
   color: #10b981; /* Premium Emerald */
   background: rgba(16, 185, 129, 0.08);
-  padding: 6px 14px;
+  padding: 6px 16px;
   border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: 99px !important;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.1);
 }
 
 .sc-header-right {
@@ -96,43 +98,46 @@ body.sc-immersive-body::-webkit-scrollbar-thumb {
   align-items: center;
 }
 
-/* Custom Action Buttons (No Rounded Corners) */
+/* Custom Action Buttons */
 .sc-action-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  min-height: 40px;
-  padding: 0 18px;
+  min-height: 42px;
+  padding: 0 20px;
   font-size: 0.84rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.04em;
   border: 1px solid transparent;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   text-decoration: none;
-  border-radius: 0 !important; /* Force Sharp Edges */
+  border-radius: 8px !important; 
 }
 
 .sc-action-btn.primary-action {
-  background-color: #2B5A8E !important; /* PSME Institutional Blue */
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%) !important;
   color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
 }
 
 .sc-action-btn.primary-action:hover {
-  background-color: #1e3f5f !important;
+  background: linear-gradient(135deg, #60a5fa 0%, #2563eb 100%) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.3);
 }
 
 .sc-action-btn.secondary-action {
   background-color: rgba(255, 255, 255, 0.05) !important;
-  border-color: rgba(255, 255, 255, 0.15) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
   color: #e2e8f0 !important;
 }
 
 .sc-action-btn.secondary-action:hover {
   background-color: rgba(255, 255, 255, 0.1) !important;
-  border-color: rgba(255, 255, 255, 0.3) !important;
+  border-color: rgba(255, 255, 255, 0.24) !important;
   color: #ffffff !important;
 }
 
@@ -159,25 +164,30 @@ body.sc-immersive-body::-webkit-scrollbar-thumb {
   width: 100%;
   max-width: 960px; /* Standard screen preview size */
   aspect-ratio: 297 / 210; /* Precise A4 landscape ratio */
-  background-color: #ffffff !important;
+  background: radial-gradient(circle at center, #ffffff 0%, #faf8f5 75%, #f4eee1 100%) !important;
+  /* Double guilloché geometric texture */
+  background-image: 
+    radial-gradient(circle at center, #ffffff 0%, #faf8f5 75%, #f4eee1 100%),
+    repeating-linear-gradient(45deg, rgba(162, 123, 76, 0.015) 0px, rgba(162, 123, 76, 0.015) 1px, transparent 1px, transparent 8px),
+    repeating-linear-gradient(-45deg, rgba(162, 123, 76, 0.015) 0px, rgba(162, 123, 76, 0.015) 1px, transparent 1px, transparent 8px) !important;
   color: #0f172a !important;
-  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.8) !important;
+  box-shadow: 0 30px 70px -15px rgba(0, 0, 0, 0.5) !important;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 48px 56px; /* Elegant white margins */
-  border: 1px solid #cbd5e1 !important;
-  border-radius: 0 !important; /* Absolute sharp corners */
+  padding: 56px 64px; /* Elegant academic margins */
+  border: 1px solid rgba(162, 123, 76, 0.3) !important;
+  border-radius: 4px !important; 
   overflow: hidden;
 }
 
-/* Inset Borders */
+/* Luxury Multi-Layered Borders */
 .sc-sheet::before {
   content: "";
   position: absolute;
   inset: 16px;
-  border: 1px solid #1e293b !important;
+  border: 1px solid #1e293b !important; /* Outer charcoal frame */
   pointer-events: none;
   z-index: 5;
 }
@@ -186,7 +196,7 @@ body.sc-immersive-body::-webkit-scrollbar-thumb {
   content: "";
   position: absolute;
   inset: 22px;
-  border: 3px solid #1e293b !important; /* Thick main border */
+  border: 3px solid #1e293b !important; /* Debossed heavy dynamic charcoal border */
   pointer-events: none;
   z-index: 5;
 }
@@ -194,10 +204,37 @@ body.sc-immersive-body::-webkit-scrollbar-thumb {
 .sc-inner-border {
   position: absolute;
   inset: 28px;
-  border: 1px dashed rgba(30, 41, 59, 0.18) !important;
+  border: 1px dashed rgba(30, 41, 59, 0.18) !important; /* Inner delicate carbon-dash frame */
   pointer-events: none;
   z-index: 5;
 }
+
+/* Ornamental Charcoal Corners */
+.sc-corner-tl, .sc-corner-tr, .sc-corner-bl, .sc-corner-br {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  border: 2px solid #1e293b;
+  z-index: 10;
+  pointer-events: none;
+}
+.sc-corner-tl { top: 22px; left: 22px; border-right: none; border-bottom: none; }
+.sc-corner-tr { top: 22px; right: 22px; border-left: none; border-bottom: none; }
+.sc-corner-bl { bottom: 22px; left: 22px; border-right: none; border-top: none; }
+.sc-corner-br { bottom: 22px; right: 22px; border-left: none; border-top: none; }
+
+.sc-corner-tl::after, .sc-corner-tr::after, .sc-corner-bl::after, .sc-corner-br::after {
+  content: "";
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: #1e293b;
+  border-radius: 50%;
+}
+.sc-corner-tl::after { bottom: -3px; right: -3px; }
+.sc-corner-tr::after { bottom: -3px; left: -3px; }
+.sc-corner-bl::after { top: -3px; right: -3px; }
+.sc-corner-br::after { top: -3px; left: -3px; }
 
 /* Certificate Header & Crest */
 .sc-crest {
@@ -205,32 +242,32 @@ body.sc-immersive-body::-webkit-scrollbar-thumb {
   flex-direction: column;
   align-items: center;
   gap: 8px;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   position: relative;
   z-index: 10;
 }
 
 .sc-crest-svg {
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.02));
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.02));
 }
 
 .sc-platform-name {
   font-size: 0.72rem;
   font-weight: 800;
-  letter-spacing: 0.3em;
-  color: #64748b !important;
+  letter-spacing: 0.35em;
+  color: #64748b !important; /* Muted descriptor */
   text-transform: uppercase;
   margin: 0;
 }
 
 .sc-title {
   font-family: 'Playfair Display', Georgia, "Times New Roman", serif;
-  font-size: 1.9rem;
+  font-size: 2.15rem;
   font-weight: 700;
-  letter-spacing: 0.12em;
-  color: #0f172a !important;
+  letter-spacing: 0.08em;
+  color: #1e293b !important;
   text-transform: uppercase;
-  margin: 8px 0 0 0;
+  margin: 6px 0 0 0;
   text-align: center;
 }
 
@@ -242,39 +279,39 @@ body.sc-immersive-body::-webkit-scrollbar-thumb {
   align-items: center;
   justify-content: center;
   flex-grow: 1;
-  padding: 0 10px;
+  padding: 8px 10px;
   position: relative;
   z-index: 10;
 }
 
 .sc-recipient-lbl {
   font-size: 0.76rem;
-  color: #475569 !important;
+  color: #64748b !important;
   text-transform: uppercase;
-  letter-spacing: 0.22em;
+  letter-spacing: 0.24em;
   font-weight: 600;
   margin: 0;
 }
 
 .sc-recipient-name {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  font-size: 2.35rem;
+  font-family: 'Playfair Display', Georgia, "Times New Roman", serif;
+  font-size: 2.5rem;
   font-weight: 700;
   color: #0f172a !important;
-  margin: 6px 0;
+  margin: 8px 0;
   padding-bottom: 2px;
-  border-bottom: 1.5px solid rgba(15, 23, 42, 0.15) !important;
+  border-bottom: 1.5px solid rgba(162, 123, 76, 0.25) !important;
   display: inline-block;
-  min-width: 55%;
-  letter-spacing: 0.02em;
+  min-width: 60%;
+  letter-spacing: 0.01em;
 }
 
 .sc-award-statement {
-  font-size: 0.82rem;
+  font-size: 0.84rem;
   line-height: 1.65;
-  color: #334155 !important;
+  color: #475569 !important;
   max-width: 680px;
-  margin: 6px auto;
+  margin: 8px auto;
   font-weight: 400;
 }
 
@@ -284,22 +321,22 @@ body.sc-immersive-body::-webkit-scrollbar-thumb {
 }
 
 .sc-course-name {
-  font-family: 'Playfair Display', Georgia, "Times New Roman", serif;
-  font-size: 1.5rem;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.65rem;
   font-weight: 700;
-  color: #2B5A8E !important; /* PSME Blue Accent */
-  margin: 4px 0 8px;
-  letter-spacing: 0.01em;
+  color: #1e3a8a !important; /* Elegant Royal Blue Accent */
+  margin: 6px 0 8px;
+  letter-spacing: 0.02em;
 }
 
 /* Footer & Signatures Block */
 .sc-footer-row {
   display: grid;
-  grid-template-columns: 1.1fr 0.8fr 1.1fr;
-  gap: 20px;
+  grid-template-columns: 1.1fr 1fr 1.1fr;
+  gap: 24px;
   align-items: flex-end;
-  border-top: 1px solid rgba(15, 23, 42, 0.08) !important;
-  padding-top: 16px;
+  border-top: 1px solid rgba(162, 123, 76, 0.15) !important;
+  padding-top: 18px;
   position: relative;
   z-index: 10;
 }
@@ -312,12 +349,15 @@ body.sc-immersive-body::-webkit-scrollbar-thumb {
 .sc-footer-col.center {
   align-items: center;
   text-align: center;
+  justify-content: center;
 }
 
 .sc-sig-line {
-  border-top: 1.5px solid #334155 !important;
+  border-top: 1.5px solid #64748b !important;
   margin-top: 20px;
   padding-top: 4px;
+  position: relative;
+  z-index: 2;
 }
 
 .sc-sig-title {
@@ -335,30 +375,18 @@ body.sc-immersive-body::-webkit-scrollbar-thumb {
   margin-top: 2px;
 }
 
-.sc-sig-handwritten {
-  font-family: 'Playfair Display', Georgia, "Times New Roman", serif;
-  font-style: italic;
-  font-size: 1.1rem;
-  color: #1e293b !important;
-  height: 28px;
-  display: flex;
-  align-items: flex-end;
-  justify-content: flex-start;
-  padding-left: 6px;
-  font-weight: 600;
-}
-
 .sc-sig-image {
   height: 48px;
   max-width: 140px;
   object-fit: contain;
   margin-bottom: -12px;
-  mix-blend-mode: multiply; /* Blends white signature background seamlessly with paper context */
-  filter: contrast(1.1) brightness(1.0);
+  mix-blend-mode: multiply; 
+  filter: contrast(1.15) brightness(1.02);
   align-self: flex-start;
   padding-left: 10px;
+  position: relative;
+  z-index: 2;
 }
-
 
 /* Security Verification Seal & QR */
 .sc-sec-info {
@@ -383,16 +411,17 @@ body.sc-immersive-body::-webkit-scrollbar-thumb {
 .sc-qr-stamp {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: center;
   gap: 12px;
+  position: relative;
 }
 
 .sc-verify-text {
   font-size: 0.58rem;
   color: #64748b !important;
-  text-align: right;
+  text-align: left;
   line-height: 1.4;
-  max-width: 140px;
+  max-width: 100px;
 }
 
 .sc-verify-text strong {
@@ -400,12 +429,37 @@ body.sc-immersive-body::-webkit-scrollbar-thumb {
 }
 
 .sc-qr-image {
-  width: 56px;
-  height: 56px;
-  border: 1px solid #1e293b !important;
-  border-radius: 0 !important; /* Strictly Sharp Edges */
+  width: 54px;
+  height: 54px;
+  border: 1px solid #c59b27 !important;
   padding: 2px;
   background-color: #ffffff !important;
+  border-radius: 4px !important;
+}
+
+/* Gold Foil Seal SVG format */
+.sc-gold-seal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0 4px 10px rgba(180, 95, 6, 0.25));
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.sc-gold-seal:hover {
+  transform: scale(1.08) rotate(4deg);
+}
+
+/* Verified Ink stamp on signature */
+.sc-verify-stamp {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.82;
+  transform: rotate(-14deg);
+  filter: drop-shadow(0 2px 4px rgba(37, 99, 235, 0.08));
 }
 
 /* ==========================================================================
@@ -416,8 +470,8 @@ body.sc-immersive-body::-webkit-scrollbar-thumb {
   max-width: 960px;
   background-color: #1e293b !important;
   border: 1px solid #334155 !important;
-  border-radius: 0 !important;
-  padding: 24px;
+  border-radius: 12px !important;
+  padding: 28px;
   box-sizing: border-box;
 }
 
@@ -442,7 +496,7 @@ body.sc-immersive-body::-webkit-scrollbar-thumb {
 
 .sc-diag-item {
   border: 1px solid #334155 !important;
-  border-radius: 0 !important;
+  border-radius: 8px !important;
   background: #0f172a !important;
   padding: 14px 16px;
 }
@@ -473,7 +527,7 @@ body.sc-immersive-body::-webkit-scrollbar-thumb {
 
 /* Alerts inside dark layout */
 .sc-immersive-body .alert {
-  border-radius: 0 !important;
+  border-radius: 8px !important;
   border: 1px solid transparent;
   padding: 14px 18px;
   font-size: 0.88rem;
@@ -498,16 +552,17 @@ body.sc-immersive-body::-webkit-scrollbar-thumb {
 /* Toast Copy notification */
 .sc-toast {
   position: fixed;
-  bottom: 24px;
+  bottom: 32px;
   left: 50%;
   transform: translateX(-50%) translateY(20px);
-  background: #1e293b;
+  background: #0f172a;
   color: #f8fafc;
-  padding: 10px 20px;
-  border: 1px solid #334155;
-  border-radius: 0;
+  padding: 12px 24px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 99px;
   font-size: 0.84rem;
   font-weight: 600;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
   opacity: 0;
   pointer-events: none;
   z-index: 3000;
@@ -606,19 +661,19 @@ body.sc-immersive-body::-webkit-scrollbar-thumb {
   }
 
   .sc-sheet {
-    padding: 32px;
+    padding: 40px;
   }
 
   .sc-title {
-    font-size: 1.5rem;
+    font-size: 1.75rem;
   }
 
   .sc-recipient-name {
-    font-size: 1.8rem;
+    font-size: 2.1rem;
   }
 
   .sc-course-name {
-    font-size: 1.25rem;
+    font-size: 1.4rem;
   }
 }
 
@@ -637,7 +692,7 @@ body.sc-immersive-body::-webkit-scrollbar-thumb {
   .sc-action-btn {
     flex-grow: 1;
     font-size: 0.78rem;
-    min-height: 36px;
+    min-height: 38px;
     padding: 0 10px;
   }
 

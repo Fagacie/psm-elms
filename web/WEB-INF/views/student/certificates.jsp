@@ -674,6 +674,10 @@
                             }}
                         >
                             <section className="sc-sheet" style={{ width: '1123px', height: '794px', maxWidth: 'none', aspectRatio: '1123 / 794', boxSizing: 'border-box' }}>
+                                <div className="sc-corner-tl"></div>
+                                <div className="sc-corner-tr"></div>
+                                <div className="sc-corner-bl"></div>
+                                <div className="sc-corner-br"></div>
                                 <div className="sc-inner-border"></div>
                                 
                                 {/* Top Platform Crest */}
@@ -713,23 +717,36 @@
                                     </div>
 
                                     <div className="sc-footer-col center">
-                                        {activeCert.qrCodePath && (
-                                            <div className="sc-qr-stamp">
-                                                <div className="sc-verify-text">
-                                                    Scan QR to verify<br />
-                                                    <strong>Official Stamp</strong>
-                                                </div>
+                                        <div className="sc-qr-stamp">
+                                            <div className="sc-verify-text">
+                                                Scan QR to verify<br />
+                                                <strong>Official Stamp</strong>
+                                            </div>
+                                            {activeCert.qrCodePath && (
                                                 <img 
                                                     className="sc-qr-image" 
                                                     src={activeCert.qrCodePath.startsWith('http') ? activeCert.qrCodePath : (window.contextPath + '/' + activeCert.qrCodePath)} 
                                                     alt="Verification QR Code" 
                                                 />
-                                            </div>
-                                        )}
+                                            )}
+                                        </div>
                                     </div>
 
-                                    <div className="sc-footer-col">
+                                    <div className="sc-footer-col" style={{ position: 'relative' }}>
                                         <img className="sc-sig-image" src={window.contextPath + "/img/registrar-sig.png"} alt="Sulaiman Sani Signature" />
+                                        <div className="sc-verify-stamp">
+                                            <svg viewBox="0 0 100 100" width="56" height="56">
+                                                <circle cx="50" cy="50" r="40" fill="none" stroke="rgba(37, 99, 235, 0.65)" strokeWidth="2" strokeDasharray="3 1.5" />
+                                                <circle cx="50" cy="50" r="34" fill="none" stroke="rgba(37, 99, 235, 0.65)" strokeWidth="0.8" />
+                                                <path id="stampTextPathComp" d="M18 50 A32 32 0 1 1 82 50" fill="none" stroke="none" />
+                                                <text fill="rgba(37, 99, 235, 0.65)" fontSize="6" fontWeight="bold" letterSpacing="0.8">
+                                                    <textPath href="#stampTextPathComp" startOffset="50%" textAnchor="middle">OFFICIAL VERIFICATION</textPath>
+                                                </text>
+                                                <text x="50" y="46" fill="rgba(37, 99, 235, 0.75)" fontSize="9" fontWeight="900" textAnchor="middle">PSM</text>
+                                                <text x="50" y="58" fill="rgba(37, 99, 235, 0.75)" fontSize="7" fontWeight="bold" textAnchor="middle">APPROVED</text>
+                                                <text x="50" y="66" fill="rgba(37, 99, 235, 0.65)" fontSize="4.5" fontWeight="bold" textAnchor="middle">REGISTRAR</text>
+                                            </svg>
+                                        </div>
                                         <div className="sc-sig-line">
                                             <h4 className="sc-sig-title">Sulaiman Sani</h4>
                                             <span className="sc-sig-sub">Registrar Office</span>

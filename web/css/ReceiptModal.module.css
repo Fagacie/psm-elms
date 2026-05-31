@@ -1,10 +1,10 @@
-/* Isolated CSS Module for receipt modal simulating narrow physical thermal ticket */
+/* Isolated CSS Module for receipt modal simulating clean minimalist digital ticket */
 
 .history_rm_backdrop {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(6px);
+    background: rgba(0, 0, 0, 0.4); /* Softer backdrop for simpler visuals */
+    backdrop-filter: blur(8px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -14,18 +14,20 @@
 }
 
 .history_rm_paper {
-    width: 400px;
+    width: 380px;
     max-width: 95vw;
-    background: #ffffff;
-    border-radius: 8px;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    background: #ffffff; /* Clean pure white */
+    border-radius: 8px; /* Elegant, simple rounded corners */
+    box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.15); /* Minimal clean shadow */
+    border: 1px solid #f1f5f9; /* Super thin divider boundary */
     position: relative;
     overflow: hidden;
-    padding: 36px 32px;
+    padding: 32px 28px;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
     page-break-inside: avoid;
+    transition: all 0.25s ease;
 }
 
 .history_rm_closeBtn {
@@ -47,7 +49,7 @@
 
 .history_rm_closeBtn:hover {
     color: #0f172a;
-    background: #f1f5f9;
+    background: #f8fafc;
 }
 
 /* Printable content targeted by React ref */
@@ -57,6 +59,7 @@
     flex-direction: column;
     box-sizing: border-box;
     background: #ffffff;
+    transition: background-color 0.25s ease;
 }
 
 .history_rm_header {
@@ -73,40 +76,40 @@
 }
 
 .history_rm_platformName {
-    font-size: 1.15rem;
-    font-weight: 800;
+    font-size: 1.1rem;
+    font-weight: 700;
     color: #0f172a;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.02em;
     margin: 0;
 }
 
 .history_rm_subtitle {
     font-family: ui-monospace, SFMono-Regular, monospace;
-    font-size: 0.72rem;
-    color: #64748b;
+    font-size: 0.7rem;
+    color: #94a3b8;
     margin-top: 4px;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.05em;
 }
 
 .history_rm_totalBox {
-    border-top: 2px dashed #cbd5e1;
-    border-bottom: 2px dashed #cbd5e1;
-    padding: 16px 0;
-    margin: 20px 0;
+    border-top: 1px solid #e2e8f0;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 14px 0;
+    margin: 18px 0;
     text-align: center;
     width: 100%;
 }
 
 .history_rm_totalLabel {
     font-family: ui-monospace, SFMono-Regular, monospace;
-    font-size: 0.78rem;
-    color: #64748b;
+    font-size: 0.72rem;
+    color: #94a3b8;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.05em;
 }
 
 .history_rm_totalAmount {
-    font-size: 2.5rem;
+    font-size: 2rem;
     font-weight: 700;
     color: #0f172a;
     margin: 4px 0 0 0;
@@ -114,8 +117,8 @@
 }
 
 .history_rm_dashedDivider {
-    border-bottom: 2px dashed #cbd5e1;
-    margin: 20px 0;
+    border-bottom: 1px solid #e2e8f0;
+    margin: 18px 0;
     width: 100%;
 }
 
@@ -123,8 +126,8 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    font-size: 0.88rem;
-    margin-bottom: 12px;
+    font-size: 0.84rem;
+    margin-bottom: 10px;
     width: 100%;
 }
 
@@ -146,46 +149,36 @@
     word-break: break-word;
 }
 
-/* Mock Barcode stripes */
+/* Minimal Barcode */
 .history_rm_barcodeContainer {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-top: 28px;
+    margin-top: 24px;
     gap: 6px;
 }
 
-.history_rm_barcodeStripes {
-    height: 40px;
+.history_rm_barcodeSvg {
     width: 100%;
-    max-width: 220px;
-    background: repeating-linear-gradient(
-        90deg,
-        #0f172a,
-        #0f172a 2px,
-        #ffffff 2px,
-        #ffffff 6px,
-        #0f172a 6px,
-        #0f172a 9px
-    );
-    opacity: 0.85;
+    max-width: 180px;
+    height: 30px;
 }
 
 .history_rm_barcodeText {
     font-family: ui-monospace, SFMono-Regular, monospace;
-    font-size: 0.72rem;
-    color: #64748b;
-    letter-spacing: 0.15em;
+    font-size: 0.68rem;
+    color: #94a3b8;
+    letter-spacing: 0.1em;
 }
 
 /* Receipt Footer Message */
 .history_rm_footer {
-    margin-top: 24px;
+    margin-top: 20px;
     text-align: center;
     font-family: ui-monospace, SFMono-Regular, monospace;
-    font-size: 0.75rem;
-    color: #64748b;
-    line-height: 1.5;
+    font-size: 0.72rem;
+    color: #94a3b8;
+    line-height: 1.4;
 }
 
 .history_rm_downloadBtn {
@@ -193,15 +186,15 @@
     color: #ffffff;
     border: none;
     border-radius: 6px;
-    padding: 14px 20px;
-    font-size: 0.9rem;
+    padding: 12px 18px;
+    font-size: 0.88rem;
     font-weight: 600;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    margin-top: 28px;
+    margin-top: 24px;
     transition: background-color 0.15s ease;
     width: 100%;
     box-sizing: border-box;
@@ -209,4 +202,62 @@
 
 .history_rm_downloadBtn:hover {
     background-color: #1e293b;
+}
+
+/* ==========================================================================
+   DARK MODE OVERRIDES (:global(html[data-theme='dark']))
+   ========================================================================== */
+
+:global(html[data-theme='dark']) .history_rm_paper {
+    background: #1e293b !important;
+    border-color: rgba(255, 255, 255, 0.05) !important;
+    box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5) !important;
+}
+
+:global(html[data-theme='dark']) .history_rm_printableArea {
+    background: #1e293b !important;
+}
+
+:global(html[data-theme='dark']) .history_rm_platformName,
+:global(html[data-theme='dark']) .history_rm_totalAmount,
+:global(html[data-theme='dark']) .history_rm_monospace {
+    color: #ffffff !important;
+}
+
+:global(html[data-theme='dark']) .history_rm_thermalIcon {
+    color: #3b82f6 !important;
+}
+
+:global(html[data-theme='dark']) .history_rm_subtitle,
+:global(html[data-theme='dark']) .history_rm_totalLabel,
+:global(html[data-theme='dark']) .history_rm_label,
+:global(html[data-theme='dark']) .history_rm_footer,
+:global(html[data-theme='dark']) .history_rm_barcodeText {
+    color: #94a3b8 !important;
+}
+
+:global(html[data-theme='dark']) .history_rm_totalBox {
+    border-top-color: rgba(255, 255, 255, 0.08) !important;
+    border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+:global(html[data-theme='dark']) .history_rm_dashedDivider {
+    border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+:global(html[data-theme='dark']) .history_rm_barcodeSvg g {
+    fill: #e2e8f0 !important;
+}
+
+:global(html[data-theme='dark']) .history_rm_closeBtn:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+:global(html[data-theme='dark']) .history_rm_downloadBtn {
+    background: #3b82f6 !important;
+}
+
+:global(html[data-theme='dark']) .history_rm_downloadBtn:hover {
+    background: #2563eb !important;
 }
