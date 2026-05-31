@@ -15,6 +15,7 @@
     <%@ include file="/WEB-INF/views/common/theme-bootstrap.jspf" %>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/learning-hub-modern.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/LearningHub.module.css">
     <script defer src="${pageContext.request.contextPath}/js/theme-toggle.js"></script>
 </head>
 <body class="sv-page lh-shell-page"
@@ -25,118 +26,104 @@
       data-current-selection-mode="${selectedMode}"
       data-material-completed="${selectedMaterialStatus == 'completed'}"
       data-course-expired="${courseExpired}">
-<%-- Focus Mode Topbar — replaces global sv-topbar for this route --%>
-<header class="lh-focus-topbar" role="banner">
-    <a href="${pageContext.request.contextPath}/student/my-enrollments"
-       class="lh-focus-topbar__back"
-       aria-label="Return to My Courses">
-        <i class="fas fa-arrow-left" aria-hidden="true"></i>
-        <span>My Courses</span>
-    </a>
-    <span class="lh-focus-topbar__title" title="${enrollment.courseName}">${enrollment.courseName}</span>
-    <div class="lh-focus-topbar__progress" aria-label="Course progress: ${progressPercent}%">
-        <span class="lh-focus-topbar__pct" id="lhTopbarPct" aria-live="polite">${progressPercent}%</span>
-        <div class="lh-focus-topbar__bar" role="progressbar"
-             aria-valuenow="${progressPercent}" aria-valuemin="0" aria-valuemax="100">
-            <div class="lh-focus-topbar__bar-fill" id="lhTopbarFill" style="width:${progressPercent}%"></div>
-        </div>
-    </div>
-    <button type="button" class="theme-toggle" data-theme-toggle aria-pressed="false" aria-label="Switch to dark mode" title="Switch to dark mode">
-        <i class="fas fa-moon" aria-hidden="true"></i>
-        <span class="theme-toggle-label">Dark mode</span>
-    </button>
-    <button class="lh-focus-topbar__toggle" id="lhSidebarToggle"
-            aria-label="Toggle course syllabus" aria-expanded="false" aria-controls="svSidebar">
-        <i class="fas fa-bars" aria-hidden="true"></i>
-    </button>
-</header>
 
-<div class="sv-layout">
-    <aside class="sv-sidebar lh-course-sidebar" id="svSidebar" aria-label="Course syllabus">
-        <%-- Slim sidebar header: just a label + progress pill --%>
-        <div class="lh-course-sidebar__header lh-sidebar-header-slim">
-            <span class="lh-sidebar-section-label">Course Content</span>
-            <div class="lh-sidebar-slim-progress">
-                <div class="lh-sidebar-slim-bar">
-                    <div class="lh-sidebar-slim-fill" id="lhSidebarProgressBar"
-                         data-progress="${progressPercent}"
-                         style="width:${progressPercent}%"></div>
-                </div>
-                <span class="lh-sidebar-slim-pct" id="lhSidebarProgressPercent">${progressPercent}%</span>
+<div class="hub_container">
+    <%-- Minimalist Top Bar (Task 2) --%>
+    <header class="hub_topBar" role="banner">
+        <a href="${pageContext.request.contextPath}/student/my-enrollments" class="hub_backBtn" aria-label="Return to My Courses">
+            <i class="fas fa-arrow-left" aria-hidden="true"></i>
+            <span>Back to Dashboard</span>
+        </a>
+        <h1 class="hub_courseTitle" title="${enrollment.courseName}">${enrollment.courseName}</h1>
+        <div class="hub_progressContainer" aria-label="Course progress: ${progressPercent}%">
+            <span class="hub_progressText" id="lhTopbarPct">${progressPercent}% Modules</span>
+            <div class="hub_progressIndicator">
+                <div class="hub_progressFill" id="lhTopbarFill" style="width: ${progressPercent}%"></div>
             </div>
+            <button type="button" class="theme-toggle" data-theme-toggle aria-pressed="false" aria-label="Switch to dark mode" title="Switch to dark mode" style="background: transparent; border: none; color: #64748b; padding: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-moon" aria-hidden="true"></i>
+            </button>
         </div>
+    </header>
 
-        <div class="lh-course-sidebar__scroll">
-            <%-- Chapter Accordion — grouped by item.groupLabel --%>
-            <nav id="lhCourseFlow" aria-label="Course syllabus">
-
-                <%-- We detect chapter boundaries by comparing each item's groupLabel to the previous --%>
+    <%-- Split View (Task 3) --%>
+    <div class="hub_splitView">
+        <%-- Sidebar Syllabus UI (Task 4) --%>
+        <aside class="hub_sidebar" id="svSidebar" aria-label="Course syllabus">
+            <div class="hub_sidebarHeader">
+                <h2 class="hub_sidebarTitle">Course Content</h2>
+                <%-- Hidden legacy elements for JS progress binder backwards compatibility --%>
+                <div style="display: none;">
+                    <div id="lhSidebarProgressBar" style="width: ${progressPercent}%;"></div>
+                    <span id="lhSidebarProgressPercent">${progressPercent}%</span>
+                </div>
+            </div>
+            <div class="hub_syllabusList">
                 <c:set var="prevChapterLabel" value=""/>
                 <c:forEach var="item" items="${learningItems}" varStatus="loop">
-
-                    <%-- Open a new chapter accordion when groupLabel changes --%>
                     <c:if test="${item.groupLabel != prevChapterLabel}">
-                        <%-- Close previous chapter items div if not first --%>
-                        <c:if test="${not loop.first}"></div></div></c:if><%-- close lh-chapter__items + lh-chapter --%>
-
-                        <%-- Determine if this chapter contains the active item --%>
-                        <c:set var="chapterHasActive" value="false"/>
-                        <c:forEach var="inner" items="${learningItems}">
-                            <c:if test="${inner.groupLabel == item.groupLabel && inner.active}"><c:set var="chapterHasActive" value="true"/></c:if>
-                        </c:forEach>
-
-                        <%-- Chapter toggle button — is-open applied by JS via data-has-active --%>
-                        <div class="lh-chapter" data-chapter="${item.groupLabel}" data-has-active="${chapterHasActive}">
-                        <button class="lh-chapter__toggle"
-                                aria-expanded="false"
-                                aria-controls="lhChapter-${loop.index}"
-                                type="button">
-                            <i class="fas fa-chevron-right lh-chapter__chevron" aria-hidden="true"></i>
-                            <span class="lh-chapter__toggle-text">${item.groupLabel}</span>
-                        </button>
-                        <div class="lh-chapter__items" id="lhChapter-${loop.index}">
+                        <div class="hub_chapterHeader">${item.groupLabel}</div>
                     </c:if>
 
-                    <%-- Individual item inside chapter --%>
                     <a href="${item.navigationUrl}"
-                       class="lh-chapter-item ${item.active ? 'is-active' : ''} ${item.completedForProgress ? 'is-completed' : ''} ${item.locked ? 'is-locked' : ''}"
+                       class="hub_moduleItem lh-chapter-item ${item.active ? 'hub_moduleItemActive is-active' : ''} ${item.completedForProgress ? 'is-completed' : ''}"
                        data-kind="${item.itemKind}"
-                       <c:if test="${item.locked}">aria-disabled="true"</c:if>
-                       aria-label="${item.title}${item.completedForProgress ? ' — Completed' : (item.locked ? ' — Locked' : '')}">
-                        <span class="lh-ci-icon" aria-hidden="true">
-                            <i class="fas ${item.iconClass}"></i>
-                        </span>
-                        <span class="lh-ci-copy">
-                            <span class="lh-ci-title">${item.title}</span>
-                            <span class="lh-ci-sub">
+                       <c:if test="${item.locked}">aria-disabled="true" style="pointer-events: none; opacity: 0.65;"</c:if>>
+                        <div class="hub_moduleLeft">
+                            <span class="hub_moduleIcon">
                                 <c:choose>
-                                    <c:when test="${item.completedForProgress}">Completed</c:when>
-                                    <c:when test="${item.locked}">Locked</c:when>
-                                    <c:otherwise>${item.itemKind}</c:otherwise>
+                                    <c:when test="${item.itemKind == 'material'}">
+                                        <c:choose>
+                                            <c:when test="${item.iconClass == 'fa-play-circle'}">
+                                                <i class="fas fa-play-circle" style="font-size: 1.1rem;"></i>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <i class="fas fa-file-text" style="font-size: 1.1rem;"></i>
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <i class="fas fa-question-circle" style="font-size: 1.1rem;"></i>
+                                    </c:otherwise>
                                 </c:choose>
                             </span>
-                        </span>
-                        <span class="lh-ci-state ${item.completedForProgress ? 'is-done' : (item.active ? 'is-active-dot' : '')}" aria-hidden="true">
-                            <c:choose>
-                                <c:when test="${item.completedForProgress}"><i class="fas fa-check-circle"></i></c:when>
-                                <c:when test="${item.locked}"><i class="fas fa-lock"></i></c:when>
-                                <c:when test="${item.active}"><i class="fas fa-play"></i></c:when>
-                                <c:otherwise><i class="fas fa-circle lh-ci-state-idle"></i></c:otherwise>
-                            </c:choose>
-                        </span>
+                            <div class="hub_moduleText">
+                                <span class="hub_moduleTitle">${item.title}</span>
+                                <span class="hub_moduleKind">
+                                    <c:choose>
+                                        <c:when test="${item.completedForProgress}">Completed</c:when>
+                                        <c:otherwise>${item.itemKind}</c:otherwise>
+                                    </c:choose>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="hub_moduleRight">
+                            <button class="hub_completionToggle ${item.completedForProgress ? 'hub_completionToggleComplete' : ''}"
+                                    onclick="toggleSidebarMaterial(event, '${item.itemId}', '${enrollment.enrollmentId}', this)"
+                                    type="button"
+                                    ${item.itemKind == 'assessment' or item.completedForProgress or item.locked ? 'disabled="disabled"' : ''}>
+                                <c:choose>
+                                    <c:when test="${item.completedForProgress}">
+                                        <i class="fas fa-check-circle" style="font-size: 1.1rem;"></i>
+                                    </c:when>
+                                    <c:when test="${item.locked}">
+                                        <i class="fas fa-lock" style="color: #cbd5e1; font-size: 0.85rem;"></i>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <i class="far fa-circle" style="font-size: 1.1rem;"></i>
+                                    </c:otherwise>
+                                </c:choose>
+                            </button>
+                        </div>
                     </a>
-
                     <c:set var="prevChapterLabel" value="${item.groupLabel}"/>
-
-                    <%-- Close the last chapter on final iteration --%>
-                    <c:if test="${loop.last}"></div></div></c:if>
-
                 </c:forEach>
-            </nav>
-        </div>
-    </aside>
+            </div>
+        </aside>
 
-    <main class="sv-main lh-main">
+        <%-- Main Stage Container (Task 3) --%>
+        <main class="hub_stage">
+            <div class="hub_stageCanvas">
 
         <c:if test="${not empty param.error or not empty param.success or not empty param.message}">
             <section class="lh-feedback ${not empty param.error ? 'is-error' : 'is-success'}" aria-live="polite">
@@ -1364,126 +1351,11 @@
                 </c:choose>
         </div><%-- /lh-content-stage --%>
 
-            <footer class="lh-action-bar">
-                <div class="lh-action-bar__actions">
-                    <a class="sv-btn lh-nav-action is-hidden" id="lhPrevAction" href="#"
-                       aria-label="Go to previous lesson">
-                        <span class="lh-nav-action-row">
-                            <i class="fas fa-arrow-left" aria-hidden="true"></i>
-                            <span>Previous</span>
-                        </span>
-                        <span class="lh-nav-label" id="lhPrevLabel"></span>
-                    </a>
-
-                    <c:choose>
-                        <c:when test="${courseExpired and (not empty selectedAssessment or not empty selectedMaterial)}">
-                            <button class="sv-btn primary" id="lhSubmitAction" disabled="disabled">
-                                <i class="fas fa-hourglass-end"></i>
-                                <span>Course Expired</span>
-                            </button>
-                        </c:when>
-                        <c:when test="${selectedMode == 'assessment' and not empty selectedAssessment and not isAttempting}">
-                            <c:choose>
-                                <c:when test="${selectedAssessment.type == 'Assignment'}">
-                                    <c:choose>
-                                        <c:when test="${empty selectedAssessmentLatest}">
-                                            <button class="sv-btn primary" id="lhSubmitAction" type="submit" form="assignmentHubForm">
-                                                <i class="fas fa-upload"></i>
-                                                <span>Submit Assignment</span>
-                                            </button>
-                                        </c:when>
-                                        <c:when test="${empty selectedAssessmentLatest.score}">
-                                            <button class="sv-btn primary" id="lhSubmitAction" disabled="disabled">
-                                                <i class="fas fa-clock-rotate-left"></i>
-                                                <span>Awaiting Review</span>
-                                            </button>
-                                        </c:when>
-                                        <c:otherwise>
-                                            <c:set var="passThreshold" value="${selectedAssessment.totalMarks * 0.7}"/>
-                                            <c:set var="hasPassedAssignment" value="${selectedAssessmentLatest.score >= passThreshold}"/>
-                                            <c:choose>
-                                                <c:when test="${hasPassedAssignment}">
-                                                    <button class="sv-btn primary lh-success-action" id="lhSubmitAction" disabled="disabled">
-                                                        <i class="fas fa-circle-check"></i>
-                                                        <span>Passed &amp; Completed</span>
-                                                    </button>
-                                                </c:when>
-                                                <c:when test="${selectedAssessmentUsedAttempts < selectedAssessmentAllowedAttempts}">
-                                                    <button class="sv-btn primary" id="lhSubmitAction" type="submit" form="assignmentHubForm">
-                                                        <i class="fas fa-rotate-left"></i>
-                                                        <span>Submit Retake</span>
-                                                    </button>
-                                                </c:when>
-                                                <c:otherwise>
-                                                    <button class="sv-btn primary" id="lhSubmitAction" disabled="disabled">
-                                                        <i class="fas fa-ban"></i>
-                                                        <span>No Attempts Left</span>
-                                                    </button>
-                                                </c:otherwise>
-                                            </c:choose>
-                                        </c:otherwise>
-                                    </c:choose>
-                                </c:when>
-                                <c:otherwise>
-                                    <c:choose>
-                                        <c:when test="${selectedAssessmentPrimaryLabel == 'View Result'}">
-                                            <a class="sv-btn primary" id="lhSubmitAction" href="${selectedAssessmentPrimaryUrl}">
-                                                <i class="fas fa-chart-column"></i>
-                                                <span>View Result</span>
-                                            </a>
-                                        </c:when>
-                                        <c:otherwise>
-                                            <c:choose>
-                                                <c:when test="${not empty selectedAssessmentLatest}">
-                                                    <c:set var="passThreshold" value="${selectedAssessment.totalMarks * 0.7}"/>
-                                                    <c:set var="hasPassedQuiz" value="${selectedAssessmentLatest.score >= passThreshold}"/>
-                                                    <c:choose>
-                                                        <c:when test="${hasPassedQuiz}">
-                                                            <a class="sv-btn primary lh-success-action" id="lhSubmitAction" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=assessments&view=result&assessmentId=${selectedAssessment.assessmentId}&submissionId=${selectedAssessmentLatest.submissionId}">
-                                                                <i class="fas fa-circle-check"></i>
-                                                                <span>View Result (Passed)</span>
-                                                            </a>
-                                                        </c:when>
-                                                        <c:when test="${selectedAssessmentUsedAttempts < selectedAssessmentAllowedAttempts}">
-                                                            <a class="sv-btn primary" id="lhSubmitAction" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=assessments&assessmentId=${selectedAssessment.assessmentId}&attempt=true">
-                                                                <i class="fas fa-rotate-left"></i>
-                                                                <span>Retake Quiz</span>
-                                                            </a>
-                                                        </c:when>
-                                                        <c:otherwise>
-                                                            <button class="sv-btn primary" id="lhSubmitAction" disabled="disabled">
-                                                                <i class="fas fa-ban"></i>
-                                                                <span>No Attempts Left</span>
-                                                            </button>
-                                                        </c:otherwise>
-                                                    </c:choose>
-                                                </c:when>
-                                                <c:otherwise>
-                                                    <a class="sv-btn primary" id="lhSubmitAction" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=assessments&assessmentId=${selectedAssessment.assessmentId}&attempt=true">
-                                                        <i class="fas fa-play"></i>
-                                                        <span>Start Quiz</span>
-                                                    </a>
-                                                </c:otherwise>
-                                            </c:choose>
-                                        </c:otherwise>
-                                    </c:choose>
-                                </c:otherwise>
-                            </c:choose>
-                        </c:when>
-                    </c:choose>
-
-                    <a class="sv-btn lh-nav-action is-hidden" id="lhNextAction" href="#"
-                       aria-label="Go to next lesson">
-                        <span class="lh-nav-action-row">
-                            <span>Next</span>
-                            <i class="fas fa-arrow-right" aria-hidden="true"></i>
-                        </span>
-                        <span class="lh-nav-label" id="lhNextLabel"></span>
-                    </a>
                 </div>
             </footer>
-    </main>
-</div>
+        </main>
+    </div> <%-- /hub_splitView --%>
+</div> <%-- /hub_container --%>
 
 <div class="sv-overlay" id="svOverlay"></div>
 <script>
@@ -1497,6 +1369,84 @@ function updateHubFileName(input, isRetake) {
     } else {
         fileBox.style.display = 'none';
     }
+}
+
+function toggleSidebarMaterial(event, materialId, enrollmentId, btn) {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    if (btn.disabled) return;
+    
+    btn.disabled = true;
+    var icon = btn.querySelector('i');
+    var originalClass = icon.className;
+    icon.className = 'fas fa-spinner fa-spin';
+    
+    var payload = 'materialId=' + encodeURIComponent(materialId) + '&enrollmentId=' + encodeURIComponent(enrollmentId);
+    
+    fetch('${pageContext.request.contextPath}/student/mark-material-completed', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+        body: payload
+    })
+    .then(function (response) {
+        if (!response.ok) throw new Error('Error');
+        return response.json();
+    })
+    .then(function (data) {
+        if (data.success) {
+            btn.classList.add('hub_completionToggleComplete');
+            icon.className = 'fas fa-check-circle';
+            
+            // Sync progress elements
+            var progressPercentNode = document.getElementById('lhSidebarProgressPercent');
+            var topbarPct = document.getElementById('lhTopbarPct');
+            var topbarFill = document.getElementById('lhTopbarFill');
+            var progressBar = document.getElementById('lhSidebarProgressBar');
+            
+            var pctText = data.progressPercent + '%';
+            if (progressPercentNode) progressPercentNode.textContent = pctText;
+            if (topbarPct) {
+                if (topbarPct.textContent.indexOf('Modules') !== -1) {
+                    topbarPct.textContent = data.progressPercent + '% Modules';
+                } else {
+                    topbarPct.textContent = pctText;
+                }
+            }
+            if (topbarFill) topbarFill.style.width = data.progressPercent + '%';
+            if (progressBar) progressBar.style.width = data.progressPercent + '%';
+            
+            // Sync active sidebar item state
+            var row = btn.closest('.hub_moduleItem');
+            if (row) {
+                row.classList.add('is-completed');
+                var kindSub = row.querySelector('.hub_moduleKind');
+                if (kindSub) kindSub.textContent = 'Completed';
+            }
+            
+            // Sync page data bridge
+            document.body.dataset.progressPercent = data.progressPercent;
+            
+            // If the active material on main stage is this one, sync complete button & badge
+            var mainCompleteBtn = document.getElementById('edMarkCompleted');
+            if (mainCompleteBtn && mainCompleteBtn.getAttribute('data-material-id') === materialId) {
+                mainCompleteBtn.disabled = true;
+                mainCompleteBtn.innerHTML = '<i class="fas fa-check-circle"></i><span>Completed</span>';
+                var badge = document.getElementById('lhItemStatusBadge');
+                if (badge) {
+                    badge.className = 'status-badge status-Approved';
+                    badge.textContent = 'Completed';
+                }
+            }
+        } else {
+            icon.className = originalClass;
+            btn.disabled = false;
+        }
+    })
+    .catch(function () {
+        icon.className = originalClass;
+        btn.disabled = false;
+    });
 }
 </script>
 <script src="${pageContext.request.contextPath}/js/learning-hub.js"></script>
