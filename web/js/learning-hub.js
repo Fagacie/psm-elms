@@ -64,10 +64,8 @@
         if (progressPercentNode) {
             progressPercentNode.textContent = progressPercent + '%';
         }
-        // Support both old sv-progress-bar and new slim fill bar
         if (progressBar) {
             progressBar.style.width = progressPercent + '%';
-            // legacy color update only if it's the old bar type
             if (progressBar.classList.contains('sv-progress-bar')) {
                 var color = '#dc2626';
                 if (progressPercent >= 35 && progressPercent < 75) {
@@ -155,7 +153,6 @@
         var items  = chapter.querySelector('.lh-chapter__items');
         if (!toggle || !items) return;
 
-        // On page load: open chapters that contain the active item (driven by server-side data-has-active)
         if (chapter.dataset.hasActive === 'true') {
             chapter.classList.add('is-open');
             toggle.classList.add('has-active');
@@ -177,7 +174,6 @@
             sidebarToggle.setAttribute('aria-expanded', String(isOpen));
         });
 
-        // Close sidebar when user clicks the dim overlay
         body.addEventListener('click', function (e) {
             if (body.classList.contains('lh-sidebar-open') &&
                 !e.target.closest('#svSidebar') &&
@@ -192,7 +188,6 @@
     var prevLabelEl = document.getElementById('lhPrevLabel');
     var nextLabelEl = document.getElementById('lhNextLabel');
 
-    // Collect all chapter-items (the new accordion anchors)
     var allChapterItems = Array.prototype.slice.call(
         document.querySelectorAll('.lh-chapter-item')
     );
@@ -209,13 +204,13 @@
 
         if (prevLabelEl && activeIdx > 0) {
             var prevTitle = allChapterItems[activeIdx - 1].getAttribute('aria-label') ||
-                            (allChapterItems[activeIdx - 1].querySelector('.lh-ci-title') || {}).textContent || '';
+                            (allChapterItems[activeIdx - 1].querySelector('.hub_moduleTitle') || {}).textContent || '';
             prevTitle = String(prevTitle);
             prevLabelEl.textContent = prevTitle.replace(/ — (Completed|Locked)$/, '');
         }
         if (nextLabelEl && activeIdx < allChapterItems.length - 1) {
             var nextTitle = allChapterItems[activeIdx + 1].getAttribute('aria-label') ||
-                            (allChapterItems[activeIdx + 1].querySelector('.lh-ci-title') || {}).textContent || '';
+                            (allChapterItems[activeIdx + 1].querySelector('.hub_moduleTitle') || {}).textContent || '';
             nextTitle = String(nextTitle);
             nextLabelEl.textContent = nextTitle.replace(/ — (Completed|Locked)$/, '');
         }
@@ -226,8 +221,142 @@
     var topbarFill = document.getElementById('lhTopbarFill');
 
     function syncTopbarProgress(pct) {
-        if (topbarPct)  topbarPct.textContent = pct + '%';
+        if (topbarPct)  topbarPct.textContent = pct + '% Modules';
         if (topbarFill) topbarFill.style.width = pct + '%';
+    }
+
+    // ── SIDEBAR CLICK INTERCEPTION (SPA) ──────────────────────
+    function bindSidebarClicks() {
+        flowLinks.forEach(function (link) {
+            if (link.dataset.clickBound === 'true') return;
+            link.dataset.clickBound = 'true';
+
+            link.addEventListener('click', function (e) {
+                if (link.getAttribute('aria-disabled') === 'true') {
+                    e.preventDefault();
+                    return;
+                }
+                var url = link.getAttribute('href');
+                if (url) {
+                    if (typeof window.loadStageContent === 'function') {
+                        e.preventDefault();
+                        window.loadStageContent(url);
+                    } else {
+                        // Let the browser perform standard navigation (default action)
+                    }
+                }
+            });
+        });
+    }
+
+    // ── FOOTER ACTIONS CLICK INTERCEPTION (SPA) ────────────────
+    function bindFooterClicks() {
+        if (prevAction) {
+            prevAction.addEventListener('click', function (e) {
+                var url = prevAction.getAttribute('href');
+                if (url) {
+                    if (typeof window.loadStageContent === 'function') {
+                        e.preventDefault();
+                        window.loadStageContent(url);
+                    } else {
+                        // Let default navigation happen
+                    }
+                }
+            });
+        }
+        if (nextAction) {
+            nextAction.addEventListener('click', function (e) {
+                var url = nextAction.getAttribute('href');
+                if (url) {
+                    if (typeof window.loadStageContent === 'function') {
+                        e.preventDefault();
+                        window.loadStageContent(url);
+                    } else {
+                        // Let default navigation happen
+                    }
+                }
+            });
+        }
+    }
+
+    // ── NAVIGATION TO NEXT SYLLABUS ITEM & VICTORY SCREEN ─────
+    function showVictoryScreen() {
+        var stage = document.querySelector('.lh-content-stage');
+        if (!stage) return;
+        
+        var isEarned = !!document.querySelector('.lh-cert-overview-card.is-earned, .lh-cert-performance-card.is-earned, .is-earned');
+        var isReady = !!document.querySelector('.lh-cert-overview-card.is-ready, .lh-cert-performance-card.is-ready, .is-ready');
+        
+        var progressPercentVal = 0;
+        var progressPercentNode = document.getElementById('lhSidebarProgressPercent');
+        if (progressPercentNode) {
+            progressPercentVal = parseFloat(progressPercentNode.textContent) || 0;
+        }
+        if (!isEarned && !isReady && progressPercentVal >= 100) {
+            isReady = true;
+        }
+        var downloadUrl = contextPath + '/student/certificate?enrollmentId=' + (body.dataset.enrollmentId || '');
+        
+        var certSection = '';
+        if (isEarned) {
+            certSection = 
+                '<div style="margin-top: 32px;">' +
+                    '<a href="' + downloadUrl + '" class="assessment_button assessment_button--primary" style="padding: 16px 32px; font-size: 1.1rem; border-radius: 50px; background: linear-gradient(135deg, #2563eb, #1d4ed8); border: none; color: #fff; box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.4); display: inline-flex; align-items: center; gap: 8px;">' +
+                        '<i class="fas fa-medal"></i>' +
+                        '<span>Download Certificate</span>' +
+                    '</a>' +
+                '</div>';
+        } else if (isReady) {
+            var enrollmentIdVal = '';
+            if (completeButton) enrollmentIdVal = completeButton.getAttribute('data-enrollment-id');
+            if (!enrollmentIdVal) {
+                var urlParams = new URLSearchParams(window.location.search);
+                enrollmentIdVal = urlParams.get('id') || urlParams.get('enrollmentId') || '';
+            }
+            certSection = 
+                '<div style="margin-top: 32px;">' +
+                    '<form method="post" action="' + contextPath + '/student/certificate" style="display: inline-block;">' +
+                        '<input type="hidden" name="enrollmentId" value="' + enrollmentIdVal + '">' +
+                        '<button type="submit" class="assessment_button assessment_button--primary" style="padding: 16px 32px; font-size: 1.1rem; border-radius: 50px; background: linear-gradient(135deg, #10b981, #059669); border: none; color: #fff; box-shadow: 0 10px 25px -5px rgba(5, 150, 105, 0.4); display: inline-flex; align-items: center; gap: 8px;">' +
+                            '<i class="fas fa-award"></i>' +
+                            '<span>Claim & Generate Certificate</span>' +
+                        '</button>' +
+                    '</form>' +
+                '</div>';
+        }
+        
+        stage.innerHTML = 
+            '<div style="max-width: 700px; margin: 60px auto; padding: 60px 40px; text-align: center; background: #ffffff; border-radius: 24px; box-shadow: 0 20px 40px -15px rgba(0,0,0,0.05); border: 1px solid #f1f5f9;">' +
+                '<div style="width: 100px; height: 100px; margin: 0 auto 30px; display: flex; align-items: center; justify-content: center; background: #ecfdf5; color: #10b981; border-radius: 50%; font-size: 3rem; box-shadow: 0 10px 20px -5px rgba(16, 185, 129, 0.2);">' +
+                    '<i class="fas fa-trophy"></i>' +
+                '</div>' +
+                '<h2 style="font-size: 2.5rem; font-weight: 800; color: #0f172a; margin-bottom: 16px; letter-spacing: -0.03em;">Course Completed!</h2>' +
+                '<p style="font-size: 1.125rem; color: #64748b; line-height: 1.7; max-width: 50ch; margin: 0 auto 32px;">' +
+                    'Congratulations! You have completed all lesson materials and passed all required assessments. You have officially finished the course.' +
+                '</p>' +
+                '<div style="display: flex; flex-direction: column; align-items: center; gap: 16px;">' +
+                    certSection +
+                    '<a href="' + contextPath + '/student/my-enrollments" class="assessment_button" style="padding: 14px 28px; border-radius: 50px; color: #475569; font-weight: 600; text-decoration: none; border: 1px solid #e2e8f0; display: inline-flex; align-items: center; gap: 8px;">' +
+                        '<i class="fas fa-house"></i>' +
+                        '<span>Return to Dashboard</span>' +
+                    '</a>' +
+                '</div>' +
+            '</div>';
+    }
+
+    function navigateToNextSyllabusItem() {
+        var activeIdx = findActiveLink();
+        if (activeIdx >= 0 && activeIdx < flowLinks.length - 1) {
+            var nextLink = flowLinks[activeIdx + 1];
+            var nextUrl = nextLink.getAttribute('href');
+            if (nextUrl && typeof window.loadStageContent === 'function') {
+                window.loadStageContent(nextUrl);
+            } else {
+                window.location.href = nextUrl;
+            }
+        } else {
+            showVictoryScreen();
+        }
     }
 
     updatePager();
@@ -235,6 +364,8 @@
     setProgress(initialProgress);
     syncTopbarProgress(initialProgress);
     injectNavLabels();
+    bindSidebarClicks();
+    bindFooterClicks();
 
     if (completeButton) {
         if (viewerState.completed) {
@@ -243,7 +374,6 @@
             setCompletionButton(true, 'Course Expired');
         } else {
             setWaitingState();
-
             bindNativeMediaUnlock();
             bindExternalResourceUnlock();
         }
@@ -285,6 +415,7 @@
                 if (typeof data.viewedMaterials === 'number') {
                     setMaterialsViewed(data.viewedMaterials, data.totalMaterials);
                 }
+                navigateToNextSyllabusItem();
             })
             .catch(function (error) {
                 viewerState.unlocked = false;
@@ -299,14 +430,12 @@
             return;
         }
 
-        // Theme sync support from secure assessment workspace
         if (event.data.type === 'syncTheme') {
             document.documentElement.setAttribute('data-theme', event.data.theme);
             try {
                 localStorage.setItem('psme-theme', event.data.theme);
             } catch (e) {}
             
-            // Trigger visual button updates if toggle buttons exist
             var buttons = document.querySelectorAll('[data-theme-toggle]');
             buttons.forEach(function (button) {
                 var label = button.querySelector('.theme-toggle-label');
@@ -344,4 +473,12 @@
             unlockCompletion(event.data.note || 'You can mark this material complete now.');
         }
     });
+
+    window.LearningHub = {
+        rebindLabels: function () {
+            injectNavLabels();
+            updatePager();
+        },
+        navigateToNext: navigateToNextSyllabusItem
+    };
 })();

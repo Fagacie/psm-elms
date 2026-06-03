@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-shell.css?v=3">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-courses.css?v=3">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-materials.css?v=3">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/InstructorAssessment.module.css?v=6">
     <script defer src="${pageContext.request.contextPath}/js/instructor-course-workspace.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/theme-toggle.css">
@@ -111,41 +112,7 @@
         color: hsl(38, 92%, 38%) !important;
     }
 
-    /* Horizontal Flex Tab system */
-    .ws-navbar-modern {
-        display: flex !important;
-        align-items: center;
-        gap: 2rem !important;
-        border-bottom: 1px solid #e2e8f0 !important;
-        background: transparent !important;
-        padding: 0 !important;
-        margin-bottom: 1rem !important;
-    }
 
-    .ws-nav-link-modern {
-        font-size: 0.95rem !important;
-        color: #64748b !important;
-        font-weight: 500 !important;
-        padding-bottom: 12px !important;
-        text-decoration: none !important;
-        border-bottom: 2px solid transparent !important;
-        display: inline-flex !important;
-        align-items: center;
-        gap: 8px;
-        transition: all 0.2s ease !important;
-        cursor: pointer;
-    }
-
-    .ws-nav-link-modern:hover {
-        color: #0f172a !important;
-    }
-
-    .ws-nav-link-modern.active {
-        color: var(--ws-primary, #6366f1) !important;
-        font-weight: 700 !important;
-        border-bottom: 2px solid var(--ws-primary, #6366f1) !important;
-        margin-bottom: -1px !important;
-    }
 
     /* High-fidelity Content Canvas */
     .ws-tab-content {
@@ -585,18 +552,8 @@
         box-shadow: 0 4px 12px rgba(2, 6, 17, 0.3) !important;
     }
 
-    :root[data-theme="dark"] .ws-head-left-slim h2,
-    :root[data-theme="dark"] .ws-nav-link-modern:hover {
+    :root[data-theme="dark"] .ws-head-left-slim h2 {
         color: #ffffff !important;
-    }
-
-    :root[data-theme="dark"] .ws-navbar-modern {
-        border-bottom: 1px solid #1f2937 !important;
-    }
-
-    :root[data-theme="dark"] .ws-nav-link-modern.active {
-        color: var(--ws-primary, #6366f1) !important;
-        border-bottom-color: var(--ws-primary, #6366f1) !important;
     }
 
     :root[data-theme="dark"] .meta-badge-chip {
@@ -1173,17 +1130,17 @@
         </c:url>
 
         <%-- WORKSPACE NAVIGATION --%>
-        <nav class="ws-navbar-modern" aria-label="Workspace navigation">
-            <a class="ws-nav-link-modern active" href="#overview" data-section-link="overview">
+        <nav class="ins-flow-nav" aria-label="Workspace navigation">
+            <a class="ins-flow-link active" href="#overview" data-section-link="overview">
                 <i class="fas fa-chart-pie"></i> Overview
             </a>
-            <a class="ws-nav-link-modern" href="#materials" data-section-link="materials">
+            <a class="ins-flow-link" href="#materials" data-section-link="materials">
                 <i class="fas fa-book-open"></i> Materials
             </a>
-            <a class="ws-nav-link-modern" href="#assessments" data-section-link="assessments">
+            <a class="ins-flow-link" href="#assessments" data-section-link="assessments">
                 <i class="fas fa-tasks"></i> Assessments
             </a>
-            <a class="ws-nav-link-modern" href="#students" data-section-link="students">
+            <a class="ins-flow-link" href="#students" data-section-link="students">
                 <i class="fas fa-users"></i> Students
             </a>
         </nav>

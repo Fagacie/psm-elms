@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
             objectiveFields.forEach(f => f.classList.remove('hidden-field'));
             assignmentFields.forEach(f => f.classList.add('hidden-field'));
             if (durationInput) durationInput.setAttribute('required', 'required');
-            if (marksInput) marksInput.removeAttribute('required');
+            if (marksInput) marksInput.setAttribute('required', 'required');
         } else if (type === 'Assignment') {
             assignmentFields.forEach(f => f.classList.remove('hidden-field'));
             objectiveFields.forEach(f => f.classList.add('hidden-field'));

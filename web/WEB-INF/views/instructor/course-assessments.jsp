@@ -15,10 +15,11 @@
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-shell.css">
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-assessments.css">
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-assessment-flow.css">
+                <link rel="stylesheet" href="${pageContext.request.contextPath}/css/InstructorAssessment.module.css?v=6">
                 <jsp:include page="/WEB-INF/views/common/head-external-assets.jsp" />
             </head>
 
-            <body class="instructor-ui">
+            <body class="instructor-ui iax-page">
                 <jsp:include page="/WEB-INF/views/common/instructor-header.jsp">
                     <jsp:param name="pageTitle" value="Course Assessments" />
                 </jsp:include>
@@ -28,28 +29,28 @@
 
 
                 <main class="app-main">
-                    <div class="content-wrapper">
+                    <div class="content-wrapper iax-shell">
                         <jsp:include page="/WEB-INF/views/instructor/fragments/assessment-breadcrumb.jsp">
                             <jsp:param name="currentLabel" value="Course Assessments" />
                         </jsp:include>
 
-                        <c:set var="currentCourseFlow" value="assessments" />
+                        <c:set var="currentCourseFlow" value="assessments" scope="request" />
                         <jsp:include page="/WEB-INF/views/instructor/fragments/course-flow-nav.jsp" />
 
-                        <section class="ins-page-head">
+                        <section class="ins-page-head iax-head">
                             <div>
                                 <p class="ins-page-kicker">Course Assessments</p>
                                 <h2>${not empty selectedCourse ? selectedCourse.courseName : 'Manage Course
                                     Assessments'}</h2>
                             </div>
-                            <div class="ins-hero-actions">
+                            <div class="ins-hero-actions iax-actions">
                                 <c:if test="${not empty selectedCourse}">
                                     <a href="${pageContext.request.contextPath}/instructor/assessments?view=archive&courseId=${selectedCourse.courseId}"
-                                        class="btn btn-secondary">
+                                        class="btn btn-secondary iax-btn">
                                         <i class="fas fa-box-archive"></i> Archive
                                     </a>
                                     <a href="${pageContext.request.contextPath}/instructor/assessments?view=editor&courseId=${selectedCourse.courseId}"
-                                        class="btn btn-primary">
+                                        class="btn btn-primary iax-btn">
                                         <i class="fas fa-plus-circle"></i> Add Assessment
                                     </a>
                                 </c:if>
@@ -72,8 +73,8 @@
                                     </c:forEach>
                                 </select>
                             </form>
-                            <div class="ia-filter-group" style="justify-content: flex-end;">
-                                <span style="font-size: 0.85rem; color: var(--ins-muted);">
+                            <div class="ia-filter-group ia-filter-count">
+                                <span class="iax-count-pill">
                                     <strong>${not empty assessments ? fn:length(assessments) : 0}</strong> Assessments
                                     Found
                                 </span>
@@ -119,13 +120,13 @@
                                     <c:if test="${not empty archivedAssessments}">
                                         <form method="post"
                                             action="${pageContext.request.contextPath}/instructor/assessments"
-                                            style="display:inline;">
+                                            class="ia-inline-form">
                                             <input type="hidden" name="action" value="bulkRestoreAssessments">
                                             <input type="hidden" name="courseId" value="${selectedCourse.courseId}">
                                             <c:forEach var="aa" items="${archivedAssessments}">
                                                 <input type="hidden" name="assessmentIds" value="${aa.assessmentId}">
                                             </c:forEach>
-                                            <button type="submit" class="btn btn-secondary btn-sm"
+                                            <button type="submit" class="btn btn-secondary btn-sm iax-btn"
                                                 onclick="return confirm('Restore all archived assessments?');">
                                                 <i class="fas fa-trash-arrow-up"></i> Restore All
                                             </button>
@@ -162,7 +163,7 @@
                                                             <input type="hidden" name="courseId"
                                                                 value="${selectedCourse.courseId}">
                                                             <input type="hidden" name="id" value="${a.assessmentId}">
-                                                            <button type="submit" class="btn btn-primary btn-sm">
+                                                            <button type="submit" class="btn btn-primary btn-sm iax-btn">
                                                                 <i class="fas fa-trash-arrow-up"></i> Restore
                                                             </button>
                                                         </form>
@@ -187,19 +188,20 @@
                                 <div class="ia-assessment-grid">
                                     <c:forEach var="a" items="${assessments}">
                                         <article class="ia-assessment-card type-${fn:toLowerCase(a.type)}">
-                                            <div
-                                                class="ia-status-tag status-${fn:toLowerCase(statusByAssessmentId[a.assessmentId])}">
-                                                ${statusByAssessmentId[a.assessmentId]}
-                                            </div>
-
-                                            <div class="ia-card-type-icon">
-                                                <c:choose>
-                                                    <c:when test="${a.type == 'Quiz'}"><i class="fas fa-bolt"></i>
-                                                    </c:when>
-                                                    <c:when test="${a.type == 'Exam'}"><i
-                                                            class="fas fa-graduation-cap"></i></c:when>
-                                                    <c:otherwise><i class="fas fa-file-pen"></i></c:otherwise>
-                                                </c:choose>
+                                            <div class="ia-card-topline">
+                                                <div class="ia-card-type-icon" aria-hidden="true">
+                                                    <c:choose>
+                                                        <c:when test="${a.type == 'Quiz'}"><i class="fas fa-bolt"></i>
+                                                        </c:when>
+                                                        <c:when test="${a.type == 'Exam'}"><i
+                                                                class="fas fa-graduation-cap"></i></c:when>
+                                                        <c:otherwise><i class="fas fa-file-pen"></i></c:otherwise>
+                                                    </c:choose>
+                                                </div>
+                                                <div
+                                                    class="ia-status-tag status-${fn:toLowerCase(statusByAssessmentId[a.assessmentId])}">
+                                                    ${statusByAssessmentId[a.assessmentId]}
+                                                </div>
                                             </div>
 
                                             <div class="ia-card-header">
@@ -230,21 +232,21 @@
                                                 </div>
                                             </div>
 
-                                            <div class="ia-card-footer">
+                                            <div class="ia-card-footer iax-card-actions">
                                                 <a href="${pageContext.request.contextPath}/instructor/assessments?view=editor&courseId=${selectedCourse.courseId}&assessmentId=${a.assessmentId}"
-                                                    class="btn btn-secondary btn-sm" title="Edit Assessment Details">
-                                                    <i class="fas fa-pen-to-square"></i> Modify
+                                                    class="btn btn-secondary btn-sm iax-btn-icon" title="Edit Assessment Details" aria-label="Edit Assessment Details">
+                                                    <i class="fas fa-pen-to-square"></i>
                                                 </a>
 
                                                 <c:if test="${a.type == 'Quiz' or a.type == 'Exam'}">
                                                     <a href="${pageContext.request.contextPath}/instructor/assessments?view=questions&courseId=${selectedCourse.courseId}&assessmentId=${a.assessmentId}"
-                                                        class="btn btn-secondary btn-sm" title="Manage Questions">
-                                                        <i class="fas fa-list-check"></i> Bank
+                                                        class="btn btn-secondary btn-sm iax-btn-icon" title="Manage Questions" aria-label="Manage Questions">
+                                                        <i class="fas fa-list-check"></i>
                                                     </a>
                                                 </c:if>
 
                                                 <a href="${pageContext.request.contextPath}/instructor/assessments?view=submissions&courseId=${selectedCourse.courseId}&assessmentId=${a.assessmentId}"
-                                                    class="btn btn-primary btn-sm">
+                                                    class="btn btn-primary btn-sm iax-primary-action">
                                                     <i
                                                         class="fas ${a.type == 'Assignment' ? 'fa-pen-to-square' : 'fa-chart-column'}"></i>
                                                     <c:choose>
@@ -255,10 +257,10 @@
                                                 </a>
 
                                                 <a href="${pageContext.request.contextPath}/instructor/assessments?action=deleteAssessment&courseId=${selectedCourse.courseId}&id=${a.assessmentId}"
-                                                    class="btn btn-danger btn-sm"
+                                                    class="btn btn-danger btn-sm iax-btn-icon"
                                                     onclick="return confirm('Archive this assessment? You can restore it from archive later.');"
-                                                    title="Archive Assessment">
-                                                    <i class="fas fa-box-archive"></i> Archive
+                                                    title="Archive Assessment" aria-label="Archive Assessment">
+                                                    <i class="fas fa-box-archive"></i>
                                                 </a>
                                             </div>
                                         </article>

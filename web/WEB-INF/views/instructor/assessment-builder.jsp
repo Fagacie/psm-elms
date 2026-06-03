@@ -17,6 +17,7 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-assessments.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-assessment-builder.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-assessment-flow.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/InstructorAssessment.module.css?v=6">
     <jsp:include page="/WEB-INF/views/common/head-external-assets.jsp"/>
 </head>
 <body class="instructor-ui">
@@ -138,9 +139,9 @@
                                 <input id="assessmentMaxAttempts" name="maxAttempts" type="number" min="1" max="10" value="${not empty selectedAssessment and not empty selectedAssessment.maxAttempts ? selectedAssessment.maxAttempts : 1}" style="width: 100%; padding: 12px;" />
                             </div>
 
-                            <div class="dynamic-field" data-type-visible="assignment">
-                                <label for="assessmentTotalMarks" style="display: block; margin-bottom: 8px; font-weight: 700; color: var(--ins-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">Total Marks <span style="color: #dc2626;">*</span></label>
-                                <input id="assessmentTotalMarks" name="totalMarks" type="number" min="1" step="1" value="${not empty selectedAssessment and not empty selectedAssessment.totalMarks ? selectedAssessment.totalMarks : ''}" placeholder="e.g., 100" style="width: 100%; padding: 12px;" />
+                            <div>
+                                <label for="assessmentTotalMarks" style="display: block; margin-bottom: 8px; font-weight: 700; color: var(--ins-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">Overall Quiz Marks / Total Points <span style="color: #dc2626;">*</span></label>
+                                <input id="assessmentTotalMarks" name="totalMarks" type="number" min="1" step="1" value="${not empty selectedAssessment and not empty selectedAssessment.totalMarks ? selectedAssessment.totalMarks : ''}" placeholder="e.g., 100" style="width: 100%; padding: 12px;" required />
                             </div>
 
                             <div>

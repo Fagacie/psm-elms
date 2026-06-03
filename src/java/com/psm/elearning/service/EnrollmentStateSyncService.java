@@ -194,6 +194,27 @@ public class EnrollmentStateSyncService {
                     // Ignore
                 }
             }
+
+            if (sumOfMarks <= 0) {
+                int questionCount = 0;
+                if (assessment != null && assessment.getAssessmentId() != null) {
+                    try (java.sql.Connection conn = com.psm.elearning.util.DBConnection.getConnection();
+                         java.sql.PreparedStatement ps = conn.prepareStatement("SELECT COUNT(*) FROM AssessmentQuestion WHERE AssessmentID = ?")) {
+                        ps.setInt(1, assessment.getAssessmentId());
+                        try (java.sql.ResultSet rs = ps.executeQuery()) {
+                            if (rs.next()) {
+                                questionCount = rs.getInt(1);
+                            }
+                        }
+                    } catch (Exception e) {
+                        // Ignore
+                    }
+                }
+                if (questionCount > 0) {
+                    sumOfMarks = questionCount * 1.0;
+                }
+            }
+
             if (sumOfMarks > 0) {
                 return sumOfMarks * (passMarkPercent / 100.0);
             }

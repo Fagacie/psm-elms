@@ -8,6 +8,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Course Assessments - Instructor</title>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/InstructorAssessment.module.css?v=6">
         <c:if test="${not empty errorMessage}">
             <div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> <c:out value="${errorMessage}"/></div>
         </c:if>
@@ -16,56 +17,14 @@
             <c:param name="courseId" value="${selectedCourse.courseId}"/>
         </c:url>
 
-        <style>
-        .ws-navbar {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            padding: 8px;
-            margin-bottom: 24px;
-            border: 1px solid var(--ins-border);
-            border-radius: 16px;
-            background: #ffffff;
-            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
-        }
-
-        .ws-nav-link {
-            flex: 1 1 180px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            padding: 14px 18px;
-            border-radius: 12px;
-            text-decoration: none;
-            color: var(--ins-muted);
-            font-weight: 700;
-            font-size: 0.95rem;
-            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .ws-nav-link:hover,
-        .ws-nav-link.active {
-            background: var(--ins-primary, #6366f1);
-            color: #ffffff;
-            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.22);
-        }
-
-        @media (max-width: 768px) {
-            .ws-navbar {
-                flex-direction: column;
-            }
-        }
-        </style>
-
-        <c:set var="currentCourseFlow" value="assessments"/>
+        <c:set var="currentCourseFlow" value="assessments" scope="request"/>
         <jsp:include page="/WEB-INF/views/instructor/fragments/course-flow-nav.jsp"/>
 
-        <section class="workspace-kpi-grid" style="margin-bottom: 24px;">
-            <div class="workspace-kpi-card"><strong>${totalStudents}</strong><span>Students enrolled</span></div>
-            <div class="workspace-kpi-card"><strong>${publishedMaterials}</strong><span>Materials count</span></div>
-            <div class="workspace-kpi-card"><strong>${assessmentCount}</strong><span>Assessments count</span></div>
-            <div class="workspace-kpi-card"><strong><fmt:formatNumber value="${completionRate}" maxFractionDigits="0"/>%</strong><span>Completion rate</span></div>
+        <section class="iax-kpi-grid">
+            <div class="iax-kpi-card"><strong>${totalStudents}</strong><span>Students enrolled</span></div>
+            <div class="iax-kpi-card"><strong>${publishedMaterials}</strong><span>Materials count</span></div>
+            <div class="iax-kpi-card"><strong>${assessmentCount}</strong><span>Assessments count</span></div>
+            <div class="iax-kpi-card"><strong><fmt:formatNumber value="${completionRate}" maxFractionDigits="0"/>%</strong><span>Completion rate</span></div>
         </section>
 
         <c:choose>
@@ -127,41 +86,41 @@
                             </div>
                         </c:when>
                         <c:otherwise>
-                            <div class="workspace-assessment-grid" style="display:grid; gap:20px; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr));">
+                            <div class="iax-workspace-grid">
                                 <c:forEach var="assessment" items="${assessments}">
-                                    <article class="ia-assessment-card" style="padding:20px; border:1px solid var(--ins-border); border-radius:12px; background:#fff;">
-                                        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
+                                    <article class="iax-mini-card">
+                                        <div class="iax-mini-card-head">
                                             <div>
-                                                <span style="font-size:0.65rem; font-weight:800; text-transform:uppercase; color:var(--ins-primary); letter-spacing:0.05em; display:block; margin-bottom:4px;">${assessment.type}</span>
-                                                <strong style="display:block; font-size:1.1rem; color:var(--ins-text);"><c:out value="${assessment.title}"/></strong>
+                                                <span class="iax-mini-kicker">${assessment.type}</span>
+                                                <strong class="iax-mini-title"><c:out value="${assessment.title}"/></strong>
                                             </div>
-                                            <div style="width:32px; height:32px; border-radius:8px; background:var(--ins-accent-soft); color:var(--ins-primary); display:flex; align-items:center; justify-content:center;">
+                                            <div class="iax-mini-icon">
                                                 <i class="fas ${assessment.type == 'Assignment' ? 'fa-file-signature' : 'fa-stopwatch'}"></i>
                                             </div>
                                         </div>
-                                        <div style="display:flex; gap:12px; margin-bottom:20px; font-size:0.8rem; color:var(--ins-muted);">
-                                            <span><i class="fas fa-users" style="margin-right:4px;"></i> ${submissionCountByAssessmentId[assessment.assessmentId]}</span>
-                                            <span style="color:#ea580c; font-weight:600;"><i class="fas fa-clock-rotate-left" style="margin-right:4px;"></i> ${not empty pendingCountByAssessmentId[assessment.assessmentId] ? pendingCountByAssessmentId[assessment.assessmentId] : 0} pending</span>
+                                        <div class="iax-mini-meta">
+                                            <span><i class="fas fa-users"></i> ${submissionCountByAssessmentId[assessment.assessmentId]}</span>
+                                            <span class="is-pending"><i class="fas fa-clock-rotate-left"></i> ${not empty pendingCountByAssessmentId[assessment.assessmentId] ? pendingCountByAssessmentId[assessment.assessmentId] : 0} pending</span>
                                         </div>
-                                        <div style="display:flex; gap:8px; border-top:1px solid var(--ins-border); padding-top:16px;">
+                                        <div class="iax-mini-actions">
                                             <c:choose>
                                                 <c:when test="${assessment.type == 'Assignment'}">
-                                                    <button type="button" class="btn btn-secondary btn-sm" onclick="openAssessmentPage('submissions', ${assessment.assessmentId})" style="flex:1; justify-content:center;">View & Grade</button>
+                                                    <button type="button" class="btn btn-secondary btn-sm iax-mini-primary" onclick="openAssessmentPage('submissions', ${assessment.assessmentId})">View & Grade</button>
                                                 </c:when>
                                                 <c:otherwise>
-                                                    <button type="button" class="btn btn-secondary btn-sm" onclick="openAssessmentPage('dashboard', ${assessment.assessmentId})" style="flex:1; justify-content:center;">Review</button>
+                                                    <button type="button" class="btn btn-secondary btn-sm iax-mini-primary" onclick="openAssessmentPage('dashboard', ${assessment.assessmentId})">Review</button>
                                                 </c:otherwise>
                                             </c:choose>
-                                            <button type="button" class="btn btn-secondary btn-sm" onclick="openAssessmentPage('editor', ${assessment.assessmentId})" style="width:40px; justify-content:center;"><i class="fas fa-cog"></i></button>
-                                            <a href="${pageContext.request.contextPath}/instructor/assessments?action=archiveAssessment&courseId=${selectedCourse.courseId}&id=${assessment.assessmentId}" class="btn btn-danger btn-sm" style="width:40px; justify-content:center;" onclick="return confirm('Archive this assessment?')" title="Archive Assessment"><i class="fas fa-box-archive"></i></a>
+                                            <button type="button" class="btn btn-secondary btn-sm iax-btn-icon" onclick="openAssessmentPage('editor', ${assessment.assessmentId})"><i class="fas fa-cog"></i></button>
+                                            <a href="${pageContext.request.contextPath}/instructor/assessments?action=archiveAssessment&courseId=${selectedCourse.courseId}&id=${assessment.assessmentId}" class="btn btn-danger btn-sm iax-btn-icon" onclick="return confirm('Archive this assessment?')" title="Archive Assessment"><i class="fas fa-box-archive"></i></a>
                                         </div>
                                     </article>
                                 </c:forEach>
                             </div>
 
                             <c:if test="${not empty archivedAssessments}">
-                                <div style="margin-top:24px; padding:16px; background:#f8fafc; border-radius:12px; display:flex; justify-content:space-between; align-items:center;">
-                                    <span style="font-size:0.85rem; color:var(--ins-muted);">You have <strong>${fn:length(archivedAssessments)}</strong> archived assessments.</span>
+                                <div class="iax-archive-note">
+                                    <span>You have <strong>${fn:length(archivedAssessments)}</strong> archived assessments.</span>
                                     <button type="button" class="btn btn-secondary btn-sm" onclick="openAssessmentPage('archive')">Manage Archive</button>
                                 </div>
                             </c:if>

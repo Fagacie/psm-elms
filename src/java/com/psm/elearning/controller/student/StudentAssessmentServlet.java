@@ -785,7 +785,12 @@ public class StudentAssessmentServlet extends HttpServlet {
         }
 
         boolean objectiveAssessment = isObjectiveAssessment(assessment);
-        double percentage = computePercentage(submission.getScore(), assessment.getTotalMarks());
+        int fallbackTotal = 0;
+        if (assessment.getTotalMarks() == null || assessment.getTotalMarks() <= 0) {
+            List<AssessmentQuestion> allQuestions = assessmentQuestionDAO.findByAssessment(assessmentId);
+            fallbackTotal = (allQuestions != null) ? allQuestions.size() : 0;
+        }
+        double percentage = computePercentage(submission.getScore(), assessment.getTotalMarks(), fallbackTotal);
         List<AssessmentGradeAudit> audits = assessmentGradeAuditDAO.findBySubmission(submissionId);
         List<AssessmentQuestion> questions = objectiveAssessment ? assessmentQuestionDAO.findByAssessment(assessmentId) : Collections.emptyList();
         Map<Integer, String> studentAnswers = parseObjectiveAnswers(submission.getAnswersFilePath());
@@ -810,11 +815,12 @@ public class StudentAssessmentServlet extends HttpServlet {
         request.getRequestDispatcher("/WEB-INF/views/student/assessment-result.jsp").forward(request, response);
     }
 
-    private double computePercentage(Double score, Integer totalMarks) {
-        if (score == null || totalMarks == null || totalMarks <= 0) {
+    private double computePercentage(Double score, Integer totalMarks, int fallbackTotal) {
+        if (score == null) {
             return 0.0;
         }
-        return round2((score / totalMarks) * 100.0);
+        int total = (totalMarks != null && totalMarks > 0) ? totalMarks : (fallbackTotal > 0 ? fallbackTotal : 1);
+        return round2((score / total) * 100.0);
     }
 
     private String humanizeSubmissionStatus(AssessmentSubmission submission) {

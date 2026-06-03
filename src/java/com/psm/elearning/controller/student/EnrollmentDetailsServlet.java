@@ -396,8 +396,13 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                     }
                 }
                 bestScoreByAssessment.put(assessment.getAssessmentId(), bestScore);
-                if (bestScore != null && assessment.getTotalMarks() != null && assessment.getTotalMarks() > 0) {
-                    Double bestPercentage = computePercentage(bestScore, assessment.getTotalMarks());
+                if (bestScore != null) {
+                    int fallbackTotal = 0;
+                    if (assessment.getTotalMarks() == null || assessment.getTotalMarks() <= 0) {
+                        List<AssessmentQuestion> aqs = assessmentQuestionDAO.findByAssessment(assessment.getAssessmentId());
+                        fallbackTotal = (aqs != null) ? aqs.size() : 0;
+                    }
+                    Double bestPercentage = computePercentage(bestScore, assessment.getTotalMarks(), fallbackTotal);
                     bestPercentageByAssessment.put(assessment.getAssessmentId(), bestPercentage);
                     performanceBestScoreTotal += bestPercentage;
                     performanceBestScoreCount++;
@@ -969,7 +974,8 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                     request.setAttribute("assessmentResultStudentAnswers", studentAnswers);
                     request.setAttribute("assessmentResultCorrectAnswers", correctAnswers);
                     request.setAttribute("assessmentResultObjective", !"Assignment".equalsIgnoreCase(resultAssessment.getType()));
-                    request.setAttribute("assessmentResultPercentage", computePercentage(resultSubmission.getScore(), resultAssessment.getTotalMarks()));
+                    int fallbackTotal = resultQuestions != null ? resultQuestions.size() : 0;
+                    request.setAttribute("assessmentResultPercentage", computePercentage(resultSubmission.getScore(), resultAssessment.getTotalMarks(), fallbackTotal));
                     request.setAttribute("assessmentResultStatusLabel", humanizeSubmissionStatus(resultSubmission));
                     request.setAttribute("assessmentResultStatusClass", statusClassForSubmission(resultSubmission));
 
@@ -1075,6 +1081,21 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                 try {
                     List<AssessmentQuestion> assessmentQuestions = assessmentQuestionDAO.findByAssessment(selectedAssessment.getAssessmentId());
                     request.setAttribute("selectedAssessmentQuestions", assessmentQuestions != null ? assessmentQuestions : new ArrayList<AssessmentQuestion>());
+
+                    // Populate review answer maps when a latest submission exists (sidebar navigation)
+                    if (selectedAssessmentLatest != null
+                            && !"Assignment".equalsIgnoreCase(selectedAssessment.getType())
+                            && assessmentQuestions != null
+                            && !assessmentQuestions.isEmpty()
+                            && request.getAttribute("assessmentResultStudentAnswers") == null) {
+                        Map<Integer, String> studentAnswers = parseObjectiveAnswers(selectedAssessmentLatest.getAnswersFilePath());
+                        Map<Integer, String> correctAnswers = new LinkedHashMap<>();
+                        for (AssessmentQuestion aq : assessmentQuestions) {
+                            correctAnswers.put(aq.getQuestionId(), aq.getCorrectOption());
+                        }
+                        request.setAttribute("assessmentResultStudentAnswers", studentAnswers);
+                        request.setAttribute("assessmentResultCorrectAnswers", correctAnswers);
+                    }
                 } catch (Exception qEx) {
                     LOGGER.log(Level.WARNING, "Failed to load assessment questions inside Learning Hub", qEx);
                     request.setAttribute("selectedAssessmentQuestions", new ArrayList<AssessmentQuestion>());
@@ -1386,11 +1407,12 @@ public class EnrollmentDetailsServlet extends HttpServlet {
         return answers;
     }
 
-    private double computePercentage(Double score, Integer totalMarks) {
-        if (score == null || totalMarks == null || totalMarks <= 0) {
+    private double computePercentage(Double score, Integer totalMarks, int fallbackTotal) {
+        if (score == null) {
             return 0.0;
         }
-        return Math.round((score / totalMarks) * 1000.0) / 10.0;
+        int total = (totalMarks != null && totalMarks > 0) ? totalMarks : (fallbackTotal > 0 ? fallbackTotal : 1);
+        return Math.round((score / total) * 1000.0) / 10.0;
     }
 
     private String humanizeSubmissionStatus(AssessmentSubmission submission) {
@@ -1505,6 +1527,26 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                     }
                 } catch (Exception e) {
                     // Ignore
+                }
+            }
+
+            if (sumOfMarks <= 0) {
+                int questionCount = 0;
+                if (a != null && a.getAssessmentId() != null) {
+                    try (java.sql.Connection conn = com.psm.elearning.util.DBConnection.getConnection();
+                         java.sql.PreparedStatement ps = conn.prepareStatement("SELECT COUNT(*) FROM AssessmentQuestion WHERE AssessmentID = ?")) {
+                        ps.setInt(1, a.getAssessmentId());
+                        try (java.sql.ResultSet rs = ps.executeQuery()) {
+                            if (rs.next()) {
+                                questionCount = rs.getInt(1);
+                            }
+                        }
+                    } catch (Exception e) {
+                        // Ignore
+                    }
+                }
+                if (questionCount > 0) {
+                    sumOfMarks = questionCount * 1.0;
                 }
             }
 

@@ -18,6 +18,7 @@
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-shell.css">
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-assessments.css">
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-assessment-flow.css">
+                <link rel="stylesheet" href="${pageContext.request.contextPath}/css/InstructorAssessment.module.css?v=6">
                 <jsp:include page="/WEB-INF/views/common/head-external-assets.jsp" />
             </head>
 
@@ -36,7 +37,7 @@
                             <jsp:param name="currentLabel" value="Question Bank" />
                         </jsp:include>
 
-                        <c:set var="currentCourseFlow" value="assessments" />
+                        <c:set var="currentCourseFlow" value="assessments" scope="request" />
                         <jsp:include page="/WEB-INF/views/instructor/fragments/course-flow-nav.jsp" />
 
                         <section class="ins-page-head">
@@ -59,11 +60,11 @@
                                     class="btn btn-secondary">
                                     <i class="fas fa-sliders"></i> Settings
                                 </a>
-                                <a href="${pageContext.request.contextPath}/instructor/assessments?view=dashboard&courseId=${selectedCourse.courseId}&assessmentId=${selectedAssessment.assessmentId}&success=draftsaved"
+                                <a href="${pageContext.request.contextPath}/instructor/courses?action=workspace&courseId=${selectedCourse.courseId}&success=draftsaved#assessments"
                                     class="btn btn-secondary">
                                     <i class="fas fa-floppy-disk"></i> Save Draft
                                 </a>
-                                <a href="${pageContext.request.contextPath}/instructor/assessments?view=dashboard&courseId=${selectedCourse.courseId}&assessmentId=${selectedAssessment.assessmentId}&success=finished"
+                                <a href="${pageContext.request.contextPath}/instructor/courses?action=workspace&courseId=${selectedCourse.courseId}&success=finished#assessments"
                                     class="btn btn-secondary">
                                     <i class="fas fa-check"></i> Finish Setup
                                 </a>

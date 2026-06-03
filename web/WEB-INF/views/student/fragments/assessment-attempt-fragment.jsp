@@ -1,132 +1,98 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
-<section class="ax-stage" data-attempt-shell>
-    <article class="ax-frame ax-focus__hero">
-        <div>
-            <span class="ax-overview__eyebrow"><i class="fas fa-shield-halved"></i> Active Assessment</span>
-            <h1 class="ax-focus__title">${assessment.title}</h1>
-            <p class="ax-focus__body">Move through the questions using the stepper, keep an eye on the timer, and submit when you are ready.</p>
+<section class="container" data-attempt-shell>
+    <div class="active_assessment_container">
+        
+        <div class="active_question_header">
+            <div>
+                <span style="font-size: 0.875rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;"><i class="fas fa-shield-halved"></i> Active Assessment</span>
+                <h1 class="title" style="margin-top: 4px; font-size: 1.75rem; text-align: left;">${assessment.title}</h1>
+            </div>
+            <div class="timer_box" data-timer>
+                <i class="fas fa-clock"></i>
+                <span data-timer-text>00:00</span>
+            </div>
         </div>
-        <div class="ax-timer" data-timer>
-            <i class="fas fa-clock"></i>
-            <span data-timer-text>00:00</span>
+
+        <div class="progress_row">
+            <span class="progress_text">Question <strong data-current-question>1</strong> of ${questions.size()}</span>
+            <span class="progress_text">Progress</span>
         </div>
-    </article>
+        <div class="progress_bar_bg">
+            <div class="progress_bar_fill" data-progress-fill></div>
+        </div>
 
-    <div class="ax-layout">
-        <section class="ax-panel">
-            <div class="ax-progress">
-                <div class="ax-progress__meta">
-                    <span>Question <strong data-current-question>1</strong> of ${questions.size()}</span>
-                    <span>Completion progress</span>
-                </div>
-                <div class="ax-progress__bar">
-                    <div class="ax-progress__fill" data-progress-fill></div>
-                </div>
-            </div>
+        <div class="stepper_row">
+            <c:forEach var="q" items="${questions}" varStatus="loop">
+                <button type="button" class="stepper_item ${loop.first ? 'stepper_item_active' : ''}" data-step-index="${loop.index}">${loop.index + 1}</button>
+            </c:forEach>
+        </div>
 
-            <div class="ax-stepper" style="margin-top: 20px;">
-                <c:forEach var="q" items="${questions}" varStatus="loop">
-                    <button type="button" class="ax-stepper__item ${loop.first ? 'is-active' : ''}" data-step-index="${loop.index}">${loop.index + 1}</button>
-                </c:forEach>
-            </div>
+        <form method="post"
+              action="${pageContext.request.contextPath}/student/assessments"
+              data-attempt-form
+              data-timer-start="${timerStartTime}"
+              data-timer-duration="${timerDurationSeconds}"
+              class="ax-attempt-form">
+            <input type="hidden" name="assessmentId" value="${assessment.assessmentId}">
+            <input type="hidden" name="enrollmentId" value="${enrollment.enrollmentId}">
+            <input type="hidden" name="timerStart" value="${timerStartTime}">
+            <input type="hidden" name="timerDuration" value="${timerDurationSeconds}">
+            <input type="hidden" name="exitSubmission" value="0">
 
-            <form method="post"
-                  action="${pageContext.request.contextPath}/student/assessments"
-                  data-attempt-form
-                  data-timer-start="${timerStartTime}"
-                  data-timer-duration="${timerDurationSeconds}"
-                  style="display: grid; gap: 24px; margin-top: 24px;">
-                <input type="hidden" name="assessmentId" value="${assessment.assessmentId}">
-                <input type="hidden" name="enrollmentId" value="${enrollment.enrollmentId}">
-                <input type="hidden" name="timerStart" value="${timerStartTime}">
-                <input type="hidden" name="timerDuration" value="${timerDurationSeconds}">
-                <input type="hidden" name="exitSubmission" value="0">
-
-                <c:forEach var="q" items="${questions}" varStatus="loop">
-                    <article class="ax-question ${loop.first ? 'is-active' : ''}" data-question-index="${loop.index}">
-                        <div class="ax-question__head">
-                            <div class="ax-question__index">${loop.index + 1}</div>
-                            <h2 class="ax-question__title">${q.questionText}</h2>
-                        </div>
-                        <div class="ax-answer-grid">
-                            <label class="ax-answer-card">
-                                <input type="radio" name="q_${q.questionId}" value="A" required>
-                                <span class="ax-answer-card__bullet"></span>
-                                <span class="ax-answer-card__label">A</span>
-                                <span class="ax-answer-card__text">${q.optionA}</span>
-                            </label>
-                            <label class="ax-answer-card">
-                                <input type="radio" name="q_${q.questionId}" value="B" required>
-                                <span class="ax-answer-card__bullet"></span>
-                                <span class="ax-answer-card__label">B</span>
-                                <span class="ax-answer-card__text">${q.optionB}</span>
-                            </label>
-                            <label class="ax-answer-card">
-                                <input type="radio" name="q_${q.questionId}" value="C" required>
-                                <span class="ax-answer-card__bullet"></span>
-                                <span class="ax-answer-card__label">C</span>
-                                <span class="ax-answer-card__text">${q.optionC}</span>
-                            </label>
-                            <label class="ax-answer-card">
-                                <input type="radio" name="q_${q.questionId}" value="D" required>
-                                <span class="ax-answer-card__bullet"></span>
-                                <span class="ax-answer-card__label">D</span>
-                                <span class="ax-answer-card__text">${q.optionD}</span>
-                            </label>
-                        </div>
-                    </article>
-                </c:forEach>
-
-                <div class="ax-sticky-bar">
-                    <div class="ax-sticky-bar__summary">
-                        <strong style="color: var(--ax-heading);">Submit when your answers are ready</strong>
-                        <span style="color: var(--ax-muted);">The button locks and switches to a grading state immediately.</span>
+            <c:forEach var="q" items="${questions}" varStatus="loop">
+                <article class="ax-question ${loop.first ? 'is-active' : ''}" data-question-index="${loop.index}" style="display: ${loop.first ? 'block' : 'none'};">
+                    <h2 class="question_statement">${loop.index + 1}. ${q.questionText}</h2>
+                    
+                    <div class="choices_container">
+                        <label class="choice_block">
+                            <input type="radio" name="q_${q.questionId}" value="A" style="display: none;" required>
+                            <span class="choice_badge">A</span>
+                            <span class="choice_text">${q.optionA}</span>
+                        </label>
+                        <label class="choice_block">
+                            <input type="radio" name="q_${q.questionId}" value="B" style="display: none;" required>
+                            <span class="choice_badge">B</span>
+                            <span class="choice_text">${q.optionB}</span>
+                        </label>
+                        <label class="choice_block">
+                            <input type="radio" name="q_${q.questionId}" value="C" style="display: none;" required>
+                            <span class="choice_badge">C</span>
+                            <span class="choice_text">${q.optionC}</span>
+                        </label>
+                        <label class="choice_block">
+                            <input type="radio" name="q_${q.questionId}" value="D" style="display: none;" required>
+                            <span class="choice_badge">D</span>
+                            <span class="choice_text">${q.optionD}</span>
+                        </label>
                     </div>
-                    <div class="ax-actions">
-                        <button type="button" class="ax-btn ax-btn--secondary" data-prev-question>
-                            <i class="fas fa-arrow-left"></i>
-                            <span>Previous</span>
-                        </button>
-                        <button type="button" class="ax-btn ax-btn--secondary" data-next-question>
-                            <span>Next</span>
-                            <i class="fas fa-arrow-right"></i>
-                        </button>
-                        <button type="button" class="ax-btn ax-btn--danger" data-exit-attempt>
-                            <i class="fas fa-door-open"></i>
-                            <span>Save & Exit</span>
-                        </button>
-                        <button type="submit" class="ax-btn ax-btn--primary" data-submit-button>
-                            <i class="fas fa-paper-plane"></i>
-                            <span>Submit Assessment</span>
-                        </button>
-                    </div>
-                </div>
-            </form>
-        </section>
+                </article>
+            </c:forEach>
 
-        <aside class="ax-side-panel">
-            <h2 class="ax-side-panel__title">Assessment Snapshot</h2>
-            <p class="ax-side-panel__copy">Keep an eye on timing, completion, and attempt context while you work.</p>
-            <div class="ax-review-list" style="margin-top: 20px;">
-                <div class="ax-inline-card">
-                    <i class="fas fa-clock"></i>
-                    <div><span>Time Limit</span><strong>${assessment.duration != null ? assessment.duration : '--'}${assessment.duration != null ? ' min' : ''}</strong></div>
+            <div class="submit_action_container" style="justify-content: space-between; border-top: 1px solid #e2e8f0; padding-top: 24px;">
+                <div style="display: flex; gap: 8px;">
+                    <button type="button" class="secondary_button" data-prev-question>
+                        <i class="fas fa-arrow-left"></i>
+                        <span>Previous</span>
+                    </button>
+                    <button type="button" class="secondary_button" data-next-question>
+                        <span>Next</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
                 </div>
-                <div class="ax-inline-card">
-                    <i class="fas fa-list-check"></i>
-                    <div><span>Questions</span><strong>${questions.size()}</strong></div>
-                </div>
-                <div class="ax-inline-card">
-                    <i class="fas fa-repeat"></i>
-                    <div><span>Attempt</span><strong>${usedAttempts + 1} of ${allowedAttempts}</strong></div>
-                </div>
-                <div class="ax-inline-card">
-                    <i class="fas fa-bullseye"></i>
-                    <div><span>Passing Score</span><strong>70%</strong></div>
+                <div style="display: flex; gap: 8px;">
+                    <button type="button" class="danger_button" data-exit-attempt>
+                        <i class="fas fa-door-open"></i>
+                        <span>Save & Exit</span>
+                    </button>
+                    <button type="submit" class="primary_button" data-submit-button>
+                        <i class="fas fa-paper-plane"></i>
+                        <span>Submit Assessment</span>
+                    </button>
                 </div>
             </div>
-        </aside>
+        </form>
     </div>
 </section>

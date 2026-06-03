@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-courses.css?v=3">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-organizer.css?v=3">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-assessment-flow.css?v=3">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/InstructorAssessment.module.css?v=6">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/theme-toggle.css?v=3">
     <script defer src="${pageContext.request.contextPath}/js/theme-toggle.js"></script>
@@ -451,4 +452,3 @@ function showErrorToast(message) {
 
 </body>
 </html>
-

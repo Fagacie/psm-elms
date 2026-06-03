@@ -3,8 +3,17 @@
         initStartTransitions(root);
         initStageToggles(root);
         initUploadZones(root);
-        initForms(root);
+        initChoiceBlocks(root);
         initAttemptExperience(root);
+        initForms(root);
+        initResultActions(root);
+    }
+
+    function stripDuplicateNav(container) {
+        var selectors = ['.hub_topBar', '.hub_sidebar', '.sv-topbar', '.sv-sidebar', '.sv-layout > aside', 'header[role="banner"]'];
+        selectors.forEach(function (sel) {
+            container.querySelectorAll(sel).forEach(function (el) { el.remove(); });
+        });
     }
 
     function notify(type, message) {
@@ -36,7 +45,7 @@
 
             button.addEventListener('click', function (event) {
                 event.preventDefault();
-                var host = button.closest('[data-assessment-stage-host]');
+                var host = button.closest('[data-assessment-stage-host]') || document.querySelector('[data-assessment-stage-host]') || document.querySelector('.lh-content-stage');
                 var url = button.getAttribute('data-load-attempt-url');
                 if (!host || !url) {
                     window.location.href = url;
@@ -60,18 +69,28 @@
                     return response.text();
                 })
                 .then(function (html) {
-                    host.innerHTML = html;
+                    var parser = new DOMParser();
+                    var doc = parser.parseFromString(html, 'text/html');
+                    var targetContent = doc.querySelector('[data-attempt-shell]') || doc.querySelector('[data-assessment-stage-host]') || doc.querySelector('.lh-content-stage') || doc.querySelector('.ax-stage-host');
+                    
+                    if (targetContent) {
+                        host.innerHTML = targetContent.tagName === 'SECTION' ? targetContent.outerHTML : targetContent.innerHTML;
+                    } else {
+                        host.innerHTML = html;
+                    }
+                    stripDuplicateNav(host);
+                    
                     host.classList.remove('is-loading');
                     if (window.history && window.history.pushState) {
                         window.history.pushState({ assessmentStage: 'active' }, '', url);
                     }
                     init(host);
-                    var focusTitle = host.querySelector('.ax-focus__title');
+                    var focusTitle = host.querySelector('.title') || host.querySelector('.ax-focus__title');
                     if (focusTitle) {
                         focusTitle.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }
                 })
-                .catch(function () {
+                .catch(function (err) {
                     host.classList.remove('is-loading');
                     button.classList.remove('is-busy');
                     button.removeAttribute('aria-disabled');
@@ -94,60 +113,68 @@
                 var target = host.querySelector('#' + targetId);
                 var current = host.querySelector('[data-stage-current]');
                 if (!target) {
+                    var globalTarget = document.getElementById(targetId);
+                    if (globalTarget) target = globalTarget;
+                }
+                if (!target) {
                     return;
                 }
 
                 if (current) {
-                    current.hidden = true;
+                    current.style.display = 'none';
                     current.removeAttribute('data-stage-current');
                 }
-                target.hidden = false;
+                target.style.display = 'block';
                 target.setAttribute('data-stage-current', 'true');
                 target.scrollIntoView({ behavior: 'smooth', block: 'start' });
             });
         });
     }
 
+    function formatBytes(bytes) {
+        if (!bytes) {
+            return '0 KB';
+        }
+        var units = ['B', 'KB', 'MB', 'GB'];
+        var value = bytes;
+        var unitIndex = 0;
+        while (value >= 1024 && unitIndex < units.length - 1) {
+            value = value / 1024;
+            unitIndex += 1;
+        }
+        return value.toFixed(unitIndex === 0 ? 0 : 1) + ' ' + units[unitIndex];
+    }
+
     function initUploadZones(root) {
-        root.querySelectorAll('[data-upload-zone]').forEach(function (zone) {
+        root.querySelectorAll('.dropzone').forEach(function (zone) {
             if (zone.dataset.bound === 'true') {
                 return;
             }
             zone.dataset.bound = 'true';
 
             var input = zone.querySelector('input[type="file"]');
-            var list = zone.closest('form') ? zone.closest('form').querySelector('[data-file-list]') : null;
-            if (!input || !list) {
+            var contentNode = zone.querySelector('.dropzone_content') || zone;
+            var list = zone.closest('form') ? zone.closest('form').querySelector('.file_list') : null;
+            if (!input) {
                 return;
             }
 
-            function updateList(files) {
-                list.innerHTML = '';
-                if (!files || !files.length) {
-                    return;
+            // Clicking the zone triggers file input selection
+            zone.addEventListener('click', function (e) {
+                if (e.target !== input) {
+                    input.click();
                 }
+            });
 
-                Array.prototype.forEach.call(files, function (file) {
-                    var item = document.createElement('div');
-                    item.className = 'ax-file-item';
-                    item.innerHTML =
-                        '<div class="ax-file-item__meta">' +
-                            '<i class="fas fa-file-lines"></i>' +
-                            '<div>' +
-                                '<div class="ax-file-item__name"></div>' +
-                                '<div class="ax-file-item__size"></div>' +
-                            '</div>' +
-                        '</div>' +
-                        '<button type="button" class="ax-file-remove" aria-label="Remove attachment"><i class="fas fa-xmark"></i></button>';
-
-                    item.querySelector('.ax-file-item__name').textContent = file.name;
-                    item.querySelector('.ax-file-item__size').textContent = formatBytes(file.size);
-                    item.querySelector('.ax-file-remove').addEventListener('click', function () {
-                        input.value = '';
-                        updateList([]);
-                    });
-                    list.appendChild(item);
-                });
+            function updateDropzoneDisplay(files) {
+                if (files && files.length > 0) {
+                    var file = files[0];
+                    zone.classList.add('dropzone_staged');
+                    contentNode.innerHTML = '<i class="fas fa-file-pdf dropzone_icon"></i><div class="dropzone_text">' + file.name + '</div><div class="dropzone_subtext">' + formatBytes(file.size) + ' - Click or drag to replace</div>';
+                } else {
+                    zone.classList.remove('dropzone_staged');
+                    contentNode.innerHTML = '<i class="fas fa-cloud-arrow-up dropzone_icon"></i><div class="dropzone_text">Click to browse or drag your PDF answer file here</div><div class="dropzone_subtext">Supports PDF up to 50MB</div>';
+                }
             }
 
             function syncFiles(fileList) {
@@ -158,7 +185,7 @@
                     });
                     input.files = transfer.files;
                 }
-                updateList(fileList);
+                updateDropzoneDisplay(fileList);
             }
 
             ['dragenter', 'dragover'].forEach(function (eventName) {
@@ -182,30 +209,125 @@
             });
 
             input.addEventListener('change', function () {
-                updateList(input.files);
+                updateDropzoneDisplay(input.files);
+            });
+        });
+    }
+
+    function initChoiceBlocks(root) {
+        root.querySelectorAll('.choice_block').forEach(function (block) {
+            if (block.dataset.bound === 'true') {
+                return;
+            }
+            block.dataset.bound = 'true';
+
+            var input = block.querySelector('input[type="radio"]');
+            if (!input) return;
+
+            input.addEventListener('change', function () {
+                var name = input.name;
+                var form = block.closest('form') || root;
+                form.querySelectorAll('input[name="' + name + '"]').forEach(function (peer) {
+                    var peerBlock = peer.closest('.choice_block');
+                    if (peerBlock) {
+                        peerBlock.classList.toggle('choice_block_selected', peer.checked);
+                    }
+                });
             });
         });
     }
 
     function initForms(root) {
-        root.querySelectorAll('[data-loading-submit]').forEach(function (form) {
+        root.querySelectorAll('[data-loading-submit], #assignmentHubForm').forEach(function (form) {
             if (form.dataset.bound === 'true') {
                 return;
             }
             form.dataset.bound = 'true';
 
-            form.addEventListener('submit', function () {
-                var button = form.querySelector('[data-submit-button]');
+            form.addEventListener('submit', function (event) {
+                var button = form.querySelector('[data-submit-button]') || form.querySelector('button[type="submit"]');
                 if (!button || button.dataset.busy === 'true') {
                     return;
                 }
+                event.preventDefault();
 
                 button.dataset.busy = 'true';
-                button.classList.add('is-busy');
                 button.disabled = true;
-                button.innerHTML = '<i class="fas fa-spinner"></i><span>' + (button.getAttribute('data-loading-label') || 'Submitting...') + '</span>';
+                var originalHTML = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>' + (button.getAttribute('data-loading-label') || 'Submitting...') + '</span>';
+
+                var formData = new FormData(form);
+                fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'fetch'
+                    }
+                })
+                .then(function (response) {
+                    if (!response.ok) throw new Error('Submission failed');
+                    return response.text();
+                })
+                .then(function (html) {
+                    var parser = new DOMParser();
+                    var doc = parser.parseFromString(html, 'text/html');
+                    var newContent = doc.querySelector('.lh-content-stage') || doc.querySelector('.ax-shell') || doc.querySelector('.sa-shell');
+                    var stage = document.querySelector('.lh-content-stage');
+                    if (newContent && stage) {
+                        stage.innerHTML = newContent.innerHTML;
+                        stripDuplicateNav(stage);
+                        init(stage);
+                        syncHubProgress(doc);
+                    } else {
+                        window.location.reload();
+                    }
+                })
+                .catch(function (err) {
+                    button.dataset.busy = 'false';
+                    button.disabled = false;
+                    button.innerHTML = originalHTML;
+                    notify('error', 'Submission failed: ' + err.message);
+                });
             });
         });
+    }
+
+    function syncHubProgress(doc) {
+        ['lhTopbarPct', 'lhTopbarFill', 'lhSidebarProgressPercent', 'lhSidebarProgressBar', 'edMaterialsViewedCount'].forEach(function (id) {
+            var src = doc.getElementById(id);
+            var dest = document.getElementById(id);
+            if (src && dest) {
+                if (id === 'lhTopbarFill' || id === 'lhSidebarProgressBar') {
+                    dest.style.width = src.style.width;
+                } else {
+                    dest.textContent = src.textContent;
+                }
+            }
+        });
+        
+        var destSidebar = document.getElementById('svSidebar');
+        var srcSidebar = doc.getElementById('svSidebar');
+        if (destSidebar && srcSidebar) {
+            var destItems = destSidebar.querySelectorAll('.lh-chapter-item');
+            var srcItems = srcSidebar.querySelectorAll('.lh-chapter-item');
+            destItems.forEach(function (destItem, index) {
+                var srcItem = srcItems[index];
+                if (srcItem) {
+                    destItem.className = srcItem.className;
+                    var destIcon = destItem.querySelector('.hub_completionToggle i');
+                    var srcIcon = srcItem.querySelector('.hub_completionToggle i');
+                    if (destIcon && srcIcon) {
+                        destIcon.className = srcIcon.className;
+                    }
+                    var destBtn = destItem.querySelector('.hub_completionToggle');
+                    var srcBtn = srcItem.querySelector('.hub_completionToggle');
+                    if (destBtn && srcBtn) {
+                        destBtn.className = srcBtn.className;
+                        destBtn.disabled = srcBtn.disabled;
+                    }
+                }
+            });
+        }
     }
 
     function initAttemptExperience(root) {
@@ -217,9 +339,9 @@
 
             var attemptShell = form.closest('[data-attempt-shell]') || root;
             var questions = Array.prototype.slice.call(form.querySelectorAll('[data-question-index]'));
-            var stepperButtons = Array.prototype.slice.call(form.querySelectorAll('[data-step-index]'));
-            var currentIndexNode = form.querySelector('[data-current-question]');
-            var progressFill = form.querySelector('[data-progress-fill]');
+            var stepperButtons = Array.prototype.slice.call(attemptShell.querySelectorAll('[data-step-index]'));
+            var currentIndexNode = attemptShell.querySelector('[data-current-question]');
+            var progressFill = attemptShell.querySelector('[data-progress-fill]');
             var submitButton = form.querySelector('[data-submit-button]');
             var previousButton = form.querySelector('[data-prev-question]');
             var nextButton = form.querySelector('[data-next-question]');
@@ -238,8 +360,7 @@
                     return;
                 }
                 submitButton.disabled = true;
-                submitButton.classList.add('is-busy');
-                submitButton.innerHTML = '<i class="fas fa-spinner"></i><span>' + label + '</span>';
+                submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>' + label + '</span>';
             }
 
             function questionAnswered(question) {
@@ -258,10 +379,10 @@
                     if (answered) {
                         completed += 1;
                         if (chip) {
-                            chip.classList.add('is-complete');
+                            chip.classList.add('stepper_item_completed');
                         }
                     } else if (chip) {
-                        chip.classList.remove('is-complete');
+                        chip.classList.remove('stepper_item_completed');
                     }
                 });
 
@@ -276,10 +397,10 @@
                 }
                 activeIndex = index;
                 questions.forEach(function (question, questionIndex) {
-                    question.classList.toggle('is-active', questionIndex === activeIndex);
+                    question.style.display = questionIndex === activeIndex ? 'block' : 'none';
                 });
                 stepperButtons.forEach(function (button, buttonIndex) {
-                    button.classList.toggle('is-active', buttonIndex === activeIndex);
+                    button.classList.toggle('stepper_item_active', buttonIndex === activeIndex);
                 });
                 if (currentIndexNode) {
                     currentIndexNode.textContent = String(activeIndex + 1);
@@ -288,9 +409,11 @@
                     previousButton.disabled = activeIndex === 0;
                 }
                 if (nextButton) {
-                    nextButton.innerHTML = activeIndex === questions.length - 1
-                        ? '<i class="fas fa-flag-checkered"></i><span>Review & Submit</span>'
-                        : '<span>Next</span><i class="fas fa-arrow-right"></i>';
+                    if (activeIndex === questions.length - 1) {
+                        nextButton.style.display = 'none';
+                    } else {
+                        nextButton.style.display = 'inline-flex';
+                    }
                 }
             }
 
@@ -304,10 +427,46 @@
                 return list;
             }
 
-            function submitWithLoading(label) {
+            function submitWithAJAX() {
                 isSubmitting = true;
-                setBusyState(label);
-                form.submit();
+                setBusyState('Grading submission...');
+                
+                var formData = new FormData(form);
+                fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'fetch'
+                    }
+                })
+                .then(function (response) {
+                    if (!response.ok) throw new Error('Submission failed');
+                    return response.text();
+                })
+                .then(function (html) {
+                    if (timerHandle) window.clearInterval(timerHandle);
+                    
+                    var parser = new DOMParser();
+                    var doc = parser.parseFromString(html, 'text/html');
+                    var newContent = doc.querySelector('.lh-content-stage') || doc.querySelector('.ax-shell') || doc.querySelector('.sa-shell');
+                    var stage = document.querySelector('.lh-content-stage');
+                    if (newContent && stage) {
+                        stage.innerHTML = newContent.innerHTML;
+                        stripDuplicateNav(stage);
+                        init(stage);
+                        syncHubProgress(doc);
+                    } else {
+                        window.location.reload();
+                    }
+                })
+                .catch(function (err) {
+                    isSubmitting = false;
+                    notify('error', 'Submission failed: ' + err.message);
+                    if (submitButton) {
+                        submitButton.disabled = false;
+                        submitButton.innerHTML = '<i class="fas fa-paper-plane"></i><span>Submit Assessment</span>';
+                    }
+                });
             }
 
             function updateTimer() {
@@ -319,10 +478,10 @@
                 if (remainingMillis <= 0) {
                     window.clearInterval(timerHandle);
                     timerText.textContent = '00:00';
-                    timerNode.classList.remove('is-warning');
-                    timerNode.classList.add('is-critical');
+                    timerNode.classList.remove('is_warning');
+                    timerNode.classList.add('is_critical');
                     setTimeout(function () {
-                        submitWithLoading('Grading your submission...');
+                        submitWithAJAX();
                     }, 700);
                     return;
                 }
@@ -331,29 +490,23 @@
                 var minutes = Math.floor(totalSeconds / 60);
                 var seconds = totalSeconds % 60;
                 timerText.textContent = String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
-                timerNode.classList.toggle('is-warning', remainingMillis <= 120000 && remainingMillis > 30000);
-                timerNode.classList.toggle('is-critical', remainingMillis <= 30000);
+                
+                // Add warnings
+                if (remainingMillis <= 120000 && remainingMillis > 30000) {
+                    timerNode.classList.add('is_warning');
+                    timerNode.classList.remove('is_critical');
+                } else if (remainingMillis <= 30000) {
+                    timerNode.classList.add('is_critical');
+                    timerNode.classList.remove('is_warning');
+                } else {
+                    timerNode.classList.remove('is_warning', 'is_critical');
+                }
             }
 
             stepperButtons.forEach(function (button) {
                 button.addEventListener('click', function () {
                     showQuestion(Number(button.getAttribute('data-step-index')));
                 });
-            });
-
-            form.querySelectorAll('.ax-answer-card input[type="radio"]').forEach(function (input) {
-                function syncSelection() {
-                    var name = input.name;
-                    form.querySelectorAll('input[name="' + name + '"]').forEach(function (peer) {
-                        var card = peer.closest('.ax-answer-card');
-                        if (card) {
-                            card.classList.toggle('is-selected', peer.checked);
-                        }
-                    });
-                    updateProgress();
-                }
-                syncSelection();
-                input.addEventListener('change', syncSelection);
             });
 
             if (previousButton) {
@@ -364,17 +517,7 @@
 
             if (nextButton) {
                 nextButton.addEventListener('click', function () {
-                    if (activeIndex < questions.length - 1) {
-                        showQuestion(activeIndex + 1);
-                        return;
-                    }
-
-                    var unanswered = unansweredIndexes();
-                    if (unanswered.length) {
-                        notify('warning', 'You still have unanswered questions: ' + unanswered.join(', '));
-                    } else {
-                        notify('success', 'All questions answered. You can submit when ready.');
-                    }
+                    showQuestion(activeIndex + 1);
                 });
             }
 
@@ -385,7 +528,7 @@
                         'Exit now? Your current attempt will be submitted immediately.',
                         function () {
                             exitField.value = '1';
-                            submitWithLoading('Saving your attempt...');
+                            submitWithAJAX();
                         }
                     );
                 });
@@ -402,16 +545,20 @@
                     : 'Submit this assessment now?';
 
                 confirmAction('Submit Assessment', message, function () {
-                    submitWithLoading('Grading your submission...');
+                    submitWithAJAX();
                 });
             });
 
-            window.addEventListener('beforeunload', function (event) {
-                if (isSubmitting) {
-                    return;
+            // Synchronize selection changes to class highlights on choices
+            form.querySelectorAll('.choice_block input[type="radio"]').forEach(function (input) {
+                input.addEventListener('change', function () {
+                    updateProgress();
+                });
+                // Initial check
+                var block = input.closest('.choice_block');
+                if (block) {
+                    block.classList.toggle('choice_block_selected', input.checked);
                 }
-                event.preventDefault();
-                event.returnValue = 'Assessment in progress. Leaving may end your attempt.';
             });
 
             showQuestion(0);
@@ -423,18 +570,26 @@
         });
     }
 
-    function formatBytes(bytes) {
-        if (!bytes) {
-            return '0 KB';
-        }
-        var units = ['B', 'KB', 'MB', 'GB'];
-        var value = bytes;
-        var unitIndex = 0;
-        while (value >= 1024 && unitIndex < units.length - 1) {
-            value = value / 1024;
-            unitIndex += 1;
-        }
-        return value.toFixed(unitIndex === 0 ? 0 : 1) + ' ' + units[unitIndex];
+    function initResultActions(root) {
+        root.querySelectorAll('[data-complete-and-continue]').forEach(function (button) {
+            if (button.dataset.bound === 'true') {
+                return;
+            }
+            button.dataset.bound = 'true';
+            button.addEventListener('click', function (event) {
+                event.preventDefault();
+                if (window.LearningHub && typeof window.LearningHub.navigateToNext === 'function') {
+                    window.LearningHub.navigateToNext();
+                } else {
+                    var nextBtn = document.querySelector('.sv-btn--primary[href*="learning"]');
+                    if (nextBtn) {
+                        window.location.href = nextBtn.href;
+                    } else {
+                        window.location.reload();
+                    }
+                }
+            });
+        });
     }
 
     document.addEventListener('DOMContentLoaded', function () {
@@ -442,6 +597,7 @@
     });
 
     window.StudentAssessmentFlow = {
-        init: init
+        init: init,
+        syncHubProgress: syncHubProgress
     };
 })();

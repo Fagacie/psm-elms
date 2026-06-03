@@ -196,6 +196,26 @@ public class InstructorAssessmentServlet extends HttpServlet {
             viewParam = (String) request.getAttribute("pathView");
         }
         String activeView = normalizeView(viewParam);
+
+        if (selectedCourseId == null) {
+            String err = request.getParameter("error");
+            String succ = request.getParameter("success");
+            String query = "";
+            if (err != null) query = "?error=" + err;
+            else if (succ != null) query = "?success=" + succ;
+            response.sendRedirect(request.getContextPath() + "/instructor/courses" + query);
+            return;
+        }
+
+        if (VIEW_DASHBOARD.equals(activeView) || VIEW_ARCHIVE.equals(activeView)) {
+            String err = request.getParameter("error");
+            String succ = request.getParameter("success");
+            String query = "";
+            if (err != null) query = "&error=" + err;
+            else if (succ != null) query = "&success=" + succ;
+            response.sendRedirect(request.getContextPath() + "/instructor/courses?action=workspace&courseId=" + selectedCourseId + query + "#assessments");
+            return;
+        }
         
         String gradeFilter = normalize(request.getParameter("gradeFilter"));
         if (gradeFilter.isEmpty()) gradeFilter = "all";
@@ -460,13 +480,13 @@ public class InstructorAssessmentServlet extends HttpServlet {
 
         Integer courseId = parseInt(request.getParameter("courseId"));
         if (courseId == null) {
-            response.sendRedirect(request.getContextPath() + "/instructor/assessments?error=invalid");
+            response.sendRedirect(request.getContextPath() + "/instructor/courses?error=invalid");
             return;
         }
 
         Course course = courseDAO.findById(courseId);
         if (course == null || !userId.equals(course.getCreatedBy())) {
-            response.sendRedirect(request.getContextPath() + "/instructor/assessments?error=permission");
+            response.sendRedirect(request.getContextPath() + "/instructor/courses?error=permission");
             return;
         }
 
@@ -525,14 +545,14 @@ public class InstructorAssessmentServlet extends HttpServlet {
         Integer courseId = parseInt(request.getParameter("courseId"));
         Integer assessmentId = parseInt(request.getParameter("assessmentId"));
         if (courseId == null || assessmentId == null) {
-            response.sendRedirect(request.getContextPath() + "/instructor/assessments?error=invalid");
+            response.sendRedirect(request.getContextPath() + "/instructor/courses?error=invalid");
             return;
         }
 
         Course course = courseDAO.findById(courseId);
         Assessment assessment = assessmentDAO.findAnyById(assessmentId);
         if (course == null || assessment == null || !userId.equals(course.getCreatedBy()) || !assessment.getCourseId().equals(courseId)) {
-            response.sendRedirect(request.getContextPath() + "/instructor/assessments?error=permission");
+            response.sendRedirect(request.getContextPath() + "/instructor/courses?error=permission");
             return;
         }
 
@@ -588,14 +608,14 @@ public class InstructorAssessmentServlet extends HttpServlet {
         Integer courseId = parseInt(request.getParameter("courseId"));
         Integer assessmentId = parseInt(request.getParameter("assessmentId"));
         if (courseId == null || assessmentId == null) {
-            response.sendRedirect(request.getContextPath() + "/instructor/assessments?error=invalid");
+            response.sendRedirect(request.getContextPath() + "/instructor/courses?error=invalid");
             return;
         }
 
         Course course = courseDAO.findById(courseId);
         Assessment assessment = assessmentDAO.findById(assessmentId);
         if (course == null || assessment == null || !userId.equals(course.getCreatedBy()) || !assessment.getCourseId().equals(courseId)) {
-            response.sendRedirect(request.getContextPath() + "/instructor/assessments?error=permission");
+            response.sendRedirect(request.getContextPath() + "/instructor/courses?error=permission");
             return;
         }
 
@@ -608,7 +628,7 @@ public class InstructorAssessmentServlet extends HttpServlet {
         assessment.setStatus(Assessment.STATUS_PUBLISHED);
         assessmentDAO.update(assessment);
 
-        response.sendRedirect(request.getContextPath() + "/instructor/assessments?view=dashboard&courseId=" + courseId + "&assessmentId=" + assessmentId + "&success=published");
+        response.sendRedirect(request.getContextPath() + "/instructor/courses?action=workspace&courseId=" + courseId + "&success=published#assessments");
     }
 
     private void archiveAssessment(HttpServletRequest request, HttpServletResponse response, Integer userId)
@@ -617,19 +637,19 @@ public class InstructorAssessmentServlet extends HttpServlet {
         Integer courseId = parseInt(request.getParameter("courseId"));
         Integer assessmentId = parseInt(request.getParameter("id"));
         if (courseId == null || assessmentId == null) {
-            response.sendRedirect(request.getContextPath() + "/instructor/assessments?error=invalid");
+            response.sendRedirect(request.getContextPath() + "/instructor/courses?error=invalid");
             return;
         }
 
         Course course = courseDAO.findById(courseId);
         Assessment assessment = assessmentDAO.findById(assessmentId);
         if (course == null || assessment == null || !userId.equals(course.getCreatedBy()) || !assessment.getCourseId().equals(courseId)) {
-            response.sendRedirect(request.getContextPath() + "/instructor/assessments?error=permission");
+            response.sendRedirect(request.getContextPath() + "/instructor/courses?error=permission");
             return;
         }
 
         boolean archived = assessmentDAO.archive(assessmentId, userId);
-        response.sendRedirect(request.getContextPath() + "/instructor/assessments?view=dashboard&courseId=" + courseId + (archived ? "&success=archived" : "&error=delete"));
+        response.sendRedirect(request.getContextPath() + "/instructor/courses?action=workspace&courseId=" + courseId + (archived ? "&success=archived" : "&error=delete") + "#assessments");
     }
 
     private void restoreAssessment(HttpServletRequest request, HttpServletResponse response, Integer userId)
@@ -638,19 +658,19 @@ public class InstructorAssessmentServlet extends HttpServlet {
         Integer courseId = parseInt(request.getParameter("courseId"));
         Integer assessmentId = parseInt(request.getParameter("id"));
         if (courseId == null || assessmentId == null) {
-            response.sendRedirect(request.getContextPath() + "/instructor/assessments?error=invalid");
+            response.sendRedirect(request.getContextPath() + "/instructor/courses?error=invalid");
             return;
         }
 
         Course course = courseDAO.findById(courseId);
         Assessment assessment = assessmentDAO.findAnyById(assessmentId);
         if (course == null || assessment == null || !userId.equals(course.getCreatedBy()) || !assessment.getCourseId().equals(courseId)) {
-            response.sendRedirect(request.getContextPath() + "/instructor/assessments?error=permission");
+            response.sendRedirect(request.getContextPath() + "/instructor/courses?error=permission");
             return;
         }
 
         boolean restored = assessmentDAO.restore(assessmentId);
-        response.sendRedirect(request.getContextPath() + "/instructor/assessments?view=dashboard&courseId=" + courseId + (restored ? "&success=restored" : "&error=restore"));
+        response.sendRedirect(request.getContextPath() + "/instructor/courses?action=workspace&courseId=" + courseId + (restored ? "&success=restored" : "&error=restore") + "#assessments");
     }
 
     private void bulkRestoreAssessments(HttpServletRequest request, HttpServletResponse response, Integer userId)
@@ -659,13 +679,13 @@ public class InstructorAssessmentServlet extends HttpServlet {
         Integer courseId = parseInt(request.getParameter("courseId"));
         String[] ids = request.getParameterValues("assessmentIds");
         if (courseId == null || ids == null || ids.length == 0) {
-            response.sendRedirect(request.getContextPath() + "/instructor/assessments?view=archive&courseId=" + (courseId != null ? courseId : "") + "&error=invalid");
+            sendWorkspaceRedirect(request, response, courseId, "error", "invalid");
             return;
         }
 
         Course course = courseDAO.findById(courseId);
         if (course == null || !userId.equals(course.getCreatedBy())) {
-            response.sendRedirect(request.getContextPath() + "/instructor/assessments?view=archive&courseId=" + courseId + "&error=permission");
+            sendWorkspaceRedirect(request, response, courseId, "error", "permission");
             return;
         }
 
@@ -681,23 +701,23 @@ public class InstructorAssessmentServlet extends HttpServlet {
             }
         }
 
-        response.sendRedirect(request.getContextPath() + "/instructor/assessments?view=archive&courseId=" + courseId + (restoredCount > 0 ? "&success=restored" : "&error=restore"));
+        sendWorkspaceRedirect(request, response, courseId, restoredCount > 0 ? "success" : "error", restoredCount > 0 ? "restored" : "restore");
     }
 
-        private void addQuestion(HttpServletRequest request, HttpServletResponse response, Integer userId)
+    private void addQuestion(HttpServletRequest request, HttpServletResponse response, Integer userId)
             throws IOException, ServletException {
 
         Integer courseId = parseInt(request.getParameter("courseId"));
         Integer assessmentId = parseInt(request.getParameter("assessmentId"));
         if (courseId == null || assessmentId == null) {
-            response.sendRedirect(request.getContextPath() + "/instructor/assessments?error=invalid");
+            sendWorkspaceRedirect(request, response, courseId, "error", "invalid");
             return;
         }
 
         Course course = courseDAO.findById(courseId);
         Assessment assessment = assessmentDAO.findById(assessmentId);
         if (course == null || assessment == null || !userId.equals(course.getCreatedBy()) || !assessment.getCourseId().equals(courseId)) {
-            response.sendRedirect(request.getContextPath() + "/instructor/assessments?error=permission");
+            sendWorkspaceRedirect(request, response, courseId, "error", "permission");
             return;
         }
 
@@ -765,14 +785,14 @@ public class InstructorAssessmentServlet extends HttpServlet {
         response.sendRedirect(request.getContextPath() + "/instructor/assessments?view=questions&courseId=" + courseId + "&assessmentId=" + assessmentId + (created != null ? "&success=qcreated" : "&error=qcreate"));
     }
 
-        private void updateQuestion(HttpServletRequest request, HttpServletResponse response, Integer userId)
+    private void updateQuestion(HttpServletRequest request, HttpServletResponse response, Integer userId)
             throws IOException, ServletException {
 
         Integer courseId = parseInt(request.getParameter("courseId"));
         Integer assessmentId = parseInt(request.getParameter("assessmentId"));
         Integer questionId = parseInt(request.getParameter("questionId"));
         if (courseId == null || assessmentId == null || questionId == null) {
-            response.sendRedirect(request.getContextPath() + "/instructor/assessments?error=invalid");
+            sendWorkspaceRedirect(request, response, courseId, "error", "invalid");
             return;
         }
 
@@ -781,7 +801,7 @@ public class InstructorAssessmentServlet extends HttpServlet {
         AssessmentQuestion existing = questionDAO.findById(questionId);
         if (course == null || assessment == null || existing == null || !userId.equals(course.getCreatedBy())
                 || !assessment.getCourseId().equals(courseId) || !existing.getAssessmentId().equals(assessmentId)) {
-            response.sendRedirect(request.getContextPath() + "/instructor/assessments?error=permission");
+            sendWorkspaceRedirect(request, response, courseId, "error", "permission");
             return;
         }
 
@@ -859,7 +879,7 @@ public class InstructorAssessmentServlet extends HttpServlet {
         Integer questionId = parseInt(request.getParameter("questionId"));
         String direction = normalize(request.getParameter("direction"));
         if (courseId == null || assessmentId == null || questionId == null || direction.isEmpty()) {
-            response.sendRedirect(request.getContextPath() + "/instructor/assessments?error=invalid");
+            sendWorkspaceRedirect(request, response, courseId, "error", "invalid");
             return;
         }
 
@@ -868,7 +888,7 @@ public class InstructorAssessmentServlet extends HttpServlet {
         AssessmentQuestion current = questionDAO.findById(questionId);
         if (course == null || assessment == null || current == null || !userId.equals(course.getCreatedBy())
                 || !assessment.getCourseId().equals(courseId) || !current.getAssessmentId().equals(assessmentId)) {
-            response.sendRedirect(request.getContextPath() + "/instructor/assessments?error=permission");
+            sendWorkspaceRedirect(request, response, courseId, "error", "permission");
             return;
         }
 
@@ -914,8 +934,11 @@ public class InstructorAssessmentServlet extends HttpServlet {
         Integer courseId = parseInt(request.getParameter("courseId"));
         Integer assessmentId = parseInt(request.getParameter("assessmentId"));
         Integer questionId = parseInt(request.getParameter("id"));
+        if (questionId == null) {
+            questionId = parseInt(request.getParameter("questionId"));
+        }
         if (courseId == null || assessmentId == null || questionId == null) {
-            response.sendRedirect(request.getContextPath() + "/instructor/assessments?error=invalid");
+            sendWorkspaceRedirect(request, response, courseId, "error", "invalid");
             return;
         }
 
@@ -924,7 +947,7 @@ public class InstructorAssessmentServlet extends HttpServlet {
         AssessmentQuestion question = questionDAO.findById(questionId);
         if (course == null || assessment == null || question == null || !userId.equals(course.getCreatedBy())
                 || !assessment.getCourseId().equals(courseId) || !question.getAssessmentId().equals(assessmentId)) {
-            response.sendRedirect(request.getContextPath() + "/instructor/assessments?error=permission");
+            sendWorkspaceRedirect(request, response, courseId, "error", "permission");
             return;
         }
 
@@ -941,30 +964,30 @@ public class InstructorAssessmentServlet extends HttpServlet {
         String gradeFilter = normalize(request.getParameter("gradeFilter"));
         if (gradeFilter.isEmpty()) gradeFilter = "all";
         if (courseId == null || assessmentId == null || requestId == null || decision.isEmpty()) {
-            response.sendRedirect(request.getContextPath() + "/instructor/assessments?error=invalid");
+            sendWorkspaceRedirect(request, response, courseId, "error", "invalid");
             return;
         }
 
         Course course = courseDAO.findById(courseId);
         Assessment assessment = assessmentDAO.findById(assessmentId);
         if (course == null || assessment == null || !userId.equals(course.getCreatedBy()) || !assessment.getCourseId().equals(courseId)) {
-            response.sendRedirect(request.getContextPath() + "/instructor/assessments?error=permission");
+            sendWorkspaceRedirect(request, response, courseId, "error", "permission");
             return;
         }
 
         if (!"approve".equalsIgnoreCase(decision) && !"reject".equalsIgnoreCase(decision)) {
-            response.sendRedirect(request.getContextPath() + "/instructor/assessments?courseId=" + courseId + "&assessmentId=" + assessmentId + "&gradeFilter=" + gradeFilter + "&error=invalid");
+            response.sendRedirect(request.getContextPath() + "/instructor/assessments?view=submissions&courseId=" + courseId + "&assessmentId=" + assessmentId + "&gradeFilter=" + gradeFilter + "&error=invalid");
             return;
         }
 
         AssessmentRetakeRequest targetRequest = retakeRequestDAO.findById(requestId);
         if (targetRequest == null || targetRequest.getAssessmentId() == null || !targetRequest.getAssessmentId().equals(assessmentId)) {
-            response.sendRedirect(request.getContextPath() + "/instructor/assessments?courseId=" + courseId + "&assessmentId=" + assessmentId + "&gradeFilter=" + gradeFilter + "&error=permission");
+            response.sendRedirect(request.getContextPath() + "/instructor/assessments?view=submissions&courseId=" + courseId + "&assessmentId=" + assessmentId + "&gradeFilter=" + gradeFilter + "&error=permission");
             return;
         }
 
         if (!"Pending".equalsIgnoreCase(targetRequest.getStatus())) {
-            response.sendRedirect(request.getContextPath() + "/instructor/assessments?courseId=" + courseId + "&assessmentId=" + assessmentId + "&gradeFilter=" + gradeFilter + "&error=retakestatus");
+            response.sendRedirect(request.getContextPath() + "/instructor/assessments?view=submissions&courseId=" + courseId + "&assessmentId=" + assessmentId + "&gradeFilter=" + gradeFilter + "&error=retakestatus");
             return;
         }
 
@@ -983,7 +1006,7 @@ public class InstructorAssessmentServlet extends HttpServlet {
         String gradeFilter = normalize(request.getParameter("gradeFilter"));
         if (gradeFilter.isEmpty()) gradeFilter = "all";
         if (courseId == null || assessmentId == null || submissionId == null) {
-            response.sendRedirect(request.getContextPath() + "/instructor/assessments?error=invalid");
+            sendWorkspaceRedirect(request, response, courseId, "error", "invalid");
             return;
         }
 
@@ -992,7 +1015,7 @@ public class InstructorAssessmentServlet extends HttpServlet {
         AssessmentSubmission submission = submissionDAO.findById(submissionId);
         if (course == null || assessment == null || submission == null || !userId.equals(course.getCreatedBy())
                 || !assessment.getCourseId().equals(courseId) || !submission.getAssessmentId().equals(assessmentId)) {
-            response.sendRedirect(request.getContextPath() + "/instructor/assessments?error=permission");
+            sendWorkspaceRedirect(request, response, courseId, "error", "permission");
             return;
         }
 
@@ -1030,7 +1053,7 @@ public class InstructorAssessmentServlet extends HttpServlet {
         if (gradeFilter.isEmpty()) gradeFilter = "all";
 
         if (courseId == null || assessmentId == null || submissionId == null) {
-            response.sendRedirect(request.getContextPath() + "/instructor/assessments?error=invalid");
+            sendWorkspaceRedirect(request, response, courseId, "error", "invalid");
             return;
         }
 
@@ -1039,14 +1062,14 @@ public class InstructorAssessmentServlet extends HttpServlet {
         AssessmentSubmission submission = submissionDAO.findById(submissionId);
         if (course == null || assessment == null || submission == null || !userId.equals(course.getCreatedBy())
                 || !assessment.getCourseId().equals(courseId) || !submission.getAssessmentId().equals(assessmentId)) {
-            response.sendRedirect(request.getContextPath() + "/instructor/assessments?error=permission");
+            sendWorkspaceRedirect(request, response, courseId, "error", "permission");
             return;
         }
 
         boolean objectiveType = isObjectiveAssessmentType(assessment.getType());
         String answersSummary = normalize(submission.getAnswersFilePath());
         if (!objectiveType || answersSummary.isEmpty() || answersSummary.startsWith("http")) {
-            response.sendRedirect(request.getContextPath() + "/instructor/assessments?courseId=" + courseId + "&assessmentId=" + assessmentId + "&gradeFilter=" + gradeFilter + "&error=regradeunsupported");
+            response.sendRedirect(request.getContextPath() + "/instructor/assessments?view=submissions&courseId=" + courseId + "&assessmentId=" + assessmentId + "&gradeFilter=" + gradeFilter + "&error=regradeunsupported");
             return;
         }
 
@@ -1078,20 +1101,20 @@ public class InstructorAssessmentServlet extends HttpServlet {
         if (gradeFilter.isEmpty()) gradeFilter = "all";
 
         if (courseId == null || assessmentId == null) {
-            response.sendRedirect(request.getContextPath() + "/instructor/assessments?error=invalid");
+            sendWorkspaceRedirect(request, response, courseId, "error", "invalid");
             return;
         }
 
         Course course = courseDAO.findById(courseId);
         Assessment assessment = assessmentDAO.findById(assessmentId);
         if (course == null || assessment == null || !userId.equals(course.getCreatedBy()) || !assessment.getCourseId().equals(courseId)) {
-            response.sendRedirect(request.getContextPath() + "/instructor/assessments?error=permission");
+            sendWorkspaceRedirect(request, response, courseId, "error", "permission");
             return;
         }
 
         boolean objectiveType = isObjectiveAssessmentType(assessment.getType());
         if (!objectiveType) {
-            response.sendRedirect(request.getContextPath() + "/instructor/assessments?courseId=" + courseId + "&assessmentId=" + assessmentId + "&gradeFilter=" + gradeFilter + "&error=regradeunsupported");
+            response.sendRedirect(request.getContextPath() + "/instructor/assessments?view=submissions&courseId=" + courseId + "&assessmentId=" + assessmentId + "&gradeFilter=" + gradeFilter + "&error=regradeunsupported");
             return;
         }
 
@@ -1438,6 +1461,14 @@ public class InstructorAssessmentServlet extends HttpServlet {
     private boolean isObjectiveAssessmentType(String type) {
         return Assessment.TYPE_QUIZ.equalsIgnoreCase(type)
             || Assessment.TYPE_EXAM.equalsIgnoreCase(type);
+    }
+
+    private void sendWorkspaceRedirect(HttpServletRequest request, HttpServletResponse response, Integer courseId, String paramName, String paramValue) throws IOException {
+        if (courseId != null) {
+            response.sendRedirect(request.getContextPath() + "/instructor/courses?action=workspace&courseId=" + courseId + "&" + paramName + "=" + paramValue + "#assessments");
+        } else {
+            response.sendRedirect(request.getContextPath() + "/instructor/courses?" + paramName + "=" + paramValue);
+        }
     }
 }
 
