@@ -21,12 +21,26 @@
     <!-- Scoped ViewCertificate CSS Module -->
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/ViewCertificate.module.css">
 </head>
-<body class="vc_viewport">
+<body class="sv-page">
+    <c:set var="topbarTitle" value="Certificate Details"/>
+    <c:set var="topbarSubtitle" value="View, print, and verify your course credential"/>
+    <jsp:include page="/WEB-INF/views/common/student-topbar.jsp"/>
 
-    <!-- Navigation Breadcrumb -->
-    <a class="vc_backLink" href="${pageContext.request.contextPath}/student/certificates">
-        <i class="fas fa-arrow-left"></i> <span>Back to Certificate Center</span>
-    </a>
+    <div class="sv-layout">
+        <c:set var="activePage" value="certificates"/>
+        <jsp:include page="/WEB-INF/views/common/student-sidebar.jsp"/>
+
+        <main class="sv-main cert-page trophy_pageWrapper" style="display: flex; flex-direction: column; align-items: center; justify-content: flex-start; min-height: calc(100vh - 68px); padding-top: 26px !important;">
+            <!-- Navigation Breadcrumb -->
+            <div class="sv-breadcrumb" style="width: 100%; max-width: 900px; margin-bottom: 24px;">
+                <a href="${pageContext.request.contextPath}/dashboard">Dashboard</a>
+                <span>/</span>
+                <a href="${pageContext.request.contextPath}/student/certificates">Certificates</a>
+                <span>/</span>
+                <span>View Certificate</span>
+            </div>
+
+            <div class="vc_viewport" style="background: transparent; min-height: auto; padding: 0; width: 100%; display: flex; flex-direction: column; align-items: center;">
 
     <!-- Error & Info Alerts -->
     <div style="max-width: 900px; width: 100%; box-sizing: border-box; margin-bottom: 20px;">
@@ -53,34 +67,34 @@
     <c:choose>
         <c:when test="${not eligible}">
             <!-- Redesigned Minimal Sharp Diagnostics when not eligible -->
-            <section class="sc-diag-card" style="width: 100%; max-width: 900px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05); border-radius: 12px !important; border: 1px solid #cbd5e1 !important; background-color: #ffffff !important; color: #0f172a !important; padding: 32px; box-sizing: border-box;">
-                <h3 class="sc-diag-title" style="color: #0f172a !important; font-size: 1.25rem; font-weight: 800; border-bottom: 1px solid #f1f5f9; padding-bottom: 16px; margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+            <section class="vc_diagCard">
+                <h3 class="vc_diagTitle">
                     <i class="fas fa-chart-bar" style="color: #2B5A8E;"></i> Eligibility Diagnostics
                 </h3>
                 <div class="alert alert-error" style="margin-bottom: 24px; border-radius: 8px; font-weight: 500;">
-                    <i class="fas fa-circle-xmark"></i> Certificate is not available yet. ${eligibilitySummary}
+                     <i class="fas fa-circle-xmark"></i> Certificate is not available yet. ${eligibilitySummary}
                 </div>
                 <div class="sc-diag-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 28px;">
-                    <div class="sc-diag-item" style="background: #f8fafc !important; border: 1px solid #e2e8f0 !important; border-radius: 8px !important; padding: 16px;">
-                        <span style="color: #64748b !important; font-size: 0.72rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em;">Payment Status</span>
+                    <div class="vc_diagItem">
+                        <span class="vc_diagLabel">Payment Status</span>
                         <strong class="${diagPaid ? 'success' : 'danger'}" style="display: block; margin-top: 6px; font-size: 1.05rem; font-weight: 700; color: ${diagPaid ? '#059669' : '#dc2626'} !important;">
                             ${diagPaid ? 'Paid' : 'Not Paid'}
                         </strong>
                     </div>
-                    <div class="sc-diag-item" style="background: #f8fafc !important; border: 1px solid #e2e8f0 !important; border-radius: 8px !important; padding: 16px;">
-                        <span style="color: #64748b !important; font-size: 0.72rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em;">Course Completion</span>
+                    <div class="vc_diagItem">
+                        <span class="vc_diagLabel">Course Completion</span>
                         <strong class="${diagCompleted ? 'success' : 'danger'}" style="display: block; margin-top: 6px; font-size: 1.05rem; font-weight: 700; color: ${diagCompleted ? '#059669' : '#dc2626'} !important;">
                             ${diagCompleted ? 'Completed' : 'Not Completed'} (${diagProgress}%)
                         </strong>
                     </div>
-                    <div class="sc-diag-item" style="background: #f8fafc !important; border: 1px solid #e2e8f0 !important; border-radius: 8px !important; padding: 16px;">
-                        <span style="color: #64748b !important; font-size: 0.72rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em;">Required Assessments</span>
+                    <div class="vc_diagItem">
+                        <span class="vc_diagLabel">Required Assessments</span>
                         <strong class="${diagPassedRequiredAssessments ? 'success' : 'danger'}" style="display: block; margin-top: 6px; font-size: 1.05rem; font-weight: 700; color: ${diagPassedRequiredAssessments ? '#059669' : '#dc2626'} !important;">
                             ${diagPassedRequiredAssessments ? 'Passed' : 'Pending/Failed'} (${diagPassedAssessments}/${diagTotalAssessments})
                         </strong>
                     </div>
-                    <div class="sc-diag-item" style="background: #f8fafc !important; border: 1px solid #e2e8f0 !important; border-radius: 8px !important; padding: 16px;">
-                        <span style="color: #64748b !important; font-size: 0.72rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em;">Materials Viewed</span>
+                    <div class="vc_diagItem">
+                        <span class="vc_diagLabel">Materials Viewed</span>
                         <strong class="${diagViewedAllMaterials ? 'success' : 'danger'}" style="display: block; margin-top: 6px; font-size: 1.05rem; font-weight: 700; color: ${diagViewedAllMaterials ? '#059669' : '#dc2626'} !important;">
                             ${diagViewedMaterials}/${diagTotalMaterials} Viewed
                         </strong>
@@ -88,14 +102,14 @@
                 </div>
                 <div style="display: flex; gap: 12px; flex-wrap: wrap;">
                     <a class="vc_primaryBtn" style="width: auto;" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=learning">Open Learning Checklist</a>
-                    <a class="vc_primaryBtn" style="width: auto; background-color: #ffffff !important; color: #0f172a !important; border: 1px solid #cbd5e1 !important;" href="${pageContext.request.contextPath}/student/certificates">Back to Certificate Center</a>
+                    <a class="vc_primaryBtn vc_secondaryBtn" style="width: auto;" href="${pageContext.request.contextPath}/student/certificates">Back to Certificate Center</a>
                 </div>
             </section>
         </c:when>
         <c:when test="${empty certificate}">
             <!-- Unissued State Certificate Unlock -->
-            <section class="sc-diag-card" style="width: 100%; max-width: 900px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05); border-radius: 12px !important; border: 1px solid #cbd5e1 !important; background-color: #ffffff !important; color: #0f172a !important; padding: 32px; box-sizing: border-box;">
-                <h3 class="sc-diag-title" style="color: #0f172a !important; font-size: 1.25rem; font-weight: 800; border-bottom: 1px solid #f1f5f9; padding-bottom: 16px; margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+            <section class="vc_diagCard">
+                <h3 class="vc_diagTitle">
                     <i class="fas fa-award" style="color: #2B5A8E;"></i> Certificate Issuance
                 </h3>
                 <c:choose>
@@ -389,6 +403,11 @@
             }
         })();
     </script>
+            </div>
+        </main>
+    </div>
+
+    <div id="svOverlay" class="sv-overlay"></div>
     <script src="${pageContext.request.contextPath}/js/student-v2.js"></script>
 </body>
 </html>

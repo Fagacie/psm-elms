@@ -180,6 +180,15 @@
                             <c:when test="${param.success == 'exited'}">
                                 Assessment saved and closed.
                             </c:when>
+                            <c:when test="${param.success == 'retakeRequested'}">
+                                Your retake request has been submitted successfully and is awaiting instructor approval.
+                            </c:when>
+                            <c:when test="${param.error == 'retakePending'}">
+                                You already have a pending retake request for this assessment.
+                            </c:when>
+                            <c:when test="${param.error == 'retakeRequestFailed'}">
+                                Failed to submit retake request. Please try again.
+                            </c:when>
                             <c:otherwise>
                                 Learning workspace updated.
                             </c:otherwise>
@@ -743,18 +752,20 @@
                                                             <p style="color: #475569; margin: 0 0 16px 0; font-size: 0.9375rem; line-height: 1.5;">Your work has been submitted successfully and is currently awaiting grading by your instructor. You do not need to upload anything again.</p>
                                                             <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.875rem; color: #64748b;">
                                                                 <div>
-                                                                    <i class="fas fa-file-alt" style="margin-right: 6px;"></i> Submitted File: 
-                                                                    <c:choose>
-                                                                        <c:when test="${not empty selectedAssessmentLatest.answersFilePath}">
-                                                                            <a href="${fn:escapeXml(selectedAssessmentLatest.answersFilePath)}" target="_blank" class="file_download_anchor" style="margin: 0; display: inline-flex;">
-                                                                                Download Submitted File <i class="fas fa-arrow-up-right-from-square" style="font-size: 0.75rem;"></i>
-                                                                            </a>
-                                                                        </c:when>
-                                                                        <c:otherwise>
-                                                                            <span style="color: #94a3b8;">No attachment path found</span>
-                                                                        </c:otherwise>
-                                                                    </c:choose>
+                                                                    <i class="fas fa-file-alt" style="margin-right: 6px;"></i> Submitted File:
                                                                 </div>
+                                                                <c:choose>
+                                                                    <c:when test="${not empty selectedAssessmentLatest.answersFilePath}">
+                                                                        <div style="margin-top: 4px;">
+                                                                            <a href="${fn:escapeXml(selectedAssessmentLatest.answersFilePath)}" target="_blank" class="file_download_anchor" style="margin: 0; display: inline-flex;">
+                                                                                Download Submitted File <i class="fas fa-arrow-up-right-from-square" style="font-size: 0.75rem; margin-left: 6px;"></i>
+                                                                            </a>
+                                                                        </div>
+                                                                    </c:when>
+                                                                    <c:otherwise>
+                                                                        <div style="color: #94a3b8; margin-top: 4px;">No attachment path found</div>
+                                                                    </c:otherwise>
+                                                                </c:choose>
                                                                 <div>
                                                                     <i class="fas fa-calendar-day" style="margin-right: 6px;"></i> Submitted On: 
                                                                     <strong>${fn:replace(selectedAssessmentLatest.submitDate, 'T', ' ')}</strong>
@@ -828,6 +839,33 @@
                                                             </form>
                                                         </div>
                                                     </c:if>
+
+                                                    <c:if test="${not hasPassedAssignment and selectedAssessmentUsedAttempts >= selectedAssessmentAllowedAttempts}">
+                                                         <div style="width: 100%; border: 1px solid #e2e8f0; border-radius: 8px; padding: 24px; background-color: #ffffff; margin-top: 24px;">
+                                                             <h3 style="font-size: 1.25rem; font-weight: 600; color: #0f172a; margin: 0 0 8px 0;"><i class="fas fa-envelope" style="color: #d97706; margin-right: 6px;"></i> Request Assignment Retake</h3>
+                                                             <p style="color: #475569; margin: 0 0 24px 0; font-size: 0.9375rem;">You have exhausted all allowed attempts for this assignment. If you failed to meet the passing threshold, you can request an additional attempt from your instructor.</p>
+                                                             
+                                                             <c:choose>
+                                                                 <c:when test="${hasPendingRetakeRequest}">
+                                                                     <button type="button" class="warning_button" disabled="disabled" style="background-color: #fef3c7; border: 1px solid #fcd34d; color: #d97706; padding: 10px 20px; border-radius: 6px; font-weight: 500; font-size: 0.875rem; display: inline-flex; align-items: center; gap: 8px;">
+                                                                         <i class="fas fa-hourglass-half"></i>
+                                                                         <span>Retake Request Pending</span>
+                                                                     </button>
+                                                                 </c:when>
+                                                                 <c:otherwise>
+                                                                     <form method="post" action="${pageContext.request.contextPath}/student/assessments" style="display: inline-block; margin: 0;">
+                                                                         <input type="hidden" name="action" value="requestRetake">
+                                                                         <input type="hidden" name="assessmentId" value="${selectedAssessment.assessmentId}">
+                                                                         <input type="hidden" name="enrollmentId" value="${enrollment.enrollmentId}">
+                                                                         <button type="submit" class="warning_button" style="background-color: #f59e0b; color: #ffffff; padding: 10px 20px; border: none; border-radius: 6px; font-weight: 500; font-size: 0.875rem; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">
+                                                                             <i class="fas fa-paper-plane"></i>
+                                                                             <span>Submit Retake Request</span>
+                                                                         </button>
+                                                                     </form>
+                                                                 </c:otherwise>
+                                                             </c:choose>
+                                                         </div>
+                                                     </c:if>
                                                 </c:when>
 
                                                 <c:otherwise>

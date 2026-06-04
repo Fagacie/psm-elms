@@ -91,10 +91,37 @@
                             </button>
                         </c:when>
                         <c:otherwise>
-                            <button type="button" class="danger_button" disabled="disabled">
-                                <i class="fas fa-ban"></i>
-                                <span>No Attempts Remaining</span>
-                            </button>
+                            <c:set var="totalPoints" value="${(assessment.totalMarks != null && assessment.totalMarks > 0) ? assessment.totalMarks : fn:length(questions)}"/>
+                            <c:set var="hasPassed" value="${not empty latestSubmission and not empty latestSubmission.score and (latestSubmission.score >= (totalPoints * 0.7))}"/>
+                            <c:choose>
+                                <c:when test="${not empty latestSubmission and not empty latestSubmission.score and not hasPassed}">
+                                    <c:choose>
+                                        <c:when test="${hasPendingRetakeRequest}">
+                                            <button type="button" class="warning_button" disabled="disabled" style="background-color: #fef3c7; border: 1px solid #fcd34d; color: #d97706; padding: 10px 20px; border-radius: 6px; font-weight: 500; font-size: 0.875rem; display: inline-flex; align-items: center; gap: 8px;">
+                                                <i class="fas fa-hourglass-half"></i>
+                                                <span>Retake Request Pending</span>
+                                            </button>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <form method="post" action="${pageContext.request.contextPath}/student/assessments" style="display: inline-block; margin: 0;">
+                                                <input type="hidden" name="action" value="requestRetake">
+                                                <input type="hidden" name="assessmentId" value="${assessment.assessmentId}">
+                                                <input type="hidden" name="enrollmentId" value="${enrollment.enrollmentId}">
+                                                <button type="submit" class="warning_button" style="background-color: #f59e0b; color: #ffffff; padding: 10px 20px; border: none; border-radius: 6px; font-weight: 500; font-size: 0.875rem; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">
+                                                    <i class="fas fa-envelope"></i>
+                                                    <span>Request Retake</span>
+                                                </button>
+                                            </form>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </c:when>
+                                <c:otherwise>
+                                    <button type="button" class="danger_button" disabled="disabled">
+                                        <i class="fas fa-ban"></i>
+                                        <span>No Attempts Remaining</span>
+                                    </button>
+                                </c:otherwise>
+                            </c:choose>
                         </c:otherwise>
                     </c:choose>
                 </div>

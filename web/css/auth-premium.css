@@ -323,18 +323,24 @@ select {
 }
 
 @keyframes authFloat {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0px);
   }
+
   50% {
     transform: translateY(-12px);
   }
 }
 
 @keyframes authGlow {
-  0%, 100% {
+
+  0%,
+  100% {
     box-shadow: var(--shadow-sm);
   }
+
   50% {
     box-shadow: 0 6px 20px rgba(15, 23, 42, 0.12);
   }
@@ -344,6 +350,7 @@ select {
   0% {
     transform: rotate(0deg);
   }
+
   100% {
     transform: rotate(360deg);
   }
@@ -795,8 +802,8 @@ select {
 
 .auth-form-wide {
   display: grid;
-  grid-template-columns: 152px repeat(2, minmax(0, 1fr));
-  gap: 12px 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px 24px;
   align-items: start;
   animation: fadeInUp 0.7s var(--transition-slow) 0.15s both;
 }
@@ -808,6 +815,8 @@ select {
 
 .auth-layout-form .auth-photo-preview {
   border-radius: 14px;
+  width: 140px;
+  height: 140px;
 }
 
 .auth-layout-form .auth-photo-placeholder i {
@@ -830,20 +839,20 @@ select {
   font-size: 0.88rem;
 }
 
-.auth-form-wide > .auth-photo-card {
-  grid-column: 1;
-  grid-row: 1;
+.auth-form-wide>.auth-photo-card {
+  grid-column: span 2;
+  justify-self: center;
+  margin-bottom: 12px;
 }
 
-.auth-form-wide > .auth-field,
-.auth-form-wide > .auth-note,
-.auth-form-wide > .auth-btn,
-.auth-form-wide > .auth-switch {
-  grid-column: 2 / -1;
+.auth-form-wide>.auth-field {
+  grid-column: span 1;
 }
 
-.auth-form-wide > .auth-field {
-  grid-column: auto;
+.auth-form-wide>.auth-note,
+.auth-form-wide>.auth-btn,
+.auth-form-wide>.auth-switch {
+  grid-column: span 2;
 }
 
 .auth-form-wide .auth-field {
@@ -910,6 +919,7 @@ select {
     opacity: 0;
     transform: translateY(16px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -921,6 +931,7 @@ select {
     opacity: 0;
     transform: translateY(-16px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -932,6 +943,7 @@ select {
     opacity: 0;
     transform: translateX(16px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -939,9 +951,12 @@ select {
 }
 
 @keyframes pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 1;
   }
+
   50% {
     opacity: 0.8;
   }
@@ -978,7 +993,7 @@ select {
   }
 
   .auth-form-wide {
-    grid-template-columns: 132px repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -1035,11 +1050,11 @@ select {
     gap: var(--space-md);
   }
 
-  .auth-form-wide > .auth-photo-card,
-  .auth-form-wide > .auth-field,
-  .auth-form-wide > .auth-note,
-  .auth-form-wide > .auth-btn,
-  .auth-form-wide > .auth-switch {
+  .auth-form-wide>.auth-photo-card,
+  .auth-form-wide>.auth-field,
+  .auth-form-wide>.auth-note,
+  .auth-form-wide>.auth-btn,
+  .auth-form-wide>.auth-switch {
     grid-column: 1;
   }
 
@@ -1098,6 +1113,7 @@ select {
 
 /* ============== ACCESSIBILITY & PREFERS REDUCED MOTION ============== */
 @media (prefers-reduced-motion: reduce) {
+
   *,
   *::before,
   *::after {

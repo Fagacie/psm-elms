@@ -254,6 +254,7 @@ public class StudentAssessmentServlet extends HttpServlet {
         int allowedAttempts = baseAttempts + retakeRequestDAO.countApproved(assessmentId, userId);
         boolean isCourseExpired = enrollment.getDaysRemaining() < 0 && enrollment.getCourseDuration() != null && enrollment.getCourseDuration() > 0;
         boolean canAttempt = usedAttempts < Math.max(allowedAttempts, 1) && materialCompleted && materialBlockReason == null && !isCourseExpired;
+        boolean hasPendingRetakeRequest = retakeRequestDAO.hasPending(assessmentId, userId);
 
         boolean attemptMode = requestedAttemptMode && objectiveAssessment;
 
@@ -288,6 +289,7 @@ public class StudentAssessmentServlet extends HttpServlet {
         request.setAttribute("allowedAttempts", allowedAttempts);
         request.setAttribute("remainingAttempts", Math.max(allowedAttempts - usedAttempts, 0));
         request.setAttribute("canAttempt", canAttempt);
+        request.setAttribute("hasPendingRetakeRequest", hasPendingRetakeRequest);
         request.setAttribute("attemptMode", attemptMode);
         request.setAttribute("latestSubmission", (submissions != null && !submissions.isEmpty()) ? submissions.get(0) : null);
         request.setAttribute("materialBlockReason", materialBlockReason);
@@ -342,6 +344,11 @@ public class StudentAssessmentServlet extends HttpServlet {
         }
         if (!hasCourseAccess(enrollment)) {
             response.sendRedirect(request.getContextPath() + "/student/enrollment-details?id=" + enrollmentId + "&tab=learning&error=paymentRequired");
+            return;
+        }
+
+        if ("requestRetake".equals(request.getParameter("action"))) {
+            handleRequestRetake(request, response, enrollment, assessment, userId);
             return;
         }
 
@@ -936,5 +943,36 @@ public class StudentAssessmentServlet extends HttpServlet {
         }
         return "raw";
     }
-}
 
+    private void handleRequestRetake(HttpServletRequest request, HttpServletResponse response, Enrollment enrollment, Assessment assessment, Integer userId) throws IOException {
+        int assessmentId = assessment.getAssessmentId();
+        int enrollmentId = enrollment.getEnrollmentId();
+
+        if (retakeRequestDAO.hasPending(assessmentId, userId)) {
+            response.sendRedirect(request.getContextPath() 
+                    + "/student/enrollment-details?id=" + enrollmentId 
+                    + "&tab=assessments&assessmentId=" + assessmentId 
+                    + "&error=retakePending");
+            return;
+        }
+
+        com.psm.elearning.model.AssessmentRetakeRequest retakeReq = new com.psm.elearning.model.AssessmentRetakeRequest();
+        retakeReq.setAssessmentId(assessmentId);
+        retakeReq.setUserId(userId);
+        retakeReq.setReason("Request to retake assessment.");
+        retakeReq.setStatus("Pending");
+
+        com.psm.elearning.model.AssessmentRetakeRequest saved = retakeRequestDAO.create(retakeReq);
+        if (saved != null) {
+            response.sendRedirect(request.getContextPath() 
+                    + "/student/enrollment-details?id=" + enrollmentId 
+                    + "&tab=assessments&assessmentId=" + assessmentId 
+                    + "&success=retakeRequested");
+        } else {
+            response.sendRedirect(request.getContextPath() 
+                    + "/student/enrollment-details?id=" + enrollmentId 
+                    + "&tab=assessments&assessmentId=" + assessmentId 
+                    + "&error=retakeRequestFailed");
+        }
+    }
+}

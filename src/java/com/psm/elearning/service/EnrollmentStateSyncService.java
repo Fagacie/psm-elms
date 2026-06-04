@@ -96,12 +96,14 @@ public class EnrollmentStateSyncService {
         // Progress = purely materials-based: viewed / total × 100.
         // Assessment data is used for completion/certificate eligibility only.
         int progressPercent;
-        if (totalMaterials == 0) {
-            // No materials — progress determined by assessments only
-            progressPercent = totalAssessments == 0 ? 100
-                    : (int) Math.round(assessmentRatio * 100.0);
-        } else {
+        if (totalMaterials == 0 && totalAssessments == 0) {
+            progressPercent = 100;
+        } else if (totalMaterials == 0) {
+            progressPercent = (int) Math.round(assessmentRatio * 100.0);
+        } else if (totalAssessments == 0) {
             progressPercent = (int) Math.round(materialRatio * 100.0);
+        } else {
+            progressPercent = (int) Math.round((materialRatio * 60.0) + (assessmentRatio * 40.0));
         }
         progressPercent = Math.max(0, Math.min(100, progressPercent));
 

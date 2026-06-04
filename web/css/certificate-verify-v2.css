@@ -3,15 +3,35 @@
    ========================================================================== */
 
 :root {
+  --cv-bg: radial-gradient(circle at center, #f8fafc 0%, #e2e8f0 100%);
+  --cv-panel: rgba(255, 255, 255, 0.85);
+  --cv-border: rgba(15, 23, 42, 0.08);
+  --cv-text: #334155;
+  --cv-heading: #0f172a;
+  --cv-muted: #64748b;
+  --cv-accent: #2563eb;
+  --cv-good: #0f5132;
+  --cv-danger: #dc3545;
+  --cv-neutral: #64748b;
+  --cv-input-bg: #ffffff;
+  --cv-input-text: #0f172a;
+  --cv-input-border: rgba(15, 23, 42, 0.15);
+}
+
+html[data-theme='dark'] {
   --cv-bg: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
   --cv-panel: rgba(30, 41, 59, 0.7);
   --cv-border: rgba(255, 255, 255, 0.08);
   --cv-text: #f1f5f9;
+  --cv-heading: #ffffff;
   --cv-muted: #94a3b8;
   --cv-accent: #3b82f6;
   --cv-good: #10b981;
   --cv-danger: #ef4444;
   --cv-neutral: #64748b;
+  --cv-input-bg: rgba(15, 23, 42, 0.4);
+  --cv-input-text: #ffffff;
+  --cv-input-border: rgba(255, 255, 255, 0.1);
 }
 
 * { 
@@ -126,7 +146,7 @@ body.cv-page {
 }
 
 .cv-form label {
-  color: #ffffff;
+  color: var(--cv-heading);
   font-size: 0.76rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -140,9 +160,9 @@ body.cv-page {
 }
 
 .cv-form-row input {
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(15, 23, 42, 0.4);
-  color: #ffffff;
+  border: 1px solid var(--cv-input-border);
+  background: var(--cv-input-bg);
+  color: var(--cv-input-text);
   min-height: 46px;
   padding: 0 16px;
   font-size: 0.92rem;

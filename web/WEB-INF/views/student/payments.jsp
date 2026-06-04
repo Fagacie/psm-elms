@@ -81,7 +81,10 @@
                             const [activeStatus, setActiveStatus] = React.useState('all');
                             const [selectedPayment, setSelectedPayment] = React.useState(null);
                             const [isFiltering, setIsFiltering] = React.useState(false);
-                            const [filteredPayments, setFilteredPayments] = React.useState(payments);
+
+                            // Sorting states
+                            const [sortField, setSortField] = React.useState('paymentDate');
+                            const [sortDirection, setSortDirection] = React.useState('desc');
 
                             // Target Ref for clean PDF generation
                             const receiptRef = React.useRef(null);
@@ -103,28 +106,56 @@
                                 }
                             }, [payments]);
 
-                            // Live text and status filtering
-                            React.useEffect(() => {
-                                setIsFiltering(true);
-                                const timer = setTimeout(() => {
-                                    const result = payments.filter(p => {
-                                        const courseMatch = p.courseName.toLowerCase().includes(searchTerm.toLowerCase());
-                                        const statusMatch = activeStatus === 'all' || p.status.toLowerCase() === activeStatus;
-                                        return courseMatch && statusMatch;
-                                    });
-                                    setFilteredPayments(result);
-                                    setIsFiltering(false);
-                                }, 200);
+                            // Sorting trigger
+                            const handleSort = (field) => {
+                                if (sortField === field) {
+                                    setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+                                } else {
+                                    setSortField(field);
+                                    setSortDirection('asc');
+                                }
+                            };
 
-                                return () => clearTimeout(timer);
-                            }, [searchTerm, activeStatus, payments]);
+                            // Compute sorted and filtered payments dynamically
+                            const sortedAndFiltered = React.useMemo(() => {
+                                const filtered = payments.filter(p => {
+                                    const courseMatch = p.courseName.toLowerCase().includes(searchTerm.toLowerCase());
+                                    const statusMatch = activeStatus === 'all' || p.status.toLowerCase() === activeStatus;
+                                    return courseMatch && statusMatch;
+                                });
+
+                                return [...filtered].sort((a, b) => {
+                                    let valA = a[sortField] || '';
+                                    let valB = b[sortField] || '';
+
+                                    if (sortField === 'amount') {
+                                        return sortDirection === 'asc' ? Number(valA) - Number(valB) : Number(valB) - Number(valA);
+                                    }
+
+                                    valA = String(valA).toLowerCase();
+                                    valB = String(valB).toLowerCase();
+
+                                    if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
+                                    if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
+                                    return 0;
+                                });
+                            }, [payments, searchTerm, activeStatus, sortField, sortDirection]);
 
                             // Re-draw Lucide icons on view changes
                             React.useEffect(() => {
                                 if (window.lucide) {
                                     window.lucide.createIcons();
                                 }
-                            }, [filteredPayments, selectedPayment, isFiltering]);
+                            }, [sortedAndFiltered, selectedPayment]);
+
+                            // Simulated skeleton transition on text input
+                            React.useEffect(() => {
+                                setIsFiltering(true);
+                                const timer = setTimeout(() => {
+                                    setIsFiltering(false);
+                                }, 150);
+                                return () => clearTimeout(timer);
+                            }, [searchTerm, activeStatus]);
 
                             const formatCurrency = (amount) => {
                                 return '₦' + Number(amount).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -183,52 +214,126 @@
                                         </div>
                                     </div>
 
-                                    {/* Task 1: Clean, Borderless Ledger List */}
-                                    {isFiltering ? (
-                                        <div className="history_ph_ledgerList">
-                                            {[1, 2, 3].map(i => (
-                                                <div key={i} className="history_ph_skeletonRow">
-                                                    <div className="history_ph_rowLeft">
-                                                        <div className="history_ph_skeletonText medium"></div>
-                                                        <div className="history_ph_skeletonText short" style={{ marginTop: 8 }}></div>
-                                                    </div>
-                                                    <div className="history_ph_rowRight">
-                                                        <div className="history_ph_skeletonText short"></div>
-                                                        <div className="history_ph_skeletonBtn"></div>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    ) : filteredPayments.length === 0 ? (
-                                        <div className="history_ph_ledgerList" style={{ background: '#ffffff', borderRadius: 8, border: '1px solid #f1f5f9' }}>
-                                            <div className="history_ph_emptyState">
-                                                <i data-lucide="receipt" style={{ width: 48, height: 48, color: '#94a3b8', strokeWidth: 1.5 }}></i>
-                                                <h3>No payments found</h3>
-                                                <p>Try adjusting your search criteria or filter options.</p>
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <div className="history_ph_ledgerList">
-                                            {filteredPayments.map((payment) => (
-                                                <div key={payment.paymentId} className="history_ph_ledgerRow">
-                                                    <div className="history_ph_rowLeft">
-                                                        <h4 className="history_ph_courseTitle">{payment.courseName}</h4>
-                                                        <span className="history_ph_rowDate">{payment.paymentDate}</span>
-                                                    </div>
-                                                    <div className="history_ph_rowRight">
-                                                        <span className="history_ph_amount">{formatCurrency(payment.amount)}</span>
-                                                        <button
-                                                            type="button"
-                                                            className="history_ph_viewBtn"
-                                                            onClick={() => setSelectedPayment(payment)}
-                                                        >
-                                                            View Receipt
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
+                                    {/* Responsive Interactive Table Wrapper */}
+                                    <div className="history_ph_tableWrapper">
+                                        <table className="history_ph_table">
+                                            <thead>
+                                                <tr>
+                                                    <th 
+                                                        className={"history_ph_th history_ph_thSortable " + (sortField === 'courseName' ? 'history_ph_thActive' : '')}
+                                                        onClick={() => handleSort('courseName')}
+                                                    >
+                                                        Course Name
+                                                        <span className="history_ph_sortIndicator">
+                                                            {sortField === 'courseName' ? (
+                                                                sortDirection === 'asc' ? <i className="fas fa-chevron-up"></i> : <i className="fas fa-chevron-down"></i>
+                                                            ) : <i className="fas fa-sort" style={{ opacity: 0.3 }}></i>}
+                                                        </span>
+                                                    </th>
+                                                    <th className="history_ph_th">Reference ID</th>
+                                                    <th 
+                                                        className={"history_ph_th history_ph_thSortable " + (sortField === 'paymentDate' ? 'history_ph_thActive' : '')}
+                                                        onClick={() => handleSort('paymentDate')}
+                                                    >
+                                                        Date Paid
+                                                        <span className="history_ph_sortIndicator">
+                                                            {sortField === 'paymentDate' ? (
+                                                                sortDirection === 'asc' ? <i className="fas fa-chevron-up"></i> : <i className="fas fa-chevron-down"></i>
+                                                            ) : <i className="fas fa-sort" style={{ opacity: 0.3 }}></i>}
+                                                        </span>
+                                                    </th>
+                                                    <th 
+                                                        className={"history_ph_th history_ph_thSortable " + (sortField === 'amount' ? 'history_ph_thActive' : '')}
+                                                        onClick={() => handleSort('amount')}
+                                                        style={{ textAlign: 'right' }}
+                                                    >
+                                                        Amount
+                                                        <span className="history_ph_sortIndicator">
+                                                            {sortField === 'amount' ? (
+                                                                sortDirection === 'asc' ? <i className="fas fa-chevron-up"></i> : <i className="fas fa-chevron-down"></i>
+                                                            ) : <i className="fas fa-sort" style={{ opacity: 0.3 }}></i>}
+                                                        </span>
+                                                    </th>
+                                                    <th className="history_ph_th" style={{ textAlign: 'center' }}>Status</th>
+                                                    <th className="history_ph_th" style={{ textAlign: 'center' }}>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {isFiltering ? (
+                                                    [1, 2, 3].map(i => (
+                                                        <tr key={i} className="history_ph_tr">
+                                                            <td className="history_ph_td">
+                                                                <div className="history_ph_skeletonText medium"></div>
+                                                            </td>
+                                                            <td className="history_ph_td">
+                                                                <div className="history_ph_skeletonText short"></div>
+                                                            </td>
+                                                            <td className="history_ph_td">
+                                                                <div className="history_ph_skeletonText short"></div>
+                                                            </td>
+                                                            <td className="history_ph_td" style={{ textAlign: 'right' }}>
+                                                                <div className="history_ph_skeletonText short" style={{ marginLeft: 'auto' }}></div>
+                                                            </td>
+                                                            <td className="history_ph_td" style={{ textAlign: 'center' }}>
+                                                                <div className="history_ph_skeletonBadge" style={{ margin: '0 auto' }}></div>
+                                                            </td>
+                                                            <td className="history_ph_td" style={{ textAlign: 'center' }}>
+                                                                <div className="history_ph_skeletonBtn" style={{ margin: '0 auto' }}></div>
+                                                            </td>
+                                                        </tr>
+                                                    ))
+                                                ) : sortedAndFiltered.length === 0 ? (
+                                                    <tr>
+                                                        <td colSpan="6" className="history_ph_td">
+                                                            <div className="history_ph_emptyState">
+                                                                <i data-lucide="receipt" style={{ width: 48, height: 48, color: '#94a3b8', strokeWidth: 1.5 }}></i>
+                                                                <h3>No payments found</h3>
+                                                                <p>Try adjusting your search criteria or filter options.</p>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                ) : (
+                                                    sortedAndFiltered.map((payment) => (
+                                                        <tr key={payment.paymentId} className="history_ph_tr">
+                                                            <td className="history_ph_td" style={{ fontWeight: 600, color: 'var(--sv-heading, #0f172a)' }}>
+                                                                {payment.courseName}
+                                                            </td>
+                                                            <td className="history_ph_td">
+                                                                <span className="history_ph_monoRef">{payment.paymentRef}</span>
+                                                            </td>
+                                                            <td className="history_ph_td" style={{ color: 'var(--sv-muted, #64748b)' }}>
+                                                                {payment.paymentDate}
+                                                            </td>
+                                                            <td className="history_ph_td" style={{ textAlign: 'right', fontWeight: 700 }}>
+                                                                {formatCurrency(payment.amount)}
+                                                            </td>
+                                                            <td className="history_ph_td" style={{ textAlign: 'center' }}>
+                                                                <span className={"history_ph_badge history_ph_badge_" + payment.status.toLowerCase()}>
+                                                                    <span style={{
+                                                                        width: 6,
+                                                                        height: 6,
+                                                                        borderRadius: '50%',
+                                                                        backgroundColor: payment.status.toLowerCase() === 'paid' ? '#198754' : (payment.status.toLowerCase() === 'pending' ? '#ffc107' : '#dc3545')
+                                                                    }}></span>
+                                                                    {payment.status}
+                                                                </span>
+                                                            </td>
+                                                            <td className="history_ph_td" style={{ textAlign: 'center' }}>
+                                                                <button
+                                                                    type="button"
+                                                                    className="history_ph_viewBtn"
+                                                                    onClick={() => setSelectedPayment(payment)}
+                                                                >
+                                                                    <i className="fas fa-receipt" style={{ marginRight: '6px' }}></i>
+                                                                    View Receipt
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                    ))
+                                                )}
+                                            </tbody>
+                                        </table>
+                                    </div>
 
                                     {/* Task 2 & 3: iOS-style Elastic Receipt Modal */}
                                     {AnimatePresence && (
@@ -343,108 +448,6 @@
                         const root = ReactDOM.createRoot(container);
                         root.render(<PaymentHistoryApp />);
                     </script>
-                </body>
-
-                </html>
-                <td>
-                    <div class="skeleton-text medium"></div>
-                </td>
-                <td>
-                    <div class="skeleton-text short"></div>
-                </td>
-                <td>
-                    <div class="skeleton-badge"></div>
-                </td>
-                <td>
-                    <div class="skeleton-text short"></div>
-                </td>
-                <td>
-                    <div class="skeleton-btn"></div>
-                </td>
-                </tr>
-                `;
-                }
-
-                function performFiltering() {
-                if (!tbody) return;
-
-                var matchingRows = allRows.filter(function (row) {
-                var courseName = (row.querySelector('strong') ? row.querySelector('strong').textContent :
-                '').toLowerCase();
-                var btn = row.querySelector('[data-payment-status]');
-                var status = btn ? btn.getAttribute('data-payment-status').toLowerCase() : '';
-
-                var textMatch = courseName.indexOf(searchTerm) !== -1;
-                var statusMatch = activeStatus === 'all' || status === activeStatus;
-
-                return textMatch && statusMatch;
-                });
-
-                // Dynamic render
-                tbody.innerHTML = '';
-                if (matchingRows.length === 0) {
-                tbody.innerHTML = `
-                <tr>
-                    <td colspan="5" style="padding: 48px 18px; text-align: center; color: var(--sv-muted);">
-                        <i class="fas fa-search-minus"
-                            style="font-size: 2.2rem; margin-bottom: 12px; display: block; opacity: 0.5;"></i>
-                        <h4 style="margin: 0 0 4px; font-weight: 700; color: var(--sv-heading);">No transactions found
-                        </h4>
-                        <p style="margin: 0; font-size: 0.84rem;">Try adjusting your keyword filter or switching status.
-                        </p>
-                    </td>
-                </tr>
-                `;
-                } else {
-                matchingRows.forEach(function (row) {
-                tbody.appendChild(row);
-                });
-                }
-                }
-
-                var filterTimeout = null;
-                function triggerFilterUpdate(instant) {
-                showSkeleton();
-
-                if (filterTimeout) clearTimeout(filterTimeout);
-
-                if (instant) {
-                performFiltering();
-                } else {
-                filterTimeout = setTimeout(performFiltering, 250);
-                }
-                }
-
-                // Set listeners for status filter buttons
-                filterButtons.forEach(function (btn) {
-                btn.addEventListener('click', function () {
-                filterButtons.forEach(function (b) {
-                b.classList.remove('primary');
-                });
-                btn.classList.add('primary');
-                activeStatus = btn.getAttribute('data-status-filter');
-                triggerFilterUpdate(false);
-                });
-                });
-
-                // Set search listener
-                if (searchInput) {
-                searchInput.addEventListener('input', function (e) {
-                searchTerm = e.target.value.toLowerCase().trim();
-                triggerFilterUpdate(false);
-                });
-                }
-
-                // Trigger URL status filtering if URL has query parameters
-                var urlStatus = new URLSearchParams(window.location.search).get('status');
-                if (urlStatus) {
-                var targetBtn = document.querySelector('[data-status-filter="' + urlStatus.toLowerCase() + '"]');
-                if (targetBtn) {
-                targetBtn.click();
-                }
-                }
-                })();
-                </script>
                 </body>
 
                 </html>

@@ -1,7 +1,7 @@
 /* Scoped CSS Module for the rewarding Certificates Trophy Room redesign */
 
 .trophy_viewport {
-    background: radial-gradient(circle at top left, #f8fafc 0%, #f1f5f9 100%);
+    background: transparent;
     min-height: 100vh;
     padding-bottom: 60px;
     box-sizing: border-box;
@@ -625,177 +625,177 @@
    DARK MODE SELECTORS (:global(html[data-theme='dark']) overrides)
    ========================================================================== */
 
-:global(html[data-theme='dark']) .trophy_viewport {
-    background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%) !important;
+html[data-theme='dark'] .trophy_viewport {
+    background: transparent !important;
 }
 
-:global(html[data-theme='dark']) .trophy_header {
+html[data-theme='dark'] .trophy_header {
     background: rgba(30, 41, 59, 0.75) !important;
     border-color: rgba(255, 255, 255, 0.08) !important;
     box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.3) !important;
 }
 
-:global(html[data-theme='dark']) .trophy_title {
+html[data-theme='dark'] .trophy_title {
     color: #ffffff !important;
 }
 
-:global(html[data-theme='dark']) .trophy_subtitle {
+html[data-theme='dark'] .trophy_subtitle {
     color: #94a3b8 !important;
 }
 
 /* Certificate Cards in Dark Mode */
-:global(html[data-theme='dark']) .trophy_card {
+html[data-theme='dark'] .trophy_card {
     background: rgba(30, 41, 59, 0.7) !important;
     border-color: rgba(255, 255, 255, 0.08) !important;
     box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.3) !important;
 }
 
-:global(html[data-theme='dark']) .trophy_card:hover {
+html[data-theme='dark'] .trophy_card:hover {
     border-color: rgba(59, 130, 246, 0.35) !important;
     box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.5) !important;
     transform: translateY(-4px);
 }
 
-:global(html[data-theme='dark']) .trophy_thumbnailArea {
+html[data-theme='dark'] .trophy_thumbnailArea {
     background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%) !important;
     border-bottom-color: rgba(255, 255, 255, 0.06) !important;
 }
 
-:global(html[data-theme='dark']) .trophy_thumbnailFrame {
+html[data-theme='dark'] .trophy_thumbnailFrame {
     border-color: rgba(255, 255, 255, 0.15) !important;
     background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%) !important;
     box-shadow: 0 8px 24px -5px rgba(0, 0, 0, 0.4) !important;
 }
 
-:global(html[data-theme='dark']) .trophy_mockCertTitle {
+html[data-theme='dark'] .trophy_mockCertTitle {
     color: #ffffff !important;
 }
 
-:global(html[data-theme='dark']) .trophy_mockStudentName {
+html[data-theme='dark'] .trophy_mockStudentName {
     color: #60a5fa !important;
 }
 
-:global(html[data-theme='dark']) .trophy_mockText {
+html[data-theme='dark'] .trophy_mockText {
     color: #94a3b8 !important;
 }
 
-:global(html[data-theme='dark']) .trophy_mockSignature {
+html[data-theme='dark'] .trophy_mockSignature {
     background: #334155 !important;
 }
 
-:global(html[data-theme='dark']) .trophy_courseTitle {
+html[data-theme='dark'] .trophy_courseTitle {
     color: #ffffff !important;
 }
 
-:global(html[data-theme='dark']) .trophy_issuedDate {
+html[data-theme='dark'] .trophy_issuedDate {
     color: #94a3b8 !important;
 }
 
-:global(html[data-theme='dark']) .trophy_credentialId {
+html[data-theme='dark'] .trophy_credentialId {
     background: #1e293b !important;
     color: #f1f5f9 !important;
 }
 
-:global(html[data-theme='dark']) .trophy_actionFooter {
+html[data-theme='dark'] .trophy_actionFooter {
     background: rgba(15, 23, 42, 0.45) !important;
     border-top-color: rgba(255, 255, 255, 0.06) !important;
 }
 
-:global(html[data-theme='dark']) .trophy_actionBtn {
+html[data-theme='dark'] .trophy_actionBtn {
     color: #94a3b8 !important;
 }
 
-:global(html[data-theme='dark']) .trophy_actionBtn:hover {
+html[data-theme='dark'] .trophy_actionBtn:hover {
     color: #ffffff !important;
     background: #1e293b !important;
 }
 
-:global(html[data-theme='dark']) .trophy_iconBtn {
+html[data-theme='dark'] .trophy_iconBtn {
     background: #1e293b !important;
     border-color: rgba(255, 255, 255, 0.08) !important;
     color: #94a3b8 !important;
 }
 
-:global(html[data-theme='dark']) .trophy_iconBtn:hover {
+html[data-theme='dark'] .trophy_iconBtn:hover {
     background: #334155 !important;
     color: #ffffff !important;
 }
 
 /* Ready to Generate Section in Dark Mode */
-:global(html[data-theme='dark']) .trophy_readyCourseTitle {
+html[data-theme='dark'] .trophy_readyCourseTitle {
     color: #ffffff !important;
 }
 
-:global(html[data-theme='dark']) .trophy_readyCard {
+html[data-theme='dark'] .trophy_readyCard {
     border-bottom-color: rgba(255, 255, 255, 0.08) !important;
 }
 
 /* Filters & Inputs in Dark Mode */
-:global(html[data-theme='dark']) .trophy_searchInput {
+html[data-theme='dark'] .trophy_searchInput {
     background: rgba(15, 23, 42, 0.4) !important;
     border-color: rgba(255, 255, 255, 0.1) !important;
     color: #ffffff !important;
 }
 
-:global(html[data-theme='dark']) .trophy_searchInput:focus {
+html[data-theme='dark'] .trophy_searchInput:focus {
     border-color: #3b82f6 !important;
 }
 
-:global(html[data-theme='dark']) .trophy_filterBtn {
+html[data-theme='dark'] .trophy_filterBtn {
     background: rgba(30, 41, 59, 0.6) !important;
     border-color: rgba(255, 255, 255, 0.1) !important;
     color: #94a3b8 !important;
 }
 
-:global(html[data-theme='dark']) .trophy_filterBtn:hover {
+html[data-theme='dark'] .trophy_filterBtn:hover {
     background: #1e293b !important;
     color: #ffffff !important;
 }
 
-:global(html[data-theme='dark']) .trophy_filterBtnActive {
+html[data-theme='dark'] .trophy_filterBtnActive {
     background: #3b82f6 !important;
     border-color: #3b82f6 !important;
     color: #ffffff !important;
 }
 
 /* Eligibility / Bottom Panels in Dark Mode */
-:global(html[data-theme='dark']) .trophy_sectionCard {
+html[data-theme='dark'] .trophy_sectionCard {
     background: rgba(30, 41, 59, 0.75) !important;
     border-color: rgba(255, 255, 255, 0.08) !important;
     box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.3) !important;
 }
 
-:global(html[data-theme='dark']) .trophy_sectionTitle {
+html[data-theme='dark'] .trophy_sectionTitle {
     color: #ffffff !important;
 }
 
-:global(html[data-theme='dark']) .trophy_sectionDesc {
+html[data-theme='dark'] .trophy_sectionDesc {
     color: #94a3b8 !important;
 }
 
-:global(html[data-theme='dark']) .trophy_table th {
+html[data-theme='dark'] .trophy_table th {
     border-bottom-color: rgba(255, 255, 255, 0.08) !important;
     color: #94a3b8 !important;
 }
 
-:global(html[data-theme='dark']) .trophy_table td {
+html[data-theme='dark'] .trophy_table td {
     border-bottom-color: rgba(255, 255, 255, 0.08) !important;
 }
 
-:global(html[data-theme='dark']) .trophy_tableCourse {
+html[data-theme='dark'] .trophy_tableCourse {
     color: #ffffff !important;
 }
 
 /* Empty State in Dark Mode */
-:global(html[data-theme='dark']) .trophy_emptyState {
+html[data-theme='dark'] .trophy_emptyState {
     background: rgba(30, 41, 59, 0.75) !important;
     border-color: rgba(255, 255, 255, 0.08) !important;
 }
 
-:global(html[data-theme='dark']) .trophy_emptyTitle {
+html[data-theme='dark'] .trophy_emptyTitle {
     color: #ffffff !important;
 }
 
-:global(html[data-theme='dark']) .trophy_emptyText {
+html[data-theme='dark'] .trophy_emptyText {
     color: #94a3b8 !important;
 }

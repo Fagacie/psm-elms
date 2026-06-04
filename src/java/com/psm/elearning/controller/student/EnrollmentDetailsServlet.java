@@ -929,6 +929,8 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                     : null;
             boolean selectedAssessmentHasActiveAttempt = selectedAssessment != null
                     && activeAttemptByAssessment.getOrDefault(selectedAssessment.getAssessmentId(), false);
+            boolean hasPendingRetakeRequest = selectedAssessment != null
+                    && retakeRequestDAO.hasPending(selectedAssessment.getAssessmentId(), userId);
             String selectedAssessmentStatusLabel = "Not Started";
             String selectedAssessmentStatusClass = "status-Archived";
             String selectedAssessmentPrimaryLabel = "";
@@ -1225,6 +1227,7 @@ public class EnrollmentDetailsServlet extends HttpServlet {
             request.setAttribute("selectedAssessmentAllowedAttempts", selectedAssessmentAllowedAttempts);
             request.setAttribute("selectedAssessmentLatest", selectedAssessmentLatest);
             request.setAttribute("selectedAssessmentHasActiveAttempt", selectedAssessmentHasActiveAttempt);
+            request.setAttribute("hasPendingRetakeRequest", hasPendingRetakeRequest);
             request.setAttribute("selectedAssessmentStatusLabel", selectedAssessmentStatusLabel);
             request.setAttribute("selectedAssessmentStatusClass", selectedAssessmentStatusClass);
             request.setAttribute("selectedAssessmentPrimaryLabel", selectedAssessmentPrimaryLabel);
@@ -1507,7 +1510,16 @@ public class EnrollmentDetailsServlet extends HttpServlet {
         }
         double assessmentRatio = totalAssessments == 0 ? 1.0 : Math.min(1.0, (double) passedAssessments / totalAssessments);
 
-        int percent = (int) Math.round((materialRatio * 60.0) + (assessmentRatio * 40.0));
+        int percent;
+        if (totalMaterials == 0 && totalAssessments == 0) {
+            percent = 100;
+        } else if (totalMaterials == 0) {
+            percent = (int) Math.round(assessmentRatio * 100.0);
+        } else if (totalAssessments == 0) {
+            percent = (int) Math.round(materialRatio * 100.0);
+        } else {
+            percent = (int) Math.round((materialRatio * 60.0) + (assessmentRatio * 40.0));
+        }
         return Math.max(0, Math.min(100, percent));
     }
 

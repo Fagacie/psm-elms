@@ -145,12 +145,14 @@
                         </a>
                     </div>
                     
-                    <!-- Highly visible Download Student PDF button for Assignments -->
-                    <div id="assignmentDownloadWrapper" class="grading-download-wrap" style="display: none;">
-                        <i class="fas fa-file-pdf grading-download-icon"></i>
-                        <h3 class="grading-download-title">Student Assignment PDF File</h3>
-                        <a id="assignmentDownloadBtn" href="" download target="_blank" class="grading-download-btn">
-                            <i class="fas fa-download"></i> Download Student PDF
+                    <!-- Sleek compact horizontal toolbar banner for PDF download -->
+                    <div id="assignmentDownloadWrapper" style="display: none; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 16px; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; margin-top: 12px; width: 100%; box-sizing: border-box;">
+                        <div style="display: flex; align-items: center; gap: 8px; color: #1e293b; font-size: 0.875rem; font-weight: 500;">
+                            <i class="fas fa-file-pdf" style="color: #ef4444; font-size: 1.125rem;"></i>
+                            <span>Student Submitted Assignment PDF</span>
+                        </div>
+                        <a id="assignmentDownloadBtn" href="" download target="_blank" class="ws-btn ws-btn-primary ws-btn-xs" style="display: inline-flex; align-items: center; gap: 6px; margin: 0; padding: 6px 12px; font-size: 0.8125rem; font-weight: 500; text-decoration: none; border-radius: 4px; color: #ffffff; background-color: #3b82f6;">
+                            <i class="fas fa-download"></i> Download File
                         </a>
                     </div>
 
@@ -258,7 +260,7 @@
                          data-feedback="<c:out value='${submission.feedback}'/>"
                          data-payload="<c:out value='${submissionPayload}'/>"
                          data-file-url="${submissionIsUrl ? submissionPayload : pageContext.request.contextPath.concat('/uploads/').concat(submissionPayload)}"
-                         data-is-pdf="${fn:endsWith(fn:toLowerCase(submissionPayload), '.pdf')}"
+                         data-is-pdf="${fn:contains(fn:toLowerCase(submissionPayload), '.pdf')}"
                          data-type="${selectedAssessment.type}">
                     </div>
                 </c:if>

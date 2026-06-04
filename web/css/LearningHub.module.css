@@ -246,93 +246,93 @@
 }
 
 /* ==========================================================================
-   DARK MODE OVERRIDES (:global(html[data-theme='dark']) context)
+   DARK MODE OVERRIDES (html[data-theme='dark'] context)
    ========================================================================== */
 
-:global(html[data-theme='dark']) .hub_container {
+html[data-theme='dark'] .hub_container {
     background: #0f172a !important;
 }
 
-:global(html[data-theme='dark']) .hub_topBar {
+html[data-theme='dark'] .hub_topBar {
     background: #1e293b !important;
     border-bottom-color: rgba(255, 255, 255, 0.08) !important;
 }
 
-:global(html[data-theme='dark']) .hub_backBtn {
+html[data-theme='dark'] .hub_backBtn {
     color: #94a3b8 !important;
 }
 
-:global(html[data-theme='dark']) .hub_backBtn:hover {
+html[data-theme='dark'] .hub_backBtn:hover {
     color: #ffffff !important;
 }
 
-:global(html[data-theme='dark']) .hub_courseTitle {
+html[data-theme='dark'] .hub_courseTitle {
     color: #ffffff !important;
 }
 
-:global(html[data-theme='dark']) .hub_progressText {
+html[data-theme='dark'] .hub_progressText {
     color: #94a3b8 !important;
 }
 
-:global(html[data-theme='dark']) .hub_progressIndicator {
+html[data-theme='dark'] .hub_progressIndicator {
     background: #334155 !important;
 }
 
-:global(html[data-theme='dark']) .hub_progressFill {
+html[data-theme='dark'] .hub_progressFill {
     background: #3b82f6 !important;
 }
 
-:global(html[data-theme='dark']) .hub_sidebar {
+html[data-theme='dark'] .hub_sidebar {
     background: #1e293b !important;
     border-right-color: rgba(255, 255, 255, 0.08) !important;
 }
 
-:global(html[data-theme='dark']) .hub_sidebarHeader {
+html[data-theme='dark'] .hub_sidebarHeader {
     border-bottom-color: rgba(255, 255, 255, 0.05) !important;
 }
 
-:global(html[data-theme='dark']) .hub_chapterHeader {
+html[data-theme='dark'] .hub_chapterHeader {
     background: #111827 !important;
     color: #94a3b8 !important;
 }
 
-:global(html[data-theme='dark']) .hub_moduleItem {
+html[data-theme='dark'] .hub_moduleItem {
     background: #1e293b !important;
     color: #cbd5e1 !important;
     border-bottom-color: rgba(255, 255, 255, 0.02) !important;
 }
 
-:global(html[data-theme='dark']) .hub_moduleItem:hover {
+html[data-theme='dark'] .hub_moduleItem:hover {
     background: #334155 !important;
     color: #ffffff !important;
 }
 
-:global(html[data-theme='dark']) .hub_moduleItemActive {
+html[data-theme='dark'] .hub_moduleItemActive {
     background: rgba(59, 130, 246, 0.08) !important;
     border-left-color: #3b82f6 !important;
     color: #3b82f6 !important;
 }
 
-:global(html[data-theme='dark']) .hub_moduleItemActive .hub_moduleIcon {
+html[data-theme='dark'] .hub_moduleItemActive .hub_moduleIcon {
     color: #3b82f6 !important;
 }
 
-:global(html[data-theme='dark']) .hub_moduleItemActive .hub_moduleKind {
+html[data-theme='dark'] .hub_moduleItemActive .hub_moduleKind {
     color: rgba(59, 130, 246, 0.8) !important;
 }
 
-:global(html[data-theme='dark']) .hub_moduleIcon {
+html[data-theme='dark'] .hub_moduleIcon {
     color: #94a3b8 !important;
 }
 
-:global(html[data-theme='dark']) .hub_completionToggle {
+html[data-theme='dark'] .hub_completionToggle {
     color: #475569 !important;
 }
 
-:global(html[data-theme='dark']) .hub_completionToggleComplete {
+html[data-theme='dark'] .hub_completionToggleComplete {
     color: #34d399 !important;
 }
 
-:global(html[data-theme='dark']) .hub_stage {
+html[data-theme='dark'] .hub_stage {
     background: #0f172a !important;
 }
