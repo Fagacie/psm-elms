@@ -153,15 +153,6 @@
     </servlet-mapping>
 
     <servlet>
-        <servlet-name>MailTestServlet</servlet-name>
-        <servlet-class>com.psm.elearning.controller.MailTestServlet</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>MailTestServlet</servlet-name>
-        <url-pattern>/mail-test</url-pattern>
-    </servlet-mapping>
-
-    <servlet>
         <servlet-name>UserManagementServlet</servlet-name>
         <servlet-class>com.psm.elearning.controller.admin.UserManagementServlet</servlet-class>
     </servlet>

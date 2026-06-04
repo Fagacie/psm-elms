@@ -148,19 +148,19 @@ public class EmailUtil {
         }
 
         // Env overrides fallback
-        if (host == SMTP_HOST || host == null || host.isEmpty()) {
+        if (host == null || host.isEmpty() || host.equals(SMTP_HOST)) {
             String envHost = System.getenv("SMTP_HOST");
             if (envHost != null && !envHost.isEmpty()) host = envHost;
         }
-        if (port == SMTP_PORT || port == null || port.isEmpty()) {
+        if (port == null || port.isEmpty() || port.equals(SMTP_PORT)) {
             String envPort = System.getenv("SMTP_PORT");
             if (envPort != null && !envPort.isEmpty()) port = envPort;
         }
-        if (username == SMTP_USERNAME || username == null || username.isEmpty()) {
+        if (username == null || username.isEmpty() || username.equals(SMTP_USERNAME)) {
             String envUser = System.getenv("SMTP_USERNAME");
             if (envUser != null && !envUser.isEmpty()) username = envUser;
         }
-        if (password == SMTP_PASSWORD || password == null || password.isEmpty()) {
+        if (password == null || password.isEmpty() || password.equals(SMTP_PASSWORD)) {
             String envPass = System.getenv("SMTP_PASSWORD");
             if (envPass != null && !envPass.isEmpty()) password = envPass;
         }

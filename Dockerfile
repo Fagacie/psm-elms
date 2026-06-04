@@ -1,22 +1,32 @@
-FROM eclipse-temurin:17-jdk AS builder
+# ==============================================================================
+# PSM E-Learning Platform - Production Dockerfile
+# Base: Apache Tomcat 9.0 on JRE 8 (Matches Java 1.8 Compilation Target)
+# ==============================================================================
+FROM tomcat:9.0-jre8-slim
 
-WORKDIR /app
+# Set environment variables for security and configuration
+ENV CATALINA_HOME=/usr/local/tomcat
+ENV PATH=$CATALINA_HOME/bin:$PATH
 
-COPY lib ./lib
-COPY src ./src
-COPY web ./web
-COPY db ./db
+# 1. Harden Tomcat: Remove default management apps (ROOT, manager, docs, etc.)
+RUN rm -rf /usr/local/tomcat/webapps/*
 
-RUN mkdir -p build/web/WEB-INF/classes build/web/WEB-INF/lib build/web/WEB-INF/classes/db \
-    && cp -R web/. build/web/ \
-    && cp -R lib/. build/web/WEB-INF/lib/ \
-    && cp db/schema.sql build/web/WEB-INF/classes/db/schema.sql \
-    && cp src/conf/*.properties build/web/WEB-INF/classes/ 2>/dev/null || true \
-    && cp src/conf/logback.xml build/web/WEB-INF/classes/ 2>/dev/null || true \
-    && find src/java -name '*.java' > sources.txt \
-    && javac --release 17 -encoding UTF-8 -cp "lib/*:build/web/WEB-INF/classes" -d build/web/WEB-INF/classes @sources.txt \
-    && jar --create --file /app/PSME.war -C build/web .
+# 2. Deploy Application to Root Context
+# By deploying as ROOT.war, the app runs at "/" instead of "/PSME/".
+# The codebase is fully compatible with dynamic context paths.
+COPY dist/PSME.war /usr/local/tomcat/webapps/ROOT.war
 
-FROM tomcat:9.0-jdk17-temurin
+# 3. Create non-root system user for runtime security
+RUN groupadd -r tomcat && useradd -r -g tomcat -d /usr/local/tomcat -s /sbin/nologin tomcat
 
-COPY --from=builder /app/PSME.war /usr/local/tomcat/webapps/PSME.war
+# 4. Set appropriate directories ownership to Tomcat user
+RUN chown -R tomcat:tomcat /usr/local/tomcat/webapps /usr/local/tomcat/work /usr/local/tomcat/temp /usr/local/tomcat/logs
+
+# 5. Expose default port
+EXPOSE 8080
+
+# 6. Switch execution context to non-privileged user
+USER tomcat
+
+# Start Tomcat server
+CMD ["catalina.sh", "run"]
