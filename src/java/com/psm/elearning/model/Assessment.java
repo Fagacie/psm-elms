@@ -55,6 +55,10 @@ public class Assessment {
     private Integer maxAttempts;
 
     private LocalDateTime createdAt;
+
+    private String attachmentUrl;
+
+    private String attachmentName;
     
     @NotNull(message = "CreatedBy user ID is required")
     private Integer createdBy;
@@ -133,6 +137,15 @@ public class Assessment {
 
     public Integer getMaxAttempts() { return maxAttempts; }
     public void setMaxAttempts(Integer maxAttempts) { this.maxAttempts = maxAttempts; }
+
+    public String getAttachmentUrl() { return attachmentUrl; }
+    public void setAttachmentUrl(String attachmentUrl) { this.attachmentUrl = attachmentUrl; }
+
+    public String getAttachmentName() { return attachmentName; }
+    public void setAttachmentName(String attachmentName) { this.attachmentName = attachmentName; }
+
+    public String getFileUrl() { return attachmentUrl; }
+    public void setFileUrl(String fileUrl) { this.attachmentUrl = fileUrl; }
     
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

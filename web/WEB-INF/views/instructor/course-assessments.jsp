@@ -232,6 +232,25 @@
                                                 </div>
                                             </div>
 
+                                            <c:if test="${a.type == 'Assignment'}">
+                                                <div class="ia-option-item" style="margin: 0 0 14px 0; justify-content: space-between;">
+                                                    <span><strong>Assignment Material:</strong>
+                                                        <c:choose>
+                                                            <c:when test="${not empty a.attachmentUrl}">
+                                                                <c:out value="${not empty a.attachmentName ? a.attachmentName : 'PDF brief'}" />
+                                                            </c:when>
+                                                            <c:otherwise>No PDF attached</c:otherwise>
+                                                        </c:choose>
+                                                    </span>
+                                                    <c:if test="${not empty a.attachmentUrl}">
+                                                        <a href="${a.attachmentUrl}" target="_blank" rel="noopener noreferrer"
+                                                           class="btn btn-secondary btn-sm iax-btn">
+                                                            <i class="fas fa-file-pdf"></i> Open
+                                                        </a>
+                                                    </c:if>
+                                                </div>
+                                            </c:if>
+
                                             <div class="ia-card-footer iax-card-actions">
                                                 <a href="${pageContext.request.contextPath}/instructor/assessments?view=editor&courseId=${selectedCourse.courseId}&assessmentId=${a.assessmentId}"
                                                     class="btn btn-secondary btn-sm iax-btn-icon" title="Edit Assessment Details" aria-label="Edit Assessment Details">

@@ -13,22 +13,48 @@
     </c:choose>
 </c:if>
 
-<aside class="app-sidebar" id="insSidebar">
-    <nav class="sidebar-nav">
-        <a href="${pageContext.request.contextPath}/dashboard" class="nav-item ${resolvedInstructorPage == 'dashboard' ? 'active' : ''}" title="Dashboard">
-            <i class="fas fa-table-columns"></i><span>Dashboard</span>
-        </a>
-        <a href="${pageContext.request.contextPath}/instructor/courses" class="nav-item ${resolvedInstructorPage == 'courses' ? 'active' : ''}" title="My Assigned Courses">
-            <i class="fas fa-book"></i><span>My Assigned Courses</span>
-        </a>
-        <a href="${pageContext.request.contextPath}/instructor/assessments" class="nav-item ${resolvedInstructorPage == 'assessments' ? 'active' : ''}" title="Assessment Hub">
-            <i class="fas fa-clipboard-check"></i><span>Assessment Hub</span>
-        </a>
-        <a href="${pageContext.request.contextPath}/profile" class="nav-item ${resolvedInstructorPage == 'profile' ? 'active' : ''}" title="Profile">
-            <i class="fas fa-user-gear"></i><span>Profile</span>
-        </a>
-        <a href="${pageContext.request.contextPath}/logout" class="nav-item nav-item-danger" title="Logout">
-            <i class="fas fa-right-from-bracket"></i><span>Logout</span>
-        </a>
-    </nav>
+<aside class="nav_mod_sidebar" id="insSidebar" aria-label="Sidebar navigation">
+    <div class="nav_mod_sidebar_shell">
+        <nav class="nav_mod_nav" aria-label="Primary navigation">
+            <span class="nav_mod_section_label">Management</span>
+            
+            <a href="${pageContext.request.contextPath}/dashboard" 
+               class="nav_mod_link ${resolvedInstructorPage == 'dashboard' ? 'active' : ''}" 
+               title="Dashboard">
+                <i class="fas fa-table-columns" aria-hidden="true"></i>
+                <span class="nav_mod_label">Dashboard</span>
+            </a>
+            
+            <a href="${pageContext.request.contextPath}/instructor/courses" 
+               class="nav_mod_link ${resolvedInstructorPage == 'courses' ? 'active' : ''}" 
+               title="My Assigned Courses">
+                <i class="fas fa-book" aria-hidden="true"></i>
+                <span class="nav_mod_label">My Assigned Courses</span>
+            </a>
+            
+            <a href="${pageContext.request.contextPath}/instructor/assessments" 
+               class="nav_mod_link ${resolvedInstructorPage == 'assessments' ? 'active' : ''}" 
+               title="Assessment Hub">
+                <i class="fas fa-clipboard-check" aria-hidden="true"></i>
+                <span class="nav_mod_label">Assessment Hub</span>
+            </a>
+            
+            <a href="${pageContext.request.contextPath}/profile" 
+               class="nav_mod_link ${resolvedInstructorPage == 'profile' ? 'active' : ''}" 
+               title="Profile">
+                <i class="fas fa-user-gear" aria-hidden="true"></i>
+                <span class="nav_mod_label">Profile</span>
+            </a>
+            
+            <div class="nav_mod_spacer"></div>
+            <hr class="nav_mod_divider" />
+            
+            <a href="${pageContext.request.contextPath}/logout" 
+               class="nav_mod_link nav_mod_link_danger" 
+               title="Logout">
+                <i class="fas fa-right-from-bracket" aria-hidden="true"></i>
+                <span class="nav_mod_label">Logout</span>
+            </a>
+        </nav>
+    </div>
 </aside>

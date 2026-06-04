@@ -108,8 +108,15 @@
                             <div class="alert alert-success"><i class="fas fa-check-circle"></i> Question added to bank.
                             </div>
                         </c:if>
+                        <c:if test="${param.success == 'qupdated'}">
+                            <div class="alert alert-success"><i class="fas fa-check-circle"></i> Assignment item updated successfully.
+                            </div>
+                        </c:if>
                         <c:if test="${param.success == 'qdeleted'}">
                             <div class="alert alert-success"><i class="fas fa-check-circle"></i> Question removed.</div>
+                        </c:if>
+                        <c:if test="${param.error == 'qupdate'}">
+                            <div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> Failed to update assignment item.</div>
                         </c:if>
                         <c:if test="${param.error == 'qoptions'}">
                             <div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> Invalid options.
@@ -138,124 +145,250 @@
                         </div>
 
                         <div class="ia-flow-grid-question">
-                            <!-- Left Side: Add Question Form -->
+                            <!-- Left Side: Add/Edit Question Form -->
                             <div class="section-card ia-flow-sticky" style="padding: 24px;">
-                                <div class="ia-panel-head">
-                                    <h3><i class="fas fa-plus-circle ia-panel-title-icon"></i> New Question</h3>
-                                </div>
 
-                                <form method="post" action="${pageContext.request.contextPath}/instructor/assessments"
-                                    class="ia-form ia-question-form" enctype="multipart/form-data">
-                                    <input type="hidden" name="action" value="addQuestion" />
-                                    <input type="hidden" name="courseId" value="${selectedCourse.courseId}" />
-                                    <input type="hidden" name="assessmentId"
-                                        value="${selectedAssessment.assessmentId}" />
-                                    <input type="hidden" name="workflowAction" value="questions" />
-
-                                    <div class="ia-question-form-block">
-                                        <label for="createQuestionText" class="field-label">
-                                            <c:out
-                                                value="${isAssignment ? 'Assignment Prompt / Questions' : 'Question Prompt'}" />
-                                            <span style="color: #dc2626;">*</span>
-                                        </label>
-                                        <textarea id="createQuestionText" name="questionText" rows="4"
-                                            placeholder="${isAssignment ? 'Enter the assignment instructions or question text...' : 'Enter the question text...'}"
-                                            ${isAssignment ? '' : 'required' }></textarea>
-                                    </div>
-
-                                    <c:if test="${not isAssignment}">
-                                        <div class="ia-question-form-grid">
-                                            <div>
-                                                <label class="field-label">Option A <span
-                                                        style="color: #dc2626;">*</span></label>
-                                                <input name="optionA" type="text" placeholder="First option" required />
-                                            </div>
-                                            <div>
-                                                <label class="field-label">Option B <span
-                                                        style="color: #dc2626;">*</span></label>
-                                                <input name="optionB" type="text" placeholder="Second option"
-                                                    required />
-                                            </div>
-                                            <div>
-                                                <label class="field-label">Option C</label>
-                                                <input name="optionC" type="text" placeholder="Optional" />
-                                            </div>
-                                            <div>
-                                                <label class="field-label">Option D</label>
-                                                <input name="optionD" type="text" placeholder="Optional" />
-                                            </div>
+                                <c:choose>
+                                    <%-- ASSIGNMENT EDIT MODE: item already exists --%>
+                                    <c:when test="${isAssignment and not empty questions}">
+                                        <c:set var="existingQ" value="${questions[0]}" />
+                                        <div class="ia-panel-head">
+                                            <h3><i class="fas fa-pen-to-square ia-panel-title-icon"></i> Edit Assignment Item</h3>
                                         </div>
 
-                                        <div class="ia-question-form-split">
-                                            <div>
-                                                <label for="createCorrectOption" class="field-label">Answer <span
-                                                        style="color: #dc2626;">*</span></label>
-                                                <select id="createCorrectOption" name="correctOption" required>
-                                                    <option value="">Choice</option>
-                                                    <option value="A">A</option>
-                                                    <option value="B">B</option>
-                                                    <option value="C">C</option>
-                                                    <option value="D">D</option>
-                                                </select>
+                                        <form method="post" action="${pageContext.request.contextPath}/instructor/assessments"
+                                            class="ia-form ia-question-form" enctype="multipart/form-data">
+                                            <input type="hidden" name="action" value="updateQuestion" />
+                                            <input type="hidden" name="courseId" value="${selectedCourse.courseId}" />
+                                            <input type="hidden" name="assessmentId" value="${selectedAssessment.assessmentId}" />
+                                            <input type="hidden" name="questionId" value="${existingQ.questionId}" />
+                                            <input type="hidden" name="workflowAction" value="questions" />
+                                            <input type="hidden" name="deleteAttachment" id="deleteAttachmentFlag" value="false" />
+
+                                            <div class="ia-question-form-block">
+                                                <label for="createQuestionText" class="field-label">
+                                                    Assignment Prompt / Questions
+                                                </label>
+                                                <textarea id="createQuestionText" name="questionText" rows="4"
+                                                    placeholder="Enter the assignment instructions or question text...">${existingQ.questionText}</textarea>
                                             </div>
-                                            <div>
-                                                <label for="createMarks" class="field-label">Marks <span
-                                                        style="color: #dc2626;">*</span></label>
-                                                <input id="createMarks" name="marks" type="number" min="0.5" step="0.5"
-                                                    value="1" required />
+
+                                            <%-- File Preview / Upload Toggle --%>
+                                            <div class="ia-question-form-block">
+                                                <c:choose>
+                                                    <c:when test="${not empty existingQ.attachmentUrl}">
+                                                        <%-- Existing file preview block --%>
+                                                        <div id="iaFilePreview" class="ia-file-preview-block">
+                                                            <div class="ia-file-preview-info">
+                                                                <span class="ia-file-preview-icon"><i class="fas fa-file-pdf"></i></span>
+                                                                <span class="ia-file-preview-name">
+                                                                    <c:out value="${not empty existingQ.attachmentName ? existingQ.attachmentName : 'Attachment.pdf'}" />
+                                                                </span>
+                                                            </div>
+                                                            <div class="ia-file-preview-actions">
+                                                                <a href="${existingQ.attachmentUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm">
+                                                                    <i class="fas fa-up-right-from-square"></i> Open
+                                                                </a>
+                                                                <button type="button" class="btn btn-secondary btn-sm" style="color: #dc2626; border-color: #fee2e2;" id="iaRemoveFileBtn">
+                                                                    <i class="fas fa-trash-can"></i> Remove / Replace
+                                                                </button>
+                                                            </div>
+                                                        </div>
+
+                                                        <%-- Hidden upload input, shown after Remove --%>
+                                                        <div id="iaFileUploadBlock" style="display: none;">
+                                                            <label for="assignmentAttachment" class="field-label">Replace Attachment PDF</label>
+                                                            <input id="assignmentAttachment" name="assignmentAttachment" type="file" accept="application/pdf,.pdf" />
+                                                            <small style="color: var(--ins-muted); display: block; margin-top: 8px;">
+                                                                Select a new PDF, or leave empty to remove the existing one.
+                                                            </small>
+                                                            <button type="button" class="btn btn-secondary btn-sm" style="margin-top: 8px;" id="iaCancelRemoveBtn">
+                                                                <i class="fas fa-undo"></i> Cancel
+                                                            </button>
+                                                        </div>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <%-- No existing file, show upload input directly --%>
+                                                        <label for="assignmentAttachment" class="field-label">Attach PDF Instructions</label>
+                                                        <input id="assignmentAttachment" name="assignmentAttachment" type="file" accept="application/pdf,.pdf" />
+                                                        <small style="color: var(--ins-muted); display: block; margin-top: 8px;">Optional. Upload a PDF if you want students to open the assignment brief directly.</small>
+                                                    </c:otherwise>
+                                                </c:choose>
                                             </div>
-                                        </div>
-                                    </c:if>
 
-                                    <c:if test="${isAssignment}">
-                                        <div class="ia-question-form-block">
-                                            <label for="assignmentAttachment" class="field-label">Attach PDF
-                                                Instructions</label>
-                                            <input id="assignmentAttachment" name="assignmentAttachment" type="file"
-                                                accept="application/pdf,.pdf" />
-                                            <small
-                                                style="color: var(--ins-muted); display: block; margin-top: 8px;">Optional.
-                                                Upload a PDF if you want students to open the assignment brief
-                                                directly.</small>
-                                        </div>
-
-                                        <div class="ia-question-form-split">
-                                            <div>
-                                                <label for="createMarks" class="field-label">Marks <span
-                                                        style="color: #dc2626;">*</span></label>
-                                                <input id="createMarks" name="marks" type="number" min="0.5" step="0.5"
-                                                    value="1" required />
+                                            <div class="ia-question-form-split">
+                                                <div>
+                                                    <label for="createMarks" class="field-label">Marks <span style="color: #dc2626;">*</span></label>
+                                                    <input id="createMarks" name="marks" type="number" min="0.5" step="0.5"
+                                                        value="${existingQ.marks}" required />
+                                                </div>
                                             </div>
-                                        </div>
-                                    </c:if>
 
-                                    <button class="btn btn-primary" type="submit">
-                                        <i class="fas fa-save"></i>
-                                        <c:out value="${isAssignment ? 'Add Assignment Item' : 'Add to Bank'}" />
-                                    </button>
-                                </form>
+                                            <button class="btn btn-primary" type="submit">
+                                                <i class="fas fa-save"></i> Save Assignment Item
+                                            </button>
+                                        </form>
 
-                                <c:if test="${isAssignment}">
-                                    <script>
-                                        document.addEventListener('DOMContentLoaded', function () {
-                                            var textField = document.getElementById('createQuestionText');
-                                            var fileField = document.getElementById('assignmentAttachment');
+                                        <script>
+                                            document.addEventListener('DOMContentLoaded', function () {
+                                                var previewBlock = document.getElementById('iaFilePreview');
+                                                var uploadBlock = document.getElementById('iaFileUploadBlock');
+                                                var removeBtn = document.getElementById('iaRemoveFileBtn');
+                                                var cancelBtn = document.getElementById('iaCancelRemoveBtn');
+                                                var deleteFlag = document.getElementById('deleteAttachmentFlag');
+                                                var textField = document.getElementById('createQuestionText');
+                                                var fileField = document.getElementById('assignmentAttachment');
 
-                                            function syncRequirement() {
-                                                if (!textField) {
-                                                    return;
+                                                if (removeBtn && previewBlock && uploadBlock) {
+                                                    removeBtn.addEventListener('click', function () {
+                                                        previewBlock.style.display = 'none';
+                                                        uploadBlock.style.display = 'block';
+                                                        deleteFlag.value = 'true';
+                                                    });
                                                 }
-                                                var hasFile = fileField && fileField.files && fileField.files.length > 0;
-                                                textField.required = !hasFile;
-                                            }
 
-                                            if (fileField) {
-                                                fileField.addEventListener('change', syncRequirement);
-                                            }
-                                            syncRequirement();
-                                        });
-                                    </script>
-                                </c:if>
+                                                if (cancelBtn && previewBlock && uploadBlock) {
+                                                    cancelBtn.addEventListener('click', function () {
+                                                        previewBlock.style.display = '';
+                                                        uploadBlock.style.display = 'none';
+                                                        deleteFlag.value = 'false';
+                                                        if (fileField) fileField.value = '';
+                                                    });
+                                                }
+
+                                                function syncRequirement() {
+                                                    if (!textField) return;
+                                                    var hasExisting = previewBlock && previewBlock.style.display !== 'none';
+                                                    var hasNewFile = fileField && fileField.files && fileField.files.length > 0;
+                                                    textField.required = !(hasExisting || hasNewFile);
+                                                }
+
+                                                if (fileField) fileField.addEventListener('change', syncRequirement);
+                                                syncRequirement();
+                                            });
+                                        </script>
+                                    </c:when>
+
+                                    <%-- DEFAULT: Add New Question/Assignment --%>
+                                    <c:otherwise>
+                                        <div class="ia-panel-head">
+                                            <h3><i class="fas fa-plus-circle ia-panel-title-icon"></i> New Question</h3>
+                                        </div>
+
+                                        <form method="post" action="${pageContext.request.contextPath}/instructor/assessments"
+                                            class="ia-form ia-question-form" enctype="multipart/form-data">
+                                            <input type="hidden" name="action" value="addQuestion" />
+                                            <input type="hidden" name="courseId" value="${selectedCourse.courseId}" />
+                                            <input type="hidden" name="assessmentId"
+                                                value="${selectedAssessment.assessmentId}" />
+                                            <input type="hidden" name="workflowAction" value="questions" />
+
+                                            <div class="ia-question-form-block">
+                                                <label for="createQuestionText" class="field-label">
+                                                    <c:out
+                                                        value="${isAssignment ? 'Assignment Prompt / Questions' : 'Question Prompt'}" />
+                                                    <span style="color: #dc2626;">*</span>
+                                                </label>
+                                                <textarea id="createQuestionText" name="questionText" rows="4"
+                                                    placeholder="${isAssignment ? 'Enter the assignment instructions or question text...' : 'Enter the question text...'}"
+                                                    ${isAssignment ? '' : 'required' }></textarea>
+                                            </div>
+
+                                            <c:if test="${not isAssignment}">
+                                                <div class="ia-question-form-grid">
+                                                    <div>
+                                                        <label class="field-label">Option A <span
+                                                                style="color: #dc2626;">*</span></label>
+                                                        <input name="optionA" type="text" placeholder="First option" required />
+                                                    </div>
+                                                    <div>
+                                                        <label class="field-label">Option B <span
+                                                                style="color: #dc2626;">*</span></label>
+                                                        <input name="optionB" type="text" placeholder="Second option"
+                                                            required />
+                                                    </div>
+                                                    <div>
+                                                        <label class="field-label">Option C</label>
+                                                        <input name="optionC" type="text" placeholder="Optional" />
+                                                    </div>
+                                                    <div>
+                                                        <label class="field-label">Option D</label>
+                                                        <input name="optionD" type="text" placeholder="Optional" />
+                                                    </div>
+                                                </div>
+
+                                                <div class="ia-question-form-split">
+                                                    <div>
+                                                        <label for="createCorrectOption" class="field-label">Answer <span
+                                                                style="color: #dc2626;">*</span></label>
+                                                        <select id="createCorrectOption" name="correctOption" required>
+                                                            <option value="">Choice</option>
+                                                            <option value="A">A</option>
+                                                            <option value="B">B</option>
+                                                            <option value="C">C</option>
+                                                            <option value="D">D</option>
+                                                        </select>
+                                                    </div>
+                                                    <div>
+                                                        <label for="createMarks" class="field-label">Marks <span
+                                                                style="color: #dc2626;">*</span></label>
+                                                        <input id="createMarks" name="marks" type="number" min="0.5" step="0.5"
+                                                            value="1" required />
+                                                    </div>
+                                                </div>
+                                            </c:if>
+
+                                            <c:if test="${isAssignment}">
+                                                <div class="ia-question-form-block">
+                                                    <label for="assignmentAttachment" class="field-label">Attach PDF
+                                                        Instructions</label>
+                                                    <input id="assignmentAttachment" name="assignmentAttachment" type="file"
+                                                        accept="application/pdf,.pdf" />
+                                                    <small
+                                                        style="color: var(--ins-muted); display: block; margin-top: 8px;">Optional.
+                                                        Upload a PDF if you want students to open the assignment brief
+                                                        directly.</small>
+                                                </div>
+
+                                                <div class="ia-question-form-split">
+                                                    <div>
+                                                        <label for="createMarks" class="field-label">Marks <span
+                                                                style="color: #dc2626;">*</span></label>
+                                                        <input id="createMarks" name="marks" type="number" min="0.5" step="0.5"
+                                                            value="1" required />
+                                                    </div>
+                                                </div>
+                                            </c:if>
+
+                                            <button class="btn btn-primary" type="submit">
+                                                <i class="fas fa-save"></i>
+                                                <c:out value="${isAssignment ? 'Add Assignment Item' : 'Add to Bank'}" />
+                                            </button>
+                                        </form>
+
+                                        <c:if test="${isAssignment}">
+                                            <script>
+                                                document.addEventListener('DOMContentLoaded', function () {
+                                                    var textField = document.getElementById('createQuestionText');
+                                                    var fileField = document.getElementById('assignmentAttachment');
+
+                                                    function syncRequirement() {
+                                                        if (!textField) {
+                                                            return;
+                                                        }
+                                                        var hasFile = fileField && fileField.files && fileField.files.length > 0;
+                                                        textField.required = !hasFile;
+                                                    }
+
+                                                    if (fileField) {
+                                                        fileField.addEventListener('change', syncRequirement);
+                                                    }
+                                                    syncRequirement();
+                                                });
+                                            </script>
+                                        </c:if>
+                                    </c:otherwise>
+                                </c:choose>
                             </div>
 
                             <!-- Right Side: Questions List -->

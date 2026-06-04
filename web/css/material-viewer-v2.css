@@ -1,7 +1,7 @@
 .mv-main {
-  display: grid;
-  gap: 20px;
-  align-content: flex-start;
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - var(--sv-topbar-height) - 52px);
 }
 
 .mv-context-nav {
@@ -151,9 +151,45 @@
   line-height: 1.4;
 }
 
-.mv-frame-wrap,
 .mv-player-wrap,
+.mv-youtube-wrap {
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  flex-shrink: 0;
+  border: 1px solid var(--sv-border);
+  border-radius: 14px;
+  background: #000000;
+  overflow: hidden;
+  box-shadow: 0 24px 46px rgba(16, 38, 26, 0.08);
+}
+
+.mv-video,
+.mv-youtube-frame {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+}
+
 .mv-audio-wrap {
+  border: 1px solid var(--sv-border);
+  border-radius: 14px;
+  background: #ffffff;
+  overflow: hidden;
+  box-shadow: 0 24px 46px rgba(16, 38, 26, 0.08);
+  padding: 28px;
+}
+
+.mv-frame-wrap {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 70vh;
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
   border: 1px solid var(--sv-border);
   border-radius: 14px;
   background: #ffffff;
@@ -162,16 +198,10 @@
 }
 
 .mv-frame {
+  flex: 1;
   width: 100%;
-  min-height: 72vh;
+  height: 100%;
   border: 0;
-  display: block;
-}
-
-.mv-video {
-  width: 100%;
-  max-height: 72vh;
-  background: #000;
   display: block;
 }
 
@@ -265,14 +295,21 @@
    Standalone Viewer Cleanup
    ============================================ */
 
-.mv-main {
-  display: grid;
-  gap: 20px;
-  align-content: flex-start;
+.mv-shell {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
 }
 
-.mv-shell {
-  overflow: hidden;
+.lh-stage-body,
+.lh-fragment-viewer,
+.cp-viewer-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  height: 100%;
+  width: 100%;
 }
 
 .mv-stage-panel {
@@ -313,4 +350,37 @@
   .mv-fragment-frame {
     height: 72vh;
   }
+}
+
+/* ============================================
+   Navigation Footer & YouTube Helpers
+   ============================================ */
+
+.mv-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 24px;
+  margin-top: 24px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.mv-footer-left,
+.mv-footer-right {
+  display: flex;
+  align-items: center;
+}
+
+.mv-youtube-note {
+  margin: 14px 0 0;
+  font-size: 0.84rem;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mv-youtube-note .fab {
+  color: #ef4444;
+  font-size: 1.1rem;
 }

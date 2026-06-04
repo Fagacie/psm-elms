@@ -271,6 +271,8 @@ public class InstructorAssessmentServlet extends HttpServlet {
             activeAssessmentCount = metrics.activeAssessmentCount;
             closedAssessmentCount = metrics.closedAssessmentCount;
             pendingGradingAssessmentCount = metrics.pendingGradingAssessmentCount;
+            hydrateAssignmentAttachments(assessments);
+            hydrateAssignmentAttachments(archivedAssessments);
         }
 
         Map<Integer, String> placementTypeByAssessmentId = new LinkedHashMap<>();
@@ -315,6 +317,7 @@ public class InstructorAssessmentServlet extends HttpServlet {
                 
                 questions = questionDAO.findByAssessment(selectedAssessmentId);
                 if (questions == null) questions = new ArrayList<>();
+                hydrateAssignmentAttachment(selectedAssessment, questions);
                 retakeRequests = retakeRequestDAO.findByAssessment(selectedAssessmentId);
                 if (retakeRequests == null) retakeRequests = new ArrayList<>();
                 submissionsUnfiltered = submissionDAO.findByAssessment(selectedAssessmentId);
@@ -821,6 +824,11 @@ public class InstructorAssessmentServlet extends HttpServlet {
         existing.setMarks(parseDouble(request.getParameter("marks")));
         String existingAttachmentUrl = existing.getAttachmentUrl();
         String existingAttachmentName = existing.getAttachmentName();
+        String deleteAttachment = request.getParameter("deleteAttachment");
+        if ("true".equalsIgnoreCase(deleteAttachment)) {
+            existingAttachmentUrl = null;
+            existingAttachmentName = null;
+        }
 
         String normalizedType = normalize(assessment.getType());
         if (Assessment.TYPE_QUIZ.equalsIgnoreCase(normalizedType) || Assessment.TYPE_EXAM.equalsIgnoreCase(normalizedType)) {
@@ -1452,6 +1460,36 @@ public class InstructorAssessmentServlet extends HttpServlet {
         }
         Material material = materialDAO.findById(placement.materialId);
         return material != null && courseId != null && courseId.equals(material.getCourseId());
+    }
+
+    private void hydrateAssignmentAttachments(List<Assessment> assessments) {
+        if (assessments == null) {
+            return;
+        }
+        for (Assessment assessment : assessments) {
+            hydrateAssignmentAttachment(assessment, null);
+        }
+    }
+
+    private void hydrateAssignmentAttachment(Assessment assessment, List<AssessmentQuestion> knownQuestions) {
+        if (assessment == null || assessment.getAssessmentId() == null
+                || !Assessment.TYPE_ASSIGNMENT.equalsIgnoreCase(assessment.getType())) {
+            return;
+        }
+        List<AssessmentQuestion> questions = knownQuestions;
+        if (questions == null) {
+            questions = questionDAO.findByAssessment(assessment.getAssessmentId());
+        }
+        if (questions == null) {
+            return;
+        }
+        for (AssessmentQuestion question : questions) {
+            if (question != null && question.getAttachmentUrl() != null && !question.getAttachmentUrl().trim().isEmpty()) {
+                assessment.setAttachmentUrl(question.getAttachmentUrl());
+                assessment.setAttachmentName(question.getAttachmentName());
+                return;
+            }
+        }
     }
 
     private boolean isInstructor(HttpSession session) {

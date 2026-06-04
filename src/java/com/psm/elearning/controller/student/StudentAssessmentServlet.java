@@ -239,6 +239,7 @@ public class StudentAssessmentServlet extends HttpServlet {
         if (questions == null) {
             questions = Collections.emptyList();
         }
+        hydrateAssignmentAttachment(assessment, questions);
         boolean objectiveAssessment = isObjectiveAssessment(assessment);
         String submissionMode = objectiveAssessment ? normalizeSubmissionMode(assessment.getSubmissionMode()) : "file";
         String displayInstructions = AssessmentPlacementUtil.stripPlacement(assessment.getInstructions());
@@ -552,6 +553,19 @@ public class StudentAssessmentServlet extends HttpServlet {
         }
         String type = assessment.getType().trim();
         return "Quiz".equalsIgnoreCase(type) || "Exam".equalsIgnoreCase(type);
+    }
+
+    private void hydrateAssignmentAttachment(Assessment assessment, List<AssessmentQuestion> questions) {
+        if (assessment == null || questions == null || !"Assignment".equalsIgnoreCase(assessment.getType())) {
+            return;
+        }
+        for (AssessmentQuestion question : questions) {
+            if (question != null && question.getAttachmentUrl() != null && !question.getAttachmentUrl().trim().isEmpty()) {
+                assessment.setAttachmentUrl(question.getAttachmentUrl());
+                assessment.setAttachmentName(question.getAttachmentName());
+                return;
+            }
+        }
     }
 
     private String normalizeSubmissionMode(String submissionMode) {

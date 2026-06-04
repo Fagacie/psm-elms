@@ -18,20 +18,37 @@ public class AssessmentQuestionDAOImpl implements AssessmentQuestionDAO {
             if (attachmentColumnsAvailable != null) {
                 return attachmentColumnsAvailable;
             }
-            String sql = "SELECT COUNT(*) AS cnt FROM information_schema.COLUMNS "
-                    + "WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'AssessmentQuestion' "
-                    + "AND COLUMN_NAME IN ('AttachmentUrl','AttachmentName')";
-            try (PreparedStatement ps = conn.prepareStatement(sql);
-                 ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    attachmentColumnsAvailable = rs.getInt("cnt") >= 2;
-                } else {
-                    attachmentColumnsAvailable = false;
-                }
+            try {
+                ensureAttachmentColumn(conn, "AttachmentUrl", "VARCHAR(500) NULL");
+                ensureAttachmentColumn(conn, "AttachmentName", "VARCHAR(255) NULL");
+                attachmentColumnsAvailable = hasAttachmentColumn(conn, "AttachmentUrl")
+                        && hasAttachmentColumn(conn, "AttachmentName");
             } catch (SQLException e) {
+                System.err.println("AssessmentQuestion attachment columns unavailable: " + e.getMessage());
                 attachmentColumnsAvailable = false;
             }
             return attachmentColumnsAvailable;
+        }
+    }
+
+    private void ensureAttachmentColumn(Connection conn, String columnName, String definition) throws SQLException {
+        if (hasAttachmentColumn(conn, columnName)) {
+            return;
+        }
+        try (Statement stmt = conn.createStatement()) {
+            stmt.execute("ALTER TABLE AssessmentQuestion ADD COLUMN " + columnName + " " + definition);
+        }
+    }
+
+    private boolean hasAttachmentColumn(Connection conn, String columnName) throws SQLException {
+        String sql = "SELECT COUNT(*) AS cnt FROM information_schema.COLUMNS "
+                + "WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'AssessmentQuestion' "
+                + "AND COLUMN_NAME = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, columnName);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() && rs.getInt("cnt") > 0;
+            }
         }
     }
 

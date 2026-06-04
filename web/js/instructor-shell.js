@@ -1,4 +1,7 @@
 (function () {
+    if (document.querySelector('.nav_mod_topbar')) {
+        return;
+    }
     var body = document.body;
     var toggle = document.getElementById('insMenuBtn') || document.getElementById('instructorMenuToggle');
     var sidebar = document.getElementById('insSidebar');

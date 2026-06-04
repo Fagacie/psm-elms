@@ -62,19 +62,18 @@
                 <jsp:include page="/WEB-INF/views/student/fragments/material-viewer-fragment.jsp"/>
             </div>
 
-            <footer class="lh-action-bar">
-                <div class="lh-action-bar__actions">
+            <footer class="mv-footer">
+                <div class="mv-footer-left">
                     <c:if test="${not empty previousMaterial}">
                         <a class="sv-btn" href="${pageContext.request.contextPath}/student/materials?action=preview&id=${previousMaterial.materialId}&enrollmentId=${previewEnrollmentId}">
-                            <i class="fas fa-arrow-left"></i>
-                            <span>Previous</span>
+                            &larr; Previous Module
                         </a>
                     </c:if>
-
+                </div>
+                <div class="mv-footer-right">
                     <c:choose>
                         <c:when test="${previewEnrollment.daysRemaining < 0 && previewEnrollment.courseDuration != null && previewEnrollment.courseDuration > 0}">
                             <button
-                                id="mvMarkCompleted"
                                 type="button"
                                 class="sv-btn"
                                 style="background: rgba(239, 68, 68, 0.1); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.2); cursor: not-allowed;"
@@ -84,25 +83,27 @@
                             </button>
                         </c:when>
                         <c:otherwise>
-                            <button
-                                id="mvMarkCompleted"
-                                type="button"
-                                class="sv-btn primary"
-                                data-material-id="${material.materialId}"
-                                data-enrollment-id="${previewEnrollmentId}"
-                                data-completed="${isCompletedMaterial}"
-                                data-complete-url="${completeActionUrl}"
-                                <c:if test="${isCompletedMaterial}">disabled="disabled"</c:if>>
-                                <i class="fas fa-check-circle"></i>
-                                <span>${isCompletedMaterial ? 'Completed' : 'Mark Complete'}</span>
-                            </button>
+                            <c:choose>
+                                <c:when test="${isCompletedMaterial}">
+                                    <a class="sv-btn primary" href="${not empty nextMaterial ? pageContext.request.contextPath.concat('/student/materials?action=preview&id=').concat(nextMaterial.materialId).concat('&enrollmentId=').concat(previewEnrollmentId) : backToHubUrl}">
+                                        Next Module &rarr;
+                                    </a>
+                                </c:when>
+                                <c:otherwise>
+                                    <button
+                                        id="mvMarkCompleted"
+                                        type="button"
+                                        class="sv-btn primary"
+                                        data-material-id="${material.materialId}"
+                                        data-enrollment-id="${previewEnrollmentId}"
+                                        data-completed="${isCompletedMaterial}"
+                                        data-complete-url="${completeActionUrl}">
+                                        Complete & Continue &rarr;
+                                    </button>
+                                </c:otherwise>
+                            </c:choose>
                         </c:otherwise>
                     </c:choose>
-
-                    <a class="sv-btn ${empty nextMaterial ? 'mv-hidden' : ''}" id="mvNextAction" href="${not empty nextMaterial ? pageContext.request.contextPath.concat('/student/materials?action=preview&id=').concat(nextMaterial.materialId).concat('&enrollmentId=').concat(previewEnrollmentId) : backToHubUrl}">
-                        <span>Next</span>
-                        <i class="fas fa-arrow-right"></i>
-                    </a>
                 </div>
             </footer>
         </section>
@@ -116,7 +117,6 @@
     var statusBadge = document.getElementById('mvStatusBadge');
     var statusChip = document.getElementById('mvStatusChip');
     var courseProgressBadge = document.getElementById('mvCourseProgressPercent');
-    var nextAction = document.getElementById('mvNextAction');
     var completedNote = 'This material is already part of your course progress.';
     var viewerState = {
         unlocked: '${isCompletedMaterial}' === 'true',
@@ -130,27 +130,13 @@
     function setButtonState(disabled, label) {
         completeButton.disabled = !!disabled;
         if (label) {
-            completeButton.innerHTML = '<i class="fas fa-check-circle"></i><span>' + label + '</span>';
+            completeButton.innerHTML = '<span>' + label + '</span>';
         }
     }
 
-    function setProgress(percent) {
-        if (typeof percent !== 'number' || isNaN(percent)) {
-            return;
-        }
-        var progressBars = document.querySelectorAll('.sv-progress-bar, .lh-progress-bar');
-        for (var i = 0; i < progressBars.length; i++) {
-            progressBars[i].style.width = percent + '%';
-        }
-        if (courseProgressBadge) {
-            courseProgressBadge.textContent = percent + '%';
-        }
-    }
-
-    function applyCompletedState(note) {
+    function applyCompletedState() {
         viewerState.completed = true;
         viewerState.unlocked = true;
-        setButtonState(true, 'Completed');
         if (statusBadge) {
             statusBadge.className = 'status-badge status-Approved';
             statusBadge.textContent = 'Completed';
@@ -158,31 +144,25 @@
         if (statusChip) {
             statusChip.textContent = 'Completed';
         }
-        if (actionNote && note) {
-            actionNote.textContent = note;
-        }
     }
 
-    function unlockCompletion(note) {
+    function unlockCompletion() {
         if (viewerState.completed) {
             return;
         }
         viewerState.unlocked = true;
-        setButtonState(false, 'Mark Complete');
-        if (actionNote && note) {
-            actionNote.textContent = note;
-        }
+        setButtonState(false, 'Complete & Continue &rarr;');
     }
 
     function setWaitingState() {
         if (viewerState.completed) {
             return;
         }
-        setButtonState(true, 'Reviewing');
+        setButtonState(true, 'Reviewing...');
     }
 
     if (viewerState.completed) {
-        applyCompletedState(completedNote);
+        applyCompletedState();
     } else {
         setWaitingState();
     }
@@ -220,20 +200,16 @@
             if (!data.success) {
                 throw new Error(data.message || 'Unable to save completion.');
             }
-            applyCompletedState('This material is now part of your course progress.');
-            if (typeof data.progressPercent === 'number') {
-                setProgress(data.progressPercent);
-            }
-            if (nextAction && data.continueLabel && data.continueUrl) {
-                nextAction.classList.remove('mv-hidden');
-                nextAction.href = data.continueUrl;
-                nextAction.innerHTML = '<span>' + data.continueLabel + '</span><i class="fas fa-arrow-right"></i>';
-            }
+            applyCompletedState();
+            
+            // Auto redirect upon successful completion
+            var nextUrl = '${not empty nextMaterial ? pageContext.request.contextPath.concat("/student/materials?action=preview&id=").concat(nextMaterial.materialId).concat("&enrollmentId=").concat(previewEnrollmentId) : backToHubUrl}';
+            window.location.href = nextUrl;
         })
         .catch(function (error) {
             viewerState.unlocked = false;
             setWaitingState();
-            unlockCompletion(error.message || 'Unable to save completion right now.');
+            unlockCompletion();
         });
     });
 
@@ -244,13 +220,13 @@
 
         if (event.data.type === 'lhViewerState') {
             if (event.data.completed) {
-                applyCompletedState(completedNote);
+                applyCompletedState();
                 return;
             }
         }
 
         if (event.data.type === 'lhViewerUnlock') {
-            unlockCompletion(event.data.note || 'You can mark this material complete now.');
+            unlockCompletion();
         }
     });
 })();

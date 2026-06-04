@@ -3,33 +3,7 @@
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/course-player.css">
-<style>
-.mv-youtube-wrap {
-    position: relative;
-    width: 100%;
-    padding-top: 56.25%; /* 16:9 ratio */
-    background: #000;
-    border-radius: 12px;
-    overflow: hidden;
-}
-.mv-youtube-frame {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    border: none;
-    border-radius: 12px;
-}
-.mv-youtube-note {
-    margin: 14px 0 0;
-    font-size: 0.84rem;
-    color: #64748b;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-.mv-youtube-note .fab { color: #ef4444; font-size: 1.1rem; }
-</style>
+
 
 <div class="cp-fragment lh-fragment-viewer">
     <div class="cp-viewer-container">

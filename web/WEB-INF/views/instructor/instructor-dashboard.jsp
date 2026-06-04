@@ -54,8 +54,16 @@
                         window.__INSTRUCTOR_NAME__ = "${not empty instructorName ? fn:escapeXml(instructorName) : fn:escapeXml(user.fullName)}";
                         window.__METRICS__ = {
                             courseCount: ${not empty totalCourses ? totalCourses : 0},
+                            activeCourses: ${not empty activeCourses ? activeCourses : 0},
                             studentCount: ${not empty totalStudents ? totalStudents : 0},
+                            totalEnrollments: ${not empty totalEnrollments ? totalEnrollments : 0},
+                            activeEnrollments: ${not empty activeEnrollments ? activeEnrollments : 0},
+                            pendingEnrollments: ${not empty pendingEnrollments ? pendingEnrollments : 0},
                             pendingGrading: ${not empty pendingGradingCount ? pendingGradingCount : 0},
+                            publishedMaterials: ${not empty publishedMaterialsCount ? publishedMaterialsCount : 0},
+                            activeLearnersCount: ${not empty activeLearnersCount ? activeLearnersCount : 0},
+                            averageProgress: ${not empty averageProgress ? averageProgress : 0},
+                            missingMaterialsCourseCount: ${not empty missingMaterialsCourseCount ? missingMaterialsCourseCount : 0},
                             dueSoon: ${not empty dueSoonAssessmentCount ? dueSoonAssessmentCount : 0}
                         };
                         window.__COURSES__ = [
@@ -67,6 +75,8 @@
                                     status: "${fn:escapeXml(course.status)}",
                                     displayDuration: "${fn:escapeXml(course.displayDuration)}",
                                     enrolledCount: ${not empty courseEnrollmentCountById[course.courseId] ? courseEnrollmentCountById[course.courseId] : 0},
+                                    materialCount: ${not empty courseMaterialCountById[course.courseId] ? courseMaterialCountById[course.courseId] : 0},
+                                    assessmentCount: ${not empty courseAssessmentCountById[course.courseId] ? courseAssessmentCountById[course.courseId] : 0},
                                     pendingGradingCount: ${not empty pendingSubmissionsByCourseId[course.courseId] ? pendingSubmissionsByCourseId[course.courseId] : 0}
                                 }${not status.last ? ',' : ''}
                             </c:forEach>
@@ -77,7 +87,7 @@
                     <script type="text/babel">
                         const { useState, useEffect } = React;
                         const { 
-                            ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid 
+                            ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Cell 
                         } = window.Recharts || {};
 
                         // CSS Module class mappings
@@ -155,26 +165,25 @@
                                 }
                             }, [courses]);
 
-                            // Generate engagement activity metric data
-                            const performanceData = [
-                                { name: 'Mon', Submissions: 4, Activity: 30 },
-                                { name: 'Tue', name: 'Tue', Submissions: 8, Activity: 55 },
-                                { name: 'Wed', Submissions: 12, Activity: 90 },
-                                { name: 'Thu', Submissions: metrics.pendingGrading || 5, Activity: 40 },
-                                { name: 'Fri', Submissions: 16, Activity: 110 },
-                                { name: 'Sat', Submissions: 7, Activity: 75 },
-                                { name: 'Sun', Submissions: 10, Activity: 85 }
-                            ];
+                            // Build chart data from real courses — per-course enrollment and pending grading counts
+                            const courseChartData = courses.map((c) => ({
+                                name: c.courseName.length > 18 ? c.courseName.substring(0, 18) + '…' : c.courseName,
+                                fullName: c.courseName,
+                                Enrolled: c.enrolledCount || 0,
+                                Pending: c.pendingGradingCount || 0
+                            }));
 
                             const CustomTooltip = ({ active, payload }) => {
                                 if (active && payload && payload.length) {
                                     return (
                                         <div className={styles.customTooltip}>
-                                            <p className={styles.tooltipLabel}>{payload[0].payload.name}</p>
-                                            <div className={styles.tooltipRow}>
-                                                <span>Submissions</span>
-                                                <span className={styles.tooltipVal} style={{ color: '#6366f1' }}>{payload[0].value}</span>
-                                            </div>
+                                            <p className={styles.tooltipLabel}>{payload[0].payload.fullName}</p>
+                                            {payload.map((entry, i) => (
+                                                <div key={i} className={styles.tooltipRow}>
+                                                    <span>{entry.name}</span>
+                                                    <span className={styles.tooltipVal} style={{ color: entry.color }}>{entry.value}</span>
+                                                </div>
+                                            ))}
                                         </div>
                                     );
                                 }
@@ -189,7 +198,7 @@
                                         <p className={styles.sectionSubtitle} style={{ margin: 0 }}>Here is your teaching workspace at a glance.</p>
                                     </header>
 
-                                    {/* Task 2: KPI Command Row */}
+                                    {/* KPI Command Row — all data from backend */}
                                     <section className={styles.kpiRow}>
                                         <MotionDiv 
                                             initial={{ opacity: 0, y: 10 }}
@@ -200,7 +209,7 @@
                                             <div className={styles.kpiContent}>
                                                 <span className={styles.kpiNum}>{metrics.studentCount}</span>
                                                 <h4 className={styles.kpiLabel}>Total Students</h4>
-                                                <p className={styles.kpiDesc}>Admitted in sll sll curriculums</p>
+                                                <p className={styles.kpiDesc}>{metrics.activeLearnersCount} currently active learners</p>
                                             </div>
                                             <div className={styles.kpiIcon}>
                                                 <i data-lucide="users" style={{ width: '20px', height: '20px' }}></i>
@@ -216,7 +225,7 @@
                                             <div className={styles.kpiContent}>
                                                 <span className={styles.kpiNum} style={{ color: metrics.pendingGrading > 0 ? '#f59e0b' : '#0f172a' }}>{metrics.pendingGrading}</span>
                                                 <h4 className={styles.kpiLabel}>Submissions to Grade</h4>
-                                                <p className={styles.kpiDesc}>Assessments awaiting reviews</p>
+                                                <p className={styles.kpiDesc}>Assessments awaiting your review</p>
                                             </div>
                                             <div className={styles.kpiIcon}>
                                                 <i data-lucide="file-spreadsheet" style={{ width: '20px', height: '20px' }}></i>
@@ -231,63 +240,87 @@
                                         >
                                             <div className={styles.kpiContent}>
                                                 <span className={styles.kpiNum}>{metrics.courseCount}</span>
-                                                <h4 className={styles.kpiLabel}>Active Courses</h4>
-                                                <p className={styles.kpiDesc}>Managed academic portfolios</p>
+                                                <h4 className={styles.kpiLabel}>Total Courses</h4>
+                                                <p className={styles.kpiDesc}>{metrics.activeCourses} approved &amp; live</p>
                                             </div>
                                             <div className={styles.kpiIcon}>
                                                 <i data-lucide="book-open" style={{ width: '20px', height: '20px' }}></i>
                                             </div>
                                         </MotionDiv>
+
+                                        <MotionDiv 
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{ duration: 0.4, delay: 0.3 }}
+                                            className={styles.kpiCard}
+                                        >
+                                            <div className={styles.kpiContent}>
+                                                <span className={styles.kpiNum}>{metrics.publishedMaterials}</span>
+                                                <h4 className={styles.kpiLabel}>Published Materials</h4>
+                                                <p className={styles.kpiDesc}>{metrics.missingMaterialsCourseCount > 0 ? metrics.missingMaterialsCourseCount + ' course(s) need content' : 'All courses have content'}</p>
+                                            </div>
+                                            <div className={styles.kpiIcon}>
+                                                <i data-lucide="file-text" style={{ width: '20px', height: '20px' }}></i>
+                                            </div>
+                                        </MotionDiv>
                                     </section>
 
-                                    {/* Task 3: Interactive Analytics */}
-                                    {window.Recharts && (
+                                    {/* Per-Course Analytics Chart — real data from backend */}
+                                    {window.Recharts && courseChartData.length > 0 && (
                                         <section className={styles.chartCard}>
                                             <div className={styles.chartHeader}>
                                                 <div>
-                                                    <h3 className={styles.sectionTitle} style={{ fontSize: '1.25rem' }}>Submissions & Engagement Analytics</h3>
-                                                    <p className={styles.sectionSubtitle} style={{ margin: 0 }}>Grading queues and active engagement frequencies in the past 7 days</p>
+                                                    <h3 className={styles.sectionTitle} style={{ fontSize: '1.25rem' }}>Course Analytics</h3>
+                                                    <p className={styles.sectionSubtitle} style={{ margin: 0 }}>Enrollment count and pending submissions per course</p>
                                                 </div>
                                                 <div className={styles.chartLegend}>
                                                     <div className={styles.legendItem}>
                                                         <span className={styles.legendDotPrimary}></span>
-                                                        <span>Submissions</span>
+                                                        <span>Enrolled</span>
+                                                    </div>
+                                                    <div className={styles.legendItem}>
+                                                        <span className={styles.legendDotAccent}></span>
+                                                        <span>Pending Grading</span>
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div style={{ width: '100%', height: '260px', padding: '0 10px' }}>
+                                            <div style={{ width: '100%', height: Math.max(260, courseChartData.length * 50) + 'px', padding: '0 10px' }}>
                                                 <ResponsiveContainer width="100%" height="100%">
-                                                    <AreaChart data={performanceData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
-                                                        <defs>
-                                                            <linearGradient id="colorSubmissions" x1="0" y1="0" x2="0" y2="1">
-                                                                <stop offset="5%" stopColor="#6366f1" stopOpacity={0.15}/>
-                                                                <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
-                                                            </linearGradient>
-                                                        </defs>
-                                                        <CartesianGrid vertical={false} horizontal={false} />
-                                                        <XAxis dataKey="name" stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} />
-                                                        <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} />
+                                                    <BarChart data={courseChartData} layout="vertical" margin={{ top: 10, right: 30, left: 10, bottom: 0 }}>
+                                                        <CartesianGrid horizontal={false} strokeDasharray="3 3" stroke="#f1f5f9" />
+                                                        <XAxis type="number" stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} />
+                                                        <YAxis dataKey="name" type="category" stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} width={140} />
                                                         <Tooltip content={<CustomTooltip />} />
-                                                        <Area 
-                                                            type="monotone" 
-                                                            dataKey="Submissions" 
-                                                            stroke="#6366f1" 
-                                                            strokeWidth={3} 
-                                                            fillOpacity={1} 
-                                                            fill="url(#colorSubmissions)" 
-                                                        />
-                                                    </AreaChart>
+                                                        <Bar dataKey="Enrolled" fill="#6366f1" radius={[0, 4, 4, 0]} barSize={16} />
+                                                        <Bar dataKey="Pending" fill="#f59e0b" radius={[0, 4, 4, 0]} barSize={16} />
+                                                    </BarChart>
                                                 </ResponsiveContainer>
                                             </div>
                                         </section>
                                     )}
 
-                                    {/* Task 4: Assigned Courses (STRICT LIST VIEW) */}
+                                    {/* Average student progress indicator */}
+                                    {metrics.totalEnrollments > 0 && (
+                                        <section className={styles.chartCard} style={{ padding: '24px 32px' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                                                <div>
+                                                    <h3 className={styles.sectionTitle} style={{ fontSize: '1.15rem', margin: 0 }}>Average Student Progress</h3>
+                                                    <p className={styles.sectionSubtitle} style={{ margin: '4px 0 0 0' }}>Across {metrics.totalEnrollments} total enrollment(s)</p>
+                                                </div>
+                                                <span className={styles.kpiNum} style={{ fontSize: '1.75rem' }}>{metrics.averageProgress}%</span>
+                                            </div>
+                                            <div style={{ width: '100%', height: '8px', borderRadius: '999px', background: '#f1f5f9', overflow: 'hidden' }}>
+                                                <div style={{ width: `${metrics.averageProgress}%`, height: '100%', borderRadius: '999px', background: 'linear-gradient(90deg, #6366f1, #818cf8)', transition: 'width 0.6s ease' }}></div>
+                                            </div>
+                                        </section>
+                                    )}
+
+                                    {/* Assigned Courses (STRICT LIST VIEW) — real course data */}
                                     <section className={styles.coursesSection}>
                                         <div className={styles.coursesHead}>
                                             <div>
-                                                <h3 className={styles.sectionTitle} style={{ fontSize: '1.25rem', margin: 0 }}>Active Courses</h3>
-                                                <p className={styles.sectionSubtitle} style={{ margin: 0 }}>Access learning materials and track student operational lists.</p>
+                                                <h3 className={styles.sectionTitle} style={{ fontSize: '1.25rem', margin: 0 }}>Your Courses</h3>
+                                                <p className={styles.sectionSubtitle} style={{ margin: 0 }}>Manage course content, materials, and assessments.</p>
                                             </div>
                                             <a href={`${window.__CONTEXT_PATH__}/instructor/courses`} className={styles.viewAllLink}>
                                                 View All <i data-lucide="arrow-right" style={{ width: '14px', height: '14px' }}></i>
@@ -317,9 +350,19 @@
                                                             </div>
                                                             <div className={styles.courseMiddle}>
                                                                 <h4 className={styles.courseTitle}>{course.courseName}</h4>
-                                                                <span className={`${styles.courseStatusPill} ${styles[statusClass]}`}>
-                                                                    {course.status}
-                                                                </span>
+                                                                <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                                                                    <span className={`${styles.courseStatusPill} ${styles[statusClass]}`}>
+                                                                        {course.status}
+                                                                    </span>
+                                                                    <span style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 500 }}>
+                                                                        {course.enrolledCount} student{course.enrolledCount !== 1 ? 's' : ''} · {course.materialCount} material{course.materialCount !== 1 ? 's' : ''} · {course.assessmentCount} assessment{course.assessmentCount !== 1 ? 's' : ''}
+                                                                    </span>
+                                                                    {course.pendingGradingCount > 0 && (
+                                                                        <span style={{ fontSize: '0.7rem', fontWeight: 700, background: 'rgba(245, 158, 11, 0.1)', color: '#f59e0b', padding: '2px 8px', borderRadius: '999px' }}>
+                                                                            {course.pendingGradingCount} to grade
+                                                                        </span>
+                                                                    )}
+                                                                </div>
                                                             </div>
                                                             <div className={styles.courseRight}>
                                                                 <button type="button" className={styles.btnManage}>
