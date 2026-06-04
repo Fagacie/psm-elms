@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-courses.css?v=3">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-materials.css?v=3">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/InstructorAssessment.module.css?v=6">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-workspace-modern.css?v=1">
     <script defer src="${pageContext.request.contextPath}/js/instructor-course-workspace.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/theme-toggle.css">

@@ -14,6 +14,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-shell.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/InstructorDashboard.module.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-workspace-modern.css?v=1">
     <jsp:include page="/WEB-INF/views/common/head-external-assets.jsp" />
     
     <!-- React & ReactDOM (UMD production versions) -->

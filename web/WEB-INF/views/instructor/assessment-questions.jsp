@@ -19,6 +19,7 @@
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-assessments.css">
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-assessment-flow.css">
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/InstructorAssessment.module.css?v=6">
+                <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-workspace-modern.css?v=1">
                 <jsp:include page="/WEB-INF/views/common/head-external-assets.jsp" />
             </head>
 

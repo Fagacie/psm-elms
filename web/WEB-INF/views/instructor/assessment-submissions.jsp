@@ -20,6 +20,7 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-assessments.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-assessment-flow.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/InstructorAssessment.module.css?v=6">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-workspace-modern.css?v=1">
     <jsp:include page="/WEB-INF/views/common/head-external-assets.jsp"/>
     
     <!-- Styles moved to InstructorAssessment.module.css -->
@@ -34,7 +35,7 @@
 
 
 <main class="app-main">
-    <div class="content-wrapper">
+    <div class="content-wrapper ia-grading-workspace">
         <jsp:include page="/WEB-INF/views/instructor/fragments/assessment-breadcrumb.jsp">
             <jsp:param name="currentLabel" value="Submissions"/>
         </jsp:include>
