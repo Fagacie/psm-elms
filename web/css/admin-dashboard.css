@@ -37,37 +37,28 @@ textarea {
   font: inherit;
 }
 
+/* Legacy .app-header is replaced by .adm_nav_topbar from AdminNav.module.css */
 .app-header {
-  position: fixed;
-  inset: 0 0 auto 0;
-  height: 74px;
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 22px 0 26px;
-  border-bottom: 1px solid var(--admin-border);
-  background: #ffffff;
-  backdrop-filter: blur(12px);
-  box-shadow: 0 1px 0 rgba(15, 23, 42, 0.02);
+  display: none !important;
 }
 
-/* Premium Light Header Overrides (similar to student topbar) */
-.app-header.admin-light-header {
-  background: rgba(248, 250, 252, 0.95) !important;
-  backdrop-filter: blur(14px) !important;
-  border-bottom: 1px solid rgba(221, 228, 236, 0.75) !important;
-  box-shadow: 0 4px 18px rgba(15, 23, 42, 0.03) !important;
-  height: 68px !important;
-}
-
+/* Legacy .app-sidebar is replaced by .adm_nav_sidebar from AdminNav.module.css */
 .app-sidebar {
-  top: 68px !important;
-  height: calc(100vh - 68px) !important;
+  display: none !important;
 }
 
+/* .app-main now uses the new AdminNav layout shell dimensions */
 .app-main {
-  padding-top: 68px !important;
+  margin-left: var(--adm_nav_sidebar_w, 260px);
+  padding-top: var(--adm_nav_topbar_h, 64px);
+  min-height: 100vh;
+  background: var(--adm_nav_bg, #f8fafc);
+  transition: margin-left 0.22s cubic-bezier(0.4, 0, 0.2, 1),
+              background 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body.sidebar-collapsed .app-main {
+  margin-left: var(--adm_nav_sidebar_cw, 72px);
 }
 
 .admin-light-header .dashboard-brand-main {
@@ -415,12 +406,7 @@ textarea {
   background: var(--admin-accent);
 }
 
-.app-main {
-  margin-left: 244px;
-  padding-top: 74px;
-  min-height: 100vh;
-  background: #ffffff;
-}
+/* Legacy .app-main layout rule removed — now handled at top of file */
 
 .content-wrapper {
   padding: 32px;
@@ -1957,12 +1943,10 @@ body.admin-embedded .admin-page-head {
 }
 
 @media (max-width: 900px) {
-  .app-sidebar {
-    width: 220px;
-  }
+  /* .app-sidebar hidden — handled by AdminNav.module.css */
 
   .app-main {
-    margin-left: 220px;
+    margin-left: var(--adm_nav_sidebar_w, 260px);
   }
 }
 
@@ -1991,7 +1975,7 @@ body.admin-embedded .admin-page-head {
 
   .app-main {
     margin-left: 0;
-    padding-top: 0;
+    padding-top: var(--adm_nav_topbar_h, 64px);
   }
 
   .content-wrapper {
@@ -2229,29 +2213,7 @@ body.admin-embedded .admin-page-head {
   transform: scale(1.05) !important;
 }
 
-/* Transitions for sidebar slide and content adjustment */
-.app-sidebar {
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), left 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-}
-
-.app-main {
-  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-}
-
-/* Collapsed Sidebar Rules */
-body.sidebar-collapsed .app-sidebar {
-  transform: translateX(-244px) !important;
-}
-
-body.sidebar-collapsed .app-main {
-  margin-left: 0 !important;
-}
-
-@media (max-width: 900px) {
-  body.sidebar-collapsed .app-sidebar {
-    transform: translateX(-220px) !important;
-  }
-}
+/* Legacy sidebar collapse rules removed — handled by AdminNav.module.css */
 
 /* Premium Dark Navigation Theme (Matches Student Panel Aesthetic) */
 .app-header {
