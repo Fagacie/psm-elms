@@ -43,7 +43,7 @@ COPY --from=builder /app/PSME.war /usr/local/tomcat/webapps/ROOT.war
 RUN groupadd -r tomcat && useradd -r -g tomcat -d /usr/local/tomcat -s /sbin/nologin tomcat
 
 # 4. Set appropriate directories ownership to Tomcat user
-RUN chown -R tomcat:tomcat /usr/local/tomcat/webapps /usr/local/tomcat/work /usr/local/tomcat/temp /usr/local/tomcat/logs
+RUN chown -R tomcat:tomcat /usr/local/tomcat/webapps /usr/local/tomcat/work /usr/local/tomcat/temp /usr/local/tomcat/logs /usr/local/tomcat/conf
 
 # 5. Expose default port
 EXPOSE 8080
