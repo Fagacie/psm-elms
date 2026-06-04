@@ -1,8 +1,33 @@
 # ==============================================================================
-# PSM E-Learning Platform - Production Dockerfile
-# Base: Apache Tomcat 9.0 on JRE 8 (Matches Java 1.8 Compilation Target)
+# PSM E-Learning Platform - Production Dockerfile (Multi-stage Build)
+# Stage 1: Build & Compile (using eclipse-temurin:17-jdk)
+# Stage 2: Hardened Runtime (using tomcat:9.0-jdk17-temurin)
 # ==============================================================================
-FROM tomcat:9.0-jre8-slim
+
+# --- Stage 1: Builder ---
+FROM eclipse-temurin:17-jdk AS builder
+
+WORKDIR /app
+
+# Copy dependency libraries and sources
+COPY lib ./lib
+COPY src ./src
+COPY web ./web
+COPY db ./db
+
+# Prepare build directory structure
+RUN mkdir -p build/web/WEB-INF/classes build/web/WEB-INF/lib build/web/WEB-INF/classes/db \
+    && cp -R web/. build/web/ \
+    && cp -R lib/. build/web/WEB-INF/lib/ \
+    && cp db/schema.sql build/web/WEB-INF/classes/db/schema.sql \
+    && cp src/conf/*.properties build/web/WEB-INF/classes/ 2>/dev/null || true \
+    && cp src/conf/logback.xml build/web/WEB-INF/classes/ 2>/dev/null || true \
+    && find src/java -name '*.java' > sources.txt \
+    && javac --release 17 -encoding UTF-8 -cp "lib/*:build/web/WEB-INF/classes" -d build/web/WEB-INF/classes @sources.txt \
+    && jar --create --file /app/PSME.war -C build/web .
+
+# --- Stage 2: Hardened Runner ---
+FROM tomcat:9.0-jdk17-temurin
 
 # Set environment variables for security and configuration
 ENV CATALINA_HOME=/usr/local/tomcat
@@ -12,9 +37,7 @@ ENV PATH=$CATALINA_HOME/bin:$PATH
 RUN rm -rf /usr/local/tomcat/webapps/*
 
 # 2. Deploy Application to Root Context
-# By deploying as ROOT.war, the app runs at "/" instead of "/PSME/".
-# The codebase is fully compatible with dynamic context paths.
-COPY dist/PSME.war /usr/local/tomcat/webapps/ROOT.war
+COPY --from=builder /app/PSME.war /usr/local/tomcat/webapps/ROOT.war
 
 # 3. Create non-root system user for runtime security
 RUN groupadd -r tomcat && useradd -r -g tomcat -d /usr/local/tomcat -s /sbin/nologin tomcat
