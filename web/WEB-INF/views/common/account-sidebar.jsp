@@ -15,9 +15,6 @@
                 <a href="${pageContext.request.contextPath}/instructor/materials" class="sv-nav-link ${activePage == 'materials' ? 'active' : ''}">
                     <i class="fas fa-folder-open"></i><span>Materials</span>
                 </a>
-                <a href="${pageContext.request.contextPath}/instructor/assessments" class="sv-nav-link ${activePage == 'assessments' ? 'active' : ''}">
-                    <i class="fas fa-clipboard-check"></i><span>Assessments</span>
-                </a>
                 <a href="${pageContext.request.contextPath}/instructor/certificates" class="sv-nav-link ${activePage == 'certificates' ? 'active' : ''}">
                     <i class="fas fa-certificate"></i><span>Certificates</span>
                 </a>

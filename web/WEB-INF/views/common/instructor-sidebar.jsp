@@ -7,7 +7,6 @@
 <c:if test="${empty resolvedInstructorPage}">
     <c:choose>
         <c:when test="${fn:contains(currentPath, '/instructor/courses')}"><c:set var="resolvedInstructorPage" value="courses"/></c:when>
-        <c:when test="${fn:contains(currentPath, '/instructor/assessments')}"><c:set var="resolvedInstructorPage" value="assessments"/></c:when>
         <c:when test="${fn:contains(currentPath, '/profile')}"><c:set var="resolvedInstructorPage" value="profile"/></c:when>
         <c:otherwise><c:set var="resolvedInstructorPage" value="dashboard"/></c:otherwise>
     </c:choose>
@@ -30,13 +29,6 @@
                title="My Assigned Courses">
                 <i class="fas fa-book" aria-hidden="true"></i>
                 <span class="nav_mod_label">My Assigned Courses</span>
-            </a>
-            
-            <a href="${pageContext.request.contextPath}/instructor/assessments" 
-               class="nav_mod_link ${resolvedInstructorPage == 'assessments' ? 'active' : ''}" 
-               title="Assessment Hub">
-                <i class="fas fa-clipboard-check" aria-hidden="true"></i>
-                <span class="nav_mod_label">Assessment Hub</span>
             </a>
             
             <a href="${pageContext.request.contextPath}/profile" 
