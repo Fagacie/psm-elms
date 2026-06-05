@@ -26,7 +26,7 @@
         <a class="ins-flow-link ${resolvedCourseFlow == 'workspace' ? 'active' : ''}" href="${courseWorkspaceUrl}">
             <i class="fas fa-chart-pie"></i> Workspace
         </a>
-        <a class="ins-flow-link ${resolvedCourseFlow == 'materials' ? 'active' : ''}" href="${pageContext.request.contextPath}/instructor/content-organizer?courseId=${selectedCourse.courseId}">
+        <a class="ins-flow-link ${resolvedCourseFlow == 'materials' ? 'active' : ''}" href="${courseWorkspaceUrl}#materials">
             <i class="fas fa-book-open"></i> Materials
         </a>
         <a class="ins-flow-link ${resolvedCourseFlow == 'assessments' ? 'active' : ''}" href="${courseAssessmentsUrl}#assessments">

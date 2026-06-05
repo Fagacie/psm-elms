@@ -1532,9 +1532,6 @@
                         <button id="saveOrderBtn" class="ws-btn ws-btn-secondary" onclick="saveMaterialsOrder()" disabled style="opacity: 0.5; cursor: not-allowed;">
                             <i class="fas fa-save"></i> Save Order
                         </button>
-                        <a href="${pageContext.request.contextPath}/instructor/content-organizer?courseId=${selectedCourse.courseId}" class="ws-btn ws-btn-secondary">
-                            <i class="fas fa-folder-open"></i> Full Organizer View
-                        </a>
                     </div>
                 </div>
 

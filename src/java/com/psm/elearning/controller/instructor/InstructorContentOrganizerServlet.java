@@ -97,11 +97,7 @@ public class InstructorContentOrganizerServlet extends HttpServlet {
             }
         }
 
-        request.setAttribute("course", course);
-        request.setAttribute("materials", materials);
-        request.setAttribute("assessmentsAfterMaterial", assessmentsAfterMaterial);
-        request.setAttribute("finalAssessments", finalAssessments);
-        request.getRequestDispatcher("/WEB-INF/views/instructor/content-organizer.jsp").forward(request, response);
+        response.sendRedirect(request.getContextPath() + "/instructor/courses?action=workspace&courseId=" + courseId + "#materials");
     }
 
     @Override
@@ -137,7 +133,7 @@ public class InstructorContentOrganizerServlet extends HttpServlet {
             return;
         }
 
-        response.sendRedirect(request.getContextPath() + "/instructor/content-organizer?courseId=" + courseId);
+        response.sendRedirect(request.getContextPath() + "/instructor/courses?action=workspace&courseId=" + courseId + "#materials");
     }
 
     private void reorderMaterials(HttpServletRequest request, HttpServletResponse response, Integer courseId)
@@ -145,7 +141,7 @@ public class InstructorContentOrganizerServlet extends HttpServlet {
 
         String[] materialIds = request.getParameterValues("materialIds[]");
         if (materialIds == null || materialIds.length == 0) {
-            response.sendRedirect(request.getContextPath() + "/instructor/content-organizer?courseId=" + courseId + "&error=invalid");
+            response.sendRedirect(request.getContextPath() + "/instructor/courses?action=workspace&courseId=" + courseId + "&error=invalid#materials");
             return;
         }
 
@@ -160,7 +156,7 @@ public class InstructorContentOrganizerServlet extends HttpServlet {
             }
         }
 
-        response.sendRedirect(request.getContextPath() + "/instructor/content-organizer?courseId=" + courseId + "&success=reordered");
+        response.sendRedirect(request.getContextPath() + "/instructor/courses?action=workspace&courseId=" + courseId + "&success=reordered#materials");
     }
 
     private void saveContentOrder(HttpServletRequest request, HttpServletResponse response, Integer courseId)
@@ -220,7 +216,7 @@ public class InstructorContentOrganizerServlet extends HttpServlet {
             }
         }
 
-        response.sendRedirect(request.getContextPath() + "/instructor/content-organizer?courseId=" + courseId + "&success=reordered");
+        response.sendRedirect(request.getContextPath() + "/instructor/courses?action=workspace&courseId=" + courseId + "&success=reordered#materials");
     }
 
     private boolean isInstructor(HttpSession session) {

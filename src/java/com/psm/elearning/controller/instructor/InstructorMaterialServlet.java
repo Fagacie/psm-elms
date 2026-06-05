@@ -98,7 +98,7 @@ public class InstructorMaterialServlet extends HttpServlet {
         if (courseIdStr != null && !courseIdStr.trim().isEmpty()) {
             try {
                 int courseId = Integer.parseInt(courseIdStr);
-                response.sendRedirect(request.getContextPath() + "/instructor/content-organizer?courseId=" + courseId);
+                response.sendRedirect(request.getContextPath() + "/instructor/courses?action=workspace&courseId=" + courseId + "#materials");
                 return;
             } catch (NumberFormatException e) {
                 // Ignore and fall through to redirect
@@ -634,21 +634,12 @@ public class InstructorMaterialServlet extends HttpServlet {
     }
 
     private String workspaceMaterialsRedirect(HttpServletRequest request, int courseId, String query) {
-        String source = request.getParameter("source");
         StringBuilder builder = new StringBuilder(request.getContextPath());
-        
-        if ("workspace".equals(source)) {
-            builder.append("/instructor/courses?action=workspace&courseId=").append(courseId);
-            if (query != null && !query.trim().isEmpty()) {
-                builder.append('&').append(query.trim());
-            }
-            builder.append("#materials");
-        } else {
-            builder.append("/instructor/content-organizer?courseId=").append(courseId);
-            if (query != null && !query.trim().isEmpty()) {
-                builder.append('&').append(query.trim());
-            }
+        builder.append("/instructor/courses?action=workspace&courseId=").append(courseId);
+        if (query != null && !query.trim().isEmpty()) {
+            builder.append('&').append(query.trim());
         }
+        builder.append("#materials");
         return builder.toString();
     }
 }
