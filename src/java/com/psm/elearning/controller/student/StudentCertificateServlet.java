@@ -168,7 +168,7 @@ public class StudentCertificateServlet extends HttpServlet {
 
     private Certificate issueCertificate(HttpServletRequest request, int enrollmentId) {
         String certificateNo = buildUniqueCertificateNo();
-        String verifyUrl = buildBaseUrl(request) + request.getContextPath() + "/certificate/verify?code=" + certificateNo;
+        String verifyUrl = getAppBaseUrl(request) + "/verify?certNo=" + certificateNo;
 
         Certificate certificate = new Certificate();
         certificate.setEnrollmentId(enrollmentId);
@@ -205,14 +205,27 @@ public class StudentCertificateServlet extends HttpServlet {
         return "PSM-CERT-" + baseDate + "-" + System.currentTimeMillis();
     }
 
-    private String buildBaseUrl(HttpServletRequest request) {
+    private String getAppBaseUrl(HttpServletRequest request) {
+        String appUrl = System.getenv("APP_URL");
+        if (appUrl != null && !appUrl.trim().isEmpty()) {
+            String url = appUrl.trim();
+            if (url.endsWith("/")) {
+                url = url.substring(0, url.length() - 1);
+            }
+            return url;
+        }
+        // Fallback: build base URL dynamically from request, including context path
         String scheme = request.getScheme();
         String server = request.getServerName();
         int port = request.getServerPort();
+        String contextPath = request.getContextPath();
+        String base;
         if (("http".equalsIgnoreCase(scheme) && port == 80) || ("https".equalsIgnoreCase(scheme) && port == 443)) {
-            return scheme + "://" + server;
+            base = scheme + "://" + server;
+        } else {
+            base = scheme + "://" + server + ":" + port;
         }
-        return scheme + "://" + server + ":" + port;
+        return base + contextPath;
     }
 
     private String buildEligibilityReasonQuery(EnrollmentStateSyncService.SyncResult syncResult) {

@@ -422,6 +422,10 @@
         <servlet-name>CertificateVerifyServlet</servlet-name>
         <url-pattern>/certificate/verify/*</url-pattern>
     </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>CertificateVerifyServlet</servlet-name>
+        <url-pattern>/verify</url-pattern>
+    </servlet-mapping>
 
     <servlet>
         <servlet-name>AdminEnrollmentListServlet</servlet-name>

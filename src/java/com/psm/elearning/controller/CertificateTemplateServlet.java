@@ -85,6 +85,7 @@ public class CertificateTemplateServlet extends HttpServlet {
         c.setInstructorName("Lead Instructor");
         c.setIssueDate(LocalDateTime.now());
         c.setVerificationURL("https://example.com/certificate/verify?code=PSM-CERT-20260216-PREVIEW");
+        c.setQrCodePath("https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://example.com/certificate/verify?code=PSM-CERT-20260216-PREVIEW");
         return c;
     }
 

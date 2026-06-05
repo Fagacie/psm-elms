@@ -164,77 +164,36 @@ body.sc-immersive-body::-webkit-scrollbar-thumb {
   width: 100%;
   max-width: 960px; /* Standard screen preview size */
   aspect-ratio: 297 / 210; /* Precise A4 landscape ratio */
-  background: radial-gradient(circle at center, #ffffff 0%, #faf8f5 75%, #f4eee1 100%) !important;
-  /* Double guilloché geometric texture */
-  background-image: 
-    radial-gradient(circle at center, #ffffff 0%, #faf8f5 75%, #f4eee1 100%),
-    repeating-linear-gradient(45deg, rgba(162, 123, 76, 0.015) 0px, rgba(162, 123, 76, 0.015) 1px, transparent 1px, transparent 8px),
-    repeating-linear-gradient(-45deg, rgba(162, 123, 76, 0.015) 0px, rgba(162, 123, 76, 0.015) 1px, transparent 1px, transparent 8px) !important;
+  background: #ffffff !important;
   color: #0f172a !important;
-  box-shadow: 0 30px 70px -15px rgba(0, 0, 0, 0.5) !important;
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.08) !important;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 56px 64px; /* Elegant academic margins */
-  border: 1px solid rgba(162, 123, 76, 0.3) !important;
-  border-radius: 4px !important; 
+  padding: 64px 80px; /* massive whitespace */
+  border: 1px solid #cbd5e1 !important; /* thin, clean, minimalist border */
+  border-radius: 0px !important; /* clean rectangular edge */
   overflow: hidden;
 }
 
-/* Luxury Multi-Layered Borders */
+/* Luxury Multi-Layered Borders - REMOVED for minimalist aesthetic */
 .sc-sheet::before {
-  content: "";
-  position: absolute;
-  inset: 16px;
-  border: 1px solid #1e293b !important; /* Outer charcoal frame */
-  pointer-events: none;
-  z-index: 5;
+  display: none !important;
 }
 
 .sc-sheet::after {
-  content: "";
-  position: absolute;
-  inset: 22px;
-  border: 3px solid #1e293b !important; /* Debossed heavy dynamic charcoal border */
-  pointer-events: none;
-  z-index: 5;
+  display: none !important;
 }
 
 .sc-inner-border {
-  position: absolute;
-  inset: 28px;
-  border: 1px dashed rgba(30, 41, 59, 0.18) !important; /* Inner delicate carbon-dash frame */
-  pointer-events: none;
-  z-index: 5;
+  display: none !important;
 }
 
-/* Ornamental Charcoal Corners */
+/* Ornamental Charcoal Corners - REMOVED for minimalist aesthetic */
 .sc-corner-tl, .sc-corner-tr, .sc-corner-bl, .sc-corner-br {
-  position: absolute;
-  width: 24px;
-  height: 24px;
-  border: 2px solid #1e293b;
-  z-index: 10;
-  pointer-events: none;
+  display: none !important;
 }
-.sc-corner-tl { top: 22px; left: 22px; border-right: none; border-bottom: none; }
-.sc-corner-tr { top: 22px; right: 22px; border-left: none; border-bottom: none; }
-.sc-corner-bl { bottom: 22px; left: 22px; border-right: none; border-top: none; }
-.sc-corner-br { bottom: 22px; right: 22px; border-left: none; border-top: none; }
-
-.sc-corner-tl::after, .sc-corner-tr::after, .sc-corner-bl::after, .sc-corner-br::after {
-  content: "";
-  position: absolute;
-  width: 6px;
-  height: 6px;
-  background: #1e293b;
-  border-radius: 50%;
-}
-.sc-corner-tl::after { bottom: -3px; right: -3px; }
-.sc-corner-tr::after { bottom: -3px; left: -3px; }
-.sc-corner-bl::after { top: -3px; right: -3px; }
-.sc-corner-br::after { top: -3px; left: -3px; }
 
 /* Certificate Header & Crest */
 .sc-crest {
@@ -248,26 +207,27 @@ body.sc-immersive-body::-webkit-scrollbar-thumb {
 }
 
 .sc-crest-svg {
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.02));
+  filter: none;
 }
 
 .sc-platform-name {
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.35em;
-  color: #64748b !important; /* Muted descriptor */
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: #64748b !important; /* small, bold, muted gray */
   text-transform: uppercase;
-  margin: 0;
+  margin: 8px 0 0 0;
+  text-align: center;
 }
 
 .sc-title {
-  font-family: 'Playfair Display', Georgia, "Times New Roman", serif;
-  font-size: 2.15rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  color: #1e293b !important;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 1.45rem;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  color: #0f172a !important;
   text-transform: uppercase;
-  margin: 6px 0 0 0;
+  margin: 10px 0 0 0;
   text-align: center;
 }
 
@@ -279,187 +239,121 @@ body.sc-immersive-body::-webkit-scrollbar-thumb {
   align-items: center;
   justify-content: center;
   flex-grow: 1;
-  padding: 8px 10px;
+  padding: 16px 10px;
   position: relative;
   z-index: 10;
 }
 
 .sc-recipient-lbl {
-  font-size: 0.76rem;
+  font-size: 0.75rem;
   color: #64748b !important;
   text-transform: uppercase;
-  letter-spacing: 0.24em;
-  font-weight: 600;
+  letter-spacing: 0.15em;
+  font-weight: 500;
   margin: 0;
 }
 
 .sc-recipient-name {
   font-family: 'Playfair Display', Georgia, "Times New Roman", serif;
-  font-size: 2.5rem;
-  font-weight: 700;
+  font-size: 3.25rem;
+  font-weight: 600;
   color: #0f172a !important;
-  margin: 8px 0;
-  padding-bottom: 2px;
-  border-bottom: 1.5px solid rgba(162, 123, 76, 0.25) !important;
+  margin: 18px 0;
+  padding-bottom: 0px;
+  border-bottom: none !important;
   display: inline-block;
-  min-width: 60%;
   letter-spacing: 0.01em;
 }
 
 .sc-award-statement {
   font-size: 0.84rem;
-  line-height: 1.65;
-  color: #475569 !important;
-  max-width: 680px;
+  line-height: 1.6;
+  color: #64748b !important;
+  max-width: 600px;
   margin: 8px auto;
   font-weight: 400;
 }
 
-.sc-award-statement strong {
-  color: #0f172a !important;
-  font-weight: 600;
-}
-
 .sc-course-name {
-  font-family: 'Playfair Display', Georgia, serif;
-  font-size: 1.65rem;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 1.75rem;
   font-weight: 700;
-  color: #1e3a8a !important; /* Elegant Royal Blue Accent */
-  margin: 6px 0 8px;
-  letter-spacing: 0.02em;
+  color: #0f172a !important; /* Bold and dark slate */
+  margin: 8px 0 0 0;
+  letter-spacing: 0.01em;
 }
 
-/* Footer & Signatures Block */
+/* Footer Row Restructuring */
 .sc-footer-row {
-  display: grid;
-  grid-template-columns: 1.1fr 1fr 1.1fr;
-  gap: 24px;
+  display: flex;
+  justify-content: space-between;
   align-items: flex-end;
-  border-top: 1px solid rgba(162, 123, 76, 0.15) !important;
-  padding-top: 18px;
+  border-top: 1px solid #cbd5e1 !important;
+  padding-top: 20px;
   position: relative;
   z-index: 10;
+  width: 100%;
 }
 
-.sc-footer-col {
+.sc-footer-left {
+  text-align: left;
   display: flex;
   flex-direction: column;
 }
 
-.sc-footer-col.center {
+.sc-footer-right {
+  display: flex;
   align-items: center;
-  text-align: center;
-  justify-content: center;
-}
-
-.sc-sig-line {
-  border-top: 1.5px solid #64748b !important;
-  margin-top: 20px;
-  padding-top: 4px;
-  position: relative;
-  z-index: 2;
-}
-
-.sc-sig-title {
-  font-size: 0.68rem;
-  font-weight: 800;
-  color: #334155 !important;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  margin: 0;
-}
-
-.sc-sig-sub {
-  font-size: 0.6rem;
-  color: #64748b !important;
-  margin-top: 2px;
-}
-
-.sc-sig-image {
-  height: 48px;
-  max-width: 140px;
-  object-fit: contain;
-  margin-bottom: -12px;
-  mix-blend-mode: multiply; 
-  filter: contrast(1.15) brightness(1.02);
-  align-self: flex-start;
-  padding-left: 10px;
-  position: relative;
-  z-index: 2;
+  gap: 20px;
 }
 
 /* Security Verification Seal & QR */
 .sc-sec-info {
-  font-size: 0.62rem;
+  font-size: 0.65rem;
   color: #64748b !important;
   line-height: 1.5;
   text-align: left;
 }
 
 .sc-sec-info strong {
-  color: #1e293b !important;
+  color: #0f172a !important;
   font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: block;
+  margin-bottom: 4px;
 }
 
 .sc-sec-info span {
   display: block;
-  word-break: break-all;
-  color: #475569 !important;
-  margin-top: 1px;
+  color: #334155 !important;
 }
 
 .sc-qr-stamp {
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: 12px;
-  position: relative;
-}
-
-.sc-verify-text {
-  font-size: 0.58rem;
-  color: #64748b !important;
-  text-align: left;
-  line-height: 1.4;
-  max-width: 100px;
-}
-
-.sc-verify-text strong {
-  color: #0f172a !important;
 }
 
 .sc-qr-image {
-  width: 54px;
-  height: 54px;
-  border: 1px solid #c59b27 !important;
-  padding: 2px;
+  width: 60px;
+  height: 60px;
+  border: 1px solid #cbd5e1 !important;
+  padding: 3px;
   background-color: #ffffff !important;
-  border-radius: 4px !important;
+  border-radius: 0px !important;
 }
 
-/* Gold Foil Seal SVG format */
-.sc-gold-seal {
-  display: inline-flex;
+/* Verification stamp */
+.sc-verify-stamp-wrapper {
+  display: flex;
   align-items: center;
   justify-content: center;
-  filter: drop-shadow(0 4px 10px rgba(180, 95, 6, 0.25));
-  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.sc-gold-seal:hover {
-  transform: scale(1.08) rotate(4deg);
-}
-
-/* Verified Ink stamp on signature */
-.sc-verify-stamp {
-  position: absolute;
-  right: 12px;
-  bottom: 12px;
-  z-index: 1;
-  pointer-events: none;
-  opacity: 0.82;
-  transform: rotate(-14deg);
-  filter: drop-shadow(0 2px 4px rgba(37, 99, 235, 0.08));
+/* Disabled/Removed Signature Classes */
+.sc-sig-line, .sc-sig-title, .sc-sig-sub, .sc-sig-image, .sc-verify-stamp, .sc-gold-seal {
+  display: none !important;
 }
 
 /* ==========================================================================
@@ -636,16 +530,7 @@ body.sc-immersive-body::-webkit-scrollbar-thumb {
     break-inside: avoid !important;
   }
 
-  /* Print Specific Double Border Adjustments */
-  .sc-sheet::before {
-    inset: 12mm !important;
-  }
-  .sc-sheet::after {
-    inset: 14mm !important;
-  }
-  .sc-inner-border {
-    inset: 16mm !important;
-  }
+  /* Print Specific Border Adjustments - REMOVED for minimalist aesthetic */
 }
 
 /* ==========================================================================

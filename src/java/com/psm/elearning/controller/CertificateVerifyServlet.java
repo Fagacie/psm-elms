@@ -36,7 +36,8 @@ public class CertificateVerifyServlet extends HttpServlet {
 
         String codeParam = trimToNull(request.getParameter("code"));
         String certParam = trimToNull(request.getParameter("cert"));
-        String rawCode = codeParam != null ? codeParam : certParam;
+        String certNoParam = trimToNull(request.getParameter("certNo"));
+        String rawCode = codeParam != null ? codeParam : (certParam != null ? certParam : certNoParam);
         String queryCode = normalizeCertificateCode(rawCode);
         Integer eidParam = parseInt(request.getParameter("eid"));
 

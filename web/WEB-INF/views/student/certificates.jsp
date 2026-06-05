@@ -674,22 +674,15 @@
                             }}
                         >
                             <section className="sc-sheet" style={{ width: '1123px', height: '794px', maxWidth: 'none', aspectRatio: '1123 / 794', boxSizing: 'border-box' }}>
-                                <div className="sc-corner-tl"></div>
-                                <div className="sc-corner-tr"></div>
-                                <div className="sc-corner-bl"></div>
-                                <div className="sc-corner-br"></div>
-                                <div className="sc-inner-border"></div>
-                                
                                 {/* Top Platform Crest */}
                                 <div className="sc-crest">
-                                    <svg className="sc-crest-svg" viewBox="0 0 100 100" width="56" height="56">
-                                        <path d="M50 15 L80 25 V55 C80 72 68 83 50 88 C32 83 20 72 20 55 V25 Z" fill="none" stroke="#1e293b" strokeWidth="2.5"></path>
-                                        <path d="M50 19 L76 28 V54 C76 69 65 79 50 84 C35 79 24 69 24 54 V28 Z" fill="#2B5A8E" opacity="0.08"></path>
-                                        <line x1="50" y1="15" x2="50" y2="88" stroke="#1e293b" strokeWidth="1.5"></line>
-                                        <line x1="20" y1="46" x2="80" y2="46" stroke="#1e293b" strokeWidth="1.5"></line>
-                                        <circle cx="35" cy="33" r="3.5" fill="#1e293b"></circle>
-                                        <circle cx="65" cy="33" r="3.5" fill="#1e293b"></circle>
-                                        <path d="M38 64 C42 60 48 60 50 63 C52 60 58 60 62 64 V52 C58 49 52 49 50 51 C48 49 42 49 38 52 Z" fill="none" stroke="#1e293b" strokeWidth="1.5"></path>
+                                    <svg className="sc-crest-svg" viewBox="0 0 100 100" width="48" height="48">
+                                        <path d="M50 15 L80 25 V55 C80 72 68 83 50 88 C32 83 20 72 20 55 V25 Z" fill="none" stroke="#0f172a" strokeWidth="2.5"></path>
+                                        <line x1="50" y1="15" x2="50" y2="88" stroke="#0f172a" strokeWidth="1.5"></line>
+                                        <line x1="20" y1="46" x2="80" y2="46" stroke="#0f172a" strokeWidth="1.5"></line>
+                                        <circle cx="35" cy="33" r="3.5" fill="#0f172a"></circle>
+                                        <circle cx="65" cy="33" r="3.5" fill="#0f172a"></circle>
+                                        <path d="M38 64 C42 60 48 60 50 63 C52 60 58 60 62 64 V52 C58 49 52 49 50 51 C48 49 42 49 38 52 Z" fill="none" stroke="#0f172a" strokeWidth="1.5"></path>
                                     </svg>
                                     <h4 className="sc-platform-name">PSM E-Learning Academy</h4>
                                     <h1 className="sc-title">Certificate of Completion</h1>
@@ -707,21 +700,32 @@
 
                                 {/* Footer Area */}
                                 <div className="sc-footer-row">
-                                    <div className="sc-footer-col">
+                                    <div className="sc-footer-left">
                                         <div className="sc-sec-info">
-                                            <strong>Credential Details</strong><br />
-                                            Student Reg: {activeCert.regNumber || 'N/A'}<br />
-                                            Certificate No: {activeCert.certificateNo}<br />
-                                            Date Issued: {activeCert.issueDate}
+                                            <strong>Credential Details</strong>
+                                            <span>Student Reg: {activeCert.regNumber || 'N/A'}</span>
+                                            <span>Certificate No: {activeCert.certificateNo}</span>
+                                            <span>Date Issued: {activeCert.issueDate}</span>
                                         </div>
                                     </div>
 
-                                    <div className="sc-footer-col center">
+                                    <div className="sc-footer-right">
+                                        {/* Verification Ink Stamp */}
+                                        <div className="sc-verify-stamp-wrapper">
+                                            <svg viewBox="0 0 100 100" width="56" height="56">
+                                                <circle cx="50" cy="50" r="40" fill="none" stroke="#0f172a" strokeWidth="1.5" strokeDasharray="3 1.5" />
+                                                <circle cx="50" cy="50" r="34" fill="none" stroke="#0f172a" strokeWidth="0.5" />
+                                                <path id="stampTextPathComp" d="M18 50 A32 32 0 1 1 82 50" fill="none" stroke="none" />
+                                                <text fill="#0f172a" fontSize="5.5" fontWeight="bold" letterSpacing="0.8">
+                                                    <textPath href="#stampTextPathComp" startOffset="50%" textAnchor="middle">OFFICIAL VERIFICATION</textPath>
+                                                </text>
+                                                <text x="50" y="46" fill="#0f172a" fontSize="9" fontWeight="900" textAnchor="middle">PSM</text>
+                                                <text x="50" y="58" fill="#0f172a" fontSize="7" fontWeight="bold" text-anchor="middle">APPROVED</text>
+                                                <text x="50" y="66" fill="#0f172a" fontSize="4" fontWeight="bold" text-anchor="middle">ACADEMY</text>
+                                            </svg>
+                                        </div>
+                                        {/* QR Code */}
                                         <div className="sc-qr-stamp">
-                                            <div className="sc-verify-text">
-                                                Scan QR to verify<br />
-                                                <strong>Official Stamp</strong>
-                                            </div>
                                             {activeCert.qrCodePath && (
                                                 <img 
                                                     className="sc-qr-image" 
@@ -729,27 +733,6 @@
                                                     alt="Verification QR Code" 
                                                 />
                                             )}
-                                        </div>
-                                    </div>
-
-                                    <div className="sc-footer-col" style={{ position: 'relative' }}>
-                                        <img className="sc-sig-image" src={window.contextPath + "/img/registrar-sig.png"} alt="Sulaiman Sani Signature" />
-                                        <div className="sc-verify-stamp">
-                                            <svg viewBox="0 0 100 100" width="56" height="56">
-                                                <circle cx="50" cy="50" r="40" fill="none" stroke="rgba(37, 99, 235, 0.65)" strokeWidth="2" strokeDasharray="3 1.5" />
-                                                <circle cx="50" cy="50" r="34" fill="none" stroke="rgba(37, 99, 235, 0.65)" strokeWidth="0.8" />
-                                                <path id="stampTextPathComp" d="M18 50 A32 32 0 1 1 82 50" fill="none" stroke="none" />
-                                                <text fill="rgba(37, 99, 235, 0.65)" fontSize="6" fontWeight="bold" letterSpacing="0.8">
-                                                    <textPath href="#stampTextPathComp" startOffset="50%" textAnchor="middle">OFFICIAL VERIFICATION</textPath>
-                                                </text>
-                                                <text x="50" y="46" fill="rgba(37, 99, 235, 0.75)" fontSize="9" fontWeight="900" textAnchor="middle">PSM</text>
-                                                <text x="50" y="58" fill="rgba(37, 99, 235, 0.75)" fontSize="7" fontWeight="bold" textAnchor="middle">APPROVED</text>
-                                                <text x="50" y="66" fill="rgba(37, 99, 235, 0.65)" fontSize="4.5" fontWeight="bold" textAnchor="middle">REGISTRAR</text>
-                                            </svg>
-                                        </div>
-                                        <div className="sc-sig-line">
-                                            <h4 className="sc-sig-title">Sulaiman Sani</h4>
-                                            <span className="sc-sig-sub">Registrar Office</span>
                                         </div>
                                     </div>
                                 </div>

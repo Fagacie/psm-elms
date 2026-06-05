@@ -538,18 +538,15 @@
                             <div className="drawer-body-gf">
                                 {/* visual certificate scaled for preview */}
                                 <section className="cert-sheet-gf">
-                                    <div className="cert-inner-border-gf"></div>
-
                                     {/* Crest */}
                                     <div className="cert-crest-gf">
-                                        <svg className="cert-crest-svg-gf" viewBox="0 0 100 100">
-                                            <path d="M50 15 L80 25 V55 C80 72 68 83 50 88 C32 83 20 72 20 55 V25 Z" fill="none" stroke="#1e293b" strokeWidth="2.5"></path>
-                                            <path d="M50 19 L76 28 V54 C76 69 65 79 50 84 C35 79 24 69 24 54 V28 Z" fill="#2b5a8e" opacity="0.08"></path>
-                                            <line x1="50" y1="15" x2="50" y2="88" stroke="#1e293b" strokeWidth="1.5"></line>
-                                            <line x1="20" y1="46" x2="80" y2="46" stroke="#1e293b" strokeWidth="1.5"></line>
-                                            <circle cx="35" cy="33" r="3.5" fill="#1e293b"></circle>
-                                            <circle cx="65" cy="33" r="3.5" fill="#1e293b"></circle>
-                                            <path d="M38 64 C42 60 48 60 50 63 C52 60 58 60 62 64 V52 C58 49 52 49 50 51 C48 49 42 49 38 52 Z" fill="none" stroke="#1e293b" strokeWidth="1.5"></path>
+                                        <svg className="cert-crest-svg-gf" viewBox="0 0 100 100" width="42" height="42">
+                                            <path d="M50 15 L80 25 V55 C80 72 68 83 50 88 C32 83 20 72 20 55 V25 Z" fill="none" stroke="#0f172a" strokeWidth="2.5"></path>
+                                            <line x1="50" y1="15" x2="50" y2="88" stroke="#0f172a" strokeWidth="1.5"></line>
+                                            <line x1="20" y1="46" x2="80" y2="46" stroke="#0f172a" strokeWidth="1.5"></line>
+                                            <circle cx="35" cy="33" r="3.5" fill="#0f172a"></circle>
+                                            <circle cx="65" cy="33" r="3.5" fill="#0f172a"></circle>
+                                            <path d="M38 64 C42 60 48 60 50 63 C52 60 58 60 62 64 V52 C58 49 52 49 50 51 C48 49 42 49 38 52 Z" fill="none" stroke="#0f172a" strokeWidth="1.5"></path>
                                         </svg>
                                         <h4 className="cert-platform-gf">PSM E-Learning Academy</h4>
                                         <h1 className="cert-title-gf">Certificate of Completion</h1>
@@ -567,29 +564,39 @@
 
                                     {/* Footer */}
                                     <div className="cert-footer-row-gf">
-                                        <div className="cert-sec-info-gf">
-                                            <strong>Credential Details</strong><br />
-                                            Reg: {selectedCert.regNumber || 'N/A'}<br />
-                                            No: {selectedCert.certificateNo}<br />
-                                            Issued: {selectedCert.issueDate ? new Date(selectedCert.issueDate.replace(' ', 'T')).toLocaleDateString() : '-'}
+                                        <div className="cert-footer-left-gf">
+                                            <div className="cert-sec-info-gf">
+                                                <strong>Credential Details</strong>
+                                                <span>Reg: {selectedCert.regNumber || 'N/A'}</span>
+                                                <span>No: {selectedCert.certificateNo}</span>
+                                                <span>Issued: {selectedCert.issueDate ? new Date(selectedCert.issueDate.replace(' ', 'T')).toLocaleDateString() : '-'}</span>
+                                            </div>
                                         </div>
 
-                                        <div className="cert-qr-stamp-gf">
-                                            <div className="cert-verify-text-gf">Scan to verify<br /><strong>Official Stamp</strong></div>
-                                            {selectedCert.qrCodePath && (
-                                                <img 
-                                                    className="cert-qr-image-gf" 
-                                                    src={selectedCert.qrCodePath.startsWith('http') ? selectedCert.qrCodePath : window.__CONTEXT_PATH__ + "/" + selectedCert.qrCodePath} 
-                                                    alt="QR" 
-                                                />
-                                            )}
-                                        </div>
-
-                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                                            <img className="cert-sig-image-gf" src={window.__CONTEXT_PATH__ + "/img/registrar-sig.png"} alt="Signature" />
-                                            <div className="cert-sig-line-gf" style={{ width: '100%', textAlign: 'right' }}>
-                                                <h4 className="cert-sig-title-gf">Sulaiman Sani</h4>
-                                                <span className="cert-sig-sub-gf">Registrar Office</span>
+                                        <div className="cert-footer-right-gf">
+                                            {/* Verification Ink Stamp */}
+                                            <div className="cert-verify-stamp-wrapper-gf">
+                                                <svg viewBox="0 0 100 100" width="36" height="36">
+                                                    <circle cx="50" cy="50" r="40" fill="none" stroke="#0f172a" strokeWidth="1.5" strokeDasharray="3 1.5" />
+                                                    <circle cx="50" cy="50" r="34" fill="none" stroke="#0f172a" strokeWidth="0.5" />
+                                                    <path id="stampTextPathAdmin" d="M18 50 A32 32 0 1 1 82 50" fill="none" stroke="none" />
+                                                    <text fill="#0f172a" fontSize="5.5" fontWeight="bold" letterSpacing="0.8">
+                                                        <textPath href="#stampTextPathAdmin" startOffset="50%" textAnchor="middle">OFFICIAL VERIFICATION</textPath>
+                                                    </text>
+                                                    <text x="50" y="46" fill="#0f172a" fontSize="9" fontWeight="900" textAnchor="middle">PSM</text>
+                                                    <text x="50" y="58" fill="#0f172a" fontSize="7" fontWeight="bold" text-anchor="middle">APPROVED</text>
+                                                    <text x="50" y="66" fill="#0f172a" fontSize="4" fontWeight="bold" text-anchor="middle">ACADEMY</text>
+                                                </svg>
+                                            </div>
+                                            {/* QR Code */}
+                                            <div className="cert-qr-stamp-gf">
+                                                {selectedCert.qrCodePath && (
+                                                    <img 
+                                                        className="cert-qr-image-gf" 
+                                                        src={selectedCert.qrCodePath.startsWith('http') ? selectedCert.qrCodePath : window.__CONTEXT_PATH__ + "/" + selectedCert.qrCodePath} 
+                                                        alt="QR" 
+                                                    />
+                                                )}
                                             </div>
                                         </div>
                                     </div>
