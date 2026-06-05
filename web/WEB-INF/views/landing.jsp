@@ -215,14 +215,109 @@
 
     <section class="preview section" id="preview">
         <div class="container preview-grid">
-            <div class="section-heading reveal">
-                <p class="eyebrow">Preview</p>
-                <h2>See how learning flows from course to certificate.</h2>
-                <p>From enrollment to verification, the steps stay simple and clear for the learner.</p>
+            <div class="preview-sidebar reveal">
+                <div class="section-heading">
+                    <p class="eyebrow">Interactive Demo</p>
+                    <h2>Explore our integrated workspaces.</h2>
+                    <p>Select a portal below to see how learning, teaching, and system administration flows seamlessly on our platform.</p>
+                </div>
+                
+                <div class="preview-tabs">
+                    <button type="button" class="preview-pill active" data-target="mockup-student">
+                        <i class="fas fa-graduation-cap"></i>
+                        <span>Student Space</span>
+                    </button>
+                    <button type="button" class="preview-pill" data-target="mockup-instructor">
+                        <i class="fas fa-chalkboard-user"></i>
+                        <span>Instructor Console</span>
+                    </button>
+                    <button type="button" class="preview-pill" data-target="mockup-admin">
+                        <i class="fas fa-user-shield"></i>
+                        <span>Admin Dashboard</span>
+                    </button>
+                </div>
             </div>
+
             <div class="preview-card reveal">
-                <div class="preview-media">
-                    <lottie-player src="${pageContext.request.contextPath}/img/landing/student-animation.json" background="transparent" speed="1" loop autoplay></lottie-player>
+                <div class="preview-media-container">
+                    <div class="preview-mockup-header">
+                        <span class="dot red"></span>
+                        <span class="dot yellow"></span>
+                        <span class="dot green"></span>
+                        <span class="mockup-url" id="mockupUrl">https://psmels.software/student/workspace</span>
+                    </div>
+                    <div class="preview-mockup-body">
+                        <!-- Student Mockup -->
+                        <div id="mockup-student" class="preview-mockup active">
+                            <div class="mockup-item">
+                                <span class="course-mini-label">Active Learning</span>
+                                <h4 style="margin: 4px 0 0; font-size: 1.1rem; color: var(--text);">Interactive Web Development</h4>
+                                <div class="mockup-progress-bar">
+                                    <span style="width: 78%;"></span>
+                                </div>
+                                <span style="font-size: 0.82rem; color: var(--muted); margin-top: 4px; display: block;">Progress: 78% &middot; 14/18 Materials Complete</span>
+                            </div>
+                            <div class="mockup-item" style="flex-direction: row; justify-content: space-between; align-items: center; gap: 12px;">
+                                <div>
+                                    <h4 style="margin: 0; font-size: 1rem; color: var(--text);">Verified Credentials</h4>
+                                    <span style="font-size: 0.82rem; color: var(--muted); display: block; margin-top: 2px;">Share public achievement links</span>
+                                </div>
+                                <i class="fas fa-certificate" style="font-size: 1.5rem; color: var(--accent); flex-shrink: 0;"></i>
+                            </div>
+                            <div style="height: 120px; display: flex; align-items: center; justify-content: center; overflow: hidden; border-radius: 12px; margin-top: 10px; background: var(--surface-soft);">
+                                <lottie-player src="${pageContext.request.contextPath}/img/landing/student-animation.json" background="transparent" speed="1" loop autoplay style="width: 220px; height: 220px;"></lottie-player>
+                            </div>
+                        </div>
+                        
+                        <!-- Instructor Mockup -->
+                        <div id="mockup-instructor" class="preview-mockup">
+                            <div class="mockup-item">
+                                <span class="course-mini-label">Course Stats</span>
+                                <div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 4px;">
+                                    <strong style="font-size: 1.8rem; font-weight: 800; color: var(--text); margin: 0;">148</strong>
+                                    <span style="font-size: 0.84rem; color: #10b981; font-weight: 600;"><i class="fas fa-arrow-up"></i> +12% this week</span>
+                                </div>
+                                <span style="font-size: 0.82rem; color: var(--muted); margin-top: 2px; display: block;">Active Enrolled Students</span>
+                            </div>
+                            <div class="mockup-item">
+                                <span class="course-mini-label">Curriculum Control</span>
+                                <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 6px;">
+                                    <div style="display: flex; align-items: center; gap: 8px; font-size: 0.84rem; padding: 6px 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; color: var(--text);">
+                                        <i class="fas fa-file-lines" style="color: var(--accent);"></i>
+                                        <span>Module 1: HTML5 Semantics</span>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 8px; font-size: 0.84rem; padding: 6px 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; color: var(--text);">
+                                        <i class="fas fa-video" style="color: var(--accent);"></i>
+                                        <span>Module 2: CSS3 Grid & Flexbox</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Admin Mockup -->
+                        <div id="mockup-admin" class="preview-mockup">
+                            <div class="mockup-item" style="padding: 16px;">
+                                <span class="course-mini-label">Platform Growth</span>
+                                <div class="mockup-chart-container">
+                                    <div class="mockup-chart-bar" style="height: 35%;"></div>
+                                    <div class="mockup-chart-bar" style="height: 55%;"></div>
+                                    <div class="mockup-chart-bar" style="height: 45%;"></div>
+                                    <div class="mockup-chart-bar" style="height: 75%;"></div>
+                                    <div class="mockup-chart-bar filled" style="height: 90%;"></div>
+                                </div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+                                <div class="mockup-item" style="padding: 12px;">
+                                    <span class="course-mini-label">Daily Revenue</span>
+                                    <strong style="font-size: 1.15rem; color: var(--text); margin: 0; display: block; margin-top: 4px;">$1,240.00</strong>
+                                </div>
+                                <div class="mockup-item" style="padding: 12px;">
+                                    <span class="course-mini-label">New Signups</span>
+                                    <strong style="font-size: 1.15rem; color: var(--text); margin: 0; display: block; margin-top: 4px;">+48 Users</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

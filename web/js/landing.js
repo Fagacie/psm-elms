@@ -127,6 +127,34 @@ document.addEventListener('DOMContentLoaded', function () {
         startCounters();
     }
 
+    // Tabs selection for preview mockups
+    var tabButtons = document.querySelectorAll('.preview-pill');
+    var mockups = document.querySelectorAll('.preview-mockup');
+    var mockupUrl = document.getElementById('mockupUrl');
+
+    var urls = {
+        'mockup-student': 'https://psmels.software/student/workspace',
+        'mockup-instructor': 'https://psmels.software/instructor/courses',
+        'mockup-admin': 'https://psmels.software/admin/dashboard'
+    };
+
+    tabButtons.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            tabButtons.forEach(function (b) { b.classList.remove('active'); });
+            mockups.forEach(function (m) { m.classList.remove('active'); });
+
+            btn.classList.add('active');
+            var targetId = btn.getAttribute('data-target');
+            var target = document.getElementById(targetId);
+            if (target) {
+                target.classList.add('active');
+            }
+            if (mockupUrl && urls[targetId]) {
+                mockupUrl.textContent = urls[targetId];
+            }
+        });
+    });
+
     window.addEventListener('scroll', function () {
         setHeaderState();
         updateActiveLink();
