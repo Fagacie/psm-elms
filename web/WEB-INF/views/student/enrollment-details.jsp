@@ -591,7 +591,7 @@
                         </section>
                     </c:when>
                     <c:when test="${selectedMode == 'assessment' and not empty selectedAssessment}">
-                        <c:set var="totalPoints" value="${(selectedAssessment.totalMarks != null && selectedAssessment.totalMarks > 0) ? selectedAssessment.totalMarks : (fn:length(selectedAssessmentQuestions) > 0 ? fn:length(selectedAssessmentQuestions) : 1)}"/>
+                        <c:set var="totalPoints" value="${selectedAssessmentTotalPossible != null ? selectedAssessmentTotalPossible : ((selectedAssessment.totalMarks != null && selectedAssessment.totalMarks > 0) ? selectedAssessment.totalMarks : (fn:length(selectedAssessmentQuestions) > 0 ? fn:length(selectedAssessmentQuestions) : 1))}"/>
                         <c:set var="isAttempting" value="${(param.attempt == 'true' || selectedAssessmentStatusLabel == 'Active') && selectedAssessment.type != 'Assignment'}"/>
                         <c:choose>
                             <c:when test="${isAttempting}">
@@ -949,18 +949,43 @@
                                                                     <span>Complete &amp; Continue</span>
                                                                     <i class="fas fa-arrow-right"></i>
                                                                 </button>
-                                                            </c:when>
-                                                            <c:when test="${selectedAssessmentUsedAttempts < selectedAssessmentAllowedAttempts}">
-                                                                <a class="primary_button" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=assessments&assessmentId=${selectedAssessment.assessmentId}&attempt=true">
-                                                                    <i class="fas fa-rotate-left"></i>
-                                                                    <span>Retake Assessment</span>
-                                                                </a>
+                                                                <c:if test="${selectedAssessmentUsedAttempts < selectedAssessmentAllowedAttempts}">
+                                                                    <a class="primary_button" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=assessments&assessmentId=${selectedAssessment.assessmentId}&attempt=true">
+                                                                        <i class="fas fa-rotate-left"></i>
+                                                                        <span>Retake Assessment</span>
+                                                                    </a>
+                                                                </c:if>
                                                             </c:when>
                                                             <c:otherwise>
-                                                                <button class="danger_button" disabled="disabled" title="No attempts remaining">
-                                                                    <i class="fas fa-ban"></i>
-                                                                    <span>No Attempts Left</span>
-                                                                </button>
+                                                                <c:choose>
+                                                                    <c:when test="${selectedAssessmentUsedAttempts < selectedAssessmentAllowedAttempts}">
+                                                                        <a class="primary_button" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=assessments&assessmentId=${selectedAssessment.assessmentId}&attempt=true">
+                                                                            <i class="fas fa-rotate-left"></i>
+                                                                            <span>Retake Assessment</span>
+                                                                        </a>
+                                                                    </c:when>
+                                                                    <c:otherwise>
+                                                                        <c:choose>
+                                                                            <c:when test="${hasPendingRetakeRequest}">
+                                                                                <button type="button" class="warning_button" disabled="disabled" style="background-color: #fef3c7; border: 1px solid #fcd34d; color: #d97706; padding: 10px 20px; border-radius: 6px; font-weight: 500; font-size: 0.875rem; display: inline-flex; align-items: center; gap: 8px;">
+                                                                                    <i class="fas fa-hourglass-half"></i>
+                                                                                    <span>Retake Pending</span>
+                                                                                </button>
+                                                                            </c:when>
+                                                                            <c:otherwise>
+                                                                                <form method="post" action="${pageContext.request.contextPath}/student/assessments" style="display: inline-block; margin: 0;">
+                                                                                    <input type="hidden" name="action" value="requestRetake">
+                                                                                    <input type="hidden" name="assessmentId" value="${selectedAssessment.assessmentId}">
+                                                                                    <input type="hidden" name="enrollmentId" value="${enrollment.enrollmentId}">
+                                                                                    <button type="submit" class="warning_button" style="background-color: #f59e0b; color: #ffffff; padding: 10px 20px; border: none; border-radius: 6px; font-weight: 500; font-size: 0.875rem; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">
+                                                                                        <i class="fas fa-envelope"></i>
+                                                                                        <span>Request Retake</span>
+                                                                                    </button>
+                                                                                </form>
+                                                                            </c:otherwise>
+                                                                        </c:choose>
+                                                                    </c:otherwise>
+                                                                </c:choose>
                                                             </c:otherwise>
                                                         </c:choose>
                                                     </div>

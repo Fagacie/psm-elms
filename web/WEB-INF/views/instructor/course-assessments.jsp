@@ -266,7 +266,7 @@
                                                 </c:if>
 
                                                 <a href="${pageContext.request.contextPath}/instructor/assessments?view=submissions&courseId=${selectedCourse.courseId}&assessmentId=${a.assessmentId}"
-                                                    class="btn btn-primary btn-sm iax-primary-action">
+                                                    class="btn btn-primary btn-sm iax-primary-action" style="position: relative;">
                                                     <i
                                                         class="fas ${a.type == 'Assignment' ? 'fa-pen-to-square' : 'fa-chart-column'}"></i>
                                                     <c:choose>
@@ -274,6 +274,11 @@
                                                         </c:when>
                                                         <c:otherwise>Results</c:otherwise>
                                                     </c:choose>
+                                                    <c:if test="${pendingRetakesCountByAssessmentId[a.assessmentId] > 0}">
+                                                        <span class="badge" style="position: absolute; top: -8px; right: -8px; background-color: #ef4444; color: white; border-radius: 50%; padding: 2px 6px; font-size: 0.625rem; font-weight: bold; border: 2px solid white;">
+                                                            ${pendingRetakesCountByAssessmentId[a.assessmentId]}
+                                                        </span>
+                                                    </c:if>
                                                 </a>
 
                                                 <a href="${pageContext.request.contextPath}/instructor/assessments?action=deleteAssessment&courseId=${selectedCourse.courseId}&id=${a.assessmentId}"

@@ -397,10 +397,15 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                 }
                 bestScoreByAssessment.put(assessment.getAssessmentId(), bestScore);
                 if (bestScore != null) {
-                    int fallbackTotal = 0;
+                    double fallbackTotal = 0.0;
                     if (assessment.getTotalMarks() == null || assessment.getTotalMarks() <= 0) {
                         List<AssessmentQuestion> aqs = assessmentQuestionDAO.findByAssessment(assessment.getAssessmentId());
-                        fallbackTotal = (aqs != null) ? aqs.size() : 0;
+                        if (aqs != null) {
+                            for (AssessmentQuestion q : aqs) {
+                                Double qMarks = q.getMarks();
+                                fallbackTotal += (qMarks != null && qMarks > 0) ? qMarks : 1.0;
+                            }
+                        }
                     }
                     Double bestPercentage = computePercentage(bestScore, assessment.getTotalMarks(), fallbackTotal);
                     bestPercentageByAssessment.put(assessment.getAssessmentId(), bestPercentage);
@@ -976,7 +981,13 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                     request.setAttribute("assessmentResultStudentAnswers", studentAnswers);
                     request.setAttribute("assessmentResultCorrectAnswers", correctAnswers);
                     request.setAttribute("assessmentResultObjective", !"Assignment".equalsIgnoreCase(resultAssessment.getType()));
-                    int fallbackTotal = resultQuestions != null ? resultQuestions.size() : 0;
+                    double fallbackTotal = 0.0;
+                    if (resultQuestions != null) {
+                        for (AssessmentQuestion q : resultQuestions) {
+                            Double qMarks = q.getMarks();
+                            fallbackTotal += (qMarks != null && qMarks > 0) ? qMarks : 1.0;
+                        }
+                    }
                     request.setAttribute("assessmentResultPercentage", computePercentage(resultSubmission.getScore(), resultAssessment.getTotalMarks(), fallbackTotal));
                     request.setAttribute("assessmentResultStatusLabel", humanizeSubmissionStatus(resultSubmission));
                     request.setAttribute("assessmentResultStatusClass", statusClassForSubmission(resultSubmission));
@@ -1084,6 +1095,20 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                     List<AssessmentQuestion> assessmentQuestions = assessmentQuestionDAO.findByAssessment(selectedAssessment.getAssessmentId());
                     request.setAttribute("selectedAssessmentQuestions", assessmentQuestions != null ? assessmentQuestions : new ArrayList<AssessmentQuestion>());
 
+                    double computedMax = 0.0;
+                    if (selectedAssessment.getTotalMarks() != null && selectedAssessment.getTotalMarks() > 0) {
+                        computedMax = selectedAssessment.getTotalMarks();
+                    } else if (assessmentQuestions != null) {
+                        for (AssessmentQuestion aq : assessmentQuestions) {
+                            Double qMarks = aq.getMarks();
+                            computedMax += (qMarks != null && qMarks > 0) ? qMarks : 1.0;
+                        }
+                    }
+                    if (computedMax <= 0.0) {
+                        computedMax = 1.0;
+                    }
+                    request.setAttribute("selectedAssessmentTotalPossible", computedMax);
+
                     // Populate review answer maps when a latest submission exists (sidebar navigation)
                     if (selectedAssessmentLatest != null
                             && !"Assignment".equalsIgnoreCase(selectedAssessment.getType())
@@ -1101,6 +1126,7 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                 } catch (Exception qEx) {
                     LOGGER.log(Level.WARNING, "Failed to load assessment questions inside Learning Hub", qEx);
                     request.setAttribute("selectedAssessmentQuestions", new ArrayList<AssessmentQuestion>());
+                    request.setAttribute("selectedAssessmentTotalPossible", 1.0);
                 }
                 request.setAttribute("selectedAssessmentInstructions", AssessmentPlacementUtil.stripPlacement(selectedAssessment.getInstructions()));
                 request.setAttribute("selectedAssessmentTimerStartTime", System.currentTimeMillis());
@@ -1410,11 +1436,11 @@ public class EnrollmentDetailsServlet extends HttpServlet {
         return answers;
     }
 
-    private double computePercentage(Double score, Integer totalMarks, int fallbackTotal) {
+    private double computePercentage(Double score, Integer totalMarks, double fallbackTotal) {
         if (score == null) {
             return 0.0;
         }
-        int total = (totalMarks != null && totalMarks > 0) ? totalMarks : (fallbackTotal > 0 ? fallbackTotal : 1);
+        double total = (totalMarks != null && totalMarks > 0) ? totalMarks.doubleValue() : (fallbackTotal > 0.0 ? fallbackTotal : 1.0);
         return Math.round((score / total) * 1000.0) / 10.0;
     }
 

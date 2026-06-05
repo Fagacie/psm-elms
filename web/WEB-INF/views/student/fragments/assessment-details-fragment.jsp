@@ -8,6 +8,9 @@
         
         <div class="metadata_row">
             <c:choose>
+                <c:when test="${assessmentTotalPossible != null}">
+                    <span class="metadata_pill">Total Points: ${assessmentTotalPossible}</span>
+                </c:when>
                 <c:when test="${assessment.totalMarks != null && assessment.totalMarks > 0}">
                     <span class="metadata_pill">Total Points: ${assessment.totalMarks}</span>
                 </c:when>
@@ -37,8 +40,8 @@
                     <a class="primary_button"
                        href="${pageContext.request.contextPath}/student/assessments?view=take&enrollmentId=${enrollment.enrollmentId}&assessmentId=${assessment.assessmentId}&mode=attempt"
                        data-load-attempt-url="${pageContext.request.contextPath}/student/assessments?view=take&enrollmentId=${enrollment.enrollmentId}&assessmentId=${assessment.assessmentId}&mode=attempt">
-                        <i class="fas fa-play"></i>
-                        <span>Start Assessment</span>
+                        <i class="fas ${not empty latestSubmission ? 'fa-rotate-left' : 'fa-play'}"></i>
+                        <span>${not empty latestSubmission ? 'Retake Assessment' : 'Start Assessment'}</span>
                     </a>
                 </c:when>
                 <c:when test="${canAttempt}">
@@ -48,7 +51,7 @@
                     </button>
                 </c:when>
                 <c:otherwise>
-                    <c:set var="totalPoints" value="${(assessment.totalMarks != null && assessment.totalMarks > 0) ? assessment.totalMarks : fn:length(questions)}"/>
+                    <c:set var="totalPoints" value="${assessmentTotalPossible != null ? assessmentTotalPossible : ((assessment.totalMarks != null && assessment.totalMarks > 0) ? assessment.totalMarks : fn:length(questions))}"/>
                     <c:set var="hasPassed" value="${not empty latestSubmission and not empty latestSubmission.score and (latestSubmission.score >= (totalPoints * 0.7))}"/>
                     <c:choose>
                         <c:when test="${not empty latestSubmission and not empty latestSubmission.score and not hasPassed}">

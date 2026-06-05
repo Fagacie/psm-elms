@@ -69,12 +69,102 @@
         <!-- Messages -->
         <c:if test="${param.success == 'graded'}"><div class="alert alert-success"><i class="fas fa-check-circle"></i> Grade saved for student.</div></c:if>
         <c:if test="${param.success == 'autoregraded'}"><div class="alert alert-success"><i class="fas fa-check-circle"></i> MCQ auto-graded successfully.</div></c:if>
+        <c:if test="${param.success == 'rreviewed'}"><div class="alert alert-success"><i class="fas fa-check-circle"></i> Retake request decision saved successfully.</div></c:if>
+        <c:if test="${param.error == 'rreview'}"><div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> Failed to submit retake request decision.</div></c:if>
         <c:if test="${param.error == 'graderange'}"><div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> Invalid score. Must be between 0 and ${selectedAssessment.totalMarks}.</div></c:if>
         <c:if test="${not empty errorMessage}"><div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> ${errorMessage}</div></c:if>
 
         <div class="ia-submissions-split-layout">
             <!-- Left Pane: Student Roster Queue -->
             <aside class="grading-roster-sidebar">
+                <!-- Retake Requests Section -->
+                <c:set var="pendingRetakesCount" value="0"/>
+                <c:forEach var="req" items="${retakeRequests}">
+                    <c:if test="${req.status == 'Pending'}">
+                        <c:set var="pendingRetakesCount" value="${pendingRetakesCount + 1}"/>
+                    </c:if>
+                </c:forEach>
+
+                <c:if test="${pendingRetakesCount > 0}">
+                    <div class="roster-header" style="background-color: #fffbeb; border-bottom: 1px solid #fef3c7; border-top: 1px solid #fef3c7; padding: 12px 16px; margin-bottom: 0;">
+                        <h3 style="color: #d97706; display: flex; align-items: center; gap: 6px; font-size: 0.875rem;">
+                            <i class="fas fa-circle-exclamation"></i> Retake Requests
+                        </h3>
+                        <span class="roster-count" style="background-color: #d97706; color: #ffffff;">${pendingRetakesCount} Pending</span>
+                    </div>
+                    <div class="roster-list" style="border-bottom: 2px solid #e2e8f0; background-color: #fffdf5; max-height: 250px; overflow-y: auto;">
+                        <c:forEach var="req" items="${retakeRequests}">
+                            <c:if test="${req.status == 'Pending'}">
+                                <div class="roster-item" style="cursor: default; padding: 12px 16px; border-bottom: 1px solid #fef3c7; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; background-color: #fffdf5; opacity: 1;">
+                                    <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
+                                        <strong class="roster-name" style="font-size: 0.875rem; color: #1e293b;">${req.studentName}</strong>
+                                        <span class="status-badge status-pending" style="font-size: 0.6875rem; padding: 2px 6px;">Pending</span>
+                                    </div>
+                                    <div style="font-size: 0.75rem; color: #64748b; margin-top: -2px;">
+                                        ${req.studentEmail}
+                                    </div>
+                                    <c:if test="${not empty req.reason}">
+                                        <div style="font-size: 0.75rem; color: #475569; background-color: #ffffff; border: 1px solid #f1f5f9; border-radius: 4px; padding: 6px 8px; width: 100%; box-sizing: border-box; word-break: break-word;">
+                                            "${req.reason}"
+                                        </div>
+                                    </c:if>
+                                    <div style="display: flex; gap: 8px; width: 100%; margin-top: 4px;">
+                                        <form method="post" action="${pageContext.request.contextPath}/instructor/assessments" style="margin: 0; flex: 1;">
+                                            <input type="hidden" name="action" value="reviewRetake">
+                                            <input type="hidden" name="courseId" value="${selectedCourse.courseId}">
+                                            <input type="hidden" name="assessmentId" value="${selectedAssessment.assessmentId}">
+                                            <input type="hidden" name="requestId" value="${req.requestId}">
+                                            <input type="hidden" name="decision" value="approve">
+                                            <button type="submit" class="ws-btn ws-btn-primary ws-btn-xs" style="width: 100%; background-color: #16a34a; border-color: #16a34a; font-size: 0.75rem; padding: 4px 8px; color: #ffffff; cursor: pointer; border-radius: 4px;">
+                                                <i class="fas fa-check"></i> Approve
+                                            </button>
+                                        </form>
+                                        <form method="post" action="${pageContext.request.contextPath}/instructor/assessments" style="margin: 0; flex: 1;">
+                                            <input type="hidden" name="action" value="reviewRetake">
+                                            <input type="hidden" name="courseId" value="${selectedCourse.courseId}">
+                                            <input type="hidden" name="assessmentId" value="${selectedAssessment.assessmentId}">
+                                            <input type="hidden" name="requestId" value="${req.requestId}">
+                                            <input type="hidden" name="decision" value="reject">
+                                            <button type="submit" class="ws-btn ws-btn-danger ws-btn-xs" style="width: 100%; font-size: 0.75rem; padding: 4px 8px; color: #ffffff; cursor: pointer; border-radius: 4px;">
+                                                <i class="fas fa-xmark"></i> Reject
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </c:if>
+                        </c:forEach>
+                    </div>
+                </c:if>
+
+                <!-- Reviewed Retake Requests History collapsible -->
+                <c:set var="hasReviewedRetakes" value="false"/>
+                <c:forEach var="req" items="${retakeRequests}">
+                    <c:if test="${req.status != 'Pending'}">
+                        <c:set var="hasReviewedRetakes" value="true"/>
+                    </c:if>
+                </c:forEach>
+
+                <c:if test="${hasReviewedRetakes}">
+                    <details style="margin: 8px 16px 12px 16px; font-size: 0.75rem; color: #64748b; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px;">
+                        <summary style="cursor: pointer; font-weight: 600; user-select: none; color: #475569;">Retake History</summary>
+                        <div style="margin-top: 6px; display: flex; flex-direction: column; gap: 6px; max-height: 150px; overflow-y: auto;">
+                            <c:forEach var="req" items="${retakeRequests}">
+                                <c:if test="${req.status != 'Pending'}">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px; border: 1px solid #e2e8f0; border-radius: 4px; background-color: #f8fafc; gap: 6px;">
+                                        <div style="word-break: break-all;">
+                                            <strong style="color: #1e293b;">${req.studentName}</strong>
+                                            <span style="display: block; font-size: 0.625rem; color: #94a3b8;">${req.studentEmail}</span>
+                                        </div>
+                                        <span class="status-badge <c:choose><c:when test="${req.status == 'Approved'}">status-graded</c:when><c:otherwise>status-timedout</c:otherwise></c:choose>" style="font-size: 0.625rem; padding: 2px 4px; margin: 0; white-space: nowrap; align-self: center;">
+                                            ${req.status}
+                                        </span>
+                                    </div>
+                                </c:if>
+                            </c:forEach>
+                        </div>
+                    </details>
+                </c:if>
+
                 <div class="roster-header">
                     <h3>Submissions Queue</h3>
                     <span class="roster-count">${fn:length(assessmentRosterRows)} Students</span>

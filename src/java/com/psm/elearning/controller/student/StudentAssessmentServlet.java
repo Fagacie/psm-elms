@@ -282,6 +282,20 @@ public class StudentAssessmentServlet extends HttpServlet {
             response.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
         }
 
+        double computedMax = 0.0;
+        if (assessment.getTotalMarks() != null && assessment.getTotalMarks() > 0) {
+            computedMax = assessment.getTotalMarks();
+        } else if (questions != null) {
+            for (AssessmentQuestion aq : questions) {
+                Double qMarks = aq.getMarks();
+                computedMax += (qMarks != null && qMarks > 0) ? qMarks : 1.0;
+            }
+        }
+        if (computedMax <= 0.0) {
+            computedMax = 1.0;
+        }
+        request.setAttribute("assessmentTotalPossible", computedMax);
+
         request.setAttribute("assessment", assessment);
         request.setAttribute("questions", questions);
         request.setAttribute("enrollment", enrollment);
@@ -806,10 +820,15 @@ public class StudentAssessmentServlet extends HttpServlet {
         }
 
         boolean objectiveAssessment = isObjectiveAssessment(assessment);
-        int fallbackTotal = 0;
+        double fallbackTotal = 0.0;
         if (assessment.getTotalMarks() == null || assessment.getTotalMarks() <= 0) {
             List<AssessmentQuestion> allQuestions = assessmentQuestionDAO.findByAssessment(assessmentId);
-            fallbackTotal = (allQuestions != null) ? allQuestions.size() : 0;
+            if (allQuestions != null) {
+                for (AssessmentQuestion q : allQuestions) {
+                    Double qMarks = q.getMarks();
+                    fallbackTotal += (qMarks != null && qMarks > 0) ? qMarks : 1.0;
+                }
+            }
         }
         double percentage = computePercentage(submission.getScore(), assessment.getTotalMarks(), fallbackTotal);
         List<AssessmentGradeAudit> audits = assessmentGradeAuditDAO.findBySubmission(submissionId);
@@ -836,11 +855,11 @@ public class StudentAssessmentServlet extends HttpServlet {
         request.getRequestDispatcher("/WEB-INF/views/student/assessment-result.jsp").forward(request, response);
     }
 
-    private double computePercentage(Double score, Integer totalMarks, int fallbackTotal) {
+    private double computePercentage(Double score, Integer totalMarks, double fallbackTotal) {
         if (score == null) {
             return 0.0;
         }
-        int total = (totalMarks != null && totalMarks > 0) ? totalMarks : (fallbackTotal > 0 ? fallbackTotal : 1);
+        double total = (totalMarks != null && totalMarks > 0) ? totalMarks.doubleValue() : (fallbackTotal > 0.0 ? fallbackTotal : 1.0);
         return round2((score / total) * 100.0);
     }
 

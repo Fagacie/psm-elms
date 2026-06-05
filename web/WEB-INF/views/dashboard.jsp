@@ -63,6 +63,14 @@
                         }${not status.last ? ',' : ''}
                     </c:forEach>
                 ];
+                window.__ACTIVITY_DATA__ = [
+                    <c:forEach var="dayData" items="${activityData}" varStatus="status">
+                        {
+                            day: "${dayData.day}",
+                            Minutes: ${dayData.Minutes}
+                        }${not status.last ? ',' : ''}
+                    </c:forEach>
+                ];
             </script>
 
             <!-- Interactive React Sandbox Application (Zero CSS Bleed) -->
@@ -108,6 +116,14 @@
                     const [activeCount] = useState(window.__ACTIVE_COURSES_COUNT__ || 0);
                     const [completedCount] = useState(window.__COMPLETED_COURSES_COUNT__ || 0);
 
+                    const [activityData] = useState(() => {
+                        if (window.__ACTIVITY_DATA__ && window.__ACTIVITY_DATA__.length > 0) {
+                            return window.__ACTIVITY_DATA__;
+                        }
+                        const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                        return days.map(d => ({ day: d, Minutes: 0 }));
+                    });
+
                     const activeCourses = courses.filter(c => c.completionStatus === 'In Progress');
                     const firstName = studentName.split(' ')[0];
                     const totalHours = Math.round(courses.reduce((acc, c) => acc + (c.progress * 0.35), 0)) + 6;
@@ -125,22 +141,11 @@
                     const overallCircumference = 2 * Math.PI * overallRadius;
                     const overallOffset = overallCircumference - (overallProgress / 100) * overallCircumference;
 
-                    // Weekly activity data
-                    const activityData = [
-                        { day: 'Mon', Minutes: 40 },
-                        { day: 'Tue', Minutes: 65 },
-                        { day: 'Wed', Minutes: totalHours * 1.5 > 120 ? 110 : 50 },
-                        { day: 'Thu', Minutes: 85 },
-                        { day: 'Fri', Minutes: 120 },
-                        { day: 'Sat', Minutes: 95 },
-                        { day: 'Sun', Minutes: totalHours * 0.8 > 80 ? 75 : 45 }
-                    ];
-
                     useEffect(() => {
                         if (window.lucide) {
                             window.lucide.createIcons();
                         }
-                    }, [courses]);
+                    }, [courses, activityData]);
 
                     const CustomTooltip = ({ active, payload }) => {
                         if (active && payload && payload.length) {
@@ -386,6 +391,12 @@
                                                 </AreaChart>
                                             </ResponsiveContainer>
                                         </div>
+                                        {activityData.every(d => d.Minutes === 0) && (
+                                            <div className="db_chartEmptyState">
+                                                <i data-lucide="info" style={{ width: 14, height: 14, color: '#3b82f6', marginRight: 6 }}></i>
+                                                <span>No study activity recorded this week. Start viewing materials or taking assessments to track your progress!</span>
+                                            </div>
+                                        )}
                                     </section>
                                 )}
 

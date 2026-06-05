@@ -537,3 +537,165 @@
   padding-bottom: 16px;
   margin-bottom: 24px;
 }
+
+/* Result Details UI redesign */
+.result_card {
+  width: 100%;
+  background: #ffffff;
+  border-radius: 20px;
+  border: 1px solid rgba(15, 23, 42, 0.05);
+  box-shadow: 0 4px 24px rgba(15, 23, 42, 0.03);
+  padding: 40px;
+  box-sizing: border-box;
+  margin-bottom: 30px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.score_ring_container {
+  position: relative;
+  width: 140px;
+  height: 140px;
+  margin: 0 auto 24px auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.score_ring_svg {
+  transform: rotate(-90deg);
+}
+
+.score_ring_bg {
+  stroke: #f1f5f9;
+}
+
+.score_ring_fg {
+  stroke: #3b82f6;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1s ease;
+}
+
+.score_ring_fg.passed {
+  stroke: #10b981;
+}
+
+.score_ring_fg.failed {
+  stroke: #ef4444;
+}
+
+.score_ring_fg.pending {
+  stroke: #f59e0b;
+}
+
+.score_center_text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.score_num {
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1;
+}
+
+.score_percentage_sub {
+  font-size: 0.72rem;
+  color: #94a3b8;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 4px;
+}
+
+.status_pill_pending {
+  background-color: #fef3c7;
+  color: #d97706;
+}
+
+.result_description {
+  color: #64748b;
+  line-height: 1.6;
+  max-width: 50ch;
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.no_review_box {
+  text-align: center;
+  padding: 32px;
+  background-color: #f8fafc;
+  border-radius: 12px;
+  border: 1px dashed #e2e8f0;
+  color: #64748b;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Redesigned review row styles */
+.review_row {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  box-sizing: border-box;
+}
+
+.review_row:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.02);
+}
+
+.review_row.correct {
+  border-left: 4px solid #10b981;
+}
+
+.review_row.incorrect {
+  border-left: 4px solid #ef4444;
+}
+
+/* Dark mode styling */
+html[data-theme='dark'] .result_card {
+  background-color: #1e293b;
+  border-color: rgba(255, 255, 255, 0.05);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+}
+
+html[data-theme='dark'] .score_ring_bg {
+  stroke: #334155;
+}
+
+html[data-theme='dark'] .score_num {
+  color: #f8fafc;
+}
+
+html[data-theme='dark'] .review_header {
+  color: #f8fafc !important;
+}
+
+html[data-theme='dark'] .review_row {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+html[data-theme='dark'] .review_row:hover {
+  border-color: #475569;
+}
+
+html[data-theme='dark'] .no_review_box {
+  background-color: #1e293b;
+  border-color: #334155;
+  color: #94a3b8;
+}

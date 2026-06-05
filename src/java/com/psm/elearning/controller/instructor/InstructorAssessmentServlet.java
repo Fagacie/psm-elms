@@ -273,6 +273,21 @@ public class InstructorAssessmentServlet extends HttpServlet {
             pendingGradingAssessmentCount = metrics.pendingGradingAssessmentCount;
             hydrateAssignmentAttachments(assessments);
             hydrateAssignmentAttachments(archivedAssessments);
+
+            Map<Integer, Integer> pendingRetakesCountByAssessmentId = new java.util.HashMap<>();
+            for (Assessment assessment : assessments) {
+                List<AssessmentRetakeRequest> reqs = retakeRequestDAO.findByAssessment(assessment.getAssessmentId());
+                int pCount = 0;
+                if (reqs != null) {
+                    for (AssessmentRetakeRequest r : reqs) {
+                        if ("Pending".equalsIgnoreCase(r.getStatus())) {
+                            pCount++;
+                        }
+                    }
+                }
+                pendingRetakesCountByAssessmentId.put(assessment.getAssessmentId(), pCount);
+            }
+            request.setAttribute("pendingRetakesCountByAssessmentId", pendingRetakesCountByAssessmentId);
         }
 
         Map<Integer, String> placementTypeByAssessmentId = new LinkedHashMap<>();

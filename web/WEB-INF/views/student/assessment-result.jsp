@@ -41,39 +41,57 @@
 
         <section class="container">
             <div class="result_container">
-                
-                <h1 class="title">${assessment.title}</h1>
-                
-                <div class="result_score_hero">
-                    <c:choose>
-                        <c:when test="${not empty submission.score}"><fmt:formatNumber value="${percentage}" maxFractionDigits="0"/>%</c:when>
-                        <c:otherwise>--</c:otherwise>
-                    </c:choose>
+                <div class="result_card">
+                    <h1 class="title">${assessment.title}</h1>
+                    
+                    <div class="score_ring_container">
+                        <svg class="score_ring_svg" width="140" height="140" viewBox="0 0 140 140">
+                            <circle class="score_ring_bg" cx="70" cy="70" r="58" stroke-width="8" fill="transparent" />
+                            <circle class="score_ring_fg ${empty submission.score ? 'pending' : (passedAssessment ? 'passed' : 'failed')}" 
+                                    cx="70" cy="70" r="58" stroke-width="8" fill="transparent" 
+                                    stroke-dasharray="364.4" 
+                                    stroke-dashoffset="${empty submission.score ? 91.1 : (364.4 - (percentage > 100 ? 100 : (percentage < 0 ? 0 : percentage)) / 100.0 * 364.4)}" />
+                        </svg>
+                        <div class="score_center_text">
+                            <c:choose>
+                                <c:when test="${not empty submission.score}">
+                                    <span class="score_num"><fmt:formatNumber value="${percentage}" maxFractionDigits="0"/>%</span>
+                                    <span class="score_percentage_sub">Score</span>
+                                </c:when>
+                                <c:otherwise>
+                                    <i class="fas fa-clock" style="font-size: 2.25rem; color: #f59e0b;"></i>
+                                </c:otherwise>
+                            </c:choose>
+                        </div>
+                    </div>
+
+                    <div class="status_pill ${empty submission.score ? 'status_pill_pending' : (passedAssessment ? 'status_pill_passed' : 'status_pill_failed')}">
+                        <i class="fas ${empty submission.score ? 'fa-clock' : (passedAssessment ? 'fa-circle-check' : 'fa-circle-xmark')}" style="margin-right: 8px;"></i>
+                        <c:choose>
+                            <c:when test="${empty submission.score}">Awaiting Grade</c:when>
+                            <c:when test="${passedAssessment}">Passed</c:when>
+                            <c:otherwise>Failed</c:otherwise>
+                        </c:choose>
+                    </div>
+
+                    <p class="result_description">
+                        <c:choose>
+                            <c:when test="${empty submission.score}">Your submission has been received and is currently awaiting grading by your instructor.</c:when>
+                            <c:when test="${passedAssessment}">Great work! You have successfully passed this assessment milestone.</c:when>
+                            <c:otherwise>Your score did not meet the 70% passing threshold. You can review the details below and try again if attempts remain.</c:otherwise>
+                        </c:choose>
+                    </p>
                 </div>
 
-                <div class="status_pill ${empty submission.score ? 'status_pill_failed' : (passedAssessment ? 'status_pill_passed' : 'status_pill_failed')}">
-                    <i class="fas ${empty submission.score ? 'fa-clock' : (passedAssessment ? 'fa-circle-check' : 'fa-circle-xmark')}" style="margin-right: 8px;"></i>
-                    <c:choose>
-                        <c:when test="${empty submission.score}">Awaiting Grade</c:when>
-                        <c:when test="${passedAssessment}">Passed</c:when>
-                        <c:otherwise>Failed</c:otherwise>
-                    </c:choose>
-                </div>
-
-                <p style="color: #64748b; line-height: 1.6; max-width: 50ch; margin: 0 auto 24px;">
-                    <c:choose>
-                        <c:when test="${empty submission.score}">Your submission has been received and is currently awaiting grading by your instructor.</c:when>
-                        <c:when test="${passedAssessment}">Great work! You have successfully passed this assessment milestone.</c:when>
-                        <c:otherwise>Your score did not meet the 70% passing threshold. You can review the details below and try again if attempts remain.</c:otherwise>
-                    </c:choose>
-                </p>
-
-                <%-- Transparent Question Review Grid --%>
+                <%-- Question Review Grid --%>
                 <div class="review_grid">
+                    <h2 class="review_header" style="font-size: 1.25rem; font-weight: 700; color: #0f172a; margin-bottom: 20px;">
+                        <i class="fas fa-list-check" style="margin-right: 8px; color: #2563eb;"></i> Submission Review
+                    </h2>
                     <c:choose>
                         <c:when test="${not objectiveAssessment || empty questions}">
-                            <div style="text-align: center; padding: 24px; background-color: #f8fafc; border-radius: 8px; color: #64748b;">
-                                <i class="fas fa-folder-open" style="font-size: 2rem; margin-bottom: 8px;"></i>
+                            <div class="no_review_box">
+                                <i class="fas fa-folder-open" style="font-size: 2rem; margin-bottom: 8px; color: #94a3b8;"></i>
                                 <p style="margin: 0;">No question-level review is available for this submission.</p>
                             </div>
                         </c:when>
@@ -83,7 +101,7 @@
                                 <c:set var="corrAns" value="${empty correctAnswerByQuestionId[q.questionId] ? '' : correctAnswerByQuestionId[q.questionId]}" />
                                 <c:set var="isCorrect" value="${not empty studAns and studAns == corrAns}" />
                                 
-                                <div class="review_row">
+                                <div class="review_row ${isCorrect ? 'correct' : 'incorrect'}">
                                     <div class="review_question_text">${loop.index + 1}. ${q.questionText}</div>
                                     <div class="student_choice">
                                         <c:choose>
@@ -114,6 +132,7 @@
                         <i class="fas fa-arrow-right"></i>
                     </a>
                 </div>
+            </div>
                 
             </div>
         </section>

@@ -16,6 +16,11 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import com.psm.elearning.util.DBConnection;
 
 public class DashboardServlet extends HttpServlet {
 
@@ -124,6 +129,11 @@ public class DashboardServlet extends HttpServlet {
                 request.setAttribute("certificatesCount", certificatesCount);
                 request.setAttribute("overallProgress", overallProgress);
                 request.setAttribute("dashboardDate", LocalDate.now());
+                
+                // Fetch dynamic study activity data for the chart
+                List<Map<String, Object>> activityData = getStudentActivityStats(user.getUserId());
+                request.setAttribute("activityData", activityData);
+
                 // Notification bell
                 try {
                     int unreadCount = notificationDAO.countUnreadByRecipientUserId(user.getUserId());
@@ -546,4 +556,83 @@ public class DashboardServlet extends HttpServlet {
         }
         return pendingCount;
     }
+
+    private List<Map<String, Object>> getStudentActivityStats(int userId) {
+        List<Map<String, Object>> activityStats = new ArrayList<>();
+        LocalDate today = LocalDate.now();
+        
+        // Initialize map for the last 7 days with 0 minutes (Mon-Sun in chronological order)
+        Map<LocalDate, Integer> dailyMinutes = new LinkedHashMap<>();
+        for (int i = 6; i >= 0; i--) {
+            dailyMinutes.put(today.minusDays(i), 0);
+        }
+        
+        String materialSql = "SELECT DATE(ViewedAt) as view_date, COUNT(*) as count " +
+                             "FROM MaterialProgress " +
+                             "WHERE UserID = ? AND ViewedAt >= DATE_SUB(CURDATE(), INTERVAL 6 DAY) " +
+                             "GROUP BY DATE(ViewedAt)";
+                             
+        String assessmentSql = "SELECT DATE(SubmitDate) as submit_date, StartedAt, EndedAt " +
+                               "FROM AssessmentSubmission " +
+                               "WHERE UserID = ? AND SubmitDate >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)";
+                               
+        try (Connection conn = DBConnection.getConnection()) {
+            // Fetch material progress activity (15 mins per viewed material)
+            try (PreparedStatement ps = conn.prepareStatement(materialSql)) {
+                ps.setInt(1, userId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        java.sql.Date sqlDate = rs.getDate("view_date");
+                        if (sqlDate != null) {
+                            LocalDate date = sqlDate.toLocalDate();
+                            int count = rs.getInt("count");
+                            dailyMinutes.put(date, dailyMinutes.getOrDefault(date, 0) + (count * 15));
+                        }
+                    }
+                }
+            }
+            
+            // Fetch assessment submission activity
+            try (PreparedStatement ps = conn.prepareStatement(assessmentSql)) {
+                ps.setInt(1, userId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        java.sql.Date sqlDate = rs.getDate("submit_date");
+                        if (sqlDate != null) {
+                            LocalDate date = sqlDate.toLocalDate();
+                            java.sql.Timestamp started = rs.getTimestamp("StartedAt");
+                            java.sql.Timestamp ended = rs.getTimestamp("EndedAt");
+                            
+                            int duration = 30; // default 30 minutes
+                            if (started != null && ended != null) {
+                                long diffMs = ended.getTime() - started.getTime();
+                                int diffMins = (int) (diffMs / (1000 * 60));
+                                if (diffMins > 0) {
+                                    duration = Math.min(diffMins, 180); // clamp to max 3 hours
+                                }
+                            }
+                            dailyMinutes.put(date, dailyMinutes.getOrDefault(date, 0) + duration);
+                        }
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.WARNING, "Failed to fetch student activity stats", e);
+        }
+        
+        // Convert to the required map list format for Recharts
+        for (Map.Entry<LocalDate, Integer> entry : dailyMinutes.entrySet()) {
+            LocalDate date = entry.getKey();
+            String dayLabel = date.getDayOfWeek().getDisplayName(java.time.format.TextStyle.SHORT, java.util.Locale.US);
+            
+            Map<String, Object> dayStat = new HashMap<>();
+            dayStat.put("day", dayLabel);
+            dayStat.put("dateLabel", date.toString());
+            dayStat.put("Minutes", entry.getValue());
+            activityStats.add(dayStat);
+        }
+        
+        return activityStats;
+    }
 }
+
