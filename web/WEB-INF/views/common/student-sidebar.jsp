@@ -152,8 +152,6 @@
                 </c:when>
 
                 <c:otherwise>
-                    <%-- Learning Section --%>
-                    <span class="nav_mod_section_label">Learning</span>
                     <a href="${pageContext.request.contextPath}/dashboard"
                        class="nav_mod_link ${resolvedActivePage == 'dashboard' ? 'active' : ''}"
                        title="Dashboard">
@@ -173,9 +171,6 @@
                         <span class="nav_mod_label">Browse Courses</span>
                     </a>
 
-                    <%-- Resources Section --%>
-                    <div class="nav_mod_divider" aria-hidden="true"></div>
-                    <span class="nav_mod_section_label">Resources</span>
                     <a href="${pageContext.request.contextPath}/student/payments"
                        class="nav_mod_link ${resolvedActivePage == 'payments' ? 'active' : ''}"
                        title="Payments">
@@ -189,9 +184,6 @@
                         <span class="nav_mod_label">Certificates</span>
                     </a>
 
-                    <%-- Account Section --%>
-                    <div class="nav_mod_divider" aria-hidden="true"></div>
-                    <span class="nav_mod_section_label">Account</span>
                     <a href="${pageContext.request.contextPath}/profile"
                        class="nav_mod_link ${resolvedActivePage == 'profile' ? 'active' : ''}"
                        title="Profile">
@@ -199,6 +191,7 @@
                         <span class="nav_mod_label">Profile</span>
                     </a>
                     <div class="nav_mod_spacer" aria-hidden="true"></div>
+                    <div class="nav_mod_divider" aria-hidden="true"></div>
                     <a href="${pageContext.request.contextPath}/logout"
                        class="nav_mod_link nav_mod_link_danger"
                        title="Logout">
