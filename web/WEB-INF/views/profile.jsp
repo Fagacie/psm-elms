@@ -13,6 +13,7 @@
     <title>Profile Settings | PSM E-Learning</title>
     <jsp:include page="/WEB-INF/views/common/student-head-assets.jsp"/>
     <c:if test="${isAdminProfile}">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/AdminNav.module.css">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin-dashboard.css">
     </c:if>
     <c:if test="${isInstructorProfile}">
@@ -28,7 +29,7 @@
     <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body class="${isInstructorProfile ? 'instructor-ui' : (isAdminProfile ? 'admin-page profile-admin sv-page' : 'sv-page')}">
+<body class="${isInstructorProfile ? 'instructor-ui' : (isAdminProfile ? 'admin-page profile-admin' : 'sv-page')}">
 <c:choose>
     <c:when test="${isInstructorProfile}">
         <jsp:include page="/WEB-INF/views/common/instructor-header.jsp">
@@ -67,12 +68,19 @@
                     <span>Profile</span>
                 </nav>
     </c:when>
+    <c:when test="${isAdminProfile}">
+        <jsp:include page="/WEB-INF/views/common/admin-sidebar.jsp"/>
+        <div class="adm_nav_layout">
+            <main class="adm_nav_main profile-page" style="padding: 24px 32px;">
+                <div class="admin-breadcrumb" style="margin-bottom: 20px;">
+                    <a href="${pageContext.request.contextPath}/dashboard">Dashboard</a>
+                    <i class="fas fa-angle-right"></i>
+                    <span>Profile</span>
+                </div>
+    </c:when>
     <c:otherwise>
         <div class="sv-layout">
             <c:choose>
-                <c:when test="${isAdminProfile}">
-                    <jsp:include page="/WEB-INF/views/common/admin-sidebar.jsp"/>
-                </c:when>
                 <c:when test="${isStudentProfile}">
                     <c:set var="activePage" value="profile"/>
                     <jsp:include page="/WEB-INF/views/common/student-sidebar.jsp"/>
@@ -99,6 +107,10 @@
     <c:when test="${isInstructorProfile}">
             </div>
         </main>
+    </c:when>
+    <c:when test="${isAdminProfile}">
+        </main>
+    </div>
     </c:when>
     <c:otherwise>
     </main>

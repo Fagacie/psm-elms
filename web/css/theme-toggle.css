@@ -1403,32 +1403,80 @@ html[data-theme='dark'] body.admin-embedded table.dataTable tbody tr:hover {
   background: #1b2430 !important;
 }
 
-html[data-theme='dark'] body.admin-page.profile-admin .sv-layout,
-html[data-theme='dark'] body.admin-page.profile-admin .sv-main {
+html[data-theme='dark'] body.admin-page.profile-admin .adm_nav_layout,
+html[data-theme='dark'] body.admin-page.profile-admin .adm_nav_main,
+html[data-theme='dark'] body.admin-page.profile-admin .prof_viewport {
   background: #0b0e13;
 }
 
-body.admin-page.profile-admin .sv-layout {
-  padding-top: 74px;
+html[data-theme='dark'] body.admin-page.profile-admin .prof_card,
+html[data-theme='dark'] body.admin-page.profile-admin .prof_sidebar {
+  background: #12161d;
+  border-color: #252c36;
 }
 
-body.admin-page.profile-admin .sv-main {
-  width: calc(100% - 244px);
-  margin-left: 244px;
+html[data-theme='dark'] body.admin-page.profile-admin .prof_cardTitle,
+html[data-theme='dark'] body.admin-page.profile-admin .prof_sidebarTitle,
+html[data-theme='dark'] body.admin-page.profile-admin .prof_profileName,
+html[data-theme='dark'] body.admin-page.profile-admin .prof_sidebarFieldValue {
+  color: #f1f5f9;
 }
 
-@media (max-width: 900px) {
-  body.admin-page.profile-admin .sv-main {
-    width: calc(100% - 220px);
-    margin-left: 220px;
-  }
+html[data-theme='dark'] body.admin-page.profile-admin .prof_sidebarFieldCard {
+  background: #181d25;
+  border-color: #252c36;
 }
 
-@media (max-width: 860px) {
-  body.admin-page.profile-admin .sv-main {
-    width: 100%;
-    margin-left: 0;
-  }
+html[data-theme='dark'] body.admin-page.profile-admin .prof_sidebarFieldLabel,
+html[data-theme='dark'] body.admin-page.profile-admin .prof_profileRole,
+html[data-theme='dark'] body.admin-page.profile-admin .prof_label {
+  color: #96a2b3;
+}
+
+html[data-theme='dark'] body.admin-page.profile-admin .prof_input,
+html[data-theme='dark'] body.admin-page.profile-admin .prof_select {
+  background: #181d25;
+  border-color: #252c36;
+  color: #e8edf5;
+}
+
+html[data-theme='dark'] body.admin-page.profile-admin .prof_inputReadOnly {
+  background: #111519;
+  border-color: #1e2530;
+  color: #64748b;
+}
+
+html[data-theme='dark'] body.admin-page.profile-admin .prof_settingsBtnOutline {
+  background: #181d25;
+  border-color: #304257;
+  color: #e8edf5;
+}
+
+html[data-theme='dark'] body.admin-page.profile-admin .prof_uploadBtn {
+  background: #181d25;
+  border-color: #304257;
+  color: #e8edf5;
+}
+
+html[data-theme='dark'] body.admin-page.profile-admin .prof_modalContent {
+  background: #12161d;
+  border-color: #252c36;
+}
+
+html[data-theme='dark'] body.admin-page.profile-admin .prof_modalTitle {
+  color: #f1f5f9;
+}
+
+html[data-theme='dark'] body.admin-page.profile-admin .prof_modalClose {
+  color: #96a2b3;
+}
+
+html[data-theme='dark'] body.admin-page.profile-admin input,
+html[data-theme='dark'] body.admin-page.profile-admin select,
+html[data-theme='dark'] body.admin-page.profile-admin textarea {
+  background: #181d25;
+  border-color: #252c36;
+  color: #e8edf5;
 }
 
 html[data-theme='dark'] body.admin-page .application-detail-panel,
