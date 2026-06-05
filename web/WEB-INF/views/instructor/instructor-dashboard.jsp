@@ -54,7 +54,7 @@
                         window.__CONTEXT_PATH__ = "${pageContext.request.contextPath}";
                         window.__INSTRUCTOR_NAME__ = "${not empty instructorName ? fn:escapeXml(instructorName) : fn:escapeXml(user.fullName)}";
                         window.__INSTRUCTOR_DASHBOARD_DATA__ = {
-                            totalRevenue: ${not empty totalRevenue ? totalRevenue : 0.0},
+                            studentCount: ${not empty totalStudents ? totalStudents : 0},
                             newEnrollments: ${not empty newEnrollments30Days ? newEnrollments30Days : 0},
                             avgScore: ${not empty averageAssessmentScore ? averageAssessmentScore : 0},
                             courseCount: ${not empty totalCourses ? totalCourses : 0},
@@ -183,15 +183,24 @@
                                 }
                             }, [dashboardData, courses]);
 
-                            const completionData = [
+                            const totalCompletion = (dashboardData.completedCount || 0) + 
+                                                    (dashboardData.inProgressCount || 0) + 
+                                                    (dashboardData.droppedCount || 0);
+                            const completionData = totalCompletion > 0 ? [
                                 { name: 'Completed', value: dashboardData.completedCount || 0 },
                                 { name: 'In Progress', value: dashboardData.inProgressCount || 0 },
                                 { name: 'Dropped', value: dashboardData.droppedCount || 0 }
+                            ] : [
+                                { name: 'No Data Available', value: 1 }
                             ];
 
-                            const passRateData = [
+                            const totalPassRate = (dashboardData.passedSubmissions || 0) + 
+                                                  (dashboardData.failedSubmissions || 0);
+                            const passRateData = totalPassRate > 0 ? [
                                 { name: 'Passed', value: dashboardData.passedSubmissions || 0 },
                                 { name: 'Failed', value: dashboardData.failedSubmissions || 0 }
+                            ] : [
+                                { name: 'No Data Available', value: 1 }
                             ];
 
                             return (
@@ -212,13 +221,13 @@
                                         >
                                             <div className={styles.kpiContent}>
                                                 <span className={styles.kpiNum}>
-                                                    ₦{(dashboardData.totalRevenue || 0).toLocaleString('en-NG', { maximumFractionDigits: 0 })}
+                                                    {(dashboardData.studentCount || 0).toLocaleString()}
                                                 </span>
-                                                <h4 className={styles.kpiLabel}>Total Revenue</h4>
-                                                <p className={styles.kpiDesc}>Gross billing across assigned courses</p>
+                                                <h4 className={styles.kpiLabel}>Total Students</h4>
+                                                <p className={styles.kpiDesc}>Total unique students taught across your courses</p>
                                             </div>
                                             <div className={styles.kpiIcon}>
-                                                <i data-lucide="dollar-sign" style={{ width: '20px', height: '20px' }}></i>
+                                                <i data-lucide="graduation-cap" style={{ width: '20px', height: '20px' }}></i>
                                             </div>
                                         </MotionDiv>
 
@@ -234,7 +243,7 @@
                                                 <p className={styles.kpiDesc}>Admissions during the last 30 days</p>
                                             </div>
                                             <div className={styles.kpiIcon}>
-                                                <i data-lucide="users" style={{ width: '20px', height: '20px' }}></i>
+                                                <i data-lucide="user-plus" style={{ width: '20px', height: '20px' }}></i>
                                             </div>
                                         </MotionDiv>
 
@@ -342,21 +351,30 @@
                                                                 cy="50%"
                                                                 innerRadius={60}
                                                                 outerRadius={80}
-                                                                paddingAngle={4}
+                                                                paddingAngle={totalCompletion > 0 ? 4 : 0}
                                                                 dataKey="value"
                                                             >
-                                                                {completionData.map((entry, index) => (
-                                                                    <Cell key={`cell-${index}`} fill={COMPLETION_COLORS[index % COMPLETION_COLORS.length]} />
-                                                                ))}
+                                                                {completionData.map((entry, index) => {
+                                                                    const fill = totalCompletion > 0 
+                                                                        ? COMPLETION_COLORS[index % COMPLETION_COLORS.length] 
+                                                                        : '#cbd5e1';
+                                                                    return <Cell key={`cell-${index}`} fill={fill} />;
+                                                                })}
                                                             </Pie>
-                                                            <Tooltip 
-                                                                contentStyle={{ backgroundColor: '#ffffff', borderRadius: '10px', border: '1px solid #f1f5f9', boxShadow: '0 4px 12px rgba(15, 23, 42, 0.08)' }}
-                                                            />
+                                                            {totalCompletion > 0 && (
+                                                                <Tooltip 
+                                                                    contentStyle={{ backgroundColor: '#ffffff', borderRadius: '10px', border: '1px solid #f1f5f9', boxShadow: '0 4px 12px rgba(15, 23, 42, 0.08)' }}
+                                                                />
+                                                            )}
                                                         </PieChart>
                                                     </ResponsiveContainer>
                                                 </div>
                                                 <div className={styles.donutLegend}>
-                                                    {completionData.map((entry, idx) => (
+                                                    {[
+                                                        { name: 'Completed', value: dashboardData.completedCount || 0 },
+                                                        { name: 'In Progress', value: dashboardData.inProgressCount || 0 },
+                                                        { name: 'Dropped', value: dashboardData.droppedCount || 0 }
+                                                    ].map((entry, idx) => (
                                                         <div key={idx} className={styles.legendItem}>
                                                             <span className="ins_mod_123_legend_dot" style={{ backgroundColor: COMPLETION_COLORS[idx % COMPLETION_COLORS.length], width: '8px', height: '8px', borderRadius: '50%', display: 'inline-block' }}></span>
                                                             <span>{entry.name}: {entry.value}</span>
@@ -382,21 +400,29 @@
                                                                 cy="50%"
                                                                 innerRadius={60}
                                                                 outerRadius={80}
-                                                                paddingAngle={4}
+                                                                paddingAngle={totalPassRate > 0 ? 4 : 0}
                                                                 dataKey="value"
                                                             >
-                                                                {passRateData.map((entry, index) => (
-                                                                    <Cell key={`cell-${index}`} fill={PASS_COLORS[index % PASS_COLORS.length]} />
-                                                                ))}
+                                                                {passRateData.map((entry, index) => {
+                                                                    const fill = totalPassRate > 0 
+                                                                        ? PASS_COLORS[index % PASS_COLORS.length] 
+                                                                        : '#cbd5e1';
+                                                                    return <Cell key={`cell-${index}`} fill={fill} />;
+                                                                })}
                                                             </Pie>
-                                                            <Tooltip 
-                                                                contentStyle={{ backgroundColor: '#ffffff', borderRadius: '10px', border: '1px solid #f1f5f9', boxShadow: '0 4px 12px rgba(15, 23, 42, 0.08)' }}
-                                                            />
+                                                            {totalPassRate > 0 && (
+                                                                <Tooltip 
+                                                                    contentStyle={{ backgroundColor: '#ffffff', borderRadius: '10px', border: '1px solid #f1f5f9', boxShadow: '0 4px 12px rgba(15, 23, 42, 0.08)' }}
+                                                                />
+                                                            )}
                                                         </PieChart>
                                                     </ResponsiveContainer>
                                                 </div>
                                                 <div className={styles.donutLegend}>
-                                                    {passRateData.map((entry, idx) => (
+                                                    {[
+                                                        { name: 'Passed', value: dashboardData.passedSubmissions || 0 },
+                                                        { name: 'Failed', value: dashboardData.failedSubmissions || 0 }
+                                                    ].map((entry, idx) => (
                                                         <div key={idx} className={styles.legendItem}>
                                                             <span className="ins_mod_123_legend_dot" style={{ backgroundColor: PASS_COLORS[idx % PASS_COLORS.length], width: '8px', height: '8px', borderRadius: '50%', display: 'inline-block' }}></span>
                                                             <span>{entry.name}: {entry.value}</span>
