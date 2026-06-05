@@ -180,6 +180,37 @@ body.instructor-ui.ins-shell-collapsed .app-main {
   transform: translateY(-1px);
 }
 
+/* --- Theme Toggle --- */
+.nav_mod_theme_toggle {
+  position: relative;
+  width: 38px;
+  height: 38px;
+  min-height: 38px;
+  padding: 0;
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid var(--nav_mod_border);
+  border-radius: var(--nav_mod_radius);
+  background: var(--nav_mod_white);
+  color: var(--nav_mod_muted_strong);
+  cursor: pointer;
+  transition: all var(--nav_mod_transition);
+  font-size: 0.92rem;
+  box-shadow: none;
+}
+
+.nav_mod_theme_toggle:hover {
+  border-color: var(--nav_mod_accent_border);
+  background: var(--nav_mod_accent_soft);
+  color: var(--nav_mod_accent);
+  box-shadow: var(--nav_mod_shadow_sm);
+  transform: translateY(-1px);
+}
+
+.nav_mod_theme_toggle .theme-toggle-label {
+  display: none;
+}
+
 .nav_mod_badge {
   position: absolute;
   top: -3px;
@@ -730,14 +761,16 @@ html[data-theme='dark'] .nav_mod_topbar {
 }
 
 html[data-theme='dark'] .nav_mod_toggle,
-html[data-theme='dark'] .nav_mod_icon_btn {
+html[data-theme='dark'] .nav_mod_icon_btn,
+html[data-theme='dark'] .nav_mod_theme_toggle {
   background: rgba(30, 41, 59, 0.8);
   border-color: rgba(148, 163, 184, 0.12);
   color: #e2e8f0;
 }
 
 html[data-theme='dark'] .nav_mod_toggle:hover,
-html[data-theme='dark'] .nav_mod_icon_btn:hover {
+html[data-theme='dark'] .nav_mod_icon_btn:hover,
+html[data-theme='dark'] .nav_mod_theme_toggle:hover {
   background: hsla(256, 100%, 56%, 0.12);
   border-color: hsla(256, 100%, 56%, 0.25);
   color: #c7d2fe;

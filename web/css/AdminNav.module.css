@@ -733,7 +733,6 @@ body.sidebar-collapsed .adm_nav_link.active::before {
     gap: 10px;
   }
 
-  .adm_nav_theme_toggle,
   .adm_nav_popover {
     display: none;
   }

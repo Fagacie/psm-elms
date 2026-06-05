@@ -711,7 +711,6 @@ body.sv-shell-collapsed .nav_mod_link.active::before {
     gap: 10px;
   }
 
-  .nav_mod_theme_toggle,
   .nav_mod_popover {
     display: none;
   }
