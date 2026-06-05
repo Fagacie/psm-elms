@@ -64,6 +64,16 @@
             }${not status.last ? ',' : ''}
         </c:forEach>
     ];
+    window.__PERFORMANCE_DATA__ = [
+        <c:forEach var="stat" items="${performanceStats}" varStatus="status">
+            {
+                day: "${fn:escapeXml(stat.day)}",
+                dateLabel: "${fn:escapeXml(stat.dateLabel)}",
+                Revenue: ${stat.revenue != null ? stat.revenue : 0.0},
+                Enrollments: ${stat.enrollments != null ? stat.enrollments : 0}
+            }${not status.last ? ',' : ''}
+        </c:forEach>
+    ];
 </script>
 
 <!-- Interactive React Command Center Application -->
@@ -76,23 +86,13 @@
     function AdminDashboard() {
         const [metrics] = useState(window.__ADMIN_METRICS__ || {});
         const [enrollments] = useState(window.__RECENT_ENROLLMENTS__ || []);
+        const [performanceData] = useState(window.__PERFORMANCE_DATA__ || []);
 
         useEffect(() => {
             if (window.lucide) {
                 window.lucide.createIcons();
             }
         }, [enrollments]);
-
-        // Weekly platform performance metrics (customized area chart)
-        const performanceData = [
-            { day: 'Mon', Revenue: 4000, Enrollments: 4 },
-            { day: 'Tue', Revenue: 6000, Enrollments: 6 },
-            { day: 'Wed', Revenue: 11000, Enrollments: 11 },
-            { day: 'Thu', Revenue: 9500, Enrollments: 9 },
-            { day: 'Fri', Revenue: 16000, Enrollments: 16 },
-            { day: 'Sat', Revenue: 14000, Enrollments: 14 },
-            { day: 'Sun', Revenue: metrics.totalRevenue || 22000, Enrollments: enrollments.length || 20 }
-        ];
 
         return (
             <div className="admin-container">

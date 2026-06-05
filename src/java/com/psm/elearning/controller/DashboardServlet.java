@@ -209,6 +209,39 @@ public class DashboardServlet extends HttpServlet {
                 systemMetrics.put("cancelledEnrollments", cancelledEnrollments);
                 systemMetrics.put("totalRevenue", totalRevenue);
                 
+                // Get performance stats for the last 7 days dynamically
+                List<Map<String, Object>> performanceStats = new ArrayList<>();
+                LocalDate today = LocalDate.now();
+                for (int i = 6; i >= 0; i--) {
+                    LocalDate date = today.minusDays(i);
+                    String dayLabel = date.getDayOfWeek().getDisplayName(java.time.format.TextStyle.SHORT, java.util.Locale.US);
+                    
+                    double revenue = 0.0;
+                    int count = 0;
+                    
+                    if (allEnrollments != null) {
+                        for (Enrollment e : allEnrollments) {
+                            if (e.getEnrollmentDate() != null && e.getEnrollmentDate().toLocalDate().equals(date)) {
+                                count++;
+                                String payStatus = e.getPaymentStatus();
+                                if (payStatus != null && (payStatus.equalsIgnoreCase("paid") || payStatus.equalsIgnoreCase("success"))) {
+                                    if (e.getCoursePrice() != null) {
+                                        revenue += e.getCoursePrice();
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
+                    Map<String, Object> dayStat = new HashMap<>();
+                    dayStat.put("day", dayLabel);
+                    dayStat.put("dateLabel", date.toString());
+                    dayStat.put("revenue", revenue);
+                    dayStat.put("enrollments", count);
+                    performanceStats.add(dayStat);
+                }
+                request.setAttribute("performanceStats", performanceStats);
+                
                 request.setAttribute("systemMetrics", systemMetrics);
                 request.setAttribute("adminName", user.getFullName());
 
