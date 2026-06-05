@@ -211,6 +211,7 @@ public class DashboardServlet extends HttpServlet {
                 
                 // Get performance stats for the last 7 days dynamically
                 List<Map<String, Object>> performanceStats = new ArrayList<>();
+                List<Map<String, Object>> platformGrowth = new ArrayList<>();
                 LocalDate today = LocalDate.now();
                 for (int i = 6; i >= 0; i--) {
                     LocalDate date = today.minusDays(i);
@@ -218,6 +219,7 @@ public class DashboardServlet extends HttpServlet {
                     
                     double revenue = 0.0;
                     int count = 0;
+                    int newUsers = 0;
                     
                     if (allEnrollments != null) {
                         for (Enrollment e : allEnrollments) {
@@ -233,14 +235,29 @@ public class DashboardServlet extends HttpServlet {
                         }
                     }
                     
+                    if (allUsers != null) {
+                        for (User u : allUsers) {
+                            if (u.getCreatedAt() != null && u.getCreatedAt().toLocalDate().equals(date)) {
+                                newUsers++;
+                            }
+                        }
+                    }
+                    
                     Map<String, Object> dayStat = new HashMap<>();
                     dayStat.put("day", dayLabel);
                     dayStat.put("dateLabel", date.toString());
                     dayStat.put("revenue", revenue);
                     dayStat.put("enrollments", count);
                     performanceStats.add(dayStat);
+                    
+                    Map<String, Object> dayGrowth = new HashMap<>();
+                    dayGrowth.put("date", date.toString());
+                    dayGrowth.put("newUsers", newUsers);
+                    dayGrowth.put("platformRevenue", revenue);
+                    platformGrowth.add(dayGrowth);
                 }
                 request.setAttribute("performanceStats", performanceStats);
+                request.setAttribute("platformGrowth", platformGrowth);
                 
                 request.setAttribute("systemMetrics", systemMetrics);
                 request.setAttribute("adminName", user.getFullName());

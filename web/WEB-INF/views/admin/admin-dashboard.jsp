@@ -13,6 +13,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin-dashboard.css?v=2.2">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/AdminNav.module.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/AdminDashboard.module.css">
     <jsp:include page="/WEB-INF/views/common/head-external-assets.jsp"/>
     
     <!-- React & ReactDOM (UMD production versions) -->
@@ -46,12 +47,31 @@
 <!-- Serialize backend JSTL variables strictly to window scope -->
 <script type="text/javascript">
     window.__CONTEXT_PATH__ = "${pageContext.request.contextPath}";
-    window.__ADMIN_METRICS__ = {
+    window.__ADMIN_DASHBOARD_DATA__ = {
+        totalRevenue: ${systemMetrics['totalRevenue'] != null ? systemMetrics['totalRevenue'] : 0.0},
+        totalUsers: ${systemMetrics['totalUsers'] != null ? systemMetrics['totalUsers'] : 0},
+        activeCourses: ${systemMetrics['approvedCourses'] != null ? systemMetrics['approvedCourses'] : 0},
+        totalEnrollments: ${systemMetrics['totalEnrollments'] != null ? systemMetrics['totalEnrollments'] : 0},
+        
         studentsCount: ${systemMetrics['studentsCount'] != null ? systemMetrics['studentsCount'] : 0},
         instructorsCount: ${systemMetrics['instructorsCount'] != null ? systemMetrics['instructorsCount'] : 0},
-        totalRevenue: ${systemMetrics['totalRevenue'] != null ? systemMetrics['totalRevenue'] : 0},
-        approvedCourses: ${systemMetrics['approvedCourses'] != null ? systemMetrics['approvedCourses'] : 0}
+        adminsCount: ${systemMetrics['adminsCount'] != null ? systemMetrics['adminsCount'] : 0},
+        
+        approvedCourses: ${systemMetrics['approvedCourses'] != null ? systemMetrics['approvedCourses'] : 0},
+        pendingCourses: ${systemMetrics['pendingCourses'] != null ? systemMetrics['pendingCourses'] : 0},
+        archivedCourses: ${systemMetrics['archivedCourses'] != null ? systemMetrics['archivedCourses'] : 0},
+        
+        platformGrowth: [
+            <c:forEach var="stat" items="${platformGrowth}" varStatus="status">
+                {
+                    date: "${fn:escapeXml(stat.date)}",
+                    newUsers: ${stat.newUsers != null ? stat.newUsers : 0},
+                    platformRevenue: ${stat.platformRevenue != null ? stat.platformRevenue : 0.0}
+                }${not status.last ? ',' : ''}
+            </c:forEach>
+        ]
     };
+    
     window.__RECENT_ENROLLMENTS__ = [
         <c:forEach var="enrollment" items="${recentEnrollments}" varStatus="status">
             {
@@ -64,121 +84,227 @@
             }${not status.last ? ',' : ''}
         </c:forEach>
     ];
-    window.__PERFORMANCE_DATA__ = [
-        <c:forEach var="stat" items="${performanceStats}" varStatus="status">
-            {
-                day: "${fn:escapeXml(stat.day)}",
-                dateLabel: "${fn:escapeXml(stat.dateLabel)}",
-                Revenue: ${stat.revenue != null ? stat.revenue : 0.0},
-                Enrollments: ${stat.enrollments != null ? stat.enrollments : 0}
-            }${not status.last ? ',' : ''}
-        </c:forEach>
-    ];
 </script>
 
 <!-- Interactive React Command Center Application -->
 <script type="text/babel">
     const { useState, useEffect } = React;
     const { 
-        ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid 
+        ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid,
+        PieChart, Pie, Cell
     } = window.Recharts || {};
 
+    const USER_COLORS = ['#3b82f6', '#10b981', '#f59e0b']; // Students, Instructors, Admins
+    const COURSE_COLORS = ['#10b981', '#f59e0b', '#ef4444']; // Active, Pending, Archived
+
     function AdminDashboard() {
-        const [metrics] = useState(window.__ADMIN_METRICS__ || {});
+        const [adminDashboardData] = useState(window.__ADMIN_DASHBOARD_DATA__ || {});
         const [enrollments] = useState(window.__RECENT_ENROLLMENTS__ || []);
-        const [performanceData] = useState(window.__PERFORMANCE_DATA__ || []);
 
         useEffect(() => {
             if (window.lucide) {
                 window.lucide.createIcons();
             }
-        }, [enrollments]);
+        }, [adminDashboardData, enrollments]);
+
+        // Formatted distribution charts data source
+        const userDemographicsData = [
+            { name: 'Students', value: adminDashboardData.studentsCount || 0 },
+            { name: 'Instructors', value: adminDashboardData.instructorsCount || 0 },
+            { name: 'Admins', value: adminDashboardData.adminsCount || 0 }
+        ];
+
+        const courseStatusesData = [
+            { name: 'Active Courses', value: adminDashboardData.approvedCourses || 0 },
+            { name: 'Pending Approval', value: adminDashboardData.pendingCourses || 0 },
+            { name: 'Rejected/Drafts', value: adminDashboardData.archivedCourses || 0 }
+        ];
 
         return (
-            <div className="admin-container">
-                {/* Greenfield typographically prioritized Header */}
-                <header className="dashboard-header-gf">
+            <div className="ad_container">
+                {/* Header */}
+                <header className="ad_header">
                     <h1>Command Center</h1>
-                    <p>Real-time system oversight, student governance, financial analytics, and key platform metrics.</p>
+                    <p>Real-time platform-wide insights, student governance, financial analytics, and key platform metrics.</p>
                 </header>
 
-                {/* KPI Metrics Row */}
-                <section className="kpi-grid-gf">
-                    <div className="kpi-card-gf">
-                        <div className="kpi-icon-gf">
-                            <i data-lucide="graduation-cap"></i>
-                        </div>
-                        <div className="kpi-details-gf">
-                            <span className="kpi-label-gf">Active Students</span>
-                            <span className="kpi-value-gf">{metrics.studentsCount || 0}</span>
-                        </div>
-                    </div>
-
-                    <div className="kpi-card-gf">
-                        <div className="kpi-icon-gf">
-                            <i data-lucide="users"></i>
-                        </div>
-                        <div className="kpi-details-gf">
-                            <span className="kpi-label-gf">Total Instructors</span>
-                            <span className="kpi-value-gf">{metrics.instructorsCount || 0}</span>
-                        </div>
-                    </div>
-
-                    <div className="kpi-card-gf">
-                        <div className="kpi-icon-gf">
+                {/* Top KPI Grid (Platform-Wide Metrics) */}
+                <section className="ad_kpi_grid">
+                    <div className="ad_kpi_card">
+                        <div className="ad_kpi_icon emerald">
                             <i data-lucide="dollar-sign"></i>
                         </div>
-                        <div className="kpi-details-gf">
-                            <span className="kpi-label-gf">Gross Revenue</span>
-                            <span className="kpi-value-gf">
-                                ₦{(metrics.totalRevenue || 0).toLocaleString('en-NG', { maximumFractionDigits: 0 })}
+                        <div className="ad_kpi_details">
+                            <span className="ad_kpi_label">Total Revenue</span>
+                            <span className="ad_kpi_value">
+                                ₦{(adminDashboardData.totalRevenue || 0).toLocaleString('en-NG', { maximumFractionDigits: 0 })}
                             </span>
                         </div>
                     </div>
 
-                    <div className="kpi-card-gf">
-                        <div className="kpi-icon-gf">
+                    <div className="ad_kpi_card">
+                        <div className="ad_kpi_icon blue">
+                            <i data-lucide="users"></i>
+                        </div>
+                        <div className="ad_kpi_details">
+                            <span className="ad_kpi_label">Total Users</span>
+                            <span className="ad_kpi_value">
+                                {(adminDashboardData.totalUsers || 0).toLocaleString()}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div className="ad_kpi_card">
+                        <div className="ad_kpi_icon violet">
                             <i data-lucide="book-open"></i>
                         </div>
-                        <div className="kpi-details-gf">
-                            <span className="kpi-label-gf">Published Courses</span>
-                            <span className="kpi-value-gf">{metrics.approvedCourses || 0}</span>
+                        <div className="ad_kpi_details">
+                            <span className="ad_kpi_label">Active Courses</span>
+                            <span className="ad_kpi_value">
+                                {(adminDashboardData.activeCourses || 0).toLocaleString()}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div className="ad_kpi_card">
+                        <div className="ad_kpi_icon amber">
+                            <i data-lucide="graduation-cap"></i>
+                        </div>
+                        <div className="ad_kpi_details">
+                            <span className="ad_kpi_label">Enrollments</span>
+                            <span className="ad_kpi_value">
+                                {(adminDashboardData.totalEnrollments || 0).toLocaleString()}
+                            </span>
                         </div>
                     </div>
                 </section>
 
-                {/* Recharts Platform Revenue Area Chart */}
+                {/* Main Growth Chart (Users & Revenue) */}
                 {window.Recharts && (
-                    <section className="recent-activity-section-gf">
-                        <div className="section-header-minimal-gf">
-                            <h2>Platform Performance</h2>
-                            <span>Billing collections and registration frequency over the past 7 days</span>
+                    <section className="ad_panel">
+                        <div className="ad_panel_header">
+                            <h2 className="ad_panel_title">Platform Growth Trends</h2>
+                            <p className="ad_panel_subtitle">Daily breakdown of user registrations and gross platform revenue</p>
                         </div>
-                        <div className="table-container-gf" style={{ padding: '2rem 1.5rem 1.5rem 0.5rem', height: '350px' }}>
+                        <div style={{ width: '100%', height: '350px' }}>
                             <ResponsiveContainer width="100%" height="100%">
-                                <AreaChart data={performanceData} margin={{ top: 10, right: 10, left: 15, bottom: 0 }}>
+                                <AreaChart data={adminDashboardData.platformGrowth || []} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
                                     <defs>
                                         <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="#10b981" stopOpacity={0.2}/>
+                                            <stop offset="5%" stopColor="#10b981" stopOpacity={0.15}/>
                                             <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
                                         </linearGradient>
+                                        <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.15}/>
+                                            <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                                        </linearGradient>
                                     </defs>
-                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                                    <XAxis dataKey="day" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
-                                    <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v) => '₦' + v.toLocaleString()} />
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" opacity={0.5} />
+                                    <XAxis dataKey="date" stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} />
+                                    <YAxis yAxisId="left" stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => '₦' + v.toLocaleString()} />
+                                    <YAxis yAxisId="right" orientation="right" stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} />
                                     <Tooltip 
                                         contentStyle={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}
                                         labelStyle={{ fontWeight: '700', color: '#0f172a' }}
+                                        formatter={(value, name) => {
+                                            if (name === "Revenue") return ['₦' + value.toLocaleString(), 'Daily Revenue'];
+                                            if (name === "New Users") return [value.toLocaleString(), 'New Registrations'];
+                                            return [value, name];
+                                        }}
                                     />
-                                    <Area type="monotone" dataKey="Revenue" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#colorRevenue)" />
+                                    <Area yAxisId="left" type="monotone" dataKey="platformRevenue" name="Revenue" stroke="#10b981" strokeWidth={2.5} fillOpacity={1} fill="url(#colorRevenue)" />
+                                    <Area yAxisId="right" type="monotone" dataKey="newUsers" name="New Users" stroke="#3b82f6" strokeWidth={2.5} fillOpacity={1} fill="url(#colorUsers)" />
                                 </AreaChart>
                             </ResponsiveContainer>
                         </div>
                     </section>
                 )}
 
+                {/* Bottom Insights (System Health Donut Charts) */}
+                {window.Recharts && (
+                    <section className="ad_distribution_grid">
+                        {/* Donut 1: User Demographics */}
+                        <div className="ad_donut_card">
+                            <div className="ad_panel_header">
+                                <h2 className="ad_panel_title">User Demographics</h2>
+                                <p className="ad_panel_subtitle">Distribution of platform members by role</p>
+                            </div>
+                            <div className="ad_donut_chart_container">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <PieChart>
+                                        <Pie
+                                            data={userDemographicsData}
+                                            cx="50%"
+                                            cy="50%"
+                                            innerRadius={60}
+                                            outerRadius={80}
+                                            paddingAngle={4}
+                                            dataKey="value"
+                                        >
+                                            {userDemographicsData.map((entry, index) => (
+                                                <Cell key={`cell-${index}`} fill={USER_COLORS[index % USER_COLORS.length]} />
+                                            ))}
+                                        </Pie>
+                                        <Tooltip 
+                                            contentStyle={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}
+                                            formatter={(value, name) => [value, name]}
+                                        />
+                                    </PieChart>
+                                </ResponsiveContainer>
+                            </div>
+                            <div className="ad_donut_legend">
+                                {userDemographicsData.map((entry, idx) => (
+                                    <div key={idx} className="ad_legend_item">
+                                        <span className="ad_legend_dot" style={{ backgroundColor: USER_COLORS[idx % USER_COLORS.length] }}></span>
+                                        <span>{entry.name}: {entry.value}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Donut 2: Course Statuses */}
+                        <div className="ad_donut_card">
+                            <div className="ad_panel_header">
+                                <h2 className="ad_panel_title">Course Statuses</h2>
+                                <p className="ad_panel_subtitle">Overview of courses pending review or published</p>
+                            </div>
+                            <div className="ad_donut_chart_container">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <PieChart>
+                                        <Pie
+                                            data={courseStatusesData}
+                                            cx="50%"
+                                            cy="50%"
+                                            innerRadius={60}
+                                            outerRadius={80}
+                                            paddingAngle={4}
+                                            dataKey="value"
+                                        >
+                                            {courseStatusesData.map((entry, index) => (
+                                                <Cell key={`cell-${index}`} fill={COURSE_COLORS[index % COURSE_COLORS.length]} />
+                                            ))}
+                                        </Pie>
+                                        <Tooltip 
+                                            contentStyle={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}
+                                            formatter={(value, name) => [value, name]}
+                                        />
+                                    </PieChart>
+                                </ResponsiveContainer>
+                            </div>
+                            <div className="ad_donut_legend">
+                                {courseStatusesData.map((entry, idx) => (
+                                    <div key={idx} className="ad_legend_item">
+                                        <span className="ad_legend_dot" style={{ backgroundColor: COURSE_COLORS[idx % COURSE_COLORS.length] }}></span>
+                                        <span>{entry.name}: {entry.value}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </section>
+                )}
+
                 {/* Global Action Bar */}
-                <section className="action-bar-gf">
+                <section className="action-bar-gf" style={{ marginTop: '0px' }}>
                     <div className="action-buttons-gf">
                         <a href={window.__CONTEXT_PATH__ + '/admin/users'} className="action-btn-gf">
                             <i data-lucide="user-plus"></i> + Add New User
@@ -190,7 +316,7 @@
                 </section>
 
                 {/* Recent Activity Table */}
-                <section className="recent-activity-section-gf">
+                <section className="recent-activity-section-gf" style={{ marginTop: '0px' }}>
                     <div className="section-header-minimal-gf">
                         <h2>Recent Enrollments</h2>
                         <span>Latest admissions and payment verifications across the platform</span>

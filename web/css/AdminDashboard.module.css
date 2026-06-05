@@ -1,0 +1,226 @@
+/* AdminDashboard.module.css: Scoped styling for premium SaaS dashboard analytics interface */
+
+.ad_container {
+  display: grid;
+  gap: 24px;
+  padding: 24px;
+}
+
+.ad_header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ad_header h1 {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--admin-text, #0f172a);
+}
+
+.ad_header p {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--admin-muted, #64748b);
+}
+
+/* 4-Column KPI Grid */
+.ad_kpi_grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 1024px) {
+  .ad_kpi_grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .ad_kpi_grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ad_kpi_card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  background: var(--admin-surface, #ffffff);
+  border: 1px solid var(--admin-border, #f1f5f9);
+  border-radius: 12px;
+  box-shadow: var(--admin-shadow, 0 8px 24px rgba(15, 23, 42, 0.04));
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.ad_kpi_card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+  border-color: var(--admin-border-strong, #e5e7eb);
+}
+
+.ad_kpi_icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  background: var(--admin-accent-soft, rgba(20, 83, 45, 0.08));
+  color: var(--admin-accent, #14532d);
+}
+
+.ad_kpi_icon.blue {
+  background: rgba(59, 130, 246, 0.08);
+  color: #3b82f6;
+}
+
+.ad_kpi_icon.emerald {
+  background: rgba(16, 185, 129, 0.08);
+  color: #10b981;
+}
+
+.ad_kpi_icon.violet {
+  background: rgba(139, 92, 246, 0.08);
+  color: #8b5cf6;
+}
+
+.ad_kpi_icon.amber {
+  background: rgba(245, 158, 11, 0.08);
+  color: #f59e0b;
+}
+
+.ad_kpi_details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ad_kpi_label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--admin-muted, #64748b);
+}
+
+.ad_kpi_value {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--admin-text, #0f172a);
+  line-height: 1.2;
+}
+
+/* Growth Panel */
+.ad_panel {
+  background: var(--admin-surface, #ffffff);
+  border: 1px solid var(--admin-border, #f1f5f9);
+  border-radius: 12px;
+  box-shadow: var(--admin-shadow, 0 8px 24px rgba(15, 23, 42, 0.04));
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.ad_panel_header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ad_panel_title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--admin-text, #0f172a);
+}
+
+.ad_panel_subtitle {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--admin-muted, #64748b);
+}
+
+/* Distribution Grid (2-column) */
+.ad_distribution_grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+@media (max-width: 768px) {
+  .ad_distribution_grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ad_donut_card {
+  background: var(--admin-surface, #ffffff);
+  border: 1px solid var(--admin-border, #f1f5f9);
+  border-radius: 12px;
+  box-shadow: var(--admin-shadow, 0 8px 24px rgba(15, 23, 42, 0.04));
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ad_donut_chart_container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  height: 240px;
+  width: 100%;
+}
+
+.ad_donut_legend {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.ad_legend_item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: var(--admin-text, #0f172a);
+  font-weight: 500;
+}
+
+.ad_legend_dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.ad_chart_tooltip {
+  background: #ffffff;
+  border: 1px solid var(--admin-border-strong, #e5e7eb);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  padding: 10px 12px;
+  font-size: 0.8rem;
+}
+
+.ad_tooltip_title {
+  font-weight: 700;
+  color: var(--admin-text, #0f172a);
+  margin-bottom: 4px;
+}
+
+.ad_tooltip_row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  justify-content: space-between;
+}
