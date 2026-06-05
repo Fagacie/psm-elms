@@ -215,12 +215,42 @@ public class StartPaymentServlet extends HttpServlet {
         if (!configured.isEmpty()) {
             return configured;
         }
-        String scheme = request.getScheme();
-        String server = request.getServerName();
-        int port = request.getServerPort();
-        boolean defaultPort = ("http".equalsIgnoreCase(scheme) && port == 80)
-                || ("https".equalsIgnoreCase(scheme) && port == 443);
-        String host = defaultPort ? (scheme + "://" + server) : (scheme + "://" + server + ":" + port);
+        
+        String scheme = request.getHeader("X-Forwarded-Proto");
+        if (scheme == null || scheme.trim().isEmpty()) {
+            scheme = request.getScheme();
+        }
+        
+        String server = request.getHeader("X-Forwarded-Host");
+        if (server == null || server.trim().isEmpty()) {
+            server = request.getServerName();
+        } else {
+            if (server.contains(":")) {
+                server = server.split(":")[0];
+            }
+        }
+        
+        String forwardedPort = request.getHeader("X-Forwarded-Port");
+        int port = -1;
+        if (forwardedPort != null && !forwardedPort.trim().isEmpty()) {
+            try {
+                port = Integer.parseInt(forwardedPort.trim());
+            } catch (NumberFormatException ignored) {}
+        }
+        if (port == -1) {
+            port = request.getServerPort();
+        }
+        
+        boolean defaultPort = ("http".equalsIgnoreCase(scheme) && (port == 80 || port == 8080))
+                || ("https".equalsIgnoreCase(scheme) && (port == 443 || port == 8443));
+                
+        String host;
+        if (request.getHeader("X-Forwarded-Host") != null) {
+            host = scheme + "://" + server;
+        } else {
+            host = defaultPort ? (scheme + "://" + server) : (scheme + "://" + server + ":" + port);
+        }
+        
         return host + request.getContextPath() + "/student/payment-callback";
     }
 

@@ -48,6 +48,7 @@ public class RegisterServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        try {
         String fullName = trim(request.getParameter("fullName"));
         String email = trim(request.getParameter("email"));
         String phone = trim(request.getParameter("phone"));
@@ -62,7 +63,13 @@ public class RegisterServlet extends HttpServlet {
         String qualification = trim(request.getParameter("qualification"));
         String emergencyContact = trim(request.getParameter("emergencyContact"));
 
-        Part passportPhotoPart = request.getPart("passportPhoto");
+        Part passportPhotoPart = null;
+        try {
+            passportPhotoPart = request.getPart("passportPhoto");
+        } catch (Exception partEx) {
+            LOGGER.log(Level.WARNING, "Could not read passport photo part", partEx);
+            // Continue without photo — don't crash the whole registration
+        }
         String passportPath = null;
 
         StringBuilder missing = new StringBuilder();
@@ -220,6 +227,12 @@ public class RegisterServlet extends HttpServlet {
         request.getSession().setAttribute("successMessage",
             "Registration successful! Your Registration Number: " + generatedReg + ". Use it or your email to login.");
         response.sendRedirect(request.getContextPath() + "/login");
+
+        } catch (Exception ex) {
+            LOGGER.log(Level.SEVERE, "Unexpected error during registration", ex);
+            request.setAttribute("error", "An unexpected error occurred during registration. Please try again.");
+            request.getRequestDispatcher("/WEB-INF/views/register.jsp").forward(request, response);
+        }
     }
 
     private static String trim(String value) {

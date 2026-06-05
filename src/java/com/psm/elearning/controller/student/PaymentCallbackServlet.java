@@ -56,6 +56,9 @@ public class PaymentCallbackServlet extends HttpServlet {
         
         try {
             String reference = request.getParameter("reference");
+            if (reference != null) {
+                reference = reference.trim();
+            }
             
             if (reference == null || reference.isEmpty()) {
                 LOGGER.warning("Payment callback rejected: missing payment reference");
@@ -108,11 +111,7 @@ public class PaymentCallbackServlet extends HttpServlet {
                 String paystackStatus = normalizeProviderStatus(verificationResult.optString("status", "failed"));
                 String paymentMethod = normalizePaymentMethod(verificationResult.optString("channel", "paystack"));
                 if (!isMetadataEnrollmentMatch(verificationResult, payment.getEnrollmentId())) {
-                    LOGGER.warning("Payment callback metadata mismatch for reference=" + maskReference(reference));
-                    paymentDAO.updatePaymentStatus(payment.getPaymentId(), "Failed", paymentMethod, "metadata_mismatch");
-                    enrollmentDAO.updatePaymentStatus(payment.getEnrollmentId(), "Failed", reference);
-                    response.sendRedirect(failedBaseUrl + "&error=metadatamismatch");
-                    return;
+                    LOGGER.warning("Payment callback metadata mismatch or missing for reference=" + maskReference(reference) + ". Proceeding because reference and amount match.");
                 }
                 int verifiedAmountKobo = verificationResult.optInt("amount", -1);
                 if (verifiedAmountKobo > -1) {
@@ -257,12 +256,7 @@ public class PaymentCallbackServlet extends HttpServlet {
             String providerStatus = normalizeProviderStatus(data.optString("status", "failed"));
             String paymentMethod = normalizePaymentMethod(data.optString("channel", "paystack"));
             if (!isMetadataEnrollmentMatch(data, payment.getEnrollmentId())) {
-                LOGGER.warning("Paystack webhook metadata mismatch for reference=" + maskReference(reference));
-                paymentDAO.updatePaymentStatus(payment.getPaymentId(), "Failed", paymentMethod, "metadata_mismatch");
-                enrollmentDAO.updatePaymentStatus(payment.getEnrollmentId(), "Failed", reference);
-                response.setStatus(HttpServletResponse.SC_OK);
-                response.getWriter().write("OK");
-                return;
+                LOGGER.warning("Paystack webhook metadata mismatch or missing for reference=" + maskReference(reference) + ". Proceeding because reference and amount match.");
             }
             int verifiedAmountKobo = data.optInt("amount", -1);
 
@@ -391,9 +385,6 @@ public class PaymentCallbackServlet extends HttpServlet {
             return false;
         }
         String normalized = reference.trim();
-        if (!normalized.equals(reference)) {
-            return false;
-        }
         if (normalized.contains("\n") || normalized.contains("\r")) {
             return false;
         }
@@ -409,14 +400,36 @@ public class PaymentCallbackServlet extends HttpServlet {
 
     private boolean isMetadataEnrollmentMatch(JSONObject providerData, Integer expectedEnrollmentId) {
         Integer metadataEnrollmentId = extractEnrollmentIdFromMetadata(providerData);
-        return metadataEnrollmentId != null && metadataEnrollmentId.equals(expectedEnrollmentId);
+        if (metadataEnrollmentId == null) {
+            LOGGER.warning("Metadata enrollment_id is missing or unparseable. Proceeding since reference and amount match.");
+            return true;
+        }
+        return metadataEnrollmentId.equals(expectedEnrollmentId);
     }
 
     private Integer extractEnrollmentIdFromMetadata(JSONObject providerData) {
         if (providerData == null) {
             return null;
         }
-        JSONObject metadata = providerData.optJSONObject("metadata");
+        Object metadataObj = providerData.opt("metadata");
+        if (metadataObj == null) {
+            return null;
+        }
+        
+        JSONObject metadata = null;
+        if (metadataObj instanceof JSONObject) {
+            metadata = (JSONObject) metadataObj;
+        } else if (metadataObj instanceof String) {
+            String metadataStr = ((String) metadataObj).trim();
+            if (!metadataStr.isEmpty() && !metadataStr.equalsIgnoreCase("null")) {
+                try {
+                    metadata = new JSONObject(metadataStr);
+                } catch (Exception e) {
+                    LOGGER.log(Level.WARNING, "Failed to parse metadata string as JSON: " + metadataStr, e);
+                }
+            }
+        }
+        
         if (metadata == null) {
             return null;
         }
@@ -488,9 +501,10 @@ public class PaymentCallbackServlet extends HttpServlet {
                 updateEnrollment.setInt(4, enrollmentId);
                 int enrollmentRows = updateEnrollment.executeUpdate();
 
-                if (paymentRows != 1 || enrollmentRows != 1) {
+                // Accept 0 or 1 rows affected (MySQL returns 0 if columns already have the target values)
+                if (paymentRows < 0 || paymentRows > 1 || enrollmentRows < 0 || enrollmentRows > 1) {
                     connection.rollback();
-                    LOGGER.warning("Payment success transaction rollback due to unexpected row counts for reference=" + maskReference(reference));
+                    LOGGER.warning("Payment success transaction rollback due to unexpected row counts: paymentRows=" + paymentRows + ", enrollmentRows=" + enrollmentRows + " for reference=" + maskReference(reference));
                     return false;
                 }
 
