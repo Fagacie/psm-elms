@@ -21,11 +21,286 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/theme-toggle.css">
     <script defer src="${pageContext.request.contextPath}/js/theme-toggle.js"></script>
     <script defer src="${pageContext.request.contextPath}/js/instructor-shell.js"></script>
+    <!-- Lucide Icons UMD -->
+    <script src="https://unpkg.com/lucide@0.395.0/dist/umd/lucide.min.js"></script>
     
     <style>
     /* ==========================================================================
-       Premium UI System — Course Workspace tabbed redesign
+       Premium UI Redesign — CSS Module Namespace (ins_ws_)
        ========================================================================== */
+    .ins_ws_page_head {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        margin-top: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    .ins_ws_page_head h2 {
+        font-size: 2.25rem !important;
+        font-weight: 800 !important;
+        color: #0f172a !important;
+        margin: 0 !important;
+        letter-spacing: -0.03em !important;
+    }
+    :root[data-theme="dark"] .ins_ws_page_head h2 {
+        color: #ffffff !important;
+    }
+
+    /* Tabs Navigation Bar */
+    .ins_ws_nav_bar {
+        display: flex;
+        gap: 2rem;
+        align-items: center;
+        background: transparent !important;
+        border: none !important;
+        border-bottom: 1px solid #e2e8f0 !important;
+        border-radius: 0 !important;
+        padding: 0 0 12px 0 !important;
+        box-shadow: none !important;
+        backdrop-filter: none !important;
+        margin-bottom: 2rem !important;
+        overflow-x: auto;
+    }
+    :root[data-theme="dark"] .ins_ws_nav_bar {
+        border-bottom-color: rgba(255, 255, 255, 0.1) !important;
+    }
+
+    .ins_ws_nav_link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: #64748b !important;
+        font-weight: 600 !important;
+        font-size: 0.95rem !important;
+        text-decoration: none !important;
+        padding: 4px 8px 12px 8px !important;
+        transition: all 0.2s ease !important;
+        border-bottom: 2px solid transparent !important;
+        margin-bottom: -14px !important;
+        background: transparent !important;
+        border-radius: 0 !important;
+    }
+    .ins_ws_nav_link svg, 
+    .ins_ws_nav_link i {
+        width: 16px;
+        height: 16px;
+        color: currentColor;
+    }
+    .ins_ws_nav_link:hover {
+        color: #0f172a !important;
+        background: transparent !important;
+    }
+    :root[data-theme="dark"] .ins_ws_nav_link:hover {
+        color: #ffffff !important;
+    }
+    .ins_ws_nav_link.active {
+        color: #6366f1 !important;
+        border-bottom-color: #6366f1 !important;
+        font-weight: 700 !important;
+        background: transparent !important;
+    }
+
+    /* Metadata pills */
+    .ins_ws_meta_chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+    .ins_ws_meta_pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background-color: #f1f5f9 !important;
+        padding: 6px 14px !important;
+        border-radius: 9999px !important;
+        font-size: 0.8rem !important;
+        color: #334155 !important;
+        font-weight: 600 !important;
+        border: none !important;
+        box-shadow: none !important;
+    }
+    .ins_ws_meta_pill svg, 
+    .ins_ws_meta_pill i {
+        color: #64748b !important;
+        width: 14px;
+        height: 14px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    :root[data-theme="dark"] .ins_ws_meta_pill {
+        background-color: #1e293b !important;
+        color: #cbd5e1 !important;
+    }
+    :root[data-theme="dark"] .ins_ws_meta_pill svg,
+    :root[data-theme="dark"] .ins_ws_meta_pill i {
+        color: #94a3b8 !important;
+    }
+
+    /* Description */
+    .ins_ws_desc {
+        color: #475569 !important;
+        font-size: 0.95rem !important;
+        line-height: 1.65 !important;
+        margin: 0 !important;
+        max-width: 850px;
+    }
+    :root[data-theme="dark"] .ins_ws_desc {
+        color: #94a3b8 !important;
+    }
+
+    /* KPI Grid */
+    .ins_ws_kpi_grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)) !important;
+        gap: 1.5rem !important;
+        margin-top: 2rem !important;
+        margin-bottom: 2.5rem !important;
+    }
+    .ins_ws_kpi_card {
+        background: #ffffff !important;
+        border: 1px solid #e2e8f0 !important;
+        border-left: none !important; /* completely clear chunk legacy border */
+        border-radius: 12px !important;
+        padding: 24px !important;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 20px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        box-sizing: border-box;
+    }
+    .ins_ws_kpi_card:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05) !important;
+        border-color: #cbd5e1 !important;
+    }
+    :root[data-theme="dark"] .ins_ws_kpi_card {
+        background: #111827 !important;
+        border-color: rgba(255, 255, 255, 0.08) !important;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+    }
+    :root[data-theme="dark"] .ins_ws_kpi_card:hover {
+        border-color: rgba(255, 255, 255, 0.15) !important;
+    }
+
+    .ins_ws_kpi_icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 50% !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.15rem;
+        flex-shrink: 0;
+    }
+    .ins_ws_kpi_icon svg,
+    .ins_ws_kpi_icon i {
+        width: 20px;
+        height: 20px;
+    }
+    .ins_ws_kpi_icon.students { background: rgba(99, 102, 241, 0.08) !important; color: #6366f1 !important; }
+    .ins_ws_kpi_icon.materials { background: rgba(16, 185, 129, 0.08) !important; color: #10b981 !important; }
+    .ins_ws_kpi_icon.assessments { background: rgba(59, 130, 246, 0.08) !important; color: #3b82f6 !important; }
+    .ins_ws_kpi_icon.pending { background: rgba(239, 68, 68, 0.08) !important; color: #ef4444 !important; }
+
+    .ins_ws_kpi_data {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        align-items: flex-start;
+        text-align: left;
+    }
+    .ins_ws_kpi_data strong {
+        font-size: 2rem !important;
+        font-weight: 800 !important;
+        color: #0f172a !important;
+        line-height: 1 !important;
+    }
+    .ins_ws_kpi_data span {
+        font-size: 0.72rem !important;
+        color: #64748b !important;
+        text-transform: uppercase !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.05em !important;
+    }
+    :root[data-theme="dark"] .ins_ws_kpi_data strong {
+        color: #ffffff !important;
+    }
+    :root[data-theme="dark"] .ins_ws_kpi_data span {
+        color: #94a3b8 !important;
+    }
+
+    /* Quick Actions */
+    .ins_ws_actions_sec {
+        border-top: 1px solid #e2e8f0 !important;
+        padding-top: 2rem !important;
+    }
+    :root[data-theme="dark"] .ins_ws_actions_sec {
+        border-top-color: rgba(255, 255, 255, 0.08) !important;
+    }
+    .ins_ws_actions_title {
+        margin: 0 0 1.25rem 0 !important;
+        font-size: 1.2rem !important;
+        font-weight: 700 !important;
+        color: #0f172a !important;
+    }
+    :root[data-theme="dark"] .ins_ws_actions_title {
+        color: #ffffff !important;
+    }
+
+    .ins_ws_actions_grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+    }
+    .ins_ws_action_btn {
+        background-color: #ffffff !important;
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 9999px !important; /* pill shape button */
+        padding: 10px 24px !important;
+        font-size: 0.88rem !important;
+        font-weight: 600 !important;
+        color: #334155 !important;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        outline: none;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02) !important;
+    }
+    .ins_ws_action_btn svg,
+    .ins_ws_action_btn i {
+        width: 15px;
+        height: 15px;
+        color: #475569;
+    }
+    .ins_ws_action_btn:hover {
+        background-color: #6366f1 !important;
+        color: #ffffff !important;
+        border-color: #6366f1 !important;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2) !important;
+    }
+    .ins_ws_action_btn:hover svg,
+    .ins_ws_action_btn:hover i {
+        color: #ffffff !important;
+    }
+    :root[data-theme="dark"] .ins_ws_action_btn {
+        background-color: #1f2937 !important;
+        border-color: rgba(255, 255, 255, 0.1) !important;
+        color: #cbd5e1 !important;
+    }
+    :root[data-theme="dark"] .ins_ws_action_btn:hover {
+        background-color: #6366f1 !important;
+        color: #ffffff !important;
+        border-color: #6366f1 !important;
+    }
 
     :root {
         --ws-primary: #6366f1;
@@ -1116,10 +1391,8 @@
     <div class="content-wrapper course-workspace-page">
         
         <%-- HEADER --%>
-        <section class="ws-page-head-slim">
-            <div class="ws-head-left-slim">
-                <h2><c:out value="${selectedCourse.courseName}"/></h2>
-            </div>
+        <section class="ins_ws_page_head">
+            <h2><c:out value="${selectedCourse.courseName}"/></h2>
         </section>
 
         <c:if test="${not empty errorMessage}">
@@ -1131,18 +1404,18 @@
         </c:url>
 
         <%-- WORKSPACE NAVIGATION --%>
-        <nav class="ins-flow-nav" aria-label="Workspace navigation">
-            <a class="ins-flow-link active" href="#overview" data-section-link="overview">
-                <i class="fas fa-chart-pie"></i> Overview
+        <nav class="ins_ws_nav_bar" aria-label="Workspace navigation">
+            <a class="ins_ws_nav_link active" href="#overview" data-section-link="overview">
+                <i data-lucide="pie-chart"></i> Overview
             </a>
-            <a class="ins-flow-link" href="#materials" data-section-link="materials">
-                <i class="fas fa-book-open"></i> Materials
+            <a class="ins_ws_nav_link" href="#materials" data-section-link="materials">
+                <i data-lucide="book-open"></i> Materials
             </a>
-            <a class="ins-flow-link" href="#assessments" data-section-link="assessments">
-                <i class="fas fa-tasks"></i> Assessments
+            <a class="ins_ws_nav_link" href="#assessments" data-section-link="assessments">
+                <i data-lucide="check-square"></i> Assessments
             </a>
-            <a class="ins-flow-link" href="#students" data-section-link="students">
-                <i class="fas fa-users"></i> Students
+            <a class="ins_ws_nav_link" href="#students" data-section-link="students">
+                <i data-lucide="users"></i> Students
             </a>
         </nav>
 
@@ -1152,73 +1425,73 @@
                 
                 <%-- TOP SECTION: COURSE DETAILS --%>
                 <section class="overview-top-section">
-                    <div class="overview-meta-chips">
-                        <div class="meta-badge-chip">
-                            <i class="fas fa-tag"></i>
+                    <div class="ins_ws_meta_chips">
+                        <div class="ins_ws_meta_pill">
+                            <i data-lucide="tag"></i>
                             <span>Category: <c:out value="${empty selectedCourse.category ? 'General' : selectedCourse.category}"/></span>
                         </div>
-                        <div class="meta-badge-chip">
-                            <i class="fas fa-signal"></i>
+                        <div class="ins_ws_meta_pill">
+                            <i data-lucide="bar-chart-2"></i>
                             <span>Level: <c:out value="${selectedCourse.level}"/></span>
                         </div>
-                        <div class="meta-badge-chip">
-                            <i class="fas fa-clock"></i>
+                        <div class="ins_ws_meta_pill">
+                            <i data-lucide="clock"></i>
                             <span>Duration: <c:out value="${selectedCourse.displayDuration}"/></span>
                         </div>
-                        <div class="meta-badge-chip">
-                            <i class="fas fa-calendar-alt"></i>
+                        <div class="ins_ws_meta_pill">
+                            <i data-lucide="calendar"></i>
                             <span>Updated: <c:out value="${not empty selectedCourse.updatedAt ? selectedCourse.updatedAt.toLocalDate() : (not empty selectedCourse.createdAt ? selectedCourse.createdAt.toLocalDate() : '-') }"/></span>
                         </div>
                     </div>
                     
                     <c:if test="${not empty selectedCourse.description}">
-                        <p class="overview-course-desc">
+                        <p class="ins_ws_desc">
                             <c:out value="${selectedCourse.description}"/>
                         </p>
                     </c:if>
                 </section>
 
                 <%-- MIDDLE SECTION: COURSE KPIS GRID --%>
-                <section class="overview-kpis-grid-modern">
+                <section class="ins_ws_kpi_grid">
                     <%-- KPI 1: Enrolled Students --%>
-                    <div class="kpi-card-modern">
-                        <div class="kpi-icon-wrapper students">
-                            <i class="fas fa-users"></i>
+                    <div class="ins_ws_kpi_card">
+                        <div class="ins_ws_kpi_icon students">
+                            <i data-lucide="users"></i>
                         </div>
-                        <div class="kpi-data-wrapper">
+                        <div class="ins_ws_kpi_data">
                             <strong><c:out value="${totalStudents}"/></strong>
                             <span>Total Enrolled Students</span>
                         </div>
                     </div>
 
                     <%-- KPI 2: Materials Uploaded --%>
-                    <div class="kpi-card-modern">
-                        <div class="kpi-icon-wrapper materials">
-                            <i class="fas fa-book-open"></i>
+                    <div class="ins_ws_kpi_card">
+                        <div class="ins_ws_kpi_icon materials">
+                            <i data-lucide="book-open"></i>
                         </div>
-                        <div class="kpi-data-wrapper">
+                        <div class="ins_ws_kpi_data">
                             <strong><c:out value="${publishedMaterials}"/></strong>
                             <span>Materials Uploaded</span>
                         </div>
                     </div>
 
                     <%-- KPI 3: Assessments Created --%>
-                    <div class="kpi-card-modern">
-                        <div class="kpi-icon-wrapper assessments">
-                            <i class="fas fa-tasks"></i>
+                    <div class="ins_ws_kpi_card">
+                        <div class="ins_ws_kpi_icon assessments">
+                            <i data-lucide="clipboard-list"></i>
                         </div>
-                        <div class="kpi-data-wrapper">
+                        <div class="ins_ws_kpi_data">
                             <strong><c:out value="${assessmentCount}"/></strong>
                             <span>Assessments Created</span>
                         </div>
                     </div>
 
                     <%-- KPI 4: Pending Submissions --%>
-                    <div class="kpi-card-modern">
-                        <div class="kpi-icon-wrapper pending">
-                            <i class="fas fa-file-signature"></i>
+                    <div class="ins_ws_kpi_card">
+                        <div class="ins_ws_kpi_icon pending">
+                            <i data-lucide="file-text"></i>
                         </div>
-                        <div class="kpi-data-wrapper">
+                        <div class="ins_ws_kpi_data">
                             <strong style="color: ${pendingGrading > 0 ? 'var(--ws-danger, #ef4444)' : 'inherit'}"><c:out value="${pendingGrading}"/></strong>
                             <span>Pending Submissions</span>
                         </div>
@@ -1226,19 +1499,19 @@
                 </section>
 
                 <%-- BOTTOM SECTION: QUICK ACTIONS --%>
-                <section class="overview-actions-section">
-                    <h3>Quick Actions</h3>
-                    <div class="overview-actions-grid">
-                        <button onclick="openUploadModal()" class="action-pill-btn" style="cursor: pointer;">
-                            <i class="fas fa-upload"></i>
+                <section class="ins_ws_actions_sec">
+                    <h3 class="ins_ws_actions_title">Quick Actions</h3>
+                    <div class="ins_ws_actions_grid">
+                        <button onclick="openUploadModal()" class="ins_ws_action_btn">
+                            <i data-lucide="upload"></i>
                             <span>Upload New Material</span>
                         </button>
-                        <a href="${assessmentWorkspaceBaseUrl}&view=editor" class="action-pill-btn">
-                            <i class="fas fa-plus"></i>
+                        <a href="${assessmentWorkspaceBaseUrl}&view=editor" class="ins_ws_action_btn">
+                            <i data-lucide="plus"></i>
                             <span>Create Assessment</span>
                         </a>
-                        <a href="#students" class="action-pill-btn">
-                            <i class="fas fa-users"></i>
+                        <a href="#students" class="ins_ws_action_btn">
+                            <i data-lucide="users"></i>
                             <span>View Roster</span>
                         </a>
                     </div>
