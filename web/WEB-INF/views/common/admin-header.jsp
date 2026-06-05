@@ -4,7 +4,10 @@
 
 <c:set var="headerUser" value="${empty user ? sessionScope.user : user}"/>
 <c:set var="headerProfilePicture" value="${not empty headerUser ? headerUser.profilePicture : null}"/>
-<c:set var="currentPath" value="${pageContext.request.requestURI}"/>
+<c:set var="currentPath" value="${requestScope['javax.servlet.forward.request_uri']}"/>
+<c:if test="${empty currentPath}">
+    <c:set var="currentPath" value="${pageContext.request.requestURI}"/>
+</c:if>
 <c:set var="topbarNotificationCount" value="${not empty notificationCount ? notificationCount : 0}"/>
 <c:set var="topbarUserName" value="${not empty headerUser.fullName ? headerUser.fullName : 'Admin'}"/>
 <c:set var="topbarInitialOne" value="${fn:length(topbarUserName) > 0 ? fn:substring(topbarUserName, 0, 1) : 'A'}"/>

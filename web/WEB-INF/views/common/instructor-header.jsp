@@ -4,7 +4,10 @@
 
 <c:set var="headerUser" value="${empty user ? sessionScope.user : user}"/>
 <c:set var="headerProfilePicture" value="${not empty headerUser ? headerUser.profilePicture : null}"/>
-<c:set var="currentPath" value="${pageContext.request.requestURI}"/>
+<c:set var="currentPath" value="${requestScope['javax.servlet.forward.request_uri']}"/>
+<c:if test="${empty currentPath}">
+    <c:set var="currentPath" value="${pageContext.request.requestURI}"/>
+</c:if>
 <c:set var="resolvedInstructorTitle" value="Instructor"/>
 <c:set var="resolvedInstructorSubtitle" value="Manage your courses and student progress"/>
 

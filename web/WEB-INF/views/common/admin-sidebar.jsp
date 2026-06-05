@@ -2,7 +2,10 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
-<c:set var="currentPath" value="${pageContext.request.requestURI}"/>
+<c:set var="currentPath" value="${requestScope['javax.servlet.forward.request_uri']}"/>
+<c:if test="${empty currentPath}">
+    <c:set var="currentPath" value="${pageContext.request.requestURI}"/>
+</c:if>
 
 <!-- Resolve active page from URL -->
 <c:set var="resolvedActivePage" value="dashboard"/>

@@ -3,7 +3,10 @@
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
 <c:set var="topbarProfilePicture" value="${not empty sessionScope.student.passportPath ? sessionScope.student.passportPath : null}"/>
-<c:set var="currentPath" value="${pageContext.request.requestURI}"/>
+<c:set var="currentPath" value="${requestScope['javax.servlet.forward.request_uri']}"/>
+<c:if test="${empty currentPath}">
+    <c:set var="currentPath" value="${pageContext.request.requestURI}"/>
+</c:if>
 <c:set var="resolvedStudentTitle" value="${not empty topbarTitle ? topbarTitle : 'Student Workspace'}"/>
 <c:set var="resolvedTopbarContext" value="${not empty navContext ? navContext : 'default'}"/>
 <c:set var="topbarNotificationCount" value="${not empty unreadNotificationCount ? unreadNotificationCount : (not empty sessionScope.unreadNotifications ? sessionScope.unreadNotifications : 0)}"/>
