@@ -198,8 +198,16 @@
                                 </div>
                                 <span class="course-mini-label">Approved course</span>
                                 <h3><c:out value="${course.courseName}"/></h3>
-                                <p><c:out value="${course.category}"/> &middot; <fmt:formatNumber value="${course.courseFee}" type="number" minFractionDigits="2"/></p>
-                                <a href="${pageContext.request.contextPath}/student/courses">View details</a>
+                                <p><c:out value="${course.category}"/> &middot; ₦<fmt:formatNumber value="${course.courseFee}" type="number" minFractionDigits="2"/></p>
+                                <button type="button" class="btn btn-ghost course-details-btn" 
+                                        data-name="${fn:escapeXml(course.courseName)}"
+                                        data-category="${fn:escapeXml(course.category)}"
+                                        data-level="${fn:escapeXml(course.level)}"
+                                        data-duration="${fn:escapeXml(course.displayDuration)}"
+                                        data-fee="${course.courseFee}"
+                                        data-desc="${fn:escapeXml(course.description)}">
+                                    View Details
+                                </button>
                             </article>
                         </c:forEach>
                     </div>
@@ -344,15 +352,14 @@
                 <span class="brand-mark">PSM</span>
                 <span class="brand-text">E-Learning</span>
             </a>
-            <p>A simple place for students to learn, instructors to teach, and anyone to verify certificates.</p>
-            <p class="footer-note">Need help? Sign in for your account or verify a certificate publicly from the link below.</p>
+            <p>PSM E-Learning is a state-of-the-art virtual campus helping students acquire industry-relevant skills, enabling instructors to build structured curricula, and offering open cryptographic credential validation.</p>
+            <p class="footer-note">© 2026 PSM E-Learning. All rights reserved.</p>
         </div>
         <div>
-            <span class="footer-title">Explore</span>
-            <a href="#features">Features</a>
-                <a href="#courses">Courses</a>
-            <a href="#preview">Preview</a>
-            <a href="#stats">Trust</a>
+            <span class="footer-title">Contact Us</span>
+            <a href="mailto:support@psmels.software"><i class="fas fa-envelope" style="margin-right: 8px;"></i> support@psmels.software</a>
+            <span style="color: #94a3b8; font-size: 0.94rem;"><i class="fas fa-location-dot" style="margin-right: 8px;"></i> PSM Virtual Campus, HQ</span>
+            <span style="color: #94a3b8; font-size: 0.94rem;"><i class="fas fa-clock" style="margin-right: 8px;"></i> Mon - Fri, 9AM - 5PM</span>
         </div>
         <div>
             <span class="footer-title">Access</span>
@@ -362,6 +369,32 @@
         </div>
     </div>
 </footer>
+
+<!-- Public Course Details Modal -->
+<div id="courseDetailsModal" class="landing-modal" aria-hidden="true" role="dialog">
+    <div class="landing-modal-dialog">
+        <div class="landing-modal-header">
+            <h3 id="modalCourseName">Course Title</h3>
+            <button type="button" class="landing-modal-close" id="modalCloseBtn" aria-label="Close modal">&times;</button>
+        </div>
+        <div class="landing-modal-body">
+            <div class="landing-modal-meta-row">
+                <span id="modalCourseCategory" class="landing-modal-pill">Category</span>
+                <span id="modalCourseLevel" class="landing-modal-pill">Level</span>
+                <span id="modalCourseDuration" class="landing-modal-pill">Duration</span>
+                <span id="modalCourseFee" class="landing-modal-pill accent">Free</span>
+            </div>
+            <div>
+                <h4 style="margin: 0 0 8px 0; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b;">Course Syllabus & Overview</h4>
+                <p id="modalCourseDesc" class="landing-modal-desc">Course description goes here.</p>
+            </div>
+        </div>
+        <div class="landing-modal-footer">
+            <a href="${pageContext.request.contextPath}/login" class="btn btn-ghost">Sign In to Enroll</a>
+            <a href="${pageContext.request.contextPath}/register" class="btn btn-solid">Register Account</a>
+        </div>
+    </div>
+</div>
 
 <script src="${pageContext.request.contextPath}/js/landing.js"></script>
 </body>

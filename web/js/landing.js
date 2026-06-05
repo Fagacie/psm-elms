@@ -155,13 +155,80 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
+    // Public Course Details Modal handlers
+    var courseDetailsModal = document.getElementById('courseDetailsModal');
+    var modalCloseBtn = document.getElementById('modalCloseBtn');
+    var courseDetailsBtns = document.querySelectorAll('.course-details-btn');
+
+    function openCourseModal(btn) {
+        if (!courseDetailsModal) return;
+        
+        var name = btn.getAttribute('data-name') || '';
+        var category = btn.getAttribute('data-category') || '';
+        var level = btn.getAttribute('data-level') || '';
+        var duration = btn.getAttribute('data-duration') || '';
+        var feeVal = parseFloat(btn.getAttribute('data-fee')) || 0;
+        var desc = btn.getAttribute('data-desc') || '';
+
+        var nameEl = document.getElementById('modalCourseName');
+        var categoryEl = document.getElementById('modalCourseCategory');
+        var levelEl = document.getElementById('modalCourseLevel');
+        var durationEl = document.getElementById('modalCourseDuration');
+        var feeEl = document.getElementById('modalCourseFee');
+        var descEl = document.getElementById('modalCourseDesc');
+
+        if (nameEl) nameEl.textContent = name;
+        if (categoryEl) categoryEl.textContent = category;
+        if (levelEl) levelEl.textContent = level;
+        if (durationEl) durationEl.textContent = duration;
+        
+        if (feeEl) {
+            if (feeVal <= 0) {
+                feeEl.textContent = 'Free';
+            } else {
+                feeEl.textContent = '₦' + feeVal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            }
+        }
+        
+        if (descEl) descEl.textContent = desc;
+
+        courseDetailsModal.classList.add('is-open');
+        courseDetailsModal.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('landing-modal-open');
+    }
+
+    function closeCourseModal() {
+        if (!courseDetailsModal) return;
+        courseDetailsModal.classList.remove('is-open');
+        courseDetailsModal.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('landing-modal-open');
+    }
+
+    courseDetailsBtns.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            openCourseModal(btn);
+        });
+    });
+
+    if (modalCloseBtn) {
+        modalCloseBtn.addEventListener('click', closeCourseModal);
+    }
+
+    if (courseDetailsModal) {
+        courseDetailsModal.addEventListener('click', function (event) {
+            if (event.target === courseDetailsModal) {
+                closeCourseModal();
+            }
+        });
+    }
+
     window.addEventListener('scroll', function () {
         setHeaderState();
         updateActiveLink();
     }, { passive: true });
 
     window.addEventListener('resize', function () {
-        if (window.innerWidth > 760) closeMenu();
+        if (window.innerWidth > 1024) closeMenu();
     });
 
     setHeaderState();
