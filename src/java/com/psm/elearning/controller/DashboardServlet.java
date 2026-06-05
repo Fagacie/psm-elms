@@ -313,6 +313,17 @@ public class DashboardServlet extends HttpServlet {
                 int progressSum = 0;
                 int progressCount = 0;
 
+                // Dynamic metric variables for KPI and Donuts
+                double instructorRevenue = 0.0;
+                int newEnrollments30Days = 0;
+                double scoreSum = 0.0;
+                int scoreCount = 0;
+                int passedSubmissions = 0;
+                int failedSubmissions = 0;
+                int completedEnrollmentsCount = 0;
+                int inProgressEnrollmentsCount = 0;
+                int droppedEnrollmentsCount = 0;
+
                 Map<Integer, Integer> courseEnrollmentCountById = new LinkedHashMap<>();
                 Map<Integer, Integer> courseMaterialCountById = new LinkedHashMap<>();
                 Map<Integer, Integer> courseAssessmentCountById = new LinkedHashMap<>();
@@ -353,6 +364,27 @@ public class DashboardServlet extends HttpServlet {
                             progressSum += clamped;
                             progressCount++;
                         }
+
+                        // Calculate total revenue, new enrollments (30 days), and completion ratios
+                        String payStatus = enrollment.getPaymentStatus();
+                        if (payStatus != null && (payStatus.equalsIgnoreCase("paid") || payStatus.equalsIgnoreCase("success"))) {
+                            if (enrollment.getCoursePrice() != null) {
+                                instructorRevenue += enrollment.getCoursePrice();
+                            }
+                        }
+                        if (enrollment.getEnrollmentDate() != null && enrollment.getEnrollmentDate().isAfter(LocalDateTime.now().minusDays(30))) {
+                            newEnrollments30Days++;
+                        }
+                        
+                        String compStatus = enrollment.getCompletionStatus();
+                        String status = enrollment.getStatus();
+                        if ("Completed".equalsIgnoreCase(compStatus)) {
+                            completedEnrollmentsCount++;
+                        } else if ("Cancelled".equalsIgnoreCase(status)) {
+                            droppedEnrollmentsCount++;
+                        } else {
+                            inProgressEnrollmentsCount++;
+                        }
                     }
 
                     List<Material> courseMaterials = materialDAO.findByCourse(courseId);
@@ -377,12 +409,72 @@ public class DashboardServlet extends HttpServlet {
                             continue;
                         }
                         coursePendingSubmissions += countPendingGrading(assessment);
+
+                        // Fetch submissions to calculate average score and pass rate
+                        List<AssessmentSubmission> submissions = assessmentSubmissionDAO.findByAssessment(assessment.getAssessmentId());
+                        if (submissions != null) {
+                            for (AssessmentSubmission sub : submissions) {
+                                if (sub == null) continue;
+                                if ("Graded".equalsIgnoreCase(sub.getStatus()) && sub.getScore() != null) {
+                                    double maxMarks = (assessment.getTotalMarks() != null && assessment.getTotalMarks() > 0) ? assessment.getTotalMarks() : 100.0;
+                                    double pct = (sub.getScore() / maxMarks) * 100.0;
+                                    scoreSum += pct;
+                                    scoreCount++;
+                                    
+                                    if (pct >= 50.0) {
+                                        passedSubmissions++;
+                                    } else {
+                                        failedSubmissions++;
+                                    }
+                                }
+                            }
+                        }
                     }
                     pendingSubmissionsByCourseId.put(courseId, coursePendingSubmissions);
                     pendingGradingCount += coursePendingSubmissions;
                 }
 
                 int averageProgress = progressCount > 0 ? Math.round((float) progressSum / progressCount) : 0;
+                int averageAssessmentScore = scoreCount > 0 ? Math.round((float) scoreSum / scoreCount) : 0;
+
+                // Calculate monthly trends for the last 6 months dynamically
+                List<Map<String, Object>> monthlyTrends = new ArrayList<>();
+                LocalDate today = LocalDate.now();
+                for (int i = 5; i >= 0; i--) {
+                    LocalDate targetMonth = today.minusMonths(i);
+                    String monthLabel = targetMonth.getMonth().getDisplayName(java.time.format.TextStyle.SHORT, java.util.Locale.US);
+                    int year = targetMonth.getYear();
+                    String label = monthLabel + " " + year;
+                    
+                    double monthRevenue = 0.0;
+                    int monthEnrollments = 0;
+                    
+                    for (Course course : courses) {
+                        if (course == null || course.getCourseId() == null) continue;
+                        List<Enrollment> courseEnrollments = enrollmentDAO.getEnrollmentsByCourse(course.getCourseId());
+                        if (courseEnrollments != null) {
+                            for (Enrollment enrollment : courseEnrollments) {
+                                if (enrollment == null || enrollment.getEnrollmentDate() == null) continue;
+                                LocalDateTime enrollDateTime = enrollment.getEnrollmentDate();
+                                if (enrollDateTime.getYear() == year && enrollDateTime.getMonthValue() == targetMonth.getMonthValue()) {
+                                    monthEnrollments++;
+                                    String payStatus = enrollment.getPaymentStatus();
+                                    if (payStatus != null && (payStatus.equalsIgnoreCase("paid") || payStatus.equalsIgnoreCase("success"))) {
+                                        if (enrollment.getCoursePrice() != null) {
+                                            monthRevenue += enrollment.getCoursePrice();
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
+                    Map<String, Object> trendVal = new HashMap<>();
+                    trendVal.put("date", label);
+                    trendVal.put("enrollments", monthEnrollments);
+                    trendVal.put("revenue", monthRevenue);
+                    monthlyTrends.add(trendVal);
+                }
 
                 request.setAttribute("totalCourses", totalCourses);
                 request.setAttribute("totalStudents", totalStudents);
@@ -401,6 +493,18 @@ public class DashboardServlet extends HttpServlet {
                 request.setAttribute("courseAssessmentCountById", courseAssessmentCountById);
                 request.setAttribute("pendingSubmissionsByCourseId", pendingSubmissionsByCourseId);
                 request.setAttribute("courseStatusById", courseStatusById);
+
+                // Add the new metrics
+                request.setAttribute("totalRevenue", instructorRevenue);
+                request.setAttribute("newEnrollments30Days", newEnrollments30Days);
+                request.setAttribute("averageAssessmentScore", averageAssessmentScore);
+                request.setAttribute("completedEnrollmentsCount", completedEnrollmentsCount);
+                request.setAttribute("inProgressEnrollmentsCount", inProgressEnrollmentsCount);
+                request.setAttribute("droppedEnrollmentsCount", droppedEnrollmentsCount);
+                request.setAttribute("passedSubmissions", passedSubmissions);
+                request.setAttribute("failedSubmissions", failedSubmissions);
+                request.setAttribute("monthlyTrends", monthlyTrends);
+
                 // Notification bell for instructor
                 try {
                     int unreadCount = notificationDAO.countUnreadByRecipientUserId(userId);

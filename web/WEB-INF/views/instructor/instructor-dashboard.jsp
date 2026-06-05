@@ -53,19 +53,28 @@
                     <script type="text/javascript">
                         window.__CONTEXT_PATH__ = "${pageContext.request.contextPath}";
                         window.__INSTRUCTOR_NAME__ = "${not empty instructorName ? fn:escapeXml(instructorName) : fn:escapeXml(user.fullName)}";
-                        window.__METRICS__ = {
+                        window.__INSTRUCTOR_DASHBOARD_DATA__ = {
+                            totalRevenue: ${not empty totalRevenue ? totalRevenue : 0.0},
+                            newEnrollments: ${not empty newEnrollments30Days ? newEnrollments30Days : 0},
+                            avgScore: ${not empty averageAssessmentScore ? averageAssessmentScore : 0},
                             courseCount: ${not empty totalCourses ? totalCourses : 0},
-                            activeCourses: ${not empty activeCourses ? activeCourses : 0},
-                            studentCount: ${not empty totalStudents ? totalStudents : 0},
-                            totalEnrollments: ${not empty totalEnrollments ? totalEnrollments : 0},
-                            activeEnrollments: ${not empty activeEnrollments ? activeEnrollments : 0},
-                            pendingEnrollments: ${not empty pendingEnrollments ? pendingEnrollments : 0},
-                            pendingGrading: ${not empty pendingGradingCount ? pendingGradingCount : 0},
-                            publishedMaterials: ${not empty publishedMaterialsCount ? publishedMaterialsCount : 0},
-                            activeLearnersCount: ${not empty activeLearnersCount ? activeLearnersCount : 0},
-                            averageProgress: ${not empty averageProgress ? averageProgress : 0},
-                            missingMaterialsCourseCount: ${not empty missingMaterialsCourseCount ? missingMaterialsCourseCount : 0},
-                            dueSoon: ${not empty dueSoonAssessmentCount ? dueSoonAssessmentCount : 0}
+                            
+                            completedCount: ${not empty completedEnrollmentsCount ? completedEnrollmentsCount : 0},
+                            inProgressCount: ${not empty inProgressEnrollmentsCount ? inProgressEnrollmentsCount : 0},
+                            droppedCount: ${not empty droppedEnrollmentsCount ? droppedEnrollmentsCount : 0},
+                            
+                            passedSubmissions: ${not empty passedSubmissions ? passedSubmissions : 0},
+                            failedSubmissions: ${not empty failedSubmissions ? failedSubmissions : 0},
+                            
+                            monthlyTrends: [
+                                <c:forEach var="trend" items="${monthlyTrends}" varStatus="status">
+                                    {
+                                        date: "${fn:escapeXml(trend.date)}",
+                                        enrollments: ${trend.enrollments != null ? trend.enrollments : 0},
+                                        revenue: ${trend.revenue != null ? trend.revenue : 0.0}
+                                    }${not status.last ? ',' : ''}
+                                </c:forEach>
+                            ]
                         };
                         window.__COURSES__ = [
                             <c:forEach var="course" items="${courses}" varStatus="status">
@@ -88,7 +97,8 @@
                     <script type="text/babel">
                         const { useState, useEffect } = React;
                         const { 
-                            ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Cell 
+                            ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid,
+                            PieChart, Pie, Cell
                         } = window.Recharts || {};
 
                         // CSS Module class mappings
@@ -125,7 +135,11 @@
                             btnManage: 'ins_mod_123_btn_manage',
                             viewAllLink: 'ins_mod_123_view_all_link',
                             emptyState: 'ins_mod_123_empty_state',
-                            emptyIcon: 'ins_mod_123_empty_icon'
+                            emptyIcon: 'ins_mod_123_empty_icon',
+                            distributionGrid: 'ins_mod_123_distribution_grid',
+                            donutCard: 'ins_mod_123_donut_card',
+                            donutChartContainer: 'ins_mod_123_donut_chart_container',
+                            donutLegend: 'ins_mod_123_donut_legend'
                         };
 
                         // Scoped Motion Container supporting Framer Motion UMD and keyframe transition fallbacks
@@ -154,8 +168,11 @@
                             );
                         };
 
+                        const COMPLETION_COLORS = ['#10b981', '#3b82f6', '#ef4444']; // Completed, In Progress, Dropped
+                        const PASS_COLORS = ['#10b981', '#ef4444']; // Passed, Failed
+
                         function InstructorDashboard() {
-                            const [metrics] = useState(window.__METRICS__ || {});
+                            const [dashboardData] = useState(window.__INSTRUCTOR_DASHBOARD_DATA__ || {});
                             const [courses] = useState(window.__COURSES__ || []);
                             const [instructorName] = useState(window.__INSTRUCTOR_NAME__ || 'Instructor');
 
@@ -164,32 +181,18 @@
                                 if (window.lucide) {
                                     window.lucide.createIcons();
                                 }
-                            }, [courses]);
+                            }, [dashboardData, courses]);
 
-                            // Build chart data from real courses — per-course enrollment and pending grading counts
-                            const courseChartData = courses.map((c) => ({
-                                name: c.courseName.length > 18 ? c.courseName.substring(0, 18) + '…' : c.courseName,
-                                fullName: c.courseName,
-                                Enrolled: c.enrolledCount || 0,
-                                Pending: c.pendingGradingCount || 0
-                            }));
+                            const completionData = [
+                                { name: 'Completed', value: dashboardData.completedCount || 0 },
+                                { name: 'In Progress', value: dashboardData.inProgressCount || 0 },
+                                { name: 'Dropped', value: dashboardData.droppedCount || 0 }
+                            ];
 
-                            const CustomTooltip = ({ active, payload }) => {
-                                if (active && payload && payload.length) {
-                                    return (
-                                        <div className={styles.customTooltip}>
-                                            <p className={styles.tooltipLabel}>{payload[0].payload.fullName}</p>
-                                            {payload.map((entry, i) => (
-                                                <div key={i} className={styles.tooltipRow}>
-                                                    <span>{entry.name}</span>
-                                                    <span className={styles.tooltipVal} style={{ color: entry.color }}>{entry.value}</span>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    );
-                                }
-                                return null;
-                            };
+                            const passRateData = [
+                                { name: 'Passed', value: dashboardData.passedSubmissions || 0 },
+                                { name: 'Failed', value: dashboardData.failedSubmissions || 0 }
+                            ];
 
                             return (
                                 <div className={styles.container}>
@@ -199,7 +202,7 @@
                                         <p className={styles.sectionSubtitle} style={{ margin: 0 }}>Here is your teaching workspace at a glance.</p>
                                     </header>
 
-                                    {/* KPI Command Row — all data from backend */}
+                                    {/* Task 1: Top KPI Grid (E-Learning Metrics) */}
                                     <section className={styles.kpiRow}>
                                         <MotionDiv 
                                             initial={{ opacity: 0, y: 10 }}
@@ -208,12 +211,14 @@
                                             className={styles.kpiCard}
                                         >
                                             <div className={styles.kpiContent}>
-                                                <span className={styles.kpiNum}>{metrics.studentCount}</span>
-                                                <h4 className={styles.kpiLabel}>Total Students</h4>
-                                                <p className={styles.kpiDesc}>{metrics.activeLearnersCount} currently active learners</p>
+                                                <span className={styles.kpiNum}>
+                                                    ₦{(dashboardData.totalRevenue || 0).toLocaleString('en-NG', { maximumFractionDigits: 0 })}
+                                                </span>
+                                                <h4 className={styles.kpiLabel}>Total Revenue</h4>
+                                                <p className={styles.kpiDesc}>Gross billing across assigned courses</p>
                                             </div>
                                             <div className={styles.kpiIcon}>
-                                                <i data-lucide="users" style={{ width: '20px', height: '20px' }}></i>
+                                                <i data-lucide="dollar-sign" style={{ width: '20px', height: '20px' }}></i>
                                             </div>
                                         </MotionDiv>
 
@@ -224,12 +229,12 @@
                                             className={styles.kpiCard}
                                         >
                                             <div className={styles.kpiContent}>
-                                                <span className={styles.kpiNum} style={{ color: metrics.pendingGrading > 0 ? '#f59e0b' : '#0f172a' }}>{metrics.pendingGrading}</span>
-                                                <h4 className={styles.kpiLabel}>Submissions to Grade</h4>
-                                                <p className={styles.kpiDesc}>Assessments awaiting your review</p>
+                                                <span className={styles.kpiNum}>{dashboardData.newEnrollments}</span>
+                                                <h4 className={styles.kpiLabel}>New Enrollments</h4>
+                                                <p className={styles.kpiDesc}>Admissions during the last 30 days</p>
                                             </div>
                                             <div className={styles.kpiIcon}>
-                                                <i data-lucide="file-spreadsheet" style={{ width: '20px', height: '20px' }}></i>
+                                                <i data-lucide="users" style={{ width: '20px', height: '20px' }}></i>
                                             </div>
                                         </MotionDiv>
 
@@ -240,12 +245,12 @@
                                             className={styles.kpiCard}
                                         >
                                             <div className={styles.kpiContent}>
-                                                <span className={styles.kpiNum}>{metrics.courseCount}</span>
-                                                <h4 className={styles.kpiLabel}>Total Courses</h4>
-                                                <p className={styles.kpiDesc}>{metrics.activeCourses} approved &amp; live</p>
+                                                <span className={styles.kpiNum}>{dashboardData.avgScore}%</span>
+                                                <h4 className={styles.kpiLabel}>Avg Assessment Score</h4>
+                                                <p className={styles.kpiDesc}>Mean score across graded attempts</p>
                                             </div>
                                             <div className={styles.kpiIcon}>
-                                                <i data-lucide="book-open" style={{ width: '20px', height: '20px' }}></i>
+                                                <i data-lucide="award" style={{ width: '20px', height: '20px' }}></i>
                                             </div>
                                         </MotionDiv>
 
@@ -256,62 +261,148 @@
                                             className={styles.kpiCard}
                                         >
                                             <div className={styles.kpiContent}>
-                                                <span className={styles.kpiNum}>{metrics.publishedMaterials}</span>
-                                                <h4 className={styles.kpiLabel}>Published Materials</h4>
-                                                <p className={styles.kpiDesc}>{metrics.missingMaterialsCourseCount > 0 ? metrics.missingMaterialsCourseCount + ' course(s) need content' : 'All courses have content'}</p>
+                                                <span className={styles.kpiNum}>{dashboardData.courseCount}</span>
+                                                <h4 className={styles.kpiLabel}>Assigned Courses</h4>
+                                                <p className={styles.kpiDesc}>Total course programs under your workspace</p>
                                             </div>
                                             <div className={styles.kpiIcon}>
-                                                <i data-lucide="file-text" style={{ width: '20px', height: '20px' }}></i>
+                                                <i data-lucide="book-open" style={{ width: '20px', height: '20px' }}></i>
                                             </div>
                                         </MotionDiv>
                                     </section>
 
-                                    {/* Per-Course Analytics Chart — real data from backend */}
-                                    {window.Recharts && courseChartData.length > 0 && (
+                                    {/* Task 2: The Main Trend Chart (Enrollments & Revenue) */}
+                                    {window.Recharts && (dashboardData.monthlyTrends || []).length > 0 && (
                                         <section className={styles.chartCard}>
                                             <div className={styles.chartHeader}>
                                                 <div>
-                                                    <h3 className={styles.sectionTitle} style={{ fontSize: '1.25rem' }}>Course Analytics</h3>
-                                                    <p className={styles.sectionSubtitle} style={{ margin: 0 }}>Enrollment count and pending submissions per course</p>
+                                                    <h3 className={styles.sectionTitle} style={{ fontSize: '1.25rem' }}>Enrollment & Revenue Trends</h3>
+                                                    <p className={styles.sectionSubtitle} style={{ margin: 0 }}>Monthly aggregation over the last 6 months</p>
                                                 </div>
                                                 <div className={styles.chartLegend}>
                                                     <div className={styles.legendItem}>
                                                         <span className={styles.legendDotPrimary}></span>
-                                                        <span>Enrolled</span>
+                                                        <span>Enrollments</span>
                                                     </div>
                                                     <div className={styles.legendItem}>
                                                         <span className={styles.legendDotAccent}></span>
-                                                        <span>Pending Grading</span>
+                                                        <span>Revenue</span>
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div style={{ width: '100%', height: Math.max(260, courseChartData.length * 50) + 'px', padding: '0 10px' }}>
+                                            <div style={{ width: '100%', height: '320px', padding: '0 10px' }}>
                                                 <ResponsiveContainer width="100%" height="100%">
-                                                    <BarChart data={courseChartData} layout="vertical" margin={{ top: 10, right: 30, left: 10, bottom: 0 }}>
-                                                        <CartesianGrid horizontal={false} strokeDasharray="3 3" stroke="#f1f5f9" />
-                                                        <XAxis type="number" stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} />
-                                                        <YAxis dataKey="name" type="category" stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} width={140} />
-                                                        <Tooltip content={<CustomTooltip />} />
-                                                        <Bar dataKey="Enrolled" fill="#6366f1" radius={[0, 4, 4, 0]} barSize={16} />
-                                                        <Bar dataKey="Pending" fill="#f59e0b" radius={[0, 4, 4, 0]} barSize={16} />
-                                                    </BarChart>
+                                                    <AreaChart data={dashboardData.monthlyTrends} margin={{ top: 10, right: 30, left: 10, bottom: 0 }}>
+                                                        <defs>
+                                                            <linearGradient id="colorEnrollments" x1="0" y1="0" x2="0" y2="1">
+                                                                <stop offset="5%" stopColor="#6366f1" stopOpacity={0.15}/>
+                                                                <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
+                                                            </linearGradient>
+                                                            <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                                                                <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.15}/>
+                                                                <stop offset="95%" stopColor="#f59e0b" stopOpacity={0}/>
+                                                            </linearGradient>
+                                                        </defs>
+                                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" opacity={0.5} />
+                                                        <XAxis dataKey="date" stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} />
+                                                        <YAxis yAxisId="left" stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} />
+                                                        <YAxis yAxisId="right" orientation="right" stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => '₦' + v.toLocaleString()} />
+                                                        <Tooltip 
+                                                            contentStyle={{ backgroundColor: '#ffffff', borderRadius: '10px', border: '1px solid #f1f5f9', boxShadow: '0 4px 12px rgba(15, 23, 42, 0.08)' }}
+                                                            formatter={(value, name) => {
+                                                                if (name === "Revenue") return ['₦' + value.toLocaleString(), 'Revenue'];
+                                                                return [value, 'Enrollments'];
+                                                            }}
+                                                        />
+                                                        <Area yAxisId="left" type="monotone" dataKey="enrollments" name="Enrollments" stroke="#6366f1" strokeWidth={2.5} fillOpacity={1} fill="url(#colorEnrollments)" />
+                                                        <Area yAxisId="right" type="monotone" dataKey="revenue" name="Revenue" stroke="#f59e0b" strokeWidth={2.5} fillOpacity={1} fill="url(#colorRevenue)" />
+                                                    </AreaChart>
                                                 </ResponsiveContainer>
                                             </div>
                                         </section>
                                     )}
 
-                                    {/* Average student progress indicator */}
-                                    {metrics.totalEnrollments > 0 && (
-                                        <section className={styles.chartCard} style={{ padding: '24px 32px' }}>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                                                <div>
-                                                    <h3 className={styles.sectionTitle} style={{ fontSize: '1.15rem', margin: 0 }}>Average Student Progress</h3>
-                                                    <p className={styles.sectionSubtitle} style={{ margin: '4px 0 0 0' }}>Across {metrics.totalEnrollments} total enrollment(s)</p>
+                                    {/* Task 3: Bottom Insights (Donut Charts) */}
+                                    {window.Recharts && (
+                                        <section className={styles.distributionGrid}>
+                                            {/* Donut 1: Course Completion */}
+                                            <div className={styles.donutCard}>
+                                                <div className={styles.chartHeader} style={{ marginBottom: '12px' }}>
+                                                    <div>
+                                                        <h3 className={styles.sectionTitle} style={{ fontSize: '1.15rem', margin: 0 }}>Course Completion Ratios</h3>
+                                                        <p className={styles.sectionSubtitle} style={{ margin: '4px 0 0 0' }}>Student state mapping across active courses</p>
+                                                    </div>
                                                 </div>
-                                                <span className={styles.kpiNum} style={{ fontSize: '1.75rem' }}>{metrics.averageProgress}%</span>
+                                                <div className={styles.donutChartContainer}>
+                                                    <ResponsiveContainer width="100%" height="100%">
+                                                        <PieChart>
+                                                            <Pie
+                                                                data={completionData}
+                                                                cx="50%"
+                                                                cy="50%"
+                                                                innerRadius={60}
+                                                                outerRadius={80}
+                                                                paddingAngle={4}
+                                                                dataKey="value"
+                                                            >
+                                                                {completionData.map((entry, index) => (
+                                                                    <Cell key={`cell-${index}`} fill={COMPLETION_COLORS[index % COMPLETION_COLORS.length]} />
+                                                                ))}
+                                                            </Pie>
+                                                            <Tooltip 
+                                                                contentStyle={{ backgroundColor: '#ffffff', borderRadius: '10px', border: '1px solid #f1f5f9', boxShadow: '0 4px 12px rgba(15, 23, 42, 0.08)' }}
+                                                            />
+                                                        </PieChart>
+                                                    </ResponsiveContainer>
+                                                </div>
+                                                <div className={styles.donutLegend}>
+                                                    {completionData.map((entry, idx) => (
+                                                        <div key={idx} className={styles.legendItem}>
+                                                            <span className="ins_mod_123_legend_dot" style={{ backgroundColor: COMPLETION_COLORS[idx % COMPLETION_COLORS.length], width: '8px', height: '8px', borderRadius: '50%', display: 'inline-block' }}></span>
+                                                            <span>{entry.name}: {entry.value}</span>
+                                                        </div>
+                                                    ))}
+                                                </div>
                                             </div>
-                                            <div style={{ width: '100%', height: '8px', borderRadius: '999px', background: '#f1f5f9', overflow: 'hidden' }}>
-                                                <div style={{ width: `${metrics.averageProgress}%`, height: '100%', borderRadius: '999px', background: 'linear-gradient(90deg, #6366f1, #818cf8)', transition: 'width 0.6s ease' }}></div>
+
+                                            {/* Donut 2: Assessment Pass Rate */}
+                                            <div className={styles.donutCard}>
+                                                <div className={styles.chartHeader} style={{ marginBottom: '12px' }}>
+                                                    <div>
+                                                        <h3 className={styles.sectionTitle} style={{ fontSize: '1.15rem', margin: 0 }}>Assessment Pass Rate</h3>
+                                                        <p className={styles.sectionSubtitle} style={{ margin: '4px 0 0 0' }}>Ratio of passed vs failed submissions</p>
+                                                    </div>
+                                                </div>
+                                                <div className={styles.donutChartContainer}>
+                                                    <ResponsiveContainer width="100%" height="100%">
+                                                        <PieChart>
+                                                            <Pie
+                                                                data={passRateData}
+                                                                cx="50%"
+                                                                cy="50%"
+                                                                innerRadius={60}
+                                                                outerRadius={80}
+                                                                paddingAngle={4}
+                                                                dataKey="value"
+                                                            >
+                                                                {passRateData.map((entry, index) => (
+                                                                    <Cell key={`cell-${index}`} fill={PASS_COLORS[index % PASS_COLORS.length]} />
+                                                                ))}
+                                                            </Pie>
+                                                            <Tooltip 
+                                                                contentStyle={{ backgroundColor: '#ffffff', borderRadius: '10px', border: '1px solid #f1f5f9', boxShadow: '0 4px 12px rgba(15, 23, 42, 0.08)' }}
+                                                            />
+                                                        </PieChart>
+                                                    </ResponsiveContainer>
+                                                </div>
+                                                <div className={styles.donutLegend}>
+                                                    {passRateData.map((entry, idx) => (
+                                                        <div key={idx} className={styles.legendItem}>
+                                                            <span className="ins_mod_123_legend_dot" style={{ backgroundColor: PASS_COLORS[idx % PASS_COLORS.length], width: '8px', height: '8px', borderRadius: '50%', display: 'inline-block' }}></span>
+                                                            <span>{entry.name}: {entry.value}</span>
+                                                        </div>
+                                                    ))}
+                                                </div>
                                             </div>
                                         </section>
                                     )}

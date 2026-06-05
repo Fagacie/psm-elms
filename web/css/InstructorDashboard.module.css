@@ -418,3 +418,52 @@
     color: #818cf8;
     background: rgba(129, 140, 248, 0.08);
 }
+
+/* Scoped styles for Redesigned Charts */
+.ins_mod_123_distribution_grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+    width: 100%;
+}
+
+@media (max-width: 768px) {
+    .ins_mod_123_distribution_grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.ins_mod_123_donut_card {
+    background: #ffffff;
+    border-radius: 16px;
+    border: none;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    padding: 32px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+[data-theme="dark"] .ins_mod_123_donut_card {
+    background-color: #1e293b;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+}
+
+.ins_mod_123_donut_chart_container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    height: 240px;
+    width: 100%;
+}
+
+.ins_mod_123_donut_legend {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+}
+
