@@ -20,6 +20,8 @@ RUN mkdir -p build/web/WEB-INF/classes build/web/WEB-INF/lib build/web/WEB-INF/c
     && cp -R web/. build/web/ \
     && cp -R lib/. build/web/WEB-INF/lib/ \
     && cp db/schema.sql build/web/WEB-INF/classes/db/schema.sql \
+    && cp db/migration_db_cleanup.sql build/web/WEB-INF/classes/db/migration_db_cleanup.sql 2>/dev/null || true \
+    && cp db/migration_performance_indexes.sql build/web/WEB-INF/classes/db/migration_performance_indexes.sql 2>/dev/null || true \
     && cp src/conf/*.properties build/web/WEB-INF/classes/ 2>/dev/null || true \
     && cp src/conf/logback.xml build/web/WEB-INF/classes/ 2>/dev/null || true \
     && find src/java -name '*.java' > sources.txt \

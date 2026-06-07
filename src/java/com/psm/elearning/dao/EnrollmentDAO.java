@@ -85,6 +85,30 @@ public interface EnrollmentDAO {
      * @return List of Enrollment objects with student information
      */
     List<Enrollment> getEnrollmentsByCourse(Integer courseId);
+
+    /**
+     * Get all enrollments across every course owned by an instructor.
+     * @param instructorId Instructor user ID
+     * @return List of enrollments with student and course fee details
+     */
+    List<Enrollment> getEnrollmentsByInstructor(Integer instructorId);
+
+    /**
+     * Get the most recent enrollments with student and course details.
+     * @param limit Maximum rows to return
+     * @return Recent enrollments ordered by enrollment date descending
+     */
+    List<Enrollment> getRecentEnrollments(int limit);
+
+    /**
+     * Aggregate enrollment payment metrics for the admin dashboard.
+     */
+    EnrollmentPaymentSummary getEnrollmentPaymentSummary();
+
+    /**
+     * Daily enrollment counts and paid revenue for a date range (inclusive start, inclusive end).
+     */
+    List<DailyEnrollmentMetric> getDailyEnrollmentMetrics(java.time.LocalDate startDate, java.time.LocalDate endDate);
     
     /**
      * Count total students enrolled in any course created by an instructor.
@@ -129,6 +153,51 @@ public interface EnrollmentDAO {
      * @return true if updated successfully, false otherwise
      */
     boolean updateExpiryDateOverride(Integer enrollmentId, LocalDateTime expiryDateOverride);
+
+    /**
+     * Aggregate payment counts and revenue for admin dashboards.
+     */
+    class EnrollmentPaymentSummary {
+        private final int totalEnrollments;
+        private final int paidEnrollments;
+        private final int pendingEnrollments;
+        private final int cancelledEnrollments;
+        private final double totalRevenue;
+
+        public EnrollmentPaymentSummary(int totalEnrollments, int paidEnrollments, int pendingEnrollments,
+                                        int cancelledEnrollments, double totalRevenue) {
+            this.totalEnrollments = totalEnrollments;
+            this.paidEnrollments = paidEnrollments;
+            this.pendingEnrollments = pendingEnrollments;
+            this.cancelledEnrollments = cancelledEnrollments;
+            this.totalRevenue = totalRevenue;
+        }
+
+        public int getTotalEnrollments() { return totalEnrollments; }
+        public int getPaidEnrollments() { return paidEnrollments; }
+        public int getPendingEnrollments() { return pendingEnrollments; }
+        public int getCancelledEnrollments() { return cancelledEnrollments; }
+        public double getTotalRevenue() { return totalRevenue; }
+    }
+
+    /**
+     * Per-day enrollment activity for dashboard charts.
+     */
+    class DailyEnrollmentMetric {
+        private final java.time.LocalDate date;
+        private final int enrollmentCount;
+        private final double revenue;
+
+        public DailyEnrollmentMetric(java.time.LocalDate date, int enrollmentCount, double revenue) {
+            this.date = date;
+            this.enrollmentCount = enrollmentCount;
+            this.revenue = revenue;
+        }
+
+        public java.time.LocalDate getDate() { return date; }
+        public int getEnrollmentCount() { return enrollmentCount; }
+        public double getRevenue() { return revenue; }
+    }
 }
 
 

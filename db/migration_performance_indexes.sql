@@ -1,0 +1,9 @@
+-- Performance indexes for common dashboard and activity queries (idempotent via SchemaSqlRunner error handling)
+
+CREATE INDEX idx_notification_recipient_read ON Notification (RecipientUserID, IsRead);
+CREATE INDEX idx_material_progress_user_viewed ON MaterialProgress (UserID, ViewedAt);
+CREATE INDEX idx_submission_user_submit_date ON AssessmentSubmission (UserID, SubmitDate);
+CREATE INDEX idx_user_role ON User (Role);
+CREATE INDEX idx_user_created_at ON User (CreatedAt);
+CREATE INDEX idx_enrollment_enrollment_date ON Enrollment (EnrollmentDate);
+CREATE INDEX idx_course_instructor_status ON Course (InstructorID, Status);

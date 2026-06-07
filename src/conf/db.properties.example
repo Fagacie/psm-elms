@@ -12,8 +12,9 @@ db.url=jdbc:mysql://localhost:3306/psm_elearning?useSSL=false&serverTimezone=UTC
 db.username=root
 db.password=your_database_password_here
 
-# Connection Pool Settings (Optional - for future implementation)
-db.pool.initialSize=5
+# HikariCP Connection Pool Settings
 db.pool.maxActive=20
-db.pool.maxIdle=10
 db.pool.minIdle=5
+db.pool.connectionTimeout=30000
+db.pool.idleTimeout=600000
+db.pool.maxLifetime=1800000

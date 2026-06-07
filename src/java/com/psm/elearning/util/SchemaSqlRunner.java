@@ -18,6 +18,10 @@ import javax.servlet.ServletContext;
 public class SchemaSqlRunner {
 
     public static boolean runFromClasspath(String resourcePath) {
+        if ("db/schema.sql".equals(resourcePath) && isSchemaAlreadyApplied()) {
+            System.out.println("SchemaSqlRunner skipped db/schema.sql because core tables already exist");
+            return true;
+        }
         try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream(resourcePath)) {
             if (in == null) {
                 return false;
@@ -91,6 +95,17 @@ public class SchemaSqlRunner {
             }
         } catch (SQLException e) {
             System.err.println("SchemaSqlRunner connection error: " + e.getMessage());
+        }
+    }
+
+    private static boolean isSchemaAlreadyApplied() {
+        try (Connection conn = DBConnection.getConnection();
+             java.sql.PreparedStatement ps = conn.prepareStatement(
+                     "SELECT 1 FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = 'User' LIMIT 1");
+             java.sql.ResultSet rs = ps.executeQuery()) {
+            return rs.next();
+        } catch (SQLException e) {
+            return false;
         }
     }
 }

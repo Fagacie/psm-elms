@@ -27,6 +27,7 @@ public class AppInitializer implements ServletContextListener {
                     "/WEB-INF/classes/db/migration_db_cleanup.sql",
                     "/WEB-INF/db/migration_db_cleanup.sql");
         }
+        SchemaSqlRunner.runFromClasspath("db/migration_performance_indexes.sql");
         if (!schemaApplied) {
             System.out.println("AppInitializer: schema runner skipped because no packaged schema.sql was found.");
         }

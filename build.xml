@@ -76,6 +76,7 @@
             <fileset dir="${basedir}/db">
                 <include name="schema.sql"/>
                 <include name="migration_db_cleanup.sql"/>
+                <include name="migration_performance_indexes.sql"/>
             </fileset>
         </copy>
         <echo message="Copied db SQL files to WEB-INF/classes/db for startup migrations"/>

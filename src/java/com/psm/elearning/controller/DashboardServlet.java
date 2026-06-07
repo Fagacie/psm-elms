@@ -2,7 +2,6 @@ package com.psm.elearning.controller;
 
 import com.psm.elearning.dao.*;
 import com.psm.elearning.model.*;
-import com.psm.elearning.service.EnrollmentStateSyncService;
 import com.psm.elearning.util.SessionUtil;
 
 import javax.servlet.ServletException;
@@ -35,7 +34,6 @@ public class DashboardServlet extends HttpServlet {
     private MaterialDAO materialDAO;
     private AssessmentDAO assessmentDAO;
     private AssessmentSubmissionDAO assessmentSubmissionDAO;
-    private EnrollmentStateSyncService enrollmentStateSyncService;
 
     @Override
     public void init() throws ServletException {
@@ -49,7 +47,6 @@ public class DashboardServlet extends HttpServlet {
         materialDAO = new MaterialDAOImpl();
         assessmentDAO = new AssessmentDAOImpl();
         assessmentSubmissionDAO = new AssessmentSubmissionDAOImpl();
-        enrollmentStateSyncService = new EnrollmentStateSyncService();
     }
 
     @Override
@@ -90,7 +87,6 @@ public class DashboardServlet extends HttpServlet {
 
                 if (enrolledCourses != null) {
                     for (Enrollment enrollment : enrolledCourses) {
-                        enrollmentStateSyncService.syncEnrollmentState(enrollment);
                         String completion = enrollment.getCompletionStatus();
                         String status = enrollment.getStatus();
                         String payment = enrollment.getPaymentStatus();
@@ -148,144 +144,65 @@ public class DashboardServlet extends HttpServlet {
         // Route admins to admin dashboard
         if ("Admin".equals(role)) {
             try {
-                // Fetch all system metrics for the admin dashboard
                 Map<String, Object> systemMetrics = new HashMap<>();
-                
-                // Get all users
-                List<User> allUsers = userDAO.findAll();
-                systemMetrics.put("totalUsers", allUsers != null ? allUsers.size() : 0);
-                
-                // Count users by role
-                int studentsCount = 0;
-                int instructorsCount = 0;
-                int adminsCount = 0;
-                if (allUsers != null) {
-                    for (User u : allUsers) {
-                        if ("Student".equals(u.getRole())) studentsCount++;
-                        else if ("Instructor".equals(u.getRole())) instructorsCount++;
-                        else if ("Admin".equals(u.getRole())) adminsCount++;
-                    }
-                }
+
+                int studentsCount = userDAO.countByRoleAllStatuses("Student");
+                int instructorsCount = userDAO.countByRoleAllStatuses("Instructor");
+                int adminsCount = userDAO.countByRoleAllStatuses("Admin");
+                systemMetrics.put("totalUsers", userDAO.countAll());
                 systemMetrics.put("studentsCount", studentsCount);
                 systemMetrics.put("instructorsCount", instructorsCount);
                 systemMetrics.put("adminsCount", adminsCount);
                 request.setAttribute("notificationCount", notificationDAO.countUnreadByRecipientUserId(user.getUserId()));
-                
-                // Get all courses and count by status
-                List<Course> allCourses = courseDAO.findAll();
-                systemMetrics.put("activeCourses", allCourses != null ? allCourses.size() : 0);
-                
-                int approvedCourses = 0;
-                int pendingCourses = 0;
-                int archivedCourses = 0;
-                if (allCourses != null) {
-                    for (Course c : allCourses) {
-                        if ("Approved".equals(c.getStatus())) approvedCourses++;
-                        else if ("Pending".equals(c.getStatus())) pendingCourses++;
-                        else if ("Archived".equals(c.getStatus())) archivedCourses++;
-                    }
-                }
+
+                int approvedCourses = courseDAO.countByStatus("Approved");
+                int pendingCourses = courseDAO.countByStatus("Pending");
+                int archivedCourses = courseDAO.countByStatus("Archived");
+                systemMetrics.put("activeCourses", approvedCourses + pendingCourses + archivedCourses);
                 systemMetrics.put("approvedCourses", approvedCourses);
                 systemMetrics.put("pendingCourses", pendingCourses);
                 systemMetrics.put("archivedCourses", archivedCourses);
-                
-                // Get all enrollments and count by payment status
-                List<Enrollment> allEnrollments = enrollmentDAO.getAllEnrollments();
-                systemMetrics.put("totalEnrollments", allEnrollments != null ? allEnrollments.size() : 0);
-                
-                int paidEnrollments = 0;
-                int pendingEnrollments = 0;
-                int cancelledEnrollments = 0;
-                double totalRevenue = 0;
-                if (allEnrollments != null) {
-                    for (Enrollment e : allEnrollments) {
-                        String paymentStatus = e.getPaymentStatus();
-                        if (paymentStatus != null) {
-                        if (paymentStatus.equalsIgnoreCase("paid") || paymentStatus.equalsIgnoreCase("success")) {
-                                paidEnrollments++;
-                                if (e.getCoursePrice() != null) {
-                                    totalRevenue += e.getCoursePrice();
-                                }
-                            } else if (paymentStatus.equalsIgnoreCase("pending")) {
-                                pendingEnrollments++;
-                            } else if (paymentStatus.equalsIgnoreCase("failed") || paymentStatus.equalsIgnoreCase("cancelled")) {
-                                cancelledEnrollments++;
-                            }
-                        }
-                    }
-                }
-                systemMetrics.put("paidEnrollments", paidEnrollments);
-                systemMetrics.put("pendingEnrollments", pendingEnrollments);
-                systemMetrics.put("cancelledEnrollments", cancelledEnrollments);
-                systemMetrics.put("totalRevenue", totalRevenue);
-                
-                // Get performance stats for the last 7 days dynamically
+
+                EnrollmentDAO.EnrollmentPaymentSummary paymentSummary = enrollmentDAO.getEnrollmentPaymentSummary();
+                systemMetrics.put("totalEnrollments", paymentSummary.getTotalEnrollments());
+                systemMetrics.put("paidEnrollments", paymentSummary.getPaidEnrollments());
+                systemMetrics.put("pendingEnrollments", paymentSummary.getPendingEnrollments());
+                systemMetrics.put("cancelledEnrollments", paymentSummary.getCancelledEnrollments());
+                systemMetrics.put("totalRevenue", paymentSummary.getTotalRevenue());
+
+                LocalDate today = LocalDate.now();
+                LocalDate chartStart = today.minusDays(6);
+                List<EnrollmentDAO.DailyEnrollmentMetric> dailyMetrics =
+                        enrollmentDAO.getDailyEnrollmentMetrics(chartStart, today);
+                Map<LocalDate, Integer> registrationsByDate =
+                        userDAO.countRegistrationsByDate(chartStart, today);
+
                 List<Map<String, Object>> performanceStats = new ArrayList<>();
                 List<Map<String, Object>> platformGrowth = new ArrayList<>();
-                LocalDate today = LocalDate.now();
-                for (int i = 6; i >= 0; i--) {
-                    LocalDate date = today.minusDays(i);
-                    String dayLabel = date.getDayOfWeek().getDisplayName(java.time.format.TextStyle.SHORT, java.util.Locale.US);
-                    
-                    double revenue = 0.0;
-                    int count = 0;
-                    int newUsers = 0;
-                    
-                    if (allEnrollments != null) {
-                        for (Enrollment e : allEnrollments) {
-                            if (e.getEnrollmentDate() != null && e.getEnrollmentDate().toLocalDate().equals(date)) {
-                                count++;
-                                String payStatus = e.getPaymentStatus();
-                                if (payStatus != null && (payStatus.equalsIgnoreCase("paid") || payStatus.equalsIgnoreCase("success"))) {
-                                    if (e.getCoursePrice() != null) {
-                                        revenue += e.getCoursePrice();
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    
-                    if (allUsers != null) {
-                        for (User u : allUsers) {
-                            if (u.getCreatedAt() != null && u.getCreatedAt().toLocalDate().equals(date)) {
-                                newUsers++;
-                            }
-                        }
-                    }
-                    
+                for (EnrollmentDAO.DailyEnrollmentMetric metric : dailyMetrics) {
+                    LocalDate date = metric.getDate();
+                    String dayLabel = date.getDayOfWeek().getDisplayName(
+                            java.time.format.TextStyle.SHORT, java.util.Locale.US);
+
                     Map<String, Object> dayStat = new HashMap<>();
                     dayStat.put("day", dayLabel);
                     dayStat.put("dateLabel", date.toString());
-                    dayStat.put("revenue", revenue);
-                    dayStat.put("enrollments", count);
+                    dayStat.put("revenue", metric.getRevenue());
+                    dayStat.put("enrollments", metric.getEnrollmentCount());
                     performanceStats.add(dayStat);
-                    
+
                     Map<String, Object> dayGrowth = new HashMap<>();
                     dayGrowth.put("date", date.toString());
-                    dayGrowth.put("newUsers", newUsers);
-                    dayGrowth.put("platformRevenue", revenue);
+                    dayGrowth.put("newUsers", registrationsByDate.getOrDefault(date, 0));
+                    dayGrowth.put("platformRevenue", metric.getRevenue());
                     platformGrowth.add(dayGrowth);
                 }
                 request.setAttribute("performanceStats", performanceStats);
                 request.setAttribute("platformGrowth", platformGrowth);
-                
+
                 request.setAttribute("systemMetrics", systemMetrics);
                 request.setAttribute("adminName", user.getFullName());
-
-                List<Enrollment> recentEnrollments = new ArrayList<>();
-                if (allEnrollments != null) {
-                    recentEnrollments = new ArrayList<>(allEnrollments);
-                    recentEnrollments.sort((e1, e2) -> {
-                        if (e1.getEnrollmentDate() == null && e2.getEnrollmentDate() == null) return 0;
-                        if (e1.getEnrollmentDate() == null) return 1;
-                        if (e2.getEnrollmentDate() == null) return -1;
-                        return e2.getEnrollmentDate().compareTo(e1.getEnrollmentDate());
-                    });
-                    if (recentEnrollments.size() > 5) {
-                        recentEnrollments = recentEnrollments.subList(0, 5);
-                    }
-                }
-                request.setAttribute("recentEnrollments", recentEnrollments);
+                request.setAttribute("recentEnrollments", enrollmentDAO.getRecentEnrollments(5));
 
             } catch (Exception e) {
                 LOGGER.log(Level.SEVERE, "Failed to load admin dashboard metrics", e);
@@ -340,8 +257,21 @@ public class DashboardServlet extends HttpServlet {
                 Map<Integer, Integer> pendingSubmissionsByCourseId = new LinkedHashMap<>();
                 Map<Integer, String> courseStatusById = new LinkedHashMap<>();
 
-                LocalDateTime dueSoonCutoff = LocalDateTime.now().plusDays(7);
-                LocalDateTime now = LocalDateTime.now();
+                List<Enrollment> instructorEnrollments = enrollmentDAO.getEnrollmentsByInstructor(userId);
+                if (instructorEnrollments == null) {
+                    instructorEnrollments = new ArrayList<>();
+                }
+                Map<Integer, List<Enrollment>> enrollmentsByCourseId = new HashMap<>();
+                for (Enrollment enrollment : instructorEnrollments) {
+                    if (enrollment == null || enrollment.getCourseId() == null) {
+                        continue;
+                    }
+                    enrollmentsByCourseId
+                            .computeIfAbsent(enrollment.getCourseId(), ignored -> new ArrayList<>())
+                            .add(enrollment);
+                }
+
+                LocalDateTime thirtyDaysAgo = LocalDateTime.now().minusDays(30);
 
                 for (Course course : courses) {
                     if (course == null || course.getCourseId() == null) {
@@ -354,16 +284,9 @@ public class DashboardServlet extends HttpServlet {
                         activeCourses++;
                     }
 
-                    List<Enrollment> courseEnrollments = enrollmentDAO.getEnrollmentsByCourse(courseId);
-                    if (courseEnrollments == null) {
-                        courseEnrollments = new ArrayList<>();
-                    }
+                    List<Enrollment> courseEnrollments = enrollmentsByCourseId.getOrDefault(courseId, new ArrayList<>());
                     courseEnrollmentCountById.put(courseId, courseEnrollments.size());
                     for (Enrollment enrollment : courseEnrollments) {
-                        if (enrollment == null) {
-                            continue;
-                        }
-                        enrollmentStateSyncService.syncEnrollmentState(enrollment);
                         String enrollmentStatus = enrollment.getStatus();
                         if (Enrollment.STATUS_ENROLLED.equalsIgnoreCase(enrollmentStatus)
                                 || Enrollment.STATUS_ACTIVE.equalsIgnoreCase(enrollmentStatus)) {
@@ -375,17 +298,16 @@ public class DashboardServlet extends HttpServlet {
                             progressCount++;
                         }
 
-                        // Calculate total revenue, new enrollments (30 days), and completion ratios
                         String payStatus = enrollment.getPaymentStatus();
                         if (payStatus != null && (payStatus.equalsIgnoreCase("paid") || payStatus.equalsIgnoreCase("success"))) {
                             if (enrollment.getCoursePrice() != null) {
                                 instructorRevenue += enrollment.getCoursePrice();
                             }
                         }
-                        if (enrollment.getEnrollmentDate() != null && enrollment.getEnrollmentDate().isAfter(LocalDateTime.now().minusDays(30))) {
+                        if (enrollment.getEnrollmentDate() != null && enrollment.getEnrollmentDate().isAfter(thirtyDaysAgo)) {
                             newEnrollments30Days++;
                         }
-                        
+
                         String compStatus = enrollment.getCompletionStatus();
                         String status = enrollment.getStatus();
                         if ("Completed".equalsIgnoreCase(compStatus)) {
@@ -415,27 +337,32 @@ public class DashboardServlet extends HttpServlet {
 
                     int coursePendingSubmissions = 0;
                     for (Assessment assessment : courseAssessments) {
-                        if (assessment == null) {
+                        if (assessment == null || assessment.getAssessmentId() == null) {
                             continue;
                         }
-                        coursePendingSubmissions += countPendingGrading(assessment);
 
-                        // Fetch submissions to calculate average score and pass rate
-                        List<AssessmentSubmission> submissions = assessmentSubmissionDAO.findByAssessment(assessment.getAssessmentId());
-                        if (submissions != null) {
-                            for (AssessmentSubmission sub : submissions) {
-                                if (sub == null) continue;
-                                if ("Graded".equalsIgnoreCase(sub.getStatus()) && sub.getScore() != null) {
-                                    double maxMarks = (assessment.getTotalMarks() != null && assessment.getTotalMarks() > 0) ? assessment.getTotalMarks() : 100.0;
-                                    double pct = (sub.getScore() / maxMarks) * 100.0;
-                                    scoreSum += pct;
-                                    scoreCount++;
-                                    
-                                    if (pct >= 50.0) {
-                                        passedSubmissions++;
-                                    } else {
-                                        failedSubmissions++;
-                                    }
+                        List<AssessmentSubmission> submissions =
+                                assessmentSubmissionDAO.findByAssessment(assessment.getAssessmentId());
+                        if (submissions == null) {
+                            submissions = new ArrayList<>();
+                        }
+                        coursePendingSubmissions += countPendingGradingFromSubmissions(submissions);
+
+                        double maxMarks = (assessment.getTotalMarks() != null && assessment.getTotalMarks() > 0)
+                                ? assessment.getTotalMarks() : 100.0;
+                        for (AssessmentSubmission sub : submissions) {
+                            if (sub == null) {
+                                continue;
+                            }
+                            if ("Graded".equalsIgnoreCase(sub.getStatus()) && sub.getScore() != null) {
+                                double pct = (sub.getScore() / maxMarks) * 100.0;
+                                scoreSum += pct;
+                                scoreCount++;
+
+                                if (pct >= 50.0) {
+                                    passedSubmissions++;
+                                } else {
+                                    failedSubmissions++;
                                 }
                             }
                         }
@@ -447,38 +374,35 @@ public class DashboardServlet extends HttpServlet {
                 int averageProgress = progressCount > 0 ? Math.round((float) progressSum / progressCount) : 0;
                 int averageAssessmentScore = scoreCount > 0 ? Math.round((float) scoreSum / scoreCount) : 0;
 
-                // Calculate monthly trends for the last 6 months dynamically
                 List<Map<String, Object>> monthlyTrends = new ArrayList<>();
                 LocalDate today = LocalDate.now();
                 for (int i = 5; i >= 0; i--) {
                     LocalDate targetMonth = today.minusMonths(i);
-                    String monthLabel = targetMonth.getMonth().getDisplayName(java.time.format.TextStyle.SHORT, java.util.Locale.US);
+                    String monthLabel = targetMonth.getMonth().getDisplayName(
+                            java.time.format.TextStyle.SHORT, java.util.Locale.US);
                     int year = targetMonth.getYear();
                     String label = monthLabel + " " + year;
-                    
+
                     double monthRevenue = 0.0;
                     int monthEnrollments = 0;
-                    
-                    for (Course course : courses) {
-                        if (course == null || course.getCourseId() == null) continue;
-                        List<Enrollment> courseEnrollments = enrollmentDAO.getEnrollmentsByCourse(course.getCourseId());
-                        if (courseEnrollments != null) {
-                            for (Enrollment enrollment : courseEnrollments) {
-                                if (enrollment == null || enrollment.getEnrollmentDate() == null) continue;
-                                LocalDateTime enrollDateTime = enrollment.getEnrollmentDate();
-                                if (enrollDateTime.getYear() == year && enrollDateTime.getMonthValue() == targetMonth.getMonthValue()) {
-                                    monthEnrollments++;
-                                    String payStatus = enrollment.getPaymentStatus();
-                                    if (payStatus != null && (payStatus.equalsIgnoreCase("paid") || payStatus.equalsIgnoreCase("success"))) {
-                                        if (enrollment.getCoursePrice() != null) {
-                                            monthRevenue += enrollment.getCoursePrice();
-                                        }
-                                    }
-                                }
+
+                    for (Enrollment enrollment : instructorEnrollments) {
+                        if (enrollment == null || enrollment.getEnrollmentDate() == null) {
+                            continue;
+                        }
+                        LocalDateTime enrollDateTime = enrollment.getEnrollmentDate();
+                        if (enrollDateTime.getYear() == year
+                                && enrollDateTime.getMonthValue() == targetMonth.getMonthValue()) {
+                            monthEnrollments++;
+                            String payStatus = enrollment.getPaymentStatus();
+                            if (payStatus != null
+                                    && (payStatus.equalsIgnoreCase("paid") || payStatus.equalsIgnoreCase("success"))
+                                    && enrollment.getCoursePrice() != null) {
+                                monthRevenue += enrollment.getCoursePrice();
                             }
                         }
                     }
-                    
+
                     Map<String, Object> trendVal = new HashMap<>();
                     trendVal.put("date", label);
                     trendVal.put("enrollments", monthEnrollments);
@@ -536,11 +460,7 @@ public class DashboardServlet extends HttpServlet {
         doGet(request, response);
     }
 
-    private int countPendingGrading(Assessment assessment) {
-        if (assessment == null || assessment.getAssessmentId() == null) {
-            return 0;
-        }
-        List<AssessmentSubmission> submissions = assessmentSubmissionDAO.findByAssessment(assessment.getAssessmentId());
+    private int countPendingGradingFromSubmissions(List<AssessmentSubmission> submissions) {
         if (submissions == null || submissions.isEmpty()) {
             return 0;
         }
@@ -550,7 +470,8 @@ public class DashboardServlet extends HttpServlet {
             if (submission == null) {
                 continue;
             }
-            if (submission.getScore() == null && (submission.getStatus() == null || !"TimedOut".equalsIgnoreCase(submission.getStatus()))) {
+            if (submission.getScore() == null
+                    && (submission.getStatus() == null || !"TimedOut".equalsIgnoreCase(submission.getStatus()))) {
                 pendingCount++;
             }
         }

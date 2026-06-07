@@ -4,7 +4,9 @@ import com.psm.elearning.model.User;
 import com.psm.elearning.util.DBConnection;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * JDBC implementation of UserDAO.
@@ -244,5 +246,70 @@ public class UserDAOImpl implements UserDAO {
             System.err.println("countByRole failed: " + e.getMessage());
         }
         return 0;
+    }
+
+    @Override
+    public int countAll() {
+        String sql = "SELECT COUNT(*) FROM User";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            System.err.println("countAll failed: " + e.getMessage());
+        }
+        return 0;
+    }
+
+    @Override
+    public int countByRoleAllStatuses(String role) {
+        String sql = "SELECT COUNT(*) FROM User WHERE Role = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, role);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("countByRoleAllStatuses failed: " + e.getMessage());
+        }
+        return 0;
+    }
+
+    @Override
+    public Map<java.time.LocalDate, Integer> countRegistrationsByDate(java.time.LocalDate startDate,
+                                                                       java.time.LocalDate endDate) {
+        Map<java.time.LocalDate, Integer> counts = new LinkedHashMap<>();
+        if (startDate == null || endDate == null || endDate.isBefore(startDate)) {
+            return counts;
+        }
+
+        String sql = "SELECT DATE(CreatedAt) AS registrationDate, COUNT(*) AS userCount " +
+                "FROM User " +
+                "WHERE DATE(CreatedAt) BETWEEN ? AND ? " +
+                "GROUP BY DATE(CreatedAt)";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setDate(1, Date.valueOf(startDate));
+            ps.setDate(2, Date.valueOf(endDate));
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Date sqlDate = rs.getDate("registrationDate");
+                    if (sqlDate != null) {
+                        counts.put(sqlDate.toLocalDate(), rs.getInt("userCount"));
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("countRegistrationsByDate failed: " + e.getMessage());
+        }
+        return counts;
     }
 }

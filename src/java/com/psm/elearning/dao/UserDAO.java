@@ -17,4 +17,8 @@ public interface UserDAO {
     boolean updateLastLogin(int userId);
     boolean delete(int userId);
     int countByRole(String role);
+    int countAll();
+    int countByRoleAllStatuses(String role);
+    java.util.Map<java.time.LocalDate, Integer> countRegistrationsByDate(java.time.LocalDate startDate,
+                                                                          java.time.LocalDate endDate);
 }

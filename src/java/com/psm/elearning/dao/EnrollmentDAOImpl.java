@@ -3,9 +3,13 @@ package com.psm.elearning.dao;
 import com.psm.elearning.model.Enrollment;
 import com.psm.elearning.util.DBConnection;
 import java.sql.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -341,6 +345,151 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
             LOGGER.log(Level.SEVERE, "Error getting enrollments by course courseId=" + courseId, e);
         }
         return enrollments;
+    }
+
+    @Override
+    public List<Enrollment> getEnrollmentsByInstructor(Integer instructorId) {
+        List<Enrollment> enrollments = new ArrayList<>();
+        String sql = "SELECT e.*, c.Title AS CourseTitle, c.CourseFee, u.FullName AS StudentName, u.Email AS StudentEmail " +
+                "FROM Enrollment e " +
+                "JOIN Course c ON e.CourseID = c.CourseID " +
+                "JOIN User u ON e.UserID = u.UserID " +
+                "WHERE c.InstructorID = ? " +
+                "ORDER BY e.EnrollmentDate DESC";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, instructorId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Enrollment enrollment = mapResultSet(rs);
+                    enrollment.setCourseName(rs.getString("CourseTitle"));
+                    enrollment.setCoursePrice(rs.getDouble("CourseFee"));
+                    enrollment.setStudentName(rs.getString("StudentName"));
+                    enrollment.setStudentEmail(rs.getString("StudentEmail"));
+                    enrollments.add(enrollment);
+                }
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error getting enrollments by instructor instructorId=" + instructorId, e);
+        }
+        return enrollments;
+    }
+
+    @Override
+    public List<Enrollment> getRecentEnrollments(int limit) {
+        List<Enrollment> enrollments = new ArrayList<>();
+        String sql = "SELECT e.*, c.Title AS CourseTitle, c.CourseFee, c.Duration AS CourseDuration, " +
+                "u.FullName AS StudentName, u.Email AS StudentEmail " +
+                "FROM Enrollment e " +
+                "JOIN Course c ON e.CourseID = c.CourseID " +
+                "JOIN User u ON e.UserID = u.UserID " +
+                "ORDER BY e.EnrollmentDate DESC " +
+                "LIMIT ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, Math.max(1, limit));
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Enrollment enrollment = mapResultSet(rs);
+                    enrollment.setCourseName(rs.getString("CourseTitle"));
+                    enrollment.setCoursePrice(rs.getDouble("CourseFee"));
+                    int durationVal = rs.getInt("CourseDuration");
+                    if (!rs.wasNull()) {
+                        enrollment.setCourseDuration(durationVal);
+                    }
+                    enrollment.setStudentName(rs.getString("StudentName"));
+                    enrollment.setStudentEmail(rs.getString("StudentEmail"));
+                    enrollments.add(enrollment);
+                }
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error getting recent enrollments", e);
+        }
+        return enrollments;
+    }
+
+    @Override
+    public EnrollmentPaymentSummary getEnrollmentPaymentSummary() {
+        String sql = "SELECT COUNT(*) AS totalEnrollments, " +
+                "SUM(CASE WHEN LOWER(e.PaymentStatus) IN ('paid', 'success') THEN 1 ELSE 0 END) AS paidEnrollments, " +
+                "SUM(CASE WHEN LOWER(e.PaymentStatus) = 'pending' THEN 1 ELSE 0 END) AS pendingEnrollments, " +
+                "SUM(CASE WHEN LOWER(e.PaymentStatus) IN ('failed', 'cancelled') THEN 1 ELSE 0 END) AS cancelledEnrollments, " +
+                "COALESCE(SUM(CASE WHEN LOWER(e.PaymentStatus) IN ('paid', 'success') THEN c.CourseFee ELSE 0 END), 0) AS totalRevenue " +
+                "FROM Enrollment e " +
+                "JOIN Course c ON e.CourseID = c.CourseID";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            if (rs.next()) {
+                return new EnrollmentPaymentSummary(
+                        rs.getInt("totalEnrollments"),
+                        rs.getInt("paidEnrollments"),
+                        rs.getInt("pendingEnrollments"),
+                        rs.getInt("cancelledEnrollments"),
+                        rs.getDouble("totalRevenue")
+                );
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error getting enrollment payment summary", e);
+        }
+        return new EnrollmentPaymentSummary(0, 0, 0, 0, 0.0);
+    }
+
+    @Override
+    public List<DailyEnrollmentMetric> getDailyEnrollmentMetrics(LocalDate startDate, LocalDate endDate) {
+        List<DailyEnrollmentMetric> metrics = new ArrayList<>();
+        if (startDate == null || endDate == null || endDate.isBefore(startDate)) {
+            return metrics;
+        }
+
+        String sql = "SELECT DATE(e.EnrollmentDate) AS enrollDate, " +
+                "COUNT(*) AS enrollmentCount, " +
+                "COALESCE(SUM(CASE WHEN LOWER(e.PaymentStatus) IN ('paid', 'success') THEN c.CourseFee ELSE 0 END), 0) AS revenue " +
+                "FROM Enrollment e " +
+                "JOIN Course c ON e.CourseID = c.CourseID " +
+                "WHERE DATE(e.EnrollmentDate) BETWEEN ? AND ? " +
+                "GROUP BY DATE(e.EnrollmentDate) " +
+                "ORDER BY enrollDate";
+
+        Map<LocalDate, DailyEnrollmentMetric> metricByDate = new HashMap<>();
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setDate(1, Date.valueOf(startDate));
+            ps.setDate(2, Date.valueOf(endDate));
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Date sqlDate = rs.getDate("enrollDate");
+                    if (sqlDate == null) {
+                        continue;
+                    }
+                    LocalDate date = sqlDate.toLocalDate();
+                    metricByDate.put(date, new DailyEnrollmentMetric(
+                            date,
+                            rs.getInt("enrollmentCount"),
+                            rs.getDouble("revenue")
+                    ));
+                }
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error getting daily enrollment metrics", e);
+        }
+
+        for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
+            DailyEnrollmentMetric metric = metricByDate.get(date);
+            metrics.add(metric != null ? metric : new DailyEnrollmentMetric(date, 0, 0.0));
+        }
+        return metrics;
     }
 
     private boolean hasColumn(ResultSet rs, String columnName) {

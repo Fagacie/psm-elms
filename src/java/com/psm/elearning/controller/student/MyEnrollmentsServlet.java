@@ -6,13 +6,9 @@ import com.psm.elearning.dao.EnrollmentDAO;
 import com.psm.elearning.dao.EnrollmentDAOImpl;
 import com.psm.elearning.dao.MaterialDAO;
 import com.psm.elearning.dao.MaterialDAOImpl;
-import com.psm.elearning.dao.PaymentDAO;
-import com.psm.elearning.dao.PaymentDAOImpl;
 import com.psm.elearning.model.Assessment;
 import com.psm.elearning.model.Enrollment;
 import com.psm.elearning.model.Material;
-import com.psm.elearning.model.Payment;
-import com.psm.elearning.service.EnrollmentStateSyncService;
 import com.psm.elearning.service.StudentAccessService;
 import com.psm.elearning.util.SessionUtil;
 
@@ -37,19 +33,15 @@ public class MyEnrollmentsServlet extends HttpServlet {
     private static final Logger LOGGER = Logger.getLogger(MyEnrollmentsServlet.class.getName());
 
     private EnrollmentDAO enrollmentDAO;
-    private PaymentDAO paymentDAO;
     private MaterialDAO materialDAO;
     private AssessmentDAO assessmentDAO;
-    private EnrollmentStateSyncService enrollmentStateSyncService;
     private StudentAccessService studentAccessService;
 
     @Override
     public void init() {
         enrollmentDAO = new EnrollmentDAOImpl();
-        paymentDAO = new PaymentDAOImpl();
         materialDAO = new MaterialDAOImpl();
         assessmentDAO = new AssessmentDAOImpl();
-        enrollmentStateSyncService = new EnrollmentStateSyncService();
         studentAccessService = new StudentAccessService();
     }
 
@@ -79,14 +71,6 @@ public class MyEnrollmentsServlet extends HttpServlet {
             Map<Integer, Integer> assessmentCountByCourse = new HashMap<>();
 
             for (Enrollment e : enrollments) {
-                enrollmentStateSyncService.syncEnrollmentState(e);
-                Payment p = paymentDAO.getPaymentByEnrollmentId(e.getEnrollmentId());
-                if (p != null) {
-                    studentAccessService.syncPaymentStatus(e);
-                } else {
-                    e.setPaymentStatus("Pending");
-                }
-
                 if (studentAccessService.isPaymentComplete(e.getPaymentStatus())) {
                     paidCount++;
                 }
