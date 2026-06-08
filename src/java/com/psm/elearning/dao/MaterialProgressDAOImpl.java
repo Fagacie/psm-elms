@@ -182,6 +182,83 @@ public class MaterialProgressDAOImpl implements MaterialProgressDAO {
         return statusByMaterial;
     }
 
+    @Override
+    public Map<Integer, Integer> countViewedByCourses(int userId, java.util.List<Integer> courseIds) {
+        Map<Integer, Integer> counts = new java.util.HashMap<>();
+        if (courseIds == null || courseIds.isEmpty()) {
+            return counts;
+        }
+        StringBuilder sql = new StringBuilder(
+            "SELECT m.CourseID, COUNT(*) AS cnt FROM MaterialProgress mp " +
+            "JOIN Material m ON mp.MaterialID = m.MaterialID " +
+            "WHERE mp.UserID=? AND mp.Status='completed' AND (m.IsDeleted=0 OR m.IsDeleted IS NULL) " +
+            "AND m.CourseID IN ("
+        );
+        for (int i = 0; i < courseIds.size(); i++) {
+            if (i > 0) sql.append(",");
+            sql.append("?");
+        }
+        sql.append(") GROUP BY m.CourseID");
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            ps.setInt(1, userId);
+            for (int i = 0; i < courseIds.size(); i++) {
+                ps.setInt(i + 2, courseIds.get(i));
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    counts.put(rs.getInt("CourseID"), rs.getInt("cnt"));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("MaterialProgress countViewedByCourses failed: " + e.getMessage());
+        }
+        return counts;
+    }
+
+    @Override
+    public Map<Integer, Set<Integer>> findViewedMaterialIdsByCourses(int userId, java.util.List<Integer> courseIds) {
+        Map<Integer, Set<Integer>> viewedIdsByCourse = new java.util.HashMap<>();
+        if (courseIds == null || courseIds.isEmpty()) {
+            return viewedIdsByCourse;
+        }
+        try (Connection conn = DBConnection.getConnection()) {
+            ProgressSchema schema = resolveSchema(conn);
+            StringBuilder sql = new StringBuilder(
+                schema.hasStatus
+                    ? "SELECT m.CourseID, mp.MaterialID FROM MaterialProgress mp " +
+                      "JOIN Material m ON mp.MaterialID = m.MaterialID " +
+                      "WHERE mp.UserID=? AND mp.Status='completed' AND (m.IsDeleted=0 OR m.IsDeleted IS NULL) AND m.CourseID IN ("
+                    : "SELECT m.CourseID, mp.MaterialID FROM MaterialProgress mp " +
+                      "JOIN Material m ON mp.MaterialID = m.MaterialID " +
+                      "WHERE mp.UserID=? AND (m.IsDeleted=0 OR m.IsDeleted IS NULL) AND m.CourseID IN ("
+            );
+            for (int i = 0; i < courseIds.size(); i++) {
+                if (i > 0) sql.append(",");
+                sql.append("?");
+            }
+            sql.append(")");
+
+            try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+                ps.setInt(1, userId);
+                for (int i = 0; i < courseIds.size(); i++) {
+                    ps.setInt(i + 2, courseIds.get(i));
+                }
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        int courseId = rs.getInt(1);
+                        int materialId = rs.getInt(2);
+                        viewedIdsByCourse.computeIfAbsent(courseId, k -> new java.util.LinkedHashSet<>()).add(materialId);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("MaterialProgress findViewedMaterialIdsByCourses failed: " + e.getMessage());
+        }
+        return viewedIdsByCourse;
+    }
+
     private ProgressSchema resolveSchema(Connection conn) throws SQLException {
         if (cachedSchema != null) {
             return cachedSchema;

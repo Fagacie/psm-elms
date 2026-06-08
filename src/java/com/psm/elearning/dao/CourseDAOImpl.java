@@ -5,7 +5,9 @@ import com.psm.elearning.util.DBConnection;
 import java.math.BigDecimal;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class CourseDAOImpl implements CourseDAO {
 
@@ -188,13 +190,11 @@ public class CourseDAOImpl implements CourseDAO {
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, instructorId);
-            System.out.println("[DEBUG] Querying courses for InstructorID: " + instructorId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     list.add(mapRow(rs));
                 }
             }
-            System.out.println("[DEBUG] Found " + list.size() + " courses for instructor " + instructorId);
         } catch (SQLException e) {
             System.err.println("Course findByInstructor failed: " + e.getMessage());
             e.printStackTrace();
@@ -282,6 +282,27 @@ public class CourseDAOImpl implements CourseDAO {
     }
 
     @Override
+    public Map<String, Integer> getCourseCountsByStatus() {
+        // Single aggregated query replaces N separate countByStatus() round-trips.
+        // The caller can extract any status count with map.getOrDefault("Approved", 0).
+        Map<String, Integer> counts = new HashMap<>();
+        String sql = "SELECT Status, COUNT(*) AS cnt FROM Course GROUP BY Status";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                String status = rs.getString("Status");
+                if (status != null) {
+                    counts.put(status, rs.getInt("cnt"));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("getCourseCountsByStatus failed: " + e.getMessage());
+        }
+        return counts;
+    }
+
+    @Override
     public List<Course> findFeaturedCourses(int limit) {
         List<Course> list = new ArrayList<>();
         String sql = "SELECT * FROM Course WHERE Status = 'Approved' ORDER BY CreatedAt DESC LIMIT ?";
@@ -309,5 +330,34 @@ public class CourseDAOImpl implements CourseDAO {
             System.err.println("assignInstructor failed: " + e.getMessage());
             return false;
         }
+    }
+
+    @Override
+    public List<Course> findByCourseIds(List<Integer> courseIds) {
+        List<Course> list = new ArrayList<>();
+        if (courseIds == null || courseIds.isEmpty()) {
+            return list;
+        }
+        StringBuilder sql = new StringBuilder("SELECT * FROM Course WHERE CourseID IN (");
+        for (int i = 0; i < courseIds.size(); i++) {
+            if (i > 0) sql.append(",");
+            sql.append("?");
+        }
+        sql.append(") ORDER BY CreatedAt DESC");
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            for (int i = 0; i < courseIds.size(); i++) {
+                ps.setInt(i + 1, courseIds.get(i));
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(mapRow(rs));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Course findByCourseIds failed: " + e.getMessage());
+        }
+        return list;
     }
 }

@@ -4,9 +4,26 @@ import com.psm.elearning.dao.CertificateDAO;
 import com.psm.elearning.dao.CertificateDAOImpl;
 import com.psm.elearning.dao.EnrollmentDAO;
 import com.psm.elearning.dao.EnrollmentDAOImpl;
+import com.psm.elearning.dao.MaterialDAO;
+import com.psm.elearning.dao.MaterialDAOImpl;
+import com.psm.elearning.dao.MaterialProgressDAO;
+import com.psm.elearning.dao.MaterialProgressDAOImpl;
+import com.psm.elearning.dao.AssessmentDAO;
+import com.psm.elearning.dao.AssessmentDAOImpl;
+import com.psm.elearning.dao.AssessmentSubmissionDAO;
+import com.psm.elearning.dao.AssessmentSubmissionDAOImpl;
+import com.psm.elearning.dao.AssessmentQuestionDAO;
+import com.psm.elearning.dao.AssessmentQuestionDAOImpl;
+import com.psm.elearning.dao.PaymentDAO;
+import com.psm.elearning.dao.PaymentDAOImpl;
 import com.psm.elearning.model.Certificate;
 import com.psm.elearning.model.CertificateView;
 import com.psm.elearning.model.Enrollment;
+import com.psm.elearning.model.Material;
+import com.psm.elearning.model.Assessment;
+import com.psm.elearning.model.AssessmentQuestion;
+import com.psm.elearning.model.AssessmentSubmission;
+import com.psm.elearning.model.Payment;
 import com.psm.elearning.service.EnrollmentStateSyncService;
 import com.psm.elearning.service.StudentAccessService;
 import com.psm.elearning.util.SessionUtil;
@@ -19,11 +36,19 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 public class StudentCertificatesServlet extends HttpServlet {
 
     private final CertificateDAO certificateDAO = new CertificateDAOImpl();
     private final EnrollmentDAO enrollmentDAO = new EnrollmentDAOImpl();
+    private final MaterialDAO materialDAO = new MaterialDAOImpl();
+    private final MaterialProgressDAO materialProgressDAO = new MaterialProgressDAOImpl();
+    private final AssessmentDAO assessmentDAO = new AssessmentDAOImpl();
+    private final AssessmentSubmissionDAO submissionDAO = new AssessmentSubmissionDAOImpl();
+    private final AssessmentQuestionDAO assessmentQuestionDAO = new AssessmentQuestionDAOImpl();
+    private final PaymentDAO paymentDAO = new PaymentDAOImpl();
     private final EnrollmentStateSyncService enrollmentStateSyncService = new EnrollmentStateSyncService();
     private final StudentAccessService studentAccessService = new StudentAccessService();
 
@@ -49,12 +74,88 @@ public class StudentCertificatesServlet extends HttpServlet {
         List<ReadinessItem> blockedEnrollments = new ArrayList<>();
         List<Enrollment> nonCertificateEnrollments = new ArrayList<>();
 
+        List<Integer> courseIds = new ArrayList<>();
+        List<Integer> enrollmentIds = new ArrayList<>();
+        for (Enrollment e : enrollments) {
+            if (issuesCertificate(e)) {
+                if (e.getCourseId() != null) {
+                    courseIds.add(e.getCourseId());
+                }
+                if (e.getEnrollmentId() != null) {
+                    enrollmentIds.add(e.getEnrollmentId());
+                }
+            }
+        }
+
+        List<Material> allMaterials = new ArrayList<>();
+        List<Assessment> allAssessments = new ArrayList<>();
+        List<Payment> allPayments = new ArrayList<>();
+        List<AssessmentQuestion> allQuestions = new ArrayList<>();
+        Map<Integer, Integer> viewedMaterialsCountMap = new HashMap<>();
+
+        if (!courseIds.isEmpty()) {
+            allMaterials = materialDAO.findByCourseIds(courseIds);
+            allAssessments = assessmentDAO.findByCourseIds(courseIds);
+            viewedMaterialsCountMap = materialProgressDAO.countViewedByCourses(userId, courseIds);
+        }
+        if (!enrollmentIds.isEmpty()) {
+            allPayments = paymentDAO.getPaymentsByEnrollmentIds(enrollmentIds);
+        }
+        List<AssessmentSubmission> allSubmissions = submissionDAO.findByUser(userId);
+        if (allSubmissions == null) allSubmissions = new ArrayList<>();
+
+        List<Integer> assessmentIds = new ArrayList<>();
+        for (Assessment a : allAssessments) {
+            if (a != null && a.getAssessmentId() != null) {
+                assessmentIds.add(a.getAssessmentId());
+            }
+        }
+        if (!assessmentIds.isEmpty()) {
+            allQuestions = assessmentQuestionDAO.findByAssessmentIds(assessmentIds);
+        }
+        if (allQuestions == null) allQuestions = new ArrayList<>();
+
+        Map<Integer, List<Material>> materialsByCourse = new HashMap<>();
+        for (Material m : allMaterials) {
+            if (m != null && m.getCourseId() != null) {
+                materialsByCourse.computeIfAbsent(m.getCourseId(), k -> new ArrayList<>()).add(m);
+            }
+        }
+
+        Map<Integer, List<Assessment>> assessmentsByCourse = new HashMap<>();
+        for (Assessment a : allAssessments) {
+            if (a != null && a.getCourseId() != null) {
+                assessmentsByCourse.computeIfAbsent(a.getCourseId(), k -> new ArrayList<>()).add(a);
+            }
+        }
+
+        Map<Integer, Payment> paymentsByEnrollment = new HashMap<>();
+        for (Payment p : allPayments) {
+            if (p != null && p.getEnrollmentId() != null) {
+                paymentsByEnrollment.put(p.getEnrollmentId(), p);
+            }
+        }
+
         for (Enrollment enrollment : enrollments) {
             if (!issuesCertificate(enrollment)) {
                 nonCertificateEnrollments.add(enrollment);
                 continue;
             }
-            EnrollmentStateSyncService.SyncResult syncResult = enrollmentStateSyncService.syncEnrollmentState(enrollment);
+
+            List<Material> materials = materialsByCourse.getOrDefault(enrollment.getCourseId(), new ArrayList<>());
+            List<Assessment> assessments = assessmentsByCourse.getOrDefault(enrollment.getCourseId(), new ArrayList<>());
+            Payment payment = paymentsByEnrollment.get(enrollment.getEnrollmentId());
+            int viewedMaterials = viewedMaterialsCountMap.getOrDefault(enrollment.getCourseId(), 0);
+
+            EnrollmentStateSyncService.SyncResult syncResult = enrollmentStateSyncService.syncEnrollmentState(
+                enrollment,
+                payment,
+                materials,
+                viewedMaterials,
+                assessments,
+                allSubmissions,
+                allQuestions
+            );
             boolean hasCertificate = false;
             if (issuedCertificates != null) {
                 for (CertificateView cv : issuedCertificates) {

@@ -19,6 +19,20 @@ import com.psm.elearning.model.Material;
 import com.psm.elearning.model.Payment;
 import com.psm.elearning.service.EnrollmentStateSyncService;
 import com.psm.elearning.util.SessionUtil;
+import com.psm.elearning.model.AssessmentQuestion;
+import com.psm.elearning.dao.AssessmentQuestionDAO;
+import com.psm.elearning.dao.AssessmentQuestionDAOImpl;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.LinkedHashMap;
+
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Set;
+import java.util.Comparator;
+import java.io.PrintWriter;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -26,22 +40,16 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
-import java.util.logging.Logger;
 
 public class MarkMaterialCompletedServlet extends HttpServlet {
-
     private static final Logger LOGGER = Logger.getLogger(MarkMaterialCompletedServlet.class.getName());
-
     private final EnrollmentDAO enrollmentDAO = new EnrollmentDAOImpl();
     private final MaterialDAO materialDAO = new MaterialDAOImpl();
     private final MaterialProgressDAO materialProgressDAO = new MaterialProgressDAOImpl();
     private final PaymentDAO paymentDAO = new PaymentDAOImpl();
     private final AssessmentDAO assessmentDAO = new AssessmentDAOImpl();
     private final AssessmentSubmissionDAO submissionDAO = new AssessmentSubmissionDAOImpl();
+    private final AssessmentQuestionDAO assessmentQuestionDAO = new AssessmentQuestionDAOImpl();
     private final EnrollmentStateSyncService enrollmentStateSyncService = new EnrollmentStateSyncService();
 
     @Override
@@ -73,7 +81,18 @@ public class MarkMaterialCompletedServlet extends HttpServlet {
                 return;
             }
 
-            Enrollment enrollment = checkEnrollment(userId, material.getCourseId());
+            Integer enrollmentId = parseInt(request.getParameter("enrollmentId"));
+            Enrollment enrollment = null;
+            if (enrollmentId != null) {
+                enrollment = enrollmentDAO.getEnrollment(enrollmentId);
+                if (enrollment != null && (!enrollment.getUserId().equals(userId) || !enrollment.getCourseId().equals(material.getCourseId()))) {
+                    enrollment = null;
+                }
+            }
+            if (enrollment == null) {
+                enrollment = checkEnrollment(userId, material.getCourseId());
+            }
+
             if (enrollment == null) {
                 response.setStatus(HttpServletResponse.SC_FORBIDDEN);
                 out.print("{\"success\":false,\"message\":\"No enrollment or course access\"}");
@@ -93,14 +112,74 @@ public class MarkMaterialCompletedServlet extends HttpServlet {
                 return;
             }
 
-            EnrollmentStateSyncService.SyncResult syncResult = syncProgress(userId, material.getCourseId());
-            int progressPercent = syncResult != null
-                    ? syncResult.getProgressPercent()
-                    : calculateProgress(userId, material.getCourseId());
-            int viewedMaterials = syncResult != null ? syncResult.getViewedMaterials() : materialProgressDAO.countViewedByCourse(userId, material.getCourseId());
-            List<Material> courseMaterials = syncResult == null ? materialDAO.findByCourse(material.getCourseId()) : null;
-            int totalMaterials = syncResult != null ? syncResult.getTotalMaterials() : (courseMaterials != null ? courseMaterials.size() : 0);
-            Material next = getNextMaterial(userId, material.getCourseId());
+            List<Material> materials = materialDAO.findByCourse(material.getCourseId());
+            if (materials == null) materials = new ArrayList<>();
+
+            List<Assessment> assessments = assessmentDAO.findByCourse(material.getCourseId());
+            if (assessments == null) assessments = new ArrayList<>();
+
+            Payment payment = paymentDAO.getPaymentByEnrollmentId(enrollment.getEnrollmentId());
+
+            List<AssessmentSubmission> allSubmissions = submissionDAO.findByUser(userId);
+            if (allSubmissions == null) allSubmissions = new ArrayList<>();
+
+            List<AssessmentQuestion> allQuestions = new ArrayList<>();
+            List<Integer> assessmentIds = new ArrayList<>();
+            for (Assessment a : assessments) {
+                if (a != null && a.getAssessmentId() != null) {
+                    assessmentIds.add(a.getAssessmentId());
+                }
+            }
+            if (!assessmentIds.isEmpty()) {
+                allQuestions = assessmentQuestionDAO.findByAssessmentIds(assessmentIds);
+            }
+            if (allQuestions == null) allQuestions = new ArrayList<>();
+
+            Map<Integer, String> materialStatusById = materialProgressDAO.findMaterialStatusByCourse(userId, enrollment.getCourseId());
+            if (materialStatusById == null) materialStatusById = new HashMap<>();
+
+            Set<Integer> completedMaterialIds = new java.util.HashSet<>();
+            for (Map.Entry<Integer, String> entry : materialStatusById.entrySet()) {
+                if ("completed".equalsIgnoreCase(entry.getValue())) {
+                    completedMaterialIds.add(entry.getKey());
+                }
+            }
+            int viewedMaterials = completedMaterialIds.size();
+            int totalMaterials = materials.size();
+
+            EnrollmentStateSyncService.SyncResult syncResult = null;
+            try {
+                syncResult = enrollmentStateSyncService.syncEnrollmentState(
+                    enrollment,
+                    payment,
+                    materials,
+                    viewedMaterials,
+                    assessments,
+                    allSubmissions,
+                    allQuestions
+                );
+            } catch (Exception syncEx) {
+                LOGGER.log(java.util.logging.Level.WARNING, "Failed to sync enrollment progress", syncEx);
+            }
+
+            int progressPercent = syncResult != null ? syncResult.getProgressPercent() : 0;
+
+            materials.sort((a, b) -> {
+                Integer ao = a.getDisplayOrder() != null ? a.getDisplayOrder() : java.lang.Integer.MAX_VALUE;
+                Integer bo = b.getDisplayOrder() != null ? b.getDisplayOrder() : java.lang.Integer.MAX_VALUE;
+                if (!ao.equals(bo)) {
+                    return ao.compareTo(bo);
+                }
+                return java.util.Comparator.nullsLast(java.lang.Integer::compareTo).compare(a.getMaterialId(), b.getMaterialId());
+            });
+            Material next = null;
+            for (Material m : materials) {
+                if (m.getMaterialId() != null && !completedMaterialIds.contains(m.getMaterialId())) {
+                    next = m;
+                    break;
+                }
+            }
+
             String continueLabel;
             String continueUrl;
 
@@ -108,7 +187,30 @@ public class MarkMaterialCompletedServlet extends HttpServlet {
                 continueLabel = "Continue Learning";
                 continueUrl = request.getContextPath() + "/student/materials?action=preview&id=" + next.getMaterialId() + "&enrollmentId=" + enrollment.getEnrollmentId();
             } else {
-                Assessment nextAssessment = getNextAssessment(userId, material.getCourseId());
+                Map<Integer, List<AssessmentSubmission>> submissionsMap = new HashMap<>();
+                for (AssessmentSubmission sub : allSubmissions) {
+                    if (sub != null) {
+                        submissionsMap.computeIfAbsent(sub.getAssessmentId(), k -> new ArrayList<>()).add(sub);
+                    }
+                }
+                Map<Integer, List<AssessmentQuestion>> questionsMap = new HashMap<>();
+                for (AssessmentQuestion q : allQuestions) {
+                    if (q != null) {
+                        questionsMap.computeIfAbsent(q.getAssessmentId(), k -> new ArrayList<>()).add(q);
+                    }
+                }
+
+                Assessment nextAssessment = null;
+                for (Assessment assessment : assessments) {
+                    List<AssessmentSubmission> subs = submissionsMap.getOrDefault(assessment.getAssessmentId(), new ArrayList<>());
+                    List<AssessmentQuestion> questions = questionsMap.getOrDefault(assessment.getAssessmentId(), new ArrayList<>());
+                    EnrollmentStateSyncService.AssessmentProgressState progressState = EnrollmentStateSyncService.resolveAssessmentProgress(assessment, subs, questions);
+                    if (!progressState.isPassed()) {
+                        nextAssessment = assessment;
+                        break;
+                    }
+                }
+
                 if (nextAssessment != null) {
                     continueLabel = "Start Assessment";
                     continueUrl = request.getContextPath() + "/student/assessments?action=start&courseId=" + material.getCourseId() + "&assessmentId=" + nextAssessment.getAssessmentId() + "&fromHub=1&enrollmentId=" + enrollment.getEnrollmentId();
@@ -123,14 +225,10 @@ public class MarkMaterialCompletedServlet extends HttpServlet {
                     ",\"totalMaterials\":" + totalMaterials +
                     ",\"status\":\"completed\"" +
                     ",\"continueLabel\":\"" + escapeJson(continueLabel) + "\",\"continueUrl\":\"" + escapeJson(continueUrl) + "\"}");
-
-        } catch (Exception ex) {
-            LOGGER.severe("MarkMaterialCompletedServlet failed: " + ex.getMessage());
+        } catch (Exception e) {
+            LOGGER.log(java.util.logging.Level.SEVERE, "Error marking material completed", e);
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            out.print("{\"success\":false,\"message\":\"Server error\"}");
-        } finally {
-            out.flush();
-            out.close();
+            out.print("{\"success\":false,\"message\":\"Internal server error: " + escapeJson(e.getMessage()) + "\"}");
         }
     }
 

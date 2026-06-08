@@ -162,72 +162,64 @@ public class UserDAOImpl implements UserDAO {
 
     @Override
     public boolean delete(int userId) {
-        Connection conn = null;
-        try {
-            conn = DBConnection.getConnection();
+        // Use try-with-resources to guarantee the connection is always returned to the pool.
+        // autoCommit is reset to true inside the block before TWR closes the connection,
+        // preventing dirty connection state from propagating to subsequent pool borrowers.
+        try (Connection conn = DBConnection.getConnection()) {
             conn.setAutoCommit(false);
-            
-            // Get user to know their role
-            User user = findById(userId);
-            if (user == null) {
-                return false;
-            }
-            
-            // Delete from role-specific table first
-            String roleDeleteSql = null;
-            switch (user.getRole()) {
-                case "Student":
-                    roleDeleteSql = "DELETE FROM Student WHERE UserID=?";
-                    break;
-                case "Instructor":
-                    roleDeleteSql = "DELETE FROM Instructor WHERE UserID=?";
-                    break;
-                case "Admin":
-                    roleDeleteSql = "DELETE FROM Admin WHERE UserID=?";
-                    break;
-            }
-            
-            if (roleDeleteSql != null) {
-                try (PreparedStatement ps = conn.prepareStatement(roleDeleteSql)) {
-                    ps.setInt(1, userId);
-                    ps.executeUpdate();
-                }
-            }
-            
-            // Then delete from User table
-            String userDeleteSql = "DELETE FROM User WHERE UserID=?";
-            try (PreparedStatement ps = conn.prepareStatement(userDeleteSql)) {
-                ps.setInt(1, userId);
-                int userDeleted = ps.executeUpdate();
-                
-                if (userDeleted > 0) {
-                    conn.commit();
-                    return true;
-                } else {
+            try {
+                // Get user to know their role
+                User user = findById(userId);
+                if (user == null) {
                     conn.rollback();
                     return false;
                 }
+
+                // Delete from role-specific table first
+                String roleDeleteSql = null;
+                switch (user.getRole()) {
+                    case "Student":
+                        roleDeleteSql = "DELETE FROM Student WHERE UserID=?";
+                        break;
+                    case "Instructor":
+                        roleDeleteSql = "DELETE FROM Instructor WHERE UserID=?";
+                        break;
+                    case "Admin":
+                        roleDeleteSql = "DELETE FROM Admin WHERE UserID=?";
+                        break;
+                }
+
+                if (roleDeleteSql != null) {
+                    try (PreparedStatement ps = conn.prepareStatement(roleDeleteSql)) {
+                        ps.setInt(1, userId);
+                        ps.executeUpdate();
+                    }
+                }
+
+                // Then delete from User table
+                String userDeleteSql = "DELETE FROM User WHERE UserID=?";
+                try (PreparedStatement ps = conn.prepareStatement(userDeleteSql)) {
+                    ps.setInt(1, userId);
+                    int userDeleted = ps.executeUpdate();
+                    if (userDeleted > 0) {
+                        conn.commit();
+                        return true;
+                    } else {
+                        conn.rollback();
+                        return false;
+                    }
+                }
+            } catch (SQLException e) {
+                System.err.println("User delete failed: " + e.getMessage());
+                try { conn.rollback(); } catch (SQLException ex) { /* ignore rollback error */ }
+                return false;
+            } finally {
+                // Always reset autoCommit before the connection is returned to the pool by TWR.
+                try { conn.setAutoCommit(true); } catch (SQLException ex) { /* ignore */ }
             }
-            
         } catch (SQLException e) {
-            System.err.println("User delete failed: " + e.getMessage());
-            if (conn != null) {
-                try {
-                    conn.rollback();
-                } catch (SQLException ex) {
-                    // Ignore rollback errors
-                }
-            }
+            System.err.println("User delete: failed to obtain connection: " + e.getMessage());
             return false;
-        } finally {
-            if (conn != null) {
-                try {
-                    conn.setAutoCommit(true);
-                    conn.close();
-                } catch (SQLException e) {
-                    // Ignore close errors
-                }
-            }
         }
     }
 

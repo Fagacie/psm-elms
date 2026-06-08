@@ -10,4 +10,6 @@ public interface MaterialProgressDAO {
     int countViewedByCourse(int userId, int courseId);
     Set<Integer> findViewedMaterialIdsByCourse(int userId, int courseId);
     Map<Integer, String> findMaterialStatusByCourse(int userId, int courseId);
+    Map<Integer, Integer> countViewedByCourses(int userId, java.util.List<Integer> courseIds);
+    Map<Integer, Set<Integer>> findViewedMaterialIdsByCourses(int userId, java.util.List<Integer> courseIds);
 }

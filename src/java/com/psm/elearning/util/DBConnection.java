@@ -93,12 +93,18 @@ public class DBConnection {
         
         String jdbcUrl = props.getProperty("db.url");
         if (jdbcUrl != null && jdbcUrl.startsWith("jdbc:mysql:")) {
-            // Ensure timeout options are set to prevent hanging connections on network latency issues
+            // Ensure timeout options are set to prevent hanging connections on network latency
+            // (Railway has higher latency than localhost; these prevent indefinite hangs).
             if (!jdbcUrl.contains("connectTimeout=")) {
                 jdbcUrl += (jdbcUrl.contains("?") ? "&" : "?") + "connectTimeout=5000";
             }
             if (!jdbcUrl.contains("socketTimeout=")) {
                 jdbcUrl += (jdbcUrl.contains("?") ? "&" : "?") + "socketTimeout=30000";
+            }
+            // tcpKeepAlive instructs the MySQL JDBC driver to enable OS-level TCP keepalives,
+            // preventing Railway's firewall/NAT from silently dropping idle connections.
+            if (!jdbcUrl.contains("tcpKeepAlive=")) {
+                jdbcUrl += "&tcpKeepAlive=true";
             }
         }
         config.setJdbcUrl(jdbcUrl);
@@ -111,6 +117,11 @@ public class DBConnection {
         config.setIdleTimeout(getLongProperty(props, "db.pool.idleTimeout", 600_000L));
         config.setMaxLifetime(getLongProperty(props, "db.pool.maxLifetime", 1_800_000L));
         config.setLeakDetectionThreshold(getLongProperty(props, "db.pool.leakDetectionThreshold", 5000L));
+        // keepaliveTime: HikariCP sends a lightweight ping to the DB on idle connections at this
+        // interval. Prevents Railway's TCP idle timeout (typically ~60-90s) from silently
+        // killing connections and causing "connection reset" errors in production.
+        long keepaliveTime = getLongProperty(props, "db.pool.keepaliveTime", 60_000L);
+        config.setKeepaliveTime(keepaliveTime);
         config.setPoolName("PSME-HikariPool");
 
         config.addDataSourceProperty("cachePrepStmts", "true");

@@ -29,6 +29,9 @@ import com.psm.elearning.service.EnrollmentStateSyncService;
 import com.psm.elearning.service.StudentAccessService;
 import com.psm.elearning.util.ActiveAssessmentAttemptUtil;
 import com.psm.elearning.util.SessionUtil;
+import com.psm.elearning.model.Payment;
+import com.psm.elearning.dao.PaymentDAO;
+import com.psm.elearning.dao.PaymentDAOImpl;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -63,6 +66,7 @@ public class EnrollmentDetailsServlet extends HttpServlet {
     private com.psm.elearning.dao.CertificateDAO certificateDAO;
     private UserDAO userDAO;
     private StudentAccessService studentAccessService;
+    private PaymentDAO paymentDAO;
 
     public static class LearningItem {
         private Integer itemId;
@@ -220,6 +224,7 @@ public class EnrollmentDetailsServlet extends HttpServlet {
         certificateDAO = new com.psm.elearning.dao.CertificateDAOImpl();
         userDAO = new UserDAOImpl();
         studentAccessService = new StudentAccessService();
+        paymentDAO = new PaymentDAOImpl();
     }
     
     @Override
@@ -252,13 +257,60 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                 return;
             }
 
-            // Sync enrollment state upon load
+            // 1. Fetch materials, assessments, submissions, questions, and payments once upfront
+            List<Material> materials = new ArrayList<>();
+            List<Assessment> assessments = new ArrayList<>();
+            if (enrollment.getCourseId() != null) {
+                materials = materialDAO.findByCourse(enrollment.getCourseId());
+                assessments = assessmentDAO.findByCourse(enrollment.getCourseId());
+            }
+            if (materials == null) materials = new ArrayList<>();
+            if (assessments == null) assessments = new ArrayList<>();
+
+            Payment payment = paymentDAO.getPaymentByEnrollmentId(enrollment.getEnrollmentId());
+
+            List<AssessmentSubmission> allSubmissions = submissionDAO.findByUser(userId);
+            if (allSubmissions == null) allSubmissions = new ArrayList<>();
+
+            List<AssessmentQuestion> allQuestions = new ArrayList<>();
+            List<Integer> assessmentIds = new ArrayList<>();
+            for (Assessment a : assessments) {
+                if (a != null && a.getAssessmentId() != null) {
+                    assessmentIds.add(a.getAssessmentId());
+                }
+            }
+            if (!assessmentIds.isEmpty()) {
+                allQuestions = assessmentQuestionDAO.findByAssessmentIds(assessmentIds);
+            }
+            if (allQuestions == null) allQuestions = new ArrayList<>();
+
+            Map<Integer, String> materialStatusById = materialProgressDAO.findMaterialStatusByCourse(userId, enrollment.getCourseId());
+            if (materialStatusById == null) materialStatusById = new java.util.HashMap<>();
+
+            Set<Integer> viewedMaterialIds = new java.util.HashSet<>();
+            for (Map.Entry<Integer, String> entry : materialStatusById.entrySet()) {
+                if ("completed".equalsIgnoreCase(entry.getValue())) {
+                    viewedMaterialIds.add(entry.getKey());
+                }
+            }
+            int viewedMaterialsCount = viewedMaterialIds.size();
+
+            // 2. Perform centralized enrollment state synchronization
+            EnrollmentStateSyncService.SyncResult syncResult = null;
             try {
-                enrollmentStateSyncService.syncEnrollmentState(enrollment);
+                syncResult = enrollmentStateSyncService.syncEnrollmentState(
+                    enrollment,
+                    payment,
+                    materials,
+                    viewedMaterialsCount,
+                    assessments,
+                    allSubmissions,
+                    allQuestions
+                );
             } catch (Exception syncEx) {
                 LOGGER.log(Level.WARNING, "Failed to sync enrollment on page load", syncEx);
             }
-            
+
             // Verify ownership
             if (!studentAccessService.belongsToStudent(enrollment, userId)) {
                 response.sendRedirect(request.getContextPath() + "/student/my-enrollments?error=unauthorized");
@@ -320,7 +372,8 @@ public class EnrollmentDetailsServlet extends HttpServlet {
             boolean safeMode = "1".equals(request.getParameter("safe")) || "true".equalsIgnoreCase(request.getParameter("safe"));
             if (safeMode) {
                 boolean paidAccess = studentAccessService.isPaymentComplete(enrollment.getPaymentStatus());
-                boolean courseAccessGranted = studentAccessService.hasCourseAccess(enrollment);
+                // Optimized courseAccessGranted check that is local and does not hit DB
+                boolean courseAccessGranted = paidAccess || !studentAccessService.requiresPayment(enrollment);
                 applyEmptyWorkspaceState(
                         request,
                         enrollment,
@@ -334,7 +387,7 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                 return;
             }
 
-            studentAccessService.syncPaymentStatus(enrollment);
+            // Sync payment status was already done in syncEnrollmentState!
             boolean paidAccess = studentAccessService.isPaymentComplete(enrollment.getPaymentStatus());
             boolean paymentRequired = studentAccessService.requiresPayment(enrollment);
             boolean courseAccessGranted = paidAccess || !paymentRequired;
@@ -344,19 +397,7 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                 return;
             }
 
-            List<Material> materials = new ArrayList<>();
-            List<Assessment> assessments = new ArrayList<>();
-            Set<Integer> viewedMaterialIds = new HashSet<>();
-            if (enrollment.getCourseId() != null) {
-                materials = materialDAO.findByCourse(enrollment.getCourseId());
-                assessments = assessmentDAO.findByCourse(enrollment.getCourseId());
-                viewedMaterialIds = materialProgressDAO.findViewedMaterialIdsByCourse(userId, enrollment.getCourseId());
-                if (materials == null) materials = new ArrayList<>();
-                if (assessments == null) assessments = new ArrayList<>();
-            }
-
-            // Batch load all student submissions and retake requests to eliminate N+1 queries
-            List<AssessmentSubmission> allSubmissions = submissionDAO.findByUser(userId);
+            // Build submissions maps from preloaded list
             Map<Integer, List<AssessmentSubmission>> submissionsMap = new LinkedHashMap<>();
             if (allSubmissions != null) {
                 for (AssessmentSubmission sub : allSubmissions) {
@@ -377,22 +418,12 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                 }
             }
 
-            // Batch load all questions for the assessments to prevent N+1 queries when calculating totalMarks fallback
-            List<AssessmentQuestion> allQuestions = new ArrayList<>();
+            // Build questions maps from preloaded list
             Map<Integer, List<AssessmentQuestion>> questionsMap = new LinkedHashMap<>();
-            if (assessments != null && !assessments.isEmpty()) {
-                List<Integer> assessmentIds = new ArrayList<>();
-                for (Assessment assessment : assessments) {
-                    if (assessment != null && assessment.getAssessmentId() != null) {
-                        assessmentIds.add(assessment.getAssessmentId());
-                    }
-                }
-                allQuestions = assessmentQuestionDAO.findByAssessmentIds(assessmentIds);
-                if (allQuestions != null) {
-                    for (AssessmentQuestion q : allQuestions) {
-                        if (q != null) {
-                            questionsMap.computeIfAbsent(q.getAssessmentId(), k -> new ArrayList<>()).add(q);
-                        }
+            if (allQuestions != null) {
+                for (AssessmentQuestion q : allQuestions) {
+                    if (q != null) {
+                        questionsMap.computeIfAbsent(q.getAssessmentId(), k -> new ArrayList<>()).add(q);
                     }
                 }
             }
@@ -879,7 +910,6 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                     tab = "overview";
                 }
             }
-            Map<Integer, String> materialStatusById = materialProgressDAO.findMaterialStatusByCourse(userId, enrollment.getCourseId());
 
             Integer currentAssessmentId = null;
             for (Assessment assessment : assessments) {
@@ -958,10 +988,13 @@ public class EnrollmentDetailsServlet extends HttpServlet {
             Integer selectedMaterialId = selectedMaterial != null ? selectedMaterial.getMaterialId() : null;
             Integer selectedAssessmentId = selectedAssessment != null ? selectedAssessment.getAssessmentId() : null;
             String selectedMaterialStatus = selectedMaterialId != null ? materialStatusById.getOrDefault(selectedMaterialId, "") : "";
-            if (selectedMaterialId != null && activeCourseAccess && !"completed".equalsIgnoreCase(selectedMaterialStatus)) {
+            if (selectedMaterialId != null && activeCourseAccess 
+                    && !"completed".equalsIgnoreCase(selectedMaterialStatus)
+                    && !"in_progress".equalsIgnoreCase(selectedMaterialStatus)) {
                 try {
                     materialProgressDAO.markInProgress(userId, selectedMaterialId, enrollment.getCourseId());
-                    selectedMaterialStatus = materialStatusById.getOrDefault(selectedMaterialId, "in_progress");
+                    selectedMaterialStatus = "in_progress";
+                    materialStatusById.put(selectedMaterialId, "in_progress");
                 } catch (Exception progressException) {
                     LOGGER.log(Level.WARNING, "EnrollmentDetailsServlet: unable to mark material in progress", progressException);
                 }
@@ -1135,7 +1168,7 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                 }
                 
                 try {
-                    List<AssessmentQuestion> assessmentQuestions = assessmentQuestionDAO.findByAssessment(selectedAssessment.getAssessmentId());
+                    List<AssessmentQuestion> assessmentQuestions = questionsMap.getOrDefault(selectedAssessment.getAssessmentId(), new ArrayList<AssessmentQuestion>());
                     request.setAttribute("selectedAssessmentQuestions", assessmentQuestions != null ? assessmentQuestions : new ArrayList<AssessmentQuestion>());
 
                     double computedMax = 0.0;
@@ -1233,13 +1266,7 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                 item.setActive(active);
             }
 
-            EnrollmentStateSyncService.SyncResult syncResult;
-            try {
-                syncResult = enrollmentStateSyncService.syncEnrollmentState(enrollment);
-            } catch (Exception syncException) {
-                LOGGER.log(Level.WARNING, "EnrollmentDetailsServlet: sync failed", syncException);
-                syncResult = null;
-            }
+            // syncResult is already resolved at the start of doGet.
 
             int progressPercent = syncResult != null
                     ? syncResult.getProgressPercent()

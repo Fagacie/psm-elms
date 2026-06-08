@@ -155,9 +155,12 @@ public class DashboardServlet extends HttpServlet {
                 systemMetrics.put("adminsCount", adminsCount);
                 request.setAttribute("notificationCount", notificationDAO.countUnreadByRecipientUserId(user.getUserId()));
 
-                int approvedCourses = courseDAO.countByStatus("Approved");
-                int pendingCourses = courseDAO.countByStatus("Pending");
-                int archivedCourses = courseDAO.countByStatus("Archived");
+                // Single DB round-trip instead of 3 separate countByStatus() calls.
+                // On Railway, each extra round-trip adds ~5-15ms of network overhead.
+                java.util.Map<String, Integer> courseCountsByStatus = courseDAO.getCourseCountsByStatus();
+                int approvedCourses = courseCountsByStatus.getOrDefault("Approved", 0);
+                int pendingCourses = courseCountsByStatus.getOrDefault("Pending", 0);
+                int archivedCourses = courseCountsByStatus.getOrDefault("Archived", 0);
                 systemMetrics.put("activeCourses", approvedCourses + pendingCourses + archivedCourses);
                 systemMetrics.put("approvedCourses", approvedCourses);
                 systemMetrics.put("pendingCourses", pendingCourses);

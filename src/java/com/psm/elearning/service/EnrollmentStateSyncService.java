@@ -55,31 +55,10 @@ public class EnrollmentStateSyncService {
         }
 
         Payment payment = paymentDAO.getPaymentByEnrollmentId(enrollment.getEnrollmentId());
-        String paymentStatus = payment != null && payment.getStatus() != null
-                ? payment.getStatus()
-                : (enrollment.getPaymentStatus() != null ? enrollment.getPaymentStatus() : "Pending");
-        String paymentRef = payment != null ? payment.getPaystackReference() : enrollment.getPaymentRef();
-        boolean paid = "Paid".equalsIgnoreCase(paymentStatus);
-
-        enrollmentDAO.updatePaymentStatus(enrollment.getEnrollmentId(), paymentStatus, paymentRef);
-        enrollment.setPaymentStatus(paymentStatus);
-        enrollment.setPaymentRef(paymentRef);
-
         List<Material> materials = materialDAO.findByCourse(enrollment.getCourseId());
-        if (materials == null) materials = new ArrayList<>();
-        int totalMaterials = materials.size();
         int viewedMaterials = materialProgressDAO.countViewedByCourse(enrollment.getUserId(), enrollment.getCourseId());
-        double materialRatio = totalMaterials == 0 ? 1.0 : Math.min(1.0, (double) viewedMaterials / totalMaterials);
-        int completionThresholdPercent = AppSettingsService.getInt(
-                AppSettingsService.KEY_LEARNING_COMPLETION_PERCENT, 100, 1, 100
-        );
-
         List<Assessment> assessments = assessmentDAO.findByCourse(enrollment.getCourseId());
-        if (assessments == null) assessments = new ArrayList<>();
-        int totalAssessments = assessments.size();
-        int passedAssessments = 0;
-        double assessmentEngagementPoints = 0.0;
-        boolean passedAllAssessments = true;
+        List<AssessmentSubmission> userSubmissions = submissionDAO.findByUser(enrollment.getUserId());
 
         List<Integer> assessmentIds = new ArrayList<>();
         for (Assessment a : assessments) {
@@ -87,8 +66,53 @@ public class EnrollmentStateSyncService {
                 assessmentIds.add(a.getAssessmentId());
             }
         }
+        com.psm.elearning.dao.AssessmentQuestionDAO questionDAO = new com.psm.elearning.dao.AssessmentQuestionDAOImpl();
+        List<com.psm.elearning.model.AssessmentQuestion> allQuestions = questionDAO.findByAssessmentIds(assessmentIds);
 
-        List<AssessmentSubmission> userSubmissions = submissionDAO.findByUser(enrollment.getUserId());
+        return syncEnrollmentState(enrollment, payment, materials, viewedMaterials, assessments, userSubmissions, allQuestions);
+    }
+
+    public SyncResult syncEnrollmentState(
+            Enrollment enrollment,
+            Payment payment,
+            List<Material> materials,
+            int viewedMaterials,
+            List<Assessment> assessments,
+            List<AssessmentSubmission> userSubmissions,
+            List<com.psm.elearning.model.AssessmentQuestion> allQuestions) {
+
+        if (enrollment == null || enrollment.getEnrollmentId() == null
+                || enrollment.getCourseId() == null || enrollment.getUserId() == null) {
+            return new SyncResult(false, false, false, false, 0, 0, 0, 0, 0,
+                    false, false, "Pending", null, "Not Started", "Pending");
+        }
+
+        String paymentStatus = payment != null && payment.getStatus() != null
+                ? payment.getStatus()
+                : (enrollment.getPaymentStatus() != null ? enrollment.getPaymentStatus() : "Pending");
+        String paymentRef = payment != null ? payment.getPaystackReference() : enrollment.getPaymentRef();
+        boolean paid = "Paid".equalsIgnoreCase(paymentStatus);
+
+        // AVOID REDUNDANT DB WRITES: Only update if status/ref changed!
+        if (!paymentStatus.equals(enrollment.getPaymentStatus()) || !java.util.Objects.equals(paymentRef, enrollment.getPaymentRef())) {
+            enrollmentDAO.updatePaymentStatus(enrollment.getEnrollmentId(), paymentStatus, paymentRef);
+        }
+        enrollment.setPaymentStatus(paymentStatus);
+        enrollment.setPaymentRef(paymentRef);
+
+        if (materials == null) materials = new ArrayList<>();
+        int totalMaterials = materials.size();
+        double materialRatio = totalMaterials == 0 ? 1.0 : Math.min(1.0, (double) viewedMaterials / totalMaterials);
+        int completionThresholdPercent = AppSettingsService.getInt(
+                AppSettingsService.KEY_LEARNING_COMPLETION_PERCENT, 100, 1, 100
+        );
+
+        if (assessments == null) assessments = new ArrayList<>();
+        int totalAssessments = assessments.size();
+        int passedAssessments = 0;
+        double assessmentEngagementPoints = 0.0;
+        boolean passedAllAssessments = true;
+
         java.util.Map<Integer, List<AssessmentSubmission>> submissionsByAssessmentId = new java.util.HashMap<>();
         if (userSubmissions != null) {
             for (AssessmentSubmission sub : userSubmissions) {
@@ -98,8 +122,6 @@ public class EnrollmentStateSyncService {
             }
         }
 
-        com.psm.elearning.dao.AssessmentQuestionDAO questionDAO = new com.psm.elearning.dao.AssessmentQuestionDAOImpl();
-        List<com.psm.elearning.model.AssessmentQuestion> allQuestions = questionDAO.findByAssessmentIds(assessmentIds);
         java.util.Map<Integer, List<com.psm.elearning.model.AssessmentQuestion>> questionsByAssessmentId = new java.util.HashMap<>();
         if (allQuestions != null) {
             for (com.psm.elearning.model.AssessmentQuestion q : allQuestions) {
@@ -122,8 +144,6 @@ public class EnrollmentStateSyncService {
         }
 
         double assessmentRatio = totalAssessments == 0 ? 1.0 : Math.min(1.0, assessmentEngagementPoints / totalAssessments);
-        // Progress = purely materials-based: viewed / total × 100.
-        // Assessment data is used for completion/certificate eligibility only.
         int progressPercent;
         if (totalMaterials == 0 && totalAssessments == 0) {
             progressPercent = 100;
@@ -143,7 +163,12 @@ public class EnrollmentStateSyncService {
         String completionStatus = completed ? "Completed" : (progressPercent > 0 ? "In Progress" : "Not Started");
         String enrollmentStatus = completed ? "Completed" : "Enrolled";
 
-        enrollmentDAO.updateLearningProgress(enrollment.getEnrollmentId(), progressPercent, completionStatus, enrollmentStatus);
+        // AVOID REDUNDANT DB WRITES: Only update if progress, completionStatus, or status changed!
+        if (enrollment.getProgress() == null || enrollment.getProgress() != progressPercent
+                || !completionStatus.equals(enrollment.getCompletionStatus())
+                || !enrollmentStatus.equals(enrollment.getStatus())) {
+            enrollmentDAO.updateLearningProgress(enrollment.getEnrollmentId(), progressPercent, completionStatus, enrollmentStatus);
+        }
         enrollment.setProgress(progressPercent);
         enrollment.setCompletionStatus(completionStatus);
         enrollment.setStatus(enrollmentStatus);

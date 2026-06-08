@@ -28,6 +28,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -140,11 +141,41 @@ public class StudentMaterialServlet extends HttpServlet {
         int totalMaterials = 0;
         int totalViewedMaterials = 0;
 
+        List<Integer> courseIds = new ArrayList<>();
+        for (Enrollment enrollment : displayEnrollments) {
+            if (enrollment.getCourseId() != null) {
+                courseIds.add(enrollment.getCourseId());
+            }
+        }
+
+        List<Material> allMaterials = new ArrayList<>();
+        List<Course> allCourses = new ArrayList<>();
+        Map<Integer, Set<Integer>> viewedMaterialIdsByCourses = new HashMap<>();
+
+        if (!courseIds.isEmpty()) {
+            allMaterials = materialDAO.findByCourseIds(courseIds);
+            allCourses = courseDAO.findByCourseIds(courseIds);
+            viewedMaterialIdsByCourses = progressDAO.findViewedMaterialIdsByCourses(userId, courseIds);
+        }
+
+        Map<Integer, List<Material>> preloadedMaterialsByCourse = new HashMap<>();
+        for (Material material : allMaterials) {
+            if (material != null && material.getCourseId() != null) {
+                preloadedMaterialsByCourse.computeIfAbsent(material.getCourseId(), k -> new ArrayList<>()).add(material);
+            }
+        }
+
+        Map<Integer, Course> preloadedCoursesById = new HashMap<>();
+        for (Course course : allCourses) {
+            if (course != null && course.getCourseId() != null) {
+                preloadedCoursesById.put(course.getCourseId(), course);
+            }
+        }
+
         for (Enrollment enrollment : displayEnrollments) {
             if (enrollment.getCourseId() == null) continue;
             int courseId = enrollment.getCourseId();
-            List<Material> materials = materialDAO.findByCourse(courseId);
-            if (materials == null) materials = new ArrayList<>();
+            List<Material> materials = preloadedMaterialsByCourse.getOrDefault(courseId, new ArrayList<>());
             int rawCount = materials.size();
             materials = filterMaterials(materials, keyword, materialType);
             materials = sortMaterials(materials, sort);
@@ -154,7 +185,7 @@ public class StudentMaterialServlet extends HttpServlet {
                     + ", keyword='" + keyword + "', materialType='" + materialType + "'");
             materialsByCourse.put(courseId, materials);
             totalMaterials += materials.size();
-            Set<Integer> viewedIds = progressDAO.findViewedMaterialIdsByCourse(userId, courseId);
+            Set<Integer> viewedIds = viewedMaterialIdsByCourses.getOrDefault(courseId, new java.util.LinkedHashSet<>());
             viewedMaterialIdsByCourse.put(courseId, viewedIds);
             int viewedInFilteredSet = 0;
             for (Material material : materials) {
@@ -164,7 +195,7 @@ public class StudentMaterialServlet extends HttpServlet {
             }
             totalViewedMaterials += viewedInFilteredSet;
 
-            Course course = courseDAO.findById(courseId);
+            Course course = preloadedCoursesById.get(courseId);
             if (course != null) {
                 courseById.put(courseId, course);
             }
