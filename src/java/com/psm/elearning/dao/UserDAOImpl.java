@@ -212,6 +212,11 @@ public class UserDAOImpl implements UserDAO {
             } catch (SQLException e) {
                 System.err.println("User delete failed: " + e.getMessage());
                 try { conn.rollback(); } catch (SQLException ex) { /* ignore rollback error */ }
+                
+                if (e.getErrorCode() == 1451) {
+                    throw new IllegalStateException("Cannot delete this user because they have associated records (e.g. created courses) that prevent deletion. Please suspend the account instead.");
+                }
+                
                 return false;
             } finally {
                 // Always reset autoCommit before the connection is returned to the pool by TWR.

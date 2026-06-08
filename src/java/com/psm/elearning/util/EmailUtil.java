@@ -35,25 +35,31 @@ public class EmailUtil {
     }
 
     /**
-     * Loads email configuration from environment variables
+     * Loads email configuration — environment variables ALWAYS take priority over DB settings.
+     * This is called once at startup and also on every createSession() to pick up live changes.
      */
     private static void loadEmailConfig() {
-        SMTP_HOST = System.getenv("SMTP_HOST");
-        SMTP_PORT = System.getenv("SMTP_PORT");
-        SMTP_USERNAME = System.getenv("SMTP_USERNAME");
-        SMTP_PASSWORD = System.getenv("SMTP_PASSWORD");
-        
-        String fromEmailEnv = System.getenv("SMTP_FROM_EMAIL");
-        FROM_EMAIL = (fromEmailEnv != null && !fromEmailEnv.isEmpty()) ? fromEmailEnv : SMTP_USERNAME;
-        
-        String fromNameEnv = System.getenv("SMTP_FROM_NAME");
-        FROM_NAME = (fromNameEnv != null && !fromNameEnv.isEmpty()) ? fromNameEnv : "PSM E-Learning Platform";
-        
-        String debugEnv = System.getenv("SMTP_DEBUG");
-        MAIL_DEBUG = "true".equalsIgnoreCase(debugEnv);
+        // --- ENV VARS (highest priority, always wins) ---
+        String envHost     = System.getenv("SMTP_HOST");
+        String envPort     = System.getenv("SMTP_PORT");
+        String envUser     = System.getenv("SMTP_USERNAME");
+        String envPass     = System.getenv("SMTP_PASSWORD");
+        String envFrom     = System.getenv("SMTP_FROM_EMAIL");
+        String envFromName = System.getenv("SMTP_FROM_NAME");
+        String envDebug    = System.getenv("SMTP_DEBUG");
 
-        if (SMTP_HOST == null || SMTP_HOST.trim().isEmpty() || SMTP_USERNAME == null || SMTP_USERNAME.trim().isEmpty()) {
-            System.err.println("SEVERE WARNING: Email functionality is disabled. Required environment variables (SMTP_HOST, SMTP_USERNAME) are missing.");
+        SMTP_HOST     = (envHost != null && !envHost.trim().isEmpty())     ? envHost.trim()     : null;
+        SMTP_PORT     = (envPort != null && !envPort.trim().isEmpty())     ? envPort.trim()     : null;
+        SMTP_USERNAME = (envUser != null && !envUser.trim().isEmpty())     ? envUser.trim()     : null;
+        SMTP_PASSWORD = (envPass != null && !envPass.trim().isEmpty())     ? envPass.trim()     : null;
+        FROM_EMAIL    = (envFrom != null && !envFrom.trim().isEmpty())     ? envFrom.trim()     : SMTP_USERNAME;
+        FROM_NAME     = (envFromName != null && !envFromName.trim().isEmpty()) ? envFromName.trim() : "PSM E-Learning Platform";
+        MAIL_DEBUG    = "true".equalsIgnoreCase(envDebug);
+
+        if (SMTP_HOST != null) {
+            System.out.println("[EmailUtil] Config source: ENVIRONMENT VARIABLES (host=" + SMTP_HOST + ", port=" + SMTP_PORT + ", user=" + SMTP_USERNAME + ")");
+        } else {
+            System.err.println("[EmailUtil] SEVERE: SMTP_HOST env var is missing. Email is DISABLED. DB settings are ignored for security.");
         }
     }
 
@@ -66,8 +72,14 @@ public class EmailUtil {
     }
 
     private static Session createSession() {
+        // Reload from env vars fresh on every call — this ensures Railway variable
+        // changes are picked up without a full redeploy, and guarantees that
+        // stale database SMTP settings never override the env vars.
+        loadEmailConfig();
+
         if (SMTP_HOST == null || SMTP_HOST.trim().isEmpty() || SMTP_USERNAME == null || SMTP_USERNAME.trim().isEmpty()) {
-            return null; // Return null early if credentials are not configured
+            System.err.println("[EmailUtil] Cannot create session: SMTP_HOST or SMTP_USERNAME is missing from environment variables.");
+            return null;
         }
 
         Properties props = new Properties();

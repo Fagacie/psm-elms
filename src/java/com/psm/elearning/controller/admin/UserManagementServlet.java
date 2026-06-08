@@ -529,10 +529,14 @@ public class UserManagementServlet extends HttpServlet {
             return;
         }
         
-        if (userDAO.delete(userId)) {
-            request.getSession().setAttribute("success", "User deleted successfully");
-        } else {
-            request.getSession().setAttribute("error", "Failed to delete user");
+        try {
+            if (userDAO.delete(userId)) {
+                request.getSession().setAttribute("success", "User deleted successfully");
+            } else {
+                request.getSession().setAttribute("error", "Failed to delete user");
+            }
+        } catch (IllegalStateException e) {
+            request.getSession().setAttribute("error", e.getMessage());
         }
         
         response.sendRedirect(request.getContextPath() + "/admin/users");
