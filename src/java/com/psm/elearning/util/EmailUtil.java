@@ -457,6 +457,47 @@ public class EmailUtil {
                 "  </p>\n" +
                 "</div>";
 
+    /**
+     * Sends a premium SaaS-style payment receipt email after successful course purchase.
+     * 
+     * @param toEmail       Recipient email address
+     * @param studentName   Student's full name
+     * @param courseTitle   Name of the purchased course
+     * @param transactionId Payment transaction ID (e.g. Paystack reference)
+     * @param date          Date of transaction
+     * @param amountPaid    Formatted amount paid (e.g. "₦15,000.00")
+     * @return true if email sent successfully via Brevo
+     */
+    public static boolean sendPaymentReceiptEmail(String toEmail, String studentName, String courseTitle, 
+                                                  String transactionId, String date, String amountPaid) {
+        String subject = "Payment Receipt - " + courseTitle;
+
+        String htmlBody = 
+            "<div style=\"max-width: 600px; margin: 0 auto; font-family: sans-serif; padding: 20px; background-color: #ffffff;\">\n" +
+            "  <h1 style=\"color: #0f172a; margin-top: 0; margin-bottom: 8px; font-size: 24px;\">PSM E-Learning Academy</h1>\n" +
+            "  <hr style=\"border: none; border-top: 1px solid #e2e8f0; margin-bottom: 24px;\">\n" +
+            "  <h2 style=\"color: #0f172a; margin-top: 0; margin-bottom: 16px; font-size: 22px;\">Payment Receipt</h2>\n" +
+            "  <p style=\"color: #334155; font-size: 16px; line-height: 1.5; margin-bottom: 24px;\">\n" +
+            "    Hello " + studentName + ", thank you for your purchase. Your payment was successful, and you now have full access to your course.\n" +
+            "  </p>\n" +
+            "  <div style=\"background-color: #f8fafc; padding: 20px; border-radius: 8px; margin: 24px 0; border: 1px solid #e2e8f0;\">\n" +
+            "    <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"font-size: 16px; color: #334155;\">\n" +
+            "      <tr><td style=\"padding-bottom: 12px;\"><strong>Course:</strong></td><td style=\"padding-bottom: 12px;\">" + courseTitle + "</td></tr>\n" +
+            "      <tr><td style=\"padding-bottom: 12px;\"><strong>Transaction ID:</strong></td><td style=\"padding-bottom: 12px;\">" + transactionId + "</td></tr>\n" +
+            "      <tr><td style=\"padding-bottom: 12px;\"><strong>Date:</strong></td><td style=\"padding-bottom: 12px;\">" + date + "</td></tr>\n" +
+            "      <tr><td style=\"padding-top: 12px; border-top: 1px solid #e2e8f0;\"><strong>Total Paid:</strong></td><td style=\"padding-top: 12px; border-top: 1px solid #e2e8f0; font-size: 18px; font-weight: bold; color: #0f172a;\">" + amountPaid + "</td></tr>\n" +
+            "    </table>\n" +
+            "  </div>\n" +
+            "  <div style=\"text-align: center; margin: 32px 0;\">\n" +
+            "    <a href=\"https://psmels.software/student/my-courses\" style=\"background-color: #0f172a; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;\">\n" +
+            "      Access Your Course\n" +
+            "    </a>\n" +
+            "  </div>\n" +
+            "  <p style=\"color: #94a3b8; font-size: 13px; text-align: center; margin-top: 32px;\">\n" +
+            "    If you have any questions about this receipt, please reply to this email.\n" +
+            "  </p>\n" +
+            "</div>";
+
         return sendHtmlEmail(toEmail, subject, htmlBody);
     }
 }

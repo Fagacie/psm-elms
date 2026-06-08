@@ -12,6 +12,13 @@ import com.psm.elearning.service.PaystackService;
 import com.psm.elearning.util.DBConnection;
 import org.json.JSONObject;
 import org.json.JSONArray;
+import com.psm.elearning.dao.UserDAO;
+import com.psm.elearning.dao.UserDAOImpl;
+import com.psm.elearning.dao.CourseDAO;
+import com.psm.elearning.dao.CourseDAOImpl;
+import com.psm.elearning.model.User;
+import com.psm.elearning.model.Course;
+import com.psm.elearning.util.EmailUtil;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -43,12 +50,16 @@ public class PaymentCallbackServlet extends HttpServlet {
     private EnrollmentDAO enrollmentDAO;
     private PaymentDAO paymentDAO;
     private PaystackService paystackService;
+    private UserDAO userDAO;
+    private CourseDAO courseDAO;
     
     @Override
     public void init() {
         enrollmentDAO = new EnrollmentDAOImpl();
         paymentDAO = new PaymentDAOImpl();
         paystackService = new PaystackService();
+        userDAO = new UserDAOImpl();
+        courseDAO = new CourseDAOImpl();
     }
     
     @Override
@@ -313,7 +324,7 @@ public class PaymentCallbackServlet extends HttpServlet {
         String nextEnrollmentStatus = AppSettingsService.getBoolean(AppSettingsService.KEY_ENROLLMENT_AUTO_ACTIVATE, true)
                 ? "Enrolled"
                 : (enrollment.getStatus() == null || enrollment.getStatus().trim().isEmpty() ? "Pending" : enrollment.getStatus());
-        return applySuccessfulStateTransaction(
+        boolean updated = applySuccessfulStateTransaction(
             payment.getPaymentId(),
             enrollment.getEnrollmentId(),
             payment.getPaystackReference(),
@@ -321,6 +332,28 @@ public class PaymentCallbackServlet extends HttpServlet {
             providerStatus,
             nextEnrollmentStatus
         );
+
+        if (updated) {
+            try {
+                User student = userDAO.getUser(enrollment.getStudentId());
+                Course course = courseDAO.getCourse(enrollment.getCourseId());
+                String dateStr = new java.text.SimpleDateFormat("MMMM dd, yyyy").format(new java.util.Date());
+                String formattedAmount = String.format("₦%,.2f", payment.getAmount());
+                new Thread(() -> {
+                    EmailUtil.sendPaymentReceiptEmail(
+                        student.getEmail(),
+                        student.getFullName(),
+                        course.getCourseName(),
+                        payment.getPaystackReference(),
+                        dateStr,
+                        formattedAmount
+                    );
+                }).start();
+            } catch (Exception e) {
+                LOGGER.log(Level.SEVERE, "Failed to send payment receipt email", e);
+            }
+        }
+        return updated;
     }
 
     private boolean ensureEnrollmentPaidState(Payment payment, String reference) {
