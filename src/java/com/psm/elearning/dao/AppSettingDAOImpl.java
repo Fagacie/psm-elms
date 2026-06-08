@@ -14,9 +14,14 @@ import java.util.Map;
 
 public class AppSettingDAOImpl implements AppSettingDAO {
 
+    private static boolean tablesEnsured = false;
+
     public AppSettingDAOImpl() {
-        ensureTableExists();
-        ensureAuditTableExists();
+        if (!tablesEnsured) {
+            ensureTableExists();
+            ensureAuditTableExists();
+            tablesEnsured = true;
+        }
     }
 
     private void ensureTableExists() {

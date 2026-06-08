@@ -197,6 +197,9 @@ public class AdminSettingsServlet extends HttpServlet {
         }
 
         boolean saved = appSettingDAO.upsertAll(input, userId);
+        if (saved) {
+            com.psm.elearning.service.AppSettingsService.clearCache();
+        }
         if (!saved) {
             if (isJson) {
                 response.setContentType("application/json");

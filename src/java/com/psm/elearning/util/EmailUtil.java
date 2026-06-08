@@ -93,14 +93,8 @@ public class EmailUtil {
      * @return Configured Session object
      */
     private static String resolveFromAddress() {
-        try {
-            com.psm.elearning.dao.AppSettingDAO dao = new com.psm.elearning.dao.AppSettingDAOImpl();
-            java.util.Map<String, String> db = dao.findAllAsMap();
-            if (db != null) {
-                String val = db.get("email.from.email");
-                if (val != null && !val.isEmpty()) return val.trim();
-            }
-        } catch (Throwable ignored) {}
+        String val = com.psm.elearning.service.AppSettingsService.getString("email.from.email", "");
+        if (!val.isEmpty()) return val;
         
         String env = System.getenv("SMTP_FROM_EMAIL");
         if (env != null && !env.isEmpty()) return env.trim();
@@ -109,14 +103,8 @@ public class EmailUtil {
     }
 
     private static String resolveFromName() {
-        try {
-            com.psm.elearning.dao.AppSettingDAO dao = new com.psm.elearning.dao.AppSettingDAOImpl();
-            java.util.Map<String, String> db = dao.findAllAsMap();
-            if (db != null) {
-                String val = db.get("email.from.name");
-                if (val != null && !val.isEmpty()) return val.trim();
-            }
-        } catch (Throwable ignored) {}
+        String val = com.psm.elearning.service.AppSettingsService.getString("email.from.name", "");
+        if (!val.isEmpty()) return val;
         
         String env = System.getenv("SMTP_FROM_NAME");
         if (env != null && !env.isEmpty()) return env.trim();
@@ -133,19 +121,17 @@ public class EmailUtil {
         String password = SMTP_PASSWORD;
         String startTls = "true";
         
-        try {
-            com.psm.elearning.dao.AppSettingDAO dao = new com.psm.elearning.dao.AppSettingDAOImpl();
-            java.util.Map<String, String> dbSettings = dao.findAllAsMap();
-            if (dbSettings != null) {
-                if (dbSettings.get("email.smtp.host") != null && !dbSettings.get("email.smtp.host").trim().isEmpty()) host = dbSettings.get("email.smtp.host").trim();
-                if (dbSettings.get("email.smtp.port") != null && !dbSettings.get("email.smtp.port").trim().isEmpty()) port = dbSettings.get("email.smtp.port").trim();
-                if (dbSettings.get("email.smtp.username") != null && !dbSettings.get("email.smtp.username").trim().isEmpty()) username = dbSettings.get("email.smtp.username").trim();
-                if (dbSettings.get("email.smtp.password") != null && !dbSettings.get("email.smtp.password").trim().isEmpty()) password = dbSettings.get("email.smtp.password").trim();
-                if (dbSettings.get("email.smtp.starttls") != null && !dbSettings.get("email.smtp.starttls").trim().isEmpty()) startTls = dbSettings.get("email.smtp.starttls").trim();
-            }
-        } catch (Throwable t) {
-            // Safe fallback
-        }
+        String dbHost = com.psm.elearning.service.AppSettingsService.getString("email.smtp.host", "");
+        String dbPort = com.psm.elearning.service.AppSettingsService.getString("email.smtp.port", "");
+        String dbUsername = com.psm.elearning.service.AppSettingsService.getString("email.smtp.username", "");
+        String dbPassword = com.psm.elearning.service.AppSettingsService.getString("email.smtp.password", "");
+        String dbStartTls = com.psm.elearning.service.AppSettingsService.getString("email.smtp.starttls", "");
+
+        if (!dbHost.isEmpty()) host = dbHost;
+        if (!dbPort.isEmpty()) port = dbPort;
+        if (!dbUsername.isEmpty()) username = dbUsername;
+        if (!dbPassword.isEmpty()) password = dbPassword;
+        if (!dbStartTls.isEmpty()) startTls = dbStartTls;
 
         // Env overrides fallback
         if (host == null || host.isEmpty() || host.equals(SMTP_HOST)) {

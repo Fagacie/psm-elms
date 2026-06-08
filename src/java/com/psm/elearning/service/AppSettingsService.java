@@ -25,25 +25,38 @@ public final class AppSettingsService {
     public static final String KEY_ASSESSMENT_MAX_ATTEMPTS = "assessment.defaultMaxAttempts";
 
     private static final AppSettingDAO APP_SETTING_DAO = new AppSettingDAOImpl();
+    private static Map<String, String> cachedSettings = null;
+    private static final Object CACHE_LOCK = new Object();
 
     private AppSettingsService() {
     }
 
     public static Map<String, String> getSettings() {
-        Map<String, String> merged = defaults();
-        try {
-            Map<String, String> persisted = APP_SETTING_DAO.findAllAsMap();
-            if (persisted != null) {
-                for (Map.Entry<String, String> entry : persisted.entrySet()) {
-                    if (entry.getValue() != null && !entry.getValue().trim().isEmpty()) {
-                        merged.put(entry.getKey(), entry.getValue().trim());
+        synchronized (CACHE_LOCK) {
+            if (cachedSettings == null) {
+                Map<String, String> merged = defaults();
+                try {
+                    Map<String, String> persisted = APP_SETTING_DAO.findAllAsMap();
+                    if (persisted != null) {
+                        for (Map.Entry<String, String> entry : persisted.entrySet()) {
+                            if (entry.getValue() != null && !entry.getValue().trim().isEmpty()) {
+                                merged.put(entry.getKey(), entry.getValue().trim());
+                            }
+                        }
                     }
+                } catch (Exception ignored) {
+                    // Fall back to defaults to keep the app available.
                 }
+                cachedSettings = merged;
             }
-        } catch (Exception ignored) {
-            // Fall back to defaults to keep the app available.
+            return new java.util.HashMap<>(cachedSettings);
         }
-        return merged;
+    }
+
+    public static void clearCache() {
+        synchronized (CACHE_LOCK) {
+            cachedSettings = null;
+        }
     }
 
     public static String getString(String key, String fallback) {

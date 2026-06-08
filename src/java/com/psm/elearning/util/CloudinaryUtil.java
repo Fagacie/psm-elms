@@ -25,26 +25,22 @@ public class CloudinaryUtil {
 
     private static void loadConfigDynamic() {
         try {
-            com.psm.elearning.dao.AppSettingDAO dao = new com.psm.elearning.dao.AppSettingDAOImpl();
-            Map<String, String> dbSettings = dao.findAllAsMap();
-            if (dbSettings != null) {
-                String dbCloudName = dbSettings.get("cloudinary.cloudName");
-                String dbApiKey = dbSettings.get("cloudinary.apiKey");
-                String dbApiSecret = dbSettings.get("cloudinary.apiSecret");
-                if (dbCloudName != null && !dbCloudName.trim().isEmpty() &&
-                    dbApiKey != null && !dbApiKey.trim().isEmpty() &&
-                    dbApiSecret != null && !dbApiSecret.trim().isEmpty()) {
-                    cloudName = dbCloudName.trim();
-                    apiKey = dbApiKey.trim();
-                    apiSecret = dbApiSecret.trim();
-                    
-                    props = new Properties();
-                    props.put("cloudinary.folder_passports", dbSettings.getOrDefault("cloudinary.folderPassports", "psm/passports"));
-                    props.put("cloudinary.folder_materials", dbSettings.getOrDefault("cloudinary.folderMaterials", "psm/materials"));
-                    props.put("cloudinary.folder_certificates", dbSettings.getOrDefault("cloudinary.folderCertificates", "psm/certificates"));
-                    props.put("cloudinary.folder_course_banners", dbSettings.getOrDefault("cloudinary.folderCourseBanners", "psm/course-banners"));
-                    return;
-                }
+            String dbCloudName = com.psm.elearning.service.AppSettingsService.getString("cloudinary.cloudName", "");
+            String dbApiKey = com.psm.elearning.service.AppSettingsService.getString("cloudinary.apiKey", "");
+            String dbApiSecret = com.psm.elearning.service.AppSettingsService.getString("cloudinary.apiSecret", "");
+            if (!dbCloudName.isEmpty() && !dbApiKey.isEmpty() && !dbApiSecret.isEmpty()) {
+                cloudName = dbCloudName;
+                apiKey = dbApiKey;
+                apiSecret = dbApiSecret;
+                
+                props = new Properties();
+                props.put("cloudinary.folder_passports", com.psm.elearning.service.AppSettingsService.getString("cloudinary.folderPassports", "psm/passports"));
+                props.put("cloudinary.folder_materials", com.psm.elearning.service.AppSettingsService.getString("cloudinary.folderMaterials", "psm/materials"));
+                props.put("cloudinary.folder_certificates", com.psm.elearning.service.AppSettingsService.getString("cloudinary.folderCertificates", "psm/certificates"));
+                props.put("cloudinary.folder_course_banners", com.psm.elearning.service.AppSettingsService.getString("cloudinary.folderCourseBanners", "psm/course-banners"));
+                props.put("cloudinary.folder_assessment_answers", com.psm.elearning.service.AppSettingsService.getString("cloudinary.folderAssessmentAnswers", "psm/assessment-answers"));
+                props.put("cloudinary.folder_assessment_attachments", com.psm.elearning.service.AppSettingsService.getString("cloudinary.folderAssessmentAttachments", "psm/assessment-attachments"));
+                return;
             }
         } catch (Throwable t) {
             System.err.println("Could not load Cloudinary settings from database: " + t.getMessage());
