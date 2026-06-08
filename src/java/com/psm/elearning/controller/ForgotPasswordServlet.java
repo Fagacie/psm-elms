@@ -68,11 +68,7 @@ public class ForgotPasswordServlet extends HttpServlet {
         }
         
         // Build reset link
-        String resetLink = request.getScheme() + "://" + 
-                          request.getServerName() + ":" + 
-                          request.getServerPort() + 
-                          request.getContextPath() + 
-                          "/reset-password?token=" + token;
+        String resetLink = "https://psmels.software/reset-password?token=" + token;
         
         // Send email
         try {
