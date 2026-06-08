@@ -1,210 +1,143 @@
 package com.psm.elearning.util;
 
-import java.util.Properties;
+import java.io.OutputStream;
 import java.io.InputStream;
-import java.io.IOException;
-import javax.mail.Authenticator;
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.PasswordAuthentication;
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 
 /**
- * Email Utility for sending emails using JavaMail API
- * Supports password reset, registration confirmation, and notifications
- * 
+ * Email Utility for sending emails via Brevo HTTP API (HTTPS/port 443).
+ * Uses Brevo's transactional email REST API to bypass all SMTP port restrictions
+ * on cloud platforms like Railway.
+ *
+ * Required environment variables:
+ *   BREVO_API_KEY   — your Brevo v3 API key (starts with "xkeysib-")
+ *   SMTP_FROM_EMAIL — sender address (defaults to SMTP_USERNAME if not set)
+ *   SMTP_FROM_NAME  — sender display name (optional)
+ *
  * @author PSM E-Learning Team
- * @version 1.0
+ * @version 2.0
  */
 public class EmailUtil {
 
-    private static String SMTP_HOST;
-    private static String SMTP_PORT;
-    private static String SMTP_USERNAME;
-    private static String SMTP_PASSWORD;
+    private static final String BREVO_API_URL = "https://api.brevo.com/v3/smtp/email";
+
+    private static String BREVO_API_KEY;
     private static String FROM_EMAIL;
     private static String FROM_NAME;
-    private static boolean MAIL_DEBUG = false;
 
-    // Static block to load email configuration
     static {
-        loadEmailConfig();
+        loadConfig();
+    }
+
+    private static void loadConfig() {
+        BREVO_API_KEY = System.getenv("BREVO_API_KEY");
+        String fromEmail = System.getenv("SMTP_FROM_EMAIL");
+        String smtpUser  = System.getenv("SMTP_USERNAME");
+        String fromName  = System.getenv("SMTP_FROM_NAME");
+
+        FROM_EMAIL = (fromEmail != null && !fromEmail.trim().isEmpty()) ? fromEmail.trim()
+                   : (smtpUser  != null && !smtpUser.trim().isEmpty())  ? smtpUser.trim()
+                   : null;
+        FROM_NAME  = (fromName != null && !fromName.trim().isEmpty()) ? fromName.trim()
+                   : "PSM E-Learning Platform";
+
+        if (BREVO_API_KEY != null && !BREVO_API_KEY.trim().isEmpty()) {
+            System.out.println("[EmailUtil] Mode: Brevo HTTP API. Sender: " + FROM_EMAIL);
+        } else {
+            System.err.println("[EmailUtil] WARNING: BREVO_API_KEY is missing. Email is DISABLED.");
+        }
+    }
+
+    /** Escape a string value for safe embedding in a JSON literal. */
+    private static String jsonEscape(String s) {
+        if (s == null) return "";
+        return s.replace("\\", "\\\\")
+                .replace("\"", "\\\"")
+                .replace("\n", "\\n")
+                .replace("\r", "\\r")
+                .replace("\t", "\\t");
     }
 
     /**
-     * Loads email configuration — environment variables ALWAYS take priority over DB settings.
-     * This is called once at startup and also on every createSession() to pick up live changes.
+     * Core send method — POSTs to Brevo's transactional email API over HTTPS.
+     *
+     * @param toEmail   Recipient address
+     * @param subject   Email subject
+     * @param htmlBody  HTML content (use plain text wrapped in &lt;pre&gt; for plain text)
+     * @param isHtml    true to send as HTML, false for plain text
+     * @return true if Brevo accepted the message (2xx response)
      */
-    private static void loadEmailConfig() {
-        // --- ENV VARS (highest priority, always wins) ---
-        String envHost     = System.getenv("SMTP_HOST");
-        String envPort     = System.getenv("SMTP_PORT");
-        String envUser     = System.getenv("SMTP_USERNAME");
-        String envPass     = System.getenv("SMTP_PASSWORD");
-        String envFrom     = System.getenv("SMTP_FROM_EMAIL");
-        String envFromName = System.getenv("SMTP_FROM_NAME");
-        String envDebug    = System.getenv("SMTP_DEBUG");
+    private static boolean sendViaBrevo(String toEmail, String subject, String content, boolean isHtml) {
+        loadConfig(); // Always reload to pick up Railway variable changes live
 
-        SMTP_HOST     = (envHost != null && !envHost.trim().isEmpty())     ? envHost.trim()     : null;
-        SMTP_PORT     = (envPort != null && !envPort.trim().isEmpty())     ? envPort.trim()     : null;
-        SMTP_USERNAME = (envUser != null && !envUser.trim().isEmpty())     ? envUser.trim()     : null;
-        SMTP_PASSWORD = (envPass != null && !envPass.trim().isEmpty())     ? envPass.trim()     : null;
-        FROM_EMAIL    = (envFrom != null && !envFrom.trim().isEmpty())     ? envFrom.trim()     : SMTP_USERNAME;
-        FROM_NAME     = (envFromName != null && !envFromName.trim().isEmpty()) ? envFromName.trim() : "PSM E-Learning Platform";
-        MAIL_DEBUG    = "true".equalsIgnoreCase(envDebug);
-
-        if (SMTP_HOST != null) {
-            System.out.println("[EmailUtil] Config source: ENVIRONMENT VARIABLES (host=" + SMTP_HOST + ", port=" + SMTP_PORT + ", user=" + SMTP_USERNAME + ")");
-        } else {
-            System.err.println("[EmailUtil] SEVERE: SMTP_HOST env var is missing. Email is DISABLED. DB settings are ignored for security.");
+        if (BREVO_API_KEY == null || BREVO_API_KEY.trim().isEmpty()) {
+            System.err.println("[EmailUtil] Cannot send email: BREVO_API_KEY env var is missing.");
+            return false;
         }
-    }
-
-    private static String resolveFromAddress() {
-        return (FROM_EMAIL != null && !FROM_EMAIL.trim().isEmpty()) ? FROM_EMAIL : SMTP_USERNAME;
-    }
-
-    private static String resolveFromName() {
-        return (FROM_NAME != null && !FROM_NAME.trim().isEmpty()) ? FROM_NAME : "PSM E-Learning Platform";
-    }
-
-    private static Session createSession() {
-        // Reload from env vars fresh on every call — this ensures Railway variable
-        // changes are picked up without a full redeploy, and guarantees that
-        // stale database SMTP settings never override the env vars.
-        loadEmailConfig();
-
-        if (SMTP_HOST == null || SMTP_HOST.trim().isEmpty() || SMTP_USERNAME == null || SMTP_USERNAME.trim().isEmpty()) {
-            System.err.println("[EmailUtil] Cannot create session: SMTP_HOST or SMTP_USERNAME is missing from environment variables.");
-            return null;
+        if (FROM_EMAIL == null || FROM_EMAIL.trim().isEmpty()) {
+            System.err.println("[EmailUtil] Cannot send email: No sender address configured (set SMTP_FROM_EMAIL or SMTP_USERNAME).");
+            return false;
         }
 
-        Properties props = new Properties();
-        
-        String host = SMTP_HOST;
-        String port = (SMTP_PORT != null && !SMTP_PORT.trim().isEmpty()) ? SMTP_PORT : "587";
-        String username = SMTP_USERNAME;
-        String password = SMTP_PASSWORD != null ? SMTP_PASSWORD : "";
-        
-        String startTls = System.getenv("SMTP_STARTTLS");
-        if (startTls == null || startTls.isEmpty()) startTls = "true";
+        String contentField = isHtml ? "htmlContent" : "textContent";
+        String json = "{"
+            + "\"sender\":{\"name\":\"" + jsonEscape(FROM_NAME) + "\",\"email\":\"" + jsonEscape(FROM_EMAIL) + "\"},"
+            + "\"to\":[{\"email\":\"" + jsonEscape(toEmail) + "\"}],"
+            + "\"subject\":\"" + jsonEscape(subject) + "\","
+            + "\"" + contentField + "\":\"" + jsonEscape(content) + "\""
+            + "}";
 
-        props.put("mail.smtp.host", host);
-        props.put("mail.smtp.port", port);
-        props.put("mail.smtp.auth", "true");
-        props.put("mail.smtp.connectiontimeout", "10000"); // 10 seconds
-        props.put("mail.smtp.timeout", "10000"); // 10 seconds
-        
-        // Disable STARTTLS if we are using port 465 (pure SSL)
-        if ("465".equals(port)) {
-            props.put("mail.smtp.starttls.enable", "false");
-            props.put("mail.smtp.starttls.required", "false");
-            props.put("mail.smtp.socketFactory.port", port);
-            props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
-            props.put("mail.smtp.ssl.enable", "true");
-        } else {
-            props.put("mail.smtp.starttls.enable", startTls);
-            props.put("mail.smtp.starttls.required", startTls);
-            props.put("mail.smtp.ssl.protocols", "TLSv1.2");
-            props.put("mail.smtp.ssl.trust", host);
-        }
-        
-        final String authUser = username;
-        final String authPass = password;
-        Session session = Session.getInstance(props, new Authenticator() {
-            @Override
-            protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(authUser, authPass);
+        try {
+            URL url = new URL(BREVO_API_URL);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("accept", "application/json");
+            conn.setRequestProperty("api-key", BREVO_API_KEY.trim());
+            conn.setRequestProperty("content-type", "application/json");
+            conn.setConnectTimeout(15000);
+            conn.setReadTimeout(15000);
+            conn.setDoOutput(true);
+
+            byte[] payload = json.getBytes(StandardCharsets.UTF_8);
+            conn.setFixedLengthStreamingMode(payload.length);
+            try (OutputStream os = conn.getOutputStream()) {
+                os.write(payload);
             }
-        });
-        if (MAIL_DEBUG) {
-            session.setDebug(true);
+
+            int status = conn.getResponseCode();
+            if (status >= 200 && status < 300) {
+                System.out.println("[EmailUtil] Email sent successfully to " + toEmail + " (HTTP " + status + ")");
+                return true;
+            } else {
+                InputStream errStream = conn.getErrorStream();
+                String errBody = "";
+                if (errStream != null) {
+                    errBody = new String(errStream.readAllBytes(), StandardCharsets.UTF_8);
+                }
+                System.err.println("[EmailUtil] Brevo API error " + status + " sending to " + toEmail + ": " + errBody);
+                return false;
+            }
+        } catch (Exception e) {
+            System.err.println("[EmailUtil] Failed to send email to " + toEmail + ": " + e.getMessage());
+            e.printStackTrace();
+            return false;
         }
-        return session;
     }
 
     /**
-     * Sends a plain text email
-     * 
-     * @param toEmail Recipient email address
-     * @param subject Email subject
-     * @param body    Email body
-     * @return true if email sent successfully, false otherwise
+     * Sends a plain text email.
      */
     public static boolean sendEmail(String toEmail, String subject, String body) {
-        try {
-            Session session = createSession();
-            if (session == null) {
-                System.err.println("ERROR: Could not send email to " + toEmail + ". SMTP credentials are not fully configured in environment variables.");
-                return false;
-            }
-
-            Message message = new MimeMessage(session);
-            String fromAddress = resolveFromAddress();
-            message.setFrom(
-                    new InternetAddress(fromAddress, resolveFromName()));
-            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(toEmail));
-            message.setSubject(subject);
-            message.setText(body);
-
-            Transport.send(message);
-            return true;
-
-        } catch (MessagingException e) {
-            System.err.println("Failed to send email to " + toEmail + ": " + e.getMessage());
-            e.printStackTrace();
-            return false;
-        } catch (java.io.UnsupportedEncodingException e) {
-            System.err.println("Email encoding error: " + e.getMessage());
-            e.printStackTrace();
-            return false;
-        } catch (Exception e) {
-            System.err.println("Unexpected error sending email: " + e.getMessage());
-            e.printStackTrace();
-            return false;
-        }
+        return sendViaBrevo(toEmail, subject, body, false);
     }
 
     /**
-     * Sends an HTML email
-     * 
-     * @param toEmail  Recipient email address
-     * @param subject  Email subject
-     * @param htmlBody HTML email body
-     * @return true if email sent successfully, false otherwise
+     * Sends an HTML email.
      */
     public static boolean sendHtmlEmail(String toEmail, String subject, String htmlBody) {
-        try {
-            Session session = createSession();
-            if (session == null) {
-                System.err.println("ERROR: Could not send HTML email to " + toEmail + ". SMTP credentials are not fully configured in environment variables.");
-                return false;
-            }
-
-            Message message = new MimeMessage(session);
-            String fromAddress = resolveFromAddress();
-            message.setFrom(
-                    new InternetAddress(fromAddress, resolveFromName()));
-            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(toEmail));
-            message.setSubject(subject);
-            message.setContent(htmlBody, "text/html; charset=utf-8");
-
-            Transport.send(message);
-            System.out.println("HTML Email sent successfully to: " + toEmail);
-            return true;
-
-        } catch (MessagingException | java.io.UnsupportedEncodingException e) {
-            System.err.println("Failed to send HTML email: " + e.getMessage());
-            e.printStackTrace();
-            return false;
-        } catch (Exception e) {
-            System.err.println("Unexpected error sending HTML email: " + e.getMessage());
-            e.printStackTrace();
-            return false;
-        }
+        return sendViaBrevo(toEmail, subject, htmlBody, true);
     }
 
     /**
