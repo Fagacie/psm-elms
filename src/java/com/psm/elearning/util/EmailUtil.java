@@ -120,6 +120,10 @@ public class EmailUtil {
     public static boolean sendEmail(String toEmail, String subject, String body) {
         try {
             Session session = createSession();
+            if (session == null) {
+                System.err.println("ERROR: Could not send email to " + toEmail + ". SMTP credentials are not fully configured in environment variables.");
+                return false;
+            }
 
             Message message = new MimeMessage(session);
             String fromAddress = resolveFromAddress();
@@ -140,6 +144,10 @@ public class EmailUtil {
             System.err.println("Email encoding error: " + e.getMessage());
             e.printStackTrace();
             return false;
+        } catch (Exception e) {
+            System.err.println("Unexpected error sending email: " + e.getMessage());
+            e.printStackTrace();
+            return false;
         }
     }
 
@@ -154,6 +162,10 @@ public class EmailUtil {
     public static boolean sendHtmlEmail(String toEmail, String subject, String htmlBody) {
         try {
             Session session = createSession();
+            if (session == null) {
+                System.err.println("ERROR: Could not send HTML email to " + toEmail + ". SMTP credentials are not fully configured in environment variables.");
+                return false;
+            }
 
             Message message = new MimeMessage(session);
             String fromAddress = resolveFromAddress();
@@ -169,6 +181,10 @@ public class EmailUtil {
 
         } catch (MessagingException | java.io.UnsupportedEncodingException e) {
             System.err.println("Failed to send HTML email: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        } catch (Exception e) {
+            System.err.println("Unexpected error sending HTML email: " + e.getMessage());
             e.printStackTrace();
             return false;
         }
