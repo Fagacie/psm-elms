@@ -125,22 +125,6 @@ public class AdminSettingsServlet extends HttpServlet {
         Map<String, String> input = buildInput(request, json, existing);
         String action = getVal(request, json, "action", "action").toLowerCase();
 
-        String validationError = validate(input);
-        if (validationError != null) {
-            if (isJson) {
-                response.setContentType("application/json");
-                response.setCharacterEncoding("UTF-8");
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                JSONObject respObj = new JSONObject();
-                respObj.put("success", false);
-                respObj.put("message", validationError);
-                response.getWriter().write(respObj.toString());
-            } else {
-                renderPage(request, response, mergeWithDefaults(input), null, validationError, null);
-            }
-            return;
-        }
-
         if ("testsmtp".equals(action)) {
             String smtpError = validateSmtp(input);
             if (smtpError != null) {
@@ -182,6 +166,24 @@ public class AdminSettingsServlet extends HttpServlet {
             }
             return;
         }
+
+        String validationError = validate(input);
+        if (validationError != null) {
+            if (isJson) {
+                response.setContentType("application/json");
+                response.setCharacterEncoding("UTF-8");
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                JSONObject respObj = new JSONObject();
+                respObj.put("success", false);
+                respObj.put("message", validationError);
+                response.getWriter().write(respObj.toString());
+            } else {
+                renderPage(request, response, mergeWithDefaults(input), null, validationError, null);
+            }
+            return;
+        }
+
+
 
         Integer userId = resolveUserId(session);
         if (userId == null) {

@@ -83,16 +83,21 @@ public class EmailUtil {
         props.put("mail.smtp.host", host);
         props.put("mail.smtp.port", port);
         props.put("mail.smtp.auth", "true");
-        props.put("mail.smtp.starttls.enable", startTls != null ? startTls : "true");
-        props.put("mail.smtp.starttls.required", startTls != null ? startTls : "true");
-        props.put("mail.smtp.ssl.protocols", "TLSv1.2");
-        props.put("mail.smtp.ssl.trust", host);
+        props.put("mail.smtp.connectiontimeout", "10000"); // 10 seconds
+        props.put("mail.smtp.timeout", "10000"); // 10 seconds
         
-        // Add SSL support for port 465
+        // Disable STARTTLS if we are using port 465 (pure SSL)
         if ("465".equals(port)) {
+            props.put("mail.smtp.starttls.enable", "false");
+            props.put("mail.smtp.starttls.required", "false");
             props.put("mail.smtp.socketFactory.port", port);
             props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
             props.put("mail.smtp.ssl.enable", "true");
+        } else {
+            props.put("mail.smtp.starttls.enable", startTls);
+            props.put("mail.smtp.starttls.required", startTls);
+            props.put("mail.smtp.ssl.protocols", "TLSv1.2");
+            props.put("mail.smtp.ssl.trust", host);
         }
         
         final String authUser = username;
