@@ -336,3 +336,39 @@ html[data-theme='dark'] .hub_completionToggleComplete {
 html[data-theme='dark'] .hub_stage {
     background: #0f172a !important;
 }
+
+/* ==========================================================================
+   MOBILE RESPONSIVENESS
+   ========================================================================== */
+
+@media (max-width: 768px) {
+    .hub_splitView {
+        flex-direction: column-reverse;
+    }
+    .hub_sidebar {
+        width: 100%;
+        flex: 1;
+        border-right: none;
+        border-top: 1px solid #e2e8f0;
+    }
+    html[data-theme='dark'] .hub_sidebar {
+        border-top-color: rgba(255, 255, 255, 0.08) !important;
+    }
+    .hub_stage {
+        flex: 1.5;
+        padding: 16px;
+    }
+    .hub_topBar {
+        padding: 0 16px;
+    }
+    .hub_courseTitle {
+        max-width: 40%;
+        font-size: 0.9rem;
+    }
+    .hub_progressIndicator {
+        width: 60px;
+    }
+    .hub_backBtn span {
+        display: none;
+    }
+}
