@@ -1,5 +1,6 @@
 package com.psm.elearning.util;
 
+import com.psm.elearning.service.AppSettingsService;
 import java.util.Properties;
 import java.io.InputStream;
 import java.io.IOException;
@@ -35,25 +36,74 @@ public class EmailUtil {
     }
 
     /**
-     * Loads email configuration from environment variables
+     * Loads email configuration with environment variables taking priority.
+     * Environment variables are always checked first. Database settings
+     * (via AppSettingsService) are used only as a fallback when an environment
+     * variable is absent or empty. This ensures Railway environment variables
+     * always override any stale values stored in the database.
      */
     private static void loadEmailConfig() {
-        SMTP_HOST = System.getenv("SMTP_HOST");
-        SMTP_PORT = System.getenv("SMTP_PORT");
-        SMTP_USERNAME = System.getenv("SMTP_USERNAME");
-        SMTP_PASSWORD = System.getenv("SMTP_PASSWORD");
-        
-        String fromEmailEnv = System.getenv("SMTP_FROM_EMAIL");
-        FROM_EMAIL = (fromEmailEnv != null && !fromEmailEnv.isEmpty()) ? fromEmailEnv : SMTP_USERNAME;
-        
-        String fromNameEnv = System.getenv("SMTP_FROM_NAME");
-        FROM_NAME = (fromNameEnv != null && !fromNameEnv.isEmpty()) ? fromNameEnv : "PSM E-Learning Platform";
-        
+        // --- SMTP Host ---
+        String envHost = System.getenv("SMTP_HOST");
+        if (envHost != null && !envHost.trim().isEmpty()) {
+            SMTP_HOST = envHost.trim();
+        } else {
+            SMTP_HOST = AppSettingsService.getString("email.smtp.host", null);
+        }
+
+        // --- SMTP Port ---
+        String envPort = System.getenv("SMTP_PORT");
+        if (envPort != null && !envPort.trim().isEmpty()) {
+            SMTP_PORT = envPort.trim();
+        } else {
+            SMTP_PORT = AppSettingsService.getString("email.smtp.port", "587");
+        }
+
+        // --- SMTP Username ---
+        String envUsername = System.getenv("SMTP_USERNAME");
+        if (envUsername != null && !envUsername.trim().isEmpty()) {
+            SMTP_USERNAME = envUsername.trim();
+        } else {
+            SMTP_USERNAME = AppSettingsService.getString("email.smtp.username", null);
+        }
+
+        // --- SMTP Password ---
+        String envPassword = System.getenv("SMTP_PASSWORD");
+        if (envPassword != null && !envPassword.trim().isEmpty()) {
+            SMTP_PASSWORD = envPassword.trim();
+        } else {
+            SMTP_PASSWORD = AppSettingsService.getString("email.smtp.password", null);
+        }
+
+        // --- From Email ---
+        String envFromEmail = System.getenv("SMTP_FROM_EMAIL");
+        if (envFromEmail != null && !envFromEmail.trim().isEmpty()) {
+            FROM_EMAIL = envFromEmail.trim();
+        } else {
+            String dbFromEmail = AppSettingsService.getString("email.from.email", null);
+            FROM_EMAIL = (dbFromEmail != null && !dbFromEmail.isEmpty()) ? dbFromEmail : SMTP_USERNAME;
+        }
+
+        // --- From Name ---
+        String envFromName = System.getenv("SMTP_FROM_NAME");
+        if (envFromName != null && !envFromName.trim().isEmpty()) {
+            FROM_NAME = envFromName.trim();
+        } else {
+            FROM_NAME = AppSettingsService.getString("email.from.name", "PSM E-Learning Platform");
+        }
+
+        // --- Debug flag ---
         String debugEnv = System.getenv("SMTP_DEBUG");
         MAIL_DEBUG = "true".equalsIgnoreCase(debugEnv);
 
         if (SMTP_HOST == null || SMTP_HOST.trim().isEmpty() || SMTP_USERNAME == null || SMTP_USERNAME.trim().isEmpty()) {
-            System.err.println("SEVERE WARNING: Email functionality is disabled. Required environment variables (SMTP_HOST, SMTP_USERNAME) are missing.");
+            System.err.println("SEVERE WARNING: Email functionality is disabled. Required SMTP configuration " +
+                    "(SMTP_HOST, SMTP_USERNAME) is missing from both environment variables and database settings.");
+        } else {
+            System.out.println("EmailUtil: SMTP configured — host=" + SMTP_HOST + ", port=" + SMTP_PORT +
+                    ", user=" + SMTP_USERNAME +
+                    " [source: " + (System.getenv("SMTP_HOST") != null && !System.getenv("SMTP_HOST").trim().isEmpty()
+                            ? "environment variables" : "database settings") + "]");
         }
     }
 
@@ -77,8 +127,11 @@ public class EmailUtil {
         String username = SMTP_USERNAME;
         String password = SMTP_PASSWORD != null ? SMTP_PASSWORD : "";
         
+        // Env var takes priority; fall back to database setting, then default to "true"
         String startTls = System.getenv("SMTP_STARTTLS");
-        if (startTls == null || startTls.isEmpty()) startTls = "true";
+        if (startTls == null || startTls.trim().isEmpty()) {
+            startTls = AppSettingsService.getString("email.smtp.starttls", "true");
+        }
 
         props.put("mail.smtp.host", host);
         props.put("mail.smtp.port", port);
