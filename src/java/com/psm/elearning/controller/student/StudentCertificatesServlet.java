@@ -55,8 +55,16 @@ public class StudentCertificatesServlet extends HttpServlet {
                 continue;
             }
             EnrollmentStateSyncService.SyncResult syncResult = enrollmentStateSyncService.syncEnrollmentState(enrollment);
-            Certificate existing = certificateDAO.findByEnrollment(enrollment.getEnrollmentId());
-            if (existing != null) {
+            boolean hasCertificate = false;
+            if (issuedCertificates != null) {
+                for (CertificateView cv : issuedCertificates) {
+                    if (cv != null && cv.getEnrollmentId() == enrollment.getEnrollmentId()) {
+                        hasCertificate = true;
+                        break;
+                    }
+                }
+            }
+            if (hasCertificate) {
                 continue;
             }
 

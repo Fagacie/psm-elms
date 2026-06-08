@@ -198,6 +198,38 @@ public interface EnrollmentDAO {
         public int getEnrollmentCount() { return enrollmentCount; }
         public double getRevenue() { return revenue; }
     }
+
+    /**
+     * Statistics for instructor dashboard.
+     */
+    class InstructorStats {
+        private final int studentCount;
+        private final int enrollmentCount;
+        private final int pendingCount;
+        private final int activeCount;
+
+        public InstructorStats(int studentCount, int enrollmentCount, int pendingCount, int activeCount) {
+            this.studentCount = studentCount;
+            this.enrollmentCount = enrollmentCount;
+            this.pendingCount = pendingCount;
+            this.activeCount = activeCount;
+        }
+
+        public int getStudentCount() { return studentCount; }
+        public int getEnrollmentCount() { return enrollmentCount; }
+        public int getPendingCount() { return pendingCount; }
+        public int getActiveCount() { return activeCount; }
+    }
+
+    /**
+     * Fetch aggregate statistics for an instructor.
+     */
+    InstructorStats getInstructorStats(Integer instructorId);
+
+    /**
+     * Get student enrollment counts grouped by course IDs.
+     */
+    java.util.Map<Integer, Integer> getEnrollmentCountsByCourseIds(List<Integer> courseIds);
 }
 
 

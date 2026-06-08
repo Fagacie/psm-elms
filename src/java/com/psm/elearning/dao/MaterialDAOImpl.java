@@ -17,14 +17,24 @@ public class MaterialDAOImpl implements MaterialDAO {
         return false;
     }
 
+    private static Boolean hasDisplayOrderColumnCache = null;
+
     private boolean hasDisplayOrderColumn(Connection conn) {
+        if (hasDisplayOrderColumnCache != null) {
+            return hasDisplayOrderColumnCache;
+        }
         try {
             String catalog = conn.getCatalog();
             try (ResultSet rs = conn.getMetaData().getColumns(catalog, null, "Material", "DisplayOrder")) {
-                if (rs.next()) return true;
+                if (rs.next()) {
+                    hasDisplayOrderColumnCache = true;
+                    return true;
+                }
             }
             try (ResultSet rs = conn.getMetaData().getColumns(catalog, null, "material", "DisplayOrder")) {
-                return rs.next();
+                boolean result = rs.next();
+                hasDisplayOrderColumnCache = result;
+                return result;
             }
         } catch (SQLException e) {
             return false;
@@ -138,6 +148,41 @@ public class MaterialDAOImpl implements MaterialDAO {
             }
         } catch (SQLException e) {
             System.err.println("Material findByCourse failed: " + e.getMessage());
+        }
+        return list;
+    }
+
+    @Override
+    public List<Material> findByCourseIds(List<Integer> courseIds) {
+        List<Material> list = new ArrayList<>();
+        if (courseIds == null || courseIds.isEmpty()) {
+            return list;
+        }
+        try (Connection conn = DBConnection.getConnection()) {
+            boolean hasDisplayOrder = hasDisplayOrderColumn(conn);
+            StringBuilder sql = new StringBuilder("SELECT * FROM Material WHERE CourseID IN (");
+            for (int i = 0; i < courseIds.size(); i++) {
+                if (i > 0) sql.append(",");
+                sql.append("?");
+            }
+            sql.append(") AND (IsDeleted=0 OR IsDeleted IS NULL) ");
+            if (hasDisplayOrder) {
+                sql.append("ORDER BY CASE WHEN DisplayOrder IS NULL THEN 1 ELSE 0 END, DisplayOrder ASC, UploadDate DESC, MaterialID DESC");
+            } else {
+                sql.append("ORDER BY UploadDate DESC");
+            }
+            try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+                for (int i = 0; i < courseIds.size(); i++) {
+                    ps.setInt(i + 1, courseIds.get(i));
+                }
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        list.add(mapRow(rs));
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Material findByCourseIds failed: " + e.getMessage());
         }
         return list;
     }

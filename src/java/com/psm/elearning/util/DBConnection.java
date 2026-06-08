@@ -71,20 +71,46 @@ public class DBConnection {
         if (envPassword != null) {
             props.setProperty("db.password", envPassword);
         }
+
+        String envMaxActive = System.getenv("DB_POOL_MAX_ACTIVE");
+        String envMinIdle = System.getenv("DB_POOL_MIN_IDLE");
+        String envConnTimeout = System.getenv("DB_POOL_CONNECTION_TIMEOUT");
+
+        if (envMaxActive != null && !envMaxActive.trim().isEmpty()) {
+            props.setProperty("db.pool.maxActive", envMaxActive.trim());
+        }
+        if (envMinIdle != null && !envMinIdle.trim().isEmpty()) {
+            props.setProperty("db.pool.minIdle", envMinIdle.trim());
+        }
+        if (envConnTimeout != null && !envConnTimeout.trim().isEmpty()) {
+            props.setProperty("db.pool.connectionTimeout", envConnTimeout.trim());
+        }
     }
 
     private static void initializePool(Properties props) {
         HikariConfig config = new HikariConfig();
         config.setDriverClassName(props.getProperty("db.driver", "com.mysql.cj.jdbc.Driver"));
-        config.setJdbcUrl(props.getProperty("db.url"));
+        
+        String jdbcUrl = props.getProperty("db.url");
+        if (jdbcUrl != null && jdbcUrl.startsWith("jdbc:mysql:")) {
+            // Ensure timeout options are set to prevent hanging connections on network latency issues
+            if (!jdbcUrl.contains("connectTimeout=")) {
+                jdbcUrl += (jdbcUrl.contains("?") ? "&" : "?") + "connectTimeout=5000";
+            }
+            if (!jdbcUrl.contains("socketTimeout=")) {
+                jdbcUrl += (jdbcUrl.contains("?") ? "&" : "?") + "socketTimeout=30000";
+            }
+        }
+        config.setJdbcUrl(jdbcUrl);
         config.setUsername(props.getProperty("db.username"));
         config.setPassword(props.getProperty("db.password", ""));
 
-        config.setMaximumPoolSize(getIntProperty(props, "db.pool.maxActive", 20));
-        config.setMinimumIdle(getIntProperty(props, "db.pool.minIdle", 5));
-        config.setConnectionTimeout(getLongProperty(props, "db.pool.connectionTimeout", 30_000L));
+        config.setMaximumPoolSize(getIntProperty(props, "db.pool.maxActive", 10));
+        config.setMinimumIdle(getIntProperty(props, "db.pool.minIdle", 2));
+        config.setConnectionTimeout(getLongProperty(props, "db.pool.connectionTimeout", 10_000L));
         config.setIdleTimeout(getLongProperty(props, "db.pool.idleTimeout", 600_000L));
         config.setMaxLifetime(getLongProperty(props, "db.pool.maxLifetime", 1_800_000L));
+        config.setLeakDetectionThreshold(getLongProperty(props, "db.pool.leakDetectionThreshold", 5000L));
         config.setPoolName("PSME-HikariPool");
 
         config.addDataSourceProperty("cachePrepStmts", "true");

@@ -8,6 +8,7 @@ public interface AssessmentDAO {
     Assessment findById(int assessmentId);
     Assessment findAnyById(int assessmentId);
     List<Assessment> findByCourse(int courseId);
+    List<Assessment> findByCourseIds(List<Integer> courseIds);
     List<Assessment> findDeletedByCourse(int courseId);
     boolean update(Assessment assessment);
     boolean delete(int assessmentId);

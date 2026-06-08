@@ -60,8 +60,31 @@ public class AdminEnrollmentListServlet extends HttpServlet {
             String successCode = request.getParameter("success");
             String errorCode = request.getParameter("error");
 
-            for (Enrollment e : enrollments) {
-                enrichEnrollmentPayment(e);
+            if (enrollments != null && !enrollments.isEmpty()) {
+                java.util.List<Integer> enrollmentIds = new java.util.ArrayList<>();
+                for (Enrollment e : enrollments) {
+                    if (e != null && e.getEnrollmentId() != null) {
+                        enrollmentIds.add(e.getEnrollmentId());
+                    }
+                }
+                java.util.List<Payment> payments = paymentDAO.getPaymentsByEnrollmentIds(enrollmentIds);
+                java.util.Map<Integer, Payment> paymentMap = new java.util.HashMap<>();
+                if (payments != null) {
+                    for (Payment p : payments) {
+                        if (p != null && p.getEnrollmentId() != null) {
+                            paymentMap.putIfAbsent(p.getEnrollmentId(), p);
+                        }
+                    }
+                }
+                for (Enrollment e : enrollments) {
+                    Payment p = paymentMap.get(e.getEnrollmentId());
+                    if (p == null) {
+                        e.setPaymentStatus("Pending");
+                    } else {
+                        e.setPaymentStatus(p.getStatus());
+                        e.setPaymentRef(firstNonBlank(p.getPaymentRef(), p.getPaystackReference()));
+                    }
+                }
             }
             request.setAttribute("enrollments", enrollments);
             request.setAttribute("successMessage", resolveSuccessMessage(successCode));

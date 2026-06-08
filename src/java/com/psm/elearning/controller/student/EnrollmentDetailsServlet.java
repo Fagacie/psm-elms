@@ -21,6 +21,7 @@ import com.psm.elearning.model.Material;
 import com.psm.elearning.model.Assessment;
 import com.psm.elearning.model.AssessmentQuestion;
 import com.psm.elearning.model.AssessmentSubmission;
+import com.psm.elearning.model.AssessmentRetakeRequest;
 import com.psm.elearning.model.User;
 import com.psm.elearning.util.AssessmentPlacementUtil;
 import com.psm.elearning.service.AppSettingsService;
@@ -354,6 +355,48 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                 if (assessments == null) assessments = new ArrayList<>();
             }
 
+            // Batch load all student submissions and retake requests to eliminate N+1 queries
+            List<AssessmentSubmission> allSubmissions = submissionDAO.findByUser(userId);
+            Map<Integer, List<AssessmentSubmission>> submissionsMap = new LinkedHashMap<>();
+            if (allSubmissions != null) {
+                for (AssessmentSubmission sub : allSubmissions) {
+                    submissionsMap.computeIfAbsent(sub.getAssessmentId(), k -> new ArrayList<>()).add(sub);
+                }
+            }
+
+            List<AssessmentRetakeRequest> allRetakeRequests = retakeRequestDAO.findByUser(userId);
+            Map<Integer, Integer> approvedRetakesCountMap = new LinkedHashMap<>();
+            Map<Integer, Boolean> hasPendingRetakeMap = new LinkedHashMap<>();
+            if (allRetakeRequests != null) {
+                for (AssessmentRetakeRequest req : allRetakeRequests) {
+                    if ("Approved".equalsIgnoreCase(req.getStatus())) {
+                        approvedRetakesCountMap.put(req.getAssessmentId(), approvedRetakesCountMap.getOrDefault(req.getAssessmentId(), 0) + 1);
+                    } else if ("Pending".equalsIgnoreCase(req.getStatus())) {
+                        hasPendingRetakeMap.put(req.getAssessmentId(), true);
+                    }
+                }
+            }
+
+            // Batch load all questions for the assessments to prevent N+1 queries when calculating totalMarks fallback
+            List<AssessmentQuestion> allQuestions = new ArrayList<>();
+            Map<Integer, List<AssessmentQuestion>> questionsMap = new LinkedHashMap<>();
+            if (assessments != null && !assessments.isEmpty()) {
+                List<Integer> assessmentIds = new ArrayList<>();
+                for (Assessment assessment : assessments) {
+                    if (assessment != null && assessment.getAssessmentId() != null) {
+                        assessmentIds.add(assessment.getAssessmentId());
+                    }
+                }
+                allQuestions = assessmentQuestionDAO.findByAssessmentIds(assessmentIds);
+                if (allQuestions != null) {
+                    for (AssessmentQuestion q : allQuestions) {
+                        if (q != null) {
+                            questionsMap.computeIfAbsent(q.getAssessmentId(), k -> new ArrayList<>()).add(q);
+                        }
+                    }
+                }
+            }
+
             Map<Integer, Integer> usedAttemptsByAssessment = new LinkedHashMap<>();
             Map<Integer, Integer> allowedAttemptsByAssessment = new LinkedHashMap<>();
             Map<Integer, AssessmentSubmission> latestSubmissionByAssessment = new LinkedHashMap<>();
@@ -370,15 +413,15 @@ public class EnrollmentDetailsServlet extends HttpServlet {
             Double performanceLowestAssessmentPercent = null;
 
             for (Assessment assessment : assessments) {
-                List<AssessmentSubmission> submissions = submissionDAO.findByAssessmentAndUser(assessment.getAssessmentId(), userId);
-                int used = submissions != null ? submissions.size() : 0;
+                List<AssessmentSubmission> submissions = submissionsMap.getOrDefault(assessment.getAssessmentId(), new ArrayList<>());
+                int used = submissions.size();
                 int defaultMaxAttempts = AppSettingsService.getInt(AppSettingsService.KEY_ASSESSMENT_MAX_ATTEMPTS, 3, 1, 10);
                 int base = assessment.getMaxAttempts() != null && assessment.getMaxAttempts() > 0 ? assessment.getMaxAttempts() : defaultMaxAttempts;
-                int allowed = base + retakeRequestDAO.countApproved(assessment.getAssessmentId(), userId);
+                int allowed = base + approvedRetakesCountMap.getOrDefault(assessment.getAssessmentId(), 0);
                 usedAttemptsByAssessment.put(assessment.getAssessmentId(), used);
                 allowedAttemptsByAssessment.put(assessment.getAssessmentId(), allowed);
-                latestSubmissionByAssessment.put(assessment.getAssessmentId(), (submissions != null && !submissions.isEmpty()) ? submissions.get(0) : null);
-                if (submissions != null && !submissions.isEmpty()) {
+                latestSubmissionByAssessment.put(assessment.getAssessmentId(), !submissions.isEmpty() ? submissions.get(0) : null);
+                if (!submissions.isEmpty()) {
                     performanceAttemptedCount++;
                     if (submissions.get(0).getScore() != null) {
                         performanceGradedCount++;
@@ -399,7 +442,7 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                 if (bestScore != null) {
                     double fallbackTotal = 0.0;
                     if (assessment.getTotalMarks() == null || assessment.getTotalMarks() <= 0) {
-                        List<AssessmentQuestion> aqs = assessmentQuestionDAO.findByAssessment(assessment.getAssessmentId());
+                        List<AssessmentQuestion> aqs = questionsMap.getOrDefault(assessment.getAssessmentId(), new ArrayList<>());
                         if (aqs != null) {
                             for (AssessmentQuestion q : aqs) {
                                 Double qMarks = q.getMarks();
@@ -582,7 +625,7 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                     int allowed = allowedAttemptsByAssessment.getOrDefault(assessment.getAssessmentId(), 0);
                     AssessmentSubmission latest = latestSubmissionByAssessment.get(assessment.getAssessmentId());
                     boolean hasActiveAttempt = activeAttemptByAssessment.getOrDefault(assessment.getAssessmentId(), false);
-                    List<AssessmentSubmission> submissions = submissionDAO.findByAssessmentAndUser(assessment.getAssessmentId(), userId);
+                    List<AssessmentSubmission> submissions = submissionsMap.getOrDefault(assessment.getAssessmentId(), new ArrayList<>());
                     EnrollmentStateSyncService.AssessmentProgressState progressState =
                             EnrollmentStateSyncService.resolveAssessmentProgress(assessment, submissions);
                     String assessmentStatusLabel;
@@ -671,7 +714,7 @@ public class EnrollmentDetailsServlet extends HttpServlet {
                 int allowed = allowedAttemptsByAssessment.getOrDefault(assessment.getAssessmentId(), 0);
                 AssessmentSubmission latest = latestSubmissionByAssessment.get(assessment.getAssessmentId());
                 boolean hasActiveAttempt = activeAttemptByAssessment.getOrDefault(assessment.getAssessmentId(), false);
-                List<AssessmentSubmission> submissions = submissionDAO.findByAssessmentAndUser(assessment.getAssessmentId(), userId);
+                List<AssessmentSubmission> submissions = submissionsMap.getOrDefault(assessment.getAssessmentId(), new ArrayList<>());
                 EnrollmentStateSyncService.AssessmentProgressState progressState =
                         EnrollmentStateSyncService.resolveAssessmentProgress(assessment, submissions);
                 String statusLabel;
@@ -935,7 +978,7 @@ public class EnrollmentDetailsServlet extends HttpServlet {
             boolean selectedAssessmentHasActiveAttempt = selectedAssessment != null
                     && activeAttemptByAssessment.getOrDefault(selectedAssessment.getAssessmentId(), false);
             boolean hasPendingRetakeRequest = selectedAssessment != null
-                    && retakeRequestDAO.hasPending(selectedAssessment.getAssessmentId(), userId);
+                    && hasPendingRetakeMap.getOrDefault(selectedAssessment.getAssessmentId(), false);
             String selectedAssessmentStatusLabel = "Not Started";
             String selectedAssessmentStatusClass = "status-Archived";
             String selectedAssessmentPrimaryLabel = "";

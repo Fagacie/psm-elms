@@ -227,10 +227,11 @@ public class DashboardServlet extends HttpServlet {
                 
                 // Gather instructor statistics
                 Integer totalCourses = courses.size();
-                Integer totalStudents = enrollmentDAO.countStudentsByInstructor(userId);
-                Integer totalEnrollments = enrollmentDAO.countEnrollmentsByInstructor(userId);
-                Integer pendingEnrollments = enrollmentDAO.countPendingEnrollmentsByInstructor(userId);
-                Integer activeEnrollments = enrollmentDAO.countActiveEnrollmentsByInstructor(userId);
+                com.psm.elearning.dao.EnrollmentDAO.InstructorStats stats = enrollmentDAO.getInstructorStats(userId);
+                Integer totalStudents = stats.getStudentCount();
+                Integer totalEnrollments = stats.getEnrollmentCount();
+                Integer pendingEnrollments = stats.getPendingCount();
+                Integer activeEnrollments = stats.getActiveCount();
                 int activeCourses = 0;
                 int publishedMaterialsCount = 0;
                 int pendingGradingCount = 0;
@@ -272,6 +273,48 @@ public class DashboardServlet extends HttpServlet {
                 }
 
                 LocalDateTime thirtyDaysAgo = LocalDateTime.now().minusDays(30);
+
+                List<Integer> courseIds = new ArrayList<>();
+                for (Course course : courses) {
+                    if (course != null && course.getCourseId() != null) {
+                        courseIds.add(course.getCourseId());
+                    }
+                }
+
+                // Batch fetch all materials, assessments, and submissions
+                List<Material> allMaterials = materialDAO.findByCourseIds(courseIds);
+                Map<Integer, List<Material>> materialsByCourseId = new HashMap<>();
+                if (allMaterials != null) {
+                    for (Material material : allMaterials) {
+                        if (material != null) {
+                            materialsByCourseId.computeIfAbsent(material.getCourseId(), k -> new ArrayList<>()).add(material);
+                        }
+                    }
+                }
+
+                List<Assessment> allAssessments = assessmentDAO.findByCourseIds(courseIds);
+                Map<Integer, List<Assessment>> assessmentsByCourseId = new HashMap<>();
+                List<Integer> assessmentIds = new ArrayList<>();
+                if (allAssessments != null) {
+                    for (Assessment assessment : allAssessments) {
+                        if (assessment != null) {
+                            assessmentsByCourseId.computeIfAbsent(assessment.getCourseId(), k -> new ArrayList<>()).add(assessment);
+                            if (assessment.getAssessmentId() != null) {
+                                assessmentIds.add(assessment.getAssessmentId());
+                            }
+                        }
+                    }
+                }
+
+                List<AssessmentSubmission> allSubmissions = assessmentSubmissionDAO.findByAssessmentIds(assessmentIds);
+                Map<Integer, List<AssessmentSubmission>> submissionsByAssessmentId = new HashMap<>();
+                if (allSubmissions != null) {
+                    for (AssessmentSubmission sub : allSubmissions) {
+                        if (sub != null) {
+                            submissionsByAssessmentId.computeIfAbsent(sub.getAssessmentId(), k -> new ArrayList<>()).add(sub);
+                        }
+                    }
+                }
 
                 for (Course course : courses) {
                     if (course == null || course.getCourseId() == null) {
@@ -319,20 +362,14 @@ public class DashboardServlet extends HttpServlet {
                         }
                     }
 
-                    List<Material> courseMaterials = materialDAO.findByCourse(courseId);
-                    if (courseMaterials == null) {
-                        courseMaterials = new ArrayList<>();
-                    }
+                    List<Material> courseMaterials = materialsByCourseId.getOrDefault(courseId, new ArrayList<>());
                     courseMaterialCountById.put(courseId, courseMaterials.size());
                     publishedMaterialsCount += courseMaterials.size();
                     if (courseMaterials.isEmpty()) {
                         missingMaterialsCourseCount++;
                     }
 
-                    List<Assessment> courseAssessments = assessmentDAO.findByCourse(courseId);
-                    if (courseAssessments == null) {
-                        courseAssessments = new ArrayList<>();
-                    }
+                    List<Assessment> courseAssessments = assessmentsByCourseId.getOrDefault(courseId, new ArrayList<>());
                     courseAssessmentCountById.put(courseId, courseAssessments.size());
 
                     int coursePendingSubmissions = 0;
@@ -342,10 +379,7 @@ public class DashboardServlet extends HttpServlet {
                         }
 
                         List<AssessmentSubmission> submissions =
-                                assessmentSubmissionDAO.findByAssessment(assessment.getAssessmentId());
-                        if (submissions == null) {
-                            submissions = new ArrayList<>();
-                        }
+                                submissionsByAssessmentId.getOrDefault(assessment.getAssessmentId(), new ArrayList<>());
                         coursePendingSubmissions += countPendingGradingFromSubmissions(submissions);
 
                         double maxMarks = (assessment.getTotalMarks() != null && assessment.getTotalMarks() > 0)

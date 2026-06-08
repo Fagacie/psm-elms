@@ -136,9 +136,19 @@ public class AdminCourseServlet extends HttpServlet {
             // Calculate enrollment counts
             com.psm.elearning.dao.EnrollmentDAO enrollmentDAO = new com.psm.elearning.dao.EnrollmentDAOImpl();
             java.util.Map<Integer, Integer> enrollmentCounts = new java.util.HashMap<>();
+            List<Integer> courseIds = new ArrayList<>();
             for (Course c : courses) {
-                List<com.psm.elearning.model.Enrollment> enrs = enrollmentDAO.getEnrollmentsByCourse(c.getCourseId());
-                enrollmentCounts.put(c.getCourseId(), enrs != null ? enrs.size() : 0);
+                if (c != null && c.getCourseId() != null) {
+                    courseIds.add(c.getCourseId());
+                }
+            }
+            if (!courseIds.isEmpty()) {
+                enrollmentCounts = enrollmentDAO.getEnrollmentCountsByCourseIds(courseIds);
+            }
+            for (Course c : courses) {
+                if (c != null && c.getCourseId() != null) {
+                    enrollmentCounts.putIfAbsent(c.getCourseId(), 0);
+                }
             }
             
             request.setAttribute("courses", courses);
@@ -602,12 +612,21 @@ public class AdminCourseServlet extends HttpServlet {
     private List<User> resolveActiveInstructors() {
         List<User> instructors = new ArrayList<>();
         try {
+            List<Instructor> allInstructors = instructorDAO.findAll();
+            java.util.Set<Integer> existingInstructorUserIds = new java.util.HashSet<>();
+            if (allInstructors != null) {
+                for (Instructor ins : allInstructors) {
+                    if (ins != null) {
+                        existingInstructorUserIds.add(ins.getUserId());
+                    }
+                }
+            }
+
             for (User user : userDAO.findAll()) {
                 if (user != null && "Instructor".equals(user.getRole()) && "Active".equals(user.getStatus())) {
                     // Self-healing check: Ensure record exists in Instructor table
-                    Instructor instructor = instructorDAO.findByUserId(user.getUserId());
-                    if (instructor == null) {
-                        instructor = new Instructor();
+                    if (!existingInstructorUserIds.contains(user.getUserId())) {
+                        Instructor instructor = new Instructor();
                         instructor.setUserId(user.getUserId());
                         instructor.setSpecialization("General Education");
                         instructor.setYearsOfExperience(1);

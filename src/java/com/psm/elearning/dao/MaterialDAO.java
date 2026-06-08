@@ -8,6 +8,7 @@ public interface MaterialDAO {
     Material findById(int materialId);
     Material findAnyById(int materialId);
     List<Material> findByCourse(int courseId);
+    List<Material> findByCourseIds(List<Integer> courseIds);
     List<Material> findDeletedByCourse(int courseId);
     boolean update(Material material);
     boolean delete(int materialId);

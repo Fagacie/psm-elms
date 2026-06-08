@@ -275,17 +275,31 @@ public class InstructorAssessmentServlet extends HttpServlet {
             hydrateAssignmentAttachments(archivedAssessments);
 
             Map<Integer, Integer> pendingRetakesCountByAssessmentId = new java.util.HashMap<>();
+            List<Integer> assessmentIds = new ArrayList<>();
             for (Assessment assessment : assessments) {
-                List<AssessmentRetakeRequest> reqs = retakeRequestDAO.findByAssessment(assessment.getAssessmentId());
-                int pCount = 0;
-                if (reqs != null) {
-                    for (AssessmentRetakeRequest r : reqs) {
-                        if ("Pending".equalsIgnoreCase(r.getStatus())) {
-                            pCount++;
+                if (assessment != null && assessment.getAssessmentId() != null) {
+                    assessmentIds.add(assessment.getAssessmentId());
+                }
+            }
+            if (!assessmentIds.isEmpty()) {
+                List<AssessmentRetakeRequest> allReqs = retakeRequestDAO.findByAssessmentIds(assessmentIds);
+                if (allReqs != null) {
+                    for (AssessmentRetakeRequest r : allReqs) {
+                        if (r != null && r.getAssessmentId() != null) {
+                            if ("Pending".equalsIgnoreCase(r.getStatus())) {
+                                pendingRetakesCountByAssessmentId.put(
+                                    r.getAssessmentId(),
+                                    pendingRetakesCountByAssessmentId.getOrDefault(r.getAssessmentId(), 0) + 1
+                                );
+                            }
                         }
                     }
                 }
-                pendingRetakesCountByAssessmentId.put(assessment.getAssessmentId(), pCount);
+            }
+            for (Assessment assessment : assessments) {
+                if (assessment != null && assessment.getAssessmentId() != null) {
+                    pendingRetakesCountByAssessmentId.putIfAbsent(assessment.getAssessmentId(), 0);
+                }
             }
             request.setAttribute("pendingRetakesCountByAssessmentId", pendingRetakesCountByAssessmentId);
         }

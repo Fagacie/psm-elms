@@ -297,4 +297,34 @@ public class PaymentDAOImpl implements PaymentDAO {
         }
         return value;
     }
+
+    @Override
+    public java.util.List<Payment> getPaymentsByEnrollmentIds(java.util.List<Integer> enrollmentIds) {
+        java.util.List<Payment> list = new java.util.ArrayList<>();
+        if (enrollmentIds == null || enrollmentIds.isEmpty()) {
+            return list;
+        }
+        StringBuilder sql = new StringBuilder("SELECT * FROM Payment WHERE EnrollmentID IN (");
+        for (int i = 0; i < enrollmentIds.size(); i++) {
+            sql.append("?");
+            if (i < enrollmentIds.size() - 1) {
+                sql.append(",");
+            }
+        }
+        sql.append(") ORDER BY PaymentID DESC");
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            for (int i = 0; i < enrollmentIds.size(); i++) {
+                ps.setInt(i + 1, enrollmentIds.get(i));
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(extractPaymentFromResultSet(rs));
+                }
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error fetching payments by enrollmentIds", e);
+        }
+        return list;
+    }
 }

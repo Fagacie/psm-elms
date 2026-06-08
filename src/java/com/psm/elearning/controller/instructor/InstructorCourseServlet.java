@@ -121,11 +121,13 @@ public class InstructorCourseServlet extends HttpServlet {
             }
             List<Course> courses = courseDAO.findByInstructor(userId);
 
-            java.util.Map<Integer, Integer> courseStudentCounts = new java.util.HashMap<>();
+            List<Integer> courseIds = new java.util.ArrayList<>();
             for (Course course : courses) {
-                List<Enrollment> enrollments = enrollmentDAO.getEnrollmentsByCourse(course.getCourseId());
-                courseStudentCounts.put(course.getCourseId(), enrollments != null ? enrollments.size() : 0);
+                if (course != null && course.getCourseId() != null) {
+                    courseIds.add(course.getCourseId());
+                }
             }
+            java.util.Map<Integer, Integer> courseStudentCounts = enrollmentDAO.getEnrollmentCountsByCourseIds(courseIds);
             
             request.setAttribute("courses", courses);
             request.setAttribute("courseStudentCounts", courseStudentCounts);
@@ -167,13 +169,24 @@ public class InstructorCourseServlet extends HttpServlet {
             if (archivedAssessments == null) archivedAssessments = java.util.Collections.emptyList();
             if (enrollments == null) enrollments = java.util.Collections.emptyList();
 
-            java.util.Map<Integer, Integer> submissionCountByAssessmentId = new java.util.HashMap<>();
+            List<Integer> assessmentIds = new java.util.ArrayList<>();
             for (Assessment assessment : assessments) {
-                List<AssessmentSubmission> submissions = submissionDAO.findByAssessment(assessment.getAssessmentId());
-                submissionCountByAssessmentId.put(
-                        assessment.getAssessmentId(),
-                        submissions != null ? submissions.size() : 0
-                );
+                if (assessment != null && assessment.getAssessmentId() != null) {
+                    assessmentIds.add(assessment.getAssessmentId());
+                }
+            }
+            List<AssessmentSubmission> allSubmissions = submissionDAO.findByAssessmentIds(assessmentIds);
+
+            java.util.Map<Integer, Integer> submissionCountByAssessmentId = new java.util.HashMap<>();
+            if (allSubmissions != null) {
+                for (AssessmentSubmission sub : allSubmissions) {
+                    if (sub != null) {
+                        submissionCountByAssessmentId.put(
+                                sub.getAssessmentId(),
+                                submissionCountByAssessmentId.getOrDefault(sub.getAssessmentId(), 0) + 1
+                        );
+                    }
+                }
             }
 
             int completedStudents = 0;
@@ -192,7 +205,7 @@ public class InstructorCourseServlet extends HttpServlet {
             int totalStudents = enrollments.size();
             int completionRate = totalStudents > 0 ? Math.round((completedStudents * 100f) / totalStudents) : 0;
             int averageProgress = totalStudents > 0 ? Math.round((float) progressSum / totalStudents) : 0;
-            int pendingGrading = countPendingGrading(assessments);
+            int pendingGrading = countPendingGrading(allSubmissions);
 
             request.setAttribute("selectedCourse", course);
             request.setAttribute("materials", materials);
@@ -314,24 +327,18 @@ public class InstructorCourseServlet extends HttpServlet {
         return null;
     }
 
-    private int countPendingGrading(List<Assessment> assessments) {
-        if (assessments == null || assessments.isEmpty()) {
+    private int countPendingGrading(List<AssessmentSubmission> submissions) {
+        if (submissions == null || submissions.isEmpty()) {
             return 0;
         }
 
         int pendingCount = 0;
-        for (Assessment assessment : assessments) {
-            List<AssessmentSubmission> submissions = submissionDAO.findByAssessment(assessment.getAssessmentId());
-            if (submissions == null || submissions.isEmpty()) {
+        for (AssessmentSubmission submission : submissions) {
+            if (submission == null) {
                 continue;
             }
-            for (AssessmentSubmission submission : submissions) {
-                if (submission == null) {
-                    continue;
-                }
-                if (submission.getScore() == null && (submission.getStatus() == null || !"TimedOut".equalsIgnoreCase(submission.getStatus()))) {
-                    pendingCount++;
-                }
+            if (submission.getScore() == null && (submission.getStatus() == null || !"TimedOut".equalsIgnoreCase(submission.getStatus()))) {
+                pendingCount++;
             }
         }
         return pendingCount;

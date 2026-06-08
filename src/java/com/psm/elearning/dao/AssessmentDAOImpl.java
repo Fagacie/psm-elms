@@ -328,6 +328,40 @@ public class AssessmentDAOImpl implements AssessmentDAO {
     }
 
     @Override
+    public List<Assessment> findByCourseIds(List<Integer> courseIds) {
+        List<Assessment> list = new ArrayList<>();
+        if (courseIds == null || courseIds.isEmpty()) {
+            return list;
+        }
+        try (Connection conn = DBConnection.getConnection()) {
+            boolean supportsArchive = supportsArchiveColumns(conn);
+            StringBuilder sql = new StringBuilder("SELECT * FROM Assessment WHERE CourseID IN (");
+            for (int i = 0; i < courseIds.size(); i++) {
+                if (i > 0) sql.append(",");
+                sql.append("?");
+            }
+            sql.append(")");
+            if (supportsArchive) {
+                sql.append(" AND (IsDeleted IS NULL OR IsDeleted=0)");
+            }
+            sql.append(" ORDER BY CreatedAt DESC");
+            try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+                for (int i = 0; i < courseIds.size(); i++) {
+                    ps.setInt(i + 1, courseIds.get(i));
+                }
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        list.add(mapRow(rs));
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Assessment findByCourseIds failed: " + e.getMessage());
+        }
+        return list;
+    }
+
+    @Override
     public List<Assessment> findDeletedByCourse(int courseId) {
         List<Assessment> list = new ArrayList<>();
         if (!supportsArchiveColumnsSafe()) {

@@ -81,9 +81,38 @@ public class EnrollmentStateSyncService {
         double assessmentEngagementPoints = 0.0;
         boolean passedAllAssessments = true;
 
+        List<Integer> assessmentIds = new ArrayList<>();
+        for (Assessment a : assessments) {
+            if (a != null && a.getAssessmentId() != null) {
+                assessmentIds.add(a.getAssessmentId());
+            }
+        }
+
+        List<AssessmentSubmission> userSubmissions = submissionDAO.findByUser(enrollment.getUserId());
+        java.util.Map<Integer, List<AssessmentSubmission>> submissionsByAssessmentId = new java.util.HashMap<>();
+        if (userSubmissions != null) {
+            for (AssessmentSubmission sub : userSubmissions) {
+                if (sub != null) {
+                    submissionsByAssessmentId.computeIfAbsent(sub.getAssessmentId(), k -> new ArrayList<>()).add(sub);
+                }
+            }
+        }
+
+        com.psm.elearning.dao.AssessmentQuestionDAO questionDAO = new com.psm.elearning.dao.AssessmentQuestionDAOImpl();
+        List<com.psm.elearning.model.AssessmentQuestion> allQuestions = questionDAO.findByAssessmentIds(assessmentIds);
+        java.util.Map<Integer, List<com.psm.elearning.model.AssessmentQuestion>> questionsByAssessmentId = new java.util.HashMap<>();
+        if (allQuestions != null) {
+            for (com.psm.elearning.model.AssessmentQuestion q : allQuestions) {
+                if (q != null) {
+                    questionsByAssessmentId.computeIfAbsent(q.getAssessmentId(), k -> new ArrayList<>()).add(q);
+                }
+            }
+        }
+
         for (Assessment assessment : assessments) {
-            List<AssessmentSubmission> submissions = submissionDAO.findByAssessmentAndUser(assessment.getAssessmentId(), enrollment.getUserId());
-            AssessmentProgressState progressState = resolveAssessmentProgress(assessment, submissions);
+            List<AssessmentSubmission> submissions = submissionsByAssessmentId.getOrDefault(assessment.getAssessmentId(), new ArrayList<>());
+            List<com.psm.elearning.model.AssessmentQuestion> questions = questionsByAssessmentId.getOrDefault(assessment.getAssessmentId(), new ArrayList<>());
+            AssessmentProgressState progressState = resolveAssessmentProgress(assessment, submissions, questions);
             assessmentEngagementPoints += progressState.getEngagementWeight();
             if (progressState.isPassed()) {
                 passedAssessments++;
@@ -141,6 +170,10 @@ public class EnrollmentStateSyncService {
     }
 
     public static AssessmentProgressState resolveAssessmentProgress(Assessment assessment, List<AssessmentSubmission> submissions) {
+        return resolveAssessmentProgress(assessment, submissions, null);
+    }
+
+    public static AssessmentProgressState resolveAssessmentProgress(Assessment assessment, List<AssessmentSubmission> submissions, List<com.psm.elearning.model.AssessmentQuestion> questions) {
         if (assessment == null || submissions == null || submissions.isEmpty()) {
             return new AssessmentProgressState(false, false, 0.0);
         }
@@ -157,7 +190,7 @@ public class EnrollmentStateSyncService {
             submitted = true;
             if (submission.getScore() != null) {
                 graded = true;
-                double threshold = resolvePassThresholdStatic(assessment);
+                double threshold = resolvePassThreshold(assessment, questions);
                 if (submission.getScore() >= threshold) {
                     passed = true;
                     break;
@@ -169,49 +202,28 @@ public class EnrollmentStateSyncService {
             return new AssessmentProgressState(true, true, 1.0);
         }
 
-
         if (submitted) {
             return new AssessmentProgressState(true, false, 0.0);
         }
         return new AssessmentProgressState(false, false, 0.0);
     }
 
-    private static double resolvePassThresholdStatic(Assessment assessment) {
+    private static double resolvePassThreshold(Assessment assessment, List<com.psm.elearning.model.AssessmentQuestion> questions) {
         int passMarkPercent = AppSettingsService.getInt(
                 AppSettingsService.KEY_ASSESSMENT_PASS_MARK, 70, 1, 100
         );
         Integer totalMarks = assessment != null ? assessment.getTotalMarks() : null;
         if (totalMarks == null || totalMarks <= 0) {
             double sumOfMarks = 0.0;
-            if (assessment != null && assessment.getAssessmentId() != null) {
-                try (java.sql.Connection conn = com.psm.elearning.util.DBConnection.getConnection();
-                     java.sql.PreparedStatement ps = conn.prepareStatement("SELECT SUM(Marks) FROM AssessmentQuestion WHERE AssessmentID = ?")) {
-                    ps.setInt(1, assessment.getAssessmentId());
-                    try (java.sql.ResultSet rs = ps.executeQuery()) {
-                        if (rs.next()) {
-                            sumOfMarks = rs.getDouble(1);
-                        }
-                    }
-                } catch (Exception e) {
-                    // Ignore
+            if (questions != null) {
+                for (com.psm.elearning.model.AssessmentQuestion q : questions) {
+                    Double marks = q.getMarks();
+                    sumOfMarks += (marks != null && marks > 0) ? marks : 0.0;
                 }
             }
 
             if (sumOfMarks <= 0) {
-                int questionCount = 0;
-                if (assessment != null && assessment.getAssessmentId() != null) {
-                    try (java.sql.Connection conn = com.psm.elearning.util.DBConnection.getConnection();
-                         java.sql.PreparedStatement ps = conn.prepareStatement("SELECT COUNT(*) FROM AssessmentQuestion WHERE AssessmentID = ?")) {
-                        ps.setInt(1, assessment.getAssessmentId());
-                        try (java.sql.ResultSet rs = ps.executeQuery()) {
-                            if (rs.next()) {
-                                questionCount = rs.getInt(1);
-                            }
-                        }
-                    } catch (Exception e) {
-                        // Ignore
-                    }
-                }
+                int questionCount = questions != null ? questions.size() : 0;
                 if (questionCount > 0) {
                     sumOfMarks = questionCount * 1.0;
                 }
@@ -223,6 +235,10 @@ public class EnrollmentStateSyncService {
             return passMarkPercent;
         }
         return totalMarks * (passMarkPercent / 100.0);
+    }
+
+    private static double resolvePassThresholdStatic(Assessment assessment) {
+        return resolvePassThreshold(assessment, null);
     }
 
     public static class SyncResult {

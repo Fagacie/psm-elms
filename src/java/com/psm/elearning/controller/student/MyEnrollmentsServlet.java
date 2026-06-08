@@ -70,6 +70,30 @@ public class MyEnrollmentsServlet extends HttpServlet {
             Map<Integer, Integer> materialCountByCourse = new HashMap<>();
             Map<Integer, Integer> assessmentCountByCourse = new HashMap<>();
 
+            List<Integer> courseIds = new ArrayList<>();
+            for (Enrollment e : enrollments) {
+                if (e != null && e.getCourseId() != null) {
+                    courseIds.add(e.getCourseId());
+                }
+            }
+
+            // Batch load all materials and assessments to eliminate N+1 queries
+            List<Material> allMaterials = materialDAO.findByCourseIds(courseIds);
+            Map<Integer, List<Material>> materialsMap = new HashMap<>();
+            if (allMaterials != null) {
+                for (Material m : allMaterials) {
+                    materialsMap.computeIfAbsent(m.getCourseId(), k -> new ArrayList<>()).add(m);
+                }
+            }
+
+            List<Assessment> allAssessments = assessmentDAO.findByCourseIds(courseIds);
+            Map<Integer, List<Assessment>> assessmentsMap = new HashMap<>();
+            if (allAssessments != null) {
+                for (Assessment a : allAssessments) {
+                    assessmentsMap.computeIfAbsent(a.getCourseId(), k -> new ArrayList<>()).add(a);
+                }
+            }
+
             for (Enrollment e : enrollments) {
                 if (studentAccessService.isPaymentComplete(e.getPaymentStatus())) {
                     paidCount++;
@@ -82,11 +106,11 @@ public class MyEnrollmentsServlet extends HttpServlet {
                     inProgressCount++;
                 }
 
-                if (e.getCourseId() != null && !materialCountByCourse.containsKey(e.getCourseId())) {
-                    List<Material> materials = materialDAO.findByCourse(e.getCourseId());
-                    List<Assessment> assessments = assessmentDAO.findByCourse(e.getCourseId());
-                    materialCountByCourse.put(e.getCourseId(), materials != null ? materials.size() : 0);
-                    assessmentCountByCourse.put(e.getCourseId(), assessments != null ? assessments.size() : 0);
+                if (e.getCourseId() != null) {
+                    List<Material> materials = materialsMap.getOrDefault(e.getCourseId(), new ArrayList<>());
+                    List<Assessment> assessments = assessmentsMap.getOrDefault(e.getCourseId(), new ArrayList<>());
+                    materialCountByCourse.put(e.getCourseId(), materials.size());
+                    assessmentCountByCourse.put(e.getCourseId(), assessments.size());
                 }
             }
 

@@ -149,6 +149,34 @@ public class AssessmentQuestionDAOImpl implements AssessmentQuestionDAO {
     }
 
     @Override
+    public List<AssessmentQuestion> findByAssessmentIds(List<Integer> assessmentIds) {
+        List<AssessmentQuestion> list = new ArrayList<>();
+        if (assessmentIds == null || assessmentIds.isEmpty()) {
+            return list;
+        }
+        StringBuilder sql = new StringBuilder("SELECT * FROM AssessmentQuestion WHERE AssessmentID IN (");
+        for (int i = 0; i < assessmentIds.size(); i++) {
+            if (i > 0) sql.append(",");
+            sql.append("?");
+        }
+        sql.append(") ORDER BY QuestionID");
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            for (int i = 0; i < assessmentIds.size(); i++) {
+                ps.setInt(i + 1, assessmentIds.get(i));
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(mapRow(rs));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("AssessmentQuestion findByAssessmentIds failed: " + e.getMessage());
+        }
+        return list;
+    }
+
+    @Override
     public boolean updateQuestion(AssessmentQuestion question) {
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(

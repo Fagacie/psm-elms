@@ -101,6 +101,33 @@ public class AssessmentRetakeRequestDAOImpl implements AssessmentRetakeRequestDA
     }
 
     @Override
+    public List<AssessmentRetakeRequest> findByAssessmentIds(List<Integer> assessmentIds) {
+        List<AssessmentRetakeRequest> list = new ArrayList<>();
+        if (assessmentIds == null || assessmentIds.isEmpty()) return list;
+        StringBuilder sql = new StringBuilder("SELECT r.*, u.FullName AS StudentName, u.Email AS StudentEmail ")
+                .append("FROM AssessmentRetakeRequest r ")
+                .append("JOIN User u ON u.UserID=r.UserID ")
+                .append("WHERE r.AssessmentID IN (");
+        for (int i = 0; i < assessmentIds.size(); i++) {
+            sql.append("?");
+            if (i < assessmentIds.size() - 1) sql.append(",");
+        }
+        sql.append(") ORDER BY r.RequestedAt DESC");
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            for (int i = 0; i < assessmentIds.size(); i++) {
+                ps.setInt(i + 1, assessmentIds.get(i));
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) list.add(mapRow(rs));
+            }
+        } catch (SQLException e) {
+            System.err.println("Retake request findByAssessmentIds failed: " + e.getMessage());
+        }
+        return list;
+    }
+
+    @Override
     public List<AssessmentRetakeRequest> findByAssessmentAndUser(int assessmentId, int userId) {
         List<AssessmentRetakeRequest> list = new ArrayList<>();
         String sql = "SELECT r.*, u.FullName AS StudentName, u.Email AS StudentEmail " +
@@ -116,6 +143,25 @@ public class AssessmentRetakeRequestDAOImpl implements AssessmentRetakeRequestDA
             }
         } catch (SQLException e) {
             System.err.println("Retake request findByAssessmentAndUser failed: " + e.getMessage());
+        }
+        return list;
+    }
+
+    @Override
+    public List<AssessmentRetakeRequest> findByUser(int userId) {
+        List<AssessmentRetakeRequest> list = new ArrayList<>();
+        String sql = "SELECT r.*, u.FullName AS StudentName, u.Email AS StudentEmail " +
+            "FROM AssessmentRetakeRequest r " +
+            "JOIN User u ON u.UserID=r.UserID " +
+            "WHERE r.UserID=? ORDER BY r.RequestedAt DESC";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) list.add(mapRow(rs));
+            }
+        } catch (SQLException e) {
+            System.err.println("Retake request findByUser failed: " + e.getMessage());
         }
         return list;
     }

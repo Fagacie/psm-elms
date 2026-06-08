@@ -53,4 +53,6 @@ public interface PaymentDAO {
      * @return Payment object or null if not found
      */
     Payment getPaymentByPaystackReference(String paystackReference);
+
+    java.util.List<Payment> getPaymentsByEnrollmentIds(java.util.List<Integer> enrollmentIds);
 }

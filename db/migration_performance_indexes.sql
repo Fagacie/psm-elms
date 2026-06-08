@@ -7,3 +7,6 @@ CREATE INDEX idx_user_role ON User (Role);
 CREATE INDEX idx_user_created_at ON User (CreatedAt);
 CREATE INDEX idx_enrollment_enrollment_date ON Enrollment (EnrollmentDate);
 CREATE INDEX idx_course_instructor_status ON Course (InstructorID, Status);
+CREATE INDEX idx_material_course ON Material (CourseID);
+CREATE INDEX idx_assessment_course ON Assessment (CourseID);
+CREATE INDEX idx_submission_assessment ON AssessmentSubmission (AssessmentID);

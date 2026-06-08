@@ -94,20 +94,82 @@ public class UserManagementServlet extends HttpServlet {
         java.util.Map<Integer, Integer> instructorMaterialsCountMap = new java.util.HashMap<>();
         java.util.Map<Integer, Integer> instructorAssessmentsCountMap = new java.util.HashMap<>();
 
-        // Load metrics for each user role dynamically
+        // 1. Batch load role records from Student and Instructor tables
+        List<Student> allStudentsList = studentDAO.findAll();
+        if (allStudentsList != null) {
+            for (Student s : allStudentsList) {
+                if (s != null) {
+                    studentDetailsMap.put(s.getUserId(), s);
+                }
+            }
+        }
+
+        List<Instructor> allInstructorsList = instructorDAO.findAll();
+        if (allInstructorsList != null) {
+            for (Instructor ins : allInstructorsList) {
+                if (ins != null) {
+                    instructorDetailsMap.put(ins.getUserId(), ins);
+                }
+            }
+        }
+
+        // 2. Batch load all enrollments and courses
         CourseDAO courseDAO = new CourseDAOImpl();
         MaterialDAO materialDAO = new MaterialDAOImpl();
         AssessmentDAO assessmentDAO = new AssessmentDAOImpl();
         EnrollmentDAO enrollmentDAO = new EnrollmentDAOImpl();
 
+        List<Enrollment> allEnrollments = enrollmentDAO.getAllEnrollments();
+        java.util.Map<Integer, List<Enrollment>> enrollmentsByStudent = new java.util.HashMap<>();
+        if (allEnrollments != null) {
+            for (Enrollment e : allEnrollments) {
+                if (e != null && e.getUserId() != null) {
+                    enrollmentsByStudent.computeIfAbsent(e.getUserId(), k -> new java.util.ArrayList<>()).add(e);
+                }
+            }
+        }
+
+        List<Course> allCourses = courseDAO.findAll();
+        java.util.Map<Integer, List<Course>> coursesByInstructor = new java.util.HashMap<>();
+        List<Integer> courseIds = new java.util.ArrayList<>();
+        if (allCourses != null) {
+            for (Course c : allCourses) {
+                if (c != null && c.getCreatedBy() != null) {
+                    coursesByInstructor.computeIfAbsent(c.getCreatedBy(), k -> new java.util.ArrayList<>()).add(c);
+                    courseIds.add(c.getCourseId());
+                }
+            }
+        }
+
+        // 3. Batch load materials and assessments for all active courses
+        java.util.Map<Integer, Integer> materialCountByCourse = new java.util.HashMap<>();
+        java.util.Map<Integer, Integer> assessmentCountByCourse = new java.util.HashMap<>();
+
+        if (!courseIds.isEmpty()) {
+            List<Material> allMaterials = materialDAO.findByCourseIds(courseIds);
+            if (allMaterials != null) {
+                for (Material m : allMaterials) {
+                    if (m != null && m.getCourseId() != null) {
+                        materialCountByCourse.put(m.getCourseId(), materialCountByCourse.getOrDefault(m.getCourseId(), 0) + 1);
+                    }
+                }
+            }
+
+            List<Assessment> allAssessments = assessmentDAO.findByCourseIds(courseIds);
+            if (allAssessments != null) {
+                for (Assessment a : allAssessments) {
+                    if (a != null && a.getCourseId() != null) {
+                        assessmentCountByCourse.put(a.getCourseId(), assessmentCountByCourse.getOrDefault(a.getCourseId(), 0) + 1);
+                    }
+                }
+            }
+        }
+
+        // 4. Group data for each user in-memory (O(1) lookups)
         for (User u : users) {
             int uid = u.getUserId();
             if ("Student".equals(u.getRole())) {
-                Student s = studentDAO.findByUserId(uid);
-                if (s != null) {
-                    studentDetailsMap.put(uid, s);
-                }
-                List<Enrollment> enrs = enrollmentDAO.getEnrollmentsByStudent(uid);
+                List<Enrollment> enrs = enrollmentsByStudent.get(uid);
                 if (enrs != null && !enrs.isEmpty()) {
                     java.util.StringJoiner sj = new java.util.StringJoiner("; ");
                     for (Enrollment e : enrs) {
@@ -118,25 +180,15 @@ public class UserManagementServlet extends HttpServlet {
                     studentEnrollmentsMap.put(uid, "None");
                 }
             } else if ("Instructor".equals(u.getRole())) {
-                Instructor ins = instructorDAO.findByUserId(uid);
-                if (ins != null) {
-                    instructorDetailsMap.put(uid, ins);
-                }
-                List<Course> courses = courseDAO.findByInstructor(uid);
+                List<Course> courses = coursesByInstructor.get(uid);
                 int matCount = 0;
                 int assCount = 0;
                 if (courses != null && !courses.isEmpty()) {
                     java.util.StringJoiner sj = new java.util.StringJoiner(", ");
                     for (Course c : courses) {
                         sj.add(c.getCourseName());
-                        List<Material> mats = materialDAO.findByCourse(c.getCourseId());
-                        if (mats != null) {
-                            matCount += mats.size();
-                        }
-                        List<Assessment> asses = assessmentDAO.findByCourse(c.getCourseId());
-                        if (asses != null) {
-                            assCount += asses.size();
-                        }
+                        matCount += materialCountByCourse.getOrDefault(c.getCourseId(), 0);
+                        assCount += assessmentCountByCourse.getOrDefault(c.getCourseId(), 0);
                     }
                     instructorCoursesMap.put(uid, sj.toString());
                 } else {

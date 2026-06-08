@@ -112,6 +112,37 @@ public class AssessmentSubmissionDAOImpl implements AssessmentSubmissionDAO {
     }
 
     @Override
+    public List<AssessmentSubmission> findByAssessmentIds(List<Integer> assessmentIds) {
+        List<AssessmentSubmission> list = new ArrayList<>();
+        if (assessmentIds == null || assessmentIds.isEmpty()) {
+            return list;
+        }
+        StringBuilder sql = new StringBuilder("SELECT s.*, u.FullName AS StudentName, u.Email AS StudentEmail ")
+                .append("FROM AssessmentSubmission s ")
+                .append("JOIN User u ON u.UserID=s.UserID ")
+                .append("WHERE s.AssessmentID IN (");
+        for (int i = 0; i < assessmentIds.size(); i++) {
+            if (i > 0) sql.append(",");
+            sql.append("?");
+        }
+        sql.append(") ORDER BY s.SubmitDate DESC");
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            for (int i = 0; i < assessmentIds.size(); i++) {
+                ps.setInt(i + 1, assessmentIds.get(i));
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(mapRow(rs));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("AssessmentSubmission findByAssessmentIds failed: " + e.getMessage());
+        }
+        return list;
+    }
+
+    @Override
     public List<AssessmentSubmission> findByAssessmentAndUser(int assessmentId, int userId) {
         List<AssessmentSubmission> list = new ArrayList<>();
         String sql = "SELECT * FROM AssessmentSubmission WHERE AssessmentID=? AND UserID=? ORDER BY SubmitDate DESC";

@@ -638,6 +638,63 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
         return false;
     }
 
+    @Override
+    public InstructorStats getInstructorStats(Integer instructorId) {
+        String sql = "SELECT " +
+                     "COUNT(DISTINCT CASE WHEN e.Status != 'Cancelled' THEN e.UserID END) AS student_count, " +
+                     "COUNT(CASE WHEN e.Status != 'Cancelled' THEN 1 END) AS enrollment_count, " +
+                     "SUM(CASE WHEN e.Status = 'Pending' THEN 1 ELSE 0 END) AS pending_count, " +
+                     "SUM(CASE WHEN e.Status = 'Active' THEN 1 ELSE 0 END) AS active_count " +
+                     "FROM Enrollment e " +
+                     "INNER JOIN Course c ON e.CourseID = c.CourseID " +
+                     "WHERE c.InstructorID = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, instructorId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return new InstructorStats(
+                        rs.getInt("student_count"),
+                        rs.getInt("enrollment_count"),
+                        rs.getInt("pending_count"),
+                        rs.getInt("active_count")
+                    );
+                }
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error getting instructor stats for instructorId=" + instructorId, e);
+        }
+        return new InstructorStats(0, 0, 0, 0);
+    }
+
+    @Override
+    public java.util.Map<Integer, Integer> getEnrollmentCountsByCourseIds(List<Integer> courseIds) {
+        java.util.Map<Integer, Integer> counts = new java.util.HashMap<>();
+        if (courseIds == null || courseIds.isEmpty()) {
+            return counts;
+        }
+        StringBuilder sql = new StringBuilder("SELECT CourseID, COUNT(*) AS cnt FROM Enrollment WHERE CourseID IN (");
+        for (int i = 0; i < courseIds.size(); i++) {
+            if (i > 0) sql.append(",");
+            sql.append("?");
+        }
+        sql.append(") GROUP BY CourseID");
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            for (int i = 0; i < courseIds.size(); i++) {
+                ps.setInt(i + 1, courseIds.get(i));
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    counts.put(rs.getInt("CourseID"), rs.getInt("cnt"));
+                }
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error getting enrollment counts by course IDs", e);
+        }
+        return counts;
+    }
+
     private void ensureExpiryOverrideColumn() {
         try (Connection conn = DBConnection.getConnection()) {
             DatabaseMetaData metaData = conn.getMetaData();
