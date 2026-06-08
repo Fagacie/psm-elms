@@ -76,14 +76,14 @@ public final class AppSettingsService {
 
     private static Map<String, String> defaults() {
         Map<String, String> defaults = new LinkedHashMap<>();
-        defaults.put(KEY_SECURITY_SESSION_TIMEOUT, "30");
-        defaults.put(KEY_SECURITY_MIN_PASSWORD_LENGTH, "8");
-        defaults.put(KEY_PAYMENT_MODE, "LIVE");
-        defaults.put(KEY_PAYMENT_CURRENCY, "NGN");
-        defaults.put(KEY_PAYMENT_PAYSTACK_PUBLIC, "");
-        defaults.put(KEY_PAYMENT_PAYSTACK_SECRET, "");
-        defaults.put(KEY_PAYMENT_PAYSTACK_WEBHOOK, "");
-        defaults.put(KEY_PAYMENT_CALLBACK_URL, "");
+        defaults.put(KEY_SECURITY_SESSION_TIMEOUT, System.getenv("SECURITY_SESSION_TIMEOUT") != null ? System.getenv("SECURITY_SESSION_TIMEOUT") : "30");
+        defaults.put(KEY_SECURITY_MIN_PASSWORD_LENGTH, System.getenv("SECURITY_MIN_PASSWORD_LENGTH") != null ? System.getenv("SECURITY_MIN_PASSWORD_LENGTH") : "8");
+        defaults.put(KEY_PAYMENT_MODE, System.getenv("PAYMENT_MODE") != null ? System.getenv("PAYMENT_MODE") : "LIVE");
+        defaults.put(KEY_PAYMENT_CURRENCY, System.getenv("PAYSTACK_CURRENCY") != null ? System.getenv("PAYSTACK_CURRENCY") : "NGN");
+        defaults.put(KEY_PAYMENT_PAYSTACK_PUBLIC, System.getenv("PAYSTACK_PUBLIC_KEY") != null ? System.getenv("PAYSTACK_PUBLIC_KEY") : "");
+        defaults.put(KEY_PAYMENT_PAYSTACK_SECRET, System.getenv("PAYSTACK_SECRET_KEY") != null ? System.getenv("PAYSTACK_SECRET_KEY") : "");
+        defaults.put(KEY_PAYMENT_PAYSTACK_WEBHOOK, System.getenv("PAYSTACK_WEBHOOK_SECRET") != null ? System.getenv("PAYSTACK_WEBHOOK_SECRET") : "");
+        defaults.put(KEY_PAYMENT_CALLBACK_URL, System.getenv("PAYSTACK_CALLBACK_URL") != null ? System.getenv("PAYSTACK_CALLBACK_URL") : "");
         defaults.put(KEY_ENROLLMENT_AUTO_ACTIVATE, "true");
         defaults.put(KEY_LEARNING_COMPLETION_PERCENT, "100");
         defaults.put(KEY_ASSESSMENT_PASS_MARK, "70");
