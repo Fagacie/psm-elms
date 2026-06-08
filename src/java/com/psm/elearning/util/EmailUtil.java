@@ -35,125 +35,50 @@ public class EmailUtil {
     }
 
     /**
-     * Loads email configuration from email.properties file
+     * Loads email configuration from environment variables
      */
     private static void loadEmailConfig() {
-        Properties props = new Properties();
-        InputStream input = null;
+        SMTP_HOST = System.getenv("SMTP_HOST");
+        SMTP_PORT = System.getenv("SMTP_PORT");
+        SMTP_USERNAME = System.getenv("SMTP_USERNAME");
+        SMTP_PASSWORD = System.getenv("SMTP_PASSWORD");
+        
+        String fromEmailEnv = System.getenv("SMTP_FROM_EMAIL");
+        FROM_EMAIL = (fromEmailEnv != null && !fromEmailEnv.isEmpty()) ? fromEmailEnv : SMTP_USERNAME;
+        
+        String fromNameEnv = System.getenv("SMTP_FROM_NAME");
+        FROM_NAME = (fromNameEnv != null && !fromNameEnv.isEmpty()) ? fromNameEnv : "PSM E-Learning Platform";
+        
+        String debugEnv = System.getenv("SMTP_DEBUG");
+        MAIL_DEBUG = "true".equalsIgnoreCase(debugEnv);
 
-        try {
-            // Try loading from classpath
-            input = EmailUtil.class.getClassLoader().getResourceAsStream("email.properties");
-
-            if (input == null) {
-                System.err.println("========================================");
-                System.err.println("CRITICAL: email.properties NOT FOUND in classpath!");
-                System.err.println("Expected location: WEB-INF/classes/email.properties");
-                System.err.println("Using INVALID default configuration - emails WILL FAIL");
-                System.err.println("========================================");
-
-                // Default configuration (WILL NOT WORK)
-                SMTP_HOST = "smtp.gmail.com";
-                SMTP_PORT = "587";
-                SMTP_USERNAME = "INVALID@example.com";
-                SMTP_PASSWORD = "INVALID_PASSWORD";
-                FROM_EMAIL = "INVALID@example.com";
-                FROM_NAME = "PSM E-Learning Platform";
-                return;
-            }
-
-            props.load(input);
-            SMTP_HOST = props.getProperty("smtp.host", "smtp.gmail.com");
-            SMTP_PORT = props.getProperty("smtp.port", "587");
-            SMTP_USERNAME = props.getProperty("smtp.username");
-            SMTP_PASSWORD = props.getProperty("smtp.password");
-            FROM_EMAIL = props.getProperty("from.email", SMTP_USERNAME);
-            FROM_NAME = props.getProperty("from.name", "PSM E-Learning Platform");
-            MAIL_DEBUG = Boolean.parseBoolean(props.getProperty("mail.debug", "false"));
-
-        } catch (IOException e) {
-            System.err.println("========================================");
-            System.err.println("ERROR loading email configuration: " + e.getMessage());
-            e.printStackTrace();
-            System.err.println("========================================");
-        } finally {
-            if (input != null) {
-                try {
-                    input.close();
-                } catch (IOException e) {
-                    // Ignore close errors
-                }
-            }
+        if (SMTP_HOST == null || SMTP_HOST.trim().isEmpty() || SMTP_USERNAME == null || SMTP_USERNAME.trim().isEmpty()) {
+            System.err.println("SEVERE WARNING: Email functionality is disabled. Required environment variables (SMTP_HOST, SMTP_USERNAME) are missing.");
         }
     }
 
-    /**
-     * Creates a mail session with SMTP authentication
-     * 
-     * @return Configured Session object
-     */
     private static String resolveFromAddress() {
-        String val = com.psm.elearning.service.AppSettingsService.getString("email.from.email", "");
-        if (!val.isEmpty()) return val;
-        
-        String env = System.getenv("SMTP_FROM_EMAIL");
-        if (env != null && !env.isEmpty()) return env.trim();
-        
         return (FROM_EMAIL != null && !FROM_EMAIL.trim().isEmpty()) ? FROM_EMAIL : SMTP_USERNAME;
     }
 
     private static String resolveFromName() {
-        String val = com.psm.elearning.service.AppSettingsService.getString("email.from.name", "");
-        if (!val.isEmpty()) return val;
-        
-        String env = System.getenv("SMTP_FROM_NAME");
-        if (env != null && !env.isEmpty()) return env.trim();
-        
-        return FROM_NAME != null ? FROM_NAME : "PSM E-Learning Platform";
+        return (FROM_NAME != null && !FROM_NAME.trim().isEmpty()) ? FROM_NAME : "PSM E-Learning Platform";
     }
 
     private static Session createSession() {
+        if (SMTP_HOST == null || SMTP_HOST.trim().isEmpty() || SMTP_USERNAME == null || SMTP_USERNAME.trim().isEmpty()) {
+            return null; // Return null early if credentials are not configured
+        }
+
         Properties props = new Properties();
         
         String host = SMTP_HOST;
-        String port = SMTP_PORT;
+        String port = (SMTP_PORT != null && !SMTP_PORT.trim().isEmpty()) ? SMTP_PORT : "587";
         String username = SMTP_USERNAME;
-        String password = SMTP_PASSWORD;
-        String startTls = "true";
+        String password = SMTP_PASSWORD != null ? SMTP_PASSWORD : "";
         
-        String dbHost = com.psm.elearning.service.AppSettingsService.getString("email.smtp.host", "");
-        String dbPort = com.psm.elearning.service.AppSettingsService.getString("email.smtp.port", "");
-        String dbUsername = com.psm.elearning.service.AppSettingsService.getString("email.smtp.username", "");
-        String dbPassword = com.psm.elearning.service.AppSettingsService.getString("email.smtp.password", "");
-        String dbStartTls = com.psm.elearning.service.AppSettingsService.getString("email.smtp.starttls", "");
-
-        if (!dbHost.isEmpty()) host = dbHost;
-        if (!dbPort.isEmpty()) port = dbPort;
-        if (!dbUsername.isEmpty()) username = dbUsername;
-        if (!dbPassword.isEmpty()) password = dbPassword;
-        if (!dbStartTls.isEmpty()) startTls = dbStartTls;
-
-        // Env overrides fallback
-        if (host == null || host.isEmpty() || host.equals(SMTP_HOST)) {
-            String envHost = System.getenv("SMTP_HOST");
-            if (envHost != null && !envHost.isEmpty()) host = envHost;
-        }
-        if (port == null || port.isEmpty() || port.equals(SMTP_PORT)) {
-            String envPort = System.getenv("SMTP_PORT");
-            if (envPort != null && !envPort.isEmpty()) port = envPort;
-        }
-        if (username == null || username.isEmpty() || username.equals(SMTP_USERNAME)) {
-            String envUser = System.getenv("SMTP_USERNAME");
-            if (envUser != null && !envUser.isEmpty()) username = envUser;
-        }
-        if (password == null || password.isEmpty() || password.equals(SMTP_PASSWORD)) {
-            String envPass = System.getenv("SMTP_PASSWORD");
-            if (envPass != null && !envPass.isEmpty()) password = envPass;
-        }
-        if (startTls == null || startTls.isEmpty()) {
-            String envTls = System.getenv("SMTP_STARTTLS");
-            if (envTls != null && !envTls.isEmpty()) startTls = envTls;
-        }
+        String startTls = System.getenv("SMTP_STARTTLS");
+        if (startTls == null || startTls.isEmpty()) startTls = "true";
 
         props.put("mail.smtp.host", host);
         props.put("mail.smtp.port", port);

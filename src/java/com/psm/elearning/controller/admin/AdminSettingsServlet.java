@@ -505,12 +505,19 @@ public class AdminSettingsServlet extends HttpServlet {
         try {
             Properties props = new Properties();
             props.put("mail.smtp.host", input.get(KEY_SMTP_HOST));
-            props.put("mail.smtp.port", input.get(KEY_SMTP_PORT));
+            String port = input.get(KEY_SMTP_PORT);
+            props.put("mail.smtp.port", port);
             props.put("mail.smtp.auth", "true");
             props.put("mail.smtp.starttls.enable", input.get(KEY_SMTP_STARTTLS));
             props.put("mail.smtp.starttls.required", input.get(KEY_SMTP_STARTTLS));
             props.put("mail.smtp.connectiontimeout", "8000");
             props.put("mail.smtp.timeout", "8000");
+
+            if ("465".equals(port)) {
+                props.put("mail.smtp.socketFactory.port", port);
+                props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+                props.put("mail.smtp.ssl.enable", "true");
+            }
 
             final String username = input.get(KEY_SMTP_USERNAME);
             final String password = input.get(KEY_SMTP_PASSWORD);
