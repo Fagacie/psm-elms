@@ -13,7 +13,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin-dashboard.css?v=2.2">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/AdminNav.module.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin-reports-gf.css?v=1.0">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/AdminReports.module.css">
+    <!-- Lucide Icons UMD -->
+    <script src="https://unpkg.com/lucide@0.395.0/dist/umd/lucide.min.js"></script>
     <jsp:include page="/WEB-INF/views/common/head-external-assets.jsp"/>
 
     <!-- React & ReactDOM UMD -->
@@ -276,6 +278,14 @@
         const [endDate, setEndDate] = useState(window.__SELECTED_END_DATE__ || '');
         const hasFilter = startDate && endDate;
 
+        // ── Selection states for custom exports ──
+        const [incSummary, setIncSummary] = useState(true);
+        const [incBreakdowns, setIncBreakdowns] = useState(true);
+        const [incAssessments, setIncAssessments] = useState(true);
+        const [incTopCourses, setIncTopCourses] = useState(true);
+        const [incRevenue, setIncRevenue] = useState(true);
+        const [incHistory, setIncHistory] = useState(true);
+
         // ── Table search state ──
         const [courseSearch, setCourseSearch] = useState('');
         const [revenueSearch, setRevenueSearch] = useState('');
@@ -344,11 +354,23 @@
         };
 
         const exportCsv = () => {
-            window.location.href = ctxPath + '/reports?startDate=' + (startDate || '') + '&endDate=' + (endDate || '') + '&export=csv';
+            window.location.href = ctxPath + '/reports?startDate=' + (startDate || '') + '&endDate=' + (endDate || '') + '&export=csv' +
+                '&incSummary=' + incSummary +
+                '&incBreakdowns=' + incBreakdowns +
+                '&incAssessments=' + incAssessments +
+                '&incTopCourses=' + incTopCourses +
+                '&incRevenue=' + incRevenue +
+                '&incHistory=' + incHistory;
         };
 
         const exportPdf = () => {
-            window.location.href = ctxPath + '/reports?startDate=' + (startDate || '') + '&endDate=' + (endDate || '') + '&export=pdf';
+            window.location.href = ctxPath + '/reports?startDate=' + (startDate || '') + '&endDate=' + (endDate || '') + '&export=pdf' +
+                '&incSummary=' + incSummary +
+                '&incBreakdowns=' + incBreakdowns +
+                '&incAssessments=' + incAssessments +
+                '&incTopCourses=' + incTopCourses +
+                '&incRevenue=' + incRevenue +
+                '&incHistory=' + incHistory;
         };
 
         // ── Chart.js: Revenue Bar Chart ──
@@ -562,6 +584,12 @@
             return () => { if (gradingModesChartRef.current) gradingModesChartRef.current.destroy(); if (submissionModesChartRef.current) submissionModesChartRef.current.destroy(); };
         }, [gradingModes, submissionModes]);
 
+        useEffect(() => {
+            if (window.lucide) {
+                window.lucide.createIcons();
+            }
+        });
+
         // ── TanStack: Top Courses filtered data ──
         const filteredCourses = useMemo(() => {
             if (!courseSearch.trim()) return topCourses;
@@ -592,10 +620,10 @@
                 cell: info => {
                     const val = info.getValue() || 0;
                     return (
-                        <div className="progress-inline-gf">
-                            <span className="progress-label-gf">{val}%</span>
-                            <div className="progress-bar-gf">
-                                <div className="progress-fill-gf" style={{ width: val + '%' }}></div>
+                        <div className="ar_progress_row">
+                            <span className="ar_progress_label">{val}%</span>
+                            <div className="ar_progress_bar">
+                                <div className="ar_progress_fill" style={{ width: val + '%' }}></div>
                             </div>
                         </div>
                     );
@@ -607,10 +635,10 @@
                 cell: info => {
                     const val = info.getValue() || 0;
                     return (
-                        <div className="progress-inline-gf">
-                            <span className="progress-label-gf">{val}%</span>
-                            <div className="progress-bar-gf">
-                                <div className="progress-fill-gf" style={{ width: val + '%' }}></div>
+                        <div className="ar_progress_row">
+                            <span className="ar_progress_label">{val}%</span>
+                            <div className="ar_progress_bar">
+                                <div className="ar_progress_fill" style={{ width: val + '%' }}></div>
                             </div>
                         </div>
                     );
@@ -653,7 +681,7 @@
                 header: 'Revenue',
                 cell: info => {
                     const v = info.getValue() || 0;
-                    return <strong style={{ color: 'var(--gf-primary-dark)' }}>{'NGN ' + Number(v).toLocaleString('en-NG')}</strong>;
+                    return <strong style={{ color: 'var(--ar-primary)' }}>{'NGN ' + Number(v).toLocaleString('en-NG')}</strong>;
                 }
             }
         ], []);
@@ -674,15 +702,15 @@
             const rows = table.getRowModel().rows;
             if (rows.length === 0) {
                 return (
-                    <div className="empty-state-gf">
-                        <i className="fas fa-chart-bar" style={{ fontSize: '2rem', color: 'var(--gf-text-muted)' }}></i>
+                    <div className="ar_empty_state">
+                        <i data-lucide="bar-chart-3" style={{ fontSize: '2rem', color: 'var(--ar-text-muted)' }}></i>
                         <p>{emptyMsg}</p>
                     </div>
                 );
             }
             return (
-                <div style={{ overflowX: 'auto' }}>
-                    <table className="data-table-gf">
+                <div className="ar_data_table_wrapper">
+                    <table className="ar_data_table">
                         <thead>
                             {table.getHeaderGroups().map(hg => (
                                 <tr key={hg.id}>
@@ -692,9 +720,9 @@
                                                 {flexRender(header.column.columnDef.header, header.getContext())}
                                                 {header.column.getCanSort() && (
                                                     <span style={{ opacity: header.column.getIsSorted() ? 1 : 0.3, fontSize: '0.7rem' }}>
-                                                        {header.column.getIsSorted() === 'asc' ? <i className="fas fa-chevron-up"></i> :
-                                                         header.column.getIsSorted() === 'desc' ? <i className="fas fa-chevron-down"></i> :
-                                                         <i className="fas fa-sort"></i>}
+                                                        {header.column.getIsSorted() === 'asc' ? <i data-lucide="chevron-up" style={{ width: '12px', height: '12px' }}></i> :
+                                                         header.column.getIsSorted() === 'desc' ? <i data-lucide="chevron-down" style={{ width: '12px', height: '12px' }}></i> :
+                                                         <i data-lucide="chevrons-up-down" style={{ width: '12px', height: '12px' }}></i>}
                                                     </span>
                                                 )}
                                             </div>
@@ -722,40 +750,18 @@
         const renderPagination = (table) => {
             if (!table.getPageCount || table.getPageCount() <= 1) return null;
             return (
-                <div className="pagination-bar-gf">
+                <div className="ar_pagination">
                     <span>Page <strong>{table.getState().pagination.pageIndex + 1}</strong> of <strong>{table.getPageCount()}</strong></span>
-                    <div className="pagination-controls-gf">
-                        <button className="btn-page-gf" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>Previous</button>
-                        <button className="btn-page-gf" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>Next</button>
+                    <div className="ar_page_controls">
+                        <button className="ar_page_btn" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>Previous</button>
+                        <button className="ar_page_btn" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>Next</button>
                     </div>
-                </div>
-            );
-        };
-
-        const renderBreakdownList = (items, emptyMessage) => {
-            if (!items || items.length === 0) {
-                return (
-                    <div className="empty-state-gf module-empty-gf">
-                        <i className="fas fa-chart-bar" style={{ fontSize: '1.5rem', color: 'var(--gf-text-muted)' }}></i>
-                        <p>{emptyMessage}</p>
-                    </div>
-                );
-            }
-
-            return (
-                <div className="module-breakdown-list-gf">
-                    {items.map((item) => (
-                        <div className="module-breakdown-row-gf" key={(item.label || 'item') + '-' + item.count}>
-                            <span className="module-breakdown-label-gf">{item.label}</span>
-                            <strong className="module-breakdown-value-gf">{item.count}</strong>
-                        </div>
-                    ))}
                 </div>
             );
         };
 
         return (
-            <div className="analytics-container-gf">
+            <div className="ar_container">
                 {/* Breadcrumb */}
                 <div className="admin-breadcrumb" style={{ margin: 0 }}>
                     <a href={ctxPath + '/dashboard'}>Dashboard</a>
@@ -764,226 +770,181 @@
                 </div>
 
                 {/* Page Header */}
-                <div className="analytics-header-gf">
+                <div className="ar_header">
                     <h1>Visual Analytics Hub</h1>
                     <p>Explore enrollment trends, revenue performance, and platform health indicators with interactive charts and filterable data tables.</p>
                 </div>
 
                 {/* ═══ Command Bar ═══ */}
-                <div className="command-bar-gf">
-                    <div className="bar-title-gf">
-                        <h2><i className="fas fa-sliders-h" style={{ color: 'var(--gf-primary)' }}></i> Report Controls</h2>
-                        <span className="admin-badge-gf">Admin Only</span>
+                <div className="ar_controls">
+                    <div className="ar_controls_top">
+                        <h2><i data-lucide="sliders" style={{ color: 'var(--ar-primary)' }}></i> Report Controls</h2>
+                        <span className="ar_table_badge">Admin Only</span>
                     </div>
-                    <div className="command-form-gf">
-                        <div className="filter-group-gf">
+                    <div className="ar_controls_form">
+                        <div className="ar_filter_group">
                             <label>From</label>
                             <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} />
                         </div>
-                        <div className="filter-group-gf">
+                        <div className="ar_filter_group">
                             <label>To</label>
                             <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} />
                         </div>
-                        <div className="command-actions-gf">
-                            <button className="btn-primary-gf" onClick={applyFilter}>
-                                <i className="fas fa-filter"></i> Apply Filter
+                        <div className="ar_controls_actions">
+                            <button className="ar_btn ar_btn_primary" onClick={applyFilter}>
+                                <i data-lucide="filter"></i> Apply Filter
                             </button>
-                            <button className="btn-secondary-gf" onClick={resetFilter}>
-                                <i className="fas fa-undo"></i> Reset
+                            <button className="ar_btn" onClick={resetFilter}>
+                                <i data-lucide="rotate-ccw"></i> Reset
                             </button>
-                            <button className="btn-primary-gf" onClick={exportCsv} style={{ background: '#0f172a' }}>
-                                <i className="fas fa-file-csv"></i> Export CSV
+                            <button className="ar_btn" onClick={exportCsv}>
+                                <i data-lucide="file-spreadsheet"></i> Export CSV
                             </button>
-                            <button className="btn-primary-gf" onClick={exportPdf} style={{ background: 'var(--gf-primary-dark)' }}>
-                                <i className="fas fa-file-pdf"></i> Download PDF
+                            <button className="ar_btn" onClick={exportPdf}>
+                                <i data-lucide="file-down"></i> Download PDF
                             </button>
                         </div>
                     </div>
-                    <div className="presets-row-gf">
-                        <button className="preset-btn-gf" onClick={() => setQuickRange(7)}>Last 7 Days</button>
-                        <button className="preset-btn-gf" onClick={() => setQuickRange(30)}>Last 30 Days</button>
-                        <button className="preset-btn-gf" onClick={() => setQuickRange(90)}>Last 90 Days</button>
-                        <button className="preset-btn-gf" onClick={setYtd}>Year to Date</button>
+                    <div className="ar_presets">
+                        <button className="ar_preset_btn" onClick={() => setQuickRange(7)}>Last 7 Days</button>
+                        <button className="ar_preset_btn" onClick={() => setQuickRange(30)}>Last 30 Days</button>
+                        <button className="ar_preset_btn" onClick={() => setQuickRange(90)}>Last 90 Days</button>
+                        <button className="ar_preset_btn" onClick={setYtd}>Year to Date</button>
+                    </div>
+                    <div className="ar_export_selections">
+                        <span className="ar_export_selections_label">
+                            <i data-lucide="check-square" style={{ width: '14px', height: '14px', color: 'var(--ar-primary)' }}></i> Include in Export:
+                        </span>
+                        <div className="ar_checkbox_grid">
+                            <label className="ar_checkbox_label">
+                                <input type="checkbox" checked={incSummary} onChange={e => setIncSummary(e.target.checked)} />
+                                <span>Platform Summary</span>
+                            </label>
+                            <label className="ar_checkbox_label">
+                                <input type="checkbox" checked={incBreakdowns} onChange={e => setIncBreakdowns(e.target.checked)} />
+                                <span>System Breakdowns</span>
+                            </label>
+                            <label className="ar_checkbox_label">
+                                <input type="checkbox" checked={incAssessments} onChange={e => setIncAssessments(e.target.checked)} />
+                                <span>Assessment Analytics</span>
+                            </label>
+                            <label className="ar_checkbox_label">
+                                <input type="checkbox" checked={incTopCourses} onChange={e => setIncTopCourses(e.target.checked)} />
+                                <span>Top Courses</span>
+                            </label>
+                            <label className="ar_checkbox_label">
+                                <input type="checkbox" checked={incRevenue} onChange={e => setIncRevenue(e.target.checked)} />
+                                <span>Revenue Data</span>
+                            </label>
+                            <label className="ar_checkbox_label">
+                                <input type="checkbox" checked={incHistory} onChange={e => setIncHistory(e.target.checked)} />
+                                <span>Export History</span>
+                            </label>
+                        </div>
                     </div>
                     {(startDate || endDate) && (
-                        <div className="filter-chips-gf">
+                        <div className="ar_chips">
                             {hasFilter ? (
-                                <span className="chip-gf chip-primary-gf">
-                                    <i className="fas fa-calendar-alt"></i> {startDate} → {endDate}
+                                <span className="ar_chip ar_chip_active">
+                                    <i data-lucide="calendar"></i> {startDate} → {endDate}
                                 </span>
                             ) : null}
-                            <span className="chip-gf chip-muted-gf">
+                            <span className="ar_chip">
                                 {hasFilter ? 'Filtered view' : 'Full history'}
                             </span>
                         </div>
                     )}
                 </div>
 
-                {/* ═══ KPI Metrics Strip ═══ */}
-                <section className="metrics-grid-gf">
-                    <div className="metric-card-gf">
-                        <span className="label"><i className="fas fa-coins" style={{ marginRight: '0.3rem' }}></i> Total Revenue</span>
-                        <span className="value" style={{ color: 'var(--gf-primary-dark)' }}>{'NGN ' + Number(totalRevenue).toLocaleString('en-NG')}</span>
-                        <span className="sub-label">{hasFilter ? 'Filtered period' : 'All time'}</span>
+                {/* ═══ Master KPIs ═══ */}
+                <section className="ar_kpi_grid">
+                    <div className="ar_kpi_card">
+                        <span className="ar_kpi_label"><i data-lucide="coins"></i> Total Revenue</span>
+                        <span className="ar_kpi_value">{'NGN ' + Number(totalRevenue).toLocaleString('en-NG')}</span>
+                        <span className="ar_kpi_sub">{hasFilter ? 'Filtered period' : 'All time'}</span>
                     </div>
-                    <div className="metric-card-gf">
-                        <span className="label"><i className="fas fa-user-graduate" style={{ marginRight: '0.3rem' }}></i> Enrollments</span>
-                        <span className="value">{totalEnrollments}</span>
-                        <span className="sub-label">{completedEnrollments} completed</span>
+                    <div className="ar_kpi_card">
+                        <span className="ar_kpi_label"><i data-lucide="graduation-cap"></i> Enrollments</span>
+                        <span className="ar_kpi_value">{totalEnrollments}</span>
+                        <span className="ar_kpi_sub">{completedEnrollments} completed</span>
                     </div>
-                    <div className="metric-card-gf">
-                        <span className="label"><i className="fas fa-chart-line" style={{ marginRight: '0.3rem' }}></i> Completion Rate</span>
-                        <span className="value" style={{ color: completionRate >= 50 ? 'var(--gf-primary-dark)' : 'var(--gf-amber)' }}>{completionRate}%</span>
-                        <span className="sub-label">Based on filtered data</span>
+                    <div className="ar_kpi_card">
+                        <span className="ar_kpi_label"><i data-lucide="trending-up"></i> Completion Rate</span>
+                        <span className="ar_kpi_value">{completionRate}%</span>
+                        <span className="ar_kpi_sub">Based on filtered data</span>
                     </div>
-                    <div className="metric-card-gf">
-                        <span className="label"><i className="fas fa-user-plus" style={{ marginRight: '0.3rem' }}></i> New Users</span>
-                        <span className="value">{newUsers}</span>
-                        <span className="sub-label">{hasFilter ? 'In selected range' : 'Use date filter'}</span>
+                    <div className="ar_kpi_card">
+                        <span className="ar_kpi_label"><i data-lucide="user-plus"></i> New Users</span>
+                        <span className="ar_kpi_value">{newUsers}</span>
+                        <span className="ar_kpi_sub">{hasFilter ? 'In selected range' : 'Use date filter'}</span>
                     </div>
                 </section>
 
-                {/* ═══ Platform Snapshot ═══ */}
-                <div className="snapshot-card-gf">
-                    <div className="snapshot-header-gf">
-                        <h3><i className="fas fa-th-large" style={{ color: 'var(--gf-primary)', marginRight: '0.4rem' }}></i> Platform Snapshot</h3>
-                        <span className="chip-gf chip-muted-gf" style={{ fontSize: '0.7rem' }}>All-Time Totals</span>
-                    </div>
-                    <div className="snapshot-grid-inner-gf">
-                        <div className="snapshot-tile-gf">
-                            <span className="tile-label">Users</span>
-                            <span className="tile-value">{summary.totalUsers || 0}</span>
+                {/* ═══ Platform Health (Consolidated Modules) ═══ */}
+                <section className="ar_health_section">
+                    <h3 className="ar_health_title">
+                        <i data-lucide="activity"></i> Platform Health
+                    </h3>
+                    <div className="ar_health_grid">
+                        <div className="ar_health_item">
+                            <div className="ar_health_header">
+                                <i data-lucide="users"></i>
+                                <span className="ar_health_label">Total Users</span>
+                            </div>
+                            <span className="ar_health_value">{summary.totalUsers || 0}</span>
                         </div>
-                        <div className="snapshot-tile-gf">
-                            <span className="tile-label">Students</span>
-                            <span className="tile-value">{summary.totalStudents || 0}</span>
+                        <div className="ar_health_item">
+                            <div className="ar_health_header">
+                                <i data-lucide="book-open"></i>
+                                <span className="ar_health_label">Active Courses</span>
+                            </div>
+                            <span className="ar_health_value">{summary.totalCourses || 0}</span>
                         </div>
-                        <div className="snapshot-tile-gf">
-                            <span className="tile-label">Instructors</span>
-                            <span className="tile-value">{summary.totalInstructors || 0}</span>
+                        <div className="ar_health_item">
+                            <div className="ar_health_header">
+                                <i data-lucide="graduation-cap"></i>
+                                <span className="ar_health_label">Enrollments</span>
+                            </div>
+                            <span className="ar_health_value">{summary.totalEnrollments || 0}</span>
                         </div>
-                        <div className="snapshot-tile-gf">
-                            <span className="tile-label">Courses</span>
-                            <span className="tile-value">{summary.totalCourses || 0}</span>
+                        <div className="ar_health_item">
+                            <div className="ar_health_header">
+                                <i data-lucide="award"></i>
+                                <span className="ar_health_label">Active Certs</span>
+                            </div>
+                            <span className="ar_health_value">{summary.activeCertificates || 0}</span>
                         </div>
-                        <div className="snapshot-tile-gf">
-                            <span className="tile-label">Enrollments</span>
-                            <span className="tile-value">{summary.totalEnrollments || 0}</span>
+                        <div className="ar_health_item">
+                            <div className="ar_health_header">
+                                <i data-lucide="clipboard-list"></i>
+                                <span className="ar_health_label">Assessments</span>
+                            </div>
+                            <span className="ar_health_value">{assessmentSummary.totalAssessments || 0}</span>
                         </div>
-                        <div className="snapshot-tile-gf">
-                            <span className="tile-label">Completed</span>
-                            <span className="tile-value">{summary.completedEnrollments || 0}</span>
+                        <div className="ar_health_item">
+                            <div className="ar_health_header">
+                                <i data-lucide="inbox"></i>
+                                <span className="ar_health_label">Submissions</span>
+                            </div>
+                            <span className="ar_health_value">{assessmentSummary.totalSubmissions || 0}</span>
                         </div>
-                        <div className="snapshot-tile-gf">
-                            <span className="tile-label">Certificates</span>
-                            <span className="tile-value">{summary.activeCertificates || 0}</span>
-                        </div>
-                        <div className="snapshot-tile-gf">
-                            <span className="tile-label">Revenue</span>
-                            <span className="tile-value" style={{ fontSize: '1.1rem' }}>{'NGN ' + Number(summary.totalRevenue || 0).toLocaleString('en-NG')}</span>
-                        </div>
-                    </div>
-                </div>
-
-                {/* ═══ Module Reports ═══ */}
-                <section className="module-grid-gf">
-                    <div className="module-card-gf">
-                        <div className="module-card-head-gf">
-                            <h3><i className="fas fa-users"></i> User Module</h3>
-                            <span>Accounts and roles</span>
-                        </div>
-                        <div className="module-summary-grid-gf">
-                            <div className="module-summary-item-gf"><span>Total</span><strong>{summary.totalUsers || 0}</strong></div>
-                            <div className="module-summary-item-gf"><span>Students</span><strong>{summary.totalStudents || 0}</strong></div>
-                            <div className="module-summary-item-gf"><span>Instructors</span><strong>{summary.totalInstructors || 0}</strong></div>
-                        </div>
-                        {renderBreakdownList(userRoles, 'No role breakdown available.')}
-                        {renderBreakdownList(userStatuses, 'No status breakdown available.')}
-                    </div>
-
-                    <div className="module-card-gf">
-                        <div className="module-card-head-gf">
-                            <h3><i className="fas fa-book-open"></i> Course Module</h3>
-                            <span>Catalog health</span>
-                        </div>
-                        <div className="module-summary-grid-gf">
-                            <div className="module-summary-item-gf"><span>Total</span><strong>{summary.totalCourses || 0}</strong></div>
-                            <div className="module-summary-item-gf"><span>Enrollments</span><strong>{summary.totalEnrollments || 0}</strong></div>
-                            <div className="module-summary-item-gf"><span>Revenue</span><strong>{'NGN ' + Number(summary.totalRevenue || 0).toLocaleString('en-NG')}</strong></div>
-                        </div>
-                        {renderBreakdownList(courseStatuses, 'No course status breakdown available.')}
-                    </div>
-
-                    <div className="module-card-gf">
-                        <div className="module-card-head-gf">
-                            <h3><i className="fas fa-graduation-cap"></i> Enrollment Module</h3>
-                            <span>Progress and completion</span>
-                        </div>
-                        <div className="module-summary-grid-gf">
-                            <div className="module-summary-item-gf"><span>Active</span><strong>{summary.totalEnrollments || 0}</strong></div>
-                            <div className="module-summary-item-gf"><span>Completed</span><strong>{summary.completedEnrollments || 0}</strong></div>
-                            <div className="module-summary-item-gf"><span>Filtered</span><strong>{summary.filteredEnrollments || summary.totalEnrollments || 0}</strong></div>
-                        </div>
-                        {renderBreakdownList(enrollmentStatuses, 'No enrollment status breakdown available.')}
-                    </div>
-
-                    <div className="module-card-gf">
-                        <div className="module-card-head-gf">
-                            <h3><i className="fas fa-coins"></i> Payment Module</h3>
-                            <span>Collections and gateway states</span>
-                        </div>
-                        <div className="module-summary-grid-gf">
-                            <div className="module-summary-item-gf"><span>Total</span><strong>{'NGN ' + Number(summary.totalRevenue || 0).toLocaleString('en-NG')}</strong></div>
-                            <div className="module-summary-item-gf"><span>Filtered</span><strong>{'NGN ' + Number(summary.filteredRevenue || summary.totalRevenue || 0).toLocaleString('en-NG')}</strong></div>
-                        </div>
-                        {renderBreakdownList(paymentStatuses, 'No payment status breakdown available.')}
-                    </div>
-
-                    <div className="module-card-gf">
-                        <div className="module-card-head-gf">
-                            <h3><i className="fas fa-certificate"></i> Certificate Module</h3>
-                            <span>Issued credentials</span>
-                        </div>
-                        <div className="module-summary-grid-gf">
-                            <div className="module-summary-item-gf"><span>Active</span><strong>{summary.activeCertificates || 0}</strong></div>
-                            <div className="module-summary-item-gf"><span>Issued</span><strong>{summary.activeCertificates || 0}</strong></div>
-                        </div>
-                        {renderBreakdownList(certificateStatuses, 'No certificate status breakdown available.')}
-                    </div>
-
-                    <div className="module-card-gf">
-                        <div className="module-card-head-gf">
-                            <h3><i className="fas fa-clipboard-check"></i> Assessment Module</h3>
-                            <span>Testing and grading</span>
-                        </div>
-                        <div className="module-summary-grid-gf">
-                            <div className="module-summary-item-gf"><span>Total</span><strong>{assessmentSummary.totalAssessments || 0}</strong></div>
-                            <div className="module-summary-item-gf"><span>Questions</span><strong>{assessmentSummary.totalQuestions || 0}</strong></div>
-                            <div className="module-summary-item-gf"><span>Submissions</span><strong>{assessmentSummary.totalSubmissions || 0}</strong></div>
-                            <div className="module-summary-item-gf"><span>Graded</span><strong>{assessmentSummary.gradedSubmissions || 0}</strong></div>
-                            <div className="module-summary-item-gf"><span>Pending</span><strong>{assessmentSummary.pendingSubmissions || 0}</strong></div>
-                            <div className="module-summary-item-gf"><span>Retakes</span><strong>{assessmentSummary.pendingRetakeRequests || 0}</strong></div>
-                        </div>
-                        {renderBreakdownList(gradingModes, 'No grading mode breakdown available.')}
-                        {renderBreakdownList(submissionModes, 'No submission mode breakdown available.')}
-                        {renderBreakdownList(reportAccessStatuses, 'No report access breakdown available.')}
                     </div>
                 </section>
 
                 {/* ═══ Charts Grid ═══ */}
-                <div className="charts-grid-gf">
+                <div className="ar_charts_grid">
                     {/* Revenue Bar Chart */}
-                    <div className="chart-card-gf">
-                        <div className="chart-header-gf">
-                            <h3><i className="fas fa-chart-bar" style={{ color: 'var(--gf-primary)' }}></i> Revenue by Course</h3>
-                            <span className="chart-sub">{revenueRows.length} courses</span>
+                    <div className="ar_chart_card">
+                        <div className="ar_chart_header">
+                            <h3><i data-lucide="bar-chart-3" style={{ color: 'var(--ar-primary)' }}></i> Revenue by Course</h3>
+                            <span className="ar_chart_sub">{revenueRows.length} courses</span>
                         </div>
-                        <div className="chart-canvas-wrap-gf" style={{ height: Math.max(200, revenueRows.length * 36) + 'px' }}>
+                        <div className="ar_chart_wrap" style={{ height: Math.max(200, revenueRows.length * 36) + 'px' }}>
                             {revenueRows.length > 0 ? (
                                 <canvas ref={revenueCanvasRef}></canvas>
                             ) : (
-                                <div className="empty-state-gf">
-                                    <i className="fas fa-chart-bar" style={{ fontSize: '2rem', color: 'var(--gf-text-muted)' }}></i>
+                                <div className="ar_empty_state">
+                                    <i data-lucide="bar-chart-3" style={{ fontSize: '2rem', color: 'var(--ar-text-muted)' }}></i>
                                     <p>No revenue data available for charting.</p>
                                 </div>
                             )}
@@ -991,17 +952,17 @@
                     </div>
 
                     {/* Enrollment Doughnut */}
-                    <div className="chart-card-gf">
-                        <div className="chart-header-gf">
-                            <h3><i className="fas fa-chart-pie" style={{ color: 'var(--gf-accent)' }}></i> Enrollment Share</h3>
-                            <span className="chart-sub">Top {Math.min(6, topCourses.length)}</span>
+                    <div className="ar_chart_card">
+                        <div className="ar_chart_header">
+                            <h3><i data-lucide="pie-chart" style={{ color: 'var(--ar-primary)' }}></i> Enrollment Share</h3>
+                            <span className="ar_chart_sub">Top {Math.min(6, topCourses.length)}</span>
                         </div>
-                        <div className="chart-canvas-wrap-gf chart-doughnut-wrap-gf" style={{ height: '320px' }}>
+                        <div className="ar_chart_wrap" style={{ height: '320px' }}>
                             {topCourses.length > 0 ? (
                                 <canvas ref={enrollCanvasRef}></canvas>
                             ) : (
-                                <div className="empty-state-gf">
-                                    <i className="fas fa-chart-pie" style={{ fontSize: '2rem', color: 'var(--gf-text-muted)' }}></i>
+                                <div className="ar_empty_state">
+                                    <i data-lucide="pie-chart" style={{ fontSize: '2rem', color: 'var(--ar-text-muted)' }}></i>
                                     <p>No enrollment data available.</p>
                                 </div>
                             )}
@@ -1010,14 +971,14 @@
                 </div>
 
                 {/* ═══ Top Courses Table ═══ */}
-                <div className="table-card-gf">
-                    <div className="table-header-gf">
-                        <h3><i className="fas fa-trophy" style={{ color: 'var(--gf-amber)' }}></i> Top Courses by Enrollment</h3>
-                        <span className="record-count-gf">{filteredCourses.length} {filteredCourses.length === 1 ? 'record' : 'records'}</span>
+                <div className="ar_table_card">
+                    <div className="ar_table_header">
+                        <h3><i data-lucide="award" style={{ color: 'var(--ar-primary)' }}></i> Top Courses by Enrollment</h3>
+                        <span className="ar_table_badge">{filteredCourses.length} {filteredCourses.length === 1 ? 'record' : 'records'}</span>
                     </div>
-                    <div className="table-controls-gf">
-                        <div className="search-box-gf">
-                            <i className="fas fa-search"></i>
+                    <div className="ar_table_controls">
+                        <div className="ar_search_box">
+                            <i data-lucide="search"></i>
                             <input type="text" placeholder="Search courses..." value={courseSearch} onChange={e => setCourseSearch(e.target.value)} />
                         </div>
                     </div>
@@ -1026,14 +987,14 @@
                 </div>
 
                 {/* ═══ Revenue Table ═══ */}
-                <div className="table-card-gf">
-                    <div className="table-header-gf">
-                        <h3><i className="fas fa-money-bill-wave" style={{ color: 'var(--gf-primary)' }}></i> Revenue Breakdown by Course</h3>
-                        <span className="record-count-gf">{filteredRevenue.length} {filteredRevenue.length === 1 ? 'record' : 'records'}</span>
+                <div className="ar_table_card">
+                    <div className="ar_table_header">
+                        <h3><i data-lucide="banknote" style={{ color: 'var(--ar-primary)' }}></i> Revenue Breakdown by Course</h3>
+                        <span className="ar_table_badge">{filteredRevenue.length} {filteredRevenue.length === 1 ? 'record' : 'records'}</span>
                     </div>
-                    <div className="table-controls-gf">
-                        <div className="search-box-gf">
-                            <i className="fas fa-search"></i>
+                    <div className="ar_table_controls">
+                        <div className="ar_search_box">
+                            <i data-lucide="search"></i>
                             <input type="text" placeholder="Search revenue..." value={revenueSearch} onChange={e => setRevenueSearch(e.target.value)} />
                         </div>
                     </div>
@@ -1043,13 +1004,13 @@
 
                 {/* ═══ Recent Exports Log ═══ */}
                 {recentExports.length > 0 && (
-                    <div className="table-card-gf">
-                        <div className="table-header-gf">
-                            <h3><i className="fas fa-history" style={{ color: 'var(--gf-text-muted)' }}></i> Recent Export History</h3>
-                            <span className="record-count-gf">{recentExports.length} exports</span>
+                    <div className="ar_table_card">
+                        <div className="ar_table_header">
+                            <h3><i data-lucide="history" style={{ color: 'var(--ar-text-muted)' }}></i> Recent Export History</h3>
+                            <span className="ar_table_badge">{recentExports.length} exports</span>
                         </div>
-                        <div style={{ overflowX: 'auto' }}>
-                            <table className="exports-table-gf">
+                        <div className="ar_data_table_wrapper">
+                            <table className="ar_exports_table">
                                 <thead>
                                     <tr>
                                         <th>ID</th>
@@ -1065,7 +1026,7 @@
                                             <td><strong>{exp.exportId}</strong></td>
                                             <td>{exp.reportType}</td>
                                             <td>
-                                                <span className={'format-badge-gf ' + (exp.exportFormat === 'CSV' ? 'format-csv-gf' : 'format-pdf-gf')}>
+                                                <span className={'ar_format_badge ' + (exp.exportFormat === 'CSV' ? 'ar_format_csv' : 'ar_format_pdf')}>
                                                     {exp.exportFormat}
                                                 </span>
                                             </td>

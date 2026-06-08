@@ -22,7 +22,7 @@ public class ReportDAOImpl implements ReportDAO {
                 "(SELECT COUNT(*) FROM Enrollment) AS totalEnrollments, " +
                 "(SELECT COUNT(*) FROM Enrollment WHERE CompletionStatus='Completed' OR Status='Completed') AS completedEnrollments, " +
                 "(SELECT COUNT(*) FROM Certificate WHERE Status='Active') AS activeCertificates, " +
-                "(SELECT COALESCE(SUM(Amount), 0) FROM Payment WHERE PaymentStatus IN ('Paid','Success','Completed')) AS totalRevenue";
+                "(SELECT COALESCE(SUM(Amount), 0) FROM Payment WHERE PaymentStatus = 'Paid') AS totalRevenue";
 
         Map<String, Object> row = new HashMap<>();
         try (Connection conn = DBConnection.getConnection();
@@ -47,7 +47,7 @@ public class ReportDAOImpl implements ReportDAO {
                             "SELECT COUNT(*) FROM Enrollment WHERE (CompletionStatus='Completed' OR Status='Completed') AND DATE(EnrollmentDate) BETWEEN ? AND ?",
                             startDate, endDate));
                     row.put("filteredRevenue", sumByDateRange(conn,
-                            "SELECT COALESCE(SUM(Amount), 0) FROM Payment WHERE PaymentStatus IN ('Paid','Success','Completed') AND DATE(COALESCE(PaymentDate, CreatedAt)) BETWEEN ? AND ?",
+                            "SELECT COALESCE(SUM(Amount), 0) FROM Payment WHERE PaymentStatus = 'Paid' AND DATE(COALESCE(PaymentDate, CreatedAt)) BETWEEN ? AND ?",
                             startDate, endDate));
                     row.put("newUsersInRange", countByDateRange(conn,
                             "SELECT COUNT(*) FROM User WHERE DATE(CreatedAt) BETWEEN ? AND ?",
@@ -114,7 +114,7 @@ public class ReportDAOImpl implements ReportDAO {
     public List<Map<String, Object>> getRevenueByCourse(int limit, String startDate, String endDate) {
         StringBuilder sql = new StringBuilder("SELECT c.CourseID, c.Title, " +
                 "COUNT(DISTINCT e.EnrollmentID) AS enrollments, " +
-                "COALESCE(SUM(CASE WHEN p.PaymentStatus IN ('Paid','Success','Completed') THEN p.Amount ELSE 0 END), 0) AS revenue " +
+                "COALESCE(SUM(CASE WHEN p.PaymentStatus = 'Paid' THEN p.Amount ELSE 0 END), 0) AS revenue " +
                 "FROM Course c " +
                 "LEFT JOIN Enrollment e ON e.CourseID = c.CourseID " +
                 "LEFT JOIN Payment p ON p.EnrollmentID = e.EnrollmentID");
@@ -260,7 +260,7 @@ public class ReportDAOImpl implements ReportDAO {
                 "COUNT(e.EnrollmentID) AS totalEnrollments, " +
                 "SUM(CASE WHEN e.CompletionStatus='Completed' OR e.Status='Completed' THEN 1 ELSE 0 END) AS completedEnrollments, " +
                 "ROUND(AVG(COALESCE(e.Progress, 0)), 0) AS avgProgress, " +
-                "COALESCE(SUM(CASE WHEN p.PaymentStatus IN ('Paid','Success','Completed') THEN p.Amount ELSE 0 END), 0) AS totalRevenue " +
+                "COALESCE(SUM(CASE WHEN p.PaymentStatus = 'Paid' THEN p.Amount ELSE 0 END), 0) AS totalRevenue " +
                 "FROM Course c " +
                 "LEFT JOIN Enrollment e ON e.CourseID = c.CourseID " +
                 "LEFT JOIN Payment p ON p.EnrollmentID = e.EnrollmentID " +

@@ -4,6 +4,7 @@ import com.psm.elearning.dao.PaymentDAO;
 import com.psm.elearning.dao.PaymentDAOImpl;
 import com.psm.elearning.model.Enrollment;
 import com.psm.elearning.model.Payment;
+import com.psm.elearning.model.PaymentStatus;
 import com.psm.elearning.util.SessionUtil;
 
 import javax.servlet.http.HttpSession;
@@ -32,13 +33,7 @@ public class StudentAccessService {
     }
 
     public boolean isPaymentComplete(String paymentStatus) {
-        if (paymentStatus == null) {
-            return false;
-        }
-        String normalized = paymentStatus.trim().toLowerCase(Locale.ENGLISH);
-        return "paid".equals(normalized)
-                || "completed".equals(normalized)
-                || "success".equals(normalized);
+        return PaymentStatus.isComplete(paymentStatus);
     }
 
     public boolean isFreeEnrollment(Enrollment enrollment) {

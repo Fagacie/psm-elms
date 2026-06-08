@@ -18,6 +18,8 @@
         <session-timeout>30</session-timeout>
         <cookie-config>
             <http-only>true</http-only>
+            <!-- Secure: only send JSESSIONID over HTTPS (enforced in Railway production) -->
+            <secure>true</secure>
         </cookie-config>
     </session-config>
 
@@ -474,19 +476,17 @@
     </servlet-mapping>
 
     <!-- Material Progress Servlets -->
-    <servlet>
-        <servlet-name>MarkMaterialCompleteServlet</servlet-name>
-        <servlet-class>com.psm.elearning.controller.student.MarkMaterialCompleteServlet</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>MarkMaterialCompleteServlet</servlet-name>
-        <url-pattern>/student/mark-material-complete</url-pattern>
-    </servlet-mapping>
-
+    <!-- NOTE: Only MarkMaterialCompletedServlet (with 'd') exists as a class.
+         The old mapping /student/mark-material-complete (without 'd') is now also
+         handled by the same servlet to avoid breaking any existing bookmarks/JS calls. -->
     <servlet>
         <servlet-name>MarkMaterialCompletedServlet</servlet-name>
         <servlet-class>com.psm.elearning.controller.student.MarkMaterialCompletedServlet</servlet-class>
     </servlet>
+    <servlet-mapping>
+        <servlet-name>MarkMaterialCompletedServlet</servlet-name>
+        <url-pattern>/student/mark-material-complete</url-pattern>
+    </servlet-mapping>
     <servlet-mapping>
         <servlet-name>MarkMaterialCompletedServlet</servlet-name>
         <url-pattern>/student/mark-material-completed</url-pattern>

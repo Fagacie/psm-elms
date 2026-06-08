@@ -6,6 +6,7 @@ import com.psm.elearning.dao.PaymentDAO;
 import com.psm.elearning.dao.PaymentDAOImpl;
 import com.psm.elearning.model.Enrollment;
 import com.psm.elearning.model.Payment;
+import com.psm.elearning.model.PaymentStatus;
 import com.psm.elearning.service.AppSettingsService;
 import com.psm.elearning.service.PaystackService;
 import com.psm.elearning.util.DBConnection;
@@ -337,11 +338,7 @@ public class PaymentCallbackServlet extends HttpServlet {
     }
 
     private boolean isPaid(String status) {
-        if (status == null) {
-            return false;
-        }
-        String normalized = status.trim().toLowerCase(Locale.ENGLISH);
-        return "paid".equals(normalized) || "completed".equals(normalized) || "success".equals(normalized);
+        return PaymentStatus.isComplete(status);
     }
 
     private String normalizeProviderStatus(String status) {
