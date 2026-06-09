@@ -8,13 +8,14 @@ import java.nio.charset.StandardCharsets;
 
 /**
  * Email Utility for sending emails via Brevo HTTP API (HTTPS/port 443).
- * Uses Brevo's transactional email REST API to bypass all SMTP port restrictions
+ * Uses Brevo's transactional email REST API to bypass all SMTP port
+ * restrictions
  * on cloud platforms like Railway.
  *
  * Required environment variables:
- *   BREVO_API_KEY   — your Brevo v3 API key (starts with "xkeysib-")
- *   SMTP_FROM_EMAIL — sender address (defaults to SMTP_USERNAME if not set)
- *   SMTP_FROM_NAME  — sender display name (optional)
+ * BREVO_API_KEY — your Brevo v3 API key (starts with "xkeysib-")
+ * SMTP_FROM_EMAIL — sender address (defaults to SMTP_USERNAME if not set)
+ * SMTP_FROM_NAME — sender display name (optional)
  *
  * @author PSM E-Learning Team
  * @version 2.0
@@ -34,14 +35,14 @@ public class EmailUtil {
     private static void loadConfig() {
         BREVO_API_KEY = System.getenv("BREVO_API_KEY");
         String fromEmail = System.getenv("SMTP_FROM_EMAIL");
-        String smtpUser  = System.getenv("SMTP_USERNAME");
-        String fromName  = System.getenv("SMTP_FROM_NAME");
+        String smtpUser = System.getenv("SMTP_USERNAME");
+        String fromName = System.getenv("SMTP_FROM_NAME");
 
         FROM_EMAIL = (fromEmail != null && !fromEmail.trim().isEmpty()) ? fromEmail.trim()
-                   : (smtpUser  != null && !smtpUser.trim().isEmpty())  ? smtpUser.trim()
-                   : null;
-        FROM_NAME  = (fromName != null && !fromName.trim().isEmpty()) ? fromName.trim()
-                   : "PSM E-Learning Platform";
+                : (smtpUser != null && !smtpUser.trim().isEmpty()) ? smtpUser.trim()
+                        : null;
+        FROM_NAME = (fromName != null && !fromName.trim().isEmpty()) ? fromName.trim()
+                : "PSM E-Learning Platform";
 
         if (BREVO_API_KEY != null && !BREVO_API_KEY.trim().isEmpty()) {
             System.out.println("[EmailUtil] Mode: Brevo HTTP API. Sender: " + FROM_EMAIL);
@@ -52,7 +53,8 @@ public class EmailUtil {
 
     /** Escape a string value for safe embedding in a JSON literal. */
     private static String jsonEscape(String s) {
-        if (s == null) return "";
+        if (s == null)
+            return "";
         return s.replace("\\", "\\\\")
                 .replace("\"", "\\\"")
                 .replace("\n", "\\n")
@@ -63,10 +65,11 @@ public class EmailUtil {
     /**
      * Core send method — POSTs to Brevo's transactional email API over HTTPS.
      *
-     * @param toEmail   Recipient address
-     * @param subject   Email subject
-     * @param htmlBody  HTML content (use plain text wrapped in &lt;pre&gt; for plain text)
-     * @param isHtml    true to send as HTML, false for plain text
+     * @param toEmail  Recipient address
+     * @param subject  Email subject
+     * @param htmlBody HTML content (use plain text wrapped in &lt;pre&gt; for plain
+     *                 text)
+     * @param isHtml   true to send as HTML, false for plain text
      * @return true if Brevo accepted the message (2xx response)
      */
     private static boolean sendViaBrevo(String toEmail, String subject, String content, boolean isHtml) {
@@ -77,17 +80,19 @@ public class EmailUtil {
             return false;
         }
         if (FROM_EMAIL == null || FROM_EMAIL.trim().isEmpty()) {
-            System.err.println("[EmailUtil] Cannot send email: No sender address configured (set SMTP_FROM_EMAIL or SMTP_USERNAME).");
+            System.err.println(
+                    "[EmailUtil] Cannot send email: No sender address configured (set SMTP_FROM_EMAIL or SMTP_USERNAME).");
             return false;
         }
 
         String contentField = isHtml ? "htmlContent" : "textContent";
         String json = "{"
-            + "\"sender\":{\"name\":\"" + jsonEscape(FROM_NAME) + "\",\"email\":\"" + jsonEscape(FROM_EMAIL) + "\"},"
-            + "\"to\":[{\"email\":\"" + jsonEscape(toEmail) + "\"}],"
-            + "\"subject\":\"" + jsonEscape(subject) + "\","
-            + "\"" + contentField + "\":\"" + jsonEscape(content) + "\""
-            + "}";
+                + "\"sender\":{\"name\":\"" + jsonEscape(FROM_NAME) + "\",\"email\":\"" + jsonEscape(FROM_EMAIL)
+                + "\"},"
+                + "\"to\":[{\"email\":\"" + jsonEscape(toEmail) + "\"}],"
+                + "\"subject\":\"" + jsonEscape(subject) + "\","
+                + "\"" + contentField + "\":\"" + jsonEscape(content) + "\""
+                + "}";
 
         try {
             URL url = new URL(BREVO_API_URL);
@@ -413,18 +418,26 @@ public class EmailUtil {
         String title = courseName != null && !courseName.trim().isEmpty() ? courseName.trim() : "Course";
         String subject = "You Have Been Assigned a New Course";
 
-        String htmlBody = "<div style=\"max-width: 600px; margin: 0 auto; font-family: sans-serif; padding: 20px; background-color: #ffffff;\">\n" +
-                "  <h1 style=\"color: #0f172a; margin-top: 0; margin-bottom: 8px; font-size: 24px;\">PSM E-Learning Academy</h1>\n" +
+        String htmlBody = "<div style=\"max-width: 600px; margin: 0 auto; font-family: sans-serif; padding: 20px; background-color: #ffffff;\">\n"
+                +
+                "  <h1 style=\"color: #0f172a; margin-top: 0; margin-bottom: 8px; font-size: 24px;\">PSM E-Learning Academy</h1>\n"
+                +
                 "  <hr style=\"border: none; border-top: 1px solid #e2e8f0; margin-bottom: 24px;\">\n" +
-                "  <h2 style=\"color: #0f172a; margin-top: 0; margin-bottom: 16px; font-size: 20px;\">New Course Assignment</h2>\n" +
+                "  <h2 style=\"color: #0f172a; margin-top: 0; margin-bottom: 16px; font-size: 20px;\">New Course Assignment</h2>\n"
+                +
                 "  <p style=\"color: #334155; font-size: 16px; line-height: 1.5; margin-bottom: 24px;\">\n" +
-                "    Hello " + recipientName + ", the administration team has assigned a new course to your workspace. You can now begin uploading materials, creating assessments, and managing your student roster.\n" +
+                "    Hello " + recipientName
+                + ", the administration team has assigned a new course to your workspace. You can now begin uploading materials, creating assessments, and managing your student roster.\n"
+                +
                 "  </p>\n" +
-                "  <div style=\"background-color: #f8fafc; padding: 15px; border-radius: 6px; margin: 20px 0; border: 1px solid #e2e8f0;\">\n" +
-                "    <p style=\"color: #334155; font-size: 16px; margin: 0 0 8px 0;\"><strong>Course Name:</strong> " + title + "</p>\n" +
+                "  <div style=\"background-color: #f8fafc; padding: 15px; border-radius: 6px; margin: 20px 0; border: 1px solid #e2e8f0;\">\n"
+                +
+                "    <p style=\"color: #334155; font-size: 16px; margin: 0 0 8px 0;\"><strong>Course Name:</strong> "
+                + title + "</p>\n" +
                 "    <p style=\"color: #334155; font-size: 16px; margin: 0;\"><strong>Role:</strong> Instructor</p>\n" +
                 "  </div>\n" +
-                "  <a href=\"https://psmels.software/instructor/workspace\" style=\"background-color: #0f172a; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold; margin: 10px 0;\">\n" +
+                "  <a href=\"https://psmels.software/instructor/workspace\" style=\"background-color: #0f172a; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold; margin: 10px 0;\">\n"
+                +
                 "    Go to Course Workspace\n" +
                 "  </a>\n" +
                 "</div>";
@@ -456,6 +469,9 @@ public class EmailUtil {
                 "    This link will expire in 1 hour.\n" +
                 "  </p>\n" +
                 "</div>";
+
+        return sendHtmlEmail(toEmail, subject, htmlBody);
+    }
 
     /**
      * Sends a premium SaaS-style payment receipt email after successful course purchase.

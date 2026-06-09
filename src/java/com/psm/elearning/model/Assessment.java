@@ -13,14 +13,14 @@ import java.time.LocalDateTime;
 public class Assessment {
     @NotNull(message = "Assessment ID cannot be null")
     private Integer assessmentId;
-    
+
     @NotNull(message = "Course ID is required")
     private Integer courseId;
-    
+
     @NotBlank(message = "Assessment title is required")
     @Size(min = 2, max = 200, message = "Title must be between 2 and 200 characters")
     private String title;
-    
+
     @NotBlank(message = "Assessment type is required")
     @Pattern(regexp = "^(Quiz|Exam|Assignment)$", message = "Type must be Quiz, Exam, or Assignment")
     private String type;
@@ -30,15 +30,15 @@ public class Assessment {
 
     @Pattern(regexp = "^(file|text|both)$", message = "Submission mode must be file, text, or both")
     private String submissionMode;
-    
+
     @Min(value = 1, message = "Duration must be at least 1 minute")
     @Max(value = 480, message = "Duration must not exceed 480 minutes (8 hours)")
     private Integer duration;
-    
+
     @Min(value = 1, message = "Total marks must be at least 1")
     @Max(value = 1000, message = "Total marks must not exceed 1000")
     private Integer totalMarks;
-    
+
     @Size(max = 5000, message = "Instructions must not exceed 5000 characters")
     private String instructions;
 
@@ -59,7 +59,7 @@ public class Assessment {
     private String attachmentUrl;
 
     private String attachmentName;
-    
+
     @NotNull(message = "CreatedBy user ID is required")
     private Integer createdBy;
 
@@ -74,15 +74,16 @@ public class Assessment {
     public static final String STATUS_PUBLISHED = "Published";
     public static final String STATUS_CLOSED = "Closed";
     public static final String STATUS_ARCHIVED = "Archived";
-    
+
     // Constructors
-    public Assessment() {}
-    
+    public Assessment() {
+    }
+
     public Assessment(Integer assessmentId, Integer courseId, String title, String type,
-                     String gradingMode,
-                     String submissionMode,
-                     Integer duration, Integer totalMarks, String instructions, String status, Integer maxAttempts,
-                     LocalDateTime createdAt, Integer createdBy) {
+            String gradingMode,
+            String submissionMode,
+            Integer duration, Integer totalMarks, String instructions, String status, Integer maxAttempts,
+            LocalDateTime createdAt, Integer createdBy) {
         this.assessmentId = assessmentId;
         this.courseId = courseId;
         this.title = title;
@@ -97,65 +98,149 @@ public class Assessment {
         this.createdAt = createdAt;
         this.createdBy = createdBy;
     }
-    
+
     // Getters and Setters
-    public Integer getAssessmentId() { return assessmentId; }
-    public void setAssessmentId(Integer assessmentId) { this.assessmentId = assessmentId; }
-    
-    public Integer getCourseId() { return courseId; }
-    public void setCourseId(Integer courseId) { this.courseId = courseId; }
-    
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
-    
-    public String getType() { return type; }
-    public void setType(String type) { this.type = type; }
+    public Integer getAssessmentId() {
+        return assessmentId;
+    }
 
-    public String getGradingMode() { return gradingMode; }
-    public void setGradingMode(String gradingMode) { this.gradingMode = gradingMode; }
+    public void setAssessmentId(Integer assessmentId) {
+        this.assessmentId = assessmentId;
+    }
 
-    public String getSubmissionMode() { return submissionMode; }
-    public void setSubmissionMode(String submissionMode) { this.submissionMode = submissionMode; }
-    
-    public Integer getDuration() { return duration; }
-    public void setDuration(Integer duration) { this.duration = duration; }
-    
-    public Integer getTotalMarks() { return totalMarks; }
-    public void setTotalMarks(Integer totalMarks) { this.totalMarks = totalMarks; }
-    
-    public String getInstructions() { return instructions; }
-    public void setInstructions(String instructions) { this.instructions = instructions; }
+    public Integer getCourseId() {
+        return courseId;
+    }
 
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+    public void setCourseId(Integer courseId) {
+        this.courseId = courseId;
+    }
 
-    public String getPlacementType() { return placementType; }
-    public void setPlacementType(String placementType) { this.placementType = placementType; }
+    public String getTitle() {
+        return title;
+    }
 
-    public Integer getPlacementMaterialId() { return placementMaterialId; }
-    public void setPlacementMaterialId(Integer placementMaterialId) { this.placementMaterialId = placementMaterialId; }
+    public void setTitle(String title) {
+        this.title = title;
+    }
 
-    public Integer getMaxAttempts() { return maxAttempts; }
-    public void setMaxAttempts(Integer maxAttempts) { this.maxAttempts = maxAttempts; }
+    public String getType() {
+        return type;
+    }
 
-    public String getAttachmentUrl() { return attachmentUrl; }
-    public void setAttachmentUrl(String attachmentUrl) { this.attachmentUrl = attachmentUrl; }
+    public void setType(String type) {
+        this.type = type;
+    }
 
-    public String getAttachmentName() { return attachmentName; }
-    public void setAttachmentName(String attachmentName) { this.attachmentName = attachmentName; }
+    public String getGradingMode() {
+        return gradingMode;
+    }
 
-    public String getFileUrl() { return attachmentUrl; }
-    public void setFileUrl(String fileUrl) { this.attachmentUrl = fileUrl; }
-    
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
-    
-    public Integer getCreatedBy() { return createdBy; }
-    public void setCreatedBy(Integer createdBy) { this.createdBy = createdBy; }
+    public void setGradingMode(String gradingMode) {
+        this.gradingMode = gradingMode;
+    }
+
+    public String getSubmissionMode() {
+        return submissionMode;
+    }
+
+    public void setSubmissionMode(String submissionMode) {
+        this.submissionMode = submissionMode;
+    }
+
+    public Integer getDuration() {
+        return duration;
+    }
+
+    public void setDuration(Integer duration) {
+        this.duration = duration;
+    }
+
+    public Integer getTotalMarks() {
+        return totalMarks;
+    }
+
+    public void setTotalMarks(Integer totalMarks) {
+        this.totalMarks = totalMarks;
+    }
+
+    public String getInstructions() {
+        return instructions;
+    }
+
+    public void setInstructions(String instructions) {
+        this.instructions = instructions;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getPlacementType() {
+        return placementType;
+    }
+
+    public void setPlacementType(String placementType) {
+        this.placementType = placementType;
+    }
+
+    public Integer getPlacementMaterialId() {
+        return placementMaterialId;
+    }
+
+    public void setPlacementMaterialId(Integer placementMaterialId) {
+        this.placementMaterialId = placementMaterialId;
+    }
+
+    public Integer getMaxAttempts() {
+        return maxAttempts;
+    }
+
+    public void setMaxAttempts(Integer maxAttempts) {
+        this.maxAttempts = maxAttempts;
+    }
+
+    public String getAttachmentUrl() {
+        return attachmentUrl;
+    }
+
+    public void setAttachmentUrl(String attachmentUrl) {
+        this.attachmentUrl = attachmentUrl;
+    }
+
+    public String getAttachmentName() {
+        return attachmentName;
+    }
+
+    public void setAttachmentName(String attachmentName) {
+        this.attachmentName = attachmentName;
+    }
+
+    public String getFileUrl() {
+        return attachmentUrl;
+    }
+
+    public void setFileUrl(String fileUrl) {
+        this.attachmentUrl = fileUrl;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public Integer getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(Integer createdBy) {
+        this.createdBy = createdBy;
+    }
 }
-
-
-
-
-
-

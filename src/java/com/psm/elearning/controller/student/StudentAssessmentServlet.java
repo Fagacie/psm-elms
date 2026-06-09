@@ -52,8 +52,10 @@ public class StudentAssessmentServlet extends HttpServlet {
 
     private static final long MAX_ASSIGNMENT_FILE_SIZE = 50L * 1024L * 1024L;
 
-    private String buildLearningHubAssessmentUrl(HttpServletRequest request, Integer enrollmentId, Integer assessmentId) {
-        return request.getContextPath() + "/student/enrollment-details?id=" + enrollmentId + "&tab=assessments&assessmentId=" + assessmentId;
+    private String buildLearningHubAssessmentUrl(HttpServletRequest request, Integer enrollmentId,
+            Integer assessmentId) {
+        return request.getContextPath() + "/student/enrollment-details?id=" + enrollmentId
+                + "&tab=assessments&assessmentId=" + assessmentId;
     }
 
     private static final class RouteContext {
@@ -111,7 +113,8 @@ public class StudentAssessmentServlet extends HttpServlet {
         Integer courseIdParam = parseInt(request.getParameter("courseId"));
         String view = routeContext != null
                 ? routeContext.view
-                : normalizeView(request.getParameter("view"), request.getParameter("mode"), request.getParameter("action"), assessmentId, submissionId);
+                : normalizeView(request.getParameter("view"), request.getParameter("mode"),
+                        request.getParameter("action"), assessmentId, submissionId);
 
         if (routeContext != null) {
             if (assessmentId == null) {
@@ -121,7 +124,8 @@ public class StudentAssessmentServlet extends HttpServlet {
                 courseIdParam = routeContext.courseId;
             }
             if (enrollmentId == null && routeContext.courseId != null) {
-                Enrollment routeEnrollment = enrollmentDAO.findLatestEnrollmentByUserAndCourse(userId, routeContext.courseId);
+                Enrollment routeEnrollment = enrollmentDAO.findLatestEnrollmentByUserAndCourse(userId,
+                        routeContext.courseId);
                 if (routeEnrollment != null) {
                     enrollmentId = routeEnrollment.getEnrollmentId();
                 }
@@ -143,7 +147,8 @@ public class StudentAssessmentServlet extends HttpServlet {
                 return;
             }
             if (!hasCourseAccess(enrollment)) {
-                response.sendRedirect(request.getContextPath() + "/student/enrollment-details?id=" + enrollmentId + "&tab=learning&error=paymentRequired");
+                response.sendRedirect(request.getContextPath() + "/student/enrollment-details?id=" + enrollmentId
+                        + "&tab=learning&error=paymentRequired");
                 return;
             }
             if ("dashboard".equals(view)) {
@@ -165,7 +170,8 @@ public class StudentAssessmentServlet extends HttpServlet {
                 return;
             }
             if (!hasCourseAccess(enrollment)) {
-                response.sendRedirect(request.getContextPath() + "/student/enrollment-details?id=" + enrollmentId + "&tab=learning&error=paymentRequired");
+                response.sendRedirect(request.getContextPath() + "/student/enrollment-details?id=" + enrollmentId
+                        + "&tab=learning&error=paymentRequired");
                 return;
             }
             renderConfirmation(request, response, userId, enrollment, assessmentId, submissionId);
@@ -183,7 +189,8 @@ public class StudentAssessmentServlet extends HttpServlet {
                 return;
             }
             if (!hasCourseAccess(enrollment)) {
-                response.sendRedirect(request.getContextPath() + "/student/enrollment-details?id=" + enrollmentId + "&tab=learning&error=paymentRequired");
+                response.sendRedirect(request.getContextPath() + "/student/enrollment-details?id=" + enrollmentId
+                        + "&tab=learning&error=paymentRequired");
                 return;
             }
             renderResult(request, response, session, userId, enrollment, assessmentId, submissionId);
@@ -201,7 +208,8 @@ public class StudentAssessmentServlet extends HttpServlet {
             return;
         }
         if (!hasCourseAccess(enrollment)) {
-            response.sendRedirect(request.getContextPath() + "/student/enrollment-details?id=" + enrollmentId + "&tab=learning&error=paymentRequired");
+            response.sendRedirect(request.getContextPath() + "/student/enrollment-details?id=" + enrollmentId
+                    + "&tab=learning&error=paymentRequired");
             return;
         }
 
@@ -210,7 +218,8 @@ public class StudentAssessmentServlet extends HttpServlet {
                 || assessment.getCourseId() == null
                 || !assessment.getCourseId().equals(enrollment.getCourseId())
                 || (courseIdParam != null && !assessment.getCourseId().equals(courseIdParam))) {
-            response.sendRedirect(request.getContextPath() + "/student/enrollment-details?id=" + enrollmentId + "&tab=assessments&error=invalidAssessment");
+            response.sendRedirect(request.getContextPath() + "/student/enrollment-details?id=" + enrollmentId
+                    + "&tab=assessments&error=invalidAssessment");
             return;
         }
 
@@ -218,7 +227,8 @@ public class StudentAssessmentServlet extends HttpServlet {
         Material prerequisiteMaterial = null;
         boolean materialCompleted = true;
 
-        AssessmentPlacementUtil.Placement placement = AssessmentPlacementUtil.parsePlacement(assessment.getInstructions());
+        AssessmentPlacementUtil.Placement placement = AssessmentPlacementUtil
+                .parsePlacement(assessment.getInstructions());
         if ("afterMaterial".equals(placement.type) && placement.materialId != null) {
             prerequisiteMaterial = materialDAO.findById(placement.materialId);
             if (prerequisiteMaterial == null) {
@@ -226,11 +236,13 @@ public class StudentAssessmentServlet extends HttpServlet {
             } else if (!prerequisiteMaterial.getCourseId().equals(enrollment.getCourseId())) {
                 materialBlockReason = "Prerequisites are not valid for this course.";
             } else {
-                Map<Integer, String> statusMap = materialProgressDAO.findMaterialStatusByCourse(userId, enrollment.getCourseId());
+                Map<Integer, String> statusMap = materialProgressDAO.findMaterialStatusByCourse(userId,
+                        enrollment.getCourseId());
                 String materialStatus = statusMap != null ? statusMap.get(placement.materialId) : null;
                 materialCompleted = "completed".equals(materialStatus);
                 if (!materialCompleted) {
-                    materialBlockReason = "You must complete '" + prerequisiteMaterial.getTitle() + "' before attempting this assessment.";
+                    materialBlockReason = "You must complete '" + prerequisiteMaterial.getTitle()
+                            + "' before attempting this assessment.";
                 }
             }
         }
@@ -249,28 +261,35 @@ public class StudentAssessmentServlet extends HttpServlet {
         int defaultMaxAttempts = AppSettingsService.getInt(AppSettingsService.KEY_ASSESSMENT_MAX_ATTEMPTS, 3, 1, 10);
         Integer maxAttemptsValue = assessment.getMaxAttempts();
         int baseAttempts = maxAttemptsValue != null && maxAttemptsValue > 0
-            ? maxAttemptsValue
-            : defaultMaxAttempts;
+                ? maxAttemptsValue
+                : defaultMaxAttempts;
         int allowedAttempts = baseAttempts + retakeRequestDAO.countApproved(assessmentId, userId);
-        boolean isCourseExpired = enrollment.getDaysRemaining() < 0 && enrollment.getCourseDuration() != null && enrollment.getCourseDuration() > 0;
-        boolean canAttempt = usedAttempts < Math.max(allowedAttempts, 1) && materialCompleted && materialBlockReason == null && !isCourseExpired;
+        boolean isCourseExpired = enrollment.getDaysRemaining() < 0 && enrollment.getCourseDuration() != null
+                && enrollment.getCourseDuration() > 0;
+        boolean canAttempt = usedAttempts < Math.max(allowedAttempts, 1) && materialCompleted
+                && materialBlockReason == null && !isCourseExpired;
         boolean hasPendingRetakeRequest = retakeRequestDAO.hasPending(assessmentId, userId);
 
         boolean attemptMode = requestedAttemptMode && objectiveAssessment;
 
         if (attemptMode && !canAttempt) {
             if (isCourseExpired) {
-                response.sendRedirect(request.getContextPath() + "/student/enrollment-details?id=" + enrollmentId + "&tab=assessments&error=expired");
+                response.sendRedirect(request.getContextPath() + "/student/enrollment-details?id=" + enrollmentId
+                        + "&tab=assessments&error=expired");
             } else if (materialBlockReason != null) {
-                response.sendRedirect(request.getContextPath() + "/student/enrollment-details?id=" + enrollmentId + "&tab=assessments&error=blocked&reason=" + java.net.URLEncoder.encode(materialBlockReason, "UTF-8"));
+                response.sendRedirect(request.getContextPath() + "/student/enrollment-details?id=" + enrollmentId
+                        + "&tab=assessments&error=blocked&reason="
+                        + java.net.URLEncoder.encode(materialBlockReason, "UTF-8"));
             } else {
-                response.sendRedirect(request.getContextPath() + "/student/enrollment-details?id=" + enrollmentId + "&tab=assessments&error=maxAttempts");
+                response.sendRedirect(request.getContextPath() + "/student/enrollment-details?id=" + enrollmentId
+                        + "&tab=assessments&error=maxAttempts");
             }
             return;
         }
 
         if (attemptMode && objectiveAssessment && questions.isEmpty()) {
-            response.sendRedirect(request.getContextPath() + "/student/enrollment-details?id=" + enrollmentId + "&tab=assessments&error=noQuestions");
+            response.sendRedirect(request.getContextPath() + "/student/enrollment-details?id=" + enrollmentId
+                    + "&tab=assessments&error=noQuestions");
             return;
         }
 
@@ -305,22 +324,26 @@ public class StudentAssessmentServlet extends HttpServlet {
         request.setAttribute("canAttempt", canAttempt);
         request.setAttribute("hasPendingRetakeRequest", hasPendingRetakeRequest);
         request.setAttribute("attemptMode", attemptMode);
-        request.setAttribute("latestSubmission", (submissions != null && !submissions.isEmpty()) ? submissions.get(0) : null);
+        request.setAttribute("latestSubmission",
+                (submissions != null && !submissions.isEmpty()) ? submissions.get(0) : null);
         request.setAttribute("materialBlockReason", materialBlockReason);
         request.setAttribute("prerequisiteMaterial", prerequisiteMaterial);
         request.setAttribute("objectiveAssessment", objectiveAssessment);
         request.setAttribute("submissionMode", submissionMode);
         request.setAttribute("displayInstructions", displayInstructions);
         request.setAttribute("timerStartTime", System.currentTimeMillis());
-        request.setAttribute("timerDurationSeconds", assessment.getDuration() != null ? assessment.getDuration() * 60 : 30 * 60);
+        request.setAttribute("timerDurationSeconds",
+                assessment.getDuration() != null ? assessment.getDuration() * 60 : 30 * 60);
         request.setAttribute("assessmentSummary", buildAssessmentSummary(enrollment, assessment, submissions, session));
 
         boolean isFragment = "true".equalsIgnoreCase(request.getParameter("fragment"));
         String targetView;
         if (isFragment) {
-            targetView = "details".equals(view) ? "/WEB-INF/views/student/fragments/assessment-details-fragment.jsp" : "/WEB-INF/views/student/fragments/assessment-attempt-fragment.jsp";
+            targetView = "details".equals(view) ? "/WEB-INF/views/student/fragments/assessment-details-fragment.jsp"
+                    : "/WEB-INF/views/student/fragments/assessment-attempt-fragment.jsp";
         } else {
-            targetView = "details".equals(view) ? "/WEB-INF/views/student/assessment-details.jsp" : "/WEB-INF/views/student/assessment-attempt.jsp";
+            targetView = "details".equals(view) ? "/WEB-INF/views/student/assessment-details.jsp"
+                    : "/WEB-INF/views/student/assessment-attempt.jsp";
         }
         request.getRequestDispatcher(targetView).forward(request, response);
     }
@@ -357,7 +380,8 @@ public class StudentAssessmentServlet extends HttpServlet {
             return;
         }
         if (!hasCourseAccess(enrollment)) {
-            response.sendRedirect(request.getContextPath() + "/student/enrollment-details?id=" + enrollmentId + "&tab=learning&error=paymentRequired");
+            response.sendRedirect(request.getContextPath() + "/student/enrollment-details?id=" + enrollmentId
+                    + "&tab=learning&error=paymentRequired");
             return;
         }
 
@@ -389,7 +413,8 @@ public class StudentAssessmentServlet extends HttpServlet {
             questions = Collections.emptyList();
         }
         if (objectiveAssessment && questions.isEmpty()) {
-            response.sendRedirect(request.getContextPath() + "/student/enrollment-details?id=" + enrollmentId + "&tab=assessments&error=noQuestions");
+            response.sendRedirect(request.getContextPath() + "/student/enrollment-details?id=" + enrollmentId
+                    + "&tab=assessments&error=noQuestions");
             return;
         }
 
@@ -398,16 +423,19 @@ public class StudentAssessmentServlet extends HttpServlet {
         int defaultMaxAttempts = AppSettingsService.getInt(AppSettingsService.KEY_ASSESSMENT_MAX_ATTEMPTS, 3, 1, 10);
         Integer maxAttemptsValue = assessment.getMaxAttempts();
         int baseAttempts = maxAttemptsValue != null && maxAttemptsValue > 0
-            ? maxAttemptsValue
-            : defaultMaxAttempts;
+                ? maxAttemptsValue
+                : defaultMaxAttempts;
         int allowedAttempts = baseAttempts + retakeRequestDAO.countApproved(assessmentId, userId);
-        boolean isCourseExpired = enrollment.getDaysRemaining() < 0 && enrollment.getCourseDuration() != null && enrollment.getCourseDuration() > 0;
+        boolean isCourseExpired = enrollment.getDaysRemaining() < 0 && enrollment.getCourseDuration() != null
+                && enrollment.getCourseDuration() > 0;
         if (isCourseExpired) {
-            response.sendRedirect(request.getContextPath() + "/student/enrollment-details?id=" + enrollmentId + "&tab=assessments&error=expired");
+            response.sendRedirect(request.getContextPath() + "/student/enrollment-details?id=" + enrollmentId
+                    + "&tab=assessments&error=expired");
             return;
         }
         if (usedAttempts >= Math.max(allowedAttempts, 1)) {
-            response.sendRedirect(request.getContextPath() + "/student/enrollment-details?id=" + enrollmentId + "&tab=assessments&error=maxAttempts");
+            response.sendRedirect(request.getContextPath() + "/student/enrollment-details?id=" + enrollmentId
+                    + "&tab=assessments&error=maxAttempts");
             return;
         }
 
@@ -439,8 +467,8 @@ public class StudentAssessmentServlet extends HttpServlet {
             if (autoGraded) {
                 if (totalPossible > 0) {
                     double achievedRatio = earned / totalPossible;
-                        Integer totalMarksValue = assessment.getTotalMarks();
-                        double scoreScale = (totalMarksValue != null && totalMarksValue > 0)
+                    Integer totalMarksValue = assessment.getTotalMarks();
+                    double scoreScale = (totalMarksValue != null && totalMarksValue > 0)
                             ? totalMarksValue
                             : totalPossible;
                     finalScore = round2(achievedRatio * scoreScale);
@@ -456,7 +484,8 @@ public class StudentAssessmentServlet extends HttpServlet {
                 Part answerFilePart = request.getPart("answerFile");
                 if (answerFilePart != null && answerFilePart.getSize() > 0) {
                     if (answerFilePart.getSize() > MAX_ASSIGNMENT_FILE_SIZE) {
-                        response.sendRedirect(buildLearningHubAssessmentUrl(request, enrollmentId, assessmentId) + "&error=assignmentFileTooLarge");
+                        response.sendRedirect(buildLearningHubAssessmentUrl(request, enrollmentId, assessmentId)
+                                + "&error=assignmentFileTooLarge");
                         return;
                     }
 
@@ -467,16 +496,19 @@ public class StudentAssessmentServlet extends HttpServlet {
                     String resourceType = resolveCloudinaryResourceType(fileName);
 
                     try (InputStream in = answerFilePart.getInputStream()) {
-                        uploadedFileUrl = CloudinaryUtil.uploadFile(in.readAllBytes(), fileName, CloudinaryUtil.getAssessmentAnswersFolder(), resourceType);
+                        uploadedFileUrl = CloudinaryUtil.uploadFile(in.readAllBytes(), fileName,
+                                CloudinaryUtil.getAssessmentAnswersFolder(), resourceType);
                     }
 
                     if (uploadedFileUrl == null || uploadedFileUrl.trim().isEmpty()) {
-                        response.sendRedirect(buildLearningHubAssessmentUrl(request, enrollmentId, assessmentId) + "&error=assignmentUploadFailed");
+                        response.sendRedirect(buildLearningHubAssessmentUrl(request, enrollmentId, assessmentId)
+                                + "&error=assignmentUploadFailed");
                         return;
                     }
                 }
             } catch (IllegalStateException ex) {
-                response.sendRedirect(buildLearningHubAssessmentUrl(request, enrollmentId, assessmentId) + "&error=assignmentFileTooLarge");
+                response.sendRedirect(buildLearningHubAssessmentUrl(request, enrollmentId, assessmentId)
+                        + "&error=assignmentFileTooLarge");
                 return;
             } catch (ServletException ex) {
                 // Continue and fail with missing file validation below when needed.
@@ -487,11 +519,13 @@ public class StudentAssessmentServlet extends HttpServlet {
 
             if (shouldValidateContent) {
                 if (resolvedFileValue.isEmpty() && answerText.isEmpty()) {
-                    response.sendRedirect(buildLearningHubAssessmentUrl(request, enrollmentId, assessmentId) + "&error=missingAnswerFile");
+                    response.sendRedirect(buildLearningHubAssessmentUrl(request, enrollmentId, assessmentId)
+                            + "&error=missingAnswerFile");
                     return;
                 }
                 if (!answerText.isEmpty() && answerText.length() > 255) {
-                    response.sendRedirect(buildLearningHubAssessmentUrl(request, enrollmentId, assessmentId) + "&error=answerTooLong");
+                    response.sendRedirect(buildLearningHubAssessmentUrl(request, enrollmentId, assessmentId)
+                            + "&error=answerTooLong");
                     return;
                 }
             }
@@ -517,7 +551,8 @@ public class StudentAssessmentServlet extends HttpServlet {
 
         AssessmentSubmission saved = assessmentSubmissionDAO.submit(submission);
         if (saved == null) {
-            response.sendRedirect(request.getContextPath() + "/student/enrollment-details?id=" + enrollmentId + "&tab=assessments&error=submitFailed");
+            response.sendRedirect(request.getContextPath() + "/student/enrollment-details?id=" + enrollmentId
+                    + "&tab=assessments&error=submitFailed");
             return;
         }
 
@@ -526,7 +561,7 @@ public class StudentAssessmentServlet extends HttpServlet {
             new com.psm.elearning.service.EnrollmentStateSyncService().syncEnrollmentState(enrollment);
         } catch (Exception syncEx) {
             java.util.logging.Logger.getLogger(StudentAssessmentServlet.class.getName())
-                .log(java.util.logging.Level.WARNING, "StudentAssessmentServlet: sync failed on submit", syncEx);
+                    .log(java.util.logging.Level.WARNING, "StudentAssessmentServlet: sync failed on submit", syncEx);
         }
 
         String successParam = timedOut ? "timed-out" : (exitSubmission ? "exited" : "submitted");
@@ -546,7 +581,8 @@ public class StudentAssessmentServlet extends HttpServlet {
 
         String enrollmentId = request.getParameter("enrollmentId");
         if (enrollmentId != null && !enrollmentId.trim().isEmpty()) {
-            response.sendRedirect(request.getContextPath() + "/student/enrollment-details?id=" + enrollmentId + "&tab=assessments");
+            response.sendRedirect(
+                    request.getContextPath() + "/student/enrollment-details?id=" + enrollmentId + "&tab=assessments");
             return;
         }
 
@@ -581,7 +617,8 @@ public class StudentAssessmentServlet extends HttpServlet {
             return;
         }
         for (AssessmentQuestion question : questions) {
-            if (question != null && question.getAttachmentUrl() != null && !question.getAttachmentUrl().trim().isEmpty()) {
+            if (question != null && question.getAttachmentUrl() != null
+                    && !question.getAttachmentUrl().trim().isEmpty()) {
                 assessment.setAttachmentUrl(question.getAttachmentUrl());
                 assessment.setAttachmentName(question.getAttachmentName());
                 return;
@@ -660,7 +697,8 @@ public class StudentAssessmentServlet extends HttpServlet {
         return null;
     }
 
-    private List<StudentAssessmentSummary> buildAssessmentSummaries(Enrollment enrollment, Integer userId, HttpSession session) {
+    private List<StudentAssessmentSummary> buildAssessmentSummaries(Enrollment enrollment, Integer userId,
+            HttpSession session) {
         if (enrollment == null || enrollment.getCourseId() == null) {
             return Collections.emptyList();
         }
@@ -672,16 +710,20 @@ public class StudentAssessmentServlet extends HttpServlet {
 
         List<StudentAssessmentSummary> summaries = new ArrayList<>();
         for (Assessment assessment : assessments) {
-            List<AssessmentSubmission> submissions = assessmentSubmissionDAO.findByAssessmentAndUser(assessment.getAssessmentId(), userId);
+            List<AssessmentSubmission> submissions = assessmentSubmissionDAO
+                    .findByAssessmentAndUser(assessment.getAssessmentId(), userId);
             summaries.add(buildAssessmentSummary(enrollment, assessment, submissions, session));
         }
 
-        summaries.sort(Comparator.comparing(StudentAssessmentSummary::getCourseName, Comparator.nullsLast(String::compareToIgnoreCase))
-                .thenComparing(StudentAssessmentSummary::getAssessmentTitle, Comparator.nullsLast(String::compareToIgnoreCase)));
+        summaries.sort(Comparator
+                .comparing(StudentAssessmentSummary::getCourseName, Comparator.nullsLast(String::compareToIgnoreCase))
+                .thenComparing(StudentAssessmentSummary::getAssessmentTitle,
+                        Comparator.nullsLast(String::compareToIgnoreCase)));
         return summaries;
     }
 
-    private StudentAssessmentSummary buildAssessmentSummary(Enrollment enrollment, Assessment assessment, List<AssessmentSubmission> submissions, HttpSession session) {
+    private StudentAssessmentSummary buildAssessmentSummary(Enrollment enrollment, Assessment assessment,
+            List<AssessmentSubmission> submissions, HttpSession session) {
         StudentAssessmentSummary summary = new StudentAssessmentSummary();
         summary.setEnrollment(enrollment);
         summary.setAssessment(assessment);
@@ -690,8 +732,11 @@ public class StudentAssessmentServlet extends HttpServlet {
 
         int usedAttempts = submissions != null ? submissions.size() : 0;
         int defaultMaxAttempts = AppSettingsService.getInt(AppSettingsService.KEY_ASSESSMENT_MAX_ATTEMPTS, 3, 1, 10);
-        int baseAttempts = assessment.getMaxAttempts() != null && assessment.getMaxAttempts() > 0 ? assessment.getMaxAttempts() : defaultMaxAttempts;
-        int allowedAttempts = baseAttempts + retakeRequestDAO.countApproved(assessment.getAssessmentId(), enrollment.getUserId());
+        int baseAttempts = assessment.getMaxAttempts() != null && assessment.getMaxAttempts() > 0
+                ? assessment.getMaxAttempts()
+                : defaultMaxAttempts;
+        int allowedAttempts = baseAttempts
+                + retakeRequestDAO.countApproved(assessment.getAssessmentId(), enrollment.getUserId());
         summary.setUsedAttempts(usedAttempts);
         summary.setAllowedAttempts(allowedAttempts);
         summary.setAttemptsRemaining(Math.max(allowedAttempts - usedAttempts, 0));
@@ -733,7 +778,8 @@ public class StudentAssessmentServlet extends HttpServlet {
         } else if ("TimedOut".equalsIgnoreCase(latest.getStatus())) {
             statusLabel = "Closed";
             statusClass = "status-closed";
-        } else if ("Submitted".equalsIgnoreCase(latest.getStatus()) || "AutoSubmitted".equalsIgnoreCase(latest.getStatus())) {
+        } else if ("Submitted".equalsIgnoreCase(latest.getStatus())
+                || "AutoSubmitted".equalsIgnoreCase(latest.getStatus())) {
             statusLabel = objectiveAssessment ? (autoGraded ? "Graded" : "Awaiting Review") : "Awaiting Review";
             statusClass = autoGraded ? "status-graded" : "status-awaiting";
         } else {
@@ -781,22 +827,29 @@ public class StudentAssessmentServlet extends HttpServlet {
         return answerMap;
     }
 
-    private void renderDashboard(HttpServletRequest request, HttpServletResponse response, HttpSession session, Integer userId, Enrollment enrollment)
+    private void renderDashboard(HttpServletRequest request, HttpServletResponse response, HttpSession session,
+            Integer userId, Enrollment enrollment)
             throws ServletException, IOException {
-        response.sendRedirect(request.getContextPath() + "/student/enrollment-details?id=" + enrollment.getEnrollmentId() + "&tab=assessments");
+        response.sendRedirect(request.getContextPath() + "/student/enrollment-details?id="
+                + enrollment.getEnrollmentId() + "&tab=assessments");
     }
 
-    private void renderHistory(HttpServletRequest request, HttpServletResponse response, HttpSession session, Integer userId, Enrollment enrollment)
+    private void renderHistory(HttpServletRequest request, HttpServletResponse response, HttpSession session,
+            Integer userId, Enrollment enrollment)
             throws ServletException, IOException {
-        response.sendRedirect(request.getContextPath() + "/student/enrollment-details?id=" + enrollment.getEnrollmentId() + "&tab=performance");
+        response.sendRedirect(request.getContextPath() + "/student/enrollment-details?id="
+                + enrollment.getEnrollmentId() + "&tab=performance");
     }
 
-    private void renderConfirmation(HttpServletRequest request, HttpServletResponse response, Integer userId, Enrollment enrollment, Integer assessmentId, Integer submissionId)
+    private void renderConfirmation(HttpServletRequest request, HttpServletResponse response, Integer userId,
+            Enrollment enrollment, Integer assessmentId, Integer submissionId)
             throws ServletException, IOException {
         Assessment assessment = assessmentDAO.findById(assessmentId);
         AssessmentSubmission submission = assessmentSubmissionDAO.findById(submissionId);
-        if (assessment == null || submission == null || !submission.getUserId().equals(userId) || !submission.getAssessmentId().equals(assessmentId)) {
-            response.sendRedirect(request.getContextPath() + "/student/enrollment-details?id=" + enrollment.getEnrollmentId() + "&tab=assessments&error=invalidSubmission");
+        if (assessment == null || submission == null || !submission.getUserId().equals(userId)
+                || !submission.getAssessmentId().equals(assessmentId)) {
+            response.sendRedirect(request.getContextPath() + "/student/enrollment-details?id="
+                    + enrollment.getEnrollmentId() + "&tab=assessments&error=invalidSubmission");
             return;
         }
 
@@ -810,12 +863,15 @@ public class StudentAssessmentServlet extends HttpServlet {
         request.getRequestDispatcher("/WEB-INF/views/student/assessment-confirmation.jsp").forward(request, response);
     }
 
-    private void renderResult(HttpServletRequest request, HttpServletResponse response, HttpSession session, Integer userId, Enrollment enrollment, Integer assessmentId, Integer submissionId)
+    private void renderResult(HttpServletRequest request, HttpServletResponse response, HttpSession session,
+            Integer userId, Enrollment enrollment, Integer assessmentId, Integer submissionId)
             throws ServletException, IOException {
         Assessment assessment = assessmentDAO.findById(assessmentId);
         AssessmentSubmission submission = assessmentSubmissionDAO.findById(submissionId);
-        if (assessment == null || submission == null || !submission.getUserId().equals(userId) || !submission.getAssessmentId().equals(assessmentId)) {
-            response.sendRedirect(request.getContextPath() + "/student/enrollment-details?id=" + enrollment.getEnrollmentId() + "&tab=assessments&error=invalidSubmission");
+        if (assessment == null || submission == null || !submission.getUserId().equals(userId)
+                || !submission.getAssessmentId().equals(assessmentId)) {
+            response.sendRedirect(request.getContextPath() + "/student/enrollment-details?id="
+                    + enrollment.getEnrollmentId() + "&tab=assessments&error=invalidSubmission");
             return;
         }
 
@@ -832,7 +888,8 @@ public class StudentAssessmentServlet extends HttpServlet {
         }
         double percentage = computePercentage(submission.getScore(), assessment.getTotalMarks(), fallbackTotal);
         List<AssessmentGradeAudit> audits = assessmentGradeAuditDAO.findBySubmission(submissionId);
-        List<AssessmentQuestion> questions = objectiveAssessment ? assessmentQuestionDAO.findByAssessment(assessmentId) : Collections.emptyList();
+        List<AssessmentQuestion> questions = objectiveAssessment ? assessmentQuestionDAO.findByAssessment(assessmentId)
+                : Collections.emptyList();
         Map<Integer, String> studentAnswers = parseObjectiveAnswers(submission.getAnswersFilePath());
         Map<Integer, String> correctAnswers = new LinkedHashMap<>();
         if (questions != null) {
@@ -859,7 +916,8 @@ public class StudentAssessmentServlet extends HttpServlet {
         if (score == null) {
             return 0.0;
         }
-        double total = (totalMarks != null && totalMarks > 0) ? totalMarks.doubleValue() : (fallbackTotal > 0.0 ? fallbackTotal : 1.0);
+        double total = (totalMarks != null && totalMarks > 0) ? totalMarks.doubleValue()
+                : (fallbackTotal > 0.0 ? fallbackTotal : 1.0);
         return round2((score / total) * 100.0);
     }
 
@@ -911,36 +969,125 @@ public class StudentAssessmentServlet extends HttpServlet {
         private String statusLabel;
         private String statusClass;
 
-        public Enrollment getEnrollment() { return enrollment; }
-        public void setEnrollment(Enrollment enrollment) { this.enrollment = enrollment; }
-        public Assessment getAssessment() { return assessment; }
-        public void setAssessment(Assessment assessment) { this.assessment = assessment; }
-        public String getCourseName() { return courseName; }
-        public void setCourseName(String courseName) { this.courseName = courseName; }
-        public String getCourseBanner() { return courseBanner; }
-        public void setCourseBanner(String courseBanner) { this.courseBanner = courseBanner; }
-        public String getAssessmentTitle() { return assessmentTitle; }
-        public void setAssessmentTitle(String assessmentTitle) { this.assessmentTitle = assessmentTitle; }
-        public String getAssessmentType() { return assessmentType; }
-        public void setAssessmentType(String assessmentType) { this.assessmentType = assessmentType; }
-        public Integer getUsedAttempts() { return usedAttempts; }
-        public void setUsedAttempts(Integer usedAttempts) { this.usedAttempts = usedAttempts; }
-        public Integer getAllowedAttempts() { return allowedAttempts; }
-        public void setAllowedAttempts(Integer allowedAttempts) { this.allowedAttempts = allowedAttempts; }
-        public Integer getAttemptsRemaining() { return attemptsRemaining; }
-        public void setAttemptsRemaining(Integer attemptsRemaining) { this.attemptsRemaining = attemptsRemaining; }
-        public Integer getQuestionCount() { return questionCount; }
-        public void setQuestionCount(Integer questionCount) { this.questionCount = questionCount; }
-        public Double getBestScore() { return bestScore; }
-        public void setBestScore(Double bestScore) { this.bestScore = bestScore; }
-        public AssessmentSubmission getLatestSubmission() { return latestSubmission; }
-        public void setLatestSubmission(AssessmentSubmission latestSubmission) { this.latestSubmission = latestSubmission; }
-        public boolean isActiveAttempt() { return activeAttempt; }
-        public void setActiveAttempt(boolean activeAttempt) { this.activeAttempt = activeAttempt; }
-        public String getStatusLabel() { return statusLabel; }
-        public void setStatusLabel(String statusLabel) { this.statusLabel = statusLabel; }
-        public String getStatusClass() { return statusClass; }
-        public void setStatusClass(String statusClass) { this.statusClass = statusClass; }
+        public Enrollment getEnrollment() {
+            return enrollment;
+        }
+
+        public void setEnrollment(Enrollment enrollment) {
+            this.enrollment = enrollment;
+        }
+
+        public Assessment getAssessment() {
+            return assessment;
+        }
+
+        public void setAssessment(Assessment assessment) {
+            this.assessment = assessment;
+        }
+
+        public String getCourseName() {
+            return courseName;
+        }
+
+        public void setCourseName(String courseName) {
+            this.courseName = courseName;
+        }
+
+        public String getCourseBanner() {
+            return courseBanner;
+        }
+
+        public void setCourseBanner(String courseBanner) {
+            this.courseBanner = courseBanner;
+        }
+
+        public String getAssessmentTitle() {
+            return assessmentTitle;
+        }
+
+        public void setAssessmentTitle(String assessmentTitle) {
+            this.assessmentTitle = assessmentTitle;
+        }
+
+        public String getAssessmentType() {
+            return assessmentType;
+        }
+
+        public void setAssessmentType(String assessmentType) {
+            this.assessmentType = assessmentType;
+        }
+
+        public Integer getUsedAttempts() {
+            return usedAttempts;
+        }
+
+        public void setUsedAttempts(Integer usedAttempts) {
+            this.usedAttempts = usedAttempts;
+        }
+
+        public Integer getAllowedAttempts() {
+            return allowedAttempts;
+        }
+
+        public void setAllowedAttempts(Integer allowedAttempts) {
+            this.allowedAttempts = allowedAttempts;
+        }
+
+        public Integer getAttemptsRemaining() {
+            return attemptsRemaining;
+        }
+
+        public void setAttemptsRemaining(Integer attemptsRemaining) {
+            this.attemptsRemaining = attemptsRemaining;
+        }
+
+        public Integer getQuestionCount() {
+            return questionCount;
+        }
+
+        public void setQuestionCount(Integer questionCount) {
+            this.questionCount = questionCount;
+        }
+
+        public Double getBestScore() {
+            return bestScore;
+        }
+
+        public void setBestScore(Double bestScore) {
+            this.bestScore = bestScore;
+        }
+
+        public AssessmentSubmission getLatestSubmission() {
+            return latestSubmission;
+        }
+
+        public void setLatestSubmission(AssessmentSubmission latestSubmission) {
+            this.latestSubmission = latestSubmission;
+        }
+
+        public boolean isActiveAttempt() {
+            return activeAttempt;
+        }
+
+        public void setActiveAttempt(boolean activeAttempt) {
+            this.activeAttempt = activeAttempt;
+        }
+
+        public String getStatusLabel() {
+            return statusLabel;
+        }
+
+        public void setStatusLabel(String statusLabel) {
+            this.statusLabel = statusLabel;
+        }
+
+        public String getStatusClass() {
+            return statusClass;
+        }
+
+        public void setStatusClass(String statusClass) {
+            this.statusClass = statusClass;
+        }
     }
 
     private String resolveCloudinaryResourceType(String fileName) {
@@ -963,14 +1110,15 @@ public class StudentAssessmentServlet extends HttpServlet {
         return "raw";
     }
 
-    private void handleRequestRetake(HttpServletRequest request, HttpServletResponse response, Enrollment enrollment, Assessment assessment, Integer userId) throws IOException {
+    private void handleRequestRetake(HttpServletRequest request, HttpServletResponse response, Enrollment enrollment,
+            Assessment assessment, Integer userId) throws IOException {
         int assessmentId = assessment.getAssessmentId();
         int enrollmentId = enrollment.getEnrollmentId();
 
         if (retakeRequestDAO.hasPending(assessmentId, userId)) {
-            response.sendRedirect(request.getContextPath() 
-                    + "/student/enrollment-details?id=" + enrollmentId 
-                    + "&tab=assessments&assessmentId=" + assessmentId 
+            response.sendRedirect(request.getContextPath()
+                    + "/student/enrollment-details?id=" + enrollmentId
+                    + "&tab=assessments&assessmentId=" + assessmentId
                     + "&error=retakePending");
             return;
         }
@@ -983,14 +1131,14 @@ public class StudentAssessmentServlet extends HttpServlet {
 
         com.psm.elearning.model.AssessmentRetakeRequest saved = retakeRequestDAO.create(retakeReq);
         if (saved != null) {
-            response.sendRedirect(request.getContextPath() 
-                    + "/student/enrollment-details?id=" + enrollmentId 
-                    + "&tab=assessments&assessmentId=" + assessmentId 
+            response.sendRedirect(request.getContextPath()
+                    + "/student/enrollment-details?id=" + enrollmentId
+                    + "&tab=assessments&assessmentId=" + assessmentId
                     + "&success=retakeRequested");
         } else {
-            response.sendRedirect(request.getContextPath() 
-                    + "/student/enrollment-details?id=" + enrollmentId 
-                    + "&tab=assessments&assessmentId=" + assessmentId 
+            response.sendRedirect(request.getContextPath()
+                    + "/student/enrollment-details?id=" + enrollmentId
+                    + "&tab=assessments&assessmentId=" + assessmentId
                     + "&error=retakeRequestFailed");
         }
     }

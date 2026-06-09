@@ -156,6 +156,26 @@ public class AssessmentDAOImpl implements AssessmentDAO {
         }
     }
 
+    private String buildSelectClause(Connection conn) {
+        StringBuilder sb = new StringBuilder("AssessmentID, CourseID, Title, Type, Duration, TotalMarks, Instructions, MaxAttempts, CreatedAt, CreatedBy");
+        if (supportsPlacementColumns(conn)) {
+            sb.append(", PlacementType, PlacementMaterialID");
+        }
+        if (supportsGradingModeColumn(conn)) {
+            sb.append(", GradingMode");
+        }
+        if (supportsSubmissionModeColumn(conn)) {
+            sb.append(", SubmissionMode");
+        }
+        if (supportsStatusColumn(conn)) {
+            sb.append(", Status");
+        }
+        if (supportsArchiveColumns(conn)) {
+            sb.append(", IsDeleted, DeletedAt, DeletedBy");
+        }
+        return sb.toString();
+    }
+
     private Assessment mapRow(ResultSet rs) throws SQLException {
         Assessment a = new Assessment();
         a.setAssessmentId(rs.getInt("AssessmentID"));
@@ -282,8 +302,8 @@ public class AssessmentDAOImpl implements AssessmentDAO {
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(
                      supportsArchiveColumns(conn)
-                             ? "SELECT * FROM Assessment WHERE AssessmentID=? AND (IsDeleted IS NULL OR IsDeleted=0)"
-                             : "SELECT * FROM Assessment WHERE AssessmentID=?")) {
+                             ? "SELECT " + buildSelectClause(conn) + " FROM Assessment WHERE AssessmentID=? AND (IsDeleted IS NULL OR IsDeleted=0)"
+                             : "SELECT " + buildSelectClause(conn) + " FROM Assessment WHERE AssessmentID=?")) {
             ps.setInt(1, assessmentId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) return mapRow(rs);
@@ -296,9 +316,8 @@ public class AssessmentDAOImpl implements AssessmentDAO {
 
     @Override
     public Assessment findAnyById(int assessmentId) {
-        String sql = "SELECT * FROM Assessment WHERE AssessmentID=?";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+             PreparedStatement ps = conn.prepareStatement("SELECT " + buildSelectClause(conn) + " FROM Assessment WHERE AssessmentID=?")) {
             ps.setInt(1, assessmentId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) return mapRow(rs);
@@ -315,8 +334,8 @@ public class AssessmentDAOImpl implements AssessmentDAO {
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(
                      supportsArchiveColumns(conn)
-                             ? "SELECT * FROM Assessment WHERE CourseID=? AND (IsDeleted IS NULL OR IsDeleted=0) ORDER BY CreatedAt DESC"
-                             : "SELECT * FROM Assessment WHERE CourseID=? ORDER BY CreatedAt DESC")) {
+                             ? "SELECT " + buildSelectClause(conn) + " FROM Assessment WHERE CourseID=? AND (IsDeleted IS NULL OR IsDeleted=0) ORDER BY CreatedAt DESC"
+                             : "SELECT " + buildSelectClause(conn) + " FROM Assessment WHERE CourseID=? ORDER BY CreatedAt DESC")) {
             ps.setInt(1, courseId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) list.add(mapRow(rs));
@@ -335,7 +354,7 @@ public class AssessmentDAOImpl implements AssessmentDAO {
         }
         try (Connection conn = DBConnection.getConnection()) {
             boolean supportsArchive = supportsArchiveColumns(conn);
-            StringBuilder sql = new StringBuilder("SELECT * FROM Assessment WHERE CourseID IN (");
+            StringBuilder sql = new StringBuilder("SELECT " + buildSelectClause(conn) + " FROM Assessment WHERE CourseID IN (");
             for (int i = 0; i < courseIds.size(); i++) {
                 if (i > 0) sql.append(",");
                 sql.append("?");
@@ -364,15 +383,15 @@ public class AssessmentDAOImpl implements AssessmentDAO {
     @Override
     public List<Assessment> findDeletedByCourse(int courseId) {
         List<Assessment> list = new ArrayList<>();
-        if (!supportsArchiveColumnsSafe()) {
-            return list;
-        }
-        String sql = "SELECT * FROM Assessment WHERE CourseID=? AND IsDeleted=1 ORDER BY DeletedAt DESC, CreatedAt DESC";
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, courseId);
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) list.add(mapRow(rs));
+        try (Connection conn = DBConnection.getConnection()) {
+            if (!supportsArchiveColumns(conn)) {
+                return list;
+            }
+            try (PreparedStatement ps = conn.prepareStatement("SELECT " + buildSelectClause(conn) + " FROM Assessment WHERE CourseID=? AND IsDeleted=1 ORDER BY DeletedAt DESC, CreatedAt DESC")) {
+                ps.setInt(1, courseId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) list.add(mapRow(rs));
+                }
             }
         } catch (SQLException e) {
             System.err.println("Assessment findDeletedByCourse failed: " + e.getMessage());

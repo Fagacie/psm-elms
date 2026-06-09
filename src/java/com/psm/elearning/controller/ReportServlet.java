@@ -59,7 +59,8 @@ public class ReportServlet extends HttpServlet {
 
         User user = (User) session.getAttribute("user");
         String role = SessionUtil.resolveRole(session);
-        if (role == null) role = user.getRole();
+        if (role == null)
+            role = user.getRole();
 
         String ip = request.getRemoteAddr();
         Integer userId = user.getUserId();
@@ -100,7 +101,8 @@ public class ReportServlet extends HttpServlet {
             if ("csv".equalsIgnoreCase(export)) {
                 reportDAO.saveGeneratedReport(userId, role, "admin-overview", filtersJson, "CSV", null);
                 reportDAO.logReportAccess(userId, role, "admin-overview-export-csv", filtersJson, "Success", ip);
-                writeAdminCsv(response, summary, topCourses, revenueRows, startDate, endDate, incSummary, incTopCourses, incRevenue);
+                writeAdminCsv(response, summary, topCourses, revenueRows, startDate, endDate, incSummary, incTopCourses,
+                        incRevenue);
                 return;
             }
 
@@ -176,14 +178,14 @@ public class ReportServlet extends HttpServlet {
     }
 
     private void writeAdminCsv(HttpServletResponse response,
-                               Map<String, Object> summary,
-                               List<Map<String, Object>> topCourses,
-                               List<Map<String, Object>> revenueRows,
-                               String startDate,
-                               String endDate,
-                               boolean incSummary,
-                               boolean incTopCourses,
-                               boolean incRevenue) throws IOException {
+            Map<String, Object> summary,
+            List<Map<String, Object>> topCourses,
+            List<Map<String, Object>> revenueRows,
+            String startDate,
+            String endDate,
+            boolean incSummary,
+            boolean incTopCourses,
+            boolean incRevenue) throws IOException {
         response.setContentType("text/csv");
         response.setCharacterEncoding("UTF-8");
         response.setHeader("Content-Disposition", "attachment; filename=admin-report.csv");
@@ -236,31 +238,32 @@ public class ReportServlet extends HttpServlet {
     }
 
     private void writeAdminPdf(HttpServletResponse response,
-                               Map<String, Object> summary,
-                               List<Map<String, Object>> topCourses,
-                               List<Map<String, Object>> revenueRows,
-                               List<Map<String, Object>> recentExports,
-                               List<Map<String, Object>> userRoles,
-                               List<Map<String, Object>> userStatuses,
-                               List<Map<String, Object>> courseStatuses,
-                               List<Map<String, Object>> enrollmentStatuses,
-                               List<Map<String, Object>> paymentStatuses,
-                               List<Map<String, Object>> certificateStatuses,
-                               Map<String, Object> assessmentSummary,
-                               List<Map<String, Object>> gradingModes,
-                               List<Map<String, Object>> submissionModes,
-                               List<Map<String, Object>> reportAccessStatuses,
-                               String startDate,
-                               String endDate,
-                               boolean incSummary,
-                               boolean incBreakdowns,
-                               boolean incAssessments,
-                               boolean incTopCourses,
-                               boolean incRevenue,
-                               boolean incHistory) throws IOException {
+            Map<String, Object> summary,
+            List<Map<String, Object>> topCourses,
+            List<Map<String, Object>> revenueRows,
+            List<Map<String, Object>> recentExports,
+            List<Map<String, Object>> userRoles,
+            List<Map<String, Object>> userStatuses,
+            List<Map<String, Object>> courseStatuses,
+            List<Map<String, Object>> enrollmentStatuses,
+            List<Map<String, Object>> paymentStatuses,
+            List<Map<String, Object>> certificateStatuses,
+            Map<String, Object> assessmentSummary,
+            List<Map<String, Object>> gradingModes,
+            List<Map<String, Object>> submissionModes,
+            List<Map<String, Object>> reportAccessStatuses,
+            String startDate,
+            String endDate,
+            boolean incSummary,
+            boolean incBreakdowns,
+            boolean incAssessments,
+            boolean incTopCourses,
+            boolean incRevenue,
+            boolean incHistory) throws IOException {
         response.setContentType("application/pdf");
         response.setCharacterEncoding("UTF-8");
-        response.setHeader("Content-Disposition", "attachment; filename=admin-report-" + LocalDate.now().format(DateTimeFormatter.BASIC_ISO_DATE) + ".pdf");
+        response.setHeader("Content-Disposition", "attachment; filename=admin-report-"
+                + LocalDate.now().format(DateTimeFormatter.BASIC_ISO_DATE) + ".pdf");
 
         Document document = new Document();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -277,7 +280,8 @@ public class ReportServlet extends HttpServlet {
 
             Font subFont = FontFactory.getFont(FontFactory.HELVETICA, 10, Color.GRAY);
             String rangeStr = displayRange(startDate, endDate);
-            Paragraph subtitle = new Paragraph("Date Range: " + rangeStr + " | Generated: " + LocalDate.now().toString(), subFont);
+            Paragraph subtitle = new Paragraph(
+                    "Date Range: " + rangeStr + " | Generated: " + LocalDate.now().toString(), subFont);
             subtitle.setAlignment(Element.ALIGN_CENTER);
             subtitle.setSpacingAfter(20f);
             document.add(subtitle);
@@ -290,7 +294,10 @@ public class ReportServlet extends HttpServlet {
             // Task 2: Platform Summary Table (2 columns)
             if (incSummary) {
                 addKeyValueTable(document, "Platform Summary", summary,
-                        new String[]{"totalUsers", "totalStudents", "totalInstructors", "totalCourses", "totalEnrollments", "completedEnrollments", "activeCertificates", "totalRevenue", "filteredEnrollments", "filteredCompletedEnrollments", "filteredRevenue", "newUsersInRange"},
+                        new String[] { "totalUsers", "totalStudents", "totalInstructors", "totalCourses",
+                                "totalEnrollments", "completedEnrollments", "activeCertificates", "totalRevenue",
+                                "filteredEnrollments", "filteredCompletedEnrollments", "filteredRevenue",
+                                "newUsersInRange" },
                         headerFont, cellFont, headerBg);
             }
 
@@ -298,25 +305,34 @@ public class ReportServlet extends HttpServlet {
             if (incBreakdowns) {
                 addBreakdownTable(document, "User Roles Breakdown", userRoles, headerFont, cellFont, headerBg);
                 addBreakdownTable(document, "User Statuses Breakdown", userStatuses, headerFont, cellFont, headerBg);
-                addBreakdownTable(document, "Course Statuses Breakdown", courseStatuses, headerFont, cellFont, headerBg);
-                addBreakdownTable(document, "Enrollment Statuses Breakdown", enrollmentStatuses, headerFont, cellFont, headerBg);
-                addBreakdownTable(document, "Payment Statuses Breakdown", paymentStatuses, headerFont, cellFont, headerBg);
-                addBreakdownTable(document, "Certificate Statuses Breakdown", certificateStatuses, headerFont, cellFont, headerBg);
+                addBreakdownTable(document, "Course Statuses Breakdown", courseStatuses, headerFont, cellFont,
+                        headerBg);
+                addBreakdownTable(document, "Enrollment Statuses Breakdown", enrollmentStatuses, headerFont, cellFont,
+                        headerBg);
+                addBreakdownTable(document, "Payment Statuses Breakdown", paymentStatuses, headerFont, cellFont,
+                        headerBg);
+                addBreakdownTable(document, "Certificate Statuses Breakdown", certificateStatuses, headerFont, cellFont,
+                        headerBg);
             }
 
             // Assessments Key-Value & breakdown
             if (incAssessments) {
                 addKeyValueTable(document, "Assessment Summary", assessmentSummary,
-                        new String[]{"totalAssessments", "activeAssessments", "deletedAssessments", "totalQuestions", "totalSubmissions", "gradedSubmissions", "pendingSubmissions", "pendingRetakeRequests"},
+                        new String[] { "totalAssessments", "activeAssessments", "deletedAssessments", "totalQuestions",
+                                "totalSubmissions", "gradedSubmissions", "pendingSubmissions",
+                                "pendingRetakeRequests" },
                         headerFont, cellFont, headerBg);
                 addBreakdownTable(document, "Assessment Grading Modes", gradingModes, headerFont, cellFont, headerBg);
-                addBreakdownTable(document, "Assessment Submission Modes", submissionModes, headerFont, cellFont, headerBg);
-                addBreakdownTable(document, "Report Access Statuses", reportAccessStatuses, headerFont, cellFont, headerBg);
+                addBreakdownTable(document, "Assessment Submission Modes", submissionModes, headerFont, cellFont,
+                        headerBg);
+                addBreakdownTable(document, "Report Access Statuses", reportAccessStatuses, headerFont, cellFont,
+                        headerBg);
             }
 
             // Task 3: Top Courses Table (4 columns)
             if (incTopCourses) {
-                Paragraph coursesTitle = new Paragraph("Top Courses by Enrollment", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12));
+                Paragraph coursesTitle = new Paragraph("Top Courses by Enrollment",
+                        FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12));
                 coursesTitle.setSpacingBefore(12f);
                 coursesTitle.setSpacingAfter(8f);
                 document.add(coursesTitle);
@@ -327,9 +343,9 @@ public class ReportServlet extends HttpServlet {
                     PdfPTable coursesTable = new PdfPTable(4);
                     coursesTable.setWidthPercentage(100f);
                     coursesTable.setSpacingAfter(15f);
-                    coursesTable.setWidths(new float[]{4f, 2f, 2f, 2f});
+                    coursesTable.setWidths(new float[] { 4f, 2f, 2f, 2f });
 
-                    String[] coursesHeaders = {"Course Name", "Enrollments", "Completions", "Completion Rate"};
+                    String[] coursesHeaders = { "Course Name", "Enrollments", "Completions", "Completion Rate" };
                     for (String ch : coursesHeaders) {
                         PdfPCell cell = new PdfPCell(new Phrase(ch, headerFont));
                         cell.setBackgroundColor(headerBg);
@@ -350,7 +366,8 @@ public class ReportServlet extends HttpServlet {
                         compCell.setPadding(5f);
                         coursesTable.addCell(compCell);
 
-                        PdfPCell rateCell = new PdfPCell(new Phrase(safeText(row.get("completionRate")) + "%", cellFont));
+                        PdfPCell rateCell = new PdfPCell(
+                                new Phrase(safeText(row.get("completionRate")) + "%", cellFont));
                         rateCell.setPadding(5f);
                         coursesTable.addCell(rateCell);
                     }
@@ -360,7 +377,8 @@ public class ReportServlet extends HttpServlet {
 
             // Task 3: Revenue by Course Table (3 columns)
             if (incRevenue) {
-                Paragraph revTitle = new Paragraph("Revenue by Course", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12));
+                Paragraph revTitle = new Paragraph("Revenue by Course",
+                        FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12));
                 revTitle.setSpacingBefore(12f);
                 revTitle.setSpacingAfter(8f);
                 document.add(revTitle);
@@ -371,9 +389,9 @@ public class ReportServlet extends HttpServlet {
                     PdfPTable revTable = new PdfPTable(3);
                     revTable.setWidthPercentage(100f);
                     revTable.setSpacingAfter(15f);
-                    revTable.setWidths(new float[]{5f, 2f, 3f});
+                    revTable.setWidths(new float[] { 5f, 2f, 3f });
 
-                    String[] revHeaders = {"Course Name", "Enrollments", "Revenue"};
+                    String[] revHeaders = { "Course Name", "Enrollments", "Revenue" };
                     for (String rh : revHeaders) {
                         PdfPCell cell = new PdfPCell(new Phrase(rh, headerFont));
                         cell.setBackgroundColor(headerBg);
@@ -390,7 +408,8 @@ public class ReportServlet extends HttpServlet {
                         enrollCell.setPadding(5f);
                         revTable.addCell(enrollCell);
 
-                        PdfPCell revenueCell = new PdfPCell(new Phrase("NGN " + safeText(row.get("revenue")), cellFont));
+                        PdfPCell revenueCell = new PdfPCell(
+                                new Phrase("NGN " + safeText(row.get("revenue")), cellFont));
                         revenueCell.setPadding(5f);
                         revTable.addCell(revenueCell);
                     }
@@ -400,7 +419,8 @@ public class ReportServlet extends HttpServlet {
 
             // Recent Exports
             if (incHistory) {
-                addRecentExportsTable(document, "Recent Report Exports History", recentExports, 5, headerFont, cellFont, headerBg);
+                addRecentExportsTable(document, "Recent Report Exports History", recentExports, 5, headerFont, cellFont,
+                        headerBg);
             }
 
         } catch (DocumentException e) {
@@ -416,7 +436,8 @@ public class ReportServlet extends HttpServlet {
         }
     }
 
-    private void addKeyValueTable(Document document, String title, Map<String, Object> values, String[] keys, Font headerFont, Font cellFont, Color headerBg) throws DocumentException {
+    private void addKeyValueTable(Document document, String title, Map<String, Object> values, String[] keys,
+            Font headerFont, Font cellFont, Color headerBg) throws DocumentException {
         Paragraph tableTitle = new Paragraph(title, FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12));
         tableTitle.setSpacingBefore(12f);
         tableTitle.setSpacingAfter(8f);
@@ -430,7 +451,7 @@ public class ReportServlet extends HttpServlet {
         PdfPTable table = new PdfPTable(2);
         table.setWidthPercentage(100f);
         table.setSpacingAfter(15f);
-        table.setWidths(new float[]{1f, 1f});
+        table.setWidths(new float[] { 1f, 1f });
 
         PdfPCell h1 = new PdfPCell(new Phrase("Metric Name", headerFont));
         h1.setBackgroundColor(headerBg);
@@ -458,7 +479,8 @@ public class ReportServlet extends HttpServlet {
         document.add(table);
     }
 
-    private void addBreakdownTable(Document document, String title, List<Map<String, Object>> rows, Font headerFont, Font cellFont, Color headerBg) throws DocumentException {
+    private void addBreakdownTable(Document document, String title, List<Map<String, Object>> rows, Font headerFont,
+            Font cellFont, Color headerBg) throws DocumentException {
         Paragraph tableTitle = new Paragraph(title, FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12));
         tableTitle.setSpacingBefore(12f);
         tableTitle.setSpacingAfter(8f);
@@ -472,7 +494,7 @@ public class ReportServlet extends HttpServlet {
         PdfPTable table = new PdfPTable(2);
         table.setWidthPercentage(100f);
         table.setSpacingAfter(15f);
-        table.setWidths(new float[]{1f, 1f});
+        table.setWidths(new float[] { 1f, 1f });
 
         PdfPCell h1 = new PdfPCell(new Phrase("Label", headerFont));
         h1.setBackgroundColor(headerBg);
@@ -496,7 +518,8 @@ public class ReportServlet extends HttpServlet {
         document.add(table);
     }
 
-    private void addRecentExportsTable(Document document, String title, List<Map<String, Object>> rows, int limit, Font headerFont, Font cellFont, Color headerBg) throws DocumentException {
+    private void addRecentExportsTable(Document document, String title, List<Map<String, Object>> rows, int limit,
+            Font headerFont, Font cellFont, Color headerBg) throws DocumentException {
         Paragraph tableTitle = new Paragraph(title, FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12));
         tableTitle.setSpacingBefore(12f);
         tableTitle.setSpacingAfter(8f);
@@ -510,9 +533,9 @@ public class ReportServlet extends HttpServlet {
         PdfPTable table = new PdfPTable(4);
         table.setWidthPercentage(100f);
         table.setSpacingAfter(15f);
-        table.setWidths(new float[]{1f, 3f, 2f, 4f});
+        table.setWidths(new float[] { 1f, 3f, 2f, 4f });
 
-        String[] headers = {"#", "Type", "Format", "Created At"};
+        String[] headers = { "#", "Type", "Format", "Created At" };
         for (String h : headers) {
             PdfPCell cell = new PdfPCell(new Phrase(h, headerFont));
             cell.setBackgroundColor(headerBg);
@@ -522,7 +545,8 @@ public class ReportServlet extends HttpServlet {
 
         int index = 1;
         for (Map<String, Object> row : rows) {
-            if (index > limit) break;
+            if (index > limit)
+                break;
 
             PdfPCell c0 = new PdfPCell(new Phrase(String.valueOf(index), cellFont));
             c0.setPadding(5f);
@@ -547,27 +571,48 @@ public class ReportServlet extends HttpServlet {
 
     private String labelForKey(String key) {
         switch (key) {
-            case "totalUsers": return "Total Users";
-            case "totalStudents": return "Total Students";
-            case "totalInstructors": return "Total Instructors";
-            case "totalCourses": return "Total Courses";
-            case "totalEnrollments": return "Total Enrollments";
-            case "completedEnrollments": return "Completed Enrollments";
-            case "activeCertificates": return "Active Certificates";
-            case "totalRevenue": return "Total Revenue";
-            case "filteredEnrollments": return "Filtered Enrollments";
-            case "filteredCompletedEnrollments": return "Filtered Completed Enrollments";
-            case "filteredRevenue": return "Filtered Revenue";
-            case "newUsersInRange": return "New Users In Range";
-            case "totalAssessments": return "Total Assessments";
-            case "activeAssessments": return "Active Assessments";
-            case "deletedAssessments": return "Deleted Assessments";
-            case "totalQuestions": return "Total Questions";
-            case "totalSubmissions": return "Total Submissions";
-            case "gradedSubmissions": return "Graded Submissions";
-            case "pendingSubmissions": return "Pending Submissions";
-            case "pendingRetakeRequests": return "Pending Retake Requests";
-            default: return key;
+            case "totalUsers":
+                return "Total Users";
+            case "totalStudents":
+                return "Total Students";
+            case "totalInstructors":
+                return "Total Instructors";
+            case "totalCourses":
+                return "Total Courses";
+            case "totalEnrollments":
+                return "Total Enrollments";
+            case "completedEnrollments":
+                return "Completed Enrollments";
+            case "activeCertificates":
+                return "Active Certificates";
+            case "totalRevenue":
+                return "Total Revenue";
+            case "filteredEnrollments":
+                return "Filtered Enrollments";
+            case "filteredCompletedEnrollments":
+                return "Filtered Completed Enrollments";
+            case "filteredRevenue":
+                return "Filtered Revenue";
+            case "newUsersInRange":
+                return "New Users In Range";
+            case "totalAssessments":
+                return "Total Assessments";
+            case "activeAssessments":
+                return "Active Assessments";
+            case "deletedAssessments":
+                return "Deleted Assessments";
+            case "totalQuestions":
+                return "Total Questions";
+            case "totalSubmissions":
+                return "Total Submissions";
+            case "gradedSubmissions":
+                return "Graded Submissions";
+            case "pendingSubmissions":
+                return "Pending Submissions";
+            case "pendingRetakeRequests":
+                return "Pending Retake Requests";
+            default:
+                return key;
         }
     }
 
@@ -575,7 +620,8 @@ public class ReportServlet extends HttpServlet {
         if ((startDate == null || startDate.isEmpty()) && (endDate == null || endDate.isEmpty())) {
             return "All time";
         }
-        return (startDate == null || startDate.isEmpty() ? "..." : startDate) + " to " + (endDate == null || endDate.isEmpty() ? "..." : endDate);
+        return (startDate == null || startDate.isEmpty() ? "..." : startDate) + " to "
+                + (endDate == null || endDate.isEmpty() ? "..." : endDate);
     }
 
     private String safeText(Object value) {

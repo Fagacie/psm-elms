@@ -39,20 +39,20 @@ import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
 /**
- * Servlet to handle Paystack payment callback (verifies payment and updates enrollment).
+ * Servlet to handle Paystack payment callback (verifies payment and updates
+ * enrollment).
  */
 public class PaymentCallbackServlet extends HttpServlet {
 
-    private static final Pattern PAYMENT_REFERENCE_PATTERN =
-            Pattern.compile("^[A-Za-z0-9][A-Za-z0-9_\\-.:]{7,119}$");
+    private static final Pattern PAYMENT_REFERENCE_PATTERN = Pattern.compile("^[A-Za-z0-9][A-Za-z0-9_\\-.:]{7,119}$");
     private static final Logger LOGGER = Logger.getLogger(PaymentCallbackServlet.class.getName());
-    
+
     private EnrollmentDAO enrollmentDAO;
     private PaymentDAO paymentDAO;
     private PaystackService paystackService;
     private UserDAO userDAO;
     private CourseDAO courseDAO;
-    
+
     @Override
     public void init() {
         enrollmentDAO = new EnrollmentDAOImpl();
@@ -61,17 +61,17 @@ public class PaymentCallbackServlet extends HttpServlet {
         userDAO = new UserDAOImpl();
         courseDAO = new CourseDAOImpl();
     }
-    
+
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) 
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
+
         try {
             String reference = request.getParameter("reference");
             if (reference != null) {
                 reference = reference.trim();
             }
-            
+
             if (reference == null || reference.isEmpty()) {
                 LOGGER.warning("Payment callback rejected: missing payment reference");
                 response.sendRedirect(request.getContextPath() + "/student/payment-failed?error=noreference");
@@ -85,37 +85,39 @@ public class PaymentCallbackServlet extends HttpServlet {
             }
 
             LOGGER.info("Verifying payment callback for reference=" + maskReference(reference));
-            
+
             // Get payment record by Paystack reference
             Payment payment = paymentDAO.getPaymentByPaystackReference(reference);
-            
+
             if (payment == null) {
                 LOGGER.warning("Payment callback failed: payment record not found for reference=" + reference);
                 response.sendRedirect(request.getContextPath() + "/student/payment-failed?error=notfound");
                 return;
             }
 
-            String failedBaseUrl = request.getContextPath() + "/student/payment-failed?enrollmentId=" + payment.getEnrollmentId();
+            String failedBaseUrl = request.getContextPath() + "/student/payment-failed?enrollmentId="
+                    + payment.getEnrollmentId();
 
             if (isPaid(payment.getStatus())) {
                 boolean stateAligned = ensureEnrollmentPaidState(payment, reference);
                 if (stateAligned) {
-                    response.sendRedirect(request.getContextPath() + "/student/payment-success?enrollmentId=" + payment.getEnrollmentId());
+                    response.sendRedirect(request.getContextPath() + "/student/payment-success?enrollmentId="
+                            + payment.getEnrollmentId());
                 } else {
                     response.sendRedirect(failedBaseUrl + "&error=state");
                 }
                 return;
             }
-            
+
             // Get enrollment
             Enrollment enrollment = enrollmentDAO.getEnrollment(payment.getEnrollmentId());
-            
+
             if (enrollment == null) {
                 LOGGER.warning("Payment callback failed: enrollment not found for paymentId=" + payment.getPaymentId());
                 response.sendRedirect(failedBaseUrl + "&error=notfound");
                 return;
             }
-            
+
             // Verify payment with Paystack
             JSONObject verificationResult = paystackService.verifyTransaction(reference);
 
@@ -123,7 +125,8 @@ public class PaymentCallbackServlet extends HttpServlet {
                 String paystackStatus = normalizeProviderStatus(verificationResult.optString("status", "failed"));
                 String paymentMethod = normalizePaymentMethod(verificationResult.optString("channel", "paystack"));
                 if (!isMetadataEnrollmentMatch(verificationResult, payment.getEnrollmentId())) {
-                    LOGGER.warning("Payment callback metadata mismatch or missing for reference=" + maskReference(reference) + ". Proceeding because reference and amount match.");
+                    LOGGER.warning("Payment callback metadata mismatch or missing for reference="
+                            + maskReference(reference) + ". Proceeding because reference and amount match.");
                 }
                 int verifiedAmountKobo = verificationResult.optInt("amount", -1);
                 if (verifiedAmountKobo > -1) {
@@ -131,7 +134,8 @@ public class PaymentCallbackServlet extends HttpServlet {
                     if (expectedAmountKobo != verifiedAmountKobo) {
                         LOGGER.warning("Payment callback amount mismatch reference=" + maskReference(reference) +
                                 " expectedKobo=" + expectedAmountKobo + " verifiedKobo=" + verifiedAmountKobo);
-                        paymentDAO.updatePaymentStatus(payment.getPaymentId(), "Failed", paymentMethod, "amount_mismatch");
+                        paymentDAO.updatePaymentStatus(payment.getPaymentId(), "Failed", paymentMethod,
+                                "amount_mismatch");
                         enrollmentDAO.updatePaymentStatus(payment.getEnrollmentId(), "Failed", reference);
                         response.sendRedirect(failedBaseUrl + "&error=amountmismatch");
                         return;
@@ -142,9 +146,11 @@ public class PaymentCallbackServlet extends HttpServlet {
 
                 switch (paystackStatus) {
                     case "success": {
-                        boolean stateUpdated = markPaymentSuccessful(payment, enrollment, paymentMethod, paystackStatus);
+                        boolean stateUpdated = markPaymentSuccessful(payment, enrollment, paymentMethod,
+                                paystackStatus);
                         if (stateUpdated) {
-                            response.sendRedirect(request.getContextPath() + "/student/payment-success?enrollmentId=" + enrollment.getEnrollmentId());
+                            response.sendRedirect(request.getContextPath() + "/student/payment-success?enrollmentId="
+                                    + enrollment.getEnrollmentId());
                         } else {
                             response.sendRedirect(failedBaseUrl + "&error=update");
                         }
@@ -152,7 +158,8 @@ public class PaymentCallbackServlet extends HttpServlet {
                     }
                     case "failed": {
                         if (!isPaid(payment.getStatus())) {
-                            paymentDAO.updatePaymentStatus(payment.getPaymentId(), "Failed", paymentMethod, paystackStatus);
+                            paymentDAO.updatePaymentStatus(payment.getPaymentId(), "Failed", paymentMethod,
+                                    paystackStatus);
                             enrollmentDAO.updatePaymentStatus(enrollment.getEnrollmentId(), "Failed", reference);
                         }
                         response.sendRedirect(failedBaseUrl + "&error=failed");
@@ -160,7 +167,8 @@ public class PaymentCallbackServlet extends HttpServlet {
                     }
                     case "abandoned": {
                         if (!isPaid(payment.getStatus())) {
-                            paymentDAO.updatePaymentStatus(payment.getPaymentId(), "Abandoned", paymentMethod, paystackStatus);
+                            paymentDAO.updatePaymentStatus(payment.getPaymentId(), "Abandoned", paymentMethod,
+                                    paystackStatus);
                             enrollmentDAO.updatePaymentStatus(enrollment.getEnrollmentId(), "Pending", reference);
                         }
                         response.sendRedirect(failedBaseUrl + "&error=abandoned");
@@ -168,19 +176,21 @@ public class PaymentCallbackServlet extends HttpServlet {
                     }
                     default: {
                         if (!isPaid(payment.getStatus())) {
-                            paymentDAO.updatePaymentStatus(payment.getPaymentId(), "Failed", paymentMethod, paystackStatus);
+                            paymentDAO.updatePaymentStatus(payment.getPaymentId(), "Failed", paymentMethod,
+                                    paystackStatus);
                             enrollmentDAO.updatePaymentStatus(enrollment.getEnrollmentId(), "Failed", reference);
                         }
                         response.sendRedirect(failedBaseUrl + "&error=unknownstatus");
                     }
                 }
             } else {
-                LOGGER.warning("Payment verification returned null for reference=" + reference + " (network or API error)");
+                LOGGER.warning(
+                        "Payment verification returned null for reference=" + reference + " (network or API error)");
                 paymentDAO.updatePaymentStatus(payment.getPaymentId(), "Failed", "paystack", "failed");
                 enrollmentDAO.updatePaymentStatus(enrollment.getEnrollmentId(), "Failed", reference);
                 response.sendRedirect(failedBaseUrl + "&error=verification");
             }
-            
+
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Payment callback processing error", e);
             response.sendRedirect(request.getContextPath() + "/student/payment-failed?error=exception");
@@ -268,7 +278,8 @@ public class PaymentCallbackServlet extends HttpServlet {
             String providerStatus = normalizeProviderStatus(data.optString("status", "failed"));
             String paymentMethod = normalizePaymentMethod(data.optString("channel", "paystack"));
             if (!isMetadataEnrollmentMatch(data, payment.getEnrollmentId())) {
-                LOGGER.warning("Paystack webhook metadata mismatch or missing for reference=" + maskReference(reference) + ". Proceeding because reference and amount match.");
+                LOGGER.warning("Paystack webhook metadata mismatch or missing for reference=" + maskReference(reference)
+                        + ". Proceeding because reference and amount match.");
             }
             int verifiedAmountKobo = data.optInt("amount", -1);
 
@@ -318,36 +329,36 @@ public class PaymentCallbackServlet extends HttpServlet {
     }
 
     private boolean markPaymentSuccessful(Payment payment,
-                                          Enrollment enrollment,
-                                          String paymentMethod,
-                                          String providerStatus) {
-        String nextEnrollmentStatus = AppSettingsService.getBoolean(AppSettingsService.KEY_ENROLLMENT_AUTO_ACTIVATE, true)
-                ? "Enrolled"
-                : (enrollment.getStatus() == null || enrollment.getStatus().trim().isEmpty() ? "Pending" : enrollment.getStatus());
+            Enrollment enrollment,
+            String paymentMethod,
+            String providerStatus) {
+        String nextEnrollmentStatus = AppSettingsService.getBoolean(AppSettingsService.KEY_ENROLLMENT_AUTO_ACTIVATE,
+                true)
+                        ? "Enrolled"
+                        : (enrollment.getStatus() == null || enrollment.getStatus().trim().isEmpty() ? "Pending"
+                                : enrollment.getStatus());
         boolean updated = applySuccessfulStateTransaction(
-            payment.getPaymentId(),
-            enrollment.getEnrollmentId(),
-            payment.getPaystackReference(),
-            paymentMethod,
-            providerStatus,
-            nextEnrollmentStatus
-        );
+                payment.getPaymentId(),
+                enrollment.getEnrollmentId(),
+                payment.getPaystackReference(),
+                paymentMethod,
+                providerStatus,
+                nextEnrollmentStatus);
 
         if (updated) {
             try {
-                User student = userDAO.getUser(enrollment.getStudentId());
-                Course course = courseDAO.getCourse(enrollment.getCourseId());
+                User student = userDAO.findById(enrollment.getUserId());
+                Course course = courseDAO.findById(enrollment.getCourseId());
                 String dateStr = new java.text.SimpleDateFormat("MMMM dd, yyyy").format(new java.util.Date());
                 String formattedAmount = String.format("₦%,.2f", payment.getAmount());
                 new Thread(() -> {
                     EmailUtil.sendPaymentReceiptEmail(
-                        student.getEmail(),
-                        student.getFullName(),
-                        course.getCourseName(),
-                        payment.getPaystackReference(),
-                        dateStr,
-                        formattedAmount
-                    );
+                            student.getEmail(),
+                            student.getFullName(),
+                            course.getCourseName(),
+                            payment.getPaystackReference(),
+                            dateStr,
+                            formattedAmount);
                 }).start();
             } catch (Exception e) {
                 LOGGER.log(Level.SEVERE, "Failed to send payment receipt email", e);
@@ -357,17 +368,17 @@ public class PaymentCallbackServlet extends HttpServlet {
     }
 
     private boolean ensureEnrollmentPaidState(Payment payment, String reference) {
-        String nextEnrollmentStatus = AppSettingsService.getBoolean(AppSettingsService.KEY_ENROLLMENT_AUTO_ACTIVATE, true)
-                ? "Enrolled"
-                : "Pending";
+        String nextEnrollmentStatus = AppSettingsService.getBoolean(AppSettingsService.KEY_ENROLLMENT_AUTO_ACTIVATE,
+                true)
+                        ? "Enrolled"
+                        : "Pending";
         return applySuccessfulStateTransaction(
-            payment.getPaymentId(),
-            payment.getEnrollmentId(),
-            reference,
-            payment.getMethod(),
-            payment.getPaystackStatus(),
-            nextEnrollmentStatus
-        );
+                payment.getPaymentId(),
+                payment.getEnrollmentId(),
+                reference,
+                payment.getMethod(),
+                payment.getPaystackStatus(),
+                nextEnrollmentStatus);
     }
 
     private boolean isPaid(String status) {
@@ -431,7 +442,8 @@ public class PaymentCallbackServlet extends HttpServlet {
     private boolean isMetadataEnrollmentMatch(JSONObject providerData, Integer expectedEnrollmentId) {
         Integer metadataEnrollmentId = extractEnrollmentIdFromMetadata(providerData);
         if (metadataEnrollmentId == null) {
-            LOGGER.warning("Metadata enrollment_id is missing or unparseable. Proceeding since reference and amount match.");
+            LOGGER.warning(
+                    "Metadata enrollment_id is missing or unparseable. Proceeding since reference and amount match.");
             return true;
         }
         return metadataEnrollmentId.equals(expectedEnrollmentId);
@@ -445,7 +457,7 @@ public class PaymentCallbackServlet extends HttpServlet {
         if (metadataObj == null) {
             return null;
         }
-        
+
         JSONObject metadata = null;
         if (metadataObj instanceof JSONObject) {
             metadata = (JSONObject) metadataObj;
@@ -459,7 +471,7 @@ public class PaymentCallbackServlet extends HttpServlet {
                 }
             }
         }
-        
+
         if (metadata == null) {
             return null;
         }
@@ -504,18 +516,18 @@ public class PaymentCallbackServlet extends HttpServlet {
     }
 
     private boolean applySuccessfulStateTransaction(Integer paymentId,
-                                                    Integer enrollmentId,
-                                                    String reference,
-                                                    String paymentMethod,
-                                                    String paystackStatus,
-                                                    String enrollmentStatus) {
+            Integer enrollmentId,
+            String reference,
+            String paymentMethod,
+            String paystackStatus,
+            String enrollmentStatus) {
         String updatePaymentSql = "UPDATE Payment SET PaymentStatus=?, PaymentMethod=?, PaystackStatus=?, PaymentRef=?, PaystackReference=? WHERE PaymentID=?";
         String updateEnrollmentSql = "UPDATE Enrollment SET Status=?, PaymentStatus=?, PaymentRef=? WHERE EnrollmentID=?";
 
         try (Connection connection = DBConnection.getConnection()) {
             connection.setAutoCommit(false);
             try (PreparedStatement updatePayment = connection.prepareStatement(updatePaymentSql);
-                 PreparedStatement updateEnrollment = connection.prepareStatement(updateEnrollmentSql)) {
+                    PreparedStatement updateEnrollment = connection.prepareStatement(updateEnrollmentSql)) {
 
                 updatePayment.setString(1, "Paid");
                 updatePayment.setString(2, normalizePaymentMethod(paymentMethod));
@@ -531,10 +543,13 @@ public class PaymentCallbackServlet extends HttpServlet {
                 updateEnrollment.setInt(4, enrollmentId);
                 int enrollmentRows = updateEnrollment.executeUpdate();
 
-                // Accept 0 or 1 rows affected (MySQL returns 0 if columns already have the target values)
+                // Accept 0 or 1 rows affected (MySQL returns 0 if columns already have the
+                // target values)
                 if (paymentRows < 0 || paymentRows > 1 || enrollmentRows < 0 || enrollmentRows > 1) {
                     connection.rollback();
-                    LOGGER.warning("Payment success transaction rollback due to unexpected row counts: paymentRows=" + paymentRows + ", enrollmentRows=" + enrollmentRows + " for reference=" + maskReference(reference));
+                    LOGGER.warning("Payment success transaction rollback due to unexpected row counts: paymentRows="
+                            + paymentRows + ", enrollmentRows=" + enrollmentRows + " for reference="
+                            + maskReference(reference));
                     return false;
                 }
 
@@ -542,7 +557,8 @@ public class PaymentCallbackServlet extends HttpServlet {
                 return true;
             } catch (SQLException sqlException) {
                 connection.rollback();
-                LOGGER.log(Level.SEVERE, "Payment success transaction failed for reference=" + maskReference(reference), sqlException);
+                LOGGER.log(Level.SEVERE, "Payment success transaction failed for reference=" + maskReference(reference),
+                        sqlException);
                 return false;
             } finally {
                 connection.setAutoCommit(true);

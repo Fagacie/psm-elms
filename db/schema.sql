@@ -1,9 +1,7 @@
 -- PSM E-Learning schema (MySQL)
 -- Aligned to current Java code (DAOs + models)
-
 CREATE DATABASE IF NOT EXISTS `psm_elearning` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE `psm_elearning`;
-
 -- Users
 CREATE TABLE IF NOT EXISTS `User` (
   `UserID` INT AUTO_INCREMENT PRIMARY KEY,
@@ -11,15 +9,14 @@ CREATE TABLE IF NOT EXISTS `User` (
   `Email` VARCHAR(150) NOT NULL,
   `PasswordHash` VARCHAR(255) NOT NULL,
   `Phone` VARCHAR(30) NOT NULL,
-  `Role` ENUM('Student','Instructor','Admin') NOT NULL,
-  `Status` ENUM('Active','Suspended','Pending') NOT NULL DEFAULT 'Active',
+  `Role` ENUM('Student', 'Instructor', 'Admin') NOT NULL,
+  `Status` ENUM('Active', 'Suspended', 'Pending') NOT NULL DEFAULT 'Active',
   `CreatedAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `UpdatedAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `LastLogin` DATETIME NULL,
   `ProfilePicture` VARCHAR(255) NULL,
   UNIQUE KEY `uk_user_email` (`Email`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 -- Students (1:1 with User)
 CREATE TABLE IF NOT EXISTS `Student` (
   `UserID` INT NOT NULL,
@@ -35,8 +32,7 @@ CREATE TABLE IF NOT EXISTS `Student` (
   PRIMARY KEY (`UserID`),
   UNIQUE KEY `uk_student_regnumber` (`RegNumber`),
   CONSTRAINT `fk_student_user` FOREIGN KEY (`UserID`) REFERENCES `User`(`UserID`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 -- Instructors (1:1 with User)
 CREATE TABLE IF NOT EXISTS `Instructor` (
   `UserID` INT NOT NULL,
@@ -47,8 +43,7 @@ CREATE TABLE IF NOT EXISTS `Instructor` (
   `HireDate` DATE NULL,
   PRIMARY KEY (`UserID`),
   CONSTRAINT `fk_instructor_user` FOREIGN KEY (`UserID`) REFERENCES `User`(`UserID`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 -- Admins (1:1 with User)
 CREATE TABLE IF NOT EXISTS `Admin` (
   `UserID` INT NOT NULL,
@@ -57,8 +52,7 @@ CREATE TABLE IF NOT EXISTS `Admin` (
   `AssignedDepartment` VARCHAR(100) NULL,
   PRIMARY KEY (`UserID`),
   CONSTRAINT `fk_admin_user` FOREIGN KEY (`UserID`) REFERENCES `User`(`UserID`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 -- Application Settings
 CREATE TABLE IF NOT EXISTS `AppSetting` (
   `SettingKey` VARCHAR(120) PRIMARY KEY,
@@ -66,9 +60,9 @@ CREATE TABLE IF NOT EXISTS `AppSetting` (
   `UpdatedBy` INT NULL,
   `CreatedAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `UpdatedAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  CONSTRAINT `fk_app_setting_updated_by` FOREIGN KEY (`UpdatedBy`) REFERENCES `User`(`UserID`) ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
+  CONSTRAINT `fk_app_setting_updated_by` FOREIGN KEY (`UpdatedBy`) REFERENCES `User`(`UserID`) ON DELETE
+  SET NULL ON UPDATE CASCADE
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 CREATE TABLE IF NOT EXISTS `AppSettingAudit` (
   `AuditID` INT AUTO_INCREMENT PRIMARY KEY,
   `SettingKey` VARCHAR(120) NOT NULL,
@@ -79,9 +73,9 @@ CREATE TABLE IF NOT EXISTS `AppSettingAudit` (
   KEY `idx_app_setting_audit_key` (`SettingKey`),
   KEY `idx_app_setting_audit_changed_at` (`ChangedAt`),
   CONSTRAINT `fk_app_setting_audit_setting_key` FOREIGN KEY (`SettingKey`) REFERENCES `AppSetting`(`SettingKey`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `fk_app_setting_audit_changed_by` FOREIGN KEY (`ChangedBy`) REFERENCES `User`(`UserID`) ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
+  CONSTRAINT `fk_app_setting_audit_changed_by` FOREIGN KEY (`ChangedBy`) REFERENCES `User`(`UserID`) ON DELETE
+  SET NULL ON UPDATE CASCADE
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 -- Instructor Applications
 CREATE TABLE IF NOT EXISTS `InstructorApplication` (
   `ApplicationID` INT AUTO_INCREMENT PRIMARY KEY,
@@ -93,20 +87,19 @@ CREATE TABLE IF NOT EXISTS `InstructorApplication` (
   `Qualification` VARCHAR(150) NOT NULL,
   `CoverMessage` TEXT NULL,
   `CvPath` VARCHAR(1024) NOT NULL,
-  `Status` ENUM('Pending','Approved','Rejected') NOT NULL DEFAULT 'Pending',
+  `Status` ENUM('Pending', 'Approved', 'Rejected') NOT NULL DEFAULT 'Pending',
   `ReviewedBy` INT NULL,
   `ReviewedAt` TIMESTAMP NULL DEFAULT NULL,
   `AdminNotes` TEXT NULL,
   `CreatedAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   KEY `idx_instructor_application_email` (`Email`),
   KEY `idx_instructor_application_status` (`Status`),
-  CONSTRAINT `fk_instructor_application_reviewer` FOREIGN KEY (`ReviewedBy`) REFERENCES `User`(`UserID`) ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
+  CONSTRAINT `fk_instructor_application_reviewer` FOREIGN KEY (`ReviewedBy`) REFERENCES `User`(`UserID`) ON DELETE
+  SET NULL ON UPDATE CASCADE
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 -- Keep existing environments aligned with current column sizes.
 ALTER TABLE `InstructorApplication`
-  MODIFY COLUMN `CvPath` VARCHAR(1024) NOT NULL;
-
+MODIFY COLUMN `CvPath` VARCHAR(1024) NOT NULL;
 -- Notifications
 CREATE TABLE IF NOT EXISTS `Notification` (
   `NotificationID` INT AUTO_INCREMENT PRIMARY KEY,
@@ -126,9 +119,9 @@ CREATE TABLE IF NOT EXISTS `Notification` (
   KEY `idx_notification_recipient_email` (`RecipientEmail`),
   KEY `idx_notification_read` (`IsRead`),
   KEY `idx_notification_related` (`RelatedEntityType`, `RelatedEntityID`),
-  CONSTRAINT `fk_notification_recipient_user` FOREIGN KEY (`RecipientUserID`) REFERENCES `User`(`UserID`) ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
+  CONSTRAINT `fk_notification_recipient_user` FOREIGN KEY (`RecipientUserID`) REFERENCES `User`(`UserID`) ON DELETE
+  SET NULL ON UPDATE CASCADE
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 -- Courses
 CREATE TABLE IF NOT EXISTS `Course` (
   `CourseID` INT AUTO_INCREMENT PRIMARY KEY,
@@ -137,8 +130,8 @@ CREATE TABLE IF NOT EXISTS `Course` (
   `Category` VARCHAR(100) NULL,
   `Level` VARCHAR(50) NULL,
   `InstructorID` INT NOT NULL,
-  `CourseFee` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-  `Status` ENUM('Pending','Approved','Archived') NOT NULL DEFAULT 'Pending',
+  `CourseFee` DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
+  `Status` ENUM('Pending', 'Approved', 'Archived') NOT NULL DEFAULT 'Pending',
   `ApprovedBy` INT NULL,
   `CourseBanner` VARCHAR(255) NULL,
   `Duration` INT NULL,
@@ -149,8 +142,7 @@ CREATE TABLE IF NOT EXISTS `Course` (
   KEY `idx_course_instructor` (`InstructorID`),
   KEY `idx_course_status` (`Status`),
   CONSTRAINT `fk_course_instructor` FOREIGN KEY (`InstructorID`) REFERENCES `Instructor`(`UserID`) ON DELETE RESTRICT ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 -- Materials
 CREATE TABLE IF NOT EXISTS `Material` (
   `MaterialID` INT AUTO_INCREMENT PRIMARY KEY,
@@ -169,17 +161,18 @@ CREATE TABLE IF NOT EXISTS `Material` (
   KEY `idx_material_course_order` (`CourseID`, `DisplayOrder`),
   KEY `idx_material_deleted` (`IsDeleted`),
   CONSTRAINT `fk_material_course` FOREIGN KEY (`CourseID`) REFERENCES `Course`(`CourseID`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `fk_material_uploader` FOREIGN KEY (`UploadedBy`) REFERENCES `User`(`UserID`) ON DELETE SET NULL ON UPDATE CASCADE,
-  CONSTRAINT `fk_material_deleted_by` FOREIGN KEY (`DeletedBy`) REFERENCES `User`(`UserID`) ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
+  CONSTRAINT `fk_material_uploader` FOREIGN KEY (`UploadedBy`) REFERENCES `User`(`UserID`) ON DELETE
+  SET NULL ON UPDATE CASCADE,
+    CONSTRAINT `fk_material_deleted_by` FOREIGN KEY (`DeletedBy`) REFERENCES `User`(`UserID`) ON DELETE
+  SET NULL ON UPDATE CASCADE
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 -- Material Progress
 CREATE TABLE IF NOT EXISTS `MaterialProgress` (
   `ProgressID` INT AUTO_INCREMENT PRIMARY KEY,
   `UserID` INT NOT NULL,
   `MaterialID` INT NOT NULL,
   `CourseID` INT NULL,
-  `Status` ENUM('in_progress','completed') NOT NULL DEFAULT 'in_progress',
+  `Status` ENUM('in_progress', 'completed') NOT NULL DEFAULT 'in_progress',
   `CompletedAt` TIMESTAMP NULL DEFAULT NULL,
   `UpdatedAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `ViewedAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -191,19 +184,24 @@ CREATE TABLE IF NOT EXISTS `MaterialProgress` (
   CONSTRAINT `fk_material_progress_user` FOREIGN KEY (`UserID`) REFERENCES `User`(`UserID`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_material_progress_material` FOREIGN KEY (`MaterialID`) REFERENCES `Material`(`MaterialID`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_material_progress_course` FOREIGN KEY (`CourseID`) REFERENCES `Course`(`CourseID`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 -- Enrollments
 CREATE TABLE IF NOT EXISTS `Enrollment` (
   `EnrollmentID` INT AUTO_INCREMENT PRIMARY KEY,
   `UserID` INT NOT NULL,
   `CourseID` INT NOT NULL,
-  `Status` ENUM('Pending','Enrolled','Active','Completed','Cancelled') NOT NULL DEFAULT 'Pending',
-  `PaymentStatus` ENUM('Pending','Paid','Failed') NOT NULL DEFAULT 'Pending',
+  `Status` ENUM(
+    'Pending',
+    'Enrolled',
+    'Active',
+    'Completed',
+    'Cancelled'
+  ) NOT NULL DEFAULT 'Pending',
+  `PaymentStatus` ENUM('Pending', 'Paid', 'Failed') NOT NULL DEFAULT 'Pending',
   `PaymentRef` VARCHAR(100) NULL,
   `EnrollmentDate` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `UpdatedDate` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `CompletionStatus` ENUM('Not Started','In Progress','Completed') NOT NULL DEFAULT 'Not Started',
+  `CompletionStatus` ENUM('Not Started', 'In Progress', 'Completed') NOT NULL DEFAULT 'Not Started',
   `Progress` INT DEFAULT 0,
   `ReminderSent` TINYINT(1) NOT NULL DEFAULT 0,
   UNIQUE KEY `uk_enrollment_user_course` (`UserID`, `CourseID`),
@@ -213,15 +211,14 @@ CREATE TABLE IF NOT EXISTS `Enrollment` (
   KEY `idx_enrollment_status` (`Status`),
   CONSTRAINT `fk_enrollment_user` FOREIGN KEY (`UserID`) REFERENCES `User`(`UserID`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_enrollment_course` FOREIGN KEY (`CourseID`) REFERENCES `Course`(`CourseID`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 -- Payments (Paystack Integration)
 CREATE TABLE IF NOT EXISTS `Payment` (
   `PaymentID` INT AUTO_INCREMENT PRIMARY KEY,
   `EnrollmentID` INT NOT NULL,
-  `Amount` DECIMAL(10,2) NOT NULL,
+  `Amount` DECIMAL(10, 2) NOT NULL,
   `PaymentMethod` VARCHAR(50) NULL,
-  `PaymentStatus` ENUM('Pending','Paid','Failed','Abandoned') NOT NULL DEFAULT 'Pending',
+  `PaymentStatus` ENUM('Pending', 'Paid', 'Failed', 'Abandoned') NOT NULL DEFAULT 'Pending',
   `PaymentDate` DATETIME NULL,
   `Reference` VARCHAR(100) NULL,
   `PaymentRef` VARCHAR(100) NULL,
@@ -236,8 +233,7 @@ CREATE TABLE IF NOT EXISTS `Payment` (
   KEY `idx_payment_enrollment` (`EnrollmentID`),
   KEY `idx_payment_status` (`PaymentStatus`),
   CONSTRAINT `fk_payment_enrollment` FOREIGN KEY (`EnrollmentID`) REFERENCES `Enrollment`(`EnrollmentID`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 -- Assessments
 CREATE TABLE IF NOT EXISTS `Assessment` (
   `AssessmentID` INT AUTO_INCREMENT PRIMARY KEY,
@@ -260,14 +256,14 @@ CREATE TABLE IF NOT EXISTS `Assessment` (
   KEY `idx_assessment_deleted` (`IsDeleted`),
   CONSTRAINT `fk_assessment_course` FOREIGN KEY (`CourseID`) REFERENCES `Course`(`CourseID`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_assessment_creator` FOREIGN KEY (`CreatedBy`) REFERENCES `User`(`UserID`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `fk_assessment_deleted_by` FOREIGN KEY (`DeletedBy`) REFERENCES `User`(`UserID`) ON DELETE SET NULL ON UPDATE CASCADE,
-  CONSTRAINT `fk_assessment_placement_material` FOREIGN KEY (`PlacementMaterialID`) REFERENCES `Material`(`MaterialID`) ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
+  CONSTRAINT `fk_assessment_deleted_by` FOREIG N KEY (`DeletedBy`) REFERENCES `User`(`UserID`) ON DELETE
+  SET NULL ON UPDATE CASCADE,
+    CONSTRAINT `fk_assessment_placement_material` FOREIGN KEY (`PlacementMaterialID`) REFERENCES `Material`(`MaterialID`) ON DELETE
+  SET NULL ON UPDATE CASCADE
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 ALTER TABLE `Assessment`
-  ADD COLUMN `GradingMode` ENUM('auto','manual') NOT NULL DEFAULT 'auto',
-  ADD COLUMN `SubmissionMode` ENUM('file','text','both') NOT NULL DEFAULT 'both';
-
+ADD COLUMN `GradingMode` ENUM('auto', 'manual') NOT NULL DEFAULT 'auto',
+  ADD COLUMN `SubmissionMode` ENUM('file', 'text', 'both') NOT NULL DEFAULT 'both';
 -- Assessment Questions
 CREATE TABLE IF NOT EXISTS `AssessmentQuestion` (
   `QuestionID` INT AUTO_INCREMENT PRIMARY KEY,
@@ -280,21 +276,25 @@ CREATE TABLE IF NOT EXISTS `AssessmentQuestion` (
   `CorrectOption` VARCHAR(10) NULL,
   `AttachmentUrl` VARCHAR(500) NULL,
   `AttachmentName` VARCHAR(255) NULL,
-  `Marks` DECIMAL(5,2) NULL,
+  `Marks` DECIMAL(5, 2) NULL,
   KEY `idx_question_assessment` (`AssessmentID`),
   CONSTRAINT `fk_question_assessment` FOREIGN KEY (`AssessmentID`) REFERENCES `Assessment`(`AssessmentID`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 -- Assessment Submissions
 CREATE TABLE IF NOT EXISTS `AssessmentSubmission` (
   `SubmissionID` INT AUTO_INCREMENT PRIMARY KEY,
   `AssessmentID` INT NOT NULL,
   `UserID` INT NOT NULL,
   `AnswersFilePath` TEXT NULL,
-  `Score` DECIMAL(5,2) NULL,
+  `Score` DECIMAL(5, 2) NULL,
   `Feedback` TEXT NULL,
   `AttemptNumber` INT NOT NULL DEFAULT 1,
-  `Status` ENUM('Submitted','TimedOut','AutoSubmitted','Graded') NOT NULL DEFAULT 'Submitted',
+  `Status` ENUM(
+    'Submitted',
+    'TimedOut',
+    'AutoSubmitted',
+    'Graded'
+  ) NOT NULL DEFAULT 'Submitted',
   `StartedAt` DATETIME NULL,
   `EndedAt` DATETIME NULL,
   `SubmitDate` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -302,19 +302,22 @@ CREATE TABLE IF NOT EXISTS `AssessmentSubmission` (
   KEY `idx_submission_user` (`UserID`),
   CONSTRAINT `fk_submission_assessment` FOREIGN KEY (`AssessmentID`) REFERENCES `Assessment`(`AssessmentID`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_submission_user` FOREIGN KEY (`UserID`) REFERENCES `User`(`UserID`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 -- Ensure existing databases also support instructor grading status.
 ALTER TABLE `AssessmentSubmission`
-  MODIFY COLUMN `Status` ENUM('Submitted','TimedOut','AutoSubmitted','Graded') NOT NULL DEFAULT 'Submitted';
-
+MODIFY COLUMN `Status` ENUM(
+    'Submitted',
+    'TimedOut',
+    'AutoSubmitted',
+    'Graded'
+  ) NOT NULL DEFAULT 'Submitted';
 -- Assessment Retake Requests
 CREATE TABLE IF NOT EXISTS `AssessmentRetakeRequest` (
   `RequestID` INT AUTO_INCREMENT PRIMARY KEY,
   `AssessmentID` INT NOT NULL,
   `UserID` INT NOT NULL,
   `Reason` TEXT NULL,
-  `Status` ENUM('Pending','Approved','Rejected') NOT NULL DEFAULT 'Pending',
+  `Status` ENUM('Pending', 'Approved', 'Rejected') NOT NULL DEFAULT 'Pending',
   `RequestedAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `ReviewedAt` TIMESTAMP NULL DEFAULT NULL,
   `ReviewedBy` INT NULL,
@@ -323,17 +326,17 @@ CREATE TABLE IF NOT EXISTS `AssessmentRetakeRequest` (
   KEY `idx_retake_status` (`Status`),
   CONSTRAINT `fk_retake_assessment` FOREIGN KEY (`AssessmentID`) REFERENCES `Assessment`(`AssessmentID`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_retake_user` FOREIGN KEY (`UserID`) REFERENCES `User`(`UserID`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `fk_retake_reviewer` FOREIGN KEY (`ReviewedBy`) REFERENCES `User`(`UserID`) ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
+  CONSTRAINT `fk_retake_reviewer` FOREIGN KEY (`ReviewedBy`) REFERENCES `User`(`UserID`) ON DELETE
+  SET NULL ON UPDATE CASCADE
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 -- Assessment Grade Audit
 CREATE TABLE IF NOT EXISTS `AssessmentGradeAudit` (
   `AuditID` INT AUTO_INCREMENT PRIMARY KEY,
   `SubmissionID` INT NOT NULL,
   `AssessmentID` INT NOT NULL,
   `ActionType` VARCHAR(40) NOT NULL,
-  `OldScore` DECIMAL(5,2) NULL,
-  `NewScore` DECIMAL(5,2) NULL,
+  `OldScore` DECIMAL(5, 2) NULL,
+  `NewScore` DECIMAL(5, 2) NULL,
   `OldFeedback` TEXT NULL,
   `NewFeedback` TEXT NULL,
   `GradedBy` INT NULL,
@@ -344,9 +347,9 @@ CREATE TABLE IF NOT EXISTS `AssessmentGradeAudit` (
   KEY `idx_grade_audit_graded_by` (`GradedBy`),
   CONSTRAINT `fk_grade_audit_submission` FOREIGN KEY (`SubmissionID`) REFERENCES `AssessmentSubmission`(`SubmissionID`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_grade_audit_assessment` FOREIGN KEY (`AssessmentID`) REFERENCES `Assessment`(`AssessmentID`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `fk_grade_audit_graded_by` FOREIGN KEY (`GradedBy`) REFERENCES `User`(`UserID`) ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
+  CONSTRAINT `fk_grade_audit_graded_by` FOREIGN KEY (`GradedBy`) REFERENCES `User`(`UserID`) ON DELETE
+  SET NULL ON UPDATE CASCADE
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 -- Certificates
 CREATE TABLE IF NOT EXISTS `Certificate` (
   `CertificateID` INT AUTO_INCREMENT PRIMARY KEY,
@@ -356,15 +359,14 @@ CREATE TABLE IF NOT EXISTS `Certificate` (
   `QRCodePath` VARCHAR(255) NULL,
   `GeneratedBy` VARCHAR(100) NULL,
   `VerificationURL` VARCHAR(255) NULL,
-  `Status` ENUM('Active','Revoked') NOT NULL DEFAULT 'Active',
+  `Status` ENUM('Active', 'Revoked') NOT NULL DEFAULT 'Active',
   `RevokedAt` TIMESTAMP NULL DEFAULT NULL,
   `RevokedBy` INT NULL,
   UNIQUE KEY `uk_certificate_no` (`CertificateNo`),
   UNIQUE KEY `uk_certificate_enrollment` (`EnrollmentID`),
   KEY `idx_certificate_status` (`Status`),
   CONSTRAINT `fk_certificate_enrollment` FOREIGN KEY (`EnrollmentID`) REFERENCES `Enrollment`(`EnrollmentID`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 -- Report Exports (stores generated report metadata)
 CREATE TABLE IF NOT EXISTS `ReportExport` (
   `ExportID` INT AUTO_INCREMENT PRIMARY KEY,
@@ -378,8 +380,7 @@ CREATE TABLE IF NOT EXISTS `ReportExport` (
   KEY `idx_report_export_user` (`UserID`),
   KEY `idx_report_export_type` (`ReportType`),
   CONSTRAINT `fk_report_export_user` FOREIGN KEY (`UserID`) REFERENCES `User`(`UserID`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 -- Report Access Log (audit trail for report module usage)
 CREATE TABLE IF NOT EXISTS `ReportAccessLog` (
   `LogID` INT AUTO_INCREMENT PRIMARY KEY,
@@ -394,8 +395,7 @@ CREATE TABLE IF NOT EXISTS `ReportAccessLog` (
   KEY `idx_report_log_type` (`ReportType`),
   KEY `idx_report_log_status` (`AccessStatus`),
   CONSTRAINT `fk_report_log_user` FOREIGN KEY (`UserID`) REFERENCES `User`(`UserID`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 -- Password Reset Tokens
 CREATE TABLE IF NOT EXISTS `PasswordResetToken` (
   `TokenID` INT AUTO_INCREMENT PRIMARY KEY,
@@ -407,7 +407,7 @@ CREATE TABLE IF NOT EXISTS `PasswordResetToken` (
   UNIQUE KEY `uk_password_reset_token` (`Token`),
   KEY `idx_token_user` (`UserID`),
   CONSTRAINT `fk_token_user` FOREIGN KEY (`UserID`) REFERENCES `User`(`UserID`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 -- Migration to add course reminder field to existing Enrollment table
-ALTER TABLE `Enrollment` ADD COLUMN `ReminderSent` TINYINT(1) NOT NULL DEFAULT 0;
+ALTER TABLE `Enrollment`
+ADD COLUMN `ReminderSent` TINYINT(1) NOT NULL DEFAULT 0;

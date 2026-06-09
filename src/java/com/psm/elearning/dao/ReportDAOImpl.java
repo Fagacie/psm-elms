@@ -20,14 +20,15 @@ public class ReportDAOImpl implements ReportDAO {
                 "(SELECT COUNT(*) FROM User WHERE Role='Instructor') AS totalInstructors, " +
                 "(SELECT COUNT(*) FROM Course) AS totalCourses, " +
                 "(SELECT COUNT(*) FROM Enrollment) AS totalEnrollments, " +
-                "(SELECT COUNT(*) FROM Enrollment WHERE CompletionStatus='Completed' OR Status='Completed') AS completedEnrollments, " +
+                "(SELECT COUNT(*) FROM Enrollment WHERE CompletionStatus='Completed' OR Status='Completed') AS completedEnrollments, "
+                +
                 "(SELECT COUNT(*) FROM Certificate WHERE Status='Active') AS activeCertificates, " +
                 "(SELECT COALESCE(SUM(Amount), 0) FROM Payment WHERE PaymentStatus = 'Paid') AS totalRevenue";
 
         Map<String, Object> row = new HashMap<>();
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+                PreparedStatement ps = conn.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()) {
 
             if (rs.next()) {
                 row.put("totalUsers", rs.getInt("totalUsers"));
@@ -69,7 +70,8 @@ public class ReportDAOImpl implements ReportDAO {
     public List<Map<String, Object>> getTopCoursesByEnrollment(int limit, String startDate, String endDate) {
         StringBuilder sql = new StringBuilder("SELECT c.CourseID, c.Title, " +
                 "COUNT(e.EnrollmentID) AS enrollments, " +
-                "SUM(CASE WHEN e.CompletionStatus='Completed' OR e.Status='Completed' THEN 1 ELSE 0 END) AS completions, " +
+                "SUM(CASE WHEN e.CompletionStatus='Completed' OR e.Status='Completed' THEN 1 ELSE 0 END) AS completions, "
+                +
                 "ROUND(AVG(COALESCE(e.Progress, 0)), 0) AS avgProgress " +
                 "FROM Course c " +
                 "LEFT JOIN Enrollment e ON e.CourseID = c.CourseID");
@@ -81,7 +83,7 @@ public class ReportDAOImpl implements ReportDAO {
 
         List<Map<String, Object>> rows = new ArrayList<>();
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+                PreparedStatement ps = conn.prepareStatement(sql.toString())) {
 
             int index = 1;
             if (isDateRangeProvided(startDate, endDate)) {
@@ -99,7 +101,8 @@ public class ReportDAOImpl implements ReportDAO {
                     row.put("avgProgress", rs.getInt("avgProgress"));
                     int enrollments = rs.getInt("enrollments");
                     int completions = rs.getInt("completions");
-                    int completionRate = enrollments > 0 ? Math.round((float) completions * 100f / (float) enrollments) : 0;
+                    int completionRate = enrollments > 0 ? Math.round((float) completions * 100f / (float) enrollments)
+                            : 0;
                     row.put("completionRate", completionRate);
                     rows.add(row);
                 }
@@ -126,7 +129,7 @@ public class ReportDAOImpl implements ReportDAO {
 
         List<Map<String, Object>> rows = new ArrayList<>();
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+                PreparedStatement ps = conn.prepareStatement(sql.toString())) {
 
             int index = 1;
             if (isDateRangeProvided(startDate, endDate)) {
@@ -156,7 +159,7 @@ public class ReportDAOImpl implements ReportDAO {
                 "FROM ReportExport ORDER BY CreatedAt DESC LIMIT ?";
         List<Map<String, Object>> rows = new ArrayList<>();
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, limit);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -177,32 +180,38 @@ public class ReportDAOImpl implements ReportDAO {
 
     @Override
     public List<Map<String, Object>> getUserRoleBreakdown() {
-        return loadBreakdown("SELECT Role AS label, COUNT(*) AS count FROM User GROUP BY Role ORDER BY FIELD(Role, 'Admin', 'Instructor', 'Student')");
+        return loadBreakdown(
+                "SELECT Role AS label, COUNT(*) AS count FROM User GROUP BY Role ORDER BY FIELD(Role, 'Admin', 'Instructor', 'Student')");
     }
 
     @Override
     public List<Map<String, Object>> getUserStatusBreakdown() {
-        return loadBreakdown("SELECT Status AS label, COUNT(*) AS count FROM User GROUP BY Status ORDER BY FIELD(Status, 'Active', 'Pending', 'Suspended')");
+        return loadBreakdown(
+                "SELECT Status AS label, COUNT(*) AS count FROM User GROUP BY Status ORDER BY FIELD(Status, 'Active', 'Pending', 'Suspended')");
     }
 
     @Override
     public List<Map<String, Object>> getCourseStatusBreakdown() {
-        return loadBreakdown("SELECT Status AS label, COUNT(*) AS count FROM Course GROUP BY Status ORDER BY FIELD(Status, 'Approved', 'Pending', 'Archived')");
+        return loadBreakdown(
+                "SELECT Status AS label, COUNT(*) AS count FROM Course GROUP BY Status ORDER BY FIELD(Status, 'Approved', 'Pending', 'Archived')");
     }
 
     @Override
     public List<Map<String, Object>> getEnrollmentStatusBreakdown() {
-        return loadBreakdown("SELECT Status AS label, COUNT(*) AS count FROM Enrollment GROUP BY Status ORDER BY FIELD(Status, 'Active', 'Enrolled', 'Completed', 'Pending', 'Cancelled')");
+        return loadBreakdown(
+                "SELECT Status AS label, COUNT(*) AS count FROM Enrollment GROUP BY Status ORDER BY FIELD(Status, 'Active', 'Enrolled', 'Completed', 'Pending', 'Cancelled')");
     }
 
     @Override
     public List<Map<String, Object>> getPaymentStatusBreakdown() {
-        return loadBreakdown("SELECT PaymentStatus AS label, COUNT(*) AS count FROM Payment GROUP BY PaymentStatus ORDER BY FIELD(PaymentStatus, 'Paid', 'Pending', 'Failed', 'Abandoned')");
+        return loadBreakdown(
+                "SELECT PaymentStatus AS label, COUNT(*) AS count FROM Payment GROUP BY PaymentStatus ORDER BY FIELD(PaymentStatus, 'Paid', 'Pending', 'Failed', 'Abandoned')");
     }
 
     @Override
     public List<Map<String, Object>> getCertificateStatusBreakdown() {
-        return loadBreakdown("SELECT Status AS label, COUNT(*) AS count FROM Certificate GROUP BY Status ORDER BY FIELD(Status, 'Active', 'Revoked')");
+        return loadBreakdown(
+                "SELECT Status AS label, COUNT(*) AS count FROM Certificate GROUP BY Status ORDER BY FIELD(Status, 'Active', 'Revoked')");
     }
 
     @Override
@@ -214,13 +223,14 @@ public class ReportDAOImpl implements ReportDAO {
                 "(SELECT COUNT(*) FROM AssessmentQuestion) AS totalQuestions, " +
                 "(SELECT COUNT(*) FROM AssessmentSubmission) AS totalSubmissions, " +
                 "(SELECT COUNT(*) FROM AssessmentSubmission WHERE Status = 'Graded') AS gradedSubmissions, " +
-                "(SELECT COUNT(*) FROM AssessmentSubmission WHERE Status IN ('Submitted', 'TimedOut', 'AutoSubmitted')) AS pendingSubmissions, " +
+                "(SELECT COUNT(*) FROM AssessmentSubmission WHERE Status IN ('Submitted', 'TimedOut', 'AutoSubmitted')) AS pendingSubmissions, "
+                +
                 "(SELECT COUNT(*) FROM AssessmentRetakeRequest WHERE Status = 'Pending') AS pendingRetakeRequests";
 
         Map<String, Object> row = new HashMap<>();
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+                PreparedStatement ps = conn.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()) {
 
             if (rs.next()) {
                 row.put("totalAssessments", rs.getInt("totalAssessments"));
@@ -240,17 +250,20 @@ public class ReportDAOImpl implements ReportDAO {
 
     @Override
     public List<Map<String, Object>> getAssessmentGradingModeBreakdown() {
-        return loadBreakdown("SELECT GradingMode AS label, COUNT(*) AS count FROM Assessment GROUP BY GradingMode ORDER BY FIELD(GradingMode, 'auto', 'manual')");
+        return loadBreakdown(
+                "SELECT GradingMode AS label, COUNT(*) AS count FROM Assessment GROUP BY GradingMode ORDER BY FIELD(GradingMode, 'auto', 'manual')");
     }
 
     @Override
     public List<Map<String, Object>> getAssessmentSubmissionModeBreakdown() {
-        return loadBreakdown("SELECT SubmissionMode AS label, COUNT(*) AS count FROM Assessment GROUP BY SubmissionMode ORDER BY FIELD(SubmissionMode, 'both', 'file', 'text')");
+        return loadBreakdown(
+                "SELECT SubmissionMode AS label, COUNT(*) AS count FROM Assessment GROUP BY SubmissionMode ORDER BY FIELD(SubmissionMode, 'both', 'file', 'text')");
     }
 
     @Override
     public List<Map<String, Object>> getReportAccessStatusBreakdown() {
-        return loadBreakdown("SELECT AccessStatus AS label, COUNT(*) AS count FROM ReportAccessLog GROUP BY AccessStatus ORDER BY FIELD(AccessStatus, 'Success', 'Failed', 'Denied')");
+        return loadBreakdown(
+                "SELECT AccessStatus AS label, COUNT(*) AS count FROM ReportAccessLog GROUP BY AccessStatus ORDER BY FIELD(AccessStatus, 'Success', 'Failed', 'Denied')");
     }
 
     @Override
@@ -258,7 +271,8 @@ public class ReportDAOImpl implements ReportDAO {
         String sql = "SELECT " +
                 "COUNT(DISTINCT c.CourseID) AS totalCourses, " +
                 "COUNT(e.EnrollmentID) AS totalEnrollments, " +
-                "SUM(CASE WHEN e.CompletionStatus='Completed' OR e.Status='Completed' THEN 1 ELSE 0 END) AS completedEnrollments, " +
+                "SUM(CASE WHEN e.CompletionStatus='Completed' OR e.Status='Completed' THEN 1 ELSE 0 END) AS completedEnrollments, "
+                +
                 "ROUND(AVG(COALESCE(e.Progress, 0)), 0) AS avgProgress, " +
                 "COALESCE(SUM(CASE WHEN p.PaymentStatus = 'Paid' THEN p.Amount ELSE 0 END), 0) AS totalRevenue " +
                 "FROM Course c " +
@@ -268,7 +282,7 @@ public class ReportDAOImpl implements ReportDAO {
 
         Map<String, Object> row = new HashMap<>();
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setInt(1, instructorId);
             try (ResultSet rs = ps.executeQuery()) {
@@ -290,7 +304,8 @@ public class ReportDAOImpl implements ReportDAO {
     public List<Map<String, Object>> getInstructorCoursePerformance(int instructorId, int limit) {
         String sql = "SELECT c.CourseID, c.Title, " +
                 "COUNT(e.EnrollmentID) AS enrollments, " +
-                "SUM(CASE WHEN e.CompletionStatus='Completed' OR e.Status='Completed' THEN 1 ELSE 0 END) AS completions, " +
+                "SUM(CASE WHEN e.CompletionStatus='Completed' OR e.Status='Completed' THEN 1 ELSE 0 END) AS completions, "
+                +
                 "ROUND(AVG(COALESCE(e.Progress, 0)), 0) AS avgProgress " +
                 "FROM Course c " +
                 "LEFT JOIN Enrollment e ON e.CourseID = c.CourseID " +
@@ -301,7 +316,7 @@ public class ReportDAOImpl implements ReportDAO {
 
         List<Map<String, Object>> rows = new ArrayList<>();
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setInt(1, instructorId);
             ps.setInt(2, limit);
@@ -326,16 +341,19 @@ public class ReportDAOImpl implements ReportDAO {
     public Map<String, Object> getStudentSummary(int studentId) {
         String sql = "SELECT " +
                 "COUNT(e.EnrollmentID) AS totalEnrollments, " +
-                "SUM(CASE WHEN e.Status='Active' OR e.CompletionStatus='In Progress' THEN 1 ELSE 0 END) AS activeEnrollments, " +
-                "SUM(CASE WHEN e.CompletionStatus='Completed' OR e.Status='Completed' THEN 1 ELSE 0 END) AS completedEnrollments, " +
+                "SUM(CASE WHEN e.Status='Active' OR e.CompletionStatus='In Progress' THEN 1 ELSE 0 END) AS activeEnrollments, "
+                +
+                "SUM(CASE WHEN e.CompletionStatus='Completed' OR e.Status='Completed' THEN 1 ELSE 0 END) AS completedEnrollments, "
+                +
                 "ROUND(AVG(COALESCE(e.Progress, 0)), 0) AS avgProgress, " +
                 "SUM(CASE WHEN e.PaymentStatus='Paid' THEN 1 ELSE 0 END) AS paidEnrollments, " +
-                "(SELECT COUNT(*) FROM Certificate c JOIN Enrollment ce ON ce.EnrollmentID = c.EnrollmentID WHERE ce.UserID = ? AND c.Status='Active') AS certificates " +
+                "(SELECT COUNT(*) FROM Certificate c JOIN Enrollment ce ON ce.EnrollmentID = c.EnrollmentID WHERE ce.UserID = ? AND c.Status='Active') AS certificates "
+                +
                 "FROM Enrollment e WHERE e.UserID = ?";
 
         Map<String, Object> row = new HashMap<>();
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setInt(1, studentId);
             ps.setInt(2, studentId);
@@ -357,13 +375,14 @@ public class ReportDAOImpl implements ReportDAO {
 
     @Override
     public List<Map<String, Object>> getStudentCourseProgress(int studentId, int limit) {
-        String sql = "SELECT e.EnrollmentID, c.Title, c.Level, e.Status, e.CompletionStatus, COALESCE(e.Progress,0) AS Progress, e.PaymentStatus " +
+        String sql = "SELECT e.EnrollmentID, c.Title, c.Level, e.Status, e.CompletionStatus, COALESCE(e.Progress,0) AS Progress, e.PaymentStatus "
+                +
                 "FROM Enrollment e JOIN Course c ON c.CourseID = e.CourseID " +
                 "WHERE e.UserID = ? ORDER BY e.EnrollmentDate DESC LIMIT ?";
 
         List<Map<String, Object>> rows = new ArrayList<>();
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setInt(1, studentId);
             ps.setInt(2, limit);
@@ -387,10 +406,11 @@ public class ReportDAOImpl implements ReportDAO {
     }
 
     @Override
-    public boolean saveGeneratedReport(Integer userId, String role, String reportType, String filtersJson, String exportFormat, String filePath) {
+    public boolean saveGeneratedReport(Integer userId, String role, String reportType, String filtersJson,
+            String exportFormat, String filePath) {
         String sql = "INSERT INTO ReportExport (UserID, RoleName, ReportType, FiltersJson, ExportFormat, FilePath) VALUES (?,?,?,?,?,?)";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setInt(1, userId);
             ps.setString(2, role);
@@ -406,10 +426,11 @@ public class ReportDAOImpl implements ReportDAO {
     }
 
     @Override
-    public boolean logReportAccess(Integer userId, String role, String reportType, String filtersJson, String accessStatus, String ipAddress) {
+    public boolean logReportAccess(Integer userId, String role, String reportType, String filtersJson,
+            String accessStatus, String ipAddress) {
         String sql = "INSERT INTO ReportAccessLog (UserID, RoleName, ReportType, FiltersJson, AccessStatus, IPAddress) VALUES (?,?,?,?,?,?)";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setInt(1, userId);
             ps.setString(2, role);
@@ -431,8 +452,8 @@ public class ReportDAOImpl implements ReportDAO {
     private List<Map<String, Object>> loadBreakdown(String sql) {
         List<Map<String, Object>> rows = new ArrayList<>();
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+                PreparedStatement ps = conn.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
                 Map<String, Object> row = new HashMap<>();

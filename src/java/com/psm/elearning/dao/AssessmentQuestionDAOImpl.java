@@ -87,11 +87,11 @@ public class AssessmentQuestionDAOImpl implements AssessmentQuestionDAO {
     @Override
     public AssessmentQuestion addQuestion(AssessmentQuestion question) {
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(
-                     supportsAttachmentColumns(conn)
-                             ? "INSERT INTO AssessmentQuestion (AssessmentID, QuestionText, OptionA, OptionB, OptionC, OptionD, CorrectOption, Marks, AttachmentUrl, AttachmentName) VALUES (?,?,?,?,?,?,?,?,?,?)"
-                             : "INSERT INTO AssessmentQuestion (AssessmentID, QuestionText, OptionA, OptionB, OptionC, OptionD, CorrectOption, Marks) VALUES (?,?,?,?,?,?,?,?)",
-                     Statement.RETURN_GENERATED_KEYS)) {
+                PreparedStatement ps = conn.prepareStatement(
+                        supportsAttachmentColumns(conn)
+                                ? "INSERT INTO AssessmentQuestion (AssessmentID, QuestionText, OptionA, OptionB, OptionC, OptionD, CorrectOption, Marks, AttachmentUrl, AttachmentName) VALUES (?,?,?,?,?,?,?,?,?,?)"
+                                : "INSERT INTO AssessmentQuestion (AssessmentID, QuestionText, OptionA, OptionB, OptionC, OptionD, CorrectOption, Marks) VALUES (?,?,?,?,?,?,?,?)",
+                        Statement.RETURN_GENERATED_KEYS)) {
             boolean includeAttachment = supportsAttachmentColumns(conn);
             ps.setInt(1, question.getAssessmentId());
             ps.setString(2, question.getQuestionText());
@@ -100,15 +100,20 @@ public class AssessmentQuestionDAOImpl implements AssessmentQuestionDAO {
             ps.setString(5, question.getOptionC());
             ps.setString(6, question.getOptionD());
             ps.setString(7, question.getCorrectOption());
-            if (question.getMarks() != null) ps.setDouble(8, question.getMarks()); else ps.setNull(8, Types.DECIMAL);
+            if (question.getMarks() != null)
+                ps.setDouble(8, question.getMarks());
+            else
+                ps.setNull(8, Types.DECIMAL);
             if (includeAttachment) {
                 ps.setString(9, question.getAttachmentUrl());
                 ps.setString(10, question.getAttachmentName());
             }
             int affected = ps.executeUpdate();
-            if (affected == 0) return null;
+            if (affected == 0)
+                return null;
             try (ResultSet rs = ps.getGeneratedKeys()) {
-                if (rs.next()) question.setQuestionId(rs.getInt(1));
+                if (rs.next())
+                    question.setQuestionId(rs.getInt(1));
             }
             return findById(question.getQuestionId());
         } catch (SQLException e) {
@@ -121,10 +126,11 @@ public class AssessmentQuestionDAOImpl implements AssessmentQuestionDAO {
     public AssessmentQuestion findById(int questionId) {
         String sql = "SELECT * FROM AssessmentQuestion WHERE QuestionID=?";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, questionId);
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return mapRow(rs);
+                if (rs.next())
+                    return mapRow(rs);
             }
         } catch (SQLException e) {
             System.err.println("AssessmentQuestion findById failed: " + e.getMessage());
@@ -137,10 +143,11 @@ public class AssessmentQuestionDAOImpl implements AssessmentQuestionDAO {
         List<AssessmentQuestion> list = new ArrayList<>();
         String sql = "SELECT * FROM AssessmentQuestion WHERE AssessmentID=? ORDER BY QuestionID";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, assessmentId);
             try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) list.add(mapRow(rs));
+                while (rs.next())
+                    list.add(mapRow(rs));
             }
         } catch (SQLException e) {
             System.err.println("AssessmentQuestion findByAssessment failed: " + e.getMessage());
@@ -156,12 +163,13 @@ public class AssessmentQuestionDAOImpl implements AssessmentQuestionDAO {
         }
         StringBuilder sql = new StringBuilder("SELECT * FROM AssessmentQuestion WHERE AssessmentID IN (");
         for (int i = 0; i < assessmentIds.size(); i++) {
-            if (i > 0) sql.append(",");
+            if (i > 0)
+                sql.append(",");
             sql.append("?");
         }
         sql.append(") ORDER BY QuestionID");
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+                PreparedStatement ps = conn.prepareStatement(sql.toString())) {
             for (int i = 0; i < assessmentIds.size(); i++) {
                 ps.setInt(i + 1, assessmentIds.get(i));
             }
@@ -179,10 +187,10 @@ public class AssessmentQuestionDAOImpl implements AssessmentQuestionDAO {
     @Override
     public boolean updateQuestion(AssessmentQuestion question) {
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(
-                     supportsAttachmentColumns(conn)
-                             ? "UPDATE AssessmentQuestion SET QuestionText=?, OptionA=?, OptionB=?, OptionC=?, OptionD=?, CorrectOption=?, Marks=?, AttachmentUrl=?, AttachmentName=? WHERE QuestionID=?"
-                             : "UPDATE AssessmentQuestion SET QuestionText=?, OptionA=?, OptionB=?, OptionC=?, OptionD=?, CorrectOption=?, Marks=? WHERE QuestionID=?")) {
+                PreparedStatement ps = conn.prepareStatement(
+                        supportsAttachmentColumns(conn)
+                                ? "UPDATE AssessmentQuestion SET QuestionText=?, OptionA=?, OptionB=?, OptionC=?, OptionD=?, CorrectOption=?, Marks=?, AttachmentUrl=?, AttachmentName=? WHERE QuestionID=?"
+                                : "UPDATE AssessmentQuestion SET QuestionText=?, OptionA=?, OptionB=?, OptionC=?, OptionD=?, CorrectOption=?, Marks=? WHERE QuestionID=?")) {
             boolean includeAttachment = supportsAttachmentColumns(conn);
             ps.setString(1, question.getQuestionText());
             ps.setString(2, question.getOptionA());
@@ -221,13 +229,13 @@ public class AssessmentQuestionDAOImpl implements AssessmentQuestionDAO {
             boolean includeAttachment = supportsAttachmentColumns(conn);
             conn.setAutoCommit(false);
             try (PreparedStatement ps = conn.prepareStatement(
-                includeAttachment
+                    includeAttachment
                             ? "UPDATE AssessmentQuestion SET QuestionText=?, OptionA=?, OptionB=?, OptionC=?, OptionD=?, CorrectOption=?, Marks=?, AttachmentUrl=?, AttachmentName=? WHERE QuestionID=?"
                             : "UPDATE AssessmentQuestion SET QuestionText=?, OptionA=?, OptionB=?, OptionC=?, OptionD=?, CorrectOption=?, Marks=? WHERE QuestionID=?")) {
-            bindQuestionContent(ps, second, firstQuestionId, includeAttachment);
+                bindQuestionContent(ps, second, firstQuestionId, includeAttachment);
                 ps.executeUpdate();
 
-            bindQuestionContent(ps, first, secondQuestionId, includeAttachment);
+                bindQuestionContent(ps, first, secondQuestionId, includeAttachment);
                 ps.executeUpdate();
             }
             conn.commit();
@@ -238,7 +246,8 @@ public class AssessmentQuestionDAOImpl implements AssessmentQuestionDAO {
         }
     }
 
-    private void bindQuestionContent(PreparedStatement ps, AssessmentQuestion source, int targetQuestionId, boolean includeAttachment) throws SQLException {
+    private void bindQuestionContent(PreparedStatement ps, AssessmentQuestion source, int targetQuestionId,
+            boolean includeAttachment) throws SQLException {
         ps.setString(1, source.getQuestionText());
         ps.setString(2, source.getOptionA());
         ps.setString(3, source.getOptionB());
@@ -263,7 +272,7 @@ public class AssessmentQuestionDAOImpl implements AssessmentQuestionDAO {
     public boolean delete(int questionId) {
         String sql = "DELETE FROM AssessmentQuestion WHERE QuestionID=?";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, questionId);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
