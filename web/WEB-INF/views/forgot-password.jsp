@@ -8,76 +8,67 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/auth-premium.css?v=20260417-1">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/Login.module.css">
     <jsp:include page="/WEB-INF/views/common/head-external-assets.jsp"/>
 </head>
-<body class="auth-page">
-<main class="auth-shell">
-    <section class="auth-layout auth-layout-recovery" aria-labelledby="forgot-title">
-        <aside class="auth-visual" aria-hidden="true">
-            <p class="auth-kicker">Account Recovery</p>
-            <h2>Regain access without friction.</h2>
-            <p class="auth-visual-text">We will send a secure reset link to the email address attached to your account so you can return to learning quickly.</p>
+<body class="log_page">
 
-            <ul class="auth-visual-list">
-                <li>One-hour secure reset link</li>
-                <li>Email-based account verification</li>
-                <li>Fast return to your learning workspace</li>
-            </ul>
+<div class="log_container">
+    <aside class="log_visual">
+        <a href="${pageContext.request.contextPath}/landing" class="log_brand">PSM E-Learning</a>
+        <div class="log_quote_wrap">
+            <h2 class="log_quote">Regain access without friction.</h2>
+            <p class="log_quote_sub">We will send a secure reset link to your email so you can return to your learning workspace quickly.</p>
+        </div>
+    </aside>
 
-            <div class="auth-scene" data-auth-scene>
-                <span class="auth-shape auth-shape-a" data-depth="10"></span>
-                <span class="auth-shape auth-shape-b" data-depth="18"></span>
-                <span class="auth-shape auth-shape-c" data-depth="14"></span>
-                <span class="auth-shape auth-shape-d" data-depth="12"></span>
-            </div>
-        </aside>
+    <main class="log_form_panel">
+        <header class="log_head">
+            <h1>Account Recovery</h1>
+            <p>Enter your email address to receive a secure reset link.</p>
+        </header>
 
-        <section class="auth-card">
-            <header class="auth-head">
-                <h1 id="forgot-title">Forgot Password</h1>
-                <p>Enter your email address and we will send you a password reset link.</p>
-            </header>
+        <% if (request.getAttribute("success") != null) { %>
+            <div class="log_alert log_alert_success"><%= request.getAttribute("success") %></div>
+        <% } %>
 
-            <div class="theme-toolbar theme-toolbar-compact">
-                <button type="button" class="theme-toggle" data-theme-toggle aria-pressed="false">
-                    <span class="theme-toggle-label">Dark mode</span>
-                </button>
-            </div>
+        <% if (request.getAttribute("error") != null) { %>
+            <div class="log_alert log_alert_error"><%= request.getAttribute("error") %></div>
+        <% } %>
 
-            <% if (request.getAttribute("success") != null) { %>
-                <div class="auth-alert auth-alert-success"><%= request.getAttribute("success") %></div>
-            <% } %>
+        <% if (request.getAttribute("warning") != null) { %>
+            <div class="log_alert log_alert_error"><%= request.getAttribute("warning") %></div>
+        <% } %>
 
-            <% if (request.getAttribute("error") != null) { %>
-                <div class="auth-alert auth-alert-error"><%= request.getAttribute("error") %></div>
-            <% } %>
-
-            <% if (request.getAttribute("warning") != null) { %>
-                <div class="auth-alert auth-alert-error"><%= request.getAttribute("warning") %></div>
-            <% } %>
-
-            <form method="post" action="${pageContext.request.contextPath}/forgot-password" class="auth-form" novalidate>
-                <div class="auth-field">
-                    <label for="email">Email Address</label>
-                    <input id="email" name="email" type="email" placeholder="Enter your email address" required>
+        <form method="post" action="${pageContext.request.contextPath}/forgot-password" novalidate>
+            <div class="log_field">
+                <div class="log_label_row">
+                    <label class="log_label" for="email">Email Address</label>
                 </div>
+                <input
+                        id="email"
+                        name="email"
+                        class="log_input"
+                        type="email"
+                        placeholder="Enter your email address"
+                        required
+                        autofocus>
+            </div>
 
-                <div class="auth-help-card">
-                    <strong>Security note</strong>
-                    <p>The reset link expires in 1 hour and can only be used once.</p>
-                </div>
+            <div class="log_field" style="margin-top: 16px; margin-bottom: 24px; padding: 12px 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
+                <span style="display: block; font-size: 0.8rem; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 4px;">Security Note</span>
+                <span style="font-size: 0.85rem; color: #64748b;">The reset link expires in 1 hour and can only be used once.</span>
+            </div>
 
-                <button type="submit" class="auth-btn">Send Reset Link</button>
-            </form>
+            <button type="submit" class="log_btn">Send Reset Link</button>
+        </form>
 
-            <p class="auth-switch">
-                Remembered your password?
-                <a href="${pageContext.request.contextPath}/login" class="auth-link">Back to Login</a>
-            </p>
-        </section>
-    </section>
-</main>
-<script src="${pageContext.request.contextPath}/js/auth-v2.js"></script>
+        <p class="log_switch">
+            Remembered your password?
+            <a href="${pageContext.request.contextPath}/login" class="log_link">Back to Login</a>
+        </p>
+    </main>
+</div>
+
 </body>
 </html>

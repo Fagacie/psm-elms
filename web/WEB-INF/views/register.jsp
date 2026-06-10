@@ -12,21 +12,18 @@
             <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
                 rel="stylesheet">
             <!-- Include Profile CSS modules styles for identical layout & colors -->
-            <link rel="stylesheet" href="${pageContext.request.contextPath}/css/Profile.module.css">
+            <link rel="stylesheet" href="${pageContext.request.contextPath}/css/Register.module.css">
             <jsp:include page="/WEB-INF/views/common/head-external-assets.jsp" />
         </head>
 
         <body class="sv-page">
-            <div class="prof_viewport"
-                style="display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh; padding: 48px 24px; background: var(--prof-bg);">
+            <div class="reg_viewport">
 
-                <div class="prof_card"
-                    style="max-width: 900px; width: 100%; padding: 40px; box-shadow: var(--sv-shadow-md);">
+                <div class="reg_card">
                     <div style="text-align: center; margin-bottom: 32px;">
-                        <h1
-                            style="font-size: 2rem; font-weight: 800; color: var(--prof-heading); margin-bottom: 8px; letter-spacing: -0.02em;">
+                        <h1>
                             Create Account</h1>
-                        <p style="font-size: 0.92rem; color: var(--prof-muted); margin: 0; line-height: 1.5;">Set up
+                        <p class="reg_sub">Set up
                             your account and begin learning today.</p>
                     </div>
 
@@ -42,74 +39,61 @@
                         enctype="multipart/form-data" novalidate
                         style="display: flex; flex-direction: column; gap: 28px; margin: 0;">
 
-                        <!-- Centered Photo Picker styled like profile avatar -->
-                        <div
-                            style="display: flex; flex-direction: column; align-items: center; gap: 12px; margin-bottom: 8px;">
-                            <label for="passportPhoto" class="prof_avatarCircle" id="photoDropzone"
-                                style="margin: 0; cursor: pointer;">
-                                <input id="passportPhoto" name="passportPhoto" type="file"
-                                    accept="image/jpeg,image/png,image/gif" style="display: none;">
-                                <img id="photoPreviewImage" alt="Selected profile photo preview" class="prof_avatarImg"
-                                    style="display: none;">
-                                <div class="prof_avatarPlaceholder" id="photoPlaceholder">
-                                    <i class="fas fa-user" style="font-size: 2.2rem; color: var(--prof-muted);"></i>
-                                </div>
-                                <div class="prof_avatarOverlay">
-                                    <i class="fas fa-camera" style="font-size: 1.25rem; color: #ffffff;"></i>
-                                </div>
+                        <!-- Modern Avatar Picker -->
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; margin-bottom: 8px;">
+                            <label for="passportPhoto" class="reg_avatar_picker" id="photoDropzone">
+                                <input id="passportPhoto" name="passportPhoto" type="file" accept="image/jpeg,image/png,image/gif" class="reg_file_input">
+                                <i data-lucide="camera" class="reg_camera_icon"></i>
+                                <img id="photoPreviewImage" alt="Selected profile photo preview" class="reg_avatarImg" style="display: none;">
                             </label>
-                            <span
-                                style="font-size: 0.72rem; font-weight: 700; color: var(--prof-muted); text-transform: uppercase; letter-spacing: 0.05em;">Upload
-                                Passport Photo</span>
+                            <span class="reg_label" style="text-align: center;">Upload Passport Photo</span>
                         </div>
 
                         <!-- Section 1: Account Credentials -->
                         <div style="display: flex; flex-direction: column; gap: 16px;">
-                            <h4
-                                style="font-size: 0.95rem; font-weight: 800; color: var(--prof-heading); border-bottom: 1px solid var(--prof-border); padding-bottom: 8px; margin: 0;">
+                            <h4>
                                 Account Credentials</h4>
-                            <div class="prof_formGrid">
-                                <div class="prof_field" style="grid-column: span 2;">
-                                    <label class="prof_label" for="email">Email Address *</label>
+                            <div class="reg_formGrid">
+                                <div class="reg_field" style="grid-column: span 2;">
+                                    <label class="reg_label" for="email">Email Address  <span class="reg_req">(Required)</span></label>
                                     <input id="email" name="email" type="email" value="${param.email}" required
-                                        class="prof_input" placeholder="e.g. user@example.com">
+                                        class="reg_input" placeholder="e.g. user@example.com">
                                 </div>
-                                <div class="prof_field">
-                                    <label class="prof_label" for="password">Password *</label>
-                                    <input id="password" name="password" type="password" required class="prof_input"
+                                <div class="reg_field">
+                                    <label class="reg_label" for="password">Password  <span class="reg_req">(Required)</span></label>
+                                    <input id="password" name="password" type="password" required class="reg_input"
                                         placeholder="Min. 8 characters">
                                 </div>
-                                <div class="prof_field">
-                                    <label class="prof_label" for="confirmPassword">Confirm Password *</label>
+                                <div class="reg_field">
+                                    <label class="reg_label" for="confirmPassword">Confirm Password  <span class="reg_req">(Required)</span></label>
                                     <input id="confirmPassword" name="confirmPassword" type="password" required
-                                        class="prof_input" placeholder="Repeat password">
+                                        class="reg_input" placeholder="Repeat password">
                                 </div>
                             </div>
                         </div>
 
                         <!-- Section 2: Personal Information -->
                         <div style="display: flex; flex-direction: column; gap: 16px;">
-                            <h4
-                                style="font-size: 0.95rem; font-weight: 800; color: var(--prof-heading); border-bottom: 1px solid var(--prof-border); padding-bottom: 8px; margin: 0;">
+                            <h4>
                                 Personal Information</h4>
-                            <div class="prof_formGrid">
-                                <div class="prof_field">
-                                    <label class="prof_label" for="fullName">Full Name *</label>
+                            <div class="reg_formGrid">
+                                <div class="reg_field">
+                                    <label class="reg_label" for="fullName">Full Name  <span class="reg_req">(Required)</span></label>
                                     <input id="fullName" name="fullName" type="text" value="${param.fullName}" required
-                                        class="prof_input" placeholder="Enter your full name">
+                                        class="reg_input" placeholder="Enter your full name">
                                 </div>
-                                <div class="prof_field">
-                                    <label class="prof_label" for="phone">Phone Number *</label>
+                                <div class="reg_field">
+                                    <label class="reg_label" for="phone">Phone Number  <span class="reg_req">(Required)</span></label>
                                     <input id="phone" name="phone" type="tel" value="${param.phone}" required
-                                        class="prof_input" placeholder="e.g. +255712345678">
+                                        class="reg_input" placeholder="e.g. +255712345678">
                                 </div>
-                                <div class="prof_field">
-                                    <label class="prof_label" for="dob">Date of Birth (Optional)</label>
-                                    <input id="dob" name="dob" type="date" value="${param.dob}" class="prof_input">
+                                <div class="reg_field">
+                                    <label class="reg_label" for="dob">Date of Birth  <span class="reg_opt">(Optional)</span></label>
+                                    <input id="dob" name="dob" type="date" value="${param.dob}" class="reg_input">
                                 </div>
-                                <div class="prof_field">
-                                    <label class="prof_label" for="gender">Gender (Optional)</label>
-                                    <select id="gender" name="gender" class="prof_select">
+                                <div class="reg_field">
+                                    <label class="reg_label" for="gender">Gender  <span class="reg_opt">(Optional)</span></label>
+                                    <select id="gender" name="gender" class="reg_select">
                                         <option value="">Select Gender</option>
                                         <option value="Male" ${param.gender=='Male' ? 'selected' : '' }>Male</option>
                                         <option value="Female" ${param.gender=='Female' ? 'selected' : '' }>Female
@@ -121,13 +105,12 @@
 
                         <!-- Section 3: Location & Additional Details -->
                         <div style="display: flex; flex-direction: column; gap: 16px;">
-                            <h4
-                                style="font-size: 0.95rem; font-weight: 800; color: var(--prof-heading); border-bottom: 1px solid var(--prof-border); padding-bottom: 8px; margin: 0;">
+                            <h4>
                                 Location & Additional Details</h4>
-                            <div class="prof_formGrid">
-                                <div class="prof_field">
-                                    <label class="prof_label" for="country">Country *</label>
-                                    <select id="country" name="country" required class="prof_select">
+                            <div class="reg_formGrid">
+                                <div class="reg_field">
+                                    <label class="reg_label" for="country">Country  <span class="reg_req">(Required)</span></label>
+                                    <select id="country" name="country" required class="reg_select">
                                         <option value="">Select Your Country</option>
                                         <option value="Afghanistan" ${param.country=='Afghanistan' ? 'selected' : '' }>
                                             Afghanistan (+93)</option>
@@ -523,23 +506,23 @@
                                             Zimbabwe (+263)</option>
                                     </select>
                                 </div>
-                                <div class="prof_field">
+                                <div class="reg_field">
                                     <label class="prof_label" for="state">State / Province</label>
-                                    <select id="state" name="state" class="prof_select">
+                                    <select id="state" name="state" class="reg_select">
                                         <option value="">Select State/Province</option>
                                     </select>
                                 </div>
-                                <div class="prof_field">
-                                    <label class="prof_label" for="qualification">Qualification (Optional)</label>
+                                <div class="reg_field">
+                                    <label class="reg_label" for="qualification">Qualification  <span class="reg_opt">(Optional)</span></label>
                                     <input id="qualification" name="qualification" type="text"
-                                        value="${param.qualification}" class="prof_input"
+                                        value="${param.qualification}" class="reg_input"
                                         placeholder="e.g. Bachelor's Degree">
                                 </div>
-                                <div class="prof_field">
-                                    <label class="prof_label" for="emergencyContact">Emergency Contact
-                                        (Optional)</label>
+                                <div class="reg_field">
+                                    <label class="reg_label" for="emergencyContact">Emergency Contact
+                                         <span class="reg_opt">(Optional)</span></label>
                                     <input id="emergencyContact" name="emergencyContact" type="tel"
-                                        value="${param.emergencyContact}" class="prof_input" placeholder="Phone number">
+                                        value="${param.emergencyContact}" class="reg_input" placeholder="Phone number">
                                 </div>
                             </div>
                         </div>
@@ -708,6 +691,15 @@
                 })();
             </script>
             <script src="${pageContext.request.contextPath}/js/auth-v2.js"></script>
-        </body>
+        
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        });
+    </script>
+</body>
 
         </html>

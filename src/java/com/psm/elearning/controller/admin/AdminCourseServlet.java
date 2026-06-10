@@ -487,30 +487,46 @@ public class AdminCourseServlet extends HttpServlet {
     }
 
     private String uploadCourseBannerIfProvided(HttpServletRequest request) {
+        System.out.println("[DEBUG] uploadCourseBannerIfProvided called");
         try {
             Part bannerPart = request.getPart("courseBanner");
-            if (bannerPart == null || bannerPart.getSize() == 0) {
+            if (bannerPart == null) {
+                System.out.println("[DEBUG] bannerPart is null");
+                return null;
+            }
+            if (bannerPart.getSize() == 0) {
+                System.out.println("[DEBUG] bannerPart size is 0");
                 return null;
             }
 
             String submittedFileName = bannerPart.getSubmittedFileName();
+            System.out.println("[DEBUG] submittedFileName: " + submittedFileName);
             if (submittedFileName == null || submittedFileName.trim().isEmpty()) {
+                System.out.println("[DEBUG] submittedFileName is empty");
                 return null;
             }
 
             String ext = getFileExtension(submittedFileName);
+            System.out.println("[DEBUG] file extension: " + ext);
             if (!isAllowedBannerExtension(ext)) {
+                System.out.println("[DEBUG] extension not allowed");
                 return null;
             }
 
             try (InputStream in = bannerPart.getInputStream()) {
-                return CloudinaryUtil.uploadFile(
-                        in.readAllBytes(),
+                byte[] bytes = in.readAllBytes();
+                System.out.println("[DEBUG] read bytes: " + bytes.length);
+                String url = CloudinaryUtil.uploadFile(
+                        bytes,
                         Paths.get(submittedFileName).getFileName().toString(),
                         CloudinaryUtil.getCourseBannersFolder(),
                         "image");
+                System.out.println("[DEBUG] Cloudinary URL: " + url);
+                return url;
             }
         } catch (Exception e) {
+            System.out.println("[DEBUG] Exception caught: " + e.getMessage());
+            e.printStackTrace();
             LOGGER.log(Level.WARNING, "Course banner upload failed", e);
             return null;
         }

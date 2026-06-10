@@ -1,0 +1,270 @@
+/* ============================================================
+   Login.module.css
+   Indigo & Slate SaaS Aesthetic (2026 Standards)
+   Prefix: log_
+   ============================================================ */
+
+:root {
+  --log-font: 'Inter', 'Segoe UI', sans-serif;
+  --log-slate-dark: #0f172a;
+  --log-slate-gray: #475569;
+  --log-slate-light: #94a3b8;
+  --log-white: #ffffff;
+  --log-gray-soft: #f8fafc;
+  --log-gray-border: #e2e8f0;
+  --log-indigo: #4f46e5;
+  --log-indigo-hover: #4338ca;
+  --log-indigo-focus: rgba(79, 70, 229, 0.4);
+  --log-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  --log-shadow-card: 0 30px 60px rgba(15, 23, 42, 0.1);
+  --log-radius: 16px;
+  --log-transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body.log_page {
+  margin: 0;
+  font-family: var(--log-font);
+  background: var(--log-gray-soft);
+  color: var(--log-slate-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+.log_container {
+  width: 100%;
+  max-width: 1000px;
+  background: var(--log-white);
+  border-radius: var(--log-radius);
+  box-shadow: var(--log-shadow-card);
+  overflow: hidden;
+  display: flex;
+  min-height: 600px;
+  animation: log_fade_up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+@keyframes log_fade_up {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* --- Left Panel: Split-Screen Redesign --- */
+.log_visual {
+  flex: 1;
+  background: var(--log-gradient);
+  padding: 60px 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  color: var(--log-white);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Abstract mesh graphic */
+.log_visual::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 40px 40px;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.log_visual::after {
+  content: "";
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+  top: -100px;
+  right: -100px;
+  pointer-events: none;
+}
+
+.log_brand {
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  position: relative;
+  z-index: 10;
+  text-decoration: none;
+  color: var(--log-white);
+}
+
+.log_quote_wrap {
+  position: relative;
+  z-index: 10;
+  max-width: 320px;
+}
+
+.log_quote {
+  font-size: 2.25rem;
+  font-weight: 700;
+  line-height: 1.1;
+  margin: 0 0 16px;
+}
+
+.log_quote_sub {
+  font-size: 1.05rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0;
+}
+
+/* --- Right Panel: Form UI --- */
+.log_form_panel {
+  flex: 1;
+  padding: 60px 80px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: var(--log-white);
+}
+
+.log_head {
+  margin-bottom: 40px;
+}
+
+.log_head h1 {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--log-slate-dark);
+  margin: 0 0 8px;
+}
+
+.log_head p {
+  color: var(--log-slate-gray);
+  margin: 0;
+  font-size: 1rem;
+}
+
+/* Alerts */
+.log_alert {
+  padding: 14px 20px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  margin-bottom: 24px;
+}
+
+.log_alert_success {
+  background: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #10b981;
+}
+
+.log_alert_error {
+  background: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #ef4444;
+}
+
+/* Form Controls */
+.log_field {
+  margin-bottom: 24px;
+}
+
+.log_label_row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.log_label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--log-slate-gray);
+}
+
+.log_link {
+  color: var(--log-indigo);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color var(--log-transition);
+}
+
+.log_link:hover {
+  color: var(--log-indigo-hover);
+  text-decoration: underline;
+}
+
+.log_input {
+  width: 100%;
+  padding: 14px 16px;
+  background: var(--log-gray-soft);
+  border: 1px solid var(--log-gray-border);
+  border-radius: 8px;
+  font-size: 1rem;
+  color: var(--log-slate-dark);
+  font-family: var(--log-font);
+  transition: all var(--log-transition);
+  box-sizing: border-box;
+}
+
+.log_input::placeholder {
+  color: var(--log-slate-light);
+}
+
+.log_input:focus {
+  outline: none;
+  border-color: transparent;
+  box-shadow: 0 0 0 2px var(--log-indigo);
+  background: var(--log-white);
+}
+
+.log_btn {
+  width: 100%;
+  background: var(--log-indigo);
+  color: var(--log-white);
+  border: none;
+  border-radius: 8px;
+  padding: 16px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--log-transition);
+  margin-top: 16px;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+}
+
+.log_btn:hover {
+  background: var(--log-indigo-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(79, 70, 229, 0.3);
+}
+
+.log_switch {
+  margin-top: 32px;
+  text-align: center;
+  font-size: 0.95rem;
+  color: var(--log-slate-gray);
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .log_container {
+    flex-direction: column;
+    min-height: auto;
+  }
+  .log_visual {
+    padding: 40px;
+    flex: none;
+  }
+  .log_form_panel {
+    padding: 40px;
+  }
+}

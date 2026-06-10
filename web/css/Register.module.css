@@ -1,0 +1,227 @@
+/* ============================================================
+   Register.module.css
+   Indigo & Slate SaaS Aesthetic (2026 Standards)
+   Prefix: reg_
+   ============================================================ */
+
+:root {
+  --reg-font: 'Inter', 'Segoe UI', sans-serif;
+  --reg-slate-dark: #0f172a;
+  --reg-slate-gray: #475569;
+  --reg-slate-light: #94a3b8;
+  --reg-white: #ffffff;
+  --reg-gray-soft: #f8fafc;
+  --reg-gray-border: #e2e8f0;
+  --reg-indigo: #4f46e5;
+  --reg-indigo-hover: #4338ca;
+  --reg-shadow-card: 0 20px 50px rgba(15, 23, 42, 0.08);
+  --reg-radius: 16px;
+  --reg-transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body.sv-page {
+  margin: 0;
+  font-family: var(--reg-font);
+  background: var(--reg-gray-soft);
+  color: var(--reg-slate-dark);
+}
+
+.reg_viewport {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 60px 24px;
+}
+
+/* --- Task 1: The Page Layout & Container --- */
+.reg_card {
+  max-width: 900px;
+  width: 100%;
+  padding: 48px;
+  background: var(--reg-white);
+  border: 1px solid var(--reg-gray-border);
+  border-radius: var(--reg-radius);
+  box-shadow: var(--reg-shadow-card);
+  box-sizing: border-box;
+}
+
+.reg_card h1 {
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: var(--reg-slate-dark);
+  margin: 0 0 12px;
+  letter-spacing: -0.02em;
+}
+
+.reg_sub {
+  font-size: 1rem;
+  color: var(--reg-slate-gray);
+  margin: 0 0 40px;
+  line-height: 1.5;
+}
+
+.reg_card h4 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--reg-slate-dark);
+  border-bottom: 1px solid var(--reg-gray-border);
+  padding-bottom: 12px;
+  margin: 0 0 24px;
+}
+
+/* --- Task 2: Modern Avatar Picker --- */
+.reg_avatar_picker {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  border: 2px dashed #cbd5e1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--reg-white);
+  cursor: pointer;
+  overflow: hidden;
+  transition: all var(--reg-transition);
+}
+
+.reg_avatar_picker:hover {
+  border-color: var(--reg-indigo);
+  background: rgba(79, 70, 229, 0.05);
+}
+
+.reg_camera_icon {
+  width: 32px;
+  height: 32px;
+  color: var(--reg-slate-light);
+  transition: color var(--reg-transition);
+}
+
+.reg_avatar_picker:hover .reg_camera_icon {
+  color: var(--reg-indigo);
+}
+
+.reg_file_input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.reg_avatarImg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  z-index: 2;
+}
+
+/* --- Task 3: Form UI & Typography --- */
+.reg_formGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+@media (max-width: 640px) {
+  .reg_formGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.reg_field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.reg_label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--reg-slate-gray);
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.reg_req, .reg_opt {
+  font-size: 0.7rem;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.reg_req {
+  color: var(--reg-slate-light);
+}
+
+.reg_opt {
+  color: var(--reg-slate-light);
+}
+
+.reg_input,
+.reg_select,
+.reg_textarea {
+  width: 100%;
+  padding: 14px 16px;
+  background: var(--reg-gray-soft);
+  border: 1px solid var(--reg-gray-border);
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: var(--reg-font);
+  color: var(--reg-slate-dark);
+  box-sizing: border-box;
+  transition: all var(--reg-transition);
+}
+
+.reg_input::placeholder,
+.reg_textarea::placeholder {
+  color: var(--reg-slate-light);
+}
+
+.reg_textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.reg_input:focus,
+.reg_select:focus,
+.reg_textarea:focus {
+  outline: none;
+  border-color: transparent;
+  background: var(--reg-white);
+  box-shadow: 0 0 0 2px var(--reg-indigo);
+}
+
+/* --- Task 4: The Call-to-Action --- */
+.reg_btn {
+  background: var(--reg-indigo);
+  color: var(--reg-white);
+  border: none;
+  border-radius: 8px;
+  padding: 16px 32px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--reg-transition);
+  margin-top: 16px;
+  width: 100%;
+}
+
+.reg_btn:hover {
+  background: var(--reg-indigo-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(79, 70, 229, 0.25);
+}
+
+.reg_btn:active {
+  transform: translateY(0);
+}

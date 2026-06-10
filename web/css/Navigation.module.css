@@ -521,25 +521,16 @@ body.sv-page {
 
 /* Active state */
 .nav_mod_link.active {
-  background: var(--nav_mod_accent_soft);
-  color: var(--nav_mod_accent);
+  background: #e0e7ff;
+  color: #4f46e5;
   font-weight: 700;
 }
 
 .nav_mod_link.active i {
-  color: var(--nav_mod_accent);
+  color: #4f46e5;
 }
 
-.nav_mod_link.active::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 8px;
-  bottom: 8px;
-  width: 3px;
-  border-radius: 0 4px 4px 0;
-  background: var(--nav_mod_accent);
-}
+/* Pseudo element removed for cleaner Indigo look */
 
 /* Danger / Logout link */
 .nav_mod_link_danger {
@@ -649,10 +640,7 @@ body.sv-shell-collapsed .nav_mod_link[title]:hover::after {
   content: attr(title);
 }
 
-body.sv-shell-collapsed .nav_mod_link.active::before {
-  top: 10px;
-  bottom: 10px;
-}
+/* body.sv-shell-collapsed .nav_mod_link.active::before removed */
 
 
 /* ============================================================

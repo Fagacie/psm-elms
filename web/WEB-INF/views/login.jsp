@@ -9,76 +9,74 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/auth-premium.css?v=20260417-1">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/Login.module.css">
     <jsp:include page="/WEB-INF/views/common/head-external-assets.jsp"/>
 </head>
-<body class="auth-page">
-<main class="auth-shell">
-    <section class="auth-layout auth-layout-login" aria-labelledby="login-title">
-        <aside class="auth-visual" aria-hidden="true">
-            <p class="auth-kicker">PSM E-Learning</p>
+<body class="log_page">
 
-            <div class="auth-scene">
-                <lottie-player
-                        class="auth-lottie"
-                        src="${pageContext.request.contextPath}/img/auth/login-circle-animation.json"
-                        background="transparent"
-                        speed="1"
-                        loop
-                        autoplay>
-                </lottie-player>
+<div class="log_container">
+    <aside class="log_visual">
+        <a href="${pageContext.request.contextPath}/landing" class="log_brand">PSM E-Learning</a>
+        <div class="log_quote_wrap">
+            <h2 class="log_quote">Welcome back. Let's pick up where you left off.</h2>
+            <p class="log_quote_sub">Sign in to access your courses, track your progress, and manage your learning journey.</p>
+        </div>
+    </aside>
+
+    <main class="log_form_panel">
+        <header class="log_head">
+            <h1>Login</h1>
+            <p>Access your account using your registration number or email.</p>
+        </header>
+
+        <c:if test="${not empty sessionScope.successMessage}">
+            <div class="log_alert log_alert_success">${sessionScope.successMessage}</div>
+            <c:remove var="successMessage" scope="session"/>
+        </c:if>
+
+        <c:if test="${not empty error}">
+            <div class="log_alert log_alert_error">${error}</div>
+        </c:if>
+
+        <form action="${pageContext.request.contextPath}/login" method="post" novalidate>
+            <div class="log_field">
+                <div class="log_label_row">
+                    <label class="log_label" for="identifier">Registration Number or Email</label>
+                </div>
+                <input
+                        id="identifier"
+                        name="identifier"
+                        class="log_input"
+                        type="text"
+                        value="${identifier}"
+                        placeholder="e.g. PSM1783 or user@example.com"
+                        required
+                        autofocus>
             </div>
-        </aside>
 
-        <section class="auth-card">
-            <header class="auth-head">
-                <h1 id="login-title">Login</h1>
-                <p>Access your account using your registration number or email.</p>
-            </header>
-
-            <c:if test="${not empty sessionScope.successMessage}">
-                <div class="auth-alert auth-alert-success">${sessionScope.successMessage}</div>
-                <c:remove var="successMessage" scope="session"/>
-            </c:if>
-
-            <c:if test="${not empty error}">
-                <div class="auth-alert auth-alert-error">${error}</div>
-            </c:if>
-
-            <form action="${pageContext.request.contextPath}/login" method="post" class="auth-form" novalidate>
-                <div class="auth-field">
-                    <label for="identifier">Registration Number or Email</label>
-                    <input
-                            id="identifier"
-                            name="identifier"
-                            type="text"
-                            value="${identifier}"
-                            placeholder="e.g. PSM1783 or user@example.com"
-                            required
-                            autofocus>
+            <div class="log_field">
+                <div class="log_label_row">
+                    <label class="log_label" for="password">Password</label>
+                    <a href="${pageContext.request.contextPath}/forgot-password" class="log_link">Forgot password?</a>
                 </div>
+                <input 
+                        id="password" 
+                        name="password" 
+                        class="log_input" 
+                        type="password" 
+                        placeholder="Enter your password" 
+                        required>
+            </div>
 
-                <div class="auth-field">
-                    <label for="password">Password</label>
-                    <input id="password" name="password" type="password" placeholder="Enter your password" required>
-                </div>
+            <button type="submit" class="log_btn">Login</button>
+        </form>
 
-                <div class="auth-row">
-                    <a href="${pageContext.request.contextPath}/forgot-password" class="auth-link">Forgot password?</a>
-                </div>
+        <p class="log_switch">
+            New student?
+            <a href="${pageContext.request.contextPath}/register" class="log_link">Create Account</a>
+        </p>
+    </main>
+</div>
 
-                <button type="submit" class="auth-btn">Login</button>
-            </form>
-
-            <p class="auth-switch">
-                New student?
-                <a href="${pageContext.request.contextPath}/register" class="auth-link">Create Account</a>
-            </p>
-        </section>
-    </section>
-</main>
-<script src="${pageContext.request.contextPath}/js/auth-v2.js"></script>
 </body>
 </html>
-

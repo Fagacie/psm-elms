@@ -1,97 +1,67 @@
 document.addEventListener('DOMContentLoaded', function () {
-    var header = document.getElementById('siteHeader');
-    var menuToggle = document.getElementById('menuToggle');
-    var nav = document.getElementById('siteNav');
-    var links = nav ? nav.querySelectorAll('a[href^="#"]') : [];
-    var reveals = document.querySelectorAll('.reveal');
-    var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    function setHeaderState() {
-        if (!header) return;
-        header.classList.toggle('is-scrolled', window.scrollY > 12);
-    }
-
-    function closeMenu() {
-        if (!nav || !menuToggle) return;
-        nav.classList.remove('is-open');
-        menuToggle.setAttribute('aria-expanded', 'false');
-    }
-
-    if (menuToggle && nav) {
-        menuToggle.addEventListener('click', function () {
-            var isOpen = nav.classList.toggle('is-open');
-            menuToggle.setAttribute('aria-expanded', String(isOpen));
+    // 1. Initialize Libraries
+    if (typeof AOS !== 'undefined') {
+        AOS.init({
+            once: true,
+            offset: 80,
+            duration: 800,
+            easing: 'ease-out-cubic',
         });
     }
 
-    links.forEach(function (link) {
-        link.addEventListener('click', function (event) {
-            var targetId = link.getAttribute('href').slice(1);
-            var target = document.getElementById(targetId);
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+
+    // 2. DOM Elements
+    const header = document.getElementById('siteHeader');
+    const nav = document.getElementById('siteNav');
+    const links = nav ? nav.querySelectorAll('a[href^="#"]') : [];
+    const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // 3. Header & Navigation State
+    function setHeaderState() {
+        if (!header) return;
+        header.classList.toggle('lp_header_scrolled', window.scrollY > 12);
+    }
+
+    links.forEach(link => {
+        link.addEventListener('click', event => {
+            const targetId = link.getAttribute('href').slice(1);
+            const target = document.getElementById(targetId);
             if (!target) return;
 
             event.preventDefault();
-            closeMenu();
-
-            var offset = header ? header.offsetHeight + 14 : 0;
-            var top = window.pageYOffset + target.getBoundingClientRect().top - offset;
-            window.scrollTo({ top: top, behavior: reduceMotion ? 'auto' : 'smooth' });
+            const offset = header ? header.offsetHeight + 14 : 0;
+            const top = window.pageYOffset + target.getBoundingClientRect().top - offset;
+            window.scrollTo({ top, behavior: reduceMotion ? 'auto' : 'smooth' });
         });
     });
 
     function updateActiveLink() {
         if (!links.length) return;
-        var fromTop = window.scrollY + (header ? header.offsetHeight : 0) + 120;
+        const fromTop = window.scrollY + (header ? header.offsetHeight : 0) + 120;
 
-        links.forEach(function (link) {
-            var section = document.querySelector(link.getAttribute('href'));
+        links.forEach(link => {
+            const section = document.querySelector(link.getAttribute('href'));
             if (!section) return;
 
-            var inView = fromTop >= section.offsetTop && fromTop < section.offsetTop + section.offsetHeight;
-            link.classList.toggle('is-active', inView);
+            const inView = fromTop >= section.offsetTop && fromTop < section.offsetTop + section.offsetHeight;
+            link.classList.toggle('lp_active', inView);
         });
     }
 
-    if (reduceMotion) {
-        reveals.forEach(function (el) {
-            el.classList.add('is-visible');
-        });
-    } else if ('IntersectionObserver' in window) {
-        var observer = new IntersectionObserver(function (entries) {
-            entries.forEach(function (entry) {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('is-visible');
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
-
-        reveals.forEach(function (el) {
-            observer.observe(el);
-        });
-    } else {
-        reveals.forEach(function (el) {
-            el.classList.add('is-visible');
-        });
-    }
-
-    document.addEventListener('click', function (event) {
-        if (!nav || !menuToggle) return;
-        if (nav.contains(event.target) || menuToggle.contains(event.target)) return;
-        closeMenu();
-    });
-
-    // Counter animation for stats
-    var statsSection = document.querySelector('.stats');
-    var counters = document.querySelectorAll('.counter');
-    var counted = false;
+    // 4. Number Count-Up Logic for Stats Banner
+    let countersStarted = false;
+    const counters = document.querySelectorAll('.lp_counter');
+    const statsTrigger = document.getElementById('statsTrigger');
 
     function countUp(element, target, duration) {
-        var start = 0;
-        var increment = target / (duration / 50);
-        var current = start;
+        const start = 0;
+        const increment = target / (duration / 50);
+        let current = start;
 
-        var timer = setInterval(function () {
+        const timer = setInterval(() => {
             current += increment;
             if (current >= target) {
                 element.textContent = target + '+';
@@ -103,79 +73,51 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function startCounters() {
-        if (counted) return;
-        counted = true;
-
-        counters.forEach(function (counter) {
-            var target = parseInt(counter.getAttribute('data-target'), 10);
-            countUp(counter, target, 1200);
+        if (countersStarted || counters.length === 0) return;
+        countersStarted = true;
+        counters.forEach(counter => {
+            const target = parseInt(counter.getAttribute('data-target'), 10);
+            if (isNaN(target)) return;
+            countUp(counter, target, 1500);
         });
     }
 
-    if ('IntersectionObserver' in window && statsSection) {
-        var counterObserver = new IntersectionObserver(function (entries) {
-            entries.forEach(function (entry) {
+    if (!reduceMotion && 'IntersectionObserver' in window && statsTrigger) {
+        const statsObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     startCounters();
-                    counterObserver.unobserve(entry.target);
+                    statsObserver.unobserve(entry.target);
                 }
             });
-        }, { threshold: 0.3 });
-
-        counterObserver.observe(statsSection);
-    } else if (statsSection) {
+        }, { threshold: 0.5 });
+        statsObserver.observe(statsTrigger);
+    } else {
+        // Fallback if no IntersectionObserver or reduced motion
         startCounters();
     }
 
-    // Tabs selection for preview mockups
-    var tabButtons = document.querySelectorAll('.preview-pill');
-    var mockups = document.querySelectorAll('.preview-mockup');
-    var mockupUrl = document.getElementById('mockupUrl');
-
-    var urls = {
-        'mockup-student': 'https://psmels.software/student/workspace',
-        'mockup-instructor': 'https://psmels.software/instructor/courses',
-        'mockup-admin': 'https://psmels.software/admin/dashboard'
-    };
-
-    tabButtons.forEach(function (btn) {
-        btn.addEventListener('click', function () {
-            tabButtons.forEach(function (b) { b.classList.remove('active'); });
-            mockups.forEach(function (m) { m.classList.remove('active'); });
-
-            btn.classList.add('active');
-            var targetId = btn.getAttribute('data-target');
-            var target = document.getElementById(targetId);
-            if (target) {
-                target.classList.add('active');
-            }
-            if (mockupUrl && urls[targetId]) {
-                mockupUrl.textContent = urls[targetId];
-            }
-        });
-    });
-
-    // Public Course Details Modal handlers
-    var courseDetailsModal = document.getElementById('courseDetailsModal');
-    var modalCloseBtn = document.getElementById('modalCloseBtn');
-    var courseDetailsBtns = document.querySelectorAll('.course-details-btn');
+    // 5. Course Details Modal handlers
+    const courseDetailsModal = document.getElementById('courseDetailsModal');
+    const modalCloseBtn = document.getElementById('modalCloseBtn');
+    const courseDetailsBtns = document.querySelectorAll('.course-details-btn');
 
     function openCourseModal(btn) {
         if (!courseDetailsModal) return;
         
-        var name = btn.getAttribute('data-name') || '';
-        var category = btn.getAttribute('data-category') || '';
-        var level = btn.getAttribute('data-level') || '';
-        var duration = btn.getAttribute('data-duration') || '';
-        var feeVal = parseFloat(btn.getAttribute('data-fee')) || 0;
-        var desc = btn.getAttribute('data-desc') || '';
+        const name = btn.getAttribute('data-name') || '';
+        const category = btn.getAttribute('data-category') || '';
+        const level = btn.getAttribute('data-level') || '';
+        const duration = btn.getAttribute('data-duration') || '';
+        const feeVal = parseFloat(btn.getAttribute('data-fee')) || 0;
+        const desc = btn.getAttribute('data-desc') || '';
 
-        var nameEl = document.getElementById('modalCourseName');
-        var categoryEl = document.getElementById('modalCourseCategory');
-        var levelEl = document.getElementById('modalCourseLevel');
-        var durationEl = document.getElementById('modalCourseDuration');
-        var feeEl = document.getElementById('modalCourseFee');
-        var descEl = document.getElementById('modalCourseDesc');
+        const nameEl = document.getElementById('modalCourseName');
+        const categoryEl = document.getElementById('modalCourseCategory');
+        const levelEl = document.getElementById('modalCourseLevel');
+        const durationEl = document.getElementById('modalCourseDuration');
+        const feeEl = document.getElementById('modalCourseFee');
+        const descEl = document.getElementById('modalCourseDesc');
 
         if (nameEl) nameEl.textContent = name;
         if (categoryEl) categoryEl.textContent = category;
@@ -194,20 +136,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
         courseDetailsModal.classList.add('is-open');
         courseDetailsModal.setAttribute('aria-hidden', 'false');
-        document.body.classList.add('landing-modal-open');
     }
 
     function closeCourseModal() {
         if (!courseDetailsModal) return;
         courseDetailsModal.classList.remove('is-open');
         courseDetailsModal.setAttribute('aria-hidden', 'true');
-        document.body.classList.remove('landing-modal-open');
     }
 
-    courseDetailsBtns.forEach(function (btn) {
-        btn.addEventListener('click', function () {
-            openCourseModal(btn);
-        });
+    courseDetailsBtns.forEach(btn => {
+        btn.addEventListener('click', () => openCourseModal(btn));
     });
 
     if (modalCloseBtn) {
@@ -215,22 +153,29 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     if (courseDetailsModal) {
-        courseDetailsModal.addEventListener('click', function (event) {
-            if (event.target === courseDetailsModal) {
-                closeCourseModal();
-            }
+        courseDetailsModal.addEventListener('click', event => {
+            if (event.target === courseDetailsModal) closeCourseModal();
         });
     }
 
-    window.addEventListener('scroll', function () {
+    // Event Listeners
+    window.addEventListener('scroll', () => {
         setHeaderState();
         updateActiveLink();
     }, { passive: true });
 
-    window.addEventListener('resize', function () {
-        if (window.innerWidth > 1024) closeMenu();
-    });
-
+    // Initial triggers
     setHeaderState();
     updateActiveLink();
 });
+
+document.addEventListener("DOMContentLoaded", function() {
+    var mobileToggle = document.getElementById("lpMobileToggle");
+    var siteHeader = document.getElementById("siteHeader");
+    if (mobileToggle && siteHeader) {
+        mobileToggle.addEventListener("click", function() {
+            siteHeader.classList.toggle("lp_mobile_open");
+        });
+    }
+});
+

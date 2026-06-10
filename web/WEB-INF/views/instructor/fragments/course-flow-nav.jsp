@@ -24,7 +24,7 @@
 
     <nav class="ins-flow-nav" aria-label="Course flow navigation">
         <a class="ins-flow-link ${resolvedCourseFlow == 'workspace' ? 'active' : ''}" href="${courseWorkspaceUrl}">
-            <i class="fas fa-chart-pie"></i> Workspace
+            <i class="fas fa-chart-pie"></i> Overview
         </a>
         <a class="ins-flow-link ${resolvedCourseFlow == 'materials' ? 'active' : ''}" href="${courseWorkspaceUrl}#materials">
             <i class="fas fa-book-open"></i> Materials

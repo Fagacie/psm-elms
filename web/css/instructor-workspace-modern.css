@@ -58,38 +58,52 @@ body.instructor-ui .ins-page-kicker {
 }
 
 body.instructor-ui .ins-flow-nav {
-    position: sticky;
-    top: 76px;
-    z-index: 20;
     display: flex;
-    gap: 6px;
+    gap: 2rem;
     align-items: center;
-    background: rgba(255, 255, 255, 0.94);
-    border: 1px solid var(--iwm-border);
-    border-radius: 8px;
-    padding: 6px;
-    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.07);
-    backdrop-filter: blur(12px);
+    background: transparent !important;
+    border: none !important;
+    border-bottom: 1px solid var(--iwm-border) !important;
+    border-radius: 0 !important;
+    padding: 0 0 12px 0 !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    margin-bottom: 2rem !important;
     overflow-x: auto;
 }
 
 body.instructor-ui .ins-flow-link {
-    min-height: 40px;
-    padding: 0 14px;
-    border-radius: 6px;
-    color: var(--iwm-muted);
-    font-weight: 700;
-    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--iwm-muted) !important;
+    font-weight: 600 !important;
+    font-size: 0.95rem !important;
+    text-decoration: none !important;
+    padding: 4px 8px 12px 8px !important;
+    transition: all 0.2s ease !important;
+    border-bottom: 2px solid transparent !important;
+    margin-bottom: -14px !important;
+    background: transparent !important;
+    border-radius: 0 !important;
+    min-height: auto;
     white-space: nowrap;
 }
 
-body.instructor-ui .ins-flow-link:hover,
-body.instructor-ui .ins-flow-link.active {
-    background: var(--iwm-primary-soft);
-    color: var(--iwm-primary);
+body.instructor-ui .ins-flow-link:hover {
+    color: var(--iwm-text) !important;
+    background: transparent !important;
 }
 
-body.instructor-ui .ins-flow-link i {
+body.instructor-ui .ins-flow-link.active {
+    color: var(--iwm-primary) !important;
+    border-bottom-color: var(--iwm-primary) !important;
+    font-weight: 700 !important;
+    background: transparent !important;
+}
+
+body.instructor-ui .ins-flow-link i,
+body.instructor-ui .ins-flow-link svg {
     color: currentColor;
 }
 

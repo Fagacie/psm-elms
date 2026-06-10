@@ -350,5 +350,7 @@
             root.render(<StudentCourseDetailsApp />);
         }
     </script>
+    <div class="sv-overlay" id="svOverlay"></div>
+    <script src="${pageContext.request.contextPath}/js/student-v2.js"></script>
 </body>
 </html>

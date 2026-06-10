@@ -1382,5 +1382,6 @@ function toggleSidebarMaterial(event, materialId, enrollmentId, btn) {
 </script>
 <script src="${pageContext.request.contextPath}/js/learning-hub.js"></script>
 <script defer src="${pageContext.request.contextPath}/js/student-assessment-flow.js"></script>
+    <script src="${pageContext.request.contextPath}/js/student-v2.js"></script>
 </body>
 </html>

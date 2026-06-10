@@ -324,7 +324,7 @@
                                                                     className="history_ph_viewBtn"
                                                                     onClick={() => setSelectedPayment(payment)}
                                                                 >
-                                                                    <i className="fas fa-receipt" style={{ marginRight: '6px' }}></i>
+                                                                    <i data-lucide="file-text" style={{ width: 16, height: 16 }}></i>
                                                                     View Receipt
                                                                 </button>
                                                             </td>
