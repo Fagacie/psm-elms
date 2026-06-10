@@ -28,6 +28,8 @@ public class AppInitializer implements ServletContextListener {
                     "/WEB-INF/db/migration_db_cleanup.sql");
         }
         SchemaSqlRunner.runFromClasspath("db/migration_performance_indexes.sql");
+        // Add BannerUploadStatus column for async banner upload tracking (idempotent)
+        SchemaSqlRunner.runFromClasspath("db/migration_async_banner_upload.sql");
         if (!schemaApplied) {
             System.out.println("AppInitializer: schema runner skipped because no packaged schema.sql was found.");
         }

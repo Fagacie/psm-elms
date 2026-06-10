@@ -1,5 +1,6 @@
 package com.psm.elearning.controller.admin;
 
+import com.psm.elearning.async.CloudinaryUploadTask;
 import com.psm.elearning.dao.CourseDAO;
 import com.psm.elearning.dao.CourseDAOImpl;
 import com.psm.elearning.dao.InstructorDAO;
@@ -377,18 +378,24 @@ public class AdminCourseServlet extends HttpServlet {
             String courseName = request.getParameter("courseName");
             String feeStr = request.getParameter("courseFee");
             Integer instructorId = parsePositiveInt(request.getParameter("instructorId"));
-            String courseBannerUrl = uploadCourseBannerIfProvided(request);
-
-            if (courseBannerUrl == null && isBannerProvided(request)) {
-                response.sendRedirect(request.getContextPath() + "/admin/courses?error=bannerupload");
-                return;
-            }
 
             if (courseName == null || courseName.trim().isEmpty() || feeStr == null || feeStr.trim().isEmpty()) {
                 response.sendRedirect(request.getContextPath() + "/admin/courses?error=invalid");
                 return;
             }
 
+            // Read banner bytes eagerly from the request (must happen before response is committed)
+            byte[] bannerBytes = null;
+            String bannerFileName = null;
+            if (isBannerProvided(request)) {
+                BannerData bd = readBannerFromRequest(request);
+                if (bd != null) {
+                    bannerBytes = bd.bytes;
+                    bannerFileName = bd.fileName;
+                }
+            }
+
+            // Create the course record immediately — no blocking Cloudinary call
             Course course = new Course();
             course.setCourseName(courseName.trim());
             course.setDescription(trimToEmpty(request.getParameter("description")));
@@ -398,12 +405,26 @@ public class AdminCourseServlet extends HttpServlet {
             course.setCourseFee(new BigDecimal(feeStr));
             course.setCreatedBy(instructorId);
             course.setStatus(Course.STATUS_APPROVED);
-            course.setCourseBanner(courseBannerUrl);
+            // Banner URL is null for now; the async task will fill it in
+            course.setCourseBanner(null);
+            // Mark upload as pending only when a file was actually provided
+            course.setBannerUploadStatus(bannerBytes != null ? Course.BANNER_STATUS_PENDING : null);
 
             Course created = courseDAO.create(course);
             if (created == null) {
                 response.sendRedirect(request.getContextPath() + "/admin/courses?error=createfailed");
                 return;
+            }
+
+            // Spawn async banner upload if a file was provided
+            if (bannerBytes != null && bannerFileName != null) {
+                final int newCourseId = created.getCourseId();
+                Thread uploadThread = new Thread(new CloudinaryUploadTask(newCourseId, bannerBytes, bannerFileName));
+                uploadThread.setDaemon(true);
+                uploadThread.setName("banner-upload-course-" + newCourseId);
+                uploadThread.start();
+                LOGGER.log(Level.INFO,
+                        "[ASYNC] Banner upload thread started for new courseId={0}", newCourseId);
             }
 
             if (instructorId != null) {
@@ -435,11 +456,21 @@ public class AdminCourseServlet extends HttpServlet {
             String courseName = request.getParameter("courseName");
             String feeStr = request.getParameter("courseFee");
             Integer instructorId = parsePositiveInt(request.getParameter("instructorId"));
-            String courseBannerUrl = uploadCourseBannerIfProvided(request);
 
             if (courseName == null || courseName.trim().isEmpty() || feeStr == null || feeStr.trim().isEmpty()) {
                 response.sendRedirect(request.getContextPath() + "/admin/courses?error=invalid");
                 return;
+            }
+
+            // Read banner bytes eagerly from the request (must happen before response is committed)
+            byte[] bannerBytes = null;
+            String bannerFileName = null;
+            if (isBannerProvided(request)) {
+                BannerData bd = readBannerFromRequest(request);
+                if (bd != null) {
+                    bannerBytes = bd.bytes;
+                    bannerFileName = bd.fileName;
+                }
             }
 
             course.setCourseName(courseName.trim());
@@ -447,15 +478,16 @@ public class AdminCourseServlet extends HttpServlet {
             course.setCategory(trimToEmpty(request.getParameter("category")));
             course.setLevel(request.getParameter("level") != null ? request.getParameter("level") : Course.LEVEL_BEGINNER);
             course.setDuration(parsePositiveInt(request.getParameter("duration")));
-            
+
             try {
                 course.setCourseFee(new BigDecimal(feeStr.trim()));
             } catch (Exception ex) {
                 course.setCourseFee(BigDecimal.ZERO);
             }
-            
-            if (courseBannerUrl != null) {
-                course.setCourseBanner(courseBannerUrl);
+
+            // If a new banner was provided, mark status as pending; the async task will update the URL
+            if (bannerBytes != null) {
+                course.setBannerUploadStatus(Course.BANNER_STATUS_PENDING);
             }
 
             boolean updated = courseDAO.update(course);
@@ -467,6 +499,17 @@ public class AdminCourseServlet extends HttpServlet {
             // Assign instructor if provided
             if (instructorId != null) {
                 courseDAO.assignInstructor(courseId, instructorId);
+            }
+
+            // Spawn async banner upload if a new file was provided
+            if (bannerBytes != null && bannerFileName != null) {
+                final int targetCourseId = courseId;
+                Thread uploadThread = new Thread(new CloudinaryUploadTask(targetCourseId, bannerBytes, bannerFileName));
+                uploadThread.setDaemon(true);
+                uploadThread.setName("banner-upload-course-" + targetCourseId);
+                uploadThread.start();
+                LOGGER.log(Level.INFO,
+                        "[ASYNC] Banner upload thread started for edited courseId={0}", targetCourseId);
             }
 
             response.sendRedirect(request.getContextPath() + "/admin/courses?success=edited");
@@ -483,6 +526,50 @@ public class AdminCourseServlet extends HttpServlet {
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Unable to inspect uploaded course banner", e);
             return false;
+        }
+    }
+
+    /**
+     * Simple value holder for banner file data read from the multipart request.
+     */
+    private static final class BannerData {
+        final byte[] bytes;
+        final String fileName;
+        BannerData(byte[] bytes, String fileName) {
+            this.bytes    = bytes;
+            this.fileName = fileName;
+        }
+    }
+
+    /**
+     * Reads the banner file from the multipart request into memory and returns a
+     * {@link BannerData} holder, or {@code null} if no valid banner was provided.
+     * The file bytes are captured here so they can be handed off to a background
+     * thread after the HTTP response has been committed.
+     */
+    private BannerData readBannerFromRequest(HttpServletRequest request) {
+        try {
+            Part bannerPart = request.getPart("courseBanner");
+            if (bannerPart == null || bannerPart.getSize() == 0) {
+                return null;
+            }
+            String submittedFileName = bannerPart.getSubmittedFileName();
+            if (submittedFileName == null || submittedFileName.trim().isEmpty()) {
+                return null;
+            }
+            String ext = getFileExtension(submittedFileName);
+            if (!isAllowedBannerExtension(ext)) {
+                LOGGER.log(Level.WARNING, "Rejected banner upload with disallowed extension: {0}", ext);
+                return null;
+            }
+            try (InputStream in = bannerPart.getInputStream()) {
+                byte[] bytes = in.readAllBytes();
+                String safeFileName = Paths.get(submittedFileName).getFileName().toString();
+                return new BannerData(bytes, safeFileName);
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Failed to read banner file from request", e);
+            return null;
         }
     }
 

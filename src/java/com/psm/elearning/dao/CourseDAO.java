@@ -27,4 +27,23 @@ public interface CourseDAO {
     boolean updateStatus(int courseId, String status);
     boolean assignInstructor(int courseId, int instructorId);
     List<Course> findByCourseIds(List<Integer> courseIds);
+
+    /**
+     * Updates only the CourseBanner column for the given course.
+     * Used by the async banner upload task after a successful Cloudinary upload.
+     *
+     * @param courseId  the course to update
+     * @param bannerUrl the Cloudinary secure URL of the uploaded banner
+     * @return true if the row was updated
+     */
+    boolean updateCourseBanner(int courseId, String bannerUrl);
+
+    /**
+     * Updates only the BannerUploadStatus column for the given course.
+     *
+     * @param courseId the course to update
+     * @param status   one of "pending", "uploaded", or "failed"
+     * @return true if the row was updated
+     */
+    boolean updateBannerUploadStatus(int courseId, String status);
 }
