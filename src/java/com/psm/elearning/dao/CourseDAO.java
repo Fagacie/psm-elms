@@ -1,11 +1,12 @@
 package com.psm.elearning.dao;
 
 import com.psm.elearning.model.Course;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
 public interface CourseDAO {
-    Course create(Course course);
+    Course create(Course course) throws SQLException;
     boolean update(Course course);
     boolean delete(int courseId);
     Course findById(int courseId);

@@ -393,11 +393,16 @@
             }
             formData.append('courseName', courseName);
             formData.append('courseFee', courseFee);
-            formData.append('instructorId', instructorId);
+            // Only append instructorId if one was actually selected — empty string confuses the server
+            if (instructorId !== '' && instructorId !== null && instructorId !== undefined) {
+                formData.append('instructorId', instructorId);
+            }
             formData.append('description', description);
             formData.append('category', category);
             formData.append('level', level);
-            formData.append('duration', duration);
+            if (duration !== '' && duration !== null && duration !== undefined) {
+                formData.append('duration', duration);
+            }
 
             const bannerInput = document.getElementById('courseBannerFile');
             if (bannerInput && bannerInput.files && bannerInput.files[0]) {
@@ -406,11 +411,18 @@
 
             fetch(window.__CONTEXT_PATH__ + '/admin/courses', {
                 method: 'POST',
-                body: formData
+                body: formData,
+                redirect: 'follow'
             })
-            .then(() => window.location.reload())
+            .then(response => {
+                // Navigate to the final URL the server redirected us to.
+                // This preserves ?success=created or ?error=createfailed params
+                // so the JSP banners actually render.
+                window.location.href = response.url || (window.__CONTEXT_PATH__ + '/admin/courses');
+            })
             .catch(err => {
                 console.error("Submit error:", err);
+                alert('Network error during submission. Please check your connection and try again.');
                 setIsSubmitting(false);
             });
         };

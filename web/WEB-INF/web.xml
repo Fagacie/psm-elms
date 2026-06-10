@@ -144,6 +144,11 @@
     <servlet>
         <servlet-name>ProfilePictureServlet</servlet-name>
         <servlet-class>com.psm.elearning.controller.ProfilePictureServlet</servlet-class>
+        <multipart-config>
+            <max-file-size>5242880</max-file-size>
+            <max-request-size>10485760</max-request-size>
+            <file-size-threshold>0</file-size-threshold>
+        </multipart-config>
     </servlet>
     <servlet-mapping>
         <servlet-name>ProfilePictureServlet</servlet-name>
@@ -172,6 +177,11 @@
     <servlet>
         <servlet-name>InstructorCourseServlet</servlet-name>
         <servlet-class>com.psm.elearning.controller.instructor.InstructorCourseServlet</servlet-class>
+        <multipart-config>
+            <max-file-size>5242880</max-file-size>
+            <max-request-size>10485760</max-request-size>
+            <file-size-threshold>0</file-size-threshold>
+        </multipart-config>
     </servlet>
     <servlet-mapping>
         <servlet-name>InstructorCourseServlet</servlet-name>
@@ -181,6 +191,11 @@
     <servlet>
         <servlet-name>InstructorMaterialServlet</servlet-name>
         <servlet-class>com.psm.elearning.controller.instructor.InstructorMaterialServlet</servlet-class>
+        <multipart-config>
+            <max-file-size>52428800</max-file-size>
+            <max-request-size>104857600</max-request-size>
+            <file-size-threshold>0</file-size-threshold>
+        </multipart-config>
     </servlet>
     <servlet-mapping>
         <servlet-name>InstructorMaterialServlet</servlet-name>
@@ -190,6 +205,11 @@
     <servlet>
         <servlet-name>InstructorAssessmentServlet</servlet-name>
         <servlet-class>com.psm.elearning.controller.instructor.InstructorAssessmentServlet</servlet-class>
+        <multipart-config>
+            <max-file-size>52428800</max-file-size>
+            <max-request-size>104857600</max-request-size>
+            <file-size-threshold>0</file-size-threshold>
+        </multipart-config>
     </servlet>
     <servlet-mapping>
         <servlet-name>InstructorAssessmentServlet</servlet-name>
@@ -212,6 +232,11 @@
     <servlet>
         <servlet-name>AdminCourseServlet</servlet-name>
         <servlet-class>com.psm.elearning.controller.admin.AdminCourseServlet</servlet-class>
+        <multipart-config>
+            <max-file-size>5242880</max-file-size>
+            <max-request-size>10485760</max-request-size>
+            <file-size-threshold>0</file-size-threshold>
+        </multipart-config>
     </servlet>
     <servlet-mapping>
         <servlet-name>AdminCourseServlet</servlet-name>
@@ -258,6 +283,11 @@
     <servlet>
         <servlet-name>StudentAssessmentServlet</servlet-name>
         <servlet-class>com.psm.elearning.controller.student.StudentAssessmentServlet</servlet-class>
+        <multipart-config>
+            <max-file-size>52428800</max-file-size>
+            <max-request-size>104857600</max-request-size>
+            <file-size-threshold>0</file-size-threshold>
+        </multipart-config>
     </servlet>
     <servlet-mapping>
         <servlet-name>StudentAssessmentServlet</servlet-name>

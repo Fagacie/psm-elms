@@ -129,7 +129,7 @@ CREATE TABLE IF NOT EXISTS `Course` (
   `Description` TEXT NULL,
   `Category` VARCHAR(100) NULL,
   `Level` VARCHAR(50) NULL,
-  `InstructorID` INT NOT NULL,
+  `InstructorID` INT NULL,
   `CourseFee` DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
   `Status` ENUM('Pending', 'Approved', 'Archived') NOT NULL DEFAULT 'Pending',
   `ApprovedBy` INT NULL,
@@ -142,7 +142,7 @@ CREATE TABLE IF NOT EXISTS `Course` (
   `ApprovedAt` DATETIME NULL,
   KEY `idx_course_instructor` (`InstructorID`),
   KEY `idx_course_status` (`Status`),
-  CONSTRAINT `fk_course_instructor` FOREIGN KEY (`InstructorID`) REFERENCES `Instructor`(`UserID`) ON DELETE RESTRICT ON UPDATE CASCADE
+  CONSTRAINT `fk_course_instructor` FOREIGN KEY (`InstructorID`) REFERENCES `Instructor`(`UserID`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 -- Materials
 CREATE TABLE IF NOT EXISTS `Material` (

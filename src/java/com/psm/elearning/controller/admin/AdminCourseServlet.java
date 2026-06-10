@@ -373,7 +373,7 @@ public class AdminCourseServlet extends HttpServlet {
     }
 
     private void createCourse(HttpServletRequest request, HttpServletResponse response)
-            throws IOException {
+            throws ServletException, IOException {
         try {
             String courseName = request.getParameter("courseName");
             String feeStr = request.getParameter("courseFee");
@@ -432,6 +432,21 @@ public class AdminCourseServlet extends HttpServlet {
             }
 
             response.sendRedirect(request.getContextPath() + "/admin/courses?success=created");
+
+        } catch (java.sql.SQLException e) {
+            // Surface the real SQL error to the admin dashboard — don't silently swallow it
+            LOGGER.log(Level.SEVERE, "[AdminCourseServlet] createCourse() DB failure", e);
+            String sqlMsg = e.getMessage();
+            if (sqlMsg == null || sqlMsg.trim().isEmpty()) {
+                sqlMsg = "SQL Error Code: " + e.getErrorCode();
+            }
+            request.setAttribute("errorMessage",
+                    "Database failed to save course. SQL detail: " + sqlMsg);
+            request.setAttribute("courses",
+                    courseDAO.findAll() != null ? courseDAO.findAll() : new java.util.ArrayList<>());
+            request.setAttribute("instructors", resolveActiveInstructors());
+            request.getRequestDispatcher("/WEB-INF/views/admin/admin-courses.jsp").forward(request, response);
+
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error creating course as admin", e);
             response.sendRedirect(request.getContextPath() + "/admin/courses?error=createfailed");

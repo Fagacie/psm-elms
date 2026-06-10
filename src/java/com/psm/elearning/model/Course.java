@@ -57,7 +57,6 @@ public class Course {
     @Pattern(regexp = "^(Beginner|Intermediate|Advanced)$", message = "Level must be Beginner, Intermediate, or Advanced")
     private String level;
     
-    @NotNull(message = "CreatedBy user ID is required")
     private Integer createdBy;
     
     private Integer approvedBy;

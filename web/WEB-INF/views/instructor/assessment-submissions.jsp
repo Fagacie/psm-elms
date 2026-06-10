@@ -248,8 +248,24 @@
 
                     <!-- Frame for PDFs -->
                     <iframe id="pdfViewerFrame" class="grading-iframe-viewer" src="" style="display: none;"></iframe>
-                    <!-- Fallback panel for Text answers -->
-                    <div id="textAnswersViewer" class="grading-text-viewer" style="display: none;"></div>
+                    
+                    <!-- Image viewer -->
+                    <div id="imageViewerContainer" style="display: none; width: 100%; text-align: center; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; box-sizing: border-box;">
+                        <img id="imageViewerContent" src="" style="max-width: 100%; height: auto; border-radius: 4px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);" />
+                    </div>
+
+                    <!-- Generic File Download Card -->
+                    <div id="genericMediaDownloadWrapper" style="display: none; background-color: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px; padding: 32px 16px; flex-direction: column; align-items: center; justify-content: center; gap: 12px; margin-top: 12px; width: 100%; box-sizing: border-box;">
+                        <i class="fas fa-file-upload" style="font-size: 2.5rem; color: #94a3b8;"></i>
+                        <span style="color: #0f172a; font-weight: 600; font-size: 1rem;">Student Submission File</span>
+                        <span style="color: #64748b; font-size: 0.875rem; text-align: center; max-width: 300px;">This file type cannot be previewed directly in the browser.</span>
+                        <a id="genericDownloadBtn" href="" download target="_blank" class="ws-btn ws-btn-primary" style="display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; font-size: 0.875rem; font-weight: 500; text-decoration: none; border-radius: 6px; color: #ffffff; background-color: #4f46e5; margin-top: 8px;">
+                            <i class="fas fa-download"></i> Download File
+                        </a>
+                    </div>
+
+                    <!-- Pre-formatted text for plain text payloads -->
+                    <pre id="textAnswersViewer" class="grading-text-viewer" style="display: none;"></pre>
                 </div>
 
                 <!-- Questions list review for Quizzes -->
@@ -432,7 +448,8 @@
         const quizQuestionsReview = document.getElementById("quizQuestionsReview");
         const quizSidebarScoreInfo = document.getElementById("quizSidebarScoreInfo");
 
-        if (type === "Quiz" || type === "Exam") {
+        const typeStr = (type || "").trim().toLowerCase();
+        if (typeStr === "quiz" || typeStr === "exam") {
             docCardViewer.style.display = "none";
             quizQuestionsReview.style.display = "flex";
             
@@ -454,32 +471,49 @@
 
             const pdfFrame = document.getElementById("pdfViewerFrame");
             const textViewer = document.getElementById("textAnswersViewer");
+            const imageContainer = document.getElementById("imageViewerContainer");
+            const imageContent = document.getElementById("imageViewerContent");
+            const genericWrapper = document.getElementById("genericMediaDownloadWrapper");
+            const genericBtn = document.getElementById("genericDownloadBtn");
             const extLink = document.getElementById("viewerExternalLink");
             const downloadWrap = document.getElementById("assignmentDownloadWrapper");
             const downloadBtn = document.getElementById("assignmentDownloadBtn");
 
+            // Reset displays
+            pdfFrame.style.display = "none";
+            textViewer.style.display = "none";
+            imageContainer.style.display = "none";
+            genericWrapper.style.display = "none";
+            downloadWrap.style.display = "none";
+            extLink.style.display = "none";
+            
             if (payload && payload.trim() !== "") {
                 extLink.style.display = "inline-flex";
                 extLink.href = fileUrl;
                 
-                if (isPdf) {
+                const lowerPayload = payload.toLowerCase();
+                const isImage = lowerPayload.endsWith(".jpg") || lowerPayload.endsWith(".jpeg") || lowerPayload.endsWith(".png") || lowerPayload.endsWith(".webp") || lowerPayload.endsWith(".gif");
+                const isPdfFile = lowerPayload.endsWith(".pdf");
+                const isUrl = lowerPayload.startsWith("http://") || lowerPayload.startsWith("https://");
+                
+                if (isPdfFile) {
                     pdfFrame.style.display = "block";
                     pdfFrame.src = fileUrl;
                     downloadWrap.style.display = "flex";
                     downloadBtn.href = fileUrl;
-                    textViewer.style.display = "none";
+                } else if (isImage) {
+                    imageContainer.style.display = "block";
+                    imageContent.src = fileUrl;
+                } else if (isUrl) {
+                    // It's a Cloudinary link or external link but not a recognized previewable format
+                    genericWrapper.style.display = "flex";
+                    genericBtn.href = fileUrl;
                 } else {
-                    pdfFrame.style.display = "none";
-                    pdfFrame.src = "";
-                    downloadWrap.style.display = "none";
+                    // It's just plain text (e.g. text assignment)
                     textViewer.style.display = "block";
                     textViewer.textContent = payload;
                 }
             } else {
-                extLink.style.display = "none";
-                pdfFrame.style.display = "none";
-                pdfFrame.src = "";
-                downloadWrap.style.display = "none";
                 textViewer.style.display = "block";
                 textViewer.innerHTML = `<div class="grading-no-submission">
                     <i class="fas fa-exclamation-circle grading-no-submission-icon"></i>

@@ -8,8 +8,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class CourseDAOImpl implements CourseDAO {
+
+    private static final Logger LOGGER = Logger.getLogger(CourseDAOImpl.class.getName());
 
     private Course mapRow(ResultSet rs) throws SQLException {
         Course c = new Course();
@@ -40,7 +44,7 @@ public class CourseDAOImpl implements CourseDAO {
     }
 
     @Override
-    public Course create(Course course) {
+    public Course create(Course course) throws SQLException {
         String sql = "INSERT INTO Course (Title, Description, Category, Duration, CourseFee, Level, InstructorID, Status, CourseBanner, BannerUploadStatus) VALUES (?,?,?,?,?,?,?,?,?,?)";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -55,14 +59,20 @@ public class CourseDAOImpl implements CourseDAO {
             ps.setString(9, course.getCourseBanner());
             ps.setString(10, course.getBannerUploadStatus());
             int affected = ps.executeUpdate();
-            if (affected == 0) return null;
+            if (affected == 0) {
+                LOGGER.log(Level.SEVERE, "[CourseDAO] INSERT executed but 0 rows affected. Possible constraint violation.");
+                return null;
+            }
             try (ResultSet rs = ps.getGeneratedKeys()) {
                 if (rs.next()) course.setCourseId(rs.getInt(1));
             }
             return findById(course.getCourseId());
         } catch (SQLException e) {
-            System.err.println("Course create failed: " + e.getMessage());
-            return null;
+            // Log with full stack trace so server logs capture the real SQL error
+            LOGGER.log(Level.SEVERE, "[CourseDAO] create() failed — SQL State: " + e.getSQLState()
+                    + " | Error Code: " + e.getErrorCode() + " | Message: " + e.getMessage(), e);
+            // Re-throw so the Servlet can catch it and surface the real error to the admin UI
+            throw e;
         }
     }
 
@@ -84,7 +94,8 @@ public class CourseDAOImpl implements CourseDAO {
             ps.setInt(11, course.getCourseId());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            System.err.println("Course update failed: " + e.getMessage());
+            LOGGER.log(Level.SEVERE, "[CourseDAO] update() failed for courseId=" + course.getCourseId()
+                    + " — SQL State: " + e.getSQLState() + " | Message: " + e.getMessage(), e);
             return false;
         }
     }
@@ -99,7 +110,7 @@ public class CourseDAOImpl implements CourseDAO {
                 if (rs.next()) return mapRow(rs);
             }
         } catch (SQLException e) {
-            System.err.println("Course findById failed: " + e.getMessage());
+            LOGGER.log(Level.SEVERE, "[CourseDAO] findById() failed for courseId=" + courseId, e);
         }
         return null;
     }
@@ -113,7 +124,7 @@ public class CourseDAOImpl implements CourseDAO {
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) list.add(mapRow(rs));
         } catch (SQLException e) {
-            System.err.println("Course findAll failed: " + e.getMessage());
+            LOGGER.log(Level.SEVERE, "[CourseDAO] findAll() failed", e);
         }
         return list;
     }
@@ -129,7 +140,7 @@ public class CourseDAOImpl implements CourseDAO {
                 while (rs.next()) list.add(mapRow(rs));
             }
         } catch (SQLException e) {
-            System.err.println("Course findByStatus failed: " + e.getMessage());
+            LOGGER.log(Level.SEVERE, "[CourseDAO] findByStatus() failed for status=" + status, e);
         }
         return list;
     }
@@ -144,7 +155,7 @@ public class CourseDAOImpl implements CourseDAO {
             ps.setInt(3, courseId);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            System.err.println("Course approve failed: " + e.getMessage());
+            LOGGER.log(Level.SEVERE, "[CourseDAO] approve() failed for courseId=" + courseId, e);
             return false;
         }
     }
@@ -158,7 +169,7 @@ public class CourseDAOImpl implements CourseDAO {
             ps.setInt(2, courseId);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            System.err.println("Course reject failed: " + e.getMessage());
+            LOGGER.log(Level.SEVERE, "[CourseDAO] reject() failed for courseId=" + courseId, e);
             return false;
         }
     }
@@ -172,7 +183,7 @@ public class CourseDAOImpl implements CourseDAO {
             ps.setInt(2, courseId);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            System.err.println("Course status update failed: " + e.getMessage());
+            LOGGER.log(Level.SEVERE, "[CourseDAO] updateStatus() failed for courseId=" + courseId, e);
             return false;
         }
     }
@@ -185,7 +196,7 @@ public class CourseDAOImpl implements CourseDAO {
             ps.setInt(1, courseId);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            System.err.println("Course delete failed: " + e.getMessage());
+            LOGGER.log(Level.SEVERE, "[CourseDAO] delete() failed for courseId=" + courseId, e);
             return false;
         }
     }
@@ -203,8 +214,7 @@ public class CourseDAOImpl implements CourseDAO {
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Course findByInstructor failed: " + e.getMessage());
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "[CourseDAO] findByInstructor() failed for instructorId=" + instructorId, e);
         }
         return list;
     }
@@ -223,7 +233,7 @@ public class CourseDAOImpl implements CourseDAO {
                 while (rs.next()) list.add(mapRow(rs));
             }
         } catch (SQLException e) {
-            System.err.println("Course search failed: " + e.getMessage());
+            LOGGER.log(Level.SEVERE, "[CourseDAO] searchCourses() failed for keyword=" + keyword, e);
         }
         return list;
     }
@@ -266,7 +276,7 @@ public class CourseDAOImpl implements CourseDAO {
                 while (rs.next()) list.add(mapRow(rs));
             }
         } catch (SQLException e) {
-            System.err.println("Course filter failed: " + e.getMessage());
+            LOGGER.log(Level.SEVERE, "[CourseDAO] filterCourses() failed", e);
         }
         return list;
     }
@@ -283,7 +293,7 @@ public class CourseDAOImpl implements CourseDAO {
                 }
             }
         } catch (SQLException e) {
-            System.err.println("countByStatus failed: " + e.getMessage());
+            LOGGER.log(Level.SEVERE, "[CourseDAO] countByStatus() failed for status=" + status, e);
         }
         return 0;
     }
@@ -304,7 +314,7 @@ public class CourseDAOImpl implements CourseDAO {
                 }
             }
         } catch (SQLException e) {
-            System.err.println("getCourseCountsByStatus failed: " + e.getMessage());
+            LOGGER.log(Level.SEVERE, "[CourseDAO] getCourseCountsByStatus() failed", e);
         }
         return counts;
     }
@@ -320,7 +330,7 @@ public class CourseDAOImpl implements CourseDAO {
                 while (rs.next()) list.add(mapRow(rs));
             }
         } catch (SQLException e) {
-            System.err.println("findFeaturedCourses failed: " + e.getMessage());
+            LOGGER.log(Level.SEVERE, "[CourseDAO] findFeaturedCourses() failed", e);
         }
         return list;
     }
@@ -334,7 +344,7 @@ public class CourseDAOImpl implements CourseDAO {
             ps.setInt(2, courseId);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            System.err.println("assignInstructor failed: " + e.getMessage());
+            LOGGER.log(Level.SEVERE, "[CourseDAO] assignInstructor() failed for courseId=" + courseId + ", instructorId=" + instructorId, e);
             return false;
         }
     }
@@ -348,7 +358,7 @@ public class CourseDAOImpl implements CourseDAO {
             ps.setInt(2, courseId);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            System.err.println("Course updateCourseBanner failed: " + e.getMessage());
+            LOGGER.log(Level.SEVERE, "[CourseDAO] updateCourseBanner() failed for courseId=" + courseId, e);
             return false;
         }
     }
@@ -362,7 +372,7 @@ public class CourseDAOImpl implements CourseDAO {
             ps.setInt(2, courseId);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            System.err.println("Course updateBannerUploadStatus failed: " + e.getMessage());
+            LOGGER.log(Level.SEVERE, "[CourseDAO] updateBannerUploadStatus() failed for courseId=" + courseId, e);
             return false;
         }
     }
@@ -391,7 +401,7 @@ public class CourseDAOImpl implements CourseDAO {
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Course findByCourseIds failed: " + e.getMessage());
+            LOGGER.log(Level.SEVERE, "[CourseDAO] findByCourseIds() failed", e);
         }
         return list;
     }
