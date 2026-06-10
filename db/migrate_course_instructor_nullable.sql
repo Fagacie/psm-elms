@@ -22,5 +22,9 @@ ALTER TABLE `Course`
     FOREIGN KEY (`InstructorID`) REFERENCES `Instructor`(`UserID`)
     ON DELETE SET NULL ON UPDATE CASCADE;
 
+-- Step 4: Add missing BannerUploadStatus column (needed for async banner uploads)
+ALTER TABLE `Course` 
+    ADD COLUMN `BannerUploadStatus` VARCHAR(20) NULL COMMENT 'Async upload state: pending, uploaded, failed' AFTER `CourseBanner`;
+
 -- Verify
 SHOW CREATE TABLE `Course`;
