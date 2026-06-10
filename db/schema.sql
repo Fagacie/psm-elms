@@ -134,6 +134,7 @@ CREATE TABLE IF NOT EXISTS `Course` (
   `Status` ENUM('Pending', 'Approved', 'Archived') NOT NULL DEFAULT 'Pending',
   `ApprovedBy` INT NULL,
   `CourseBanner` VARCHAR(255) NULL,
+  `BannerUploadStatus` VARCHAR(20) NULL COMMENT 'Async upload state: pending, uploaded, failed',
   `Duration` INT NULL,
   `Language` VARCHAR(50) DEFAULT 'English',
   `CreatedAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,

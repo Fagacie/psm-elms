@@ -31,12 +31,17 @@ public class CourseDAOImpl implements CourseDAO {
         c.setUpdatedAt(uAt != null ? uAt.toLocalDateTime() : null);
         c.setStatus(rs.getString("Status"));
         c.setCourseBanner(rs.getString("CourseBanner"));
+        try {
+            c.setBannerUploadStatus(rs.getString("BannerUploadStatus"));
+        } catch (SQLException ignored) {
+            // Column may not exist in older schema versions; treat as null
+        }
         return c;
     }
 
     @Override
     public Course create(Course course) {
-        String sql = "INSERT INTO Course (Title, Description, Category, Duration, CourseFee, Level, InstructorID, Status, CourseBanner) VALUES (?,?,?,?,?,?,?,?,?)";
+        String sql = "INSERT INTO Course (Title, Description, Category, Duration, CourseFee, Level, InstructorID, Status, CourseBanner, BannerUploadStatus) VALUES (?,?,?,?,?,?,?,?,?,?)";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, course.getCourseName());
@@ -48,6 +53,7 @@ public class CourseDAOImpl implements CourseDAO {
             if (course.getCreatedBy() != null) ps.setInt(7, course.getCreatedBy()); else ps.setNull(7, Types.INTEGER);
             ps.setString(8, course.getStatus() != null ? course.getStatus() : Course.STATUS_PENDING);
             ps.setString(9, course.getCourseBanner());
+            ps.setString(10, course.getBannerUploadStatus());
             int affected = ps.executeUpdate();
             if (affected == 0) return null;
             try (ResultSet rs = ps.getGeneratedKeys()) {
@@ -62,7 +68,7 @@ public class CourseDAOImpl implements CourseDAO {
 
     @Override
     public boolean update(Course course) {
-        String sql = "UPDATE Course SET Title=?, Description=?, Category=?, Duration=?, CourseFee=?, Level=?, ApprovedBy=?, Status=?, CourseBanner=? WHERE CourseID=?";
+        String sql = "UPDATE Course SET Title=?, Description=?, Category=?, Duration=?, CourseFee=?, Level=?, ApprovedBy=?, Status=?, CourseBanner=?, BannerUploadStatus=? WHERE CourseID=?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, course.getCourseName());
@@ -74,7 +80,8 @@ public class CourseDAOImpl implements CourseDAO {
             if (course.getApprovedBy() != null) ps.setInt(7, course.getApprovedBy()); else ps.setNull(7, Types.INTEGER);
             ps.setString(8, course.getStatus());
             ps.setString(9, course.getCourseBanner());
-            ps.setInt(10, course.getCourseId());
+            ps.setString(10, course.getBannerUploadStatus());
+            ps.setInt(11, course.getCourseId());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             System.err.println("Course update failed: " + e.getMessage());
@@ -328,6 +335,34 @@ public class CourseDAOImpl implements CourseDAO {
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             System.err.println("assignInstructor failed: " + e.getMessage());
+            return false;
+        }
+    }
+
+    @Override
+    public boolean updateCourseBanner(int courseId, String bannerUrl) {
+        String sql = "UPDATE Course SET CourseBanner=? WHERE CourseID=?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, bannerUrl);
+            ps.setInt(2, courseId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Course updateCourseBanner failed: " + e.getMessage());
+            return false;
+        }
+    }
+
+    @Override
+    public boolean updateBannerUploadStatus(int courseId, String status) {
+        String sql = "UPDATE Course SET BannerUploadStatus=? WHERE CourseID=?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, status);
+            ps.setInt(2, courseId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Course updateBannerUploadStatus failed: " + e.getMessage());
             return false;
         }
     }

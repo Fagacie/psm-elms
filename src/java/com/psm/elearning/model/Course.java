@@ -72,6 +72,18 @@ public class Course {
     @Size(max = 255, message = "Course banner URL must not exceed 255 characters")
     private String courseBanner;
 
+    /**
+     * Tracks the async Cloudinary upload state for the course banner.
+     * Values: "pending" (upload queued), "uploaded" (complete), "failed" (upload error).
+     * Null means no banner upload has been initiated.
+     */
+    private String bannerUploadStatus;
+
+    // Banner upload status constants
+    public static final String BANNER_STATUS_PENDING  = "pending";
+    public static final String BANNER_STATUS_UPLOADED = "uploaded";
+    public static final String BANNER_STATUS_FAILED   = "failed";
+
     // Status constants
     public static final String LEVEL_BEGINNER = "Beginner";
     public static final String LEVEL_INTERMEDIATE = "Intermediate";
@@ -120,6 +132,9 @@ public class Course {
 
     public String getCourseBanner() { return courseBanner; }
     public void setCourseBanner(String courseBanner) { this.courseBanner = courseBanner; }
+
+    public String getBannerUploadStatus() { return bannerUploadStatus; }
+    public void setBannerUploadStatus(String bannerUploadStatus) { this.bannerUploadStatus = bannerUploadStatus; }
 
     // Duration is stored in days; these helpers keep UI expressive (days/weeks/months).
     public String getDurationUnitGuess() {
