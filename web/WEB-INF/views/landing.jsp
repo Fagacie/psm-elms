@@ -28,16 +28,18 @@
             <i data-lucide="menu"></i>
         </button>
 
-        <nav class="lp_nav" id="siteNav" aria-label="Primary navigation">
-            <a href="#home">Home</a>
-            <a href="#courses">Courses</a>
-            <a href="#verify">Verify</a>
-            <a href="#contact">Contact</a>
-        </nav>
+        <div class="lp_nav_wrapper" id="lpNavWrapper">
+            <nav class="lp_nav" id="siteNav" aria-label="Primary navigation">
+                <a href="#home">Home</a>
+                <a href="#courses">Courses</a>
+                <a href="#verify">Verify</a>
+                <a href="#contact">Contact</a>
+            </nav>
 
-        <div class="lp_header_actions">
-            <a class="lp_btn lp_btn_ghost" href="${pageContext.request.contextPath}/login">Login</a>
-            <a class="lp_btn lp_btn_indigo" href="${pageContext.request.contextPath}/register">Get Started</a>
+            <div class="lp_header_actions">
+                <a class="lp_btn lp_btn_ghost" href="${pageContext.request.contextPath}/login">Login</a>
+                <a class="lp_btn lp_btn_indigo" href="${pageContext.request.contextPath}/register">Get Started</a>
+            </div>
         </div>
     </div>
 </header>
@@ -261,28 +263,48 @@
 <footer class="lp_footer" id="contact">
     <div class="lp_container">
         <div class="lp_footer_grid">
-            <div>
+            <div class="lp_footer_col_brand">
                 <a class="lp_brand" href="#home" style="margin-bottom: 24px;">
                     <span class="lp_brand_mark">PSM</span>
                     <span class="lp_brand_text">E-Learning</span>
                 </a>
-                <p>PSM E-Learning is a state-of-the-art virtual campus helping students acquire industry-relevant skills, enabling instructors to build structured curricula, and offering open cryptographic credential validation.</p>
+                <p>Empowering students and instructors with a state-of-the-art virtual campus.</p>
+                <div class="lp_footer_socials">
+                    <a href="#" aria-label="Twitter"><i data-lucide="twitter"></i></a>
+                    <a href="#" aria-label="LinkedIn"><i data-lucide="linkedin"></i></a>
+                    <a href="#" aria-label="Facebook"><i data-lucide="facebook"></i></a>
+                    <a href="#" aria-label="Instagram"><i data-lucide="instagram"></i></a>
+                </div>
             </div>
-            <div>
-                <span class="lp_footer_title">Contact Us</span>
-                <a href="mailto:support@psmels.software"><i data-lucide="mail" style="width: 18px;"></i> support@psmels.software</a>
-                <span><i data-lucide="map-pin" style="width: 18px;"></i> PSM Virtual Campus, HQ</span>
-                <span><i data-lucide="clock" style="width: 18px;"></i> Mon - Fri, 9AM - 5PM</span>
+            
+            <div class="lp_footer_col">
+                <span class="lp_footer_title">Features</span>
+                <a href="#features">Course Management</a>
+                <a href="#features">Assessments & Quizzes</a>
+                <a href="#features">Secure Payments</a>
+                <a href="#features">Role Portals</a>
             </div>
-            <div>
+
+            <div class="lp_footer_col">
+                <span class="lp_footer_title">Support</span>
+                <a href="mailto:support@psmels.software">Contact Support</a>
+                <a href="#">Help Center</a>
+                <a href="#">Terms of Service</a>
+                <a href="#">Privacy Policy</a>
+            </div>
+
+            <div class="lp_footer_col">
                 <span class="lp_footer_title">Access</span>
-                <a href="${pageContext.request.contextPath}/login"><i data-lucide="log-in" style="width: 18px;"></i> Login</a>
-                <a href="${pageContext.request.contextPath}/register"><i data-lucide="user-plus" style="width: 18px;"></i> Register</a>
-                <a href="${pageContext.request.contextPath}/certificate/verify"><i data-lucide="shield" style="width: 18px;"></i> Verify Certificate</a>
+                <a href="${pageContext.request.contextPath}/login">Login</a>
+                <a href="${pageContext.request.contextPath}/register">Register</a>
+                <a href="${pageContext.request.contextPath}/certificate/verify">Verify Certificate</a>
             </div>
         </div>
         <div class="lp_footer_bottom">
-            © 2026 PSM E-Learning. All rights reserved.
+            <span>© 2026 PSM E-Learning. All rights reserved.</span>
+            <div class="lp_footer_bottom_links">
+                <a href="#">System Status: <strong style="color: var(--lp-cyan);">All Systems Operational</strong></a>
+            </div>
         </div>
     </div>
 </footer>

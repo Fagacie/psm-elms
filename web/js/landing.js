@@ -348,6 +348,13 @@ document.addEventListener("DOMContentLoaded", function() {
         mobileToggle.addEventListener("click", function() {
             siteHeader.classList.toggle("lp_mobile_open");
         });
+        
+        var navLinks = siteHeader.querySelectorAll('.lp_nav a, .lp_header_actions a');
+        navLinks.forEach(function(link) {
+            link.addEventListener('click', function() {
+                siteHeader.classList.remove("lp_mobile_open");
+            });
+        });
     }
 });
 
