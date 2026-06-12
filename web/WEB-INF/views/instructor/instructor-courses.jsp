@@ -13,6 +13,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-shell.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-courses.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/student-v2.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/theme-toggle.css">
     <script defer src="${pageContext.request.contextPath}/js/theme-toggle.js"></script>
@@ -77,43 +78,46 @@
                     </div>
                 </c:when>
                 <c:otherwise>
-                    <section class="assigned-courses-grid" id="course-list-container" aria-label="Assigned courses">
+                    <section class="course-catalog-grid" id="course-list-container" aria-label="Assigned courses" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; margin-top: 24px;">
                         <c:forEach var="course" items="${courses}">
-                            <article class="premium-course-card">
-                                <div class="card-thumbnail-wrapper">
+                            <a href="${pageContext.request.contextPath}/instructor/courses?action=workspace&courseId=${course.courseId}" class="sv-premium-card premium-course-card" style="text-decoration: none;">
+                                <div class="sv-premium-cover">
                                     <c:choose>
                                         <c:when test="${not empty course.courseBanner}">
-                                            <img src="${course.courseBanner}" alt="<c:out value='${course.courseName}'/> Banner" class="card-thumbnail-image">
+                                            <img src="${course.courseBanner}" alt="" class="sv-premium-img">
                                         </c:when>
                                         <c:otherwise>
-                                            <div class="card-thumbnail-fallback">
+                                            <div style="height: 100%; display: flex; align-items: center; justify-content: center; background: #f8fafc; color: #94a3b8; font-size: 2rem;">
                                                 <i class="fas fa-graduation-cap"></i>
                                             </div>
                                         </c:otherwise>
                                     </c:choose>
-                                    <span class="card-category-badge"><c:out value="${empty course.category ? 'General' : course.category}"/></span>
                                 </div>
-                                <div class="card-body-section">
-                                    <h4 class="card-title-text" data-search-text><c:out value="${course.courseName}"/></h4>
-                                    <span class="card-status-pill status-${fn:toLowerCase(course.status)}" data-search-text><c:out value="${course.status}"/></span>
+                                
+                                <div class="sv-premium-gradient"></div>
+                                
+                                <div class="sv-premium-basic-info">
+                                    <span class="sv-premium-category"><c:out value="${empty course.category ? 'General' : course.category}"/></span>
+                                    <h3><c:out value="${course.courseName}"/></h3>
+                                </div>
+                                
+                                <div class="sv-premium-reveal">
+                                    <div class="sv-premium-reveal-price">
+                                        <span class="status-badge status-${fn:toLowerCase(course.status)}" style="font-size: 0.8rem; padding: 4px 10px; background: rgba(255,255,255,0.2); border: none; color: white; border-radius: 6px;"><c:out value="${course.status}"/></span>
+                                    </div>
                                     
-                                    <div class="card-metrics-row">
-                                        <div class="card-metric-item" title="Enrolled Students">
-                                            <i class="fas fa-users card-metric-icon"></i>
-                                            <span><c:out value="${courseStudentCounts[course.courseId] != null ? courseStudentCounts[course.courseId] : 0}"/> Students</span>
-                                        </div>
-                                        <div class="card-metric-item" title="Course Duration">
-                                            <i class="far fa-clock card-metric-icon"></i>
-                                            <span><c:out value="${course.displayDuration}"/></span>
-                                        </div>
+                                    <div class="sv-premium-reveal-meta">
+                                        <span><i class="fas fa-users"></i> <c:out value="${courseStudentCounts[course.courseId] != null ? courseStudentCounts[course.courseId] : 0}"/> Students</span>
+                                        <span><i class="far fa-clock"></i> <c:out value="${empty course.displayDuration ? '10 Hrs' : course.displayDuration}"/></span>
+                                    </div>
+                                    
+                                    <div style="width: 100%; display: flex; flex-direction: column; gap: 8px;">
+                                        <span style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 12px; background: #10b981; color: white; border-radius: 12px; text-decoration: none; font-weight: 600; font-size: 0.95rem; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
+                                            Manage Workspace <i class="fas fa-arrow-right"></i>
+                                        </span>
                                     </div>
                                 </div>
-                                <div class="card-action-layer">
-                                    <a href="${pageContext.request.contextPath}/instructor/courses?action=workspace&courseId=${course.courseId}" class="card-action-button">
-                                        Enter Workspace <i class="fas fa-arrow-right"></i>
-                                    </a>
-                                </div>
-                            </article>
+                            </a>
                         </c:forEach>
                     </section>
                 </c:otherwise>

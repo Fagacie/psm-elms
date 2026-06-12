@@ -168,9 +168,30 @@
 
                                 const opt = {
                                     margin: 0.5,
-                                    filename: 'transaction-receipt.pdf',
+                                    filename: 'transaction-receipt-' + (selectedPayment ? selectedPayment.paymentId : 'pass') + '.pdf',
                                     image: { type: 'jpeg', quality: 0.98 },
-                                    html2canvas: { scale: 2, useCORS: true },
+                                    html2canvas: { 
+                                        scale: 2, 
+                                        useCORS: true,
+                                        onclone: (clonedDoc) => {
+                                            // Remove problematic CSS masks that crash html2canvas
+                                            const passElements = clonedDoc.querySelectorAll('.history_rm_digitalPass');
+                                            passElements.forEach(pass => {
+                                                pass.style.maskImage = 'none';
+                                                pass.style.webkitMaskImage = 'none';
+                                                pass.style.borderRadius = '0px';
+                                            });
+
+                                            // Ensure Lucide SVGs render properly by forcing attributes
+                                            const svgs = clonedDoc.querySelectorAll('svg');
+                                            svgs.forEach(svg => {
+                                                const w = svg.style.width || svg.getAttribute('width') || '24px';
+                                                const h = svg.style.height || svg.getAttribute('height') || '24px';
+                                                svg.setAttribute('width', w);
+                                                svg.setAttribute('height', h);
+                                            });
+                                        }
+                                    },
                                     jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
                                 };
 
