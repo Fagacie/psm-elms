@@ -165,7 +165,8 @@
     <section class="lp_section lp_verify" id="verify">
         <div class="lp_container">
             <div class="lp_verify_wrapper" data-aos="fade-up">
-                <p class="lp_eyebrow">Public verification</p>
+                <i data-lucide="shield-check" class="lp_verify_watermark"></i>
+                <p class="lp_eyebrow" style="color: var(--lp-cyan);">Public verification</p>
                 <h2>Verify certificates seamlessly.</h2>
                 <p style="margin-top: 16px;">Enter the certificate code to check authenticity instantly without logging in.</p>
                 
@@ -174,7 +175,7 @@
                         <i data-lucide="search"></i>
                         <input id="landingCertificateCode" class="lp_verify_input" type="text" name="code" placeholder="PSM-CERT-20260404-ABC123" required>
                         <button class="lp_verify_btn" type="submit">
-                            Verify <i data-lucide="arrow-right" style="margin-left: 4px; color: white;"></i>
+                            Verify <i data-lucide="arrow-right"></i>
                         </button>
                     </div>
                 </form>
