@@ -400,59 +400,44 @@
                                     >
                                         <a
                                             href={detailUrl}
-                                            className={styles.courseCard}
+                                            className="sv-premium-card"
                                         >
-                                            <div className={styles.courseBannerWrap}>
+                                            <div className="sv-premium-cover">
                                                 {course.courseBanner ? (
-                                                    <img 
-                                                        src={bannerSrc}
-                                                        alt=""
-                                                        className={styles.courseBanner}
-                                                    />
+                                                    <img src={bannerSrc} alt="" className="sv-premium-img" />
                                                 ) : (
-                                                    <div className={styles.courseBannerEmpty}>
+                                                    <div className={styles.courseBannerEmpty} style={{height: '100%'}}>
                                                         <i className="fas fa-book-open"></i>
                                                     </div>
                                                 )}
-                                                <span className={styles.courseStatus + ' ' + statusClass}>
+                                            </div>
+                                            
+                                            <div className="sv-premium-gradient"></div>
+                                            
+                                            <div className="sv-premium-basic-info">
+                                                <span className="sv-premium-category" style={{ color: course.completionStatus === 'Completed' ? '#10b981' : (course.completionStatus === 'In Progress' ? '#06b6d4' : '#fbbf24') }}>
                                                     {course.completionStatus}
                                                 </span>
+                                                <h3>{course.courseName}</h3>
+                                                <span className="sv-premium-instructor"><i className="far fa-user"></i> {course.instructorName}</span>
                                             </div>
 
-                                            <div className={styles.courseBody}>
-                                                <div className={styles.courseInfo}>
-                                                    <h4 className={styles.courseTitle}>{course.courseName}</h4>
-                                                    <p className={styles.courseInstructor}>
-                                                        By <strong>{course.instructorName}</strong>
-                                                    </p>
-                                                </div>
-
-                                                <div className={styles.progressCircularContainer}>
-                                                    <div className={styles.progressRingWrapper}>
-                                                        <svg className={styles.svgRing} width="48" height="48" viewBox="0 0 48 48">
-                                                            <circle 
-                                                                className={styles.ringBg} 
-                                                                cx="24" 
-                                                                cy="24" 
-                                                                r={RING_RADIUS} 
-                                                                strokeWidth="4.5" 
-                                                                fill="transparent" 
-                                                            />
-                                                            <circle 
-                                                                className={styles.ringFg} 
-                                                                cx="24" 
-                                                                cy="24" 
-                                                                r={RING_RADIUS} 
-                                                                strokeWidth="4.5" 
-                                                                fill="transparent" 
-                                                                strokeDasharray={CIRCUMFERENCE}
-                                                                strokeDashoffset={offset}
-                                                            />
-                                                        </svg>
-                                                        <div className={styles.ringText}>{course.progress}%</div>
+                                            <div className="sv-premium-reveal">
+                                                <div className="sv-premium-reveal-meta" style={{ marginBottom: '24px' }}>
+                                                    <div className={styles.progressCircularContainer} style={{ background: 'transparent' }}>
+                                                        <div className={styles.progressRingWrapper} style={{ transform: 'scale(1.5)', marginBottom: '16px' }}>
+                                                            <svg className={styles.svgRing} width="48" height="48" viewBox="0 0 48 48">
+                                                                <circle className={styles.ringBg} cx="24" cy="24" r={RING_RADIUS} strokeWidth="4.5" fill="transparent" />
+                                                                <circle className={styles.ringFg} cx="24" cy="24" r={RING_RADIUS} strokeWidth="4.5" fill="transparent" strokeDasharray={CIRCUMFERENCE} strokeDashoffset={offset} />
+                                                            </svg>
+                                                            <div className={styles.ringText} style={{ color: 'white' }}>{course.progress}%</div>
+                                                        </div>
                                                     </div>
-                                                    <span className={styles.progressActionHint}>
-                                                        {actionLabel} <i className="fas fa-arrow-right" style={{ fontSize: '0.75rem' }}></i>
+                                                </div>
+                                                
+                                                <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                                    <span className={styles.svBtn + ' ' + (course.completionStatus === 'Completed' ? styles.svBtnSuccess : styles.svBtnPrimary)} style={{ width: '100%' }}>
+                                                        {actionLabel} <i className="fas fa-arrow-right"></i>
                                                     </span>
                                                 </div>
                                             </div>

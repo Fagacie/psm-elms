@@ -390,93 +390,74 @@
                                         key={course.courseId}
                                         variants={cardVariants}
                                     >
-                                        <article className={styles.courseCard}>
-                                            {/* Thumbnail & Floating Badges */}
-                                            <div className={styles.courseBannerWrap}>
+                                        <a 
+                                            href={isEnrolled ? ctxPath + "/student/enrollment-details?id=" + enrolledMap[course.courseId] : ctxPath + "/student/courses?action=details&id=" + course.courseId}
+                                            className="sv-premium-card"
+                                        >
+                                            <div className="sv-premium-cover">
                                                 {course.courseBanner ? (
-                                                    <img 
-                                                        src={bannerSrc}
-                                                        alt=""
-                                                        className={styles.courseBanner}
-                                                    />
+                                                    <img src={bannerSrc} alt="" className="sv-premium-img" />
                                                 ) : (
-                                                    <div className={styles.courseBannerEmpty}>
+                                                    <div className={styles.courseBannerEmpty} style={{height: '100%'}}>
                                                         <i className="fas fa-image"></i>
-                                                        <span>No Image</span>
                                                     </div>
                                                 )}
-                                                <span className={styles.categoryBadge}>{course.category}</span>
-                                                <span className={styles.levelBadge}>{course.level}</span>
                                             </div>
-
-                                            {/* Body Stack */}
-                                            <div className={styles.courseBody}>
-                                                <div className={styles.courseInfo}>
-                                                    <h3 className={styles.courseTitle}>{course.courseName}</h3>
-                                                    <p className={styles.courseInstructor}>
-                                                        <i className="far fa-user"></i> By <strong>{course.instructorName}</strong>
-                                                    </p>
-                                                </div>
-
-                                                {/* Meta & Price Info */}
-                                                <div className={styles.courseMeta}>
-                                                    <span className={styles.metaItem}>
-                                                        <i className="far fa-clock"></i> {course.displayDuration}
-                                                    </span>
-                                                    
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                        {isEnrolled ? (
-                                                            <span className={styles.enrolledPill}>
-                                                                <i className="fas fa-circle-check"></i> Enrolled
-                                                            </span>
-                                                        ) : (
-                                                            <span className={styles.metaItem + ' ' + (isFree ? styles.priceFree : styles.priceValue)}>
-                                                                {isFree ? 'Free' : '₦' + formattedPrice}
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                </div>
-
-                                                {/* Action Buttons */}
-                                                <div className={styles.cardAction}>
+                                            
+                                            <div className="sv-premium-gradient"></div>
+                                            
+                                            <div className="sv-premium-basic-info">
+                                                <span className="sv-premium-category">{course.category}</span>
+                                                <h3>{course.courseName}</h3>
+                                                <span className="sv-premium-instructor"><i className="far fa-user"></i> {course.instructorName}</span>
+                                            </div>
+                                            
+                                            <div className="sv-premium-reveal">
+                                                <div className="sv-premium-reveal-price">
                                                     {isEnrolled ? (
-                                                        <a 
-                                                            href={ctxPath + "/student/enrollment-details?id=" + enrolledMap[course.courseId]} 
-                                                            className={styles.svBtn + ' ' + styles.svBtnSuccess}
-                                                        >
-                                                            Continue Learning <i className="fas fa-arrow-right" style={{ fontSize: '0.75rem' }}></i>
-                                                        </a>
+                                                        <span style={{ color: '#10b981', fontSize: '1.25rem' }}><i className="fas fa-check-circle"></i> Enrolled</span>
                                                     ) : (
-                                                        <div style={{ display: 'flex', gap: '8px', width: '100%' }}>
-                                                            <a 
-                                                                href={ctxPath + "/student/courses?action=details&id=" + course.courseId} 
-                                                                className={styles.svBtn + ' ' + styles.svBtnSecondary}
-                                                                style={{ width: '40%' }}
-                                                            >
-                                                                Details
-                                                            </a>
+                                                        isFree ? 'Free' : '₦' + formattedPrice
+                                                    )}
+                                                </div>
+                                                
+                                                <div className="sv-premium-reveal-meta">
+                                                    <span><i className="far fa-clock"></i> {course.displayDuration}</span>
+                                                    <span><i className="fas fa-layer-group"></i> {course.level}</span>
+                                                </div>
+                                                
+                                                <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                                    {isEnrolled ? (
+                                                        <span className={styles.svBtn + ' ' + styles.svBtnSuccess} style={{ width: '100%' }}>
+                                                            Continue Learning <i className="fas fa-arrow-right"></i>
+                                                        </span>
+                                                    ) : (
+                                                        <React.Fragment>
+                                                            <span className={styles.svBtn + ' ' + styles.svBtnSecondary} style={{ width: '100%' }}>
+                                                                View Details
+                                                            </span>
                                                             {isFree ? (
                                                                 <button 
-                                                                    onClick={() => handleEnrollFree(course.courseId, course.courseName)} 
-                                                                    className={styles.svBtn + ' ' + styles.svBtnPrimary}
-                                                                    style={{ width: '60%' }}
+                                                                    onClick={(e) => { e.preventDefault(); handleEnrollFree(course.courseId, course.courseName); }} 
+                                                                    className={styles.svBtn + ' ' + styles.svBtnPrimary} 
+                                                                    style={{ width: '100%' }}
                                                                 >
-                                                                    Enroll Free <i className="fas fa-graduation-cap" style={{ fontSize: '0.85rem' }}></i>
+                                                                    Enroll Now
                                                                 </button>
                                                             ) : (
                                                                 <button 
-                                                                    onClick={() => handleEnrollPaid(course.courseId)} 
-                                                                    className={styles.svBtn + ' ' + styles.svBtnPrimary}
-                                                                    style={{ width: '60%' }}
+                                                                    onClick={(e) => { e.preventDefault(); window.location.href = ctxPath + "/student/enrollment-summary?courseId=" + course.courseId; }}
+                                                                    className={styles.svBtn + ' ' + styles.svBtnPrimary} 
+                                                                    style={{ width: '100%' }}
                                                                 >
-                                                                    Enroll Now <i className="fas fa-credit-card" style={{ fontSize: '0.85rem' }}></i>
+                                                                    Enroll Now
                                                                 </button>
                                                             )}
-                                                        </div>
+                                                        </React.Fragment>
                                                     )}
                                                 </div>
                                             </div>
-                                        </article>
+                                        </a>
                                     </MotionDiv>
                                 );
                             })}
