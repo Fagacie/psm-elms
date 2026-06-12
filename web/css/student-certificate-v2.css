@@ -191,6 +191,10 @@ body.sc-immersive-body::-webkit-scrollbar-thumb {
 }
 
 /* Ornamental Charcoal Corners - REMOVED for minimalist aesthetic */
+.sc-corner {
+  display: none !important;
+}
+
 .sc-corner-tl, .sc-corner-tr, .sc-corner-bl, .sc-corner-br {
   display: none !important;
 }

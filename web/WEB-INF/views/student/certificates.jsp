@@ -350,8 +350,8 @@
                                     <div className={styles.readyLeft}>
                                         <h4 className={styles.readyCourseTitle}>{enrollment.courseName}</h4>
                                         <div className={styles.readyBadge}>
-                                            <i data-lucide="award" style={{ width: 12, height: 12, marginRight: 4, color: '#059669' }}></i>
-                                            <span style={{ color: '#059669', fontWeight: 600 }}>100% Completed</span>
+                                            <i data-lucide="award" style={{ width: 14, height: 14, marginRight: 6 }}></i>
+                                            <span>100% Completed</span>
                                         </div>
                                     </div>
                                     <div className={styles.readyRight}>
@@ -446,77 +446,70 @@
                                     return (
                                         <motion.div 
                                             key={cert.certificateNo} 
-                                            className={styles.card}
+                                            className="sv-premium-card"
                                             variants={cardVariants}
                                         >
-                                            {/* Framed Landscape Thumbnail Preview */}
-                                            <div className={styles.thumbnailArea}>
-                                                <div className={styles.thumbnailFrame}>
-                                                    <div className={styles.mockHeader}>
-                                                        <div className={styles.mockGoldSeal}></div>
-                                                        <span className={styles.mockCertTitle}>Completion Certificate</span>
-                                                    </div>
-                                                    <div className={styles.mockBody}>
-                                                        <div className={styles.mockStudentName}>{window.studentName || 'Certified Student'}</div>
-                                                        <div className={styles.mockText}>OFFICIAL ACADEMIC COMPLETION</div>
-                                                    </div>
-                                                    <div className={styles.mockFooter}>
-                                                        <div className={styles.mockSignature}></div>
-                                                        <span className={styles.mockCode}>{"#" + cert.certificateNo.substring(0, 7)}</span>
+                                            {/* Premium Background / Thumbnail Cover */}
+                                            <div className="sv-premium-cover">
+                                                <div className={styles.thumbnailArea} style={{ height: '100%' }}>
+                                                    <div className={styles.thumbnailFrame}>
+                                                        <div className={styles.mockHeader}>
+                                                            <div className={styles.mockGoldSeal}></div>
+                                                            <span className={styles.mockCertTitle}>Completion Certificate</span>
+                                                        </div>
+                                                        <div className={styles.mockBody}>
+                                                            <div className={styles.mockStudentName}>{window.studentName || 'Certified Student'}</div>
+                                                            <div className={styles.mockText}>OFFICIAL ACADEMIC COMPLETION</div>
+                                                        </div>
+                                                        <div className={styles.mockFooter}>
+                                                            <div className={styles.mockSignature}></div>
+                                                            <span className={styles.mockCode}>{"#" + cert.certificateNo.substring(0, 7)}</span>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
-
-                                            {/* Card content body */}
-                                            <div className={styles.cardBody}>
-                                                <h3 className={styles.courseTitle} title={cert.courseName}>{cert.courseName}</h3>
-                                                <div className={styles.detailsRow}>
-                                                    <span className={styles.issuedDate}>Issued: {cert.issueDate}</span>
-                                                    <span 
-                                                        className={styles.credentialId} 
-                                                        onClick={() => handleCopy(cert.certificateNo)} 
-                                                        style={{ cursor: 'pointer' }}
-                                                        title="Click to Copy Credential ID"
-                                                    >
-                                                        {cert.certificateNo}
-                                                    </span>
-                                                </div>
+                                            <div className="sv-premium-gradient"></div>
+                                            
+                                            {/* Basic Info that shows normally */}
+                                            <div className="sv-premium-basic-info">
+                                                <div className="sv-premium-category" style={{ color: '#eab308' }}>Verified Credential</div>
+                                                <h3 title={cert.courseName}>{cert.courseName}</h3>
+                                                <div className="sv-premium-instructor">Issued: {cert.issueDate}</div>
                                             </div>
 
-                                            {/* Action Buttons Footer */}
-                                            <div className={styles.actionFooter} style={{ flexDirection: 'column', gap: '8px' }}>
-                                                <a 
-                                                    href={window.contextPath + "/student/certificate?enrollmentId=" + cert.enrollmentId} 
-                                                    className={styles.primaryViewBtn}
-                                                    title="View Immersive"
-                                                >
-                                                    <i data-lucide="external-link" style={{ width: 14, height: 14 }}></i>
-                                                    <span>View Certificate</span>
-                                                </a>
-                                                <div style={{ display: 'flex', gap: '8px', width: '100%' }}>
-                                                    <button 
-                                                        type="button" 
-                                                        className={styles.iconBtn}
-                                                        style={{ flex: 1 }}
-                                                        onClick={() => triggerDownload(cert)}
-                                                        disabled={isCompiling}
-                                                        title="Download High-Res PDF"
+                                            {/* Premium Hover Reveal panel */}
+                                            <div className="sv-premium-reveal">
+                                                <div className="sv-premium-reveal-price"><i data-lucide="award" style={{ width: 48, height: 48, color: '#eab308' }}></i></div>
+                                                <div className="sv-premium-reveal-meta" style={{ marginBottom: 16 }}>
+                                                    <span style={{ fontSize: '0.85rem' }}>ID: {cert.certificateNo}</span>
+                                                </div>
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
+                                                    <a 
+                                                        href={window.contextPath + "/student/certificate?enrollmentId=" + cert.enrollmentId} 
+                                                        className="sv-btn sv-btn-primary"
+                                                        style={{ width: '100%', padding: '10px 0', minHeight: '38px', fontSize: '0.85rem' }}
                                                     >
-                                                        {isCompiling ? (
-                                                            <i className="fas fa-spinner fa-spin" style={{ fontSize: 14 }}></i>
-                                                        ) : (
-                                                            <i data-lucide="download" style={{ width: 15, height: 15 }}></i>
-                                                        )}
-                                                    </button>
-                                                    <button 
-                                                        type="button" 
-                                                        className={styles.iconBtn}
-                                                        style={{ flex: 1 }}
-                                                        onClick={() => handleShare(cert.certificateNo)}
-                                                        title="Share verification link"
-                                                    >
-                                                        <i data-lucide="share-2" style={{ width: 14, height: 14 }}></i>
-                                                    </button>
+                                                        View Certificate
+                                                    </a>
+                                                    <div style={{ display: 'flex', gap: '8px', width: '100%' }}>
+                                                        <button 
+                                                            type="button" 
+                                                            className="sv-btn"
+                                                            style={{ flex: 1, padding: '8px 0', minHeight: '36px', fontSize: '0.8rem', background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)' }}
+                                                            onClick={(e) => { e.preventDefault(); triggerDownload(cert); }}
+                                                            disabled={isCompiling}
+                                                        >
+                                                            {isCompiling ? <i className="fas fa-spinner fa-spin"></i> : <i data-lucide="download"></i>} PDF
+                                                        </button>
+                                                        <button 
+                                                            type="button" 
+                                                            className="sv-btn"
+                                                            style={{ flex: 1, padding: '8px 0', minHeight: '36px', fontSize: '0.8rem', background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)' }}
+                                                            onClick={(e) => { e.preventDefault(); handleShare(cert.certificateNo); }}
+                                                        >
+                                                            <i data-lucide="share-2"></i> Share
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </motion.div>
@@ -528,65 +521,68 @@
                                 {filteredIssued.map((cert) => {
                                     const isCompiling = compilingCert === cert.certificateNo;
                                     return (
-                                        <div key={cert.certificateNo} className={styles.card}>
-                                            <div className={styles.thumbnailArea}>
-                                                <div className={styles.thumbnailFrame}>
-                                                    <div className={styles.mockHeader}>
-                                                        <div className={styles.mockGoldSeal}></div>
-                                                        <span className={styles.mockCertTitle}>Completion Certificate</span>
-                                                    </div>
-                                                    <div className={styles.mockBody}>
-                                                        <div className={styles.mockStudentName}>{window.studentName || 'Certified Student'}</div>
-                                                        <div className={styles.mockText}>OFFICIAL ACADEMIC COMPLETION</div>
-                                                    </div>
-                                                    <div className={styles.mockFooter}>
-                                                        <div className={styles.mockSignature}></div>
-                                                        <span className={styles.mockCode}>{"#" + cert.certificateNo.substring(0, 7)}</span>
+                                        <div key={cert.certificateNo} className="sv-premium-card">
+                                            {/* Premium Background / Thumbnail Cover */}
+                                            <div className="sv-premium-cover">
+                                                <div className={styles.thumbnailArea} style={{ height: '100%' }}>
+                                                    <div className={styles.thumbnailFrame}>
+                                                        <div className={styles.mockHeader}>
+                                                            <div className={styles.mockGoldSeal}></div>
+                                                            <span className={styles.mockCertTitle}>Completion Certificate</span>
+                                                        </div>
+                                                        <div className={styles.mockBody}>
+                                                            <div className={styles.mockStudentName}>{window.studentName || 'Certified Student'}</div>
+                                                            <div className={styles.mockText}>OFFICIAL ACADEMIC COMPLETION</div>
+                                                        </div>
+                                                        <div className={styles.mockFooter}>
+                                                            <div className={styles.mockSignature}></div>
+                                                            <span className={styles.mockCode}>{"#" + cert.certificateNo.substring(0, 7)}</span>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div className={styles.cardBody}>
-                                                <h3 className={styles.courseTitle} title={cert.courseName}>{cert.courseName}</h3>
-                                                <div className={styles.detailsRow}>
-                                                    <span className={styles.issuedDate}>Issued: {cert.issueDate}</span>
-                                                    <span className={styles.credentialId} onClick={() => handleCopy(cert.certificateNo)} style={{ cursor: 'pointer' }}>
-                                                        {cert.certificateNo}
-                                                    </span>
-                                                </div>
+                                            <div className="sv-premium-gradient"></div>
+                                            
+                                            {/* Basic Info that shows normally */}
+                                            <div className="sv-premium-basic-info">
+                                                <div className="sv-premium-category" style={{ color: '#eab308' }}>Verified Credential</div>
+                                                <h3 title={cert.courseName}>{cert.courseName}</h3>
+                                                <div className="sv-premium-instructor">Issued: {cert.issueDate}</div>
                                             </div>
-                                            <div className={styles.actionFooter} style={{ flexDirection: 'column', gap: '8px' }}>
-                                                <a 
-                                                    href={window.contextPath + "/student/certificate?enrollmentId=" + cert.enrollmentId} 
-                                                    className={styles.primaryViewBtn}
-                                                    title="View Immersive"
-                                                >
-                                                    <i data-lucide="external-link" style={{ width: 14, height: 14 }}></i>
-                                                    <span>View Certificate</span>
-                                                </a>
-                                                <div style={{ display: 'flex', gap: '8px', width: '100%' }}>
-                                                    <button 
-                                                        type="button" 
-                                                        className={styles.iconBtn}
-                                                        style={{ flex: 1 }}
-                                                        onClick={() => triggerDownload(cert)}
-                                                        disabled={isCompiling}
-                                                        title="Download High-Res PDF"
+
+                                            {/* Premium Hover Reveal panel */}
+                                            <div className="sv-premium-reveal">
+                                                <div className="sv-premium-reveal-price"><i data-lucide="award" style={{ width: 48, height: 48, color: '#eab308' }}></i></div>
+                                                <div className="sv-premium-reveal-meta" style={{ marginBottom: 16 }}>
+                                                    <span style={{ fontSize: '0.85rem' }}>ID: {cert.certificateNo}</span>
+                                                </div>
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
+                                                    <a 
+                                                        href={window.contextPath + "/student/certificate?enrollmentId=" + cert.enrollmentId} 
+                                                        className="sv-btn sv-btn-primary"
+                                                        style={{ width: '100%', padding: '10px 0', minHeight: '38px', fontSize: '0.85rem' }}
                                                     >
-                                                        {isCompiling ? (
-                                                            <i className="fas fa-spinner fa-spin" style={{ fontSize: 14 }}></i>
-                                                        ) : (
-                                                            <i data-lucide="download" style={{ width: 15, height: 15 }}></i>
-                                                        )}
-                                                    </button>
-                                                    <button 
-                                                        type="button" 
-                                                        className={styles.iconBtn}
-                                                        style={{ flex: 1 }}
-                                                        onClick={() => handleShare(cert.certificateNo)}
-                                                        title="Share verification link"
-                                                    >
-                                                        <i data-lucide="share-2" style={{ width: 14, height: 14 }}></i>
-                                                    </button>
+                                                        View Certificate
+                                                    </a>
+                                                    <div style={{ display: 'flex', gap: '8px', width: '100%' }}>
+                                                        <button 
+                                                            type="button" 
+                                                            className="sv-btn"
+                                                            style={{ flex: 1, padding: '8px 0', minHeight: '36px', fontSize: '0.8rem', background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)' }}
+                                                            onClick={(e) => { e.preventDefault(); triggerDownload(cert); }}
+                                                            disabled={isCompiling}
+                                                        >
+                                                            {isCompiling ? <i className="fas fa-spinner fa-spin"></i> : <i data-lucide="download"></i>} PDF
+                                                        </button>
+                                                        <button 
+                                                            type="button" 
+                                                            className="sv-btn"
+                                                            style={{ flex: 1, padding: '8px 0', minHeight: '36px', fontSize: '0.8rem', background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)' }}
+                                                            onClick={(e) => { e.preventDefault(); handleShare(cert.certificateNo); }}
+                                                        >
+                                                            <i data-lucide="share-2"></i> Share
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
