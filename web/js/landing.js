@@ -97,6 +97,21 @@ document.addEventListener('DOMContentLoaded', function () {
         startCounters();
     }
 
+    // 4.5 Innovative Parallax
+    if (!reduceMotion && statsTrigger) {
+        document.addEventListener('mousemove', (e) => {
+            const layers = statsTrigger.querySelectorAll('.lp_stat_parallax_layer');
+            if(!layers.length) return;
+            const xAxis = (window.innerWidth / 2 - e.clientX) / 40;
+            const yAxis = (window.innerHeight / 2 - e.clientY) / 40;
+            
+            layers.forEach((layer, index) => {
+                const depth = (index + 1) * 0.6;
+                layer.style.transform = `translate(${xAxis * depth}px, ${yAxis * depth}px)`;
+            });
+        });
+    }
+
     // 5. Course Details Modal handlers
     const courseDetailsModal = document.getElementById('courseDetailsModal');
     const modalCloseBtn = document.getElementById('modalCloseBtn');
@@ -156,6 +171,163 @@ document.addEventListener('DOMContentLoaded', function () {
         courseDetailsModal.addEventListener('click', event => {
             if (event.target === courseDetailsModal) closeCourseModal();
         });
+    }
+
+    // 6. Dynamic Course Loading, Filtering & Pagination
+    const courseDataStore = document.getElementById('courseDataStore');
+    const dynamicCourseContainer = document.getElementById('dynamicCourseContainer');
+    const filterContainer = document.getElementById('courseFilterContainer');
+    const paginationContainer = document.getElementById('coursePaginationContainer');
+    
+    if (courseDataStore && dynamicCourseContainer) {
+        let allCourses = [];
+        let categories = new Set();
+        
+        const dataItems = courseDataStore.querySelectorAll('.course-data-item');
+        dataItems.forEach(item => {
+            const course = {
+                id: item.dataset.id,
+                name: item.dataset.name,
+                category: item.dataset.category,
+                fee: parseFloat(item.dataset.fee),
+                duration: item.dataset.duration,
+                level: item.dataset.level,
+                banner: item.dataset.banner,
+                context: item.dataset.context,
+                desc: item.textContent.trim()
+            };
+            allCourses.push(course);
+            if(course.category) categories.add(course.category);
+        });
+
+        let currentFilter = 'all';
+        let currentSearchQuery = '';
+        let currentPage = 1;
+        const itemsPerPage = 4;
+        let filteredCourses = [...allCourses];
+
+        const searchInput = document.getElementById('courseSearchInput');
+
+        function applyFilters() {
+            filteredCourses = allCourses.filter(c => {
+                const matchSearch = currentSearchQuery === '' || 
+                                    c.name.toLowerCase().includes(currentSearchQuery.toLowerCase()) || 
+                                    (c.desc && c.desc.toLowerCase().includes(currentSearchQuery.toLowerCase()));
+                return matchSearch;
+            });
+            currentPage = 1;
+            renderCourses();
+        }
+
+        if(searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                currentSearchQuery = e.target.value.trim();
+                applyFilters();
+            });
+        }
+
+        function renderCourses() {
+            const totalPages = Math.ceil(filteredCourses.length / itemsPerPage) || 1;
+            if(currentPage > totalPages) currentPage = totalPages;
+            
+            const startIdx = (currentPage - 1) * itemsPerPage;
+            const currentCourses = filteredCourses.slice(startIdx, startIdx + itemsPerPage);
+            
+            dynamicCourseContainer.innerHTML = '';
+            
+            if(currentCourses.length === 0) {
+                dynamicCourseContainer.innerHTML = `
+                    <div style="grid-column: 1/-1; padding: 60px; text-align: center; border: 1px dashed var(--lp-gray-border); border-radius: var(--lp-radius); color: var(--lp-slate-light);">
+                        <p>No courses found matching your search.</p>
+                    </div>`;
+                if(paginationContainer) paginationContainer.style.display = 'none';
+                return;
+            }
+
+            currentCourses.forEach((course, index) => {
+                const feeDisplay = course.fee > 0 ? '₦' + course.fee.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2}) : 'Free';
+                
+                let imgSrc = `<div style="height: 100%; display: flex; align-items: center; justify-content: center; background: var(--lp-gray-soft); color: var(--lp-slate-light);">No Image</div>`;
+                if(course.banner) {
+                    if(course.banner.startsWith('http')) {
+                        imgSrc = `<img class="lp_course_img" src="${course.banner}" alt="cover">`;
+                    } else {
+                        imgSrc = `<img class="lp_course_img" src="${course.context}${course.banner}" alt="cover">`;
+                    }
+                }
+
+                const article = document.createElement('article');
+                article.className = 'lp_course_card course-details-btn';
+                article.setAttribute('data-name', course.name.replace(/"/g, '&quot;'));
+                article.setAttribute('data-category', course.category.replace(/"/g, '&quot;'));
+                article.setAttribute('data-level', course.level.replace(/"/g, '&quot;'));
+                article.setAttribute('data-duration', course.duration.replace(/"/g, '&quot;'));
+                article.setAttribute('data-fee', course.fee);
+                article.setAttribute('data-desc', course.desc.replace(/"/g, '&quot;'));
+                article.setAttribute('data-aos', 'fade-up');
+                article.setAttribute('data-aos-delay', (index * 100).toString());
+                
+                article.innerHTML = `
+                    <div class="lp_course_cover">
+                        ${imgSrc}
+                        <div class="lp_course_gradient"></div>
+                    </div>
+                    <div class="lp_course_basic_info">
+                        <span class="lp_course_category">${course.category}</span>
+                        <h3>${course.name}</h3>
+                    </div>
+                    <div class="lp_course_reveal">
+                        <div class="lp_reveal_price">${feeDisplay}</div>
+                        <div class="lp_reveal_meta">
+                            <span><i data-lucide="bar-chart"></i> Level: ${course.level}</span>
+                            <span><i data-lucide="clock"></i> Duration: ${course.duration}</span>
+                        </div>
+                        <span class="lp_hover_btn">View Details <i data-lucide="arrow-right"></i></span>
+                    </div>
+                `;
+                dynamicCourseContainer.appendChild(article);
+            });
+
+            if(typeof lucide !== 'undefined') lucide.createIcons();
+            
+            const newBtns = dynamicCourseContainer.querySelectorAll('.course-details-btn');
+            newBtns.forEach(btn => {
+                btn.addEventListener('click', () => openCourseModal(btn));
+            });
+
+            if(paginationContainer && totalPages > 1) {
+                paginationContainer.style.display = 'flex';
+                document.getElementById('coursePageIndicator').textContent = 'Page ' + currentPage + ' of ' + totalPages;
+                document.getElementById('prevCoursePage').disabled = currentPage === 1;
+                document.getElementById('nextCoursePage').disabled = currentPage === totalPages;
+            } else if(paginationContainer) {
+                paginationContainer.style.display = 'none';
+            }
+        }
+
+        const prevBtn = document.getElementById('prevCoursePage');
+        const nextBtn = document.getElementById('nextCoursePage');
+        
+        if(prevBtn) {
+            prevBtn.addEventListener('click', () => {
+                if(currentPage > 1) {
+                    currentPage--;
+                    renderCourses();
+                }
+            });
+        }
+        
+        if(nextBtn) {
+            nextBtn.addEventListener('click', () => {
+                const totalPages = Math.ceil(filteredCourses.length / itemsPerPage);
+                if(currentPage < totalPages) {
+                    currentPage++;
+                    renderCourses();
+                }
+            });
+        }
+
+        renderCourses();
     }
 
     // Event Listeners

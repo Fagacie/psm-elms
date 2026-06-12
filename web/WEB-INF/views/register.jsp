@@ -13,7 +13,7 @@
                 rel="stylesheet">
             <!-- Include Profile CSS modules styles for identical layout & colors -->
             <link rel="stylesheet" href="${pageContext.request.contextPath}/css/Register.module.css">
-            <jsp:include page="/WEB-INF/views/common/head-external-assets.jsp" />
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
         </head>
 
         <body class="sv-page">
@@ -54,7 +54,7 @@
                             <h4>
                                 Account Credentials</h4>
                             <div class="reg_formGrid">
-                                <div class="reg_field" style="grid-column: span 2;">
+                                <div class="reg_field reg_fullWidth">
                                     <label class="reg_label" for="email">Email Address  <span class="reg_req">(Required)</span></label>
                                     <input id="email" name="email" type="email" value="${param.email}" required
                                         class="reg_input" placeholder="e.g. user@example.com">
@@ -507,7 +507,7 @@
                                     </select>
                                 </div>
                                 <div class="reg_field">
-                                    <label class="prof_label" for="state">State / Province</label>
+                                    <label class="reg_label" for="state">State / Province</label>
                                     <select id="state" name="state" class="reg_select">
                                         <option value="">Select State/Province</option>
                                     </select>
@@ -529,21 +529,21 @@
 
                         <!-- Submit Button Area -->
                         <div
-                            style="display: flex; flex-direction: column; gap: 16px; margin-top: 8px; border-top: 1px solid var(--prof-border); padding-top: 24px;">
-                            <button type="submit" class="prof_saveBtn"
-                                style="width: 100%; min-height: 46px; font-size: 0.95rem; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
+                            style="display: flex; flex-direction: column; gap: 16px; margin-top: 8px; border-top: 1px solid var(--reg-gray-border); padding-top: 24px;">
+                            <button type="submit" class="reg_btn"
+                                style="min-height: 46px; font-size: 0.95rem; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
                                 <i class="fas fa-user-plus"></i>
                                 <span>Create Account</span>
                             </button>
-                            <p style="font-size: 0.81rem; color: var(--prof-muted); text-align: center; margin: 0;">
+                            <p style="font-size: 0.81rem; color: var(--reg-slate-gray); text-align: center; margin: 0;">
                                 Registration number is generated automatically after successful creation.
                             </p>
                             <div style="text-align: center; margin-top: 8px;">
-                                <span style="font-size: 0.9rem; color: var(--prof-muted);">Already have an
+                                <span style="font-size: 0.9rem; color: var(--reg-slate-gray);">Already have an
                                     account?</span>
                                 <a href="${pageContext.request.contextPath}/login"
-                                    style="font-size: 0.9rem; font-weight: 700; color: var(--prof-accent); margin-left: 6px; text-decoration: none; border-bottom: 1px solid transparent;"
-                                    onmouseover="this.style.borderBottomColor='var(--prof-accent)'"
+                                    style="font-size: 0.9rem; font-weight: 700; color: var(--reg-indigo); margin-left: 6px; text-decoration: none; border-bottom: 1px solid transparent;"
+                                    onmouseover="this.style.borderBottomColor='var(--reg-indigo)'"
                                     onmouseout="this.style.borderBottomColor='transparent'">Login</a>
                             </div>
                         </div>

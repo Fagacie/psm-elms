@@ -37,8 +37,8 @@ public class LandingServlet extends HttpServlet {
         int instructorCount = userDAO.countByRole(User.ROLE_INSTRUCTOR);
         int courseCount = courseDAO.countByStatus(Course.STATUS_APPROVED);
         
-        // Fetch featured courses (latest 6 approved courses)
-        List<Course> featuredCourses = courseDAO.findFeaturedCourses(6);
+        // Fetch all approved courses for dynamic client-side filtering/pagination
+        List<Course> featuredCourses = courseDAO.findByStatus(Course.STATUS_APPROVED);
         
         // Set attributes for JSP
         request.setAttribute("studentCount", studentCount);

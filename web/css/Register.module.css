@@ -129,9 +129,25 @@ body.sv-page {
   gap: 24px;
 }
 
+.reg_fullWidth {
+  grid-column: span 2;
+}
+
 @media (max-width: 640px) {
   .reg_formGrid {
     grid-template-columns: 1fr;
+  }
+  .reg_fullWidth {
+    grid-column: span 1;
+  }
+  .reg_viewport {
+    padding: 30px 16px;
+  }
+  .reg_card {
+    padding: 32px 20px;
+  }
+  .reg_card h1 {
+    font-size: 1.75rem;
   }
 }
 

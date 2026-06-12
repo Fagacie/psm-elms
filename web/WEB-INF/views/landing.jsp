@@ -59,42 +59,16 @@
     <section class="lp_hero" id="home">
         <div class="lp_container lp_hero_grid">
             <div class="lp_hero_copy" data-aos="fade-up">
-                <h1>Start learning with clear steps and real progress you can track.</h1>
-                <p class="lp_hero_lead">Find a course, continue where you stopped, and verify your certificate easily when you finish.</p>
+                <h1>Start learning with clear steps and real progress.</h1>
+                <p class="lp_hero_lead">Find a course, continue where you stopped, and verify your certificate easily when you finish your learning journey.</p>
                 <div class="lp_hero_actions">
-                    <a class="lp_btn lp_btn_indigo" href="${pageContext.request.contextPath}/register">Get Started</a>
-                    <a class="lp_btn lp_btn_ghost" href="#features">Learn More</a>
+                    <a class="lp_btn lp_btn_indigo" href="${pageContext.request.contextPath}/register">Register</a>
+                    <a class="lp_btn lp_btn_ghost" href="${pageContext.request.contextPath}/login">Login</a>
                 </div>
             </div>
 
             <div class="lp_hero_visual" aria-hidden="true" data-aos="fade-up" data-aos-delay="200">
-                <div class="lp_floating_card lp_floating_card_1">
-                    <div class="lp_mini_avatar"></div>
-                    <div style="height: 8px; border-radius: 4px; background: var(--lp-gray-border); margin-bottom: 12px;"><div style="width: 70%; height: 100%; background: var(--lp-indigo); border-radius: 4px;"></div></div>
-                    <div style="font-size: 0.8rem; margin-top: 8px; color: var(--lp-slate-gray); font-weight: 600;">Active Learning</div>
-                </div>
-                
-                <div class="lp_floating_card lp_floating_card_2">
-                    <div style="font-size: 2rem; font-weight: 800; line-height: 1; margin-bottom: 4px;">148</div>
-                    <div style="font-size: 0.8rem; color: var(--lp-slate-light); font-weight: 600;">Enrolled Students</div>
-                    <div class="lp_mini_chart">
-                        <div class="lp_mini_chart_bar"></div>
-                        <div class="lp_mini_chart_bar"></div>
-                        <div class="lp_mini_chart_bar"></div>
-                        <div class="lp_mini_chart_bar"></div>
-                    </div>
-                </div>
-                
-                <div class="lp_floating_card lp_floating_card_3">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                        <span style="font-size: 0.8rem; font-weight: 700; color: var(--lp-slate-dark);">Module 1: HTML5 Semantics</span>
-                        <i data-lucide="check-circle" style="color: #22c55e; width: 18px; height: 18px;"></i>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-size: 0.8rem; font-weight: 700; color: var(--lp-slate-light);">Module 2: CSS3 Grid</span>
-                        <div style="width: 16px; height: 16px; border: 2px solid var(--lp-gray-border); border-radius: 50%;"></div>
-                    </div>
-                </div>
+                <canvas id="heroCanvas" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 1; border-radius: var(--lp-radius);"></canvas>
             </div>
         </div>
     </section>
@@ -106,18 +80,24 @@
             <h2 data-aos="fade-up" data-aos-delay="100">A quick view of who is learning here.</h2>
             <p data-aos="fade-up" data-aos-delay="200">Simple numbers help students and instructors see progress at a glance.</p>
             
-            <div class="lp_stats_grid" id="statsTrigger">
-                <div class="lp_stat_item" data-aos="fade-up" data-aos-delay="300">
-                    <strong data-target="${studentCount}" class="lp_stat_value lp_counter">0</strong>
-                    <span class="lp_stat_label">Active Students</span>
+            <div class="lp_stats_innovative" id="statsTrigger">
+                <div class="lp_stat_item_innovative" data-aos="fade-up" data-aos-delay="300">
+                    <div class="lp_stat_parallax_layer">
+                        <strong data-target="${empty studentCount ? 10500 : studentCount}" class="lp_stat_value_innovative lp_counter lp_text_gradient_1">0</strong>
+                        <span class="lp_stat_label_innovative"><i data-lucide="users"></i> Active Students</span>
+                    </div>
                 </div>
-                <div class="lp_stat_item" data-aos="fade-up" data-aos-delay="400">
-                    <strong data-target="${instructorCount}" class="lp_stat_value lp_counter">0</strong>
-                    <span class="lp_stat_label">Instructors</span>
+                <div class="lp_stat_item_innovative" data-aos="fade-up" data-aos-delay="400">
+                    <div class="lp_stat_parallax_layer">
+                        <strong data-target="${empty instructorCount ? 320 : instructorCount}" class="lp_stat_value_innovative lp_counter lp_text_gradient_2">0</strong>
+                        <span class="lp_stat_label_innovative"><i data-lucide="graduation-cap"></i> Instructors</span>
+                    </div>
                 </div>
-                <div class="lp_stat_item" data-aos="fade-up" data-aos-delay="500">
-                    <strong data-target="${courseCount}" class="lp_stat_value lp_counter">0</strong>
-                    <span class="lp_stat_label">Approved Courses</span>
+                <div class="lp_stat_item_innovative" data-aos="fade-up" data-aos-delay="500">
+                    <div class="lp_stat_parallax_layer">
+                        <strong data-target="${empty courseCount ? 1200 : courseCount}" class="lp_stat_value_innovative lp_counter lp_text_gradient_3">0</strong>
+                        <span class="lp_stat_label_innovative"><i data-lucide="book-open"></i> Approved Courses</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -127,66 +107,54 @@
     <section class="lp_section lp_courses lp_section_alt" id="courses">
         <div class="lp_container">
             <div class="lp_section_heading" data-aos="fade-up">
-                <p class="lp_eyebrow">Featured courses</p>
-                <h2>Choose a course and start learning.</h2>
-                <p>A short list makes it easier to find a course and continue quickly.</p>
+                <p class="lp_eyebrow">Explore our courses</p>
+                <h2>Discover your next skill.</h2>
+                <p>Browse our catalog, filter by category, and hover over a course to preview its syllabus.</p>
             </div>
             
             <c:choose>
                 <c:when test="${not empty featuredCourses}">
-                    <div class="lp_course_grid">
-                        <c:forEach var="course" items="${featuredCourses}" begin="0" end="2" varStatus="status">
-                            <article class="lp_course_card" data-aos="fade-up" data-aos-delay="${status.index * 150}">
-                                <div class="lp_course_cover">
-                                    <c:choose>
-                                        <c:when test="${not empty course.courseBanner}">
-                                            <c:choose>
-                                                <c:when test="${fn:startsWith(course.courseBanner, 'http')}">
-                                                    <img class="lp_course_img" src="${course.courseBanner}" alt="${course.courseName} cover">
-                                                </c:when>
-                                                <c:otherwise>
-                                                    <img class="lp_course_img" src="${pageContext.request.contextPath}${course.courseBanner}" alt="${course.courseName} cover">
-                                                </c:otherwise>
-                                            </c:choose>
-                                        </c:when>
-                                        <c:otherwise>
-                                            <div class="lp_course_img" style="display: flex; align-items: center; justify-content: center; background: var(--lp-gray-soft); color: var(--lp-slate-light);">No Image</div>
-                                        </c:otherwise>
-                                    </c:choose>
-                                </div>
-                                <div class="lp_course_content">
-                                    <span class="lp_course_category"><c:out value="${course.category}"/></span>
-                                    <h3><c:out value="${course.courseName}"/></h3>
-                                    
-                                    <div class="lp_course_footer">
-                                        <span class="lp_course_price">
-                                            <c:choose>
-                                                <c:when test="${course.courseFee > 0}">
-                                                    ₦<fmt:formatNumber value="${course.courseFee}" type="number" minFractionDigits="2"/>
-                                                </c:when>
-                                                <c:otherwise>Free</c:otherwise>
-                                            </c:choose>
-                                        </span>
-                                        <button type="button" class="lp_course_btn course-details-btn" 
-                                                data-name="${fn:escapeXml(course.courseName)}"
-                                                data-category="${fn:escapeXml(course.category)}"
-                                                data-level="${fn:escapeXml(course.level)}"
-                                                data-duration="${fn:escapeXml(course.displayDuration)}"
-                                                data-fee="${course.courseFee}"
-                                                data-desc="${fn:escapeXml(course.description)}"
-                                                aria-label="View Details">
-                                            <i data-lucide="arrow-right"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </article>
+                    <!-- Dynamic Search -->
+                    <div class="lp_course_search_container" data-aos="fade-up" data-aos-delay="50">
+                        <div class="lp_course_search">
+                            <i data-lucide="search"></i>
+                            <input type="text" id="courseSearchInput" placeholder="Search courses by name or keyword..." aria-label="Search courses">
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Grid -->
+                    <div class="lp_course_grid" id="dynamicCourseContainer" data-aos="fade-up" data-aos-delay="200">
+                        <!-- Course cards injected here via JS -->
+                    </div>
+
+                    <!-- Pagination Controls -->
+                    <div class="lp_course_pagination" id="coursePaginationContainer" data-aos="fade-up" data-aos-delay="300" style="display: none;">
+                        <button class="lp_page_btn" id="prevCoursePage" disabled><i data-lucide="chevron-left"></i> Prev</button>
+                        <span class="lp_page_indicator" id="coursePageIndicator">Page 1 of 1</span>
+                        <button class="lp_page_btn" id="nextCoursePage">Next <i data-lucide="chevron-right"></i></button>
+                    </div>
+
+                    <!-- Robust Data Store for JS parsing -->
+                    <div id="courseDataStore" style="display: none;">
+                        <c:forEach var="course" items="${featuredCourses}">
+                            <div class="course-data-item"
+                                 data-id="${course.courseId}"
+                                 data-name="${fn:escapeXml(course.courseName)}"
+                                 data-category="${fn:escapeXml(course.category)}"
+                                 data-fee="${course.courseFee}"
+                                 data-duration="${fn:escapeXml(course.displayDuration)}"
+                                 data-level="${fn:escapeXml(course.level)}"
+                                 data-banner="${fn:escapeXml(course.courseBanner)}"
+                                 data-context="${pageContext.request.contextPath}">
+                                 ${fn:escapeXml(course.description)}
+                            </div>
                         </c:forEach>
                     </div>
                 </c:when>
                 <c:otherwise>
                     <div style="padding: 60px; text-align: center; border: 1px dashed var(--lp-gray-border); border-radius: var(--lp-radius); color: var(--lp-slate-light);" data-aos="fade-up">
                         <i data-lucide="inbox" style="width: 48px; height: 48px; margin-bottom: 16px; opacity: 0.5;"></i>
-                        <p>No featured courses are available right now.</p>
+                        <p>No courses are available right now.</p>
                     </div>
                 </c:otherwise>
             </c:choose>
@@ -297,5 +265,75 @@
 <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
 <script src="${pageContext.request.contextPath}/js/landing.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const canvas = document.getElementById('heroCanvas');
+    if (canvas) {
+        const ctx = canvas.getContext('2d');
+        let width = canvas.offsetWidth;
+        let height = canvas.offsetHeight;
+        canvas.width = width;
+        canvas.height = height;
+
+        const particles = [];
+        const numParticles = 60;
+
+        for (let i = 0; i < numParticles; i++) {
+            particles.push({
+                x: Math.random() * width,
+                y: Math.random() * height,
+                vx: (Math.random() - 0.5) * 1.2,
+                vy: (Math.random() - 0.5) * 1.2,
+                radius: Math.random() * 2 + 1
+            });
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, width, height);
+            
+            for (let i = 0; i < numParticles; i++) {
+                let p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+
+                if (p.x < 0) { p.x = 0; p.vx *= -1; }
+                else if (p.x > width) { p.x = width; p.vx *= -1; }
+                if (p.y < 0) { p.y = 0; p.vy *= -1; }
+                else if (p.y > height) { p.y = height; p.vy *= -1; }
+
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(79, 70, 229, 0.6)';
+                ctx.fill();
+
+                for (let j = i + 1; j < numParticles; j++) {
+                    let p2 = particles[j];
+                    let dx = p.x - p2.x;
+                    let dy = p.y - p2.y;
+                    let dist = Math.sqrt(dx * dx + dy * dy);
+
+                    if (dist < 120) {
+                        ctx.beginPath();
+                        ctx.moveTo(p.x, p.y);
+                        ctx.lineTo(p2.x, p2.y);
+                        ctx.strokeStyle = 'rgba(79, 70, 229, ' + (1 - dist/120) * 0.4 + ')';
+                        ctx.lineWidth = 1;
+                        ctx.stroke();
+                    }
+                }
+            }
+            requestAnimationFrame(draw);
+        }
+        draw();
+
+        window.addEventListener('resize', () => {
+            width = canvas.offsetWidth;
+            height = canvas.offsetHeight;
+            canvas.width = width;
+            canvas.height = height;
+        });
+    }
+});
+</script>
 </body>
 </html>
