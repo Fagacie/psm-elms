@@ -323,7 +323,7 @@
 
                                                         {/* Inner printable Digital Pass targeted by React Ref */}
                                                         <div ref={receiptRef} className="history_rm_digitalPass" style={{ position: 'relative' }}>
-                                                            
+
                                                             {/* Official Document Watermark Stamp */}
                                                             <div className={"history_rm_stamp history_rm_stamp_" + selectedPayment.status.toLowerCase()}>
                                                                 {selectedPayment.status}

@@ -248,6 +248,15 @@ html[data-theme='dark'] .prof_card {
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
 }
 
+@media (max-width: 640px) {
+    .prof_container {
+        padding: 20px 16px;
+    }
+    .prof_card {
+        padding: 20px 16px;
+    }
+}
+
 .prof_cardTitle {
     font-size: 1.15rem;
     font-weight: 800;

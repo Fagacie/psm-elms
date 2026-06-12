@@ -640,7 +640,7 @@
                                 <div className={styles.card}>
                                     <h3 className={styles.cardTitle}>Account Settings</h3>
                                     
-                                    <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                                    <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
                                         <button 
                                             type="submit" 
                                             className={styles.saveBtn}
@@ -779,6 +779,11 @@
     const root = ReactDOM.createRoot(container);
     root.render(<ProfileSettingsWorkspace />);
 </script>
-<script src="${pageContext.request.contextPath}/js/student-v2.js"></script>
+
+<c:if test="${not isInstructorProfile and not isAdminProfile}">
+    <div class="sv-overlay" id="svOverlay"></div>
+    <script src="${pageContext.request.contextPath}/js/student-v2.js"></script>
+</c:if>
+
 </body>
 </html>

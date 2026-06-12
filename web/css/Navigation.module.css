@@ -452,6 +452,7 @@ body.sv-page {
   flex-direction: column;
   gap: 8px;
   min-height: 100%;
+  padding-bottom: 24px;
 }
 
 .nav_mod_nav {

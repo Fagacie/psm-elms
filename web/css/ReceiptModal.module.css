@@ -53,13 +53,13 @@
     display: flex;
     flex-direction: column;
     /* CSS Masking for the left and right semi-circle notches at 180px down */
-    -webkit-mask-image: radial-gradient(circle at 0px 180px, transparent 16px, black 17px), 
-                        radial-gradient(circle at 100% 180px, transparent 16px, black 17px);
+    -webkit-mask-image: radial-gradient(circle at 0px 180px, transparent 16px, black 17px),
+        radial-gradient(circle at 100% 180px, transparent 16px, black 17px);
     -webkit-mask-size: 51% 100%, 51% 100%;
     -webkit-mask-position: left, right;
     -webkit-mask-repeat: no-repeat;
-    mask-image: radial-gradient(circle at 0px 180px, transparent 16px, black 17px), 
-                radial-gradient(circle at 100% 180px, transparent 16px, black 17px);
+    mask-image: radial-gradient(circle at 0px 180px, transparent 16px, black 17px),
+        radial-gradient(circle at 100% 180px, transparent 16px, black 17px);
     mask-size: 51% 100%, 51% 100%;
     mask-position: left, right;
     mask-repeat: no-repeat;
@@ -72,7 +72,8 @@
     flex-direction: column;
     align-items: center;
     text-align: center;
-    min-height: 180px; /* Matches the notch position */
+    min-height: 180px;
+    /* Matches the notch position */
     box-sizing: border-box;
 }
 
@@ -110,9 +111,20 @@
     margin-bottom: 16px;
 }
 
-.history_rm_status_paid { background-color: #dcfce3; color: #166534; }
-.history_rm_status_pending { background-color: #fff3cd; color: #664d03; }
-.history_rm_status_failed { background-color: #f8d7da; color: #842029; }
+.history_rm_status_paid {
+    background-color: #dcfce3;
+    color: #166534;
+}
+
+.history_rm_status_pending {
+    background-color: #fff3cd;
+    color: #664d03;
+}
+
+.history_rm_status_failed {
+    background-color: #f8d7da;
+    color: #842029;
+}
 
 .history_rm_totalAmount {
     font-size: 2.5rem;
@@ -135,7 +147,8 @@
     padding: 24px 32px 32px;
     display: flex;
     flex-direction: column;
-    background: rgba(241, 245, 249, 0.5); /* Slight contrast from top */
+    background: rgba(241, 245, 249, 0.5);
+    /* Slight contrast from top */
 }
 
 .history_rm_metaGrid {
@@ -268,24 +281,43 @@ html[data-theme='dark'] .history_rm_barcodeStripes {
     opacity: 0.5;
 }
 
-html[data-theme='dark'] .history_rm_status_paid { background-color: rgba(22, 101, 52, 0.3); color: #86efac; }
-html[data-theme='dark'] .history_rm_status_pending { background-color: rgba(146, 64, 14, 0.3); color: #fde047; }
-html[data-theme='dark'] .history_rm_status_failed { background-color: rgba(153, 27, 27, 0.3); color: #fca5a5; }
+html[data-theme='dark'] .history_rm_status_paid {
+    background-color: rgba(22, 101, 52, 0.3);
+    color: #86efac;
+}
+
+html[data-theme='dark'] .history_rm_status_pending {
+    background-color: rgba(146, 64, 14, 0.3);
+    color: #fde047;
+}
+
+html[data-theme='dark'] .history_rm_status_failed {
+    background-color: rgba(153, 27, 27, 0.3);
+    color: #fca5a5;
+}
 
 /* ==========================================================================
    PRINT MEDIA STYLES (Single Page PDF)
    ========================================================================== */
 @media print {
-    body * { visibility: hidden !important; }
-    .history_rm_backdrop, .history_rm_backdrop * {
+    body * {
+        visibility: hidden !important;
+    }
+
+    .history_rm_backdrop,
+    .history_rm_backdrop * {
         visibility: visible !important;
         background: transparent !important;
         backdrop-filter: none !important;
         position: absolute !important;
-        left: 0 !important; top: 0 !important;
-        width: 100% !important; margin: 0 !important; padding: 0 !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
         display: block !important;
     }
+
     .history_rm_passWrapper {
         visibility: visible !important;
         position: absolute !important;
@@ -298,6 +330,7 @@ html[data-theme='dark'] .history_rm_status_failed { background-color: rgba(153, 
         margin: 0 auto !important;
         page-break-inside: avoid !important;
     }
+
     .history_rm_digitalPass {
         -webkit-mask-image: none !important;
         mask-image: none !important;
@@ -305,7 +338,9 @@ html[data-theme='dark'] .history_rm_status_failed { background-color: rgba(153, 
         border-radius: 12px !important;
         background: #ffffff !important;
     }
-    .history_rm_closeBtn, .history_rm_downloadBtn {
+
+    .history_rm_closeBtn,
+    .history_rm_downloadBtn {
         display: none !important;
     }
 }
@@ -362,34 +397,41 @@ html[data-theme='dark'] .history_rm_status_failed { background-color: rgba(153, 
         width: 100%;
         max-width: 100%;
     }
+
     .history_rm_metaGrid {
         grid-template-columns: 1fr;
         gap: 12px;
     }
+
     .history_rm_metaItem[style*="gridColumn: 'span 2'"],
     .history_rm_metaItem[style*="grid-column: span 2"] {
         grid-column: span 1 !important;
     }
+
     .history_rm_stamp {
         font-size: 2.5rem;
         padding: 8px 16px;
         border-width: 4px;
     }
+
     .history_rm_passTop {
         padding: 24px 20px 16px;
         min-height: auto;
     }
+
     .history_rm_passBottom {
         padding: 16px 20px 24px;
     }
+
     .history_rm_totalAmount {
         font-size: 2rem;
     }
+
     .history_rm_digitalPass {
         /* Adjust notches for smaller screens if needed, or keep them */
-        -webkit-mask-image: radial-gradient(circle at 0px 160px, transparent 12px, black 13px), 
-                            radial-gradient(circle at 100% 160px, transparent 12px, black 13px);
-        mask-image: radial-gradient(circle at 0px 160px, transparent 12px, black 13px), 
-                    radial-gradient(circle at 100% 160px, transparent 12px, black 13px);
+        -webkit-mask-image: radial-gradient(circle at 0px 160px, transparent 12px, black 13px),
+            radial-gradient(circle at 100% 160px, transparent 12px, black 13px);
+        mask-image: radial-gradient(circle at 0px 160px, transparent 12px, black 13px),
+            radial-gradient(circle at 100% 160px, transparent 12px, black 13px);
     }
 }
