@@ -201,138 +201,95 @@
                                         </div>
 
                                         <div className="history_ph_filterGroup" role="group" aria-label="Filter transactions by status">
-                                            {['all', 'paid', 'pending', 'failed'].map((status) => (
-                                                <button
-                                                    key={status}
-                                                    type="button"
-                                                    className={"history_ph_filterBtn " + (activeStatus === status ? "history_ph_filterBtnActive" : "")}
-                                                    onClick={() => setActiveStatus(status)}
+                                            <div className="history_ph_sortWrap">
+                                                <select
+                                                    className="history_ph_searchInput"
+                                                    style={{ paddingLeft: '16px', paddingRight: '36px', appearance: 'none', cursor: 'pointer', background: 'var(--sv-surface-secondary)' }}
+                                                    value={sortField + '-' + sortDirection}
+                                                    onChange={(e) => {
+                                                        const [f, d] = e.target.value.split('-');
+                                                        setSortField(f);
+                                                        setSortDirection(d);
+                                                    }}
                                                 >
-                                                    {status.charAt(0).toUpperCase() + status.slice(1)}
-                                                </button>
-                                            ))}
+                                                    <option value="paymentDate-desc">Newest First</option>
+                                                    <option value="paymentDate-asc">Oldest First</option>
+                                                    <option value="amount-desc">Highest Amount</option>
+                                                    <option value="amount-asc">Lowest Amount</option>
+                                                    <option value="courseName-asc">Course A-Z</option>
+                                                </select>
+                                                <i data-lucide="chevron-down" style={{ position: 'absolute', right: '12px', top: '11px', width: 16, height: 16, pointerEvents: 'none', color: 'var(--sv-muted)' }}></i>
+                                            </div>
+
+                                            <div className="history_ph_statusGroup">
+                                                {['all', 'paid', 'pending', 'failed'].map((status) => (
+                                                    <button
+                                                        key={status}
+                                                        type="button"
+                                                        className={"history_ph_filterBtn " + (activeStatus === status ? "history_ph_filterBtnActive" : "")}
+                                                        onClick={() => setActiveStatus(status)}
+                                                    >
+                                                        {status.charAt(0).toUpperCase() + status.slice(1)}
+                                                    </button>
+                                                ))}
+                                            </div>
                                         </div>
                                     </div>
 
-                                    {/* Responsive Interactive Table Wrapper */}
-                                    <div className="history_ph_tableWrapper">
-                                        <table className="history_ph_table">
-                                            <thead>
-                                                <tr>
-                                                    <th 
-                                                        className={"history_ph_th history_ph_thSortable " + (sortField === 'courseName' ? 'history_ph_thActive' : '')}
-                                                        onClick={() => handleSort('courseName')}
-                                                    >
-                                                        Course Name
-                                                        <span className="history_ph_sortIndicator">
-                                                            {sortField === 'courseName' ? (
-                                                                sortDirection === 'asc' ? <i className="fas fa-chevron-up"></i> : <i className="fas fa-chevron-down"></i>
-                                                            ) : <i className="fas fa-sort" style={{ opacity: 0.3 }}></i>}
+                                    {/* Responsive Floating Ledger Rows */}
+                                    <div className="history_ph_ledgerList">
+                                        {isFiltering ? (
+                                            [1, 2, 3].map(i => (
+                                                <article key={i} className="history_ph_ledgerRow">
+                                                    <div className="history_ph_rowLeft">
+                                                        <div className="history_ph_skeletonText medium"></div>
+                                                        <div className="history_ph_skeletonText short" style={{ height: '12px', marginTop: '4px' }}></div>
+                                                    </div>
+                                                    <div className="history_ph_rowRight">
+                                                        <div className="history_ph_skeletonText short" style={{ width: '60px' }}></div>
+                                                        <div className="history_ph_skeletonBadge"></div>
+                                                        <div className="history_ph_skeletonBtn"></div>
+                                                    </div>
+                                                </article>
+                                            ))
+                                        ) : sortedAndFiltered.length === 0 ? (
+                                            <div className="history_ph_emptyState">
+                                                <i data-lucide="receipt" style={{ width: 48, height: 48, color: '#94a3b8', strokeWidth: 1.5 }}></i>
+                                                <h3>No payments found</h3>
+                                                <p>Try adjusting your search criteria or filter options.</p>
+                                            </div>
+                                        ) : (
+                                            sortedAndFiltered.map((payment) => (
+                                                <article key={payment.paymentId} className="history_ph_ledgerRow">
+                                                    <div className="history_ph_rowLeft">
+                                                        <h3 className="history_ph_courseTitle">{payment.courseName}</h3>
+                                                        <div className="history_ph_rowDate">
+                                                            <span>{payment.paymentRef}</span> &nbsp;&bull;&nbsp; {payment.paymentDate}
+                                                        </div>
+                                                    </div>
+                                                    <div className="history_ph_rowRight">
+                                                        <div className="history_ph_amount">{formatCurrency(payment.amount)}</div>
+                                                        <span className={"history_ph_badge history_ph_badge_" + payment.status.toLowerCase()}>
+                                                            <span style={{
+                                                                width: 6,
+                                                                height: 6,
+                                                                borderRadius: '50%',
+                                                                backgroundColor: payment.status.toLowerCase() === 'paid' ? '#198754' : (payment.status.toLowerCase() === 'pending' ? '#ffc107' : '#dc3545')
+                                                            }}></span>
+                                                            {payment.status}
                                                         </span>
-                                                    </th>
-                                                    <th className="history_ph_th">Reference ID</th>
-                                                    <th 
-                                                        className={"history_ph_th history_ph_thSortable " + (sortField === 'paymentDate' ? 'history_ph_thActive' : '')}
-                                                        onClick={() => handleSort('paymentDate')}
-                                                    >
-                                                        Date Paid
-                                                        <span className="history_ph_sortIndicator">
-                                                            {sortField === 'paymentDate' ? (
-                                                                sortDirection === 'asc' ? <i className="fas fa-chevron-up"></i> : <i className="fas fa-chevron-down"></i>
-                                                            ) : <i className="fas fa-sort" style={{ opacity: 0.3 }}></i>}
-                                                        </span>
-                                                    </th>
-                                                    <th 
-                                                        className={"history_ph_th history_ph_thSortable " + (sortField === 'amount' ? 'history_ph_thActive' : '')}
-                                                        onClick={() => handleSort('amount')}
-                                                        style={{ textAlign: 'right' }}
-                                                    >
-                                                        Amount
-                                                        <span className="history_ph_sortIndicator">
-                                                            {sortField === 'amount' ? (
-                                                                sortDirection === 'asc' ? <i className="fas fa-chevron-up"></i> : <i className="fas fa-chevron-down"></i>
-                                                            ) : <i className="fas fa-sort" style={{ opacity: 0.3 }}></i>}
-                                                        </span>
-                                                    </th>
-                                                    <th className="history_ph_th" style={{ textAlign: 'center' }}>Status</th>
-                                                    <th className="history_ph_th" style={{ textAlign: 'center' }}>Actions</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {isFiltering ? (
-                                                    [1, 2, 3].map(i => (
-                                                        <tr key={i} className="history_ph_tr">
-                                                            <td className="history_ph_td">
-                                                                <div className="history_ph_skeletonText medium"></div>
-                                                            </td>
-                                                            <td className="history_ph_td">
-                                                                <div className="history_ph_skeletonText short"></div>
-                                                            </td>
-                                                            <td className="history_ph_td">
-                                                                <div className="history_ph_skeletonText short"></div>
-                                                            </td>
-                                                            <td className="history_ph_td" style={{ textAlign: 'right' }}>
-                                                                <div className="history_ph_skeletonText short" style={{ marginLeft: 'auto' }}></div>
-                                                            </td>
-                                                            <td className="history_ph_td" style={{ textAlign: 'center' }}>
-                                                                <div className="history_ph_skeletonBadge" style={{ margin: '0 auto' }}></div>
-                                                            </td>
-                                                            <td className="history_ph_td" style={{ textAlign: 'center' }}>
-                                                                <div className="history_ph_skeletonBtn" style={{ margin: '0 auto' }}></div>
-                                                            </td>
-                                                        </tr>
-                                                    ))
-                                                ) : sortedAndFiltered.length === 0 ? (
-                                                    <tr>
-                                                        <td colSpan="6" className="history_ph_td">
-                                                            <div className="history_ph_emptyState">
-                                                                <i data-lucide="receipt" style={{ width: 48, height: 48, color: '#94a3b8', strokeWidth: 1.5 }}></i>
-                                                                <h3>No payments found</h3>
-                                                                <p>Try adjusting your search criteria or filter options.</p>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                ) : (
-                                                    sortedAndFiltered.map((payment) => (
-                                                        <tr key={payment.paymentId} className="history_ph_tr">
-                                                            <td className="history_ph_td" style={{ fontWeight: 600, color: 'var(--sv-heading, #0f172a)' }}>
-                                                                {payment.courseName}
-                                                            </td>
-                                                            <td className="history_ph_td">
-                                                                <span className="history_ph_monoRef">{payment.paymentRef}</span>
-                                                            </td>
-                                                            <td className="history_ph_td" style={{ color: 'var(--sv-muted, #64748b)' }}>
-                                                                {payment.paymentDate}
-                                                            </td>
-                                                            <td className="history_ph_td" style={{ textAlign: 'right', fontWeight: 700 }}>
-                                                                {formatCurrency(payment.amount)}
-                                                            </td>
-                                                            <td className="history_ph_td" style={{ textAlign: 'center' }}>
-                                                                <span className={"history_ph_badge history_ph_badge_" + payment.status.toLowerCase()}>
-                                                                    <span style={{
-                                                                        width: 6,
-                                                                        height: 6,
-                                                                        borderRadius: '50%',
-                                                                        backgroundColor: payment.status.toLowerCase() === 'paid' ? '#198754' : (payment.status.toLowerCase() === 'pending' ? '#ffc107' : '#dc3545')
-                                                                    }}></span>
-                                                                    {payment.status}
-                                                                </span>
-                                                            </td>
-                                                            <td className="history_ph_td" style={{ textAlign: 'center' }}>
-                                                                <button
-                                                                    type="button"
-                                                                    className="history_ph_viewBtn"
-                                                                    onClick={() => setSelectedPayment(payment)}
-                                                                >
-                                                                    <i data-lucide="file-text" style={{ width: 16, height: 16 }}></i>
-                                                                    View Receipt
-                                                                </button>
-                                                            </td>
-                                                        </tr>
-                                                    ))
-                                                )}
-                                            </tbody>
-                                        </table>
+                                                        <button
+                                                            type="button"
+                                                            className="history_ph_viewBtn"
+                                                            onClick={() => setSelectedPayment(payment)}
+                                                        >
+                                                            <i data-lucide="file-text" style={{ width: 16, height: 16 }}></i>
+                                                            View Receipt
+                                                        </button>
+                                                    </div>
+                                                </article>
+                                            ))
+                                        )}
                                     </div>
 
                                     {/* Task 2 & 3: iOS-style Elastic Receipt Modal */}
@@ -347,7 +304,7 @@
                                                     onClick={() => setSelectedPayment(null)}
                                                 >
                                                     <motion.section
-                                                        className="history_rm_paper"
+                                                        className="history_rm_passWrapper"
                                                         initial={{ scale: 0.9, y: 15, opacity: 0 }}
                                                         animate={{ scale: 1, y: 0, opacity: 1 }}
                                                         exit={{ scale: 0.92, y: 10, opacity: 0 }}
@@ -361,68 +318,70 @@
                                                             onClick={() => setSelectedPayment(null)}
                                                             aria-label="Close modal"
                                                         >
-                                                            <i data-lucide="x" style={{ width: 16, height: 16, strokeWidth: 2.5 }}></i>
+                                                            <i data-lucide="x" style={{ width: 20, height: 20, strokeWidth: 2.5 }}></i>
                                                         </button>
 
-                                                        {/* Inner Thermal printable document targeted by React Ref */}
-                                                        <div ref={receiptRef} className="history_rm_printableArea">
-
-                                                            {/* Thermal Header Platform Name */}
-                                                            <div className="history_rm_header">
-                                                                <i data-lucide="qr-code" className="history_rm_thermalIcon" style={{ width: 44, height: 44, strokeWidth: 1.5 }}></i>
-                                                                <h3 className="history_rm_platformName">PSM E-LEARNING</h3>
-                                                                <span className="history_rm_subtitle">CASHIER: AUTOMATED SYSTEM</span>
-                                                                <span className="history_rm_subtitle">*** TRANSACTION RECORD ***</span>
+                                                        {/* Inner printable Digital Pass targeted by React Ref */}
+                                                        <div ref={receiptRef} className="history_rm_digitalPass" style={{ position: 'relative' }}>
+                                                            
+                                                            {/* Official Document Watermark Stamp */}
+                                                            <div className={"history_rm_stamp history_rm_stamp_" + selectedPayment.status.toLowerCase()}>
+                                                                {selectedPayment.status}
                                                             </div>
 
-                                                            {/* Massive Bold Total Boxed with dashed borders */}
-                                                            <div className="history_rm_totalBox">
-                                                                <span className="history_rm_totalLabel">TOTAL AMOUNT</span>
+                                                            {/* Pass Top: Title & Price */}
+                                                            <div className="history_rm_passTop" style={{ zIndex: 2, position: 'relative' }}>
+                                                                <div className="history_rm_platformIcon">
+                                                                    <i data-lucide="wallet" style={{ width: 24, height: 24, strokeWidth: 2 }}></i>
+                                                                </div>
+                                                                <h3 className="history_rm_courseTitle">{selectedPayment.courseName}</h3>
+                                                                <span className={"history_rm_statusBadge history_rm_status_" + selectedPayment.status.toLowerCase()}>
+                                                                    <span style={{
+                                                                        width: 6, height: 6, borderRadius: '50%',
+                                                                        backgroundColor: selectedPayment.status.toLowerCase() === 'paid' ? '#166534' : (selectedPayment.status.toLowerCase() === 'pending' ? '#664d03' : '#842029')
+                                                                    }}></span>
+                                                                    {selectedPayment.status}
+                                                                </span>
                                                                 <div className="history_rm_totalAmount">
                                                                     {formatCurrency(selectedPayment.amount)}
                                                                 </div>
                                                             </div>
 
-                                                            {/* Monospace Metadata Detail Fields */}
-                                                            <div className="history_rm_lineItem">
-                                                                <span className="history_rm_label">DATE PAID</span>
-                                                                <span className="history_rm_monospace">{selectedPayment.paymentDate}</span>
-                                                            </div>
+                                                            {/* Dashed Tear Line */}
+                                                            <div className="history_rm_passDivider" style={{ zIndex: 2, position: 'relative' }}></div>
 
-                                                            <div className="history_rm_lineItem">
-                                                                <span className="history_rm_label">TRANSACTION ID</span>
-                                                                <span className="history_rm_monospace">{selectedPayment.paymentRef}</span>
-                                                            </div>
+                                                            {/* Pass Bottom: Metadata & Barcode */}
+                                                            <div className="history_rm_passBottom" style={{ zIndex: 2, position: 'relative' }}>
+                                                                <div className="history_rm_metaGrid">
+                                                                    <div className="history_rm_metaItem">
+                                                                        <span className="history_rm_metaLabel">Student Name</span>
+                                                                        <span className="history_rm_metaValue">{selectedPayment.studentName}</span>
+                                                                    </div>
+                                                                    <div className="history_rm_metaItem">
+                                                                        <span className="history_rm_metaLabel">Enrollment ID</span>
+                                                                        <span className="history_rm_metaValue mono">{selectedPayment.enrollmentId}</span>
+                                                                    </div>
+                                                                    <div className="history_rm_metaItem">
+                                                                        <span className="history_rm_metaLabel">Date & Time</span>
+                                                                        <span className="history_rm_metaValue">{selectedPayment.paymentDate}</span>
+                                                                    </div>
+                                                                    <div className="history_rm_metaItem">
+                                                                        <span className="history_rm_metaLabel">Method</span>
+                                                                        <span className="history_rm_metaValue" style={{ textTransform: 'capitalize' }}>{selectedPayment.method}</span>
+                                                                    </div>
+                                                                    <div className="history_rm_metaItem" style={{ gridColumn: 'span 2' }}>
+                                                                        <span className="history_rm_metaLabel">Transaction Reference</span>
+                                                                        <span className="history_rm_metaValue mono" style={{ fontSize: '0.8rem' }}>
+                                                                            {selectedPayment.paymentRef}
+                                                                            {selectedPayment.paystackReference !== '-' && ` / ${selectedPayment.paystackReference}`}
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
 
-                                                            <div className="history_rm_lineItem">
-                                                                <span className="history_rm_label">GATEWAY REF</span>
-                                                                <span className="history_rm_monospace">{selectedPayment.paystackReference}</span>
-                                                            </div>
-
-                                                            <div className="history_rm_lineItem">
-                                                                <span className="history_rm_label">METHOD</span>
-                                                                <span className="history_rm_monospace">{selectedPayment.method.toUpperCase()}</span>
-                                                            </div>
-
-                                                            <div className="history_rm_dashedDivider"></div>
-
-                                                            <div className="history_rm_lineItem">
-                                                                <span className="history_rm_label">ITEM</span>
-                                                                <span className="history_rm_monospace" style={{ textAlign: 'right', display: 'block' }}>
-                                                                    {selectedPayment.courseName.toUpperCase()}
-                                                                </span>
-                                                            </div>
-
-                                                            {/* Stylized Mock Barcode */}
-                                                            <div className="history_rm_barcodeContainer">
-                                                                <div className="history_rm_barcodeStripes"></div>
-                                                                <span className="history_rm_barcodeText">*{selectedPayment.paymentId}*</span>
-                                                            </div>
-
-                                                            {/* Receipt Footer Message */}
-                                                            <div className="history_rm_footer">
-                                                                *** THANK YOU FOR ENROLLING ***<br />
-                                                                SUPPORT: SUPPORT@USYYTECH.COM
+                                                                <div className="history_rm_barcodeWrapper">
+                                                                    <div className="history_rm_barcodeStripes"></div>
+                                                                    <span className="history_rm_barcodeText">*{selectedPayment.paymentId}*</span>
+                                                                </div>
                                                             </div>
                                                         </div>
 
@@ -433,7 +392,7 @@
                                                             onClick={handleDownload}
                                                         >
                                                             <i data-lucide="download" style={{ width: 18, height: 18, strokeWidth: 2.5 }}></i>
-                                                            <span>Download PDF</span>
+                                                            <span>Download Pass PDF</span>
                                                         </button>
                                                     </motion.section>
                                                 </motion.div>

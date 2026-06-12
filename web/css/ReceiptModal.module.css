@@ -1,10 +1,10 @@
-/* Isolated CSS Module for receipt modal simulating clean minimalist digital ticket */
+/* Premium Digital Wallet Pass Modal (Receipt Redesign) */
 
 .history_rm_backdrop {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.4); /* Softer backdrop for simpler visuals */
-    backdrop-filter: blur(8px);
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(12px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -13,251 +13,383 @@
     box-sizing: border-box;
 }
 
-.history_rm_paper {
+/* Wrapper for drop-shadow because mask-image on the child clips standard box-shadows */
+.history_rm_passWrapper {
     width: 380px;
     max-width: 95vw;
-    background: #ffffff; /* Clean pure white */
-    border-radius: 8px; /* Elegant, simple rounded corners */
-    box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.15); /* Minimal clean shadow */
-    border: 1px solid #f1f5f9; /* Super thin divider boundary */
     position: relative;
-    overflow: hidden;
-    padding: 32px 28px;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    page-break-inside: avoid;
-    transition: all 0.25s ease;
+    filter: drop-shadow(0 25px 40px rgba(0, 0, 0, 0.15));
+    transition: filter 0.3s ease;
 }
 
 .history_rm_closeBtn {
     position: absolute;
-    top: 16px;
-    right: 16px;
-    background: transparent;
+    top: -48px;
+    right: 0;
+    background: rgba(255, 255, 255, 0.2);
     border: none;
     cursor: pointer;
-    color: #94a3b8;
-    padding: 6px;
+    color: #ffffff;
+    padding: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    transition: all 0.15s ease;
+    transition: all 0.2s ease;
     z-index: 10;
 }
 
 .history_rm_closeBtn:hover {
+    background: #ffffff;
     color: #0f172a;
-    background: #f8fafc;
+    transform: scale(1.1);
 }
 
-/* Printable content targeted by React ref */
-.history_rm_printableArea {
+/* The actual Digital Pass with the CSS notched cutouts */
+.history_rm_digitalPass {
     width: 100%;
+    background: linear-gradient(160deg, #ffffff 0%, #f8fafc 100%);
+    border-radius: 20px;
     display: flex;
     flex-direction: column;
-    box-sizing: border-box;
-    background: #ffffff;
-    transition: background-color 0.25s ease;
+    /* CSS Masking for the left and right semi-circle notches at 180px down */
+    -webkit-mask-image: radial-gradient(circle at 0px 180px, transparent 16px, black 17px), 
+                        radial-gradient(circle at 100% 180px, transparent 16px, black 17px);
+    -webkit-mask-size: 51% 100%, 51% 100%;
+    -webkit-mask-position: left, right;
+    -webkit-mask-repeat: no-repeat;
+    mask-image: radial-gradient(circle at 0px 180px, transparent 16px, black 17px), 
+                radial-gradient(circle at 100% 180px, transparent 16px, black 17px);
+    mask-size: 51% 100%, 51% 100%;
+    mask-position: left, right;
+    mask-repeat: no-repeat;
 }
 
-.history_rm_header {
+/* --- Pass Top (Header & Total) --- */
+.history_rm_passTop {
+    padding: 36px 32px 24px;
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
-    margin-bottom: 6px;
+    min-height: 180px; /* Matches the notch position */
+    box-sizing: border-box;
 }
 
-.history_rm_thermalIcon {
-    color: #0f172a;
-    margin-bottom: 12px;
+.history_rm_platformIcon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: var(--sv-accent, #4f46e5);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+    box-shadow: 0 8px 16px rgba(79, 70, 229, 0.25);
 }
 
-.history_rm_platformName {
+.history_rm_courseTitle {
     font-size: 1.1rem;
     font-weight: 700;
     color: #0f172a;
-    letter-spacing: 0.02em;
-    margin: 0;
+    margin: 0 0 4px;
+    line-height: 1.3;
 }
 
-.history_rm_subtitle {
-    font-family: ui-monospace, SFMono-Regular, monospace;
+.history_rm_statusBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 99px;
     font-size: 0.7rem;
-    color: #94a3b8;
-    margin-top: 4px;
-    letter-spacing: 0.05em;
-}
-
-.history_rm_totalBox {
-    border-top: 1px solid #e2e8f0;
-    border-bottom: 1px solid #e2e8f0;
-    padding: 14px 0;
-    margin: 18px 0;
-    text-align: center;
-    width: 100%;
-}
-
-.history_rm_totalLabel {
-    font-family: ui-monospace, SFMono-Regular, monospace;
-    font-size: 0.72rem;
-    color: #94a3b8;
+    font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.05em;
+    margin-bottom: 16px;
 }
+
+.history_rm_status_paid { background-color: #dcfce3; color: #166534; }
+.history_rm_status_pending { background-color: #fff3cd; color: #664d03; }
+.history_rm_status_failed { background-color: #f8d7da; color: #842029; }
 
 .history_rm_totalAmount {
-    font-size: 2rem;
-    font-weight: 700;
+    font-size: 2.5rem;
+    font-weight: 800;
     color: #0f172a;
-    margin: 4px 0 0 0;
     letter-spacing: -0.02em;
+    margin-top: auto;
 }
 
-.history_rm_dashedDivider {
-    border-bottom: 1px solid #e2e8f0;
-    margin: 18px 0;
-    width: 100%;
+/* --- Pass Tear Line --- */
+.history_rm_passDivider {
+    width: calc(100% - 64px);
+    margin: 0 auto;
+    border-top: 2px dashed #cbd5e1;
+    opacity: 0.7;
 }
 
-.history_rm_lineItem {
+/* --- Pass Bottom (Metadata & Barcode) --- */
+.history_rm_passBottom {
+    padding: 24px 32px 32px;
     display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    font-size: 0.84rem;
-    margin-bottom: 10px;
-    width: 100%;
+    flex-direction: column;
+    background: rgba(241, 245, 249, 0.5); /* Slight contrast from top */
 }
 
-.history_rm_lineItem:last-child {
-    margin-bottom: 0;
+.history_rm_metaGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 28px;
 }
 
-.history_rm_label {
+.history_rm_metaItem {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.history_rm_metaLabel {
+    font-size: 0.75rem;
     color: #64748b;
-    font-weight: 500;
-}
-
-.history_rm_monospace {
-    font-family: ui-monospace, SFMono-Regular, monospace;
-    color: #0f172a;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
     font-weight: 600;
-    text-align: right;
-    max-width: 220px;
-    word-break: break-word;
 }
 
-/* Minimal Barcode */
-.history_rm_barcodeContainer {
+.history_rm_metaValue {
+    font-size: 0.9rem;
+    color: #0f172a;
+    font-weight: 700;
+    word-break: break-all;
+}
+
+.history_rm_metaValue.mono {
+    font-family: ui-monospace, SFMono-Regular, monospace;
+}
+
+/* Futuristic Barcode */
+.history_rm_barcodeWrapper {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-top: 24px;
-    gap: 6px;
+    margin-top: 10px;
 }
 
-.history_rm_barcodeSvg {
+.history_rm_barcodeStripes {
+    height: 48px;
     width: 100%;
-    max-width: 180px;
-    height: 30px;
+    background: repeating-linear-gradient(90deg,
+            #0f172a,
+            #0f172a 2px,
+            transparent 2px,
+            transparent 6px,
+            #0f172a 6px,
+            #0f172a 10px);
+    opacity: 0.8;
+    border-radius: 4px;
+    margin-bottom: 8px;
 }
 
 .history_rm_barcodeText {
     font-family: ui-monospace, SFMono-Regular, monospace;
-    font-size: 0.68rem;
-    color: #94a3b8;
-    letter-spacing: 0.1em;
+    font-size: 0.75rem;
+    color: #64748b;
+    letter-spacing: 0.25em;
 }
 
-/* Receipt Footer Message */
-.history_rm_footer {
-    margin-top: 20px;
-    text-align: center;
-    font-family: ui-monospace, SFMono-Regular, monospace;
-    font-size: 0.72rem;
-    color: #94a3b8;
-    line-height: 1.4;
-}
-
+/* Download Action Button */
 .history_rm_downloadBtn {
-    background: #0f172a;
+    background: var(--sv-accent, #4f46e5);
     color: #ffffff;
     border: none;
-    border-radius: 6px;
-    padding: 12px 18px;
-    font-size: 0.88rem;
+    border-radius: 12px;
+    padding: 14px 24px;
+    font-size: 0.95rem;
     font-weight: 600;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 10px;
     margin-top: 24px;
-    transition: background-color 0.15s ease;
+    transition: all 0.2s ease;
     width: 100%;
     box-sizing: border-box;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
 }
 
 .history_rm_downloadBtn:hover {
-    background-color: #1e293b;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(79, 70, 229, 0.3);
 }
 
 /* ==========================================================================
-   DARK MODE OVERRIDES (html[data-theme='dark'])
+   DARK MODE OVERRIDES
    ========================================================================== */
 
-html[data-theme='dark'] .history_rm_paper {
-    background: #1e293b !important;
-    border-color: rgba(255, 255, 255, 0.05) !important;
-    box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5) !important;
+html[data-theme='dark'] .history_rm_passWrapper {
+    filter: drop-shadow(0 25px 50px rgba(0, 0, 0, 0.6));
 }
 
-html[data-theme='dark'] .history_rm_printableArea {
-    background: #1e293b !important;
+html[data-theme='dark'] .history_rm_digitalPass {
+    background: linear-gradient(160deg, #1e293b 0%, #0f172a 100%);
 }
 
-html[data-theme='dark'] .history_rm_platformName,
+html[data-theme='dark'] .history_rm_passBottom {
+    background: rgba(15, 23, 42, 0.4);
+}
+
+html[data-theme='dark'] .history_rm_courseTitle,
 html[data-theme='dark'] .history_rm_totalAmount,
-html[data-theme='dark'] .history_rm_monospace {
-    color: #ffffff !important;
+html[data-theme='dark'] .history_rm_metaValue {
+    color: #f8fafc;
 }
 
-html[data-theme='dark'] .history_rm_thermalIcon {
-    color: #3b82f6 !important;
-}
-
-html[data-theme='dark'] .history_rm_subtitle,
-html[data-theme='dark'] .history_rm_totalLabel,
-html[data-theme='dark'] .history_rm_label,
-html[data-theme='dark'] .history_rm_footer,
+html[data-theme='dark'] .history_rm_metaLabel,
 html[data-theme='dark'] .history_rm_barcodeText {
-    color: #94a3b8 !important;
+    color: #94a3b8;
 }
 
-html[data-theme='dark'] .history_rm_totalBox {
-    border-top-color: rgba(255, 255, 255, 0.08) !important;
-    border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+html[data-theme='dark'] .history_rm_passDivider {
+    border-top-color: #334155;
 }
 
-html[data-theme='dark'] .history_rm_dashedDivider {
-    border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+html[data-theme='dark'] .history_rm_barcodeStripes {
+    background: repeating-linear-gradient(90deg,
+            #cbd5e1,
+            #cbd5e1 2px,
+            transparent 2px,
+            transparent 6px,
+            #cbd5e1 6px,
+            #cbd5e1 10px);
+    opacity: 0.5;
 }
 
-html[data-theme='dark'] .history_rm_barcodeSvg g {
-    fill: #e2e8f0 !important;
+html[data-theme='dark'] .history_rm_status_paid { background-color: rgba(22, 101, 52, 0.3); color: #86efac; }
+html[data-theme='dark'] .history_rm_status_pending { background-color: rgba(146, 64, 14, 0.3); color: #fde047; }
+html[data-theme='dark'] .history_rm_status_failed { background-color: rgba(153, 27, 27, 0.3); color: #fca5a5; }
+
+/* ==========================================================================
+   PRINT MEDIA STYLES (Single Page PDF)
+   ========================================================================== */
+@media print {
+    body * { visibility: hidden !important; }
+    .history_rm_backdrop, .history_rm_backdrop * {
+        visibility: visible !important;
+        background: transparent !important;
+        backdrop-filter: none !important;
+        position: absolute !important;
+        left: 0 !important; top: 0 !important;
+        width: 100% !important; margin: 0 !important; padding: 0 !important;
+        display: block !important;
+    }
+    .history_rm_passWrapper {
+        visibility: visible !important;
+        position: absolute !important;
+        left: 50% !important;
+        top: 30px !important;
+        transform: translateX(-50%) !important;
+        width: 380px !important;
+        max-width: 100% !important;
+        filter: none !important;
+        margin: 0 auto !important;
+        page-break-inside: avoid !important;
+    }
+    .history_rm_digitalPass {
+        -webkit-mask-image: none !important;
+        mask-image: none !important;
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 12px !important;
+        background: #ffffff !important;
+    }
+    .history_rm_closeBtn, .history_rm_downloadBtn {
+        display: none !important;
+    }
 }
 
-html[data-theme='dark'] .history_rm_closeBtn:hover {
-    color: #ffffff;
-    background: rgba(255, 255, 255, 0.08);
+/* ==========================================================================
+   OFFICIAL TICKET WATERMARK STAMPS
+   ========================================================================== */
+.history_rm_stamp {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-15deg);
+    border: 6px double;
+    border-radius: 12px;
+    padding: 12px 32px;
+    font-size: 3.5rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    opacity: 0.08;
+    pointer-events: none;
+    z-index: 1;
+    font-family: 'Courier New', Courier, monospace;
+    white-space: nowrap;
 }
 
-html[data-theme='dark'] .history_rm_downloadBtn {
-    background: #3b82f6 !important;
+.history_rm_stamp_paid {
+    color: #166534;
+    border-color: #166534;
 }
 
-html[data-theme='dark'] .history_rm_downloadBtn:hover {
-    background: #2563eb !important;
+.history_rm_stamp_pending {
+    color: #854d0e;
+    border-color: #854d0e;
+}
+
+.history_rm_stamp_failed {
+    color: #991b1b;
+    border-color: #991b1b;
+}
+
+/* Ensure the stamp shows properly and powerfully on print */
+@media print {
+    .history_rm_stamp {
+        opacity: 0.15 !important;
+    }
+}
+
+/* ==========================================================================
+   RESPONSIVE MEDIA QUERIES
+   ========================================================================== */
+@media (max-width: 480px) {
+    .history_rm_passWrapper {
+        width: 100%;
+        max-width: 100%;
+    }
+    .history_rm_metaGrid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    .history_rm_metaItem[style*="gridColumn: 'span 2'"],
+    .history_rm_metaItem[style*="grid-column: span 2"] {
+        grid-column: span 1 !important;
+    }
+    .history_rm_stamp {
+        font-size: 2.5rem;
+        padding: 8px 16px;
+        border-width: 4px;
+    }
+    .history_rm_passTop {
+        padding: 24px 20px 16px;
+        min-height: auto;
+    }
+    .history_rm_passBottom {
+        padding: 16px 20px 24px;
+    }
+    .history_rm_totalAmount {
+        font-size: 2rem;
+    }
+    .history_rm_digitalPass {
+        /* Adjust notches for smaller screens if needed, or keep them */
+        -webkit-mask-image: radial-gradient(circle at 0px 160px, transparent 12px, black 13px), 
+                            radial-gradient(circle at 100% 160px, transparent 12px, black 13px);
+        mask-image: radial-gradient(circle at 0px 160px, transparent 12px, black 13px), 
+                    radial-gradient(circle at 100% 160px, transparent 12px, black 13px);
+    }
 }
