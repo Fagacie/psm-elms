@@ -24,6 +24,10 @@
   --lp-transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
 html {
   scroll-behavior: smooth;
   overflow-x: hidden;
@@ -1014,6 +1018,12 @@ h1, h2, h3, h4, h5, h6 {
   margin-bottom: 0 !important;
 }
 
+.lp_footer_socials a svg,
+.lp_footer_socials a i {
+  width: 20px;
+  height: 20px;
+}
+
 .lp_footer_socials a:hover {
   background: var(--lp-cyan-gradient);
   border-color: transparent;
@@ -1108,52 +1118,66 @@ h1, h2, h3, h4, h5, h6 {
   .lp_nav_wrapper {
     display: flex;
     flex-direction: column;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(15, 23, 42, 0.95);
+    position: absolute;
+    top: calc(100% + 16px);
+    left: 16px;
+    right: 16px;
+    width: auto;
+    height: auto;
+    background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
+    border-radius: 24px;
+    box-shadow: 0 30px 60px rgba(15, 23, 42, 0.15);
+    border: 1px solid rgba(15, 23, 42, 0.05);
     z-index: 90;
-    padding: 100px 24px 24px;
+    padding: 32px 24px;
     opacity: 0;
     pointer-events: none;
-    transform: translateY(-20px);
+    transform: translateY(-20px) scale(0.95);
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   }
   
   .lp_header.lp_mobile_open .lp_nav_wrapper {
     opacity: 1;
     pointer-events: auto;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
   }
   
   .lp_nav {
     flex-direction: column;
     align-items: center;
-    gap: 32px;
+    gap: 24px;
     margin: 0 auto;
+    width: 100%;
   }
   
   .lp_nav a {
-    color: var(--lp-white);
-    font-size: 1.5rem;
+    color: var(--lp-slate-dark);
+    font-size: 1.25rem;
     font-weight: 700;
+    width: 100%;
+    text-align: center;
+    padding: 12px 0;
+    border-radius: 12px;
+    transition: background 0.3s;
+  }
+  
+  .lp_nav a:active {
+    background: rgba(15, 23, 42, 0.05);
   }
   
   .lp_header_actions {
     flex-direction: column;
     width: 100%;
-    margin-top: 40px;
+    margin-top: 32px;
     gap: 16px;
   }
 
   .lp_header_actions .lp_btn {
     width: 100%;
     min-height: 56px;
-    font-size: 1.1rem;
+    font-size: 1.05rem;
   }
 
   .lp_hamburger {
@@ -1161,11 +1185,11 @@ h1, h2, h3, h4, h5, h6 {
     margin-left: auto;
     position: relative;
     z-index: 100;
-    transition: color 0.3s ease;
+    transition: transform 0.3s ease;
   }
   
   .lp_header.lp_mobile_open .lp_hamburger {
-    color: var(--lp-white);
+    transform: rotate(90deg);
   }
 }
 
@@ -1217,31 +1241,31 @@ h1, h2, h3, h4, h5, h6 {
   /* Features Galaxy Responsiveness */
   .lp_feature_galaxy {
     height: auto;
-    display: flex;
-    flex-direction: column;
-    padding: 40px 24px;
-    gap: 32px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    padding: 32px 20px;
+    gap: 24px;
     border-radius: 24px;
   }
   .lp_orb {
     position: relative !important;
     top: auto !important; left: auto !important; right: auto !important; bottom: auto !important;
     animation: none !important;
-    flex-direction: row !important;
-    text-align: left;
-    align-items: flex-start;
-    gap: 16px;
+    flex-direction: column !important;
+    text-align: center;
+    align-items: center;
+    gap: 12px;
     width: 100%;
   }
   .lp_orb_core {
-    width: 60px;
-    height: 60px;
+    width: 50px;
+    height: 50px;
     margin: 0;
     flex-shrink: 0;
   }
   .lp_orb_core i {
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
   }
   .lp_orb_info {
     opacity: 1;
@@ -1254,13 +1278,14 @@ h1, h2, h3, h4, h5, h6 {
     padding: 0;
   }
   .lp_orb_info h3 {
-    font-size: 1.1rem;
+    font-size: 0.95rem;
     margin-bottom: 4px;
   }
   .lp_orb_info p {
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     color: rgba(255, 255, 255, 0.7);
   }
+
   
   /* Verification section responsiveness */
   .lp_verify_wrapper {

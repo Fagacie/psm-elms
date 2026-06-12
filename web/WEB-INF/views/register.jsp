@@ -17,6 +17,8 @@
         </head>
 
         <body class="sv-page">
+            <div class="reg_bg_orb reg_bg_orb_1"></div>
+            <div class="reg_bg_orb reg_bg_orb_2"></div>
             <div class="reg_viewport">
 
                 <div class="reg_card">

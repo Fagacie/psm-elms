@@ -14,6 +14,9 @@
 </head>
 <body class="log_page">
 
+<div class="log_bg_orb log_bg_orb_1"></div>
+<div class="log_bg_orb log_bg_orb_2"></div>
+
 <div class="log_container">
     <aside class="log_visual">
         <a href="${pageContext.request.contextPath}/landing" class="log_brand">PSM E-Learning</a>
@@ -59,13 +62,18 @@
                     <label class="log_label" for="password">Password</label>
                     <a href="${pageContext.request.contextPath}/forgot-password" class="log_link">Forgot password?</a>
                 </div>
-                <input 
-                        id="password" 
-                        name="password" 
-                        class="log_input" 
-                        type="password" 
-                        placeholder="Enter your password" 
-                        required>
+                <div class="log_input_group">
+                    <input 
+                            id="password" 
+                            name="password" 
+                            class="log_input" 
+                            type="password" 
+                            placeholder="Enter your password" 
+                            required>
+                    <button type="button" class="log_pwd_toggle" id="togglePassword" aria-label="Toggle password visibility">
+                        <i data-lucide="eye"></i>
+                    </button>
+                </div>
             </div>
 
             <button type="submit" class="log_btn">Login</button>
@@ -77,6 +85,31 @@
         </p>
     </main>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
+        const togglePassword = document.getElementById('togglePassword');
+        const password = document.getElementById('password');
+
+        if (togglePassword && password) {
+            togglePassword.addEventListener('click', function () {
+                const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+                password.setAttribute('type', type);
+                
+                const icon = this.querySelector('i');
+                if (type === 'text') {
+                    icon.setAttribute('data-lucide', 'eye-off');
+                } else {
+                    icon.setAttribute('data-lucide', 'eye');
+                }
+                lucide.createIcons();
+            });
+        }
+    });
+</script>
 
 </body>
 </html>

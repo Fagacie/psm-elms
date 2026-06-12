@@ -1,6 +1,6 @@
 /* ============================================================
    Register.module.css
-   Indigo & Slate SaaS Aesthetic (2026 Standards)
+   Dark Glassmorphism Aesthetic
    Prefix: reg_
    ============================================================ */
 
@@ -11,19 +11,60 @@
   --reg-slate-light: #94a3b8;
   --reg-white: #ffffff;
   --reg-gray-soft: #f8fafc;
-  --reg-gray-border: #e2e8f0;
+  --reg-gray-border: rgba(255, 255, 255, 0.1);
   --reg-indigo: #4f46e5;
-  --reg-indigo-hover: #4338ca;
-  --reg-shadow-card: 0 20px 50px rgba(15, 23, 42, 0.08);
-  --reg-radius: 16px;
+  --reg-cyan: #06b6d4;
+  --reg-cyan-gradient: linear-gradient(135deg, #4f46e5 0%, #06b6d4 100%);
+  --reg-shadow-card: 0 30px 60px rgba(0, 0, 0, 0.4);
+  --reg-radius: 24px;
   --reg-transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
 }
 
 body.sv-page {
   margin: 0;
   font-family: var(--reg-font);
-  background: var(--reg-gray-soft);
-  color: var(--reg-slate-dark);
+  background: var(--reg-slate-dark);
+  color: var(--reg-white);
+  position: relative;
+  overflow-x: hidden;
+  color-scheme: dark;
+}
+
+/* Background Glowing Orbs */
+.reg_bg_orb {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(80px);
+  z-index: 0;
+  animation: floatOrb 20s infinite alternate ease-in-out;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.reg_bg_orb_1 {
+  width: 500px;
+  height: 500px;
+  background: var(--reg-indigo);
+  top: -100px;
+  left: -100px;
+}
+
+.reg_bg_orb_2 {
+  width: 600px;
+  height: 600px;
+  background: var(--reg-cyan);
+  bottom: -200px;
+  right: -100px;
+  animation-delay: -5s;
+}
+
+@keyframes floatOrb {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(40px, -40px) scale(1.1); }
 }
 
 .reg_viewport {
@@ -32,75 +73,94 @@ body.sv-page {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  padding: 60px 24px;
+  padding: 80px 24px;
+  position: relative;
+  z-index: 10;
 }
 
 /* --- Task 1: The Page Layout & Container --- */
 .reg_card {
   max-width: 900px;
   width: 100%;
-  padding: 48px;
-  background: var(--reg-white);
-  border: 1px solid var(--reg-gray-border);
+  padding: 60px;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--reg-radius);
   box-shadow: var(--reg-shadow-card);
   box-sizing: border-box;
+  animation: reg_fade_up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+@keyframes reg_fade_up {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .reg_card h1 {
-  font-size: 2.25rem;
+  font-size: 2.5rem;
   font-weight: 800;
-  color: var(--reg-slate-dark);
+  color: var(--reg-white);
   margin: 0 0 12px;
   letter-spacing: -0.02em;
 }
 
 .reg_sub {
-  font-size: 1rem;
-  color: var(--reg-slate-gray);
+  font-size: 1.05rem;
+  color: rgba(255, 255, 255, 0.7);
   margin: 0 0 40px;
   line-height: 1.5;
 }
 
 .reg_card h4 {
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   font-weight: 700;
-  color: var(--reg-slate-dark);
-  border-bottom: 1px solid var(--reg-gray-border);
-  padding-bottom: 12px;
+  color: var(--reg-white);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 16px;
   margin: 0 0 24px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 /* --- Task 2: Modern Avatar Picker --- */
 .reg_avatar_picker {
   position: relative;
-  width: 100px;
-  height: 100px;
+  width: 120px;
+  height: 120px;
   border-radius: 50%;
-  border: 2px dashed #cbd5e1;
+  border: 2px dashed rgba(255, 255, 255, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--reg-white);
+  background: rgba(255, 255, 255, 0.05);
   cursor: pointer;
   overflow: hidden;
   transition: all var(--reg-transition);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
 }
 
 .reg_avatar_picker:hover {
-  border-color: var(--reg-indigo);
-  background: rgba(79, 70, 229, 0.05);
+  border-color: var(--reg-cyan);
+  background: rgba(6, 182, 212, 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 15px 30px rgba(6, 182, 212, 0.2);
 }
 
 .reg_camera_icon {
-  width: 32px;
-  height: 32px;
-  color: var(--reg-slate-light);
+  width: 36px;
+  height: 36px;
+  color: rgba(255, 255, 255, 0.5);
   transition: color var(--reg-transition);
 }
 
 .reg_avatar_picker:hover .reg_camera_icon {
-  color: var(--reg-indigo);
+  color: var(--reg-cyan);
 }
 
 .reg_file_input {
@@ -133,24 +193,6 @@ body.sv-page {
   grid-column: span 2;
 }
 
-@media (max-width: 640px) {
-  .reg_formGrid {
-    grid-template-columns: 1fr;
-  }
-  .reg_fullWidth {
-    grid-column: span 1;
-  }
-  .reg_viewport {
-    padding: 30px 16px;
-  }
-  .reg_card {
-    padding: 32px 20px;
-  }
-  .reg_card h1 {
-    font-size: 1.75rem;
-  }
-}
-
 .reg_field {
   display: flex;
   flex-direction: column;
@@ -158,86 +200,152 @@ body.sv-page {
 }
 
 .reg_label {
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--reg-slate-gray);
+  color: rgba(255, 255, 255, 0.7);
   display: flex;
   align-items: baseline;
   justify-content: space-between;
 }
 
 .reg_req, .reg_opt {
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 500;
   text-transform: none;
   letter-spacing: normal;
 }
 
 .reg_req {
-  color: var(--reg-slate-light);
+  color: var(--reg-cyan);
 }
 
 .reg_opt {
-  color: var(--reg-slate-light);
+  color: rgba(255, 255, 255, 0.4);
 }
 
 .reg_input,
 .reg_select,
 .reg_textarea {
   width: 100%;
-  padding: 14px 16px;
-  background: var(--reg-gray-soft);
-  border: 1px solid var(--reg-gray-border);
-  border-radius: 8px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
   font-size: 1rem;
   font-family: var(--reg-font);
-  color: var(--reg-slate-dark);
+  color: var(--reg-white);
   box-sizing: border-box;
   transition: all var(--reg-transition);
 }
 
 .reg_input::placeholder,
 .reg_textarea::placeholder {
-  color: var(--reg-slate-light);
+  color: rgba(255, 255, 255, 0.3);
+}
+
+/* Fix Browser Autofill Background */
+.reg_input:-webkit-autofill,
+.reg_input:-webkit-autofill:hover, 
+.reg_input:-webkit-autofill:focus, 
+.reg_input:-webkit-autofill:active{
+    -webkit-box-shadow: 0 0 0 30px #1e293b inset !important;
+    -webkit-text-fill-color: var(--reg-white) !important;
+    transition: background-color 5000s ease-in-out 0s;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.reg_select {
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2394a3b8%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  background-size: 16px;
+}
+
+.reg_select option {
+  background: var(--reg-slate-dark);
+  color: var(--reg-white);
 }
 
 .reg_textarea {
   resize: vertical;
-  min-height: 100px;
+  min-height: 120px;
 }
 
 .reg_input:focus,
 .reg_select:focus,
 .reg_textarea:focus {
   outline: none;
-  border-color: transparent;
-  background: var(--reg-white);
-  box-shadow: 0 0 0 2px var(--reg-indigo);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--reg-cyan);
+  box-shadow: 0 0 0 4px rgba(6, 182, 212, 0.1);
 }
 
 /* --- Task 4: The Call-to-Action --- */
 .reg_btn {
-  background: var(--reg-indigo);
+  background: var(--reg-cyan-gradient);
   color: var(--reg-white);
   border: none;
-  border-radius: 8px;
-  padding: 16px 32px;
-  font-size: 1.05rem;
+  border-radius: 12px;
+  padding: 18px 32px;
+  font-size: 1.1rem;
   font-weight: 700;
   cursor: pointer;
   transition: all var(--reg-transition);
-  margin-top: 16px;
+  margin-top: 24px;
   width: 100%;
+  box-shadow: 0 10px 20px rgba(6, 182, 212, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.reg_btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(rgba(255,255,255,0.2), transparent);
+  opacity: 0;
+  transition: opacity var(--reg-transition);
 }
 
 .reg_btn:hover {
-  background: var(--reg-indigo-hover);
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(79, 70, 229, 0.25);
+  box-shadow: 0 15px 30px rgba(6, 182, 212, 0.4);
+}
+
+.reg_btn:hover::after {
+  opacity: 1;
 }
 
 .reg_btn:active {
   transform: translateY(0);
+}
+
+@media (max-width: 768px) {
+  .reg_formGrid {
+    grid-template-columns: 1fr;
+  }
+  .reg_fullWidth {
+    grid-column: span 1;
+  }
+  .reg_viewport {
+    padding: 40px 24px;
+  }
+  .reg_card {
+    padding: 40px 32px;
+  }
+}
+
+@media (max-width: 480px) {
+  .reg_viewport {
+    padding: 24px 16px;
+  }
+  .reg_card {
+    padding: 32px 20px;
+  }
+  .reg_card h1 {
+    font-size: 2rem;
+  }
 }
