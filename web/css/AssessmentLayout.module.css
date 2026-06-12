@@ -812,3 +812,88 @@ html[data-theme='dark'] .secondary_button:hover {
   background-color: rgba(30, 41, 59, 0.9);
   border-color: rgba(255, 255, 255, 0.2);
 }
+
+/* ==========================================================================
+   MOBILE RESPONSIVE QUERIES
+   ========================================================================== */
+@media (max-width: 768px) {
+  .container {
+    padding: 16px;
+    border-radius: 12px;
+  }
+
+  .pre_assessment_container,
+  .active_assessment_container,
+  .result_container {
+    padding: 20px 0;
+  }
+
+  .title {
+    font-size: 1.5rem;
+  }
+
+  .result_score_hero {
+    font-size: 2.5rem;
+  }
+
+  .metadata_row {
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .progress_row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .question_statement {
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+  }
+
+  .choice_block {
+    padding: 12px;
+  }
+
+  .choice_block_selected {
+    padding: 11px !important;
+  }
+
+  .stepper_row {
+    gap: 6px;
+    justify-content: center;
+  }
+
+  .stepper_item {
+    width: 32px;
+    height: 32px;
+    font-size: 0.8rem;
+  }
+
+  .submit_action_container {
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+  }
+
+  .primary_button,
+  .secondary_button,
+  .danger_button {
+    width: 100%;
+    padding: 12px 20px;
+  }
+
+  .dropzone {
+    padding: 24px 16px;
+  }
+
+  .dropzone_icon {
+    font-size: 2rem;
+  }
+
+  .dropzone_text {
+    font-size: 1rem;
+  }
+}
