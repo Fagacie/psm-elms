@@ -168,7 +168,12 @@
                                 transition={{ duration: 0.45 }}
                             >
                                 {/* ── Hero Greeting ── */}
-                                <header className="db_hero">
+                                <MotionDiv 
+                                    className="db_hero"
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.5, delay: 0.1 }}
+                                >
                                     <div className="db_heroText">
                                         <h1 className="db_welcomeTitle">
                                             {greeting}, {firstName} 👋
@@ -207,10 +212,15 @@
                                             </div>
                                         </div>
                                     )}
-                                </header>
+                                </MotionDiv>
 
                                 {/* ── KPI Summary Grid ── */}
-                                <section className="db_kpiGrid">
+                                <MotionDiv 
+                                    className="db_kpiGrid"
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.5, delay: 0.2 }}
+                                >
                                     <div className="db_kpiBlock">
                                         <div className="db_kpiIcon blue">
                                             <i data-lucide="book-open" style={{ width: 20, height: 20 }}></i>
@@ -247,10 +257,15 @@
                                             <span className="db_kpiLabel">Certificates</span>
                                         </div>
                                     </div>
-                                </section>
+                                </MotionDiv>
 
                                 {/* ── Continue Learning Section ── */}
-                                <section className="db_section">
+                                <MotionDiv 
+                                    className="db_section"
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.5, delay: 0.3 }}
+                                >
                                     <div className="db_sectionHeader">
                                         <h3 className="db_sectionTitle">Continue Learning</h3>
                                         {activeCourses.length > 0 && (
@@ -325,10 +340,15 @@
                                             </a>
                                         </div>
                                     )}
-                                </section>
+                                </MotionDiv>
 
                                 {/* ── Quick Actions ── */}
-                                <section className="db_quickActions">
+                                <MotionDiv 
+                                    className="db_quickActions"
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.5, delay: 0.4 }}
+                                >
                                     <a href={window.__CONTEXT_PATH__ + "/student/courses"} className="db_quickAction">
                                         <div className="db_quickActionIcon">
                                             <i data-lucide="compass" style={{ width: 18, height: 18 }}></i>
@@ -356,11 +376,16 @@
                                             <span className="db_quickActionSub">Review transaction records</span>
                                         </div>
                                     </a>
-                                </section>
+                                </MotionDiv>
 
                                 {/* ── Activity Chart ── */}
                                 {window.Recharts && (
-                                    <section className="db_chartCard">
+                                    <MotionDiv 
+                                        className="db_chartCard"
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ duration: 0.5, delay: 0.5 }}
+                                    >
                                         <div className="db_chartHeader">
                                             <div className="db_chartTitleWrap">
                                                 <h3 className="db_sectionTitle">Weekly Study Activity</h3>
@@ -371,9 +396,13 @@
                                             <ResponsiveContainer width="100%" height="100%">
                                                 <AreaChart data={activityData} margin={{ top: 8, right: 8, left: -28, bottom: 0 }}>
                                                     <defs>
-                                                        <linearGradient id="colorMinutes" x1="0" y1="0" x2="0" y2="1">
-                                                            <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.12}/>
-                                                            <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                                                        <linearGradient id="colorMinutes" x1="0" y1="0" x2="1" y2="0">
+                                                            <stop offset="0%" stopColor="#06b6d4" stopOpacity={0.25}/>
+                                                            <stop offset="100%" stopColor="#4f46e5" stopOpacity={0.25}/>
+                                                        </linearGradient>
+                                                        <linearGradient id="colorMinutesLine" x1="0" y1="0" x2="1" y2="0">
+                                                            <stop offset="0%" stopColor="#06b6d4" stopOpacity={1}/>
+                                                            <stop offset="100%" stopColor="#4f46e5" stopOpacity={1}/>
                                                         </linearGradient>
                                                     </defs>
                                                     <CartesianGrid vertical={false} horizontal={false} />
@@ -383,8 +412,8 @@
                                                     <Area 
                                                         type="monotone" 
                                                         dataKey="Minutes" 
-                                                        stroke="#3b82f6" 
-                                                        strokeWidth={2.5} 
+                                                        stroke="url(#colorMinutesLine)" 
+                                                        strokeWidth={3} 
                                                         fillOpacity={1} 
                                                         fill="url(#colorMinutes)" 
                                                     />
@@ -397,7 +426,7 @@
                                                 <span>No study activity recorded this week. Start viewing materials or taking assessments to track your progress!</span>
                                             </div>
                                         )}
-                                    </section>
+                                    </MotionDiv>
                                 )}
 
                             </MotionDiv>

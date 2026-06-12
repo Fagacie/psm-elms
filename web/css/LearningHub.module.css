@@ -250,11 +250,39 @@
    ========================================================================== */
 
 html[data-theme='dark'] .hub_container {
-    background: #0f172a !important;
+    background-color: #0f172a !important;
+    position: relative;
+    z-index: 1;
+}
+
+html[data-theme='dark'] .hub_container::before {
+    content: '';
+    position: fixed;
+    top: -20%;
+    left: -10%;
+    width: 60vw;
+    height: 60vw;
+    background: radial-gradient(circle, rgba(6, 182, 212, 0.12) 0%, transparent 60%);
+    z-index: -1;
+    pointer-events: none;
+}
+
+html[data-theme='dark'] .hub_container::after {
+    content: '';
+    position: fixed;
+    bottom: -20%;
+    right: -10%;
+    width: 60vw;
+    height: 60vw;
+    background: radial-gradient(circle, rgba(79, 70, 229, 0.1) 0%, transparent 60%);
+    z-index: -1;
+    pointer-events: none;
 }
 
 html[data-theme='dark'] .hub_topBar {
-    background: #1e293b !important;
+    background: rgba(15, 23, 42, 0.6) !important;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     border-bottom-color: rgba(255, 255, 255, 0.08) !important;
 }
 
@@ -279,11 +307,24 @@ html[data-theme='dark'] .hub_progressIndicator {
 }
 
 html[data-theme='dark'] .hub_progressFill {
-    background: #3b82f6 !important;
+    background: linear-gradient(90deg, #06b6d4, #3b82f6) !important;
+    box-shadow: 0 0 12px rgba(6, 182, 212, 0.8) !important;
+    animation: hub_pulse_glow 2s infinite alternate;
+}
+
+@keyframes hub_pulse_glow {
+    0% {
+        box-shadow: 0 0 8px rgba(6, 182, 212, 0.5);
+    }
+    100% {
+        box-shadow: 0 0 16px rgba(6, 182, 212, 0.9), 0 0 24px rgba(59, 130, 246, 0.6);
+    }
 }
 
 html[data-theme='dark'] .hub_sidebar {
-    background: #1e293b !important;
+    background: rgba(30, 41, 59, 0.4) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border-right-color: rgba(255, 255, 255, 0.08) !important;
 }
 
@@ -297,7 +338,7 @@ html[data-theme='dark'] .hub_chapterHeader {
 }
 
 html[data-theme='dark'] .hub_moduleItem {
-    background: #1e293b !important;
+    background: transparent !important;
     color: #cbd5e1 !important;
     border-bottom-color: rgba(255, 255, 255, 0.02) !important;
 }
@@ -334,41 +375,105 @@ html[data-theme='dark'] .hub_completionToggleComplete {
 }
 
 html[data-theme='dark'] .hub_stage {
-    background: #0f172a !important;
+    background: transparent !important;
 }
 
 /* ==========================================================================
    MOBILE RESPONSIVENESS
    ========================================================================== */
 
+.hub_mobileToggle {
+    display: none;
+    background: transparent;
+    border: none;
+    color: #64748b;
+    font-size: 1.25rem;
+    padding: 8px;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+html[data-theme='dark'] .hub_mobileToggle {
+    color: #94a3b8;
+}
+
+.hub_mobileToggle:hover {
+    color: #0f172a;
+}
+
+html[data-theme='dark'] .hub_mobileToggle:hover {
+    color: #f8fafc;
+}
+
+.hub_mobileOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 990;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+body.hub-mobile-open .hub_mobileOverlay {
+    opacity: 1;
+    pointer-events: auto;
+}
+
 @media (max-width: 768px) {
+    .hub_mobileToggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
     .hub_splitView {
-        flex-direction: column-reverse;
+        flex-direction: row;
     }
+    
     .hub_sidebar {
-        width: 100%;
-        flex: 1;
+        position: fixed;
+        top: 0;
+        left: -100%;
+        width: 280px;
+        height: 100vh;
+        z-index: 1000;
+        box-shadow: 4px 0 24px rgba(0,0,0,0.15);
+        transition: left 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         border-right: none;
-        border-top: 1px solid #e2e8f0;
     }
+    
     html[data-theme='dark'] .hub_sidebar {
-        border-top-color: rgba(255, 255, 255, 0.08) !important;
+        box-shadow: 4px 0 24px rgba(0,0,0,0.5);
     }
+    
+    body.hub-mobile-open .hub_sidebar {
+        left: 0;
+    }
+    
     .hub_stage {
-        flex: 1.5;
         padding: 16px;
     }
+    
     .hub_topBar {
         padding: 0 16px;
     }
+    
     .hub_courseTitle {
-        max-width: 40%;
+        max-width: 30%;
         font-size: 0.9rem;
     }
+    
     .hub_progressIndicator {
-        width: 60px;
+        display: none;
     }
-    .hub_backBtn span {
+    
+    .hub_backBtn_text {
         display: none;
     }
 }

@@ -227,7 +227,10 @@
             const sortedCourses = useMemo(() => {
                 let items = [...courses];
                 
-                // 1. Category Filter
+                // 1. Filter out already enrolled courses
+                items = items.filter(c => !enrolledIds.includes(c.courseId));
+                
+                // 2. Category Filter
                 if (selectedCategory !== 'All') {
                     items = items.filter(c => c.category === selectedCategory);
                 }

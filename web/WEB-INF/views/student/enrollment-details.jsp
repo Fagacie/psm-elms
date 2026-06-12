@@ -31,11 +31,16 @@
 <div class="hub_container">
     <%-- Minimalist Top Bar (Task 2) --%>
     <header class="hub_topBar" role="banner">
-        <a href="${pageContext.request.contextPath}/student/my-enrollments" class="hub_backBtn" aria-label="Return to My Courses">
-            <i class="fas fa-arrow-left" aria-hidden="true"></i>
-            <span>Back to Dashboard</span>
-        </a>
-        <h1 class="hub_courseTitle" title="${enrollment.courseName}">${enrollment.courseName}</h1>
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <button class="hub_mobileToggle" id="hubMobileToggle" type="button" aria-label="Toggle syllabus sidebar">
+                <i class="fas fa-bars"></i>
+            </button>
+            <a href="${pageContext.request.contextPath}/student/my-enrollments" class="hub_backBtn" aria-label="Return to My Courses">
+                <i class="fas fa-arrow-left" aria-hidden="true"></i>
+                <span class="hub_backBtn_text">Back to Dashboard</span>
+            </a>
+            <h1 class="hub_courseTitle" title="${enrollment.courseName}">${enrollment.courseName}</h1>
+        </div>
         <div class="hub_progressContainer" aria-label="Course progress: ${progressPercent}%">
             <span class="hub_progressText" id="lhTopbarPct">${progressPercent}% Modules</span>
             <div class="hub_progressIndicator">
@@ -46,6 +51,8 @@
             </button>
         </div>
     </header>
+
+    <div class="hub_mobileOverlay" id="hubMobileOverlay"></div>
 
     <%-- Split View (Task 3) --%>
     <div class="hub_splitView">
@@ -1379,9 +1386,26 @@ function toggleSidebarMaterial(event, materialId, enrollmentId, btn) {
         btn.disabled = false;
     });
 }
+
+// Mobile sidebar toggle logic
+document.addEventListener('DOMContentLoaded', function() {
+    var mobileToggle = document.getElementById('hubMobileToggle');
+    var mobileOverlay = document.getElementById('hubMobileOverlay');
+    var body = document.body;
+    
+    if (mobileToggle && mobileOverlay) {
+        mobileToggle.addEventListener('click', function() {
+            body.classList.toggle('hub-mobile-open');
+        });
+        
+        mobileOverlay.addEventListener('click', function() {
+            body.classList.remove('hub-mobile-open');
+        });
+    }
+});
 </script>
 <script src="${pageContext.request.contextPath}/js/learning-hub.js"></script>
 <script defer src="${pageContext.request.contextPath}/js/student-assessment-flow.js"></script>
-    <script src="${pageContext.request.contextPath}/js/student-v2.js"></script>
+<script src="${pageContext.request.contextPath}/js/student-v2.js"></script>
 </body>
 </html>

@@ -71,6 +71,13 @@
             </div>
         </div>
 
+        <c:if test="${fn:contains(currentPath, '/student/enrollment-details') or fn:contains(currentPath, '/student/materials')}">
+            <button type="button" class="nav_mod_theme_toggle" id="theaterModeToggle" aria-pressed="false" aria-label="Toggle theater mode" title="Toggle theater mode">
+                <i class="fas fa-expand" aria-hidden="true"></i>
+                <span class="theme-toggle-label">Theater</span>
+            </button>
+        </c:if>
+
         <button type="button" class="nav_mod_theme_toggle" data-theme-toggle aria-pressed="false" aria-label="Switch to dark mode" title="Switch to dark mode">
             <i class="fas fa-moon" aria-hidden="true"></i>
             <span class="theme-toggle-label">Dark mode</span>

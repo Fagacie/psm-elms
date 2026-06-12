@@ -72,37 +72,37 @@
 }
 
 html[data-theme="dark"] {
-  /* Slate Midnight HSL Premium Dark Theme Colors */
-  --bg-primary: hsl(224 71% 4%);
-  --bg-secondary: hsl(224 64% 7%);
-  --surface-primary: hsla(224 60% 10% / 0.8);
-  --surface-secondary: hsl(224 55% 12%);
-  --surface-elevated: hsl(224 50% 15%);
-  --surface-accent: hsla(250 100% 68% / 0.08);
-  --border-subtle: hsla(0 0% 100% / 0.06);
-  --border-strong: hsla(0 0% 100% / 0.12);
-  --text-primary: hsl(220 20% 96%);
-  --text-secondary: hsl(220 15% 76%);
-  --text-muted: hsl(220 10% 56%);
-  --text-inverse: hsl(224 71% 4%);
+  /* Glassmorphism Premium Dark Theme Colors */
+  --bg-primary: transparent;
+  --bg-secondary: transparent;
+  --surface-primary: rgba(30, 41, 59, 0.4);
+  --surface-secondary: rgba(15, 23, 42, 0.5);
+  --surface-elevated: rgba(30, 41, 59, 0.6);
+  --surface-accent: rgba(56, 189, 248, 0.1);
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.15);
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  --text-inverse: #0f172a;
   
-  /* Premium Slate Active Accents */
-  --accent: hsl(250 100% 68%);
-  --accent-strong: hsl(250 100% 74%);
-  --accent-soft: hsla(250 100% 68% / 0.18);
+  /* Cyan / Indigo Active Accents */
+  --accent: #06b6d4;
+  --accent-strong: #22d3ee;
+  --accent-soft: rgba(6, 182, 212, 0.15);
   
   /* Statuses */
-  --success: hsl(142 76% 45%);
-  --success-soft: hsla(142 76% 45% / 0.16);
-  --warning: hsl(40 96% 54%);
-  --warning-soft: hsla(40 96% 54% / 0.16);
-  --danger: hsl(0 90% 62%);
-  --danger-soft: hsla(0 90% 62% / 0.16);
+  --success: #10b981;
+  --success-soft: rgba(16, 185, 129, 0.15);
+  --warning: #f59e0b;
+  --warning-soft: rgba(245, 158, 11, 0.15);
+  --danger: #ef4444;
+  --danger-soft: rgba(239, 68, 68, 0.15);
   
-  --shadow-sm: 0 4px 16px rgba(0, 0, 0, 0.2);
-  --shadow-md: 0 16px 40px rgba(0, 0, 0, 0.35);
-  --shadow-lg: 0 32px 80px rgba(0, 0, 0, 0.5);
-  --focus-ring: 0 0 0 3px hsla(250 100% 68% / 0.35);
+  --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+  --focus-ring: 0 0 0 3px rgba(6, 182, 212, 0.35);
 }
 
 /* ==========================================================================
@@ -1464,6 +1464,38 @@ html[data-theme="dark"] .lh-focus-topbar {
   border: 1px solid var(--border-subtle);
   border-radius: var(--lh-radius-lg);
   background: linear-gradient(180deg, var(--surface-secondary), var(--surface-primary));
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease, border-color 0.4s ease;
+  transform-style: preserve-3d;
+  perspective: 1000px;
+}
+
+.lh-cert-overview-card:hover,
+.lh-cert-performance-card:hover {
+  transform: translateY(-5px) rotateX(2deg) rotateY(-2deg);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 0 0 40px rgba(6, 182, 212, 0.15);
+  border-color: rgba(6, 182, 212, 0.3);
+}
+
+.lh-cert-overview-card::before,
+.lh-cert-performance-card::before {
+  content: '';
+  position: absolute;
+  top: 0; 
+  left: -100%; 
+  width: 50%; 
+  height: 100%;
+  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.15), transparent);
+  transform: skewX(-25deg);
+  transition: all 0.75s ease;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.lh-cert-overview-card:hover::before,
+.lh-cert-performance-card:hover::before {
+  left: 200%;
 }
 
 .lh-cert-overview-card__content,
@@ -2116,4 +2148,86 @@ html[data-theme="dark"] .lh-action-bar__actions {
   .lh-post-actions .sv-btn {
     width: 100%;
   }
+}
+
+/* ==========================================================================
+   STAGGERED ENTRANCE ANIMATIONS
+   ========================================================================== */
+
+@keyframes lh_fade_in_up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.lh-overview > *,
+.lh-performance-shell > *,
+.lh-result-shell > *,
+.sa-shell > *,
+.mv-shell > * {
+  animation: lh_fade_in_up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 0;
+}
+
+.lh-overview > *:nth-child(1), .sa-shell > *:nth-child(1), .mv-shell > *:nth-child(1) { animation-delay: 0.05s; }
+.lh-overview > *:nth-child(2), .sa-shell > *:nth-child(2), .mv-shell > *:nth-child(2) { animation-delay: 0.1s; }
+.lh-overview > *:nth-child(3), .sa-shell > *:nth-child(3), .mv-shell > *:nth-child(3) { animation-delay: 0.15s; }
+.lh-overview > *:nth-child(4), .sa-shell > *:nth-child(4), .mv-shell > *:nth-child(4) { animation-delay: 0.2s; }
+.lh-overview > *:nth-child(5), .sa-shell > *:nth-child(5), .mv-shell > *:nth-child(5) { animation-delay: 0.25s; }
+.lh-overview > *:nth-child(6), .sa-shell > *:nth-child(6), .mv-shell > *:nth-child(6) { animation-delay: 0.3s; }
+
+.ax-inline-card {
+  animation: lh_fade_in_up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 0;
+}
+
+#assessmentListContainer .ax-inline-card:nth-child(1) { animation-delay: 0.1s; }
+#assessmentListContainer .ax-inline-card:nth-child(2) { animation-delay: 0.15s; }
+#assessmentListContainer .ax-inline-card:nth-child(3) { animation-delay: 0.2s; }
+#assessmentListContainer .ax-inline-card:nth-child(4) { animation-delay: 0.25s; }
+#assessmentListContainer .ax-inline-card:nth-child(5) { animation-delay: 0.3s; }
+#assessmentListContainer .ax-inline-card:nth-child(6) { animation-delay: 0.35s; }
+#assessmentListContainer .ax-inline-card:nth-child(7) { animation-delay: 0.4s; }
+
+/* ==========================================================================
+   THEATER MODE
+   ========================================================================== */
+
+body.theater-mode .hub_sidebar,
+body.theater-mode .nav_mod_sidebar {
+  width: 0 !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  overflow: hidden !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+body.theater-mode .hub_stage,
+body.theater-mode .sv-main {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin-left: 0 !important;
+}
+
+body.theater-mode .hub_topBar,
+body.theater-mode .nav_mod_topbar {
+  opacity: 0.8;
+  transition: opacity 0.3s ease;
+}
+
+body.theater-mode .hub_topBar:hover,
+body.theater-mode .nav_mod_topbar:hover {
+  opacity: 1;
+}
+
+/* Ensure smooth transition for theater mode */
+.hub_sidebar, .nav_mod_sidebar, .hub_stage, .sv-main {
+  transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1), margin-left 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease, padding 0.4s ease;
 }

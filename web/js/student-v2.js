@@ -81,6 +81,24 @@
 
     syncDesktopState();
 
+    var theaterModeToggle = document.getElementById('theaterModeToggle');
+    if (theaterModeToggle) {
+        theaterModeToggle.addEventListener('click', function () {
+            var isTheater = body.classList.toggle('theater-mode');
+            theaterModeToggle.setAttribute('aria-pressed', isTheater ? 'true' : 'false');
+            var icon = theaterModeToggle.querySelector('i');
+            if (icon) {
+                if (isTheater) {
+                    icon.classList.remove('fa-expand');
+                    icon.classList.add('fa-compress');
+                } else {
+                    icon.classList.remove('fa-compress');
+                    icon.classList.add('fa-expand');
+                }
+            }
+        });
+    }
+
     if (shellToggle && sidebar && overlay) {
         shellToggle.addEventListener('click', function () {
             if (isMobileShell()) {
