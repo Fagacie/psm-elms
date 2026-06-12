@@ -693,6 +693,11 @@ body.sv-shell-collapsed .nav_mod_link[title]:hover::after {
     box-shadow: var(--nav_mod_shadow_lg);
   }
 
+  /* Don't push the logout button to the very bottom on mobile to ensure it stays visible */
+  .nav_mod_spacer {
+    display: none;
+  }
+
   /* Overlay styling handled by existing sv-overlay in student-v2.css */
 }
 
