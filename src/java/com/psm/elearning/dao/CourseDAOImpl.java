@@ -47,31 +47,40 @@ public class CourseDAOImpl implements CourseDAO {
     public Course create(Course course) throws SQLException {
         String sql = "INSERT INTO Course (Title, Description, Category, Duration, CourseFee, Level, InstructorID, Status, CourseBanner, BannerUploadStatus) VALUES (?,?,?,?,?,?,?,?,?,?)";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, course.getCourseName());
             ps.setString(2, course.getDescription());
             ps.setString(3, course.getCategory());
-            if (course.getDuration() != null) ps.setInt(4, course.getDuration()); else ps.setNull(4, Types.INTEGER);
+            if (course.getDuration() != null)
+                ps.setInt(4, course.getDuration());
+            else
+                ps.setNull(4, Types.INTEGER);
             ps.setBigDecimal(5, course.getCourseFee() != null ? course.getCourseFee() : BigDecimal.ZERO);
             ps.setString(6, course.getLevel());
-            if (course.getCreatedBy() != null) ps.setInt(7, course.getCreatedBy()); else ps.setNull(7, Types.INTEGER);
+            if (course.getCreatedBy() != null)
+                ps.setInt(7, course.getCreatedBy());
+            else
+                ps.setNull(7, Types.INTEGER);
             ps.setString(8, course.getStatus() != null ? course.getStatus() : Course.STATUS_PENDING);
             ps.setString(9, course.getCourseBanner());
             ps.setString(10, course.getBannerUploadStatus());
             int affected = ps.executeUpdate();
             if (affected == 0) {
-                LOGGER.log(Level.SEVERE, "[CourseDAO] INSERT executed but 0 rows affected. Possible constraint violation.");
+                LOGGER.log(Level.SEVERE,
+                        "[CourseDAO] INSERT executed but 0 rows affected. Possible constraint violation.");
                 return null;
             }
             try (ResultSet rs = ps.getGeneratedKeys()) {
-                if (rs.next()) course.setCourseId(rs.getInt(1));
+                if (rs.next())
+                    course.setCourseId(rs.getInt(1));
             }
             return findById(course.getCourseId());
         } catch (SQLException e) {
             // Log with full stack trace so server logs capture the real SQL error
             LOGGER.log(Level.SEVERE, "[CourseDAO] create() failed — SQL State: " + e.getSQLState()
                     + " | Error Code: " + e.getErrorCode() + " | Message: " + e.getMessage(), e);
-            // Re-throw so the Servlet can catch it and surface the real error to the admin UI
+            // Re-throw so the Servlet can catch it and surface the real error to the admin
+            // UI
             throw e;
         }
     }
@@ -80,14 +89,20 @@ public class CourseDAOImpl implements CourseDAO {
     public boolean update(Course course) {
         String sql = "UPDATE Course SET Title=?, Description=?, Category=?, Duration=?, CourseFee=?, Level=?, ApprovedBy=?, Status=?, CourseBanner=?, BannerUploadStatus=? WHERE CourseID=?";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, course.getCourseName());
             ps.setString(2, course.getDescription());
             ps.setString(3, course.getCategory());
-            if (course.getDuration() != null) ps.setInt(4, course.getDuration()); else ps.setNull(4, Types.INTEGER);
+            if (course.getDuration() != null)
+                ps.setInt(4, course.getDuration());
+            else
+                ps.setNull(4, Types.INTEGER);
             ps.setBigDecimal(5, course.getCourseFee());
             ps.setString(6, course.getLevel());
-            if (course.getApprovedBy() != null) ps.setInt(7, course.getApprovedBy()); else ps.setNull(7, Types.INTEGER);
+            if (course.getApprovedBy() != null)
+                ps.setInt(7, course.getApprovedBy());
+            else
+                ps.setNull(7, Types.INTEGER);
             ps.setString(8, course.getStatus());
             ps.setString(9, course.getCourseBanner());
             ps.setString(10, course.getBannerUploadStatus());
@@ -104,10 +119,11 @@ public class CourseDAOImpl implements CourseDAO {
     public Course findById(int courseId) {
         String sql = "SELECT * FROM Course WHERE CourseID=?";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, courseId);
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return mapRow(rs);
+                if (rs.next())
+                    return mapRow(rs);
             }
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "[CourseDAO] findById() failed for courseId=" + courseId, e);
@@ -120,9 +136,10 @@ public class CourseDAOImpl implements CourseDAO {
         List<Course> list = new ArrayList<>();
         String sql = "SELECT * FROM Course ORDER BY CreatedAt DESC";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) list.add(mapRow(rs));
+                PreparedStatement ps = conn.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()) {
+            while (rs.next())
+                list.add(mapRow(rs));
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "[CourseDAO] findAll() failed", e);
         }
@@ -134,10 +151,11 @@ public class CourseDAOImpl implements CourseDAO {
         List<Course> list = new ArrayList<>();
         String sql = "SELECT * FROM Course WHERE Status=? ORDER BY CreatedAt DESC";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, status);
             try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) list.add(mapRow(rs));
+                while (rs.next())
+                    list.add(mapRow(rs));
             }
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "[CourseDAO] findByStatus() failed for status=" + status, e);
@@ -149,7 +167,7 @@ public class CourseDAOImpl implements CourseDAO {
     public boolean approve(int courseId, int approvedBy) {
         String sql = "UPDATE Course SET Status=?, ApprovedBy=? WHERE CourseID=?";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, Course.STATUS_APPROVED);
             ps.setInt(2, approvedBy);
             ps.setInt(3, courseId);
@@ -164,7 +182,7 @@ public class CourseDAOImpl implements CourseDAO {
     public boolean reject(int courseId) {
         String sql = "UPDATE Course SET Status=? WHERE CourseID=?";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, Course.STATUS_ARCHIVED);
             ps.setInt(2, courseId);
             return ps.executeUpdate() > 0;
@@ -178,7 +196,7 @@ public class CourseDAOImpl implements CourseDAO {
     public boolean updateStatus(int courseId, String status) {
         String sql = "UPDATE Course SET Status=? WHERE CourseID=?";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, status);
             ps.setInt(2, courseId);
             return ps.executeUpdate() > 0;
@@ -192,7 +210,7 @@ public class CourseDAOImpl implements CourseDAO {
     public boolean delete(int courseId) {
         String sql = "DELETE FROM Course WHERE CourseID=?";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, courseId);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -206,7 +224,7 @@ public class CourseDAOImpl implements CourseDAO {
         List<Course> list = new ArrayList<>();
         String sql = "SELECT * FROM Course WHERE InstructorID=? ORDER BY CreatedAt DESC";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, instructorId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -224,13 +242,14 @@ public class CourseDAOImpl implements CourseDAO {
         List<Course> list = new ArrayList<>();
         String sql = "SELECT * FROM Course WHERE Status='Approved' AND (Title LIKE ? OR Description LIKE ? OR Category LIKE ?) ORDER BY CreatedAt DESC";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             String searchPattern = "%" + keyword + "%";
             ps.setString(1, searchPattern);
             ps.setString(2, searchPattern);
             ps.setString(3, searchPattern);
             try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) list.add(mapRow(rs));
+                while (rs.next())
+                    list.add(mapRow(rs));
             }
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "[CourseDAO] searchCourses() failed for keyword=" + keyword, e);
@@ -242,7 +261,7 @@ public class CourseDAOImpl implements CourseDAO {
     public List<Course> filterCourses(String category, String level, Double minFee, Double maxFee) {
         List<Course> list = new ArrayList<>();
         StringBuilder sql = new StringBuilder("SELECT * FROM Course WHERE Status='Approved'");
-        
+
         if (category != null && !category.isEmpty()) {
             sql.append(" AND Category=?");
         }
@@ -258,7 +277,7 @@ public class CourseDAOImpl implements CourseDAO {
         sql.append(" ORDER BY CreatedAt DESC");
 
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+                PreparedStatement ps = conn.prepareStatement(sql.toString())) {
             int paramIndex = 1;
             if (category != null && !category.isEmpty()) {
                 ps.setString(paramIndex++, category);
@@ -273,7 +292,8 @@ public class CourseDAOImpl implements CourseDAO {
                 ps.setDouble(paramIndex++, maxFee);
             }
             try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) list.add(mapRow(rs));
+                while (rs.next())
+                    list.add(mapRow(rs));
             }
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "[CourseDAO] filterCourses() failed", e);
@@ -285,7 +305,7 @@ public class CourseDAOImpl implements CourseDAO {
     public int countByStatus(String status) {
         String sql = "SELECT COUNT(*) FROM Course WHERE Status = ?";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, status);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -305,8 +325,8 @@ public class CourseDAOImpl implements CourseDAO {
         Map<String, Integer> counts = new HashMap<>();
         String sql = "SELECT Status, COUNT(*) AS cnt FROM Course GROUP BY Status";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+                PreparedStatement ps = conn.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 String status = rs.getString("Status");
                 if (status != null) {
@@ -324,10 +344,11 @@ public class CourseDAOImpl implements CourseDAO {
         List<Course> list = new ArrayList<>();
         String sql = "SELECT * FROM Course WHERE Status = 'Approved' ORDER BY CreatedAt DESC LIMIT ?";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, limit);
             try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) list.add(mapRow(rs));
+                while (rs.next())
+                    list.add(mapRow(rs));
             }
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "[CourseDAO] findFeaturedCourses() failed", e);
@@ -339,12 +360,14 @@ public class CourseDAOImpl implements CourseDAO {
     public boolean assignInstructor(int courseId, int instructorId) {
         String sql = "UPDATE Course SET InstructorID = ? WHERE CourseID = ?";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, instructorId);
             ps.setInt(2, courseId);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "[CourseDAO] assignInstructor() failed for courseId=" + courseId + ", instructorId=" + instructorId, e);
+            LOGGER.log(Level.SEVERE,
+                    "[CourseDAO] assignInstructor() failed for courseId=" + courseId + ", instructorId=" + instructorId,
+                    e);
             return false;
         }
     }
@@ -353,7 +376,7 @@ public class CourseDAOImpl implements CourseDAO {
     public boolean updateCourseBanner(int courseId, String bannerUrl) {
         String sql = "UPDATE Course SET CourseBanner=? WHERE CourseID=?";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, bannerUrl);
             ps.setInt(2, courseId);
             return ps.executeUpdate() > 0;
@@ -367,7 +390,7 @@ public class CourseDAOImpl implements CourseDAO {
     public boolean updateBannerUploadStatus(int courseId, String status) {
         String sql = "UPDATE Course SET BannerUploadStatus=? WHERE CourseID=?";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, status);
             ps.setInt(2, courseId);
             return ps.executeUpdate() > 0;
@@ -385,13 +408,14 @@ public class CourseDAOImpl implements CourseDAO {
         }
         StringBuilder sql = new StringBuilder("SELECT * FROM Course WHERE CourseID IN (");
         for (int i = 0; i < courseIds.size(); i++) {
-            if (i > 0) sql.append(",");
+            if (i > 0)
+                sql.append(",");
             sql.append("?");
         }
         sql.append(") ORDER BY CreatedAt DESC");
 
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+                PreparedStatement ps = conn.prepareStatement(sql.toString())) {
             for (int i = 0; i < courseIds.size(); i++) {
                 ps.setInt(i + 1, courseIds.get(i));
             }
