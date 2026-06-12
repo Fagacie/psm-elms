@@ -62,8 +62,7 @@
                 <h1>Start learning with clear steps and real progress.</h1>
                 <p class="lp_hero_lead">Find a course, continue where you stopped, and verify your certificate easily when you finish your learning journey.</p>
                 <div class="lp_hero_actions">
-                    <a class="lp_btn lp_btn_indigo" href="${pageContext.request.contextPath}/register">Register</a>
-                    <a class="lp_btn lp_btn_ghost" href="${pageContext.request.contextPath}/login">Login</a>
+                    <a class="lp_btn lp_btn_indigo" href="${pageContext.request.contextPath}/register">Get Started</a>
                 </div>
             </div>
 
@@ -190,22 +189,70 @@
                 <h2>Built around what people need to do.</h2>
                 <p>Each part of the system helps people start, continue, and verify without confusion.</p>
             </div>
-            <div class="lp_feature_grid">
-                <article class="lp_feature_card" data-aos="fade-up" data-aos-delay="100">
-                    <div class="lp_feature_icon"><i data-lucide="layout"></i></div>
-                    <h3>Course control</h3>
-                    <p>Create and manage courses with a layout that stays out of the way.</p>
-                </article>
-                <article class="lp_feature_card" data-aos="fade-up" data-aos-delay="200">
-                    <div class="lp_feature_icon"><i data-lucide="activity"></i></div>
-                    <h3>Assessment flow</h3>
-                    <p>Track submissions, progress, and outcomes without cluttered screens.</p>
-                </article>
-                <article class="lp_feature_card" data-aos="fade-up" data-aos-delay="300">
-                    <div class="lp_feature_icon"><i data-lucide="shield-check"></i></div>
-                    <h3>Certificate trust</h3>
-                    <p>Issue and verify credentials publicly with a direct, reliable workflow.</p>
-                </article>
+            <div class="lp_feature_galaxy" aria-label="Interactive features layout">
+                <div class="lp_orb lp_orb_1">
+                    <div class="lp_orb_core">
+                        <i data-lucide="layout"></i>
+                    </div>
+                    <div class="lp_orb_info">
+                        <h3>Course control</h3>
+                        <p>Create and manage courses with a layout that stays out of the way.</p>
+                    </div>
+                </div>
+                <div class="lp_orb lp_orb_2">
+                    <div class="lp_orb_core">
+                        <i data-lucide="activity"></i>
+                    </div>
+                    <div class="lp_orb_info">
+                        <h3>Assessment flow</h3>
+                        <p>Track submissions, progress, and outcomes without cluttered screens.</p>
+                    </div>
+                </div>
+                <div class="lp_orb lp_orb_3">
+                    <div class="lp_orb_core">
+                        <i data-lucide="shield-check"></i>
+                    </div>
+                    <div class="lp_orb_info">
+                        <h3>Certificate trust</h3>
+                        <p>Issue and verify credentials publicly with a direct, reliable workflow.</p>
+                    </div>
+                </div>
+                <div class="lp_orb lp_orb_4">
+                    <div class="lp_orb_core">
+                        <i data-lucide="credit-card"></i>
+                    </div>
+                    <div class="lp_orb_info">
+                        <h3>Secure Payments</h3>
+                        <p>Integrated Paystack processing for instant, secure course enrollment.</p>
+                    </div>
+                </div>
+                <div class="lp_orb lp_orb_5">
+                    <div class="lp_orb_core">
+                        <i data-lucide="trending-up"></i>
+                    </div>
+                    <div class="lp_orb_info">
+                        <h3>Progress Tracking</h3>
+                        <p>Real-time monitoring of module completion and learning performance.</p>
+                    </div>
+                </div>
+                <div class="lp_orb lp_orb_6">
+                    <div class="lp_orb_core">
+                        <i data-lucide="help-circle"></i>
+                    </div>
+                    <div class="lp_orb_info">
+                        <h3>Interactive Quizzes</h3>
+                        <p>Engaging assessments with automated grading and instant feedback.</p>
+                    </div>
+                </div>
+                <div class="lp_orb lp_orb_7">
+                    <div class="lp_orb_core">
+                        <i data-lucide="users"></i>
+                    </div>
+                    <div class="lp_orb_info">
+                        <h3>Multi-role Portals</h3>
+                        <p>Dedicated dashboards optimized for students, instructors, and admins.</p>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
