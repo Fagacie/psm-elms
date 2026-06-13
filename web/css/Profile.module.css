@@ -473,3 +473,137 @@ html[data-theme='dark'] .prof_modalContent {
     margin: 0;
     line-height: 1.45;
 }
+
+/* --- MISSING BANNER AND RESPONSIVENESS CSS --- */
+.prof_topBanner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(135deg, var(--prof-accent) 0%, #1e293b 100%);
+    border-radius: 16px;
+    padding: 32px 40px;
+    color: #ffffff;
+    box-shadow: 0 10px 25px -5px rgba(15, 81, 50, 0.2);
+    flex-wrap: wrap;
+    gap: 24px;
+}
+
+.prof_bannerLeft {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.prof_bannerRight {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.prof_bannerKicker {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.prof_bannerTitle {
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin: 0;
+    line-height: 1.2;
+}
+
+.prof_bannerSubtitle {
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.85);
+    margin: 0;
+    max-width: 500px;
+    line-height: 1.5;
+}
+
+.prof_bannerBtnPrimary {
+    background: #ffffff;
+    color: var(--prof-accent);
+    border: none;
+    padding: 10px 24px;
+    font-weight: 700;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.prof_bannerBtnPrimary:hover {
+    background: #f8fafc;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.prof_bannerBtnSecondary {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 10px 24px;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.prof_bannerBtnSecondary:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.prof_kpiRow {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+}
+
+.prof_kpiCard {
+    background: var(--prof-surface);
+    border: 1px solid var(--prof-border);
+    border-radius: 12px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+}
+
+.prof_kpiNum {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--prof-heading);
+    line-height: 1;
+}
+
+.prof_kpiLabel {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--prof-muted);
+}
+
+/* Mobile Media Queries */
+@media (max-width: 768px) {
+    .prof_topBanner {
+        padding: 24px;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .prof_kpiRow {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    .prof_bannerTitle {
+        font-size: 1.5rem;
+    }
+    .prof_bannerRight {
+        width: 100%;
+    }
+    .prof_bannerBtnPrimary, .prof_bannerBtnSecondary {
+        width: 100%;
+        text-align: center;
+    }
+}

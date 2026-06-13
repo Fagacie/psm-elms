@@ -167,22 +167,29 @@
                                 if (!element) return;
 
                                 const opt = {
-                                    margin: 0.5,
+                                    margin: 0,
                                     filename: 'transaction-receipt-' + (selectedPayment ? selectedPayment.paymentId : 'pass') + '.pdf',
-                                    image: { type: 'jpeg', quality: 0.98 },
+                                    image: { type: 'jpeg', quality: 1 },
                                     html2canvas: { 
                                         scale: 2, 
                                         useCORS: true,
+                                        scrollY: -window.scrollY,
+                                        windowWidth: document.documentElement.offsetWidth,
                                         onclone: (clonedDoc) => {
-                                            // Remove problematic CSS masks that crash html2canvas
+                                            // Remove problematic CSS masks and transforms that crash html2canvas
                                             const passElements = clonedDoc.querySelectorAll('.history_rm_digitalPass');
                                             passElements.forEach(pass => {
                                                 pass.style.maskImage = 'none';
                                                 pass.style.webkitMaskImage = 'none';
-                                                pass.style.borderRadius = '0px';
+                                                pass.style.borderRadius = '12px';
+                                                pass.style.transform = 'none';
+                                                pass.style.boxShadow = 'none';
                                             });
 
-                                            // Ensure Lucide SVGs render properly by forcing attributes
+                                            const wrappers = clonedDoc.querySelectorAll('.history_rm_passWrapper');
+                                            wrappers.forEach(w => w.style.transform = 'none');
+
+                                            // Ensure SVGs render properly by forcing attributes
                                             const svgs = clonedDoc.querySelectorAll('svg');
                                             svgs.forEach(svg => {
                                                 const w = svg.style.width || svg.getAttribute('width') || '24px';
@@ -192,7 +199,7 @@
                                             });
                                         }
                                     },
-                                    jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+                                    jsPDF: { unit: 'in', format: [4, 6], orientation: 'portrait' }
                                 };
 
                                 // Execute HTML to PDF rendering

@@ -22,6 +22,11 @@
     <script defer src="${pageContext.request.contextPath}/js/theme-toggle.js"></script>
     <script defer src="${pageContext.request.contextPath}/js/instructor-shell.js"></script>
     <!-- Lucide Icons UMD -->
+    
+    <!-- React & Babel for Workspace SPA -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://unpkg.com/lucide@0.395.0/dist/umd/lucide.min.js"></script>
     
     <style>
@@ -1403,357 +1408,438 @@
             <c:param name="courseId" value="${selectedCourse.courseId}"/>
         </c:url>
 
-        <%-- WORKSPACE NAVIGATION --%>
-        <nav class="ins_ws_nav_bar" aria-label="Workspace navigation">
-            <a class="ins_ws_nav_link active" href="#overview" data-section-link="overview">
-                <i data-lucide="pie-chart"></i> Overview
-            </a>
-            <a class="ins_ws_nav_link" href="#materials" data-section-link="materials">
-                <i data-lucide="book-open"></i> Materials
-            </a>
-            <a class="ins_ws_nav_link" href="#assessments" data-section-link="assessments">
-                <i data-lucide="check-square"></i> Assessments
-            </a>
-            <a class="ins_ws_nav_link" href="#students" data-section-link="students">
-                <i data-lucide="users"></i> Students
-            </a>
-        </nav>
 
-        <%-- SECTION 1: OVERVIEW DASHBOARD --%>
-        <div id="overview" class="ws-tab-content active">
-            <div class="overview-dashboard-container">
-                
-                <%-- TOP SECTION: COURSE DETAILS --%>
-                <section class="overview-top-section">
-                    <div class="ins_ws_meta_chips">
-                        <div class="ins_ws_meta_pill">
-                            <i data-lucide="tag"></i>
-                            <span>Category: <c:out value="${empty selectedCourse.category ? 'General' : selectedCourse.category}"/></span>
-                        </div>
-                        <div class="ins_ws_meta_pill">
-                            <i data-lucide="bar-chart-2"></i>
-                            <span>Level: <c:out value="${selectedCourse.level}"/></span>
-                        </div>
-                        <div class="ins_ws_meta_pill">
-                            <i data-lucide="clock"></i>
-                            <span>Duration: <c:out value="${selectedCourse.displayDuration}"/></span>
-                        </div>
-                        <div class="ins_ws_meta_pill">
-                            <i data-lucide="calendar"></i>
-                            <span>Updated: <c:out value="${not empty selectedCourse.updatedAt ? selectedCourse.updatedAt.toLocalDate() : (not empty selectedCourse.createdAt ? selectedCourse.createdAt.toLocalDate() : '-') }"/></span>
-                        </div>
-                    </div>
-                    
-                    <c:if test="${not empty selectedCourse.description}">
-                        <p class="ins_ws_desc">
-                            <c:out value="${selectedCourse.description}"/>
+        <c:url var="assessmentWorkspaceBaseUrl" value="/instructor/assessments">
+            <c:param name="courseId" value="${selectedCourse.courseId}"/>
+        </c:url>
+
+        <!-- Scoped React Sandbox Root -->
+        <div id="workspace-react-root"></div>
+
+        <!-- Serialize JSTL properties to window state for React execution -->
+        <div id="workspace-data-json" style="display:none;" data-json="<c:out value='${workspaceDataJsonStr}' escapeXml='true'/>"></div>
+        <script>
+            // Safely parse JSON from data attribute to prevent backtick/quote injection syntax errors
+            const rawJson = document.getElementById('workspace-data-json').getAttribute('data-json');
+            
+            // Check if backend Java servlet hot-reload failed
+            if (!rawJson || rawJson.trim() === '') {
+                console.error("Backend data missing! Tomcat may need a restart to load the new Servlet class.");
+            }
+            
+            window.__WORKSPACE_DATA__ = JSON.parse(rawJson || '{}');
+        </script>
+
+        <!-- Load interactive workspace react application -->
+        <script type="text/babel">
+const { useState, useEffect, useRef } = React;
+
+function CourseWorkspaceApp() {
+    const [activeTab, setActiveTab] = useState(window.location.hash.replace('#', '') || 'overview');
+    
+    // Sync tab with URL and listen for browser back/forward buttons
+    useEffect(() => {
+        // Only update hash if it's different from current
+        const currentHash = window.location.hash.replace('#', '');
+        if (currentHash !== activeTab) {
+            window.location.hash = activeTab;
+        }
+    }, [activeTab]);
+
+    useEffect(() => {
+        const handleHashChange = () => {
+            const hashTab = window.location.hash.replace('#', '');
+            if (hashTab && ['overview', 'materials', 'assessments', 'students'].includes(hashTab)) {
+                setActiveTab(hashTab);
+            }
+        };
+        window.addEventListener('hashchange', handleHashChange);
+        return () => window.removeEventListener('hashchange', handleHashChange);
+    }, []);
+    return (
+        <div className="workspace-react-container" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            {/* Premium Tab Navigation */}
+            <nav className="ins_ws_nav_bar" aria-label="Workspace navigation">
+                {[
+                    { id: 'overview', icon: 'fa-pie-chart', label: 'Overview' },
+                    { id: 'materials', icon: 'fa-book-open', label: 'Materials' },
+                    { id: 'assessments', icon: 'fa-check-square', label: 'Assessments' },
+                    { id: 'students', icon: 'fa-users', label: 'Students' }
+                ].map(tab => (
+                    <button 
+                        key={tab.id}
+                        className={`ins_ws_nav_link ${'$'}{activeTab === tab.id ? 'active' : ''}`}
+                        onClick={() => setActiveTab(tab.id)}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+                    >
+                        <i className={`fas ${'$'}{tab.icon}`}></i> {tab.label}
+                    </button>
+                ))}
+            </nav>
+
+            {/* Content Canvas Area with animation */}
+            <div className="ws-tab-content active" style={{ animation: 'wsFadeInUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards' }} key={activeTab}>
+                <ErrorBoundary>
+                    {activeTab === 'overview' && <OverviewTab />}
+                    {activeTab === 'materials' && <MaterialsTab />}
+                    {activeTab === 'assessments' && <AssessmentsTab />}
+                    {activeTab === 'students' && <StudentsTab />}
+                </ErrorBoundary>
+            </div>
+        </div>
+    );
+}
+
+// Global data objects exposed from JSP
+const workspaceData = window.__WORKSPACE_DATA__ || {};
+
+// Simple Error Boundary to catch render errors instead of unmounting the whole app
+class ErrorBoundary extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = { hasError: false, error: null };
+    }
+    static getDerivedStateFromError(error) {
+        return { hasError: true, error };
+    }
+    render() {
+        if (this.state.hasError) {
+            return (
+                <div style={{ padding: '20px', background: '#fee2e2', color: '#991b1b', borderRadius: '8px', marginTop: '20px' }}>
+                    <h3 style={{ marginTop: 0 }}><i className="fas fa-exclamation-triangle"></i> Render Error</h3>
+                    <p>Something went wrong displaying this tab.</p>
+                    <pre style={{ background: '#f87171', padding: '10px', color: 'white', borderRadius: '4px', overflowX: 'auto' }}>
+                        {this.state.error?.toString()}
+                    </pre>
+                    {(!workspaceData.course || !workspaceData.course.courseId) && (
+                        <p style={{ fontWeight: 'bold', marginTop: '10px' }}>
+                            Diagnostic: Backend data is missing! You need to Clean and Build your project in NetBeans and restart Tomcat so the new Java Servlet class is loaded!
                         </p>
-                    </c:if>
-                </section>
+                    )}
+                </div>
+            );
+        }
+        return this.props.children;
+    }
+}
 
-                <%-- MIDDLE SECTION: COURSE KPIS GRID --%>
-                <section class="ins_ws_kpi_grid">
-                    <%-- KPI 1: Enrolled Students --%>
-                    <div class="ins_ws_kpi_card">
-                        <div class="ins_ws_kpi_icon students">
-                            <i data-lucide="users"></i>
-                        </div>
-                        <div class="ins_ws_kpi_data">
-                            <strong><c:out value="${totalStudents}"/></strong>
-                            <span>Total Enrolled Students</span>
-                        </div>
-                    </div>
+function OverviewTab() {
+    const { course, stats } = workspaceData;
+    return (
+        <div className="overview-dashboard-container">
+            <section className="overview-top-section">
+                <div className="ins_ws_meta_chips">
+                    <div className="ins_ws_meta_pill"><i className="fas fa-tag"></i> <span>Category: {course.category || 'General'}</span></div>
+                    <div className="ins_ws_meta_pill"><i className="fas fa-chart-bar"></i> <span>Level: {course.level}</span></div>
+                    <div className="ins_ws_meta_pill"><i className="far fa-clock"></i> <span>Duration: {course.displayDuration}</span></div>
+                </div>
+                {course.description && <p className="ins_ws_desc">{course.description}</p>}
+            </section>
 
-                    <%-- KPI 2: Materials Uploaded --%>
-                    <div class="ins_ws_kpi_card">
-                        <div class="ins_ws_kpi_icon materials">
-                            <i data-lucide="book-open"></i>
-                        </div>
-                        <div class="ins_ws_kpi_data">
-                            <strong><c:out value="${publishedMaterials}"/></strong>
-                            <span>Materials Uploaded</span>
-                        </div>
-                    </div>
+            <section className="ins_ws_kpi_grid" style={{ marginTop: '30px' }}>
+                <KpiCard icon="fas fa-users" colorClass="students" value={stats.totalStudents} label="Total Enrolled Students" />
+                <KpiCard icon="fas fa-book-open" colorClass="materials" value={stats.publishedMaterials} label="Materials Uploaded" />
+                <KpiCard icon="fas fa-clipboard-list" colorClass="assessments" value={stats.assessmentCount} label="Assessments Created" />
+                <KpiCard icon="fas fa-file-text" colorClass="pending" value={stats.pendingGrading} label="Pending Submissions" />
+            </section>
 
-                    <%-- KPI 3: Assessments Created --%>
-                    <div class="ins_ws_kpi_card">
-                        <div class="ins_ws_kpi_icon assessments">
-                            <i data-lucide="clipboard-list"></i>
-                        </div>
-                        <div class="ins_ws_kpi_data">
-                            <strong><c:out value="${assessmentCount}"/></strong>
-                            <span>Assessments Created</span>
-                        </div>
-                    </div>
+            <section className="ins_ws_actions_sec">
+                <h3 className="ins_ws_actions_title">Quick Actions</h3>
+                <div className="ins_ws_actions_grid">
+                    <button onClick={() => window.openUploadModal()} className="ins_ws_action_btn">
+                        <i className="fas fa-upload"></i> <span>Upload New Material</span>
+                    </button>
+                    <a href={workspaceData.assessmentBaseUrl + '&view=editor'} className="ins_ws_action_btn">
+                        <i className="fas fa-plus"></i> <span>Create Assessment</span>
+                    </a>
+                </div>
+            </section>
+        </div>
+    );
+}
 
-                    <%-- KPI 4: Pending Submissions --%>
-                    <div class="ins_ws_kpi_card">
-                        <div class="ins_ws_kpi_icon pending">
-                            <i data-lucide="file-text"></i>
-                        </div>
-                        <div class="ins_ws_kpi_data">
-                            <strong style="color: ${pendingGrading > 0 ? 'var(--ws-danger, #ef4444)' : 'inherit'}"><c:out value="${pendingGrading}"/></strong>
-                            <span>Pending Submissions</span>
-                        </div>
-                    </div>
-                </section>
-
-                <%-- BOTTOM SECTION: QUICK ACTIONS --%>
-                <section class="ins_ws_actions_sec">
-                    <h3 class="ins_ws_actions_title">Quick Actions</h3>
-                    <div class="ins_ws_actions_grid">
-                        <button onclick="openUploadModal()" class="ins_ws_action_btn">
-                            <i data-lucide="upload"></i>
-                            <span>Upload New Material</span>
-                        </button>
-                        <a href="${assessmentWorkspaceBaseUrl}&view=editor" class="ins_ws_action_btn">
-                            <i data-lucide="plus"></i>
-                            <span>Create Assessment</span>
-                        </a>
-                        <a href="#students" class="ins_ws_action_btn">
-                            <i data-lucide="users"></i>
-                            <span>View Roster</span>
-                        </a>
-                    </div>
-                </section>
-                
+function KpiCard({ icon, colorClass, value, label }) {
+    return (
+        <div className="ins_ws_kpi_card">
+            <div className={`ins_ws_kpi_icon ${'$'}{colorClass}`}><i className={icon}></i></div>
+            <div className="ins_ws_kpi_data">
+                <strong style={{ color: colorClass === 'pending' && value > 0 ? '#ef4444' : 'inherit' }}>{value}</strong>
+                <span>{label}</span>
             </div>
         </div>
+    );
+}
 
-        <%-- SECTION 2: CURRICULUM MATERIALS --%>
-        <div id="materials" class="ws-tab-content">
-            <div class="section-card">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
-                    <h3 class="section-title" style="margin: 0; font-weight: 800; font-size: 1.25rem;">Course Curriculum Materials (${fn:length(materials)} items)</h3>
-                    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-                        <button class="ws-btn ws-btn-primary" onclick="openUploadModal()">
-                            <i class="fas fa-upload"></i> Upload Material
-                        </button>
-                        <button id="saveOrderBtn" class="ws-btn ws-btn-secondary" onclick="saveMaterialsOrder()" disabled style="opacity: 0.5; cursor: not-allowed;">
-                            <i class="fas fa-save"></i> Save Order
-                        </button>
-                    </div>
+function MaterialsTab() {
+    const [materials, setMaterials] = useState(workspaceData.materials || []);
+    const [isSavingOrder, setIsSavingOrder] = useState(false);
+    const [hasOrderChanged, setHasOrderChanged] = useState(false);
+
+    // Simple Drag and Drop state
+    const dragItem = useRef(null);
+    const dragOverItem = useRef(null);
+
+    const handleSort = () => {
+        if (dragItem.current === null || dragOverItem.current === null) return;
+        let _materials = [...materials];
+        const draggedItemContent = _materials.splice(dragItem.current, 1)[0];
+        _materials.splice(dragOverItem.current, 0, draggedItemContent);
+        dragItem.current = null;
+        dragOverItem.current = null;
+        setMaterials(_materials);
+        setHasOrderChanged(true);
+    };
+
+    const saveOrder = () => {
+        setIsSavingOrder(true);
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = workspaceData.contextPath + '/instructor/content-organizer';
+        
+        const actionInput = document.createElement('input');
+        actionInput.type = 'hidden';
+        actionInput.name = 'action';
+        actionInput.value = 'saveContentOrder';
+        form.appendChild(actionInput);
+
+        const courseIdInput = document.createElement('input');
+        courseIdInput.type = 'hidden';
+        courseIdInput.name = 'courseId';
+        courseIdInput.value = workspaceData.course.courseId;
+        form.appendChild(courseIdInput);
+
+        materials.forEach(mat => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'materialIds[]';
+            input.value = mat.materialId;
+            form.appendChild(input);
+        });
+
+        document.body.appendChild(form);
+        form.submit();
+    };
+
+    return (
+        <div className="section-card" style={{ padding: '0', background: 'transparent', border: 'none', boxShadow: 'none' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
+                <h3 className="section-title" style={{ margin: 0, fontWeight: 800, fontSize: '1.25rem' }}>Course Curriculum Materials ({materials.length} items)</h3>
+                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                    <button className="ws-btn ws-btn-primary" onClick={() => window.openUploadModal()}>
+                        <i className="fas fa-upload"></i> Upload Material
+                    </button>
+                    <button className={`ws-btn ${'$'}{hasOrderChanged ? 'ws-btn-primary' : 'ws-btn-secondary'}`} onClick={saveOrder} disabled={!hasOrderChanged || isSavingOrder} style={{ opacity: (!hasOrderChanged || isSavingOrder) ? 0.5 : 1 }}>
+                        {isSavingOrder ? <><i className="fas fa-spinner fa-spin"></i> Saving...</> : <><i className="fas fa-save"></i> Save Order</>}
+                    </button>
                 </div>
+            </div>
 
-                <c:choose>
-                    <c:when test="${empty materials}">
-                        <div class="empty-state-box workspace-empty-box" style="padding: 40px; text-align: center;">
-                            <i class="fas fa-folder-open" style="font-size: 3rem; color: var(--ins-muted); margin-bottom: 16px;"></i>
-                            <p style="font-weight: 600; margin-bottom: 12px;">No active materials uploaded for this course yet.</p>
-                            <button class="ws-btn ws-btn-primary ws-btn-sm" onclick="openUploadModal()">Upload First Material</button>
-                        </div>
-                    </c:when>
-                    <c:otherwise>
-                        <div class="pm-materials-list" id="materialsContainer">
-                            <c:forEach var="material" items="${materials}">
-                                <div class="pm-material-card" draggable="true" data-id="${material.materialId}">
-                                    <div class="pm-material-drag-handle" title="Drag to reorder">
-                                        <i class="fas fa-grip-vertical"></i>
+            {materials.length === 0 ? (
+                <div className="empty-state-box workspace-empty-box" style={{ padding: '40px', textAlign: 'center' }}>
+                    <i className="fas fa-folder-open" style={{ fontSize: '3rem', color: '#94a3b8', marginBottom: '16px' }}></i>
+                    <p style={{ fontWeight: 600, marginBottom: '12px' }}>No active materials uploaded for this course yet.</p>
+                    <button className="ws-btn ws-btn-primary ws-btn-sm" onClick={() => window.openUploadModal()}>Upload First Material</button>
+                </div>
+            ) : (
+                <div className="pm-materials-list">
+                    {materials.map((mat, index) => {
+                        const typeClass = mat.type.toLowerCase();
+                        let typeIcon = 'fa-file-alt';
+                        if (typeClass === 'pdf') typeIcon = 'fa-file-pdf';
+                        if (typeClass === 'video') typeIcon = 'fa-file-video';
+                        if (typeClass === 'slides') typeIcon = 'fa-file-powerpoint';
+                        if (typeClass === 'link') typeIcon = 'fa-link';
+                        if (typeClass === 'youtube') typeIcon = 'fa-play-circle';
+
+                        return (
+                            <div 
+                                key={mat.materialId}
+                                className="pm-material-card"
+                                draggable
+                                onDragStart={(e) => { dragItem.current = index; e.currentTarget.classList.add('dragging'); }}
+                                onDragEnter={(e) => { dragOverItem.current = index; e.currentTarget.classList.add('drag-over'); }}
+                                onDragLeave={(e) => e.currentTarget.classList.remove('drag-over')}
+                                onDragEnd={(e) => { e.currentTarget.classList.remove('dragging'); handleSort(); document.querySelectorAll('.pm-material-card').forEach(c => c.classList.remove('drag-over')); }}
+                                onDragOver={(e) => e.preventDefault()}
+                            >
+                                <div className="pm-material-drag-handle" title="Drag to reorder"><i className="fas fa-grip-vertical"></i></div>
+                                <div className={`pm-material-type-icon type-${'$'}{typeClass}`}><i className={`fas ${'$'}{typeIcon}`}></i></div>
+                                <div className="pm-material-details">
+                                    <div className="pm-material-title-row">
+                                        <span className="pm-material-title">{mat.title}</span>
+                                        <span className={`type-badge badge-${'$'}{typeClass}`}>{mat.type}</span>
                                     </div>
-                                    <div class="pm-material-type-icon type-${fn:toLowerCase(material.materialType)}">
-                                        <i class="fas <c:choose>
-                                            <c:when test="${material.materialType == 'PDF'}">fa-file-pdf</c:when>
-                                            <c:when test="${material.materialType == 'Video'}">fa-file-video</c:when>
-                                            <c:when test="${material.materialType == 'Slides'}">fa-file-powerpoint</c:when>
-                                            <c:when test="${material.materialType == 'Link'}">fa-link</c:when>
-                                            <c:when test="${material.materialType == 'YouTube'}">fa-play-circle</c:when>
-                                            <c:otherwise>fa-file-alt</c:otherwise>
-                                        </c:choose>"></i>
-                                    </div>
-                                    <div class="pm-material-details">
-                                        <div class="pm-material-title-row">
-                                            <span class="pm-material-title"><c:out value="${material.title}"/></span>
-                                            <span class="type-badge badge-${fn:toLowerCase(material.materialType)}"><c:out value="${material.materialType}"/></span>
-                                            <span style="font-weight: 700; font-size: 0.8rem; color: var(--ws-primary);">#${not empty material.displayOrder ? material.displayOrder : '-'}</span>
-                                        </div>
-                                        <p class="pm-material-desc"><c:out value="${material.description}" default="No description has been written for this module block."/></p>
-                                    </div>
-                                    <div class="pm-material-actions">
-                                        <c:choose>
-                                            <c:when test="${not empty material.filePath}">
-                                                <a href="${pageContext.request.contextPath}/instructor/materials-preview?action=preview&id=${material.materialId}" target="_blank" class="ws-btn ws-btn-secondary ws-btn-xs" style="padding: 6px 10px;"><i class="fas fa-eye"></i> Preview</a>
-                                            </c:when>
-                                        </c:choose>
-                                        <button class="ws-btn ws-btn-secondary ws-btn-xs" style="padding: 6px 10px;"
-                                                data-material-id="${material.materialId}"
-                                                data-title="<c:out value='${material.title}'/>"
-                                                data-type="<c:out value='${material.materialType}'/>"
-                                                data-order="${material.displayOrder}"
-                                                data-description="<c:out value='${material.description}'/>"
-                                                data-external-url="<c:out value='${material.filePath}'/>"
-                                                onclick="openEditMaterialModal(this, false)">
-                                            <i class="fas fa-edit"></i> Edit
+                                    <p className="pm-material-desc">{mat.description || 'No description provided.'}</p>
+                                </div>
+                                <div className="pm-material-actions">
+                                    {mat.filePath && (
+                                        <a href={`${'$'}{workspaceData.contextPath}/instructor/materials-preview?action=preview&id=${'$'}{mat.materialId}`} target="_blank" className="ws-btn ws-btn-secondary ws-btn-xs" style={{ padding: '6px 10px' }}>
+                                            <i className="fas fa-eye"></i> Preview
+                                        </a>
+                                    )}
+                                    <button 
+                                        className="ws-btn ws-btn-secondary ws-btn-xs" 
+                                        style={{ padding: '6px 10px' }}
+                                        onClick={(e) => {
+                                            // Create an artificial DOM element to pass to the existing global openEditMaterialModal
+                                            const btn = document.createElement('button');
+                                            btn.dataset.materialId = mat.materialId;
+                                            btn.dataset.title = mat.title;
+                                            btn.dataset.type = mat.type;
+                                            btn.dataset.order = mat.order;
+                                            btn.dataset.description = mat.description;
+                                            btn.dataset.externalUrl = mat.filePath;
+                                            window.openEditMaterialModal(btn, false);
+                                        }}
+                                    >
+                                        <i className="fas fa-edit"></i> Edit
+                                    </button>
+                                    <form action={`${'$'}{workspaceData.contextPath}/instructor/materials`} method="get" style={{ display: 'inline' }} onSubmit={(e) => { if(!window.confirm('Delete this material?')) e.preventDefault(); }}>
+                                        <input type="hidden" name="action" value="delete" />
+                                        <input type="hidden" name="id" value={mat.materialId} />
+                                        <input type="hidden" name="courseId" value={workspaceData.course.courseId} />
+                                        <input type="hidden" name="source" value="workspace" />
+                                        <button type="submit" className="ws-btn ws-btn-danger ws-btn-xs" style={{ padding: '6px 10px', fontWeight: 600 }}>
+                                            <i className="fas fa-trash"></i> Delete
                                         </button>
-                                        <form action="${pageContext.request.contextPath}/instructor/materials" method="get" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this material?');">
-                                            <input type="hidden" name="action" value="delete">
-                                            <input type="hidden" name="id" value="${material.materialId}">
-                                            <input type="hidden" name="courseId" value="${selectedCourse.courseId}">
-                                            <input type="hidden" name="source" value="workspace">
-                                            <button type="submit" class="ws-btn ws-btn-danger ws-btn-xs" style="padding: 6px 10px; font-weight: 600;"><i class="fas fa-trash"></i> Delete</button>
-                                        </form>
-                                    </div>
+                                    </form>
                                 </div>
-                            </c:forEach>
-                        </div>
-                    </c:otherwise>
-                </c:choose>
-            </div>
-        </div>
-
-        <%-- SECTION 3: ASSESSMENTS LIBRARY --%>
-        <div id="assessments" class="ws-tab-content">
-            <div class="section-card" style="padding: 16px; border-radius: 12px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 16px;">
-                    <h3 class="section-title" style="margin: 0; font-weight: 800; font-size: 1.25rem;">Course Assessments Library (${fn:length(assessments)} items)</h3>
-                    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-                        <a href="${assessmentWorkspaceBaseUrl}&view=editor" class="btn btn-primary">
-                            <i class="fas fa-plus"></i> Create Assessment
-                        </a>
-                        <a href="${assessmentWorkspaceBaseUrl}" class="btn btn-secondary">
-                            <i class="fas fa-clipboard-list"></i> Assessments Hub
-                        </a>
-                    </div>
+                            </div>
+                        );
+                    })}
                 </div>
+            )}
+        </div>
+    );
+}
 
-                <c:choose>
-                    <c:when test="${empty assessments}">
-                        <div class="empty-state-box workspace-empty-box" style="padding: 40px; text-align: center;">
-                            <i class="fas fa-clipboard-list" style="font-size: 3rem; color: var(--ins-muted); margin-bottom: 16px;"></i>
-                            <p style="font-weight: 600; margin-bottom: 12px;">No assessments created for this course yet.</p>
-                            <a href="${assessmentWorkspaceBaseUrl}&view=editor" class="btn btn-primary btn-sm">Create First Assessment</a>
-                        </div>
-                    </c:when>
-                    <c:otherwise>
-                        <div class="assessments-grid">
-                            <c:forEach var="assessment" items="${assessments}">
-                                <div class="assessment-card">
-                                    <div class="assessment-card-header">
-                                        <div class="assessment-icon-circle ${fn:toLowerCase(assessment.type)}">
-                                            <i class="fas ${assessment.type == 'Assignment' ? 'fa-file-signature' : 'fa-stopwatch'}"></i>
-                                        </div>
-                                        <span class="type-badge badge-${fn:toLowerCase(assessment.type)}">${assessment.type}</span>
-                                    </div>
-                                    <h4 class="assessment-title" style="margin: 0; font-weight: 700;"><c:out value="${assessment.title}"/></h4>
-                                    <p class="assessment-desc"><c:out value="${assessment.instructions}" default="No instruction details provided for this evaluation module."/></p>
-                                    <div class="assessment-stats-row">
-                                        <div class="stat-bubble">
-                                            <span class="stat-num">${submissionCountByAssessmentId[assessment.assessmentId] != null ? submissionCountByAssessmentId[assessment.assessmentId] : 0}</span>
-                                            <span class="stat-lbl">Attempts</span>
-                                        </div>
-                                        <div class="stat-bubble">
-                                            <span class="stat-num">
-                                                <c:choose>
-                                                    <c:when test="${not empty assessment.duration and assessment.duration > 0}"><c:out value="${assessment.duration}"/>m</c:when>
-                                                    <c:otherwise>-</c:otherwise>
-                                                </c:choose>
-                                            </span>
-                                            <span class="stat-lbl">Time Limit</span>
-                                        </div>
-                                        <div class="stat-bubble">
-                                            <span class="stat-num">
-                                                <c:choose>
-                                                    <c:when test="${not empty assessment.totalMarks}"><c:out value="${assessment.totalMarks}"/></c:when>
-                                                    <c:otherwise>-</c:otherwise>
-                                                </c:choose>
-                                            </span>
-                                            <span class="stat-lbl">Points</span>
-                                        </div>
-                                    </div>
-                                    <div class="assessment-actions">
-                                        <a href="${assessmentWorkspaceBaseUrl}&view=editor&assessmentId=${assessment.assessmentId}" class="btn btn-secondary btn-sm" style="flex: 1;"><i class="fas fa-edit"></i> Edit</a>
-                                        <a href="${assessmentWorkspaceBaseUrl}&view=submissions&assessmentId=${assessment.assessmentId}" class="btn btn-primary btn-sm" style="flex: 1;"><i class="fas fa-inbox"></i> Grades</a>
-                                    </div>
+function AssessmentsTab() {
+    const assessments = workspaceData.assessments || [];
+    return (
+        <div className="section-card" style={{ padding: '16px', borderRadius: '12px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '16px' }}>
+                <h3 className="section-title" style={{ margin: 0, fontWeight: 800, fontSize: '1.25rem' }}>Course Assessments Library ({assessments.length} items)</h3>
+                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                    <a href={`${'$'}{workspaceData.assessmentBaseUrl}&view=editor`} className="ws-btn ws-btn-primary"><i className="fas fa-plus"></i> Create Assessment</a>
+                    <a href={workspaceData.assessmentBaseUrl} className="ws-btn ws-btn-secondary"><i className="fas fa-clipboard-list"></i> Assessments Hub</a>
+                </div>
+            </div>
+
+            {assessments.length === 0 ? (
+                <div className="empty-state-box workspace-empty-box" style={{ padding: '40px', textAlign: 'center' }}>
+                    <i className="fas fa-clipboard-list" style={{ fontSize: '3rem', color: '#94a3b8', marginBottom: '16px' }}></i>
+                    <p style={{ fontWeight: 600, marginBottom: '12px' }}>No assessments created for this course yet.</p>
+                </div>
+            ) : (
+                <div className="assessments-grid">
+                    {assessments.map(ass => (
+                        <div key={ass.id} className="assessment-card">
+                            <div className="assessment-card-header">
+                                <div className={`assessment-icon-circle ${'$'}{ass.type.toLowerCase()}`}>
+                                    <i className={`fas ${'$'}{ass.type === 'Assignment' ? 'fa-file-signature' : 'fa-stopwatch'}`}></i>
                                 </div>
-                            </c:forEach>
+                                <span className={`type-badge badge-${'$'}{ass.type.toLowerCase()}`}>{ass.type}</span>
+                            </div>
+                            <h4 className="assessment-title" style={{ margin: 0, fontWeight: 700 }}>{ass.title}</h4>
+                            <p className="assessment-desc">{ass.instructions}</p>
+                            <div className="assessment-stats-row">
+                                <div className="stat-bubble"><span className="stat-num">{ass.attempts}</span><span className="stat-lbl">Attempts</span></div>
+                                <div className="stat-bubble"><span className="stat-num">{ass.duration ? `${'$'}{ass.duration}m` : '-'}</span><span className="stat-lbl">Time Limit</span></div>
+                                <div className="stat-bubble"><span className="stat-num">{ass.points ? ass.points : '-'}</span><span className="stat-lbl">Points</span></div>
+                            </div>
+                            <div className="assessment-actions">
+                                <a href={`${'$'}{workspaceData.assessmentBaseUrl}&view=editor&assessmentId=${'$'}{ass.id}`} className="ws-btn ws-btn-secondary ws-btn-sm" style={{ flex: 1 }}><i className="fas fa-edit"></i> Edit</a>
+                                <a href={`${'$'}{workspaceData.assessmentBaseUrl}&view=submissions&assessmentId=${'$'}{ass.id}`} className="ws-btn ws-btn-primary ws-btn-sm" style={{ flex: 1 }}><i className="fas fa-inbox"></i> Grades</a>
+                            </div>
                         </div>
-                    </c:otherwise>
-                </c:choose>
-            </div>
-        </div>
-
-        <%-- SECTION 4: ENROLLED STUDENTS --%>
-        <div id="students" class="ws-tab-content">
-            <div class="section-card" style="padding: 16px; border-radius: 12px;">
-                <div class="student-search-bar">
-                    <h3 class="section-title" style="margin: 0; font-weight: 800; font-size: 1.25rem;">Active Roster (${fn:length(enrollments)} students)</h3>
-                    <div class="search-input-wrap">
-                        <i class="fas fa-search"></i>
-                        <input type="text" id="wsRosterSearchInput" placeholder="Filter roster by student name or email..." oninput="filterRosterTable()">
-                    </div>
+                    ))}
                 </div>
-
-                <c:choose>
-                    <c:when test="${empty enrollments}">
-                        <div class="empty-state-box workspace-empty-box" style="padding: 40px; text-align: center;">
-                            <i class="fas fa-user-slash" style="font-size: 3rem; color: var(--ins-muted); margin-bottom: 16px;"></i>
-                            <p style="font-weight: 600;">No students are registered or enrolled in this course syllabus yet.</p>
-                        </div>
-                    </c:when>
-                    <c:otherwise>
-                        <div class="premium-table-wrapper">
-                            <table class="premium-table" id="wsRosterTable">
-                                <thead>
-                                    <tr>
-                                        <th>Student Details</th>
-                                        <th style="width: 140px;">Status</th>
-                                        <th style="width: 200px;">Progress Tracking</th>
-                                        <th style="width: 150px;">Registration</th>
-                                        <th style="width: 160px; text-align: right;">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <c:forEach var="enrollment" items="${enrollments}">
-                                        <tr class="student-table-row">
-                                            <td>
-                                                <div class="material-name-block">
-                                                    <div class="ws-student-avatar" style="width: 28px; height: 28px; border-radius: 50%; background: var(--ws-primary-glow); color: var(--ws-primary); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; flex-shrink: 0;">
-                                                        <c:out value="${fn:substring(enrollment.studentName, 0, 1)}"/>
-                                                    </div>
-                                                    <div>
-                                                        <strong class="student-search-name" style="font-size: 0.95rem; color: var(--ins-heading, #0f172a);"><c:out value="${enrollment.studentName}"/></strong>
-                                                        <p class="student-search-email" style="font-size: 0.8rem; color: var(--ins-muted, #64748b); margin: 2px 0 0;"><c:out value="${enrollment.studentEmail}"/></p>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <span class="status-badge status-${fn:toLowerCase(enrollment.status)}">
-                                                    <c:out value="${enrollment.status}"/>
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <div class="ws-student-progress" style="display: flex; flex-direction: column; gap: 6px;">
-                                                    <div class="ws-progress-bar" style="width: 100%; height: 6px; background: rgba(99, 102, 241, 0.08); border-radius: 4px; overflow: hidden;">
-                                                        <div class="ws-progress-fill" style="width: ${not empty enrollment.progress ? enrollment.progress : 0}%; height: 100%; background: var(--ws-primary); border-radius: 4px;"></div>
-                                                    </div>
-                                                    <span class="ws-progress-text" style="font-size: 0.78rem; font-weight: 700; color: var(--ins-muted);"><c:out value="${not empty enrollment.progress ? enrollment.progress : 0}"/>% Completed</span>
-                                                </div>
-                                            </td>
-                                            <td style="color: var(--ins-muted); font-size: 0.85rem;">
-                                                <i class="far fa-calendar-alt" style="margin-right: 6px;"></i>
-                                                <c:out value="${fn:substring(enrollment.enrollmentDate, 0, 10)}"/>
-                                            </td>
-                                            <td style="text-align: right; display: flex; gap: 8px; justify-content: flex-end;">
-                                                <a href="${pageContext.request.contextPath}/instructor/assessments?view=submissions&courseId=${selectedCourse.courseId}" class="btn btn-secondary btn-xs" title="View Grades">
-                                                    <i class="fas fa-chart-bar"></i> Grades
-                                                </a>
-                                                <c:if test="${enrollment.progress == 100 || fn:toLowerCase(enrollment.status) == 'completed' || fn:toLowerCase(enrollment.completionStatus) == 'completed'}">
-                                                    <a href="${pageContext.request.contextPath}/certificate/verify?enrollmentId=${enrollment.enrollmentId}" class="btn btn-xs" title="Issue/View Certificate" target="_blank" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); color: var(--ws-success); font-weight: 600;">
-                                                        <i class="fas fa-certificate"></i> Cert
-                                                    </a>
-                                                </c:if>
-                                            </td>
-                                        </tr>
-                                    </c:forEach>
-                                </tbody>
-                            </table>
-                        </div>
-                    </c:otherwise>
-                </c:choose>
-            </div>
+            )}
         </div>
+    );
+}
 
-    </div>
-</main>
+function StudentsTab() {
+    const enrollments = workspaceData.enrollments || [];
+    const [query, setQuery] = useState('');
+
+    const filtered = enrollments.filter(e => e.name.toLowerCase().includes(query.toLowerCase()) || e.email.toLowerCase().includes(query.toLowerCase()));
+
+    return (
+        <div className="section-card" style={{ padding: '16px', borderRadius: '12px' }}>
+            <div className="student-search-bar">
+                <h3 className="section-title" style={{ margin: 0, fontWeight: 800, fontSize: '1.25rem' }}>Active Roster ({enrollments.length} students)</h3>
+                <div className="search-input-wrap">
+                    <i className="fas fa-search"></i>
+                    <input type="text" placeholder="Filter roster by student name or email..." value={query} onChange={e => setQuery(e.target.value)} />
+                </div>
+            </div>
+
+            {enrollments.length === 0 ? (
+                <div className="empty-state-box workspace-empty-box" style={{ padding: '40px', textAlign: 'center' }}>
+                    <i className="fas fa-user-slash" style={{ fontSize: '3rem', color: '#94a3b8', marginBottom: '16px' }}></i>
+                    <p style={{ fontWeight: 600 }}>No students are enrolled in this course yet.</p>
+                </div>
+            ) : (
+                <div className="premium-table-wrapper">
+                    <table className="premium-table">
+                        <thead>
+                            <tr>
+                                <th>Student Details</th>
+                                <th style={{ width: '140px' }}>Status</th>
+                                <th style={{ width: '200px' }}>Progress Tracking</th>
+                                <th style={{ width: '150px' }}>Registration</th>
+                                <th style={{ width: '160px', textAlign: 'right' }}>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {filtered.map(enr => (
+                                <tr key={enr.id} className="student-table-row">
+                                    <td>
+                                        <div className="material-name-block">
+                                            <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'var(--ws-primary-glow)', color: 'var(--ws-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '0.8rem', flexShrink: 0 }}>
+                                                {enr.name.charAt(0)}
+                                            </div>
+                                            <div>
+                                                <strong style={{ fontSize: '0.95rem', color: 'var(--ins-heading, #0f172a)' }}>{enr.name}</strong>
+                                                <p style={{ fontSize: '0.8rem', color: 'var(--ins-muted, #64748b)', margin: '2px 0 0' }}>{enr.email}</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><span className={`status-badge status-${'$'}{enr.status.toLowerCase()}`}>{enr.status}</span></td>
+                                    <td>
+                                        <div className="ws-student-progress" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                            <div className="ws-progress-bar" style={{ width: '100%', height: '6px', background: 'rgba(99, 102, 241, 0.08)', borderRadius: '4px', overflow: 'hidden' }}>
+                                                <div className="ws-progress-fill" style={{ width: `${'$'}{enr.progress}%`, height: '100%', background: 'var(--ws-primary)', borderRadius: '4px' }}></div>
+                                            </div>
+                                            <span className="ws-progress-text" style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--ins-muted)' }}>{enr.progress}% Completed</span>
+                                        </div>
+                                    </td>
+                                    <td style={{ color: 'var(--ins-muted)', fontSize: '0.85rem' }}><i className="far fa-calendar-alt" style={{ marginRight: '6px' }}></i> {enr.date}</td>
+                                    <td style={{ textAlign: 'right', display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                                        <a href={`${'$'}{workspaceData.assessmentBaseUrl}&view=submissions`} className="ws-btn ws-btn-secondary ws-btn-xs" title="View Grades"><i className="fas fa-chart-bar"></i> Grades</a>
+                                        {enr.progress === 100 && (
+                                            <a href={`${'$'}{workspaceData.contextPath}/certificate/verify?enrollmentId=${'$'}{enr.id}`} className="ws-btn ws-btn-xs" title="Issue/View Certificate" target="_blank" style={{ background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.2)', color: '#10b981', fontWeight: 600 }}><i className="fas fa-certificate"></i> Cert</a>
+                                        )}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            )}
+        </div>
+    );
+}
+
+// Render the application
+const rootNode = document.getElementById('workspace-react-root');
+if (rootNode) {
+    const root = ReactDOM.createRoot(rootNode);
+    root.render(<CourseWorkspaceApp />);
+}
+
+        </script>
 
 <!-- Upload Material Modal -->
 <div id="uploadModal" class="modal">
@@ -1875,30 +1961,7 @@
 </div>
 
 <script>
-    // Anchor navigation state for workspace sections.
-    document.addEventListener("DOMContentLoaded", function() {
-        const links = document.querySelectorAll("[data-section-link]");
-
-        function syncActiveSection() {
-            const activeSection = window.location.hash.replace("#", "") || "overview";
-            
-            // Toggle links
-            links.forEach(link => {
-                link.classList.toggle("active", link.dataset.sectionLink === activeSection);
-            });
-            
-            // Toggle content panes
-            document.querySelectorAll(".ws-tab-content").forEach(pane => {
-                pane.classList.remove("active");
-                if (pane.id === activeSection) {
-                    pane.classList.add("active");
-                }
-            });
-        }
-
-        syncActiveSection();
-        window.addEventListener("hashchange", syncActiveSection);
-    });
+    // (Legacy Vanilla JS tab sync removed to prevent conflicts with React)
 
     // Client-side quick keyword filter for Enrolled Students roster table
     function filterRosterTable() {

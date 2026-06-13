@@ -207,6 +207,69 @@ public class InstructorCourseServlet extends HttpServlet {
             int averageProgress = totalStudents > 0 ? Math.round((float) progressSum / totalStudents) : 0;
             int pendingGrading = countPendingGrading(allSubmissions);
 
+            org.json.JSONObject workspaceDataJson = new org.json.JSONObject();
+            workspaceDataJson.put("contextPath", request.getContextPath());
+            workspaceDataJson.put("assessmentBaseUrl", request.getContextPath() + "/instructor/assessments?courseId=" + courseId);
+            
+            org.json.JSONObject courseJson = new org.json.JSONObject();
+            courseJson.put("courseId", course.getCourseId());
+            courseJson.put("courseName", course.getCourseName() == null ? "" : course.getCourseName());
+            courseJson.put("status", course.getStatus() == null ? "" : course.getStatus());
+            courseJson.put("category", course.getCategory() == null ? "" : course.getCategory());
+            courseJson.put("level", course.getLevel() == null ? "" : course.getLevel());
+            courseJson.put("displayDuration", course.getDisplayDuration() == null ? "" : course.getDisplayDuration());
+            courseJson.put("description", course.getDescription() == null ? "" : course.getDescription());
+            workspaceDataJson.put("course", courseJson);
+            
+            org.json.JSONObject statsJson = new org.json.JSONObject();
+            statsJson.put("totalStudents", totalStudents);
+            statsJson.put("publishedMaterials", materials.size());
+            statsJson.put("assessmentCount", assessments.size());
+            statsJson.put("pendingGrading", pendingGrading);
+            workspaceDataJson.put("stats", statsJson);
+            
+            org.json.JSONArray materialsArray = new org.json.JSONArray();
+            for (Material mat : materials) {
+                org.json.JSONObject m = new org.json.JSONObject();
+                m.put("materialId", mat.getMaterialId());
+                m.put("title", mat.getTitle() == null ? "" : mat.getTitle());
+                m.put("type", mat.getMaterialType() == null ? "" : mat.getMaterialType());
+                m.put("description", mat.getDescription() == null ? "" : mat.getDescription());
+                m.put("order", mat.getDisplayOrder() == null ? "" : mat.getDisplayOrder().toString());
+                m.put("filePath", mat.getFilePath() == null ? "" : mat.getFilePath());
+                materialsArray.put(m);
+            }
+            workspaceDataJson.put("materials", materialsArray);
+            
+            org.json.JSONArray assessmentsArray = new org.json.JSONArray();
+            for (Assessment ass : assessments) {
+                org.json.JSONObject a = new org.json.JSONObject();
+                a.put("id", ass.getAssessmentId());
+                a.put("title", ass.getTitle() == null ? "" : ass.getTitle());
+                a.put("type", ass.getType() == null ? "" : ass.getType());
+                a.put("instructions", ass.getInstructions() == null ? "" : ass.getInstructions());
+                a.put("duration", ass.getDuration() == null ? "" : ass.getDuration().toString());
+                a.put("points", ass.getTotalMarks() == null ? "" : ass.getTotalMarks().toString());
+                a.put("attempts", submissionCountByAssessmentId.getOrDefault(ass.getAssessmentId(), 0));
+                assessmentsArray.put(a);
+            }
+            workspaceDataJson.put("assessments", assessmentsArray);
+            
+            org.json.JSONArray enrollmentsArray = new org.json.JSONArray();
+            for (Enrollment enr : enrollments) {
+                org.json.JSONObject e = new org.json.JSONObject();
+                e.put("id", enr.getEnrollmentId());
+                e.put("name", enr.getStudentName() == null ? "" : enr.getStudentName());
+                e.put("email", enr.getStudentEmail() == null ? "" : enr.getStudentEmail());
+                e.put("status", enr.getStatus() == null ? "" : enr.getStatus());
+                e.put("progress", enr.getProgress() == null ? 0 : enr.getProgress());
+                e.put("date", enr.getEnrollmentDate() == null ? "" : enr.getEnrollmentDate().toString());
+                enrollmentsArray.put(e);
+            }
+            workspaceDataJson.put("enrollments", enrollmentsArray);
+            
+            request.setAttribute("workspaceDataJsonStr", workspaceDataJson.toString());
+
             request.setAttribute("selectedCourse", course);
             request.setAttribute("materials", materials);
             request.setAttribute("assessments", assessments);
