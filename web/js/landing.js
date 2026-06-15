@@ -247,13 +247,24 @@ document.addEventListener('DOMContentLoaded', function () {
             currentCourses.forEach((course, index) => {
                 const feeDisplay = course.fee > 0 ? '₦' + course.fee.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2}) : 'Free';
                 
-                let imgSrc = `<div style="height: 100%; display: flex; align-items: center; justify-content: center; background: var(--lp-gray-soft); color: var(--lp-slate-light);">No Image</div>`;
+                const GRADIENTS = [
+                    'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
+                    'linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%)',
+                    'linear-gradient(135deg, #f43f5e 0%, #e11d48 100%)',
+                    'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                    'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)'
+                ];
+                let imgSrc = '';
                 if(course.banner) {
                     if(course.banner.startsWith('http')) {
                         imgSrc = `<img class="lp_course_img" src="${course.banner}" alt="cover">`;
                     } else {
                         imgSrc = `<img class="lp_course_img" src="${course.context}${course.banner}" alt="cover">`;
                     }
+                } else {
+                    const fallbackGradient = GRADIENTS[course.id % 5];
+                    const fallbackText = course.name ? course.name.substring(0, 2).toUpperCase() : 'CO';
+                    imgSrc = `<div style="height: 100%; display: flex; align-items: center; justify-content: center; background: ${fallbackGradient}; color: #ffffff; font-size: 2.5rem; font-weight: 800; letter-spacing: 2px;">${fallbackText}</div>`;
                 }
 
                 const article = document.createElement('article');
