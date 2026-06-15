@@ -244,6 +244,14 @@
         );
     }
 
+    const GRADIENTS = [
+        'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
+        'linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%)',
+        'linear-gradient(135deg, #f43f5e 0%, #e11d48 100%)',
+        'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+        'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)'
+    ];
+
     function CoursesManagement() {
         const [courses, setCourses] = useState(window.__COURSES__ || []);
         const [instructors] = useState(window.__INSTRUCTORS__ || []);
@@ -440,13 +448,15 @@
                 cell: info => {
                     const row = info.row.original;
                     const banner = row.courseBanner;
+                    const fallbackGradient = GRADIENTS[row.courseId % 5];
+                    const fallbackText = row.courseName ? row.courseName.substring(0, 2).toUpperCase() : 'CO';
                     return (
                         <div className="course-cell-gf">
-                            <div className="course-thumbnail-gf">
+                            <div className="course-thumbnail-gf" style={{ background: banner ? 'transparent' : fallbackGradient, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ffffff', fontWeight: 'bold' }}>
                                 {banner ? (
-                                    <img src={banner} alt={row.courseName} />
+                                    <img src={banner} alt={row.courseName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                 ) : (
-                                    <i className="fas fa-graduation-cap"></i>
+                                    <span>{fallbackText}</span>
                                 )}
                             </div>
                             <div className="course-meta-gf">
@@ -724,11 +734,11 @@
                                     /* Course Details View mode */
                                     <div className="details-section-gf">
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', borderBottom: '1px solid var(--gf-border)', paddingBottom: '1.5rem', marginBottom: '0.5rem' }}>
-                                            <div className="course-thumbnail-gf" style={{ width: '6rem', height: '4rem' }}>
+                                            <div className="course-thumbnail-gf" style={{ width: '6rem', height: '4rem', background: selectedCourse.courseBanner ? 'transparent' : GRADIENTS[selectedCourse.courseId % 5], display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ffffff', fontWeight: 'bold', fontSize: '1.5rem', borderRadius: '8px', overflow: 'hidden' }}>
                                                 {selectedCourse.courseBanner ? (
-                                                    <img src={selectedCourse.courseBanner} alt={selectedCourse.courseName} />
+                                                    <img src={selectedCourse.courseBanner} alt={selectedCourse.courseName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                                 ) : (
-                                                    <i className="fas fa-graduation-cap" style={{ fontSize: '2rem' }}></i>
+                                                    <span>{selectedCourse.courseName ? selectedCourse.courseName.substring(0, 2).toUpperCase() : 'CO'}</span>
                                                 )}
                                             </div>
                                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>

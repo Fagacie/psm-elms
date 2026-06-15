@@ -199,6 +199,14 @@
             }
         };
 
+        const GRADIENTS = [
+            'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
+            'linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%)',
+            'linear-gradient(135deg, #f43f5e 0%, #e11d48 100%)',
+            'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+            'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)'
+        ];
+
         function StudentCoursesApp() {
             const [enrollments] = useState(window.__ENROLLED_COURSES__ || []);
             const [filterStatus, setFilterStatus] = useState('all');
@@ -390,6 +398,9 @@
                                 const bannerSrc = course.courseBanner 
                                     ? (course.courseBanner.startsWith('http') ? course.courseBanner : ctxPath + '/' + course.courseBanner)
                                     : '';
+                                
+                                const fallbackGradient = GRADIENTS[course.courseId % 5];
+                                const fallbackText = course.courseName ? course.courseName.substring(0, 2).toUpperCase() : 'CO';
 
                                 const actionLabel = course.completionStatus === 'Completed' ? 'Review' : 'Resume';
 
@@ -406,8 +417,8 @@
                                                 {course.courseBanner ? (
                                                     <img src={bannerSrc} alt="" className="sv-premium-img" />
                                                 ) : (
-                                                    <div className={styles.courseBannerEmpty} style={{height: '100%'}}>
-                                                        <i className="fas fa-book-open"></i>
+                                                    <div className={styles.courseBannerEmpty} style={{height: '100%', background: fallbackGradient, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ffffff', fontSize: '2.5rem', fontWeight: '800', letterSpacing: '2px'}}>
+                                                        {fallbackText}
                                                     </div>
                                                 )}
                                             </div>

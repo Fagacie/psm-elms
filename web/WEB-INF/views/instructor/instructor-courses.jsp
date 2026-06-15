@@ -87,8 +87,17 @@
                                             <img src="${course.courseBanner}" alt="" class="sv-premium-img">
                                         </c:when>
                                         <c:otherwise>
-                                            <div style="height: 100%; display: flex; align-items: center; justify-content: center; background: #f8fafc; color: #94a3b8; font-size: 2rem;">
-                                                <i class="fas fa-graduation-cap"></i>
+                                            <c:set var="gradientIdx" value="${course.courseId % 5}" />
+                                            <c:choose>
+                                                <c:when test="${gradientIdx == 0}"><c:set var="bgGrad" value="linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)" /></c:when>
+                                                <c:when test="${gradientIdx == 1}"><c:set var="bgGrad" value="linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%)" /></c:when>
+                                                <c:when test="${gradientIdx == 2}"><c:set var="bgGrad" value="linear-gradient(135deg, #f43f5e 0%, #e11d48 100%)" /></c:when>
+                                                <c:when test="${gradientIdx == 3}"><c:set var="bgGrad" value="linear-gradient(135deg, #10b981 0%, #059669 100%)" /></c:when>
+                                                <c:otherwise><c:set var="bgGrad" value="linear-gradient(135deg, #f59e0b 0%, #d97706 100%)" /></c:otherwise>
+                                            </c:choose>
+                                            <c:set var="courseInitials" value="${fn:substring(course.courseName, 0, 2)}" />
+                                            <div style="height: 100%; display: flex; align-items: center; justify-content: center; background: ${bgGrad}; color: #ffffff; font-size: 2.5rem; font-weight: 800; letter-spacing: 2px; text-transform: uppercase;">
+                                                ${fn:escapeXml(courseInitials)}
                                             </div>
                                         </c:otherwise>
                                     </c:choose>
