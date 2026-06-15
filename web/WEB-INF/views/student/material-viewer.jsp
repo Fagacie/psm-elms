@@ -20,11 +20,25 @@
 <c:set var="navContextPage" value="materials"/>
 <c:set var="navCourseEnrollmentId" value="${previewEnrollmentId}"/>
 <c:set var="navCourseTitle" value="${not empty previewEnrollment.courseName ? previewEnrollment.courseName : material.title}"/>
-<jsp:include page="/WEB-INF/views/common/student-topbar.jsp"/>
+<c:choose>
+    <c:when test="${not empty sessionScope.instructor}">
+        <jsp:include page="/WEB-INF/views/common/instructor-topbar.jsp"/>
+    </c:when>
+    <c:otherwise>
+        <jsp:include page="/WEB-INF/views/common/student-topbar.jsp"/>
+    </c:otherwise>
+</c:choose>
 
 <div class="sv-layout">
     <c:set var="activePage" value="my-courses"/>
-    <jsp:include page="/WEB-INF/views/common/student-sidebar.jsp"/>
+    <c:choose>
+        <c:when test="${not empty sessionScope.instructor}">
+            <jsp:include page="/WEB-INF/views/common/instructor-sidebar.jsp"/>
+        </c:when>
+        <c:otherwise>
+            <jsp:include page="/WEB-INF/views/common/student-sidebar.jsp"/>
+        </c:otherwise>
+    </c:choose>
 
     <main class="sv-main mv-main">
 
