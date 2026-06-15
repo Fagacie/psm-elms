@@ -1875,7 +1875,7 @@ if (rootNode) {
                     </div>
                     <div class="field" id="fileFieldContainer" style="display: flex; flex-direction: column; gap: 6px; grid-column: span 2;">
                         <label>Upload Attachment File</label>
-                        <input type="file" name="materialFile" id="materialFile" accept=".pdf,.doc,.docx,.txt,.ppt,.pptx,.zip,.mp4,.webm,.mov,.m4v,.mp3" style="display: none;">
+                        <input type="file" name="materialFile" id="materialFile" accept=".pdf,.doc,.docx,.txt,.ppt,.pptx,.zip,.mp4,.webm,.mov,.m4v,.mp3" style="opacity: 0.01; position: absolute; width: 1px; height: 1px;">
                         <div class="modern-drag-drop-zone" id="uploadDragDropZone">
                             <i class="fas fa-cloud-upload-alt upload-icon"></i>
                             <p class="drag-drop-text">Click or drag file here to upload</p>
