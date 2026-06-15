@@ -334,7 +334,7 @@
 
 <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
-<script src="${pageContext.request.contextPath}/js/landing.js"></script>
+<script src="${pageContext.request.contextPath}/js/landing.js?v=2"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const canvas = document.getElementById('heroCanvas');
