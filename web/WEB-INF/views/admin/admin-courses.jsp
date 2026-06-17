@@ -160,7 +160,7 @@
 </script>
 
 <!-- Interactive React Command Center Application -->
-<script type="text/babel" data-presets="react,env">
+<script type="text/babel" data-presets="react">
     const { useState, useEffect } = React;
     const { 
         useReactTable, getCoreRowModel, getPaginationRowModel, getSortedRowModel, flexRender 

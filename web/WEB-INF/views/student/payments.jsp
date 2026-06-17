@@ -74,7 +74,7 @@
                     </script>
 
                     <!-- React Application Script Compiling with Babel in Browser -->
-                    <script type="text/babel" data-presets="react,env">
+                    <script type="text/babel" data-presets="react">
                         const PaymentHistoryApp = () => {
                             const [payments, setPayments] = React.useState(window.paymentsData || []);
                             const [searchTerm, setSearchTerm] = React.useState('');

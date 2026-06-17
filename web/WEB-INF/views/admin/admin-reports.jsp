@@ -249,7 +249,7 @@
     window.__SELECTED_END_DATE__ = "${selectedEndDate}";
 </script>
 
-<script type="text/babel" data-presets="react,env">
+<script type="text/babel" data-presets="react">
     const { useState, useEffect, useMemo, useRef } = React;
     const {
         useReactTable, getCoreRowModel, getPaginationRowModel, getSortedRowModel, flexRender

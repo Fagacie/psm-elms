@@ -121,7 +121,7 @@
 </script>
 
 <!-- React Frontend Script compiled with Babel in Browser -->
-<script type="text/babel" data-presets="react,env">
+<script type="text/babel" data-presets="react">
     // Scoped CSS Module class bridge mapping to mimic webpack/bundler css isolation
     const styles = {
         viewport: 'trophy_viewport',

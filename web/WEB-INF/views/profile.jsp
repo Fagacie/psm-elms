@@ -159,7 +159,7 @@
 <c:remove var="passwordError" scope="session"/>
 
 <!-- React Settings Workspace compiled in browser via Babel -->
-<script type="text/babel" data-presets="react,env">
+<script type="text/babel" data-presets="react">
     const styles = {
         viewport: 'prof_viewport',
         container: 'prof_container',

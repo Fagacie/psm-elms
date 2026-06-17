@@ -96,7 +96,7 @@
     window.__HAS_CLOUDINARY_SECRET__ = ${hasCloudinarySecret != null ? hasCloudinarySecret : false};
 </script>
 
-<script type="text/babel" data-presets="react,env">
+<script type="text/babel" data-presets="react">
     const { useState, useEffect } = React;
     const { useForm } = window.ReactHookForm || {};
 
