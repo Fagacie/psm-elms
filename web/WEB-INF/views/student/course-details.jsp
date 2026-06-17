@@ -18,7 +18,7 @@
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
     
     <!-- Babel Standalone for browser JSX compilation -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>`n    <script type="text/babel" data-type="config">{"presets": [["react", {"runtime": "classic"}]]}</script>
 
     <!-- Lucide Core for thin UI icons -->
     <script src="https://unpkg.com/lucide@latest"></script>

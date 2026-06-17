@@ -26,7 +26,7 @@
     <!-- React & Babel for Workspace SPA -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>`n    <script type="text/babel" data-type="config">{"presets": [["react", {"runtime": "classic"}]]}</script>
     <script src="https://unpkg.com/lucide@0.395.0/dist/umd/lucide.min.js"></script>
     
     <style>

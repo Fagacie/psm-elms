@@ -17,7 +17,7 @@
             <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
             
             <!-- Babel Standalone for JSX rendering -->
-            <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+            <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>`n    <script type="text/babel" data-type="config">{"presets": [["react", {"runtime": "classic"}]]}</script>
             
             <!-- Recharts dependencies (Prop-Types, Recharts UMD) -->
             <script src="https://unpkg.com/prop-types@15.8.1/prop-types.min.js"></script>
