@@ -23,7 +23,7 @@
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
 
     <!-- Babel Standalone for JSX -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>`n    <script type="text/babel" data-type="config">{"presets": [["react", {"runtime": "classic"}]]}</script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>`n    
 
     <!-- TanStack Table UMD -->
     <script src="https://unpkg.com/@tanstack/react-table@8.17.3/build/umd/index.production.js"></script>
@@ -249,7 +249,7 @@
     window.__SELECTED_END_DATE__ = "${selectedEndDate}";
 </script>
 
-<script type="text/babel" data-presets="react">
+<script type="text/babel" data-plugins="transform-react-jsx">
     const { useState, useEffect, useMemo, useRef } = React;
     const {
         useReactTable, getCoreRowModel, getPaginationRowModel, getSortedRowModel, flexRender

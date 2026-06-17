@@ -17,7 +17,7 @@
             <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
             
             <!-- Babel Standalone for JSX rendering -->
-            <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>`n    <script type="text/babel" data-type="config">{"presets": [["react", {"runtime": "classic"}]]}</script>
+            <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>`n    
             
             <!-- Recharts dependencies (Prop-Types, Recharts UMD) -->
             <script src="https://unpkg.com/prop-types@15.8.1/prop-types.min.js"></script>
@@ -74,7 +74,7 @@
             </script>
 
             <!-- Interactive React Sandbox Application (Zero CSS Bleed) -->
-            <script type="text/babel" data-presets="react">
+            <script type="text/babel" data-plugins="transform-react-jsx">
                 const { useState, useEffect, useRef } = React;
                 const { 
                     ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid 

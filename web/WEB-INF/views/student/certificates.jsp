@@ -16,7 +16,7 @@
     <!-- React, Animation & Lucide CDNs -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>`n    <script type="text/babel" data-type="config">{"presets": [["react", {"runtime": "classic"}]]}</script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>`n    
     <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     
@@ -121,7 +121,7 @@
 </script>
 
 <!-- React Frontend Script compiled with Babel in Browser -->
-<script type="text/babel" data-presets="react">
+<script type="text/babel" data-plugins="transform-react-jsx">
     // Scoped CSS Module class bridge mapping to mimic webpack/bundler css isolation
     const styles = {
         viewport: 'trophy_viewport',

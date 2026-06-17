@@ -20,7 +20,7 @@
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
     
     <!-- Babel Standalone for JSX rendering -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>`n    <script type="text/babel" data-type="config">{"presets": [["react", {"runtime": "classic"}]]}</script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>`n    
     
     <!-- Lucide Icons UMD -->
     <script src="https://unpkg.com/lucide@0.395.0/dist/umd/lucide.min.js"></script>
@@ -92,7 +92,7 @@
 </script>
 
 <!-- Interactive React Command Center Application -->
-<script type="text/babel" data-presets="react">
+<script type="text/babel" data-plugins="transform-react-jsx">
     const { useState, useEffect } = React;
     const { 
         useReactTable, getCoreRowModel, getPaginationRowModel, getSortedRowModel, flexRender 

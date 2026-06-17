@@ -18,7 +18,7 @@
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
     
     <!-- Babel Standalone for browser JSX compilation -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>`n    <script type="text/babel" data-type="config">{"presets": [["react", {"runtime": "classic"}]]}</script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>`n    
 
     <!-- Lucide Core for thin UI icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -94,7 +94,7 @@
     </script>
 
     <!-- React App Engine -->
-    <script type="text/babel" data-presets="react">
+    <script type="text/babel" data-plugins="transform-react-jsx">
         const { useState, useEffect } = React;
 
         // Custom Scoped Isolated CSS classes (immune to legacy Bootstrap overrides)
