@@ -1431,7 +1431,7 @@
         </script>
 
         <!-- Load interactive workspace react application -->
-        <script type="text/babel">
+        <script type="text/babel" data-presets="react,env">
 const { useState, useEffect, useRef } = React;
 
 function CourseWorkspaceApp() {

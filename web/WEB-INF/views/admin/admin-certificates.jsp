@@ -97,7 +97,7 @@
 </script>
 
 <!-- Interactive React Command Center Application -->
-<script type="text/babel">
+<script type="text/babel" data-presets="react,env">
     const { useState, useEffect, useMemo } = React;
     const { 
         useReactTable, getCoreRowModel, getPaginationRowModel, getSortedRowModel, flexRender 

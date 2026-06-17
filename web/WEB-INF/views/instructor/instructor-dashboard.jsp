@@ -94,7 +94,7 @@
                     </script>
 
                     <!-- Interactive React Sandbox Application (Zero CSS Bleed) -->
-                    <script type="text/babel">
+                    <script type="text/babel" data-presets="react,env">
                         const { useState, useEffect } = React;
                         const { 
                             ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid,

@@ -94,7 +94,7 @@
     </script>
 
     <!-- React App Engine -->
-    <script type="text/babel">
+    <script type="text/babel" data-presets="react,env">
         const { useState, useEffect } = React;
 
         // Custom Scoped Isolated CSS classes (immune to legacy Bootstrap overrides)

@@ -100,7 +100,7 @@
     </script>
 
     <!-- React App Engine -->
-    <script type="text/babel">
+    <script type="text/babel" data-presets="react,env">
         const { useState, useEffect, useMemo } = React;
 
         // Isolated CSS class name mappings — universal premium discovery design
