@@ -74,7 +74,8 @@
                     </script>
 
                     <!-- React Application Script Compiling with Babel in Browser -->
-                    <script type="text/babel" data-plugins="transform-react-jsx">
+                    <script src="${pageContext.request.contextPath}/js/react-jsx-bridge.js"></script>
+    <script type="text/jsx-custom" data-plugins="transform-react-jsx">
                         const PaymentHistoryApp = () => {
                             const [payments, setPayments] = React.useState(window.paymentsData || []);
                             const [searchTerm, setSearchTerm] = React.useState('');

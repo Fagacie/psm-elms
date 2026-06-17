@@ -134,7 +134,8 @@
 </script>
 
 <!-- Interactive React Command Center Application -->
-<script type="text/babel" data-plugins="transform-react-jsx">
+<script src="${pageContext.request.contextPath}/js/react-jsx-bridge.js"></script>
+    <script type="text/jsx-custom" data-plugins="transform-react-jsx">
     const { useState, useEffect } = React;
     const { 
         useReactTable, getCoreRowModel, getPaginationRowModel, getSortedRowModel, flexRender 

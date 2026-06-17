@@ -94,7 +94,8 @@
     </script>
 
     <!-- React App Engine -->
-    <script type="text/babel" data-plugins="transform-react-jsx">
+    <script src="${pageContext.request.contextPath}/js/react-jsx-bridge.js"></script>
+    <script type="text/jsx-custom" data-plugins="transform-react-jsx">
         const { useState, useEffect } = React;
 
         // Custom Scoped Isolated CSS classes (immune to legacy Bootstrap overrides)

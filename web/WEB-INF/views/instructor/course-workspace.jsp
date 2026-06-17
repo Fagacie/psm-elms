@@ -1431,7 +1431,8 @@
         </script>
 
         <!-- Load interactive workspace react application -->
-        <script type="text/babel" data-plugins="transform-react-jsx">
+        <script src="${pageContext.request.contextPath}/js/react-jsx-bridge.js"></script>
+    <script type="text/jsx-custom" data-plugins="transform-react-jsx">
 const { useState, useEffect, useRef } = React;
 
 function CourseWorkspaceApp() {

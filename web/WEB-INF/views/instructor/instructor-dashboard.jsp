@@ -94,7 +94,8 @@
                     </script>
 
                     <!-- Interactive React Sandbox Application (Zero CSS Bleed) -->
-                    <script type="text/babel" data-plugins="transform-react-jsx">
+                    <script src="${pageContext.request.contextPath}/js/react-jsx-bridge.js"></script>
+    <script type="text/jsx-custom" data-plugins="transform-react-jsx">
                         const { useState, useEffect } = React;
                         const { 
                             ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid,

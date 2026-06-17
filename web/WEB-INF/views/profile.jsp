@@ -159,7 +159,8 @@
 <c:remove var="passwordError" scope="session"/>
 
 <!-- React Settings Workspace compiled in browser via Babel -->
-<script type="text/babel" data-plugins="transform-react-jsx">
+<script src="${pageContext.request.contextPath}/js/react-jsx-bridge.js"></script>
+    <script type="text/jsx-custom" data-plugins="transform-react-jsx">
     const styles = {
         viewport: 'prof_viewport',
         container: 'prof_container',

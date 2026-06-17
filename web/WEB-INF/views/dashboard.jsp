@@ -17,7 +17,7 @@
             <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
             
             <!-- Babel Standalone for JSX rendering -->
-            <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>`n    
+            <script src="https://unpkg.com/@babel/standalone@7.10.0/babel.min.js"></script>
             
             <!-- Recharts dependencies (Prop-Types, Recharts UMD) -->
             <script src="https://unpkg.com/prop-types@15.8.1/prop-types.min.js"></script>
@@ -74,7 +74,9 @@
             </script>
 
             <!-- Interactive React Sandbox Application (Zero CSS Bleed) -->
-            <script type="text/babel" data-plugins="transform-react-jsx">
+            <script src="${pageContext.request.contextPath}/js/react-jsx-bridge.js"></script>
+    <script type="text/jsx-custom" id="dashboard-jsx">
+                console.log("BABEL SCRIPT STARTED!!!");
                 const { useState, useEffect, useRef } = React;
                 const { 
                     ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid 
@@ -107,7 +109,7 @@
                     );
                 };
 
-                function StudentDashboard() {
+                function StudentDashboard() { console.log("STUDENT DASHBOARD RENDERED!");
                     const [courses] = useState(window.__ENROLLED_COURSES__ || []);
                     const [studentName] = useState(window.__STUDENT_NAME__ || 'Student');
                     const [certificatesCount] = useState(window.__CERTIFICATES_COUNT__ || 0);

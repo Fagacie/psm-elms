@@ -96,7 +96,8 @@
     window.__HAS_CLOUDINARY_SECRET__ = ${hasCloudinarySecret != null ? hasCloudinarySecret : false};
 </script>
 
-<script type="text/babel" data-plugins="transform-react-jsx">
+<script src="${pageContext.request.contextPath}/js/react-jsx-bridge.js"></script>
+    <script type="text/jsx-custom" data-plugins="transform-react-jsx">
     const { useState, useEffect } = React;
     const { useForm } = window.ReactHookForm || {};
 

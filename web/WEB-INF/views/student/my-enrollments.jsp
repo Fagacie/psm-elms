@@ -103,7 +103,8 @@
     </script>
 
     <!-- React App Engine -->
-    <script type="text/babel" data-plugins="transform-react-jsx">
+    <script src="${pageContext.request.contextPath}/js/react-jsx-bridge.js"></script>
+    <script type="text/jsx-custom" data-plugins="transform-react-jsx">
         const { useState, useEffect, useMemo } = React;
 
         // Isolated CSS class name mappings — universal design matching dashboard

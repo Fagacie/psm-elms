@@ -121,7 +121,8 @@
 </script>
 
 <!-- React Frontend Script compiled with Babel in Browser -->
-<script type="text/babel" data-plugins="transform-react-jsx">
+<script src="${pageContext.request.contextPath}/js/react-jsx-bridge.js"></script>
+    <script type="text/jsx-custom" data-plugins="transform-react-jsx">
     // Scoped CSS Module class bridge mapping to mimic webpack/bundler css isolation
     const styles = {
         viewport: 'trophy_viewport',
