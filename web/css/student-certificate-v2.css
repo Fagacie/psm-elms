@@ -173,210 +173,342 @@ body.sc-immersive-body::-webkit-scrollbar-thumb {
   color: #0f172a !important;
   box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.08) !important;
   box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 64px 80px;
-  /* massive whitespace */
-  border: 1px solid #cbd5e1 !important;
-  /* thin, clean, minimalist border */
-  border-radius: 0px !important;
-  /* clean rectangular edge */
+  padding: 0;
+  font-family: 'Plus Jakarta Sans', sans-serif;
   overflow: hidden;
 }
 
-/* Luxury Multi-Layered Borders - REMOVED for minimalist aesthetic */
-.sc-sheet::before {
-  display: none !important;
+/* Borders & Corners */
+.sc-border-outer {
+  position: absolute;
+  top: 20px; left: 20px; right: 20px; bottom: 20px;
+  border: 1px solid #1e40af;
+  pointer-events: none;
+  z-index: 2;
+}
+.sc-border-inner {
+  position: absolute;
+  top: 26px; left: 26px; right: 26px; bottom: 26px;
+  border: 1px solid #E2E8F0;
+  pointer-events: none;
+  z-index: 2;
+}
+.sc-corner-tl, .sc-corner-tr, .sc-corner-bl, .sc-corner-br {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  border: 4px solid #0F172A;
+  z-index: 3;
+}
+.sc-corner-tl { top: 16px; left: 16px; border-bottom: none; border-right: none; }
+.sc-corner-tr { top: 16px; right: 16px; border-bottom: none; border-left: none; }
+.sc-corner-bl { bottom: 16px; left: 16px; border-top: none; border-right: none; }
+.sc-corner-br { bottom: 16px; right: 16px; border-top: none; border-left: none; }
+
+/* Watermark */
+.sc-watermark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0.04;
+  z-index: 1;
+  pointer-events: none;
+}
+.sc-watermark svg {
+  width: 500px;
+  height: 500px;
 }
 
-.sc-sheet::after {
-  display: none !important;
-}
-
-.sc-inner-border {
-  display: none !important;
-}
-
-/* Ornamental Charcoal Corners - REMOVED for minimalist aesthetic */
-.sc-corner {
-  display: none !important;
-}
-
-.sc-corner-tl,
-.sc-corner-tr,
-.sc-corner-bl,
-.sc-corner-br {
-  display: none !important;
-}
-
-/* Certificate Header & Crest */
-.sc-crest {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 4px;
-  position: relative;
-  z-index: 10;
-}
-
-.sc-crest-svg {
-  filter: none;
-}
-
-.sc-platform-name {
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  color: #64748b !important;
-  /* small, bold, muted gray */
-  text-transform: uppercase;
-  margin: 8px 0 0 0;
-  text-align: center;
-}
-
-.sc-title {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  font-size: 1.45rem;
-  font-weight: 500;
-  letter-spacing: 0.15em;
-  color: #0f172a !important;
-  text-transform: uppercase;
-  margin: 10px 0 0 0;
-  text-align: center;
-}
-
-/* Certificate Body Content */
-.sc-body-content {
-  text-align: center;
+/* Left Banner */
+.sc-left-banner {
+  position: absolute;
+  top: 0;
+  left: 60px;
+  width: 70px;
+  height: 65%;
+  background-color: #1e40af;
+  z-index: 5;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  flex-grow: 1;
-  padding: 16px 10px;
-  position: relative;
-  z-index: 10;
+}
+.sc-left-banner::before {
+  content: '';
+  position: absolute;
+  top: 10px; left: 10px; right: 10px; height: 60px;
+  background: repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(255,255,255,0.1) 4px, rgba(255,255,255,0.1) 5px);
+}
+.sc-left-banner::after {
+  content: '';
+  position: absolute;
+  bottom: -35px;
+  left: 0;
+  border-left: 35px solid transparent;
+  border-right: 35px solid transparent;
+  border-top: 35px solid #1e40af;
+  border-bottom: 0;
+}
+.sc-banner-text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #FFFFFF;
+  font-size: 34px;
+  font-weight: 700;
+  line-height: 1;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+.sc-banner-dot {
+  font-size: 16px;
+  margin: 12px 0;
 }
 
-.sc-recipient-lbl {
-  font-size: 0.75rem;
-  color: #64748b !important;
-  text-transform: uppercase;
+/* Content Wrapper */
+.sc-content-wrapper {
+  position: absolute;
+  top: 26px; /* Constrain inside the top inner border */
+  bottom: 26px; /* Constrain inside the bottom inner border */
+  left: 130px; /* Constrain beyond the left banner */
+  right: 26px; /* Constrain inside the right inner border */
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 20px; 
+  box-sizing: border-box;
+}
+
+/* Crest & Header */
+.sc-crest {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.sc-crest svg {
+  margin-bottom: 8px;
+}
+.sc-platform-name {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  color: #1e40af !important;
+  font-size: 0.85rem;
+  font-weight: 700;
   letter-spacing: 0.15em;
-  font-weight: 500;
+  text-transform: uppercase;
   margin: 0;
 }
 
-.sc-recipient-name {
-  font-family: 'Playfair Display', Georgia, "Times New Roman", serif;
-  font-size: 3.25rem;
+.sc-title {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #1e40af !important;
+  text-transform: uppercase;
+  margin: 0 0 16px 0;
+  letter-spacing: 0.05em;
+}
+
+.sc-divider-diamond {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 320px;
+  margin-bottom: 24px;
+}
+.sc-divider-diamond::before,
+.sc-divider-diamond::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background-color: #E2E8F0;
+}
+.sc-divider-diamond span {
+  width: 8px;
+  height: 8px;
+  background-color: #1e40af;
+  transform: rotate(45deg);
+  margin: 0 16px;
+}
+
+/* Recipient Section */
+.sc-body-content {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.sc-recipient-lbl {
+  font-size: 0.85rem;
+  color: #475569 !important;
   font-weight: 600;
-  color: #0f172a !important;
-  margin: 18px 0;
-  padding-bottom: 0px;
-  border-bottom: none !important;
-  display: inline-block;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin: 0 0 16px 0;
+}
+
+.sc-recipient-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 4.2rem;
+  font-weight: 600;
+  color: #0F172A !important;
+  margin: 0 0 24px 0;
+  line-height: 1.1;
   letter-spacing: 0.01em;
 }
 
 .sc-award-statement {
-  font-size: 0.84rem;
-  line-height: 1.6;
-  color: #64748b !important;
-  max-width: 600px;
-  margin: 8px auto;
-  font-weight: 400;
+  font-size: 0.85rem;
+  color: #475569 !important;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin: 0 0 8px 0;
 }
 
 .sc-course-name {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  font-size: 1.75rem;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 1.6rem;
   font-weight: 700;
-  color: #0f172a !important;
-  /* Bold and dark slate */
-  margin: 8px 0 0 0;
-  letter-spacing: 0.01em;
+  color: #1e40af !important;
+  margin: 0;
 }
 
-/* Footer Row Restructuring */
+/* Footer Section */
 .sc-footer-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  border-top: 1px solid #cbd5e1 !important;
-  padding-top: 20px;
-  position: relative;
-  z-index: 10;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
   width: 100%;
+  max-width: 850px;
+  margin-bottom: 24px;
 }
 
-.sc-footer-left {
-  text-align: left;
+.sc-footer-info {
+  grid-column: 2;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 32px;
+  transform: translateX(-30px); /* Visually shift left to balance the QR code's heavy visual weight on the right */
+}
+
+.sc-info-col {
   display: flex;
   flex-direction: column;
+  align-items: center;
+  text-align: center;
 }
 
-.sc-footer-right {
+.sc-info-icon {
+  font-size: 1.1rem;
+  color: #0F172A; /* Match the dark text for icons */
+  margin-bottom: 10px;
+  background: #f1f5f9;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
-  gap: 20px;
+  justify-content: center;
+  border-radius: 50%;
 }
 
-/* Security Verification Seal & QR */
-.sc-sec-info {
-  font-size: 0.9rem;
-  color: #64748b !important;
-  line-height: 1.6;
-  text-align: left;
-}
-
-.sc-sec-info strong {
-  color: #0f172a !important;
-  font-size: 1.05rem;
+.sc-info-label {
+  font-size: 0.65rem;
+  color: #475569 !important;
   font-weight: 700;
-  text-transform: uppercase;
   letter-spacing: 0.05em;
-  display: block;
-  margin-bottom: 6px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
 }
 
-.sc-sec-info span {
-  display: block;
-  color: #334155 !important;
+.sc-info-val {
+  font-size: 0.85rem;
+  color: #0F172A !important;
+  font-weight: 600;
 }
 
-.sc-qr-stamp {
+.sc-info-divider {
+  width: 1px;
+  height: 40px;
+  background-color: #E2E8F0;
+  margin-bottom: 8px; /* align with text */
+}
+
+/* QR Code Section */
+.sc-qr-section {
+  grid-column: 3;
+  justify-self: end;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 12px;
+  padding-right: 10px;
 }
 
 .sc-qr-image {
   width: 90px;
   height: 90px;
-  border: 1px solid #cbd5e1 !important;
-  padding: 5px;
-  background-color: #ffffff !important;
-  border-radius: 0px !important;
+  margin-bottom: 6px;
+  border: none !important; /* No large boxes around it */
+  padding: 0;
+  background-color: transparent !important;
 }
 
-/* Verification stamp */
-.sc-verify-stamp-wrapper {
+.sc-qr-text {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.6rem;
+  color: #475569 !important;
+  text-align: center;
+  line-height: 1.3;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.sc-qr-text strong {
+  color: #1e40af !important;
+  font-weight: 800;
+  font-size: 0.7rem;
+  display: block; /* Forces line break, removing need for <br> */
+}
+
+/* Bottom Verification Text */
+.sc-footer-bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.sc-divider-diamond-small {
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 100%;
+  max-width: 500px;
+  margin-bottom: 12px;
+}
+.sc-divider-diamond-small::before,
+.sc-divider-diamond-small::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background-color: #E2E8F0;
+}
+.sc-divider-diamond-small span {
+  width: 6px;
+  height: 6px;
+  background-color: #1e40af;
+  transform: rotate(45deg);
+  margin: 0 12px;
 }
 
-/* Disabled/Removed Signature Classes */
-.sc-sig-line,
-.sc-sig-title,
-.sc-sig-sub,
-.sc-sig-image,
-.sc-verify-stamp,
-.sc-gold-seal {
-  display: none !important;
+.sc-verification-text {
+  font-size: 0.65rem;
+  color: #475569 !important;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin: 0;
 }
 
 /* ==========================================================================

@@ -1,0 +1,381 @@
+/* ==========================================================================
+   PSM CERTIFICATE V3 - PREMIUM TEMPLATE DESIGN
+   ========================================================================== */
+
+/* The Canvas Wrapper */
+.vc_certificateWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 24px;
+  background-color: transparent;
+  margin-bottom: 24px;
+}
+
+/* ==========================================================================
+   THE CERTIFICATE SHEET (A4 Landscape Print Proportions)
+   ========================================================================== */
+.sc-sheet {
+  position: relative;
+  width: 100%;
+  max-width: 1050px; /* Wider for the premium template */
+  aspect-ratio: 297 / 210; /* Precise A4 landscape ratio */
+  background: #ffffff !important;
+  color: #0f172a !important;
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.15) !important;
+  box-sizing: border-box;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+}
+
+/* Base inner content wrapper to allow for absolute borders */
+.sc-content-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: 60px 80px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 5;
+  box-sizing: border-box;
+}
+
+/* Background Watermark/Waves */
+.sc-watermark-waves {
+  position: absolute;
+  bottom: -50px;
+  right: -50px;
+  width: 600px;
+  height: 600px;
+  opacity: 0.05;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Absolutely positioned SVG Border Overlay */
+.sc-border-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* ==========================================================================
+   HEADER SECTION
+   ========================================================================== */
+.sc-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+}
+
+.sc-crest-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.sc-platform-name {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  color: #0f172a !important;
+  text-transform: uppercase;
+  margin-top: 12px;
+}
+
+.sc-diamond-separator {
+  margin: 16px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.sc-diamond-separator svg {
+  width: 16px;
+  height: 16px;
+  fill: #d4af37;
+}
+
+.sc-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 3.2rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #0f172a !important;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+/* ==========================================================================
+   BODY SECTION
+   ========================================================================== */
+.sc-body-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.sc-recipient-lbl {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  color: #475569 !important;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.sc-recipient-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 4rem;
+  font-weight: 700;
+  color: #0f172a !important;
+  margin: 0;
+  letter-spacing: 0.02em;
+}
+
+.sc-award-statement {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: #475569 !important;
+  max-width: 500px;
+  margin: 20px auto 10px auto;
+}
+
+.sc-course-name {
+  font-family: 'Inter', sans-serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #0f172a !important;
+  margin: 0;
+}
+
+/* ==========================================================================
+   METADATA ROW (Icons & Verification)
+   ========================================================================== */
+.sc-meta-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin-top: 30px;
+  padding-top: 30px;
+  border-top: 1px solid rgba(15, 23, 42, 0.1);
+  gap: 32px;
+}
+
+.sc-meta-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 0 16px;
+  position: relative;
+}
+
+.sc-meta-column:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  right: -16px;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 40px;
+  width: 1px;
+  background-color: rgba(15, 23, 42, 0.15);
+}
+
+.sc-meta-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid #0f172a;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.sc-meta-icon i {
+  color: #0f172a;
+  font-size: 14px;
+}
+
+.sc-meta-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #0f172a !important;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.sc-meta-value {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 400;
+  color: #475569 !important;
+}
+
+.sc-verification-block {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 24px;
+  padding-left: 16px;
+}
+
+.sc-gold-seal {
+  width: 90px;
+  height: 90px;
+}
+
+.sc-qr-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.sc-qr-image {
+  width: 70px;
+  height: 70px;
+  border: 1px solid rgba(15, 23, 42, 0.2);
+  padding: 4px;
+  margin-bottom: 6px;
+}
+
+.sc-qr-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.55rem;
+  font-weight: 700;
+  color: #0f172a;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+.sc-qr-sublabel {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.5rem;
+  color: #475569;
+  text-align: center;
+}
+
+/* ==========================================================================
+   SIGNATURES ROW
+   ========================================================================== */
+.sc-signatures-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-end;
+  width: 100%;
+  margin-top: 10px;
+  padding: 0 40px;
+}
+
+.sc-sig-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 250px;
+}
+
+.sc-sig-img {
+  height: 60px;
+  margin-bottom: -10px;
+  opacity: 0.85;
+}
+
+.sc-sig-line {
+  width: 100%;
+  height: 1px;
+  background-color: #d4af37; /* Gold signature line */
+  margin-bottom: 8px;
+}
+
+.sc-sig-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #0f172a !important;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 2px;
+}
+
+.sc-sig-sub {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.65rem;
+  color: #64748b !important;
+}
+
+.sc-center-laurel {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 60px;
+  height: 60px;
+}
+
+/* ==========================================================================
+   PRINT SPECIFICS
+   ========================================================================== */
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 0 !important;
+  }
+  body {
+    background-color: #ffffff !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  .sv-sidebar, .sv-topbar, .sv-breadcrumb, .vc_metaBoard {
+    display: none !important;
+  }
+  .sv-main {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  .vc_certificateWrapper {
+    padding: 0 !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+  }
+  .sc-sheet {
+    box-shadow: none !important;
+    border: none !important;
+    width: 297mm !important;
+    height: 210mm !important;
+  }
+}
+
+/* Simple mobile preview scaling */
+@media (max-width: 1100px) {
+  .vc_certificateWrapper {
+    overflow-x: auto;
+    justify-content: flex-start;
+    padding: 24px 0;
+  }
+  .sc-sheet {
+    min-width: 960px; /* Lock minimum width for horizontal scroll */
+  }
+}

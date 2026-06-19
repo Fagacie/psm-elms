@@ -15,9 +15,7 @@
                 <!-- Academic Serif & Sans Fonts -->
                 <link rel="preconnect" href="https://fonts.googleapis.com">
                 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-                <link
-                    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Inter:wght@300;400;500;600;700;800&display=swap"
-                    rel="stylesheet">
+                <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
                 <jsp:include page="/WEB-INF/views/common/student-head-assets.jsp" />
                 <!-- Redesigned Certificate CSS Sheet -->
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/student-certificate-v2.css">
@@ -173,94 +171,111 @@
                                     <!-- A4 locked container with heavy dropshadow placed flat on a slate desk -->
                                     <div class="vc_certificateWrapper">
                                         <section class="sc-sheet">
-                                            <!-- Top Platform Crest -->
-                                            <div class="sc-crest">
-                                                <svg class="sc-crest-svg" viewBox="0 0 100 100" width="48" height="48">
-                                                    <path
-                                                        d="M50 15 L80 25 V55 C80 72 68 83 50 88 C32 83 20 72 20 55 V25 Z"
-                                                        fill="none" stroke="#0f172a" stroke-width="2.5"></path>
-                                                    <line x1="50" y1="15" x2="50" y2="88" stroke="#0f172a"
-                                                        stroke-width="1.5"></line>
-                                                    <line x1="20" y1="46" x2="80" y2="46" stroke="#0f172a"
-                                                        stroke-width="1.5"></line>
-                                                    <circle cx="35" cy="33" r="3.5" fill="#0f172a"></circle>
-                                                    <circle cx="65" cy="33" r="3.5" fill="#0f172a"></circle>
-                                                    <path
-                                                        d="M38 64 C42 60 48 60 50 63 C52 60 58 60 62 64 V52 C58 49 52 49 50 51 C48 49 42 49 38 52 Z"
-                                                        fill="none" stroke="#0f172a" stroke-width="1.5"></path>
-                                                </svg>
-                                                <h4 class="sc-platform-name">PSM E-Learning Academy</h4>
-                                                <h1 class="sc-title">Certificate of Completion</h1>
+                                            <!-- Border and Corners -->
+                                            <div class="sc-border-outer"></div>
+                                            <div class="sc-border-inner"></div>
+                                            <div class="sc-corner-tl"></div>
+                                            <div class="sc-corner-tr"></div>
+                                            <div class="sc-corner-bl"></div>
+                                            <div class="sc-corner-br"></div>
+                                            
+                                            <!-- Left Banner -->
+                                            <div class="sc-left-banner">
+                                                <div class="sc-banner-text">
+                                                    <span>P</span>
+                                                    <span class="sc-banner-dot">&bull;</span>
+                                                    <span>S</span>
+                                                    <span class="sc-banner-dot">&bull;</span>
+                                                    <span>M</span>
+                                                </div>
                                             </div>
 
-                                            <!-- Centered Recipient & Program Description -->
-                                            <div class="sc-body-content">
-                                                <p class="sc-recipient-lbl">This programmatically verified credential is
-                                                    proudly presented to</p>
-                                                <h2 class="sc-recipient-name">${studentUser.fullName}</h2>
-                                                <p class="sc-award-statement">
-                                                    who has successfully fulfilled all academic requirements and
-                                                    completed the certified program of study in
-                                                </p>
-                                                <h3 class="sc-course-name">${course.courseName}</h3>
-                                            </div>
-
-                                            <!-- Structured Security Metadata & Signatures -->
-                                            <div class="sc-footer-row">
-                                                <!-- Bottom Left Block: Issue Data & Id -->
-                                                <div class="sc-footer-left">
-                                                    <div class="sc-sec-info">
-                                                        <strong>Credential Details</strong>
-                                                        <span>Student Reg:
-                                                            <c:out value="${studentProfile.regNumber}" default="N/A" />
-                                                        </span>
-                                                        <span>Certificate No: ${certificate.certificateNo}</span>
-                                                        <span>Date Issued:
-                                                            <c:choose>
-                                                                <c:when test="${not empty certificate.issueDate}">
-                                                                    ${certificate.issueDate.toLocalDate()}</c:when>
-                                                                <c:otherwise>-</c:otherwise>
-                                                            </c:choose>
-                                                        </span>
-                                                    </div>
+                                            <div class="sc-content-wrapper">
+                                                <!-- Watermark -->
+                                                <div class="sc-watermark">
+                                                    <svg viewBox="0 0 100 100" width="450" height="450">
+                                                        <path d="M50 15 L80 25 V55 C80 72 68 83 50 88 C32 83 20 72 20 55 V25 Z" fill="none" stroke="#0f172a" stroke-width="2.5"></path>
+                                                        <line x1="50" y1="15" x2="50" y2="88" stroke="#0f172a" stroke-width="1.5"></line>
+                                                        <line x1="20" y1="46" x2="80" y2="46" stroke="#0f172a" stroke-width="1.5"></line>
+                                                        <circle cx="35" cy="33" r="3.5" fill="#0f172a"></circle>
+                                                        <circle cx="65" cy="33" r="3.5" fill="#0f172a"></circle>
+                                                        <path d="M38 64 C42 60 48 60 50 63 C52 60 58 60 62 64 V52 C58 49 52 49 50 51 C48 49 42 49 38 52 Z" fill="none" stroke="#0f172a" stroke-width="1.5"></path>
+                                                    </svg>
+                                                </div>
+                                                <!-- Top Crest -->
+                                                <div class="sc-crest">
+                                                    <svg class="sc-crest-svg" viewBox="0 0 100 100" width="44" height="44">
+                                                        <path d="M50 15 L80 25 V55 C80 72 68 83 50 88 C32 83 20 72 20 55 V25 Z" fill="none" stroke="#0f172a" stroke-width="2.5"></path>
+                                                        <line x1="50" y1="15" x2="50" y2="88" stroke="#0f172a" stroke-width="1.5"></line>
+                                                        <line x1="20" y1="46" x2="80" y2="46" stroke="#0f172a" stroke-width="1.5"></line>
+                                                        <circle cx="35" cy="33" r="3.5" fill="#0f172a"></circle>
+                                                        <circle cx="65" cy="33" r="3.5" fill="#0f172a"></circle>
+                                                        <path d="M38 64 C42 60 48 60 50 63 C52 60 58 60 62 64 V52 C58 49 52 49 50 51 C48 49 42 49 38 52 Z" fill="none" stroke="#0f172a" stroke-width="1.5"></path>
+                                                    </svg>
+                                                    <h4 class="sc-platform-name">PSM E-LEARNING ACADEMY</h4>
                                                 </div>
 
-                                                <!-- Bottom Right Block: Structured QR & Stamp -->
-                                                <div class="sc-footer-right">
-                                                    <!-- Verification Ink Stamp -->
-                                                    <div class="sc-verify-stamp-wrapper">
-                                                        <svg viewBox="0 0 100 100" width="86" height="86">
-                                                            <circle cx="50" cy="50" r="40" fill="none" stroke="#0f172a"
-                                                                stroke-width="1.5" stroke-dasharray="3 1.5" />
-                                                            <circle cx="50" cy="50" r="34" fill="none" stroke="#0f172a"
-                                                                stroke-width="0.5" />
-                                                            <text x="50" y="24" fill="#0f172a" font-size="5" font-weight="bold" letter-spacing="1.2" text-anchor="middle">OFFICIAL VERIFICATION</text>
-                                                            <text x="50" y="46" fill="#0f172a" font-size="9"
-                                                                font-weight="900" text-anchor="middle">PSM</text>
-                                                            <text x="50" y="58" fill="#0f172a" font-size="7"
-                                                                font-weight="bold" text-anchor="middle">APPROVED</text>
-                                                            <text x="50" y="66" fill="#0f172a" font-size="4"
-                                                                font-weight="bold" text-anchor="middle">ACADEMY</text>
-                                                        </svg>
+                                                <h1 class="sc-title">CERTIFICATE OF COMPLETION</h1>
+                                                
+                                                <div class="sc-divider-diamond"><span></span></div>
+
+                                                <!-- Centered Recipient & Program Description -->
+                                                <div class="sc-body-content">
+                                                    <p class="sc-recipient-lbl">PRESENTED TO</p>
+                                                    <h2 class="sc-recipient-name">${studentUser.fullName}</h2>
+                                                    <p class="sc-award-statement">FOR SUCCESSFULLY COMPLETING THE PROGRAM</p>
+                                                    <h3 class="sc-course-name">${course.courseName}</h3>
+                                                </div>
+
+                                                <!-- Structured Metadata & QR -->
+                                                <div class="sc-footer-row">
+                                                    <div class="sc-footer-info">
+                                                        <div class="sc-info-col">
+                                                            <div class="sc-info-icon"><i class="fas fa-user-circle"></i></div>
+                                                            <span class="sc-info-label">STUDENT ID</span>
+                                                            <span class="sc-info-val"><c:out value="${studentProfile.regNumber}" default="N/A" /></span>
+                                                        </div>
+                                                        <div class="sc-info-divider"></div>
+                                                        <div class="sc-info-col">
+                                                            <div class="sc-info-icon"><i class="fas fa-file-contract"></i></div>
+                                                            <span class="sc-info-label">CERTIFICATE NO.</span>
+                                                            <span class="sc-info-val">${certificate.certificateNo}</span>
+                                                        </div>
+                                                        <div class="sc-info-divider"></div>
+                                                        <div class="sc-info-col">
+                                                            <div class="sc-info-icon"><i class="fas fa-calendar-alt"></i></div>
+                                                            <span class="sc-info-label">ISSUED ON</span>
+                                                            <span class="sc-info-val">
+                                                                <c:choose>
+                                                                    <c:when test="${not empty certificate.issueDate}">
+                                                                        ${certificate.issueDate.toLocalDate()}</c:when>
+                                                                    <c:otherwise>-</c:otherwise>
+                                                                </c:choose>
+                                                            </span>
+                                                        </div>
                                                     </div>
-                                                    <!-- QR Code -->
-                                                    <div class="sc-qr-stamp">
+                                                    
+                                                    <div class="sc-qr-section">
                                                         <c:if test="${not empty certificate.qrCodePath}">
                                                             <c:choose>
-                                                                <c:when
-                                                                    test="${certificate.qrCodePath.startsWith('http')}">
-                                                                    <img class="sc-qr-image"
-                                                                        src="${certificate.qrCodePath}"
-                                                                        alt="Verification QR Code">
+                                                                <c:when test="${certificate.qrCodePath.startsWith('http')}">
+                                                                    <img class="sc-qr-image" src="${certificate.qrCodePath}" alt="Verification QR Code">
                                                                 </c:when>
                                                                 <c:otherwise>
-                                                                    <img class="sc-qr-image"
-                                                                        src="${pageContext.request.contextPath}/${certificate.qrCodePath}"
-                                                                        alt="Verification QR Code">
+                                                                    <img class="sc-qr-image" src="${pageContext.request.contextPath}/${certificate.qrCodePath}" alt="Verification QR Code">
                                                                 </c:otherwise>
                                                             </c:choose>
                                                         </c:if>
+                                                        <div class="sc-qr-text">
+                                                            <strong>SCAN TO VERIFY</strong>THIS CERTIFICATE
+                                                        </div>
                                                     </div>
+                                                </div>
+
+                                                <!-- Verification Bottom Text -->
+                                                <div class="sc-footer-bottom">
+                                                    <div class="sc-divider-diamond-small"><span></span></div>
+                                                    <p class="sc-verification-text">THIS CERTIFICATE IS DIGITALLY GENERATED AND CAN BE VERIFIED USING THE QR CODE.</p>
                                                 </div>
                                             </div>
                                         </section>
