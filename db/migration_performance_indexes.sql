@@ -10,3 +10,9 @@ CREATE INDEX idx_course_instructor_status ON Course (InstructorID, Status);
 CREATE INDEX idx_material_course ON Material (CourseID);
 CREATE INDEX idx_assessment_course ON Assessment (CourseID);
 CREATE INDEX idx_submission_assessment ON AssessmentSubmission (AssessmentID);
+
+-- Dashboard Reporting Indexes
+CREATE INDEX idx_payment_status_date ON Payment (PaymentStatus, PaymentDate);
+CREATE INDEX idx_payment_paystack_ref ON Payment (PaystackReference);
+CREATE INDEX idx_enrollment_course_status_date ON Enrollment (CourseID, Status, EnrollmentDate);
+CREATE INDEX idx_enrollment_user_completion ON Enrollment (UserID, CompletionStatus);

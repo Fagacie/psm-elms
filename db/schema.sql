@@ -210,6 +210,8 @@ CREATE TABLE IF NOT EXISTS `Enrollment` (
   KEY `idx_enrollment_user` (`UserID`),
   KEY `idx_enrollment_payment_status` (`PaymentStatus`),
   KEY `idx_enrollment_status` (`Status`),
+  KEY `idx_enrollment_course_status_date` (`CourseID`, `Status`, `EnrollmentDate`),
+  KEY `idx_enrollment_user_completion` (`UserID`, `CompletionStatus`),
   CONSTRAINT `fk_enrollment_user` FOREIGN KEY (`UserID`) REFERENCES `User`(`UserID`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_enrollment_course` FOREIGN KEY (`CourseID`) REFERENCES `Course`(`CourseID`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
@@ -233,6 +235,8 @@ CREATE TABLE IF NOT EXISTS `Payment` (
   UNIQUE KEY `uk_payment_reference` (`Reference`),
   KEY `idx_payment_enrollment` (`EnrollmentID`),
   KEY `idx_payment_status` (`PaymentStatus`),
+  KEY `idx_payment_status_date` (`PaymentStatus`, `PaymentDate`),
+  KEY `idx_payment_paystack_ref` (`PaystackReference`),
   CONSTRAINT `fk_payment_enrollment` FOREIGN KEY (`EnrollmentID`) REFERENCES `Enrollment`(`EnrollmentID`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 -- Assessments
