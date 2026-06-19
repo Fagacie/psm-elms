@@ -4,7 +4,14 @@
 # Stage 2: Hardened Runtime (using tomcat:9.0-jdk17-temurin)
 # ==============================================================================
 
-# --- Stage 1: Builder ---
+# --- Stage 1: Frontend Builder ---
+FROM node:20-alpine AS frontend-builder
+WORKDIR /app
+COPY frontend ./frontend
+WORKDIR /app/frontend
+RUN npm install && npm run build
+
+# --- Stage 2: Backend Builder ---
 FROM eclipse-temurin:17-jdk AS builder
 
 WORKDIR /app
@@ -13,6 +20,7 @@ WORKDIR /app
 COPY lib ./lib
 COPY src ./src
 COPY web ./web
+COPY --from=frontend-builder /app/web/js/dist ./web/js/dist
 COPY db ./db
 
 # Prepare build directory structure

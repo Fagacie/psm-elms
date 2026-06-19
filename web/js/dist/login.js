@@ -1,0 +1,1 @@
+const{useState:c,useEffect:a,useMemo:n,useCallback:l,useRef:o}=window.React||React,e=window.ReactDOM,t=()=>React.createElement("div",null,"Test");e.createRoot(document.createElement("div")).render(React.createElement(t,null));

@@ -111,6 +111,6 @@
     });
 </script>
 
-<script src="${pageContext.request.contextPath}/js/react-jsx-bridge.js"></script>
-    <script type="text/jsx-custom" data-plugins="transform-react-jsx">const App = () => <div>Test</div>; ReactDOM.createRoot(document.createElement("div")).render(<App />);</script></body>
+
+    <script type="module" src="${pageContext.request.contextPath}/js/dist/login.js"></script></body>
 </html>
