@@ -18,9 +18,11 @@ body.sc-immersive-body {
 body.sc-immersive-body::-webkit-scrollbar {
   width: 8px;
 }
+
 body.sc-immersive-body::-webkit-scrollbar-track {
   background: #0f172a;
 }
+
 body.sc-immersive-body::-webkit-scrollbar-thumb {
   background: #334155;
   border-radius: 4px;
@@ -83,7 +85,8 @@ body.sc-immersive-body::-webkit-scrollbar-thumb {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #10b981; /* Premium Emerald */
+  color: #10b981;
+  /* Premium Emerald */
   background: rgba(16, 185, 129, 0.08);
   padding: 6px 16px;
   border: 1px solid rgba(16, 185, 129, 0.2);
@@ -114,7 +117,7 @@ body.sc-immersive-body::-webkit-scrollbar-thumb {
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   text-decoration: none;
-  border-radius: 8px !important; 
+  border-radius: 8px !important;
 }
 
 .sc-action-btn.primary-action {
@@ -162,8 +165,10 @@ body.sc-immersive-body::-webkit-scrollbar-thumb {
 .sc-sheet {
   position: relative;
   width: 100%;
-  max-width: 960px; /* Standard screen preview size */
-  aspect-ratio: 297 / 210; /* Precise A4 landscape ratio */
+  max-width: 960px;
+  /* Standard screen preview size */
+  aspect-ratio: 297 / 210;
+  /* Precise A4 landscape ratio */
   background: #ffffff !important;
   color: #0f172a !important;
   box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.08) !important;
@@ -171,9 +176,12 @@ body.sc-immersive-body::-webkit-scrollbar-thumb {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 64px 80px; /* massive whitespace */
-  border: 1px solid #cbd5e1 !important; /* thin, clean, minimalist border */
-  border-radius: 0px !important; /* clean rectangular edge */
+  padding: 64px 80px;
+  /* massive whitespace */
+  border: 1px solid #cbd5e1 !important;
+  /* thin, clean, minimalist border */
+  border-radius: 0px !important;
+  /* clean rectangular edge */
   overflow: hidden;
 }
 
@@ -195,7 +203,10 @@ body.sc-immersive-body::-webkit-scrollbar-thumb {
   display: none !important;
 }
 
-.sc-corner-tl, .sc-corner-tr, .sc-corner-bl, .sc-corner-br {
+.sc-corner-tl,
+.sc-corner-tr,
+.sc-corner-bl,
+.sc-corner-br {
   display: none !important;
 }
 
@@ -218,7 +229,8 @@ body.sc-immersive-body::-webkit-scrollbar-thumb {
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.2em;
-  color: #64748b !important; /* small, bold, muted gray */
+  color: #64748b !important;
+  /* small, bold, muted gray */
   text-transform: uppercase;
   margin: 8px 0 0 0;
   text-align: center;
@@ -282,7 +294,8 @@ body.sc-immersive-body::-webkit-scrollbar-thumb {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-size: 1.75rem;
   font-weight: 700;
-  color: #0f172a !important; /* Bold and dark slate */
+  color: #0f172a !important;
+  /* Bold and dark slate */
   margin: 8px 0 0 0;
   letter-spacing: 0.01em;
 }
@@ -313,19 +326,20 @@ body.sc-immersive-body::-webkit-scrollbar-thumb {
 
 /* Security Verification Seal & QR */
 .sc-sec-info {
-  font-size: 0.65rem;
+  font-size: 0.9rem;
   color: #64748b !important;
-  line-height: 1.5;
+  line-height: 1.6;
   text-align: left;
 }
 
 .sc-sec-info strong {
   color: #0f172a !important;
+  font-size: 1.05rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   display: block;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
 }
 
 .sc-sec-info span {
@@ -340,10 +354,10 @@ body.sc-immersive-body::-webkit-scrollbar-thumb {
 }
 
 .sc-qr-image {
-  width: 60px;
-  height: 60px;
+  width: 90px;
+  height: 90px;
   border: 1px solid #cbd5e1 !important;
-  padding: 3px;
+  padding: 5px;
   background-color: #ffffff !important;
   border-radius: 0px !important;
 }
@@ -356,7 +370,12 @@ body.sc-immersive-body::-webkit-scrollbar-thumb {
 }
 
 /* Disabled/Removed Signature Classes */
-.sc-sig-line, .sc-sig-title, .sc-sig-sub, .sc-sig-image, .sc-verify-stamp, .sc-gold-seal {
+.sc-sig-line,
+.sc-sig-title,
+.sc-sig-sub,
+.sc-sig-image,
+.sc-verify-stamp,
+.sc-gold-seal {
   display: none !important;
 }
 
@@ -477,7 +496,8 @@ body.sc-immersive-body::-webkit-scrollbar-thumb {
    ========================================================================== */
 @page {
   size: A4 landscape;
-  margin: 0 !important; /* Eliminate default margins to fit custom double-border */
+  margin: 0 !important;
+  /* Eliminate default margins to fit custom double-border */
 }
 
 @media print {
@@ -592,7 +612,8 @@ body.sc-immersive-body::-webkit-scrollbar-thumb {
   }
 
   .sc-sheet {
-    width: 768px; /* Render at reasonable width, let user scroll sideways in mobile preview if needed */
+    width: 768px;
+    /* Render at reasonable width, let user scroll sideways in mobile preview if needed */
   }
 
   .sc-diag-grid {
