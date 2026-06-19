@@ -9,7 +9,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "lucide-react": "^0.395.0",
-    "recharts": "^2.12.7",
+    "recharts": "^3.8.1",
     "framer-motion": "^10.16.4"
   },
   "devDependencies": {

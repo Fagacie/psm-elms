@@ -26,7 +26,7 @@
     
     <!-- Recharts dependencies (Prop-Types, Recharts UMD) -->
     <script src="https://unpkg.com/prop-types@15.8.1/prop-types.min.js"></script>
-    <script src="https://unpkg.com/recharts@2.12.7/umd/Recharts.js"></script>
+    <script src="https://unpkg.com/recharts@3.8.1/umd/Recharts.js"></script>
 
     <!-- Framer Motion UMD -->
     <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
