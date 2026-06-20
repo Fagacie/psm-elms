@@ -31,6 +31,7 @@ import com.psm.elearning.util.AssessmentPlacementUtil;
 import com.psm.elearning.util.CloudinaryUtil;
 import com.psm.elearning.util.SessionUtil;
 
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -52,6 +53,7 @@ import java.util.Map;
 import java.util.Set;
 import java.nio.file.Paths;
 
+@WebServlet(name = "InstructorAssessmentServlet", urlPatterns = {"/instructor/assessments", "/instructor/assessments/*"})
 @MultipartConfig(maxFileSize = 52428800)
 public class InstructorAssessmentServlet extends HttpServlet {
 

@@ -37,11 +37,11 @@ function CourseWorkspaceApp() {
                 ].map(tab => (
                     <button 
                         key={tab.id}
-                        className={`ins_ws_nav_link ${'$'}{activeTab === tab.id ? 'active' : ''}`}
+                        className={`ins_ws_nav_link ${activeTab === tab.id ? 'active' : ''}`}
                         onClick={() => setActiveTab(tab.id)}
                         style={{ background: 'none', border: 'none', cursor: 'pointer' }}
                     >
-                        <i className={`fas ${'$'}{tab.icon}`}></i> {tab.label}
+                        <i className={`fas ${tab.icon}`}></i> {tab.label}
                     </button>
                 ))}
             </nav>
@@ -130,7 +130,7 @@ function OverviewTab() {
 function KpiCard({ icon, colorClass, value, label }) {
     return (
         <div className="ins_ws_kpi_card">
-            <div className={`ins_ws_kpi_icon ${'$'}{colorClass}`}><i className={icon}></i></div>
+            <div className={`ins_ws_kpi_icon ${colorClass}`}><i className={icon}></i></div>
             <div className="ins_ws_kpi_data">
                 <strong style={{ color: colorClass === 'pending' && value > 0 ? '#ef4444' : 'inherit' }}>{value}</strong>
                 <span>{label}</span>
@@ -197,7 +197,7 @@ function MaterialsTab() {
                     <button className="ws-btn ws-btn-primary" onClick={() => window.openUploadModal()}>
                         <i className="fas fa-upload"></i> Upload Material
                     </button>
-                    <button className={`ws-btn ${'$'}{hasOrderChanged ? 'ws-btn-primary' : 'ws-btn-secondary'}`} onClick={saveOrder} disabled={!hasOrderChanged || isSavingOrder} style={{ opacity: (!hasOrderChanged || isSavingOrder) ? 0.5 : 1 }}>
+                    <button className={`ws-btn ${hasOrderChanged ? 'ws-btn-primary' : 'ws-btn-secondary'}`} onClick={saveOrder} disabled={!hasOrderChanged || isSavingOrder} style={{ opacity: (!hasOrderChanged || isSavingOrder) ? 0.5 : 1 }}>
                         {isSavingOrder ? <><i className="fas fa-spinner fa-spin"></i> Saving...</> : <><i className="fas fa-save"></i> Save Order</>}
                     </button>
                 </div>
@@ -232,17 +232,17 @@ function MaterialsTab() {
                                 onDragOver={(e) => e.preventDefault()}
                             >
                                 <div className="pm-material-drag-handle" title="Drag to reorder"><i className="fas fa-grip-vertical"></i></div>
-                                <div className={`pm-material-type-icon type-${'$'}{typeClass}`}><i className={`fas ${'$'}{typeIcon}`}></i></div>
+                                <div className={`pm-material-type-icon type-${typeClass}`}><i className={`fas ${typeIcon}`}></i></div>
                                 <div className="pm-material-details">
                                     <div className="pm-material-title-row">
                                         <span className="pm-material-title">{mat.title}</span>
-                                        <span className={`type-badge badge-${'$'}{typeClass}`}>{mat.type}</span>
+                                        <span className={`type-badge badge-${typeClass}`}>{mat.type}</span>
                                     </div>
                                     <p className="pm-material-desc">{mat.description || 'No description provided.'}</p>
                                 </div>
                                 <div className="pm-material-actions">
                                     {mat.filePath && (
-                                        <a href={`${'$'}{workspaceData.contextPath}/instructor/materials-preview?action=preview&id=${'$'}{mat.materialId}`} target="_blank" className="ws-btn ws-btn-secondary ws-btn-xs" style={{ padding: '6px 10px' }}>
+                                        <a href={`${workspaceData.contextPath}/instructor/materials-preview?action=preview&id=${mat.materialId}`} target="_blank" className="ws-btn ws-btn-secondary ws-btn-xs" style={{ padding: '6px 10px' }}>
                                             <i className="fas fa-eye"></i> Preview
                                         </a>
                                     )}
@@ -263,7 +263,7 @@ function MaterialsTab() {
                                     >
                                         <i className="fas fa-edit"></i> Edit
                                     </button>
-                                    <form action={`${'$'}{workspaceData.contextPath}/instructor/materials`} method="get" style={{ display: 'inline' }} onSubmit={(e) => { if(!window.confirm('Delete this material?')) e.preventDefault(); }}>
+                                    <form action={`${workspaceData.contextPath}/instructor/materials`} method="get" style={{ display: 'inline' }} onSubmit={(e) => { if(!window.confirm('Delete this material?')) e.preventDefault(); }}>
                                         <input type="hidden" name="action" value="delete" />
                                         <input type="hidden" name="id" value={mat.materialId} />
                                         <input type="hidden" name="courseId" value={workspaceData.course.courseId} />
@@ -289,7 +289,7 @@ function AssessmentsTab() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '16px' }}>
                 <h3 className="section-title" style={{ margin: 0, fontWeight: 800, fontSize: '1.25rem' }}>Course Assessments Library ({assessments.length} items)</h3>
                 <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                    <a href={`${'$'}{workspaceData.assessmentBaseUrl}&view=editor`} className="ws-btn ws-btn-primary"><i className="fas fa-plus"></i> Create Assessment</a>
+                    <a href={`${workspaceData.assessmentBaseUrl}&view=editor`} className="ws-btn ws-btn-primary"><i className="fas fa-plus"></i> Create Assessment</a>
                     <a href={workspaceData.assessmentBaseUrl} className="ws-btn ws-btn-secondary"><i className="fas fa-clipboard-list"></i> Assessments Hub</a>
                 </div>
             </div>
@@ -304,21 +304,21 @@ function AssessmentsTab() {
                     {assessments.map(ass => (
                         <div key={ass.id} className="assessment-card">
                             <div className="assessment-card-header">
-                                <div className={`assessment-icon-circle ${'$'}{ass.type.toLowerCase()}`}>
-                                    <i className={`fas ${'$'}{ass.type === 'Assignment' ? 'fa-file-signature' : 'fa-stopwatch'}`}></i>
+                                <div className={`assessment-icon-circle ${ass.type.toLowerCase()}`}>
+                                    <i className={`fas ${ass.type === 'Assignment' ? 'fa-file-signature' : 'fa-stopwatch'}`}></i>
                                 </div>
-                                <span className={`type-badge badge-${'$'}{ass.type.toLowerCase()}`}>{ass.type}</span>
+                                <span className={`type-badge badge-${ass.type.toLowerCase()}`}>{ass.type}</span>
                             </div>
                             <h4 className="assessment-title" style={{ margin: 0, fontWeight: 700 }}>{ass.title}</h4>
                             <p className="assessment-desc">{ass.instructions}</p>
                             <div className="assessment-stats-row">
                                 <div className="stat-bubble"><span className="stat-num">{ass.attempts}</span><span className="stat-lbl">Attempts</span></div>
-                                <div className="stat-bubble"><span className="stat-num">{ass.duration ? `${'$'}{ass.duration}m` : '-'}</span><span className="stat-lbl">Time Limit</span></div>
+                                <div className="stat-bubble"><span className="stat-num">{ass.duration ? `${ass.duration}m` : '-'}</span><span className="stat-lbl">Time Limit</span></div>
                                 <div className="stat-bubble"><span className="stat-num">{ass.points ? ass.points : '-'}</span><span className="stat-lbl">Points</span></div>
                             </div>
                             <div className="assessment-actions">
-                                <a href={`${'$'}{workspaceData.assessmentBaseUrl}&view=editor&assessmentId=${'$'}{ass.id}`} className="ws-btn ws-btn-secondary ws-btn-sm" style={{ flex: 1 }}><i className="fas fa-edit"></i> Edit</a>
-                                <a href={`${'$'}{workspaceData.assessmentBaseUrl}&view=submissions&assessmentId=${'$'}{ass.id}`} className="ws-btn ws-btn-primary ws-btn-sm" style={{ flex: 1 }}><i className="fas fa-inbox"></i> Grades</a>
+                                <a href={`${workspaceData.assessmentBaseUrl}&view=editor&assessmentId=${ass.id}`} className="ws-btn ws-btn-secondary ws-btn-sm" style={{ flex: 1 }}><i className="fas fa-edit"></i> Edit</a>
+                                <a href={`${workspaceData.assessmentBaseUrl}&view=submissions&assessmentId=${ass.id}`} className="ws-btn ws-btn-primary ws-btn-sm" style={{ flex: 1 }}><i className="fas fa-inbox"></i> Grades</a>
                             </div>
                         </div>
                     ))}
@@ -375,20 +375,20 @@ function StudentsTab() {
                                             </div>
                                         </div>
                                     </td>
-                                    <td><span className={`status-badge status-${'$'}{enr.status.toLowerCase()}`}>{enr.status}</span></td>
+                                    <td><span className={`status-badge status-${enr.status.toLowerCase()}`}>{enr.status}</span></td>
                                     <td>
                                         <div className="ws-student-progress" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                                             <div className="ws-progress-bar" style={{ width: '100%', height: '6px', background: 'rgba(99, 102, 241, 0.08)', borderRadius: '4px', overflow: 'hidden' }}>
-                                                <div className="ws-progress-fill" style={{ width: `${'$'}{enr.progress}%`, height: '100%', background: 'var(--ws-primary)', borderRadius: '4px' }}></div>
+                                                <div className="ws-progress-fill" style={{ width: `${enr.progress}%`, height: '100%', background: 'var(--ws-primary)', borderRadius: '4px' }}></div>
                                             </div>
                                             <span className="ws-progress-text" style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--ins-muted)' }}>{enr.progress}% Completed</span>
                                         </div>
                                     </td>
                                     <td style={{ color: 'var(--ins-muted)', fontSize: '0.85rem' }}><i className="far fa-calendar-alt" style={{ marginRight: '6px' }}></i> {enr.date}</td>
                                     <td style={{ textAlign: 'right', display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                                        <a href={`${'$'}{workspaceData.assessmentBaseUrl}&view=submissions`} className="ws-btn ws-btn-secondary ws-btn-xs" title="View Grades"><i className="fas fa-chart-bar"></i> Grades</a>
+                                        <a href={`${workspaceData.assessmentBaseUrl}&view=submissions`} className="ws-btn ws-btn-secondary ws-btn-xs" title="View Grades"><i className="fas fa-chart-bar"></i> Grades</a>
                                         {enr.progress === 100 && (
-                                            <a href={`${'$'}{workspaceData.contextPath}/certificate/verify?enrollmentId=${'$'}{enr.id}`} className="ws-btn ws-btn-xs" title="Issue/View Certificate" target="_blank" style={{ background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.2)', color: '#10b981', fontWeight: 600 }}><i className="fas fa-certificate"></i> Cert</a>
+                                            <a href={`${workspaceData.contextPath}/certificate/verify?enrollmentId=${enr.id}`} className="ws-btn ws-btn-xs" title="Issue/View Certificate" target="_blank" style={{ background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.2)', color: '#10b981', fontWeight: 600 }}><i className="fas fa-certificate"></i> Cert</a>
                                         )}
                                     </td>
                                 </tr>
