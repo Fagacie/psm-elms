@@ -28,12 +28,12 @@
 
 /* Core Greenfield Grid & Layout */
 .admin-container-gf {
-  max-width: 1400px;
+  max-width: 1600px;
   margin: 0 auto;
-  padding: 3rem 2rem;
+  padding: 0 1.5rem 1.5rem 1.5rem;
   display: flex;
   flex-direction: column;
-  gap: 2.5rem;
+  gap: 1rem;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
@@ -218,20 +218,20 @@
 }
 
 .courses-table-gf th {
-  padding: 1.25rem 2rem;
-  font-size: 0.8rem;
-  font-weight: 700;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--gf-text-secondary);
-  background-color: #fcfcfd;
+  color: var(--gf-text-muted);
+  background-color: transparent;
   border-bottom: 1px solid var(--gf-border);
 }
 
 .courses-table-gf td {
-  padding: 1.25rem 2rem;
-  font-size: 0.95rem;
-  color: var(--gf-text-primary);
+  padding: 0.75rem 1.5rem;
+  font-size: 0.85rem;
+  color: var(--gf-text-secondary);
   border-bottom: 1px solid var(--gf-border);
   vertical-align: middle;
   transition: background-color 0.15s ease;
@@ -283,9 +283,9 @@
 }
 
 .course-title-gf {
-  font-weight: 600;
+  font-weight: 500;
   color: var(--gf-text-primary);
-  font-size: 0.95rem;
+  font-size: 0.85rem;
 }
 
 .course-category-gf {
@@ -319,24 +319,25 @@
 .instructor-name-gf {
   font-weight: 500;
   color: var(--gf-text-secondary);
+  font-size: 0.85rem;
 }
 
 .badge-unassigned-gf {
   background-color: var(--gf-amber-light);
   color: var(--gf-amber);
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 600;
-  padding: 0.2rem 0.5rem;
-  border-radius: 4px;
+  padding: 0.15rem 0.6rem;
+  border-radius: 9999px;
 }
 
 /* Status pills */
 .badge-gf {
   display: inline-flex;
   align-items: center;
-  padding: 0.25rem 0.75rem;
+  padding: 0.15rem 0.6rem;
   border-radius: 9999px;
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   font-weight: 600;
 }
 
@@ -825,4 +826,148 @@
   font-size: 0.9rem;
   color: var(--gf-text-primary);
   font-weight: 600;
+}
+
+/* ---------------------------------------------------
+   Premium Dark Mode Overrides (Greenfield System)
+--------------------------------------------------- */
+html[data-theme='dark'] .admin-page {
+  --gf-bg: #0f172a;
+  --gf-card-bg: #1e293b;
+  --gf-border: #334155;
+  
+  --gf-text-primary: #f8fafc;
+  --gf-text-secondary: #cbd5e1;
+  --gf-text-muted: #94a3b8;
+  
+  --gf-primary-light: rgba(16, 185, 129, 0.15);
+  --gf-primary-dark: #34d399;
+  
+  --gf-blue-light: rgba(59, 130, 246, 0.15);
+  --gf-blue: #60a5fa;
+  
+  --gf-purple-light: rgba(168, 85, 247, 0.15);
+  --gf-purple: #c084fc;
+  
+  --gf-amber-light: rgba(245, 158, 11, 0.15);
+  --gf-amber: #fbbf24;
+  
+  --gf-red-light: rgba(239, 68, 68, 0.15);
+  --gf-red: #f87171;
+  
+  --gf-gray-light: rgba(148, 163, 184, 0.1);
+  --gf-card-shadow: none;
+}
+
+html[data-theme='dark'] .courses-table-gf th {
+  background-color: transparent;
+  color: #94a3b8;
+  border-bottom: 1px solid var(--gf-border);
+}
+
+html[data-theme='dark'] .courses-table-gf tbody tr:hover td {
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+html[data-theme='dark'] .search-box-gf input {
+  background-color: #0f172a;
+  color: #f8fafc;
+}
+
+html[data-theme='dark'] .search-box-gf input:focus {
+  background-color: #1e293b;
+}
+
+html[data-theme='dark'] .filter-tabs-gf {
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--gf-border);
+}
+
+html[data-theme='dark'] .tab-btn-gf.active {
+  background-color: #334155;
+  color: #f8fafc;
+}
+
+html[data-theme='dark'] .actions-dropdown-gf {
+  background-color: rgba(30, 41, 59, 0.95);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--gf-border);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+}
+
+html[data-theme='dark'] .dropdown-item-gf:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: #f8fafc;
+}
+
+html[data-theme='dark'] .btn-secondary-gf {
+  background-color: #1e293b;
+  color: #cbd5e1;
+}
+
+html[data-theme='dark'] .btn-secondary-gf:hover {
+  background-color: #334155;
+  color: #f8fafc;
+}
+
+html[data-theme='dark'] .pagination-bar-gf {
+  background-color: #1e293b;
+}
+
+html[data-theme='dark'] .btn-page-gf {
+  background-color: #1e293b;
+  color: #cbd5e1;
+}
+
+html[data-theme='dark'] .btn-page-gf:hover:not(:disabled) {
+  background-color: #334155;
+  color: #f8fafc;
+}
+
+html[data-theme='dark'] .drawer-container-gf {
+  background-color: #0f172a;
+  box-shadow: -10px 0 25px -5px rgba(0, 0, 0, 0.5);
+}
+
+html[data-theme='dark'] .drawer-footer-gf {
+  background-color: #1e293b;
+}
+
+html[data-theme='dark'] .form-group-gf input,
+html[data-theme='dark'] .form-group-gf select,
+html[data-theme='dark'] .form-group-gf textarea {
+  background-color: #1e293b;
+  color: #f8fafc;
+}
+
+html[data-theme='dark'] .autocomplete-dropdown-gf {
+  background-color: #1e293b;
+  border-color: #334155;
+}
+
+html[data-theme='dark'] .autocomplete-item-gf:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+html[data-theme='dark'] .autocomplete-item-gf.selected {
+  background-color: rgba(16, 185, 129, 0.15);
+}
+
+html[data-theme='dark'] .modal-box-gf {
+  background-color: #1e293b;
+}
+
+html[data-theme='dark'] .details-item-gf {
+  background-color: #1e293b;
+}
+
+html[data-theme='dark'] .badge-archived-gf {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: #94a3b8;
+}
+
+/* Glassmorphism Overrides */
+.drawer-overlay-gf, .modal-overlay-gf {
+  backdrop-filter: blur(8px) saturate(150%);
+  -webkit-backdrop-filter: blur(8px) saturate(150%);
 }

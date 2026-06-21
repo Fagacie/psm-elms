@@ -1,11 +1,33 @@
 const { useState, useEffect, useMemo, useCallback, useRef } = window.React || React;
 const ReactDOM = window.ReactDOM;
-
+const { motion, AnimatePresence } = window.Motion || { motion: { div: 'div', section: 'section', header: 'header' }, AnimatePresence: ({children}) => children };
     
-    const { 
-        useReactTable, getCoreRowModel, getPaginationRowModel, getSortedRowModel, flexRender 
-    } = window.ReactTable || {};
+const { 
+    useReactTable, getCoreRowModel, getPaginationRowModel, getSortedRowModel, flexRender 
+} = window.ReactTable || {};
 
+// Animation variants
+const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
+};
+
+const itemVariants = {
+    hidden: { opacity: 0, y: 15 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.3, ease: "easeOut" } }
+};
+
+const drawerVariants = {
+    hidden: { x: "100%" },
+    visible: { x: 0, transition: { type: "spring", damping: 25, stiffness: 200 } },
+    exit: { x: "100%", transition: { duration: 0.2 } }
+};
+
+const overlayVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { duration: 0.2 } },
+    exit: { opacity: 0, transition: { duration: 0.2 } }
+};
     // Custom Autocomplete Searchable Select component for Instructor Assignments
     function AutocompleteSelect({ options, value, onChange, placeholder }) {
         const [search, setSearch] = useState('');
@@ -221,6 +243,36 @@ const ReactDOM = window.ReactDOM;
             setDeleteModalOpen(true);
         };
 
+        // Export filtered courses to CSV
+        const handleExportCSV = useCallback(() => {
+            const headers = ['ID', 'Course Title', 'Category', 'Level', 'Duration (Days)', 'Fee', 'Instructor', 'Status', 'Enrollments'];
+            const rows = filteredData.map(course => [
+                course.courseId,
+                `"${(course.courseName || '').replace(/"/g, '""')}"`,
+                `"${course.category || ''}"`,
+                course.level || 'Beginner',
+                course.duration || '0',
+                course.courseFee || '0',
+                `"${course.instructorLabel || 'Unassigned'}"`,
+                course.status || 'Pending',
+                course.enrolledCount || 0
+            ]);
+            
+            const csvContent = [
+                headers.join(','),
+                ...rows.map(r => r.join(','))
+            ].join('\n');
+            
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'courses_export.csv');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }, [filteredData]);
+
         // Execute asynchronous Hard Deletion GET call
         const handleDeleteConfirm = () => {
             if (!courseToDelete) return;
@@ -430,41 +482,18 @@ const ReactDOM = window.ReactDOM;
         });
 
         return (
-            <div className="admin-container-gf">
-                {/* Header Section */}
-                <header className="dashboard-header-gf">
-                    <h1>Course Catalog</h1>
-                    <p>Keep the platform curriculum catalog organized, assign professional instructors dynamically, review course approval requests, and verify syllabus specifications.</p>
-                </header>
-
-                {/* Metrics Cards row */}
-                <section className="metrics-grid-gf">
-                    <div className="metric-card-gf">
-                        <span className="label">Total Courses</span>
-                        <span className="value">{totalCourses}</span>
-                        <span className="meta">Total registered records</span>
-                    </div>
-                    <div className="metric-card-gf">
-                        <span className="label">Published</span>
-                        <span className="value" style={{ color: '#047857' }}>{approvedCount}</span>
-                        <span className="meta">Visible to student catalog</span>
-                    </div>
-                    <div className="metric-card-gf">
-                        <span className="label">Pending Review</span>
-                        <span className="value" style={{ color: '#b45309' }}>{pendingCount}</span>
-                        <span className="meta">Requires admin evaluation</span>
-                    </div>
-                    <div className="metric-card-gf">
-                        <span className="label">Unassigned</span>
-                        <span className="value" style={{ color: '#ef4444' }}>{unassignedCount}</span>
-                        <span className="meta">Instructors missing</span>
-                    </div>
-                </section>
-
+            <motion.div 
+                className="admin-container-gf"
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+            >
                 {/* Data Table Shell */}
-                <section className="table-card-gf">
+                <motion.section variants={itemVariants} className="table-card-gf">
                     <div className="table-controls-gf">
                         <div className="controls-left-gf">
+                            <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 600, color: 'var(--gf-text-primary)' }}>Courses</h2>
+                            
                             {/* Search Box */}
                             <div className="search-box-gf">
                                 <i className="fas fa-search"></i>
@@ -485,10 +514,15 @@ const ReactDOM = window.ReactDOM;
                             </div>
                         </div>
 
-                        {/* Create Primary CTA */}
-                        <button className="btn-primary-gf" onClick={handleOpenCreate}>
-                            <i className="fas fa-plus"></i> + Create Course
-                        </button>
+                        {/* Export & Create CTAs */}
+                        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                            <button className="btn-secondary-gf" onClick={handleExportCSV}>
+                                <i className="fas fa-file-csv"></i> Export CSV
+                            </button>
+                            <button className="btn-primary-gf" onClick={handleOpenCreate}>
+                                <i className="fas fa-plus"></i> + Create Course
+                            </button>
+                        </div>
                     </div>
 
                     {/* Table Render */}
@@ -556,12 +590,13 @@ const ReactDOM = window.ReactDOM;
                             </div>
                         </div>
                     )}
-                </section>
+                </motion.section>
 
                 {/* Right Slide-out Drawer */}
+                <AnimatePresence>
                 {drawerOpen && (
-                    <div className="drawer-overlay-gf" onClick={() => setDrawerOpen(false)}>
-                        <div className="drawer-container-gf" onClick={e => e.stopPropagation()}>
+                    <motion.div variants={overlayVariants} initial="hidden" animate="visible" exit="exit" className="drawer-overlay-gf" onClick={() => setDrawerOpen(false)}>
+                        <motion.div variants={drawerVariants} initial="hidden" animate="visible" exit="exit" className="drawer-container-gf" onClick={e => e.stopPropagation()}>
                             <header className="drawer-header-gf">
                                 <h2>
                                     {drawerMode === 'create' ? 'Create New Course' : drawerMode === 'edit' ? 'Update Course details' : 'Course Details Profile'}
@@ -736,14 +771,16 @@ const ReactDOM = window.ReactDOM;
                                     </button>
                                 )}
                             </footer>
-                        </div>
-                    </div>
+                        </motion.div>
+                    </motion.div>
                 )}
+                </AnimatePresence>
 
                 {/* Centered Safe Deletion Modal Overlay */}
+                <AnimatePresence>
                 {deleteModalOpen && courseToDelete && (
-                    <div className="modal-overlay-gf" onClick={() => setDeleteModalOpen(false)}>
-                        <div className="modal-box-gf" onClick={e => e.stopPropagation()}>
+                    <motion.div variants={overlayVariants} initial="hidden" animate="visible" exit="exit" className="modal-overlay-gf" onClick={() => setDeleteModalOpen(false)}>
+                        <motion.div variants={itemVariants} initial="hidden" animate="visible" exit="hidden" className="modal-box-gf" onClick={e => e.stopPropagation()}>
                             <h3 className="modal-title-gf">
                                 <i className="fas fa-exclamation-triangle"></i> Safe Deletion Warning
                             </h3>
@@ -763,10 +800,11 @@ const ReactDOM = window.ReactDOM;
                                     Confirm Deletion
                                 </button>
                             </footer>
-                        </div>
-                    </div>
+                        </motion.div>
+                    </motion.div>
                 )}
-            </div>
+                </AnimatePresence>
+            </motion.div>
         );
     }
 

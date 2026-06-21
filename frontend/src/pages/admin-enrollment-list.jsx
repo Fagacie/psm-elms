@@ -265,35 +265,10 @@ const ReactDOM = window.ReactDOM;
 
         return (
             <div className="admin-container-gf">
-                {/* Header Section */}
-                <header className="dashboard-header-gf">
-                    <h1>Enrollments</h1>
-                    <p>Track learner material completion ratios, sync payment clearances, re-configure lifecycle access parameters, and manage course access.</p>
-                </header>
-
-                {/* Metrics Cards row */}
-                <section className="metrics-grid-gf">
-                    <div className="metric-card-gf">
-                        <span className="label">Total Enrollments</span>
-                        <span className="value">{totalCount}</span>
-                    </div>
-                    <div className="metric-card-gf">
-                        <span className="label">Active Access</span>
-                        <span className="value" style={{ color: '#10b981' }}>{activeCount}</span>
-                    </div>
-                    <div className="metric-card-gf">
-                        <span className="label">Completed</span>
-                        <span className="value" style={{ color: '#1d4ed8' }}>{completedCount}</span>
-                    </div>
-                    <div className="metric-card-gf">
-                        <span className="label">Total Tuition Revenue</span>
-                        <span className="value" style={{ color: '#0f172a' }}>₦{totalRevenue.toLocaleString('en-NG', { minimumFractionDigits: 2 })}</span>
-                    </div>
-                </section>
-
                 {/* Data Table Shell */}
                 <section className="table-card-gf">
                     <div className="table-controls-gf">
+                        <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: '700', color: 'var(--gf-text-primary)' }}>Enrollments</h2>
                         <div className="controls-left-gf">
                             {/* Search Box */}
                             <div className="search-box-gf">

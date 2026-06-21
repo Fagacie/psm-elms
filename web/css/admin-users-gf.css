@@ -25,12 +25,12 @@
 
 /* Base Greenfield Layout Structure */
 .admin-container-gf {
-  max-width: 1400px;
+  max-width: 1600px;
   margin: 0 auto;
-  padding: 3rem 2rem;
+  padding: 0 1.5rem 1.5rem 1.5rem;
   display: flex;
   flex-direction: column;
-  gap: 2.5rem;
+  gap: 1rem;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
@@ -192,20 +192,20 @@
 }
 
 .users-table-gf th {
-  padding: 1rem 2rem;
-  font-size: 0.8rem;
-  font-weight: 700;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--gf-text-secondary);
-  background-color: #fcfcfd;
+  color: var(--gf-text-muted);
+  background-color: transparent;
   border-bottom: 1px solid var(--gf-border);
 }
 
 .users-table-gf td {
-  padding: 1.25rem 2rem;
-  font-size: 0.95rem;
-  color: var(--gf-text-primary);
+  padding: 0.75rem 1.5rem;
+  font-size: 0.85rem;
+  color: var(--gf-text-secondary);
   border-bottom: 1px solid var(--gf-border);
   vertical-align: middle;
   transition: background-color 0.15s ease;
@@ -249,13 +249,13 @@
 }
 
 .user-name-gf {
-  font-weight: 600;
+  font-weight: 500;
   color: var(--gf-text-primary);
-  font-size: 0.95rem;
+  font-size: 0.85rem;
 }
 
 .user-email-gf {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: var(--gf-text-muted);
 }
 
@@ -263,9 +263,9 @@
 .badge-gf {
   display: inline-flex;
   align-items: center;
-  padding: 0.25rem 0.75rem;
+  padding: 0.15rem 0.6rem;
   border-radius: 9999px;
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   font-weight: 600;
   letter-spacing: 0.02em;
 }
@@ -763,4 +763,70 @@
   background-color: var(--gf-red-light);
   color: var(--gf-red);
   border: 1px solid rgba(185, 28, 28, 0.15);
+}
+
+/* ------------------------------------- */
+/* DARK MODE OVERRIDES                   */
+/* ------------------------------------- */
+
+html[data-theme='dark'] {
+  --gf-bg: #0f172a;
+  --gf-card-bg: #1e293b;
+  --gf-border: #334155;
+  --gf-text-primary: #f8fafc;
+  --gf-text-secondary: #cbd5e1;
+  --gf-text-muted: #94a3b8;
+  --gf-card-shadow: none;
+  
+  --gf-primary-light: rgba(16, 185, 129, 0.15);
+  --gf-blue-light: rgba(30, 64, 175, 0.15);
+  --gf-blue: #60a5fa;
+  --gf-purple-light: rgba(107, 33, 168, 0.15);
+  --gf-purple: #c084fc;
+  --gf-gray-light: rgba(51, 65, 85, 0.3);
+  --gf-gray: #e2e8f0;
+  --gf-red-light: rgba(185, 28, 28, 0.15);
+  --gf-red: #f87171;
+}
+
+html[data-theme='dark'] .table-controls-gf,
+html[data-theme='dark'] .users-table-gf th,
+html[data-theme='dark'] .pagination-bar-gf,
+html[data-theme='dark'] .drawer-container-gf,
+html[data-theme='dark'] .drawer-footer-gf,
+html[data-theme='dark'] .details-item-gf,
+html[data-theme='dark'] .search-box-gf input,
+html[data-theme='dark'] .modal-box-gf,
+html[data-theme='dark'] .modal-footer-gf {
+  background-color: var(--gf-card-bg);
+}
+
+html[data-theme='dark'] .users-table-gf th {
+  background-color: transparent;
+  border-bottom: 1px solid var(--gf-border);
+}
+
+html[data-theme='dark'] .users-table-gf tbody tr:hover td,
+html[data-theme='dark'] .tab-btn-gf:hover,
+html[data-theme='dark'] .dropdown-item-gf:hover,
+html[data-theme='dark'] .btn-page-gf:hover:not(:disabled),
+html[data-theme='dark'] .actions-btn-gf:hover,
+html[data-theme='dark'] .drawer-close-gf:hover {
+  background-color: #334155;
+}
+
+html[data-theme='dark'] .actions-dropdown-gf {
+  background-color: rgba(30, 41, 59, 0.95);
+  backdrop-filter: blur(12px);
+  border-color: var(--gf-border);
+}
+
+html[data-theme='dark'] .tab-btn-gf.active {
+  background-color: #334155;
+  color: var(--gf-text-primary);
+}
+
+html[data-theme='dark'] .filter-tabs-gf {
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--gf-border);
 }

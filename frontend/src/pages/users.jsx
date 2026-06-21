@@ -1,13 +1,36 @@
 const { useState, useEffect, useMemo, useCallback, useRef } = window.React || React;
 const ReactDOM = window.ReactDOM;
-
+const { motion, AnimatePresence } = window.Motion || { motion: { div: 'div', section: 'section', header: 'header' }, AnimatePresence: ({children}) => children };
     
-    const { 
-        useReactTable, getCoreRowModel, getPaginationRowModel, getSortedRowModel, flexRender 
-    } = window.ReactTable || {};
+const { 
+    useReactTable, getCoreRowModel, getPaginationRowModel, getSortedRowModel, flexRender 
+} = window.ReactTable || {};
 
-    function UsersManagement() {
-        const [users, setUsers] = useState(window.__USERS__ || []);
+// Animation variants
+const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
+};
+
+const itemVariants = {
+    hidden: { opacity: 0, y: 15 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.3, ease: "easeOut" } }
+};
+
+const drawerVariants = {
+    hidden: { x: "100%" },
+    visible: { x: 0, transition: { type: "spring", damping: 25, stiffness: 200 } },
+    exit: { x: "100%", transition: { duration: 0.2 } }
+};
+
+const overlayVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { duration: 0.2 } },
+    exit: { opacity: 0, transition: { duration: 0.2 } }
+};
+
+function UsersManagement() {
+    const [users, setUsers] = useState(window.__USERS__ || []);
         const [globalFilter, setGlobalFilter] = useState('');
         const [roleFilter, setRoleFilter] = useState('All');
         
@@ -131,6 +154,35 @@ const ReactDOM = window.ReactDOM;
             setAssignedDepartment('');
 
             setSelectedUser(null);
+        };
+
+        // Export filtered data to CSV
+        const handleExportCSV = () => {
+            if (filteredData.length === 0) return;
+            
+            const headers = ['ID', 'Full Name', 'Email', 'Phone', 'Role', 'Status'];
+            const csvRows = [headers.join(',')];
+            
+            filteredData.forEach(user => {
+                const row = [
+                    user.userId,
+                    `"${user.fullName || ''}"`,
+                    `"${user.email || ''}"`,
+                    `"${user.phone || ''}"`,
+                    user.role,
+                    user.status || 'Active'
+                ];
+                csvRows.push(row.join(','));
+            });
+            
+            const csvData = new Blob([csvRows.join('\n')], { type: 'text/csv' });
+            const csvUrl = URL.createObjectURL(csvData);
+            const hiddenLink = document.createElement('a');
+            hiddenLink.href = csvUrl;
+            hiddenLink.download = `User_Directory_Export_${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(hiddenLink);
+            hiddenLink.click();
+            document.body.removeChild(hiddenLink);
         };
 
         // Open drawer in Create mode
@@ -358,45 +410,18 @@ const ReactDOM = window.ReactDOM;
         });
 
         return (
-            <div className="admin-container-gf">
-                {/* Modern Greenfield typographic Header */}
-                <header className="dashboard-header-gf">
-                    <h1>User Directory</h1>
-                    <p>Govern platform membership accounts, inspect user academic credentials, update specializations, and manage administrative credentials.</p>
-                </header>
-
-                {/* Metrics Cards row */}
-                <section className="metrics-grid-gf">
-                    <div className="metric-card-gf">
-                        <span className="label">Total Members</span>
-                        <span className="value">{users.length}</span>
-                    </div>
-                    <div className="metric-card-gf">
-                        <span className="label">Active Students</span>
-                        <span className="value">{studentsCount}</span>
-                    </div>
-                    <div className="metric-card-gf">
-                        <span className="label">Active Instructors</span>
-                        <span className="value">{instructorsCount}</span>
-                    </div>
-                    <div className="metric-card-gf">
-                        <span className="label">Administrators</span>
-                        <span className="value">{adminsCount}</span>
-                    </div>
-                    <div className="metric-card-gf" style={{ borderLeft: '3px solid #10b981' }}>
-                        <span className="label">Status Active</span>
-                        <span className="value" style={{ color: '#047857' }}>{activeCount}</span>
-                    </div>
-                    <div className="metric-card-gf" style={{ borderLeft: '3px solid #ef4444' }}>
-                        <span className="label">Status Suspended</span>
-                        <span className="value" style={{ color: '#b91c1c' }}>{suspendedCount}</span>
-                    </div>
-                </section>
-
+            <motion.div 
+                className="admin-container-gf"
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+            >
                 {/* Headless Data Table Shell */}
-                <section className="table-card-gf">
+                <motion.section className="table-card-gf" variants={itemVariants}>
                     <div className="table-controls-gf">
                         <div className="controls-left-gf">
+                            <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 600, color: 'var(--gf-text-primary)' }}>Customers</h2>
+                            
                             {/* Search bar */}
                             <div className="search-box-gf">
                                 <i className="fas fa-search"></i>
@@ -417,10 +442,15 @@ const ReactDOM = window.ReactDOM;
                             </div>
                         </div>
 
-                        {/* Add button */}
-                        <button className="btn-primary-gf" onClick={handleOpenCreate}>
-                            <i className="fas fa-plus"></i> + Add New User
-                        </button>
+                        {/* Add & Export buttons */}
+                        <div style={{ display: 'flex', gap: '1rem' }}>
+                            <button className="btn-secondary-gf" onClick={handleExportCSV}>
+                                <i className="fas fa-file-csv"></i> Export to CSV
+                            </button>
+                            <button className="btn-primary-gf" onClick={handleOpenCreate}>
+                                <i className="fas fa-plus"></i> + Add New User
+                            </button>
+                        </div>
                     </div>
 
                     {/* Headless table render */}
@@ -488,12 +518,27 @@ const ReactDOM = window.ReactDOM;
                             </div>
                         </div>
                     )}
-                </section>
+                </motion.section>
 
                 {/* Greenfield Slide-out CRUD & Details Drawer */}
+                <AnimatePresence>
                 {drawerOpen && (
-                    <div className="drawer-overlay-gf" onClick={() => setDrawerOpen(false)}>
-                        <div className="drawer-container-gf" onClick={e => e.stopPropagation()}>
+                    <motion.div 
+                        className="drawer-overlay-gf" 
+                        onClick={() => setDrawerOpen(false)}
+                        variants={overlayVariants}
+                        initial="hidden"
+                        animate="visible"
+                        exit="exit"
+                    >
+                        <motion.div 
+                            className="drawer-container-gf" 
+                            onClick={e => e.stopPropagation()}
+                            variants={drawerVariants}
+                            initial="hidden"
+                            animate="visible"
+                            exit="exit"
+                        >
                             <header className="drawer-header-gf">
                                 <h2>
                                     {drawerMode === 'create' ? 'Create New User' : drawerMode === 'edit' ? 'Update User Details' : 'Member Details Profile'}
@@ -852,52 +897,60 @@ const ReactDOM = window.ReactDOM;
                                 )}
                             </div>
 
-                            <footer className="drawer-footer-gf">
-                                <button className="btn-secondary-gf" onClick={() => setDrawerOpen(false)}>
-                                    {drawerMode === 'view' ? 'Close' : 'Cancel'}
-                                </button>
-                                {drawerMode !== 'view' && (
+                            {/* Drawer Footer Actions */}
+                            {drawerMode !== 'view' && (
+                                <footer className="drawer-footer-gf">
+                                    <button className="btn-secondary-gf" onClick={() => setDrawerOpen(false)}>Cancel</button>
                                     <button 
                                         type="submit" 
                                         form="drawerForm" 
                                         className="btn-primary-gf"
                                         disabled={isSubmitting}
                                     >
-                                        {isSubmitting ? 'Saving...' : drawerMode === 'edit' ? 'Update User' : 'Save User'}
+                                        {isSubmitting ? 'Saving...' : drawerMode === 'create' ? 'Create User' : 'Save Changes'}
                                     </button>
-                                )}
-                            </footer>
-                        </div>
-                    </div>
+                                </footer>
+                            )}
+                        </motion.div>
+                    </motion.div>
                 )}
+                </AnimatePresence>
 
-                {/* Centered Deletion Confirmation Modal Overlay */}
+                {/* Centered Modal for Delete Confirmation */}
+                <AnimatePresence>
                 {deleteModalOpen && userToDelete && (
-                    <div className="modal-overlay-gf" onClick={() => setDeleteModalOpen(false)}>
-                        <div className="modal-box-gf" onClick={e => e.stopPropagation()}>
+                    <motion.div 
+                        className="modal-overlay-gf" 
+                        onClick={() => setDeleteModalOpen(false)}
+                        variants={overlayVariants}
+                        initial="hidden"
+                        animate="visible"
+                        exit="exit"
+                    >
+                        <motion.div 
+                            className="modal-box-gf" 
+                            onClick={e => e.stopPropagation()}
+                            initial={{ scale: 0.95, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.95, opacity: 0 }}
+                            transition={{ duration: 0.2 }}
+                        >
                             <h3 className="modal-title-gf">
-                                <i className="fas fa-exclamation-triangle"></i> Safe Deletion Warning
+                                <i className="fas fa-exclamation-triangle"></i>
+                                Confirm Deletion
                             </h3>
                             <div className="modal-body-gf">
-                                <p>
-                                    Are you absolutely sure you want to delete <strong>{userToDelete.fullName}</strong> ({userToDelete.email})?
-                                </p>
-                                <p style={{ marginTop: '0.5rem', fontSize: '0.85rem', color: 'var(--gf-red)' }}>
-                                    This action is irreversible and will purge all core user qualifications, grades, submissions, and course enrollments.
-                                </p>
+                                <p>Are you sure you want to permanently delete user <strong>{userToDelete?.fullName}</strong>? This action cannot be undone and will remove all associated records including enrollments, certificates, and uploaded materials.</p>
                             </div>
                             <footer className="modal-footer-gf">
-                                <button className="btn-secondary-gf" onClick={() => setDeleteModalOpen(false)}>
-                                    Cancel
-                                </button>
-                                <button className="btn-danger-gf" onClick={handleDeleteConfirm}>
-                                    Confirm Deletion
-                                </button>
+                                <button className="btn-secondary-gf" onClick={() => setDeleteModalOpen(false)}>Cancel</button>
+                                <button className="btn-danger-gf" onClick={handleDeleteConfirm}>Yes, Delete User</button>
                             </footer>
-                        </div>
-                    </div>
+                        </motion.div>
+                    </motion.div>
                 )}
-            </div>
+                </AnimatePresence>
+            </motion.div>
         );
     }
 
