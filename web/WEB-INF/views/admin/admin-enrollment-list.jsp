@@ -10,8 +10,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin-dashboard.css?v=2.2">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/AdminNav.module.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin-dashboard.css?v=2.3">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/AdminNav.module.css?v=2.1">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin-enrollments-gf.css?v=1.0">
     <jsp:include page="/WEB-INF/views/common/head-external-assets.jsp"/>
     
@@ -38,7 +38,7 @@
 
 <main class="app-main">
     <!-- Success/Error JSTL Notification Banners -->
-    <div style="max-width: 1400px; margin: 2rem auto 0 auto; padding: 0 2rem;">
+    <div style="max-width: 1400px; margin: 0 auto; padding: 0 2rem;">
         <c:if test="${not empty successMessage}">
             <div class="alert-gf alert-success-gf" style="margin-bottom: 1.5rem;">
                 <i class="fas fa-check-circle"></i> <c:out value="${successMessage}"/>

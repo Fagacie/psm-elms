@@ -97,6 +97,36 @@ const ReactDOM = window.ReactDOM;
             });
         }, [enrollments, globalFilter, statusFilter, courseFilter]);
 
+        // Export filtered data to CSV
+        const handleExportCSV = useCallback(() => {
+            if (filteredData.length === 0) return;
+            
+            const headers = ['Enrollment ID', 'Student Name', 'Student Email', 'Course Name', 'Enrollment Date', 'Status', 'Payment Status'];
+            const csvRows = [headers.join(',')];
+            
+            filteredData.forEach(item => {
+                const row = [
+                    item.enrollmentId,
+                    `"${item.studentName || ''}"`,
+                    `"${item.studentEmail || ''}"`,
+                    `"${item.courseName || ''}"`,
+                    `"${item.enrollmentDate || ''}"`,
+                    item.status,
+                    item.paymentStatus
+                ];
+                csvRows.push(row.join(','));
+            });
+            
+            const csvData = new Blob([csvRows.join('\n')], { type: 'text/csv' });
+            const csvUrl = URL.createObjectURL(csvData);
+            const hiddenLink = document.createElement('a');
+            hiddenLink.href = csvUrl;
+            hiddenLink.download = `Enrollments_Export_${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(hiddenLink);
+            hiddenLink.click();
+            document.body.removeChild(hiddenLink);
+        }, [filteredData]);
+
         // Open drawer in View details mode
         const handleOpenView = (enrollment) => {
             setSelectedEnrollment(enrollment);
@@ -300,6 +330,10 @@ const ReactDOM = window.ReactDOM;
                                 <button className={"tab-btn-gf " + (statusFilter === 'Completed' ? 'active' : '')} onClick={() => setStatusFilter('Completed')}>Completed</button>
                                 <button className={"tab-btn-gf " + (statusFilter === 'Revoked' ? 'active' : '')} onClick={() => setStatusFilter('Revoked')}>Revoked</button>
                             </div>
+                            <button className="btn-secondary-gf" onClick={handleExportCSV} style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center' }}>
+                                <i data-lucide="download" style={{ width: 16, height: 16, marginRight: 8 }}></i>
+                                Export CSV
+                            </button>
                         </div>
                     </div>
 

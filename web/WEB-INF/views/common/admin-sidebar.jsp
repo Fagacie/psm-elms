@@ -75,17 +75,17 @@
             <%-- Account Section --%>
             <div class="adm_nav_divider" aria-hidden="true"></div>
             <span class="adm_nav_section_label">Account</span>
-            <a href="${pageContext.request.contextPath}/profile"
-               class="adm_nav_link ${resolvedActivePage == 'profile' ? 'active' : ''}"
-               title="Profile">
-                <i data-lucide="user-circle" aria-hidden="true"></i>
-                <span class="adm_nav_label">Profile</span>
-            </a>
             <a href="${pageContext.request.contextPath}/admin/settings"
                class="adm_nav_link ${resolvedActivePage == 'settings' ? 'active' : ''}"
                title="Settings">
                 <i data-lucide="settings" aria-hidden="true"></i>
                 <span class="adm_nav_label">Settings</span>
+            </a>
+            <a href="${pageContext.request.contextPath}/profile"
+               class="adm_nav_link ${resolvedActivePage == 'profile' ? 'active' : ''}"
+               title="Profile">
+                <i data-lucide="user-circle" aria-hidden="true"></i>
+                <span class="adm_nav_label">Profile</span>
             </a>
 
             <div class="adm_nav_spacer" aria-hidden="true"></div>

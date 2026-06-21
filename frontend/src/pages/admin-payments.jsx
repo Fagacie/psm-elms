@@ -35,6 +35,35 @@ const AdminPaymentsApp = () => {
         window.location.href = window.__CONTEXT_PATH__ + '/admin/payments?action=view&id=' + payment.paymentId;
     };
 
+    const handleExportCSV = useCallback(() => {
+        if (filteredData.length === 0) return;
+        
+        const headers = ['Payment ID', 'Student Name', 'Course Name', 'Amount', 'Date', 'Status', 'Reference'];
+        const csvRows = [headers.join(',')];
+        
+        filteredData.forEach(item => {
+            const row = [
+                item.paymentId,
+                `"${item.studentName || ''}"`,
+                `"${item.courseName || ''}"`,
+                item.amount,
+                `"${item.paymentDate || ''}"`,
+                item.status,
+                `"${item.paymentRef || ''}"`
+            ];
+            csvRows.push(row.join(','));
+        });
+        
+        const csvData = new Blob([csvRows.join('\n')], { type: 'text/csv' });
+        const csvUrl = URL.createObjectURL(csvData);
+        const hiddenLink = document.createElement('a');
+        hiddenLink.href = csvUrl;
+        hiddenLink.download = `Payments_Export_${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(hiddenLink);
+        hiddenLink.click();
+        document.body.removeChild(hiddenLink);
+    }, [filteredData]);
+
     // Table Column Definitions
     const columns = useMemo(() => [
         {
@@ -181,8 +210,8 @@ const AdminPaymentsApp = () => {
                         </div>
                     </div>
                     <div className="controls-right-gf">
-                        <button className="btn-secondary-gf" onClick={() => window.print()}>
-                            <i className="fas fa-download"></i> Export
+                        <button className="btn-secondary-gf" onClick={handleExportCSV}>
+                            <i data-lucide="download" style={{ width: 16, height: 16, marginRight: 8 }}></i> Export CSV
                         </button>
                     </div>
                 </div>

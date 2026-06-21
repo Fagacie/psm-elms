@@ -60,61 +60,61 @@ function AdminDashboard() {
 
     return (
         <motion.div 
-            className="ad_container"
+            className="dashboard-container-gf"
             variants={containerVariants}
             initial="hidden"
             animate="visible"
         >
             {/* Header */}
-            <motion.header className="ad_header" variants={itemVariants}>
+            <motion.header className="dashboard-header-gf" variants={itemVariants}>
                 <h1>Command Center</h1>
             </motion.header>
 
             {/* Top KPI Grid (Platform-Wide Metrics) */}
-            <motion.section className="ad_kpi_grid" variants={itemVariants}>
-                <div className="ad_kpi_card">
-                    <div className="ad_kpi_icon emerald">
+            <motion.section className="metrics-grid-gf" variants={itemVariants}>
+                <div className="metric-card-gf">
+                    <div className="metric-icon-gf emerald">
                         <i data-lucide="dollar-sign"></i>
                     </div>
-                    <div className="ad_kpi_details">
-                        <span className="ad_kpi_label">Total Revenue</span>
-                        <span className="ad_kpi_value">
+                    <div className="metric-details-gf">
+                        <span className="metric-label-gf">Total Revenue</span>
+                        <span className="metric-value-gf">
                             ₦{(adminDashboardData.totalRevenue || 0).toLocaleString('en-NG', { maximumFractionDigits: 0 })}
                         </span>
                     </div>
                 </div>
 
-                <div className="ad_kpi_card">
-                    <div className="ad_kpi_icon blue">
+                <div className="metric-card-gf">
+                    <div className="metric-icon-gf blue">
                         <i data-lucide="users"></i>
                     </div>
-                    <div className="ad_kpi_details">
-                        <span className="ad_kpi_label">Total Users</span>
-                        <span className="ad_kpi_value">
+                    <div className="metric-details-gf">
+                        <span className="metric-label-gf">Total Users</span>
+                        <span className="metric-value-gf">
                             {(adminDashboardData.totalUsers || 0).toLocaleString()}
                         </span>
                     </div>
                 </div>
 
-                <div className="ad_kpi_card">
-                    <div className="ad_kpi_icon violet">
+                <div className="metric-card-gf">
+                    <div className="metric-icon-gf violet">
                         <i data-lucide="book-open"></i>
                     </div>
-                    <div className="ad_kpi_details">
-                        <span className="ad_kpi_label">Active Courses</span>
-                        <span className="ad_kpi_value">
+                    <div className="metric-details-gf">
+                        <span className="metric-label-gf">Active Courses</span>
+                        <span className="metric-value-gf">
                             {(adminDashboardData.activeCourses || 0).toLocaleString()}
                         </span>
                     </div>
                 </div>
 
-                <div className="ad_kpi_card">
-                    <div className="ad_kpi_icon amber">
+                <div className="metric-card-gf">
+                    <div className="metric-icon-gf amber">
                         <i data-lucide="graduation-cap"></i>
                     </div>
-                    <div className="ad_kpi_details">
-                        <span className="ad_kpi_label">Enrollments</span>
-                        <span className="ad_kpi_value">
+                    <div className="metric-details-gf">
+                        <span className="metric-label-gf">Enrollments</span>
+                        <span className="metric-value-gf">
                             {(adminDashboardData.totalEnrollments || 0).toLocaleString()}
                         </span>
                     </div>
@@ -123,9 +123,9 @@ function AdminDashboard() {
 
             {/* Main Growth Chart (Users & Revenue) */}
             {window.Recharts && (
-                <motion.section className="ad_panel" variants={itemVariants}>
-                    <div className="ad_panel_header">
-                        <h2 className="ad_panel_title">Platform Growth Trends</h2>
+                <motion.section className="dashboard-panel-gf" variants={itemVariants}>
+                    <div className="panel-header-gf">
+                        <h2 className="panel-title-gf">Platform Growth Trends</h2>
                     </div>
                     <div style={{ width: '100%', height: '350px' }}>
                         <ResponsiveContainer width="100%" height="100%">
@@ -140,13 +140,13 @@ function AdminDashboard() {
                                         <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.05}/>
                                     </linearGradient>
                                 </defs>
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#64748b" opacity={0.2} />
-                                <XAxis dataKey="date" stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} />
-                                <YAxis yAxisId="left" stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => '₦' + v.toLocaleString()} />
-                                <YAxis yAxisId="right" orientation="right" stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} />
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--gf-border)" opacity={0.5} />
+                                <XAxis dataKey="date" stroke="var(--gf-text-muted)" fontSize={11} tickLine={false} axisLine={false} />
+                                <YAxis yAxisId="left" stroke="var(--gf-text-muted)" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => '₦' + v.toLocaleString()} />
+                                <YAxis yAxisId="right" orientation="right" stroke="var(--gf-text-muted)" fontSize={11} tickLine={false} axisLine={false} />
                                 <Tooltip 
-                                    contentStyle={{ borderRadius: '12px', border: '1px solid var(--admin-border-strong, #e5e7eb)', boxShadow: '0 8px 16px rgba(0, 0, 0, 0.1)' }}
-                                    wrapperClassName="ad_chart_tooltip"
+                                    contentStyle={{ borderRadius: '12px', border: '1px solid var(--gf-border)', boxShadow: 'var(--gf-shadow-md)', background: 'var(--gf-surface)', color: 'var(--gf-text-primary)' }}
+                                    wrapperClassName="gf_chart_tooltip"
                                     labelStyle={{ fontWeight: '700', marginBottom: '8px' }}
                                     formatter={(value, name) => {
                                         if (name === "Revenue") return ['₦' + value.toLocaleString(), 'Daily Revenue'];
@@ -164,13 +164,13 @@ function AdminDashboard() {
 
             {/* Bottom Insights (System Health Donut Charts) */}
             {window.Recharts && (
-                <motion.section className="ad_distribution_grid" variants={itemVariants}>
+                <motion.section className="distribution-grid-gf" variants={itemVariants}>
                     {/* Donut 1: User Demographics */}
-                    <div className="ad_donut_card">
-                        <div className="ad_panel_header">
-                            <h2 className="ad_panel_title">User Demographics</h2>
+                    <div className="donut-card-gf">
+                        <div className="panel-header-gf">
+                            <h2 className="panel-title-gf">User Demographics</h2>
                         </div>
-                        <div className="ad_donut_chart_container">
+                        <div className="donut-container-gf">
                             <ResponsiveContainer width="100%" height="100%">
                                 <PieChart>
                                     <Pie
@@ -188,17 +188,16 @@ function AdminDashboard() {
                                         ))}
                                     </Pie>
                                     <Tooltip 
-                                        contentStyle={{ borderRadius: '12px', border: '1px solid var(--admin-border-strong, #e5e7eb)', boxShadow: '0 8px 16px rgba(0, 0, 0, 0.1)' }}
-                                        wrapperClassName="ad_chart_tooltip"
+                                        contentStyle={{ borderRadius: '12px', border: '1px solid var(--gf-border)', boxShadow: 'var(--gf-shadow-md)', background: 'var(--gf-surface)', color: 'var(--gf-text-primary)' }}
                                         formatter={(value, name) => [value, name]}
                                     />
                                 </PieChart>
                             </ResponsiveContainer>
                         </div>
-                        <div className="ad_donut_legend">
+                        <div className="donut-legend-gf">
                             {userDemographicsData.map((entry, idx) => (
-                                <div key={idx} className="ad_legend_item">
-                                    <span className="ad_legend_dot" style={{ backgroundColor: USER_COLORS[idx % USER_COLORS.length] }}></span>
+                                <div key={idx} className="legend-item-gf">
+                                    <span className="legend-dot-gf" style={{ backgroundColor: USER_COLORS[idx % USER_COLORS.length] }}></span>
                                     <span>{entry.name}: {entry.value}</span>
                                 </div>
                             ))}
@@ -206,11 +205,11 @@ function AdminDashboard() {
                     </div>
 
                     {/* Donut 2: Course Statuses */}
-                    <div className="ad_donut_card">
-                        <div className="ad_panel_header">
-                            <h2 className="ad_panel_title">Course Statuses</h2>
+                    <div className="donut-card-gf">
+                        <div className="panel-header-gf">
+                            <h2 className="panel-title-gf">Course Statuses</h2>
                         </div>
-                        <div className="ad_donut_chart_container">
+                        <div className="donut-container-gf">
                             <ResponsiveContainer width="100%" height="100%">
                                 <PieChart>
                                     <Pie
@@ -228,17 +227,16 @@ function AdminDashboard() {
                                         ))}
                                     </Pie>
                                     <Tooltip 
-                                        contentStyle={{ borderRadius: '12px', border: '1px solid var(--admin-border-strong, #e5e7eb)', boxShadow: '0 8px 16px rgba(0, 0, 0, 0.1)' }}
-                                        wrapperClassName="ad_chart_tooltip"
+                                        contentStyle={{ borderRadius: '12px', border: '1px solid var(--gf-border)', boxShadow: 'var(--gf-shadow-md)', background: 'var(--gf-surface)', color: 'var(--gf-text-primary)' }}
                                         formatter={(value, name) => [value, name]}
                                     />
                                 </PieChart>
                             </ResponsiveContainer>
                         </div>
-                        <div className="ad_donut_legend">
+                        <div className="donut-legend-gf">
                             {courseStatusesData.map((entry, idx) => (
-                                <div key={idx} className="ad_legend_item">
-                                    <span className="ad_legend_dot" style={{ backgroundColor: COURSE_COLORS[idx % COURSE_COLORS.length] }}></span>
+                                <div key={idx} className="legend-item-gf">
+                                    <span className="legend-dot-gf" style={{ backgroundColor: COURSE_COLORS[idx % COURSE_COLORS.length] }}></span>
                                     <span>{entry.name}: {entry.value}</span>
                                 </div>
                             ))}
@@ -248,42 +246,42 @@ function AdminDashboard() {
             )}
 
             {/* NEW MODULES: Quick Actions & Live Activity Feed */}
-            <motion.section className="ad_dashboard_lower" variants={itemVariants}>
+            <motion.section className="lower-grid-gf" variants={itemVariants}>
                 
                 {/* Left: Quick Actions Command Hub */}
-                <div className="ad_panel">
-                    <div className="ad_panel_header">
-                        <h2 className="ad_panel_title">Quick Actions</h2>
+                <div className="dashboard-panel-gf">
+                    <div className="panel-header-gf">
+                        <h2 className="panel-title-gf">Quick Actions</h2>
                     </div>
-                    <div className="ad_quick_actions">
-                        <a href={window.__CONTEXT_PATH__ + '/admin/courses'} className="ad_action_btn">
-                            <i data-lucide="plus-circle" style={{ width: 32, height: 32, strokeWidth: 1.5 }}></i>
+                    <div className="quick-actions-gf">
+                        <a href={window.__CONTEXT_PATH__ + '/admin/courses'} className="action-btn-gf">
+                            <i data-lucide="plus-circle" style={{ width: 24, height: 24, strokeWidth: 1.5 }}></i>
                             Add Courses
                         </a>
-                        <a href={window.__CONTEXT_PATH__ + '/admin/payments'} className="ad_action_btn">
-                            <i data-lucide="file-spreadsheet" style={{ width: 32, height: 32, strokeWidth: 1.5 }}></i>
+                        <a href={window.__CONTEXT_PATH__ + '/admin/payments'} className="action-btn-gf">
+                            <i data-lucide="file-spreadsheet" style={{ width: 24, height: 24, strokeWidth: 1.5 }}></i>
                             View Financials
                         </a>
-                        <a href={window.__CONTEXT_PATH__ + '/admin/users'} className="ad_action_btn">
-                            <i data-lucide="user-plus" style={{ width: 32, height: 32, strokeWidth: 1.5 }}></i>
+                        <a href={window.__CONTEXT_PATH__ + '/admin/users'} className="action-btn-gf">
+                            <i data-lucide="user-plus" style={{ width: 24, height: 24, strokeWidth: 1.5 }}></i>
                             Manage Users
                         </a>
-                        <a href={window.__CONTEXT_PATH__ + '/admin/settings'} className="ad_action_btn">
-                            <i data-lucide="settings" style={{ width: 32, height: 32, strokeWidth: 1.5 }}></i>
+                        <a href={window.__CONTEXT_PATH__ + '/admin/settings'} className="action-btn-gf">
+                            <i data-lucide="settings" style={{ width: 24, height: 24, strokeWidth: 1.5 }}></i>
                             System Settings
                         </a>
                     </div>
                 </div>
 
                 {/* Right: Recent Activity Feed */}
-                <div className="ad_panel">
-                    <div className="ad_panel_header">
-                        <h2 className="ad_panel_title">Live Activity</h2>
+                <div className="dashboard-panel-gf">
+                    <div className="panel-header-gf">
+                        <h2 className="panel-title-gf">Live Activity</h2>
                     </div>
-                    <div className="ad_feed_list">
+                    <div className="feed-list-gf">
                         {enrollments.length === 0 ? (
-                            <div style={{ textAlign: 'center', padding: '24px 0', color: 'var(--admin-muted)' }}>
-                                <i data-lucide="activity" style={{ opacity: 0.5, marginBottom: 8 }}></i>
+                            <div style={{ textAlign: 'center', padding: '24px 0', color: 'var(--gf-text-muted)' }}>
+                                <i data-lucide="activity" style={{ opacity: 0.5, marginBottom: 8, width: 32, height: 32 }}></i>
                                 <div>No recent activity</div>
                             </div>
                         ) : (
@@ -293,18 +291,18 @@ function AdminDashboard() {
                                     : enr.paymentStatus === 'Pending' ? 'pending' : 'failed';
                                 
                                 return (
-                                    <div key={idx} className="ad_feed_item">
-                                        <div className="ad_feed_avatar">
+                                    <div key={idx} className="feed-item-gf">
+                                        <div className="feed-avatar-gf">
                                             {enr.studentName ? enr.studentName.charAt(0).toUpperCase() : 'U'}
                                         </div>
-                                        <div className="ad_feed_content">
-                                            <div className="ad_feed_title">{enr.studentName || 'Unknown User'}</div>
-                                            <div style={{ fontSize: '0.8rem', color: 'var(--admin-text)' }}>
+                                        <div className="feed-content-gf">
+                                            <div className="feed-title-gf">{enr.studentName || 'Unknown User'}</div>
+                                            <div style={{ fontSize: '0.8rem', color: 'var(--gf-text-secondary)' }}>
                                                 Enrolled in <span style={{ fontWeight: 600 }}>{enr.courseName}</span>
                                             </div>
-                                            <div className="ad_feed_meta">
+                                            <div className="feed-meta-gf">
                                                 <span>{enr.enrollmentDate}</span>
-                                                <span className={`ad_feed_status ${statusClass}`}>
+                                                <span className={`feed-status-gf ${statusClass}`}>
                                                     {enr.paymentStatus}
                                                 </span>
                                             </div>

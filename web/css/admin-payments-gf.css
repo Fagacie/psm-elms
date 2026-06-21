@@ -32,7 +32,7 @@
 .admin-container-gf {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 0 1.5rem 1.5rem 1.5rem;
+  padding: 2rem 1.5rem 1.5rem 1.5rem;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
@@ -108,7 +108,7 @@
 .table-card-gf {
   background-color: var(--gf-card-bg);
   border: 1px solid var(--gf-border);
-  border-radius: 16px;
+  border-radius: 12px;
   box-shadow: var(--gf-card-shadow);
   overflow: hidden;
 }
@@ -121,7 +121,7 @@
   align-items: center;
   gap: 1.5rem;
   border-bottom: 1px solid var(--gf-border);
-  background-color: #ffffff;
+  background-color: var(--gf-card-bg, #ffffff);
 }
 
 .controls-left-gf {
@@ -159,7 +159,7 @@
 
 .search-box-gf input:focus {
   border-color: var(--gf-primary);
-  background-color: #ffffff;
+  background-color: var(--gf-card-bg, #ffffff);
   box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
 }
 
@@ -188,7 +188,7 @@
 }
 
 .tab-btn-gf.active {
-  background-color: #ffffff;
+  background-color: var(--gf-card-bg, #ffffff);
   color: var(--gf-text-primary);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
@@ -207,7 +207,7 @@
 
 .select-filter-gf:focus {
   border-color: var(--gf-primary);
-  background-color: #ffffff;
+  background-color: var(--gf-card-bg, #ffffff);
 }
 
 /* Headless Table structure */
@@ -381,7 +381,7 @@
   right: 2rem;
   top: 50%;
   transform: translateY(-50%);
-  background-color: #ffffff;
+  background-color: var(--gf-card-bg, #ffffff);
   border: 1px solid var(--gf-border);
   border-radius: 8px;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
@@ -447,7 +447,7 @@
   width: 100%;
   max-width: 480px;
   height: 100%;
-  background-color: #ffffff;
+  background-color: var(--gf-card-bg, #ffffff);
   box-shadow: -10px 0 25px -5px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
@@ -513,7 +513,7 @@
 }
 
 .btn-secondary-gf {
-  background-color: #ffffff;
+  background-color: var(--gf-card-bg, #ffffff);
   border: 1px solid var(--gf-border);
   color: var(--gf-text-secondary);
   padding: 0.75rem 1.25rem;
@@ -554,7 +554,7 @@
   border: 1px solid var(--gf-border);
   border-radius: 12px;
   padding: 2rem;
-  background-color: #ffffff;
+  background-color: var(--gf-card-bg, #ffffff);
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
   display: flex;
   flex-direction: column;
@@ -707,7 +707,7 @@
   justify-content: space-between;
   align-items: center;
   border-top: 1px solid var(--gf-border);
-  background-color: #ffffff;
+  background-color: var(--gf-card-bg, #ffffff);
   font-size: 0.85rem;
   color: var(--gf-text-secondary);
 }
@@ -718,7 +718,7 @@
 }
 
 .btn-page-gf {
-  background-color: #ffffff;
+  background-color: var(--gf-card-bg, #ffffff);
   border: 1px solid var(--gf-border);
   padding: 0.5rem 1rem;
   font-size: 0.85rem;
@@ -820,3 +820,4 @@ html[data-theme='dark'] .btn-secondary-gf {
 html[data-theme='dark'] .invoice-receipt-gf {
   background-color: rgba(15, 23, 42, 0.5);
 }
+

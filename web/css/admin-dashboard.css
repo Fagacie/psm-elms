@@ -3391,3 +3391,7 @@ html[data-theme="dark"] body.admin-page,
 
 
 
+
+/* User Request: Remove border radius to everything */
+* { border-radius: 0 !important; }
+

@@ -376,7 +376,7 @@ const overlayVariants = {
                             </div>
                         );
                     } else {
-                        return <span className="badge-unassigned-gf">Unassigned</span>;
+                        return <span className="badge-gf badge-archived-gf" style={{ padding: '0.15rem 0.5rem', fontSize: '0.7rem' }}>Unassigned</span>;
                     }
                 }
             },

@@ -1,0 +1,301 @@
+/* ==========================================================================
+   Greenfield Admin Dashboard Design System
+   ========================================================================== */
+
+:root {
+    --gf-primary: #10b981;
+    --gf-primary-hover: #059669;
+    --gf-primary-dark: #065f46;
+    
+    --gf-bg-body: #f8fafc;
+    --gf-surface: #ffffff;
+    --gf-surface-muted: #f1f5f9;
+    --gf-border: #e2e8f0;
+    
+    --gf-text-primary: #0f172a;
+    --gf-text-secondary: #475569;
+    --gf-text-muted: #94a3b8;
+    
+    --gf-success: #10b981;
+    --gf-error: #ef4444;
+    --gf-warning: #f59e0b;
+    --gf-info: #3b82f6;
+    
+    --gf-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --gf-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+    
+    --gf-radius: 12px;
+    --gf-font: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.dashboard-container-gf {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    font-family: var(--gf-font);
+}
+
+.dashboard-header-gf {
+    margin-bottom: 0.5rem;
+}
+
+.dashboard-header-gf h1 {
+    font-size: 1.875rem;
+    font-weight: 800;
+    color: var(--gf-text-primary);
+    margin: 0;
+    letter-spacing: -0.025em;
+    text-transform: uppercase;
+}
+
+/* KPI Cards */
+.metrics-grid-gf {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+}
+
+.metric-card-gf {
+    background: var(--gf-surface);
+    border: 1px solid var(--gf-border);
+    border-radius: var(--gf-radius);
+    padding: 1.5rem;
+    box-shadow: var(--gf-shadow-sm);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.metric-card-gf:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--gf-shadow-md);
+}
+
+.metric-icon-gf {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    font-size: 1.5rem;
+}
+
+.metric-icon-gf.emerald { background: rgba(16, 185, 129, 0.1); color: var(--gf-success); }
+.metric-icon-gf.blue { background: rgba(59, 130, 246, 0.1); color: var(--gf-info); }
+.metric-icon-gf.violet { background: rgba(139, 92, 246, 0.1); color: #8b5cf6; }
+.metric-icon-gf.amber { background: rgba(245, 158, 11, 0.1); color: var(--gf-warning); }
+
+.metric-details-gf {
+    display: flex;
+    flex-direction: column;
+}
+
+.metric-label-gf {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--gf-text-muted);
+    letter-spacing: 0.05em;
+}
+
+.metric-value-gf {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--gf-text-primary);
+    line-height: 1.2;
+}
+
+/* Panels */
+.dashboard-panel-gf {
+    background: var(--gf-surface);
+    border: 1px solid var(--gf-border);
+    border-radius: var(--gf-radius);
+    padding: 1.5rem;
+    box-shadow: var(--gf-shadow-sm);
+}
+
+.panel-header-gf {
+    margin-bottom: 1.25rem;
+}
+
+.panel-title-gf {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--gf-text-primary);
+    margin: 0;
+}
+
+/* Donut Grid */
+.distribution-grid-gf {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 1.5rem;
+}
+
+.donut-card-gf {
+    background: var(--gf-surface);
+    border: 1px solid var(--gf-border);
+    border-radius: var(--gf-radius);
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.donut-container-gf {
+    height: 250px;
+    width: 100%;
+}
+
+.donut-legend-gf {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.legend-item-gf {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--gf-text-secondary);
+    font-weight: 500;
+}
+
+.legend-dot-gf {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+/* Lower Section */
+.lower-grid-gf {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 1.5rem;
+}
+
+.quick-actions-gf {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.action-btn-gf {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    background: var(--gf-surface-muted);
+    border: 1px solid var(--gf-border);
+    border-radius: 10px;
+    color: var(--gf-text-primary);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+}
+
+.action-btn-gf:hover {
+    background: var(--gf-primary-dark);
+    color: #ffffff;
+    border-color: var(--gf-primary-dark);
+    transform: translateY(-2px);
+}
+
+/* Feed List */
+.feed-list-gf {
+    display: flex;
+    flex-direction: column;
+}
+
+.feed-item-gf {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--gf-border);
+}
+
+.feed-item-gf:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.feed-avatar-gf {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--gf-primary-dark);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.feed-content-gf {
+    flex-grow: 1;
+}
+
+.feed-title-gf {
+    font-weight: 700;
+    color: var(--gf-text-primary);
+    font-size: 0.95rem;
+    margin-bottom: 0.25rem;
+}
+
+.feed-meta-gf {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 0.35rem;
+    font-size: 0.8rem;
+    color: var(--gf-text-muted);
+}
+
+.feed-status-gf {
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    letter-spacing: 0.05em;
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+}
+
+.feed-status-gf.success { background: rgba(16, 185, 129, 0.1); color: var(--gf-success); }
+.feed-status-gf.pending { background: rgba(245, 158, 11, 0.1); color: var(--gf-warning); }
+.feed-status-gf.failed { background: rgba(239, 68, 68, 0.1); color: var(--gf-error); }
+
+/* ---------------------------------------------------
+   Premium Dark Mode Overrides (Greenfield System)
+--------------------------------------------------- */
+html[data-theme='dark'] .admin-page {
+    --gf-bg-body: #0f172a;
+    --gf-surface: #1e293b;
+    --gf-surface-muted: rgba(148, 163, 184, 0.1);
+    --gf-border: #334155;
+    
+    --gf-text-primary: #f8fafc;
+    --gf-text-secondary: #cbd5e1;
+    --gf-text-muted: #94a3b8;
+    
+    --gf-primary: #34d399;
+    --gf-primary-hover: #10b981;
+    --gf-primary-dark: #34d399;
+    
+    --gf-shadow-sm: none;
+    --gf-shadow-md: none;
+}
+
+html[data-theme='dark'] .action-btn-gf:hover {
+    background: var(--gf-primary-dark);
+    color: #0f172a;
+}
+

@@ -838,13 +838,13 @@ html[data-theme='dark'] .adm_nav_theme_toggle {
 html[data-theme='dark'] .adm_nav_toggle:hover,
 html[data-theme='dark'] .adm_nav_icon_btn:hover,
 html[data-theme='dark'] .adm_nav_theme_toggle:hover {
-  background: rgba(15, 81, 50, 0.15);
-  border-color: rgba(15, 81, 50, 0.3);
-  color: #86efac;
+  background: rgba(16, 185, 129, 0.15); /* gf-primary */
+  border-color: rgba(16, 185, 129, 0.3);
+  color: #34d399; /* gf-primary-light */
 }
 
 html[data-theme='dark'] .adm_nav_brand_main {
-  color: #86efac;
+  color: #34d399;
 }
 
 html[data-theme='dark'] .adm_nav_brand_sub {
@@ -852,7 +852,7 @@ html[data-theme='dark'] .adm_nav_brand_sub {
 }
 
 html[data-theme='dark'] .adm_nav_page_title h1 {
-  color: #94a3b8;
+  color: #cbd5e1;
 }
 
 html[data-theme='dark'] .adm_nav_page_title {
@@ -873,11 +873,11 @@ html[data-theme='dark'] .adm_nav_avatar {
 }
 
 html[data-theme='dark'] .adm_nav_avatar_fallback {
-  color: #86efac;
+  color: #34d399;
 }
 
 html[data-theme='dark'] .adm_nav_sidebar {
-  background: #0f172a;
+  background: #0f172a; /* matches gf-bg-body */
   border-right-color: rgba(148, 163, 184, 0.08);
 }
 
@@ -899,21 +899,21 @@ html[data-theme='dark'] .adm_nav_link:hover {
 }
 
 html[data-theme='dark'] .adm_nav_link.active {
-  background: rgba(15, 81, 50, 0.15);
-  color: #86efac;
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
 }
 
 html[data-theme='dark'] .adm_nav_link.active i {
-  color: #86efac;
+  color: #34d399;
 }
 
 html[data-theme='dark'] .adm_nav_link.active::before {
-  background: #22c55e;
+  background: #10b981;
 }
 
 html[data-theme='dark'] .adm_nav_popover_panel,
 html[data-theme='dark'] .adm_nav_profile_menu {
-  background: #1e293b;
+  background: #1e293b; /* gf-surface */
   border-color: rgba(148, 163, 184, 0.1);
 }
 
@@ -930,12 +930,12 @@ html[data-theme='dark'] .adm_nav_profile_menu a {
 }
 
 html[data-theme='dark'] .adm_nav_profile_menu a:hover {
-  background: rgba(15, 81, 50, 0.12);
-  color: #86efac;
+  background: rgba(16, 185, 129, 0.12);
+  color: #34d399;
 }
 
 html[data-theme='dark'] .adm_nav_profile_menu a:hover i {
-  color: #86efac;
+  color: #34d399;
 }
 
 html[data-theme='dark'] .adm_nav_link_danger {
@@ -951,12 +951,13 @@ html[data-theme='dark'] .adm_nav_profile_menu a.adm_nav_logout_link {
   border-top-color: rgba(148, 163, 184, 0.1);
 }
 
+html[data-theme='dark'] body.admin-page .app-main,
 html[data-theme='dark'] .adm_nav_main {
-  background: #07111f;
+  background: #0f172a; /* Make main area match gf-bg-body perfectly */
 }
 
 html[data-theme='dark'] .adm_nav_layout {
-  background: #07111f;
+  background: #0f172a;
 }
 
 html[data-theme='dark'] .adm_nav_overlay {
