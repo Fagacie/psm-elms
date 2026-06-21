@@ -105,6 +105,6 @@
 
 <!-- Interactive React Command Center Application -->
 
-    <script type="module" src="${pageContext.request.contextPath}/js/dist/payments.js?v=<%= System.currentTimeMillis() %>"></script>
+    <script type="module" src="${pageContext.request.contextPath}/js/dist/admin-payments.js?v=<%= System.currentTimeMillis() %>"></script>
 </body>
 </html>

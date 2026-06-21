@@ -145,44 +145,7 @@ const ReactDOM = window.ReactDOM;
 
         return (
             <div className="settings-container-gf">
-                {/* Typographic Header */}
-                <header className="settings-header-gf">
-                    <div className="admin-breadcrumb" style={{ margin: '0 0 0.5rem 0' }}>
-                        <a href={ctxPath + '/dashboard'}>Dashboard</a>
-                        <span>&gt;</span>
-                        <span>Settings Hub</span>
-                    </div>
-                    <h1>Platform configurations</h1>
-                    <p>Govern platform membership rules, update gateway API credentials, configure SMTP email servers, and review settings audit trails.</p>
-                </header>
-
-                {/* Dashboard Metrics Strip */}
-                <section className="settings-metrics-gf">
-                    <article className="metric-card-gf">
-                        <span className="label"><i className="fas fa-building"></i> Platform Identity</span>
-                        <span className="value">{s['platform.name'] || 'PSME Platform'}</span>
-                        <span className="sub">Support: {s['platform.supportEmail']}</span>
-                    </article>
-                    <article className="metric-card-gf">
-                        <span className="label"><i className="fas fa-credit-card"></i> Gateways Mode</span>
-                        <span className="value" style={{ color: s['payment.mode'] === 'LIVE' ? 'var(--gf-success)' : 'var(--gf-warning)' }}>
-                            {s['payment.mode'] || 'LIVE'}
-                        </span>
-                        <span className="sub">
-                            {window.__HAS_PAYSTACK_SECRET__ ? 'Paystack Ready' : 'Pending Paystack'}
-                        </span>
-                    </article>
-                    <article className="metric-card-gf">
-                        <span className="label"><i className="fas fa-envelope"></i> SMTP Server</span>
-                        <span className="value">{window.__HAS_SMTP_PASSWORD__ ? 'Ready' : 'Unconfigured'}</span>
-                        <span className="sub">{s['email.smtp.host'] || 'SMTP Pending'}</span>
-                    </article>
-                    <article className="metric-card-gf">
-                        <span className="label"><i className="fas fa-clock-rotate-left"></i> Integrity Auditing</span>
-                        <span className="value">{audits.length} entries</span>
-                        <span className="sub">Tracked operational state changes</span>
-                    </article>
-                </section>
+                {/* Header and Metrics removed for Greenfield alignment */}
 
                 {/* Horizontal Tab Navigation */}
                 <div className="tab-navigation-gf">

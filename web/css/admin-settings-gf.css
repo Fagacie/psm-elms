@@ -462,7 +462,7 @@ body.admin-page {
 
 .audit-table-gf th,
 .audit-table-gf td {
-    padding: 0.875rem 1.25rem;
+    padding: 0.75rem 1.5rem;
     text-align: left;
     border-bottom: 1px solid var(--gf-border);
 }
@@ -562,4 +562,39 @@ body.admin-page {
     font-size: 0.875rem;
     color: var(--gf-text-secondary);
     margin: 0;
+}
+
+/* ---------------------------------------------------
+   Premium Dark Mode Overrides (Greenfield System)
+--------------------------------------------------- */
+html[data-theme='dark'] .admin-page {
+    --gf-bg-body: #0f172a;
+    --gf-surface: #1e293b;
+    --gf-surface-muted: #0f172a;
+    --gf-border: #334155;
+    
+    --gf-text-primary: #f8fafc;
+    --gf-text-secondary: #cbd5e1;
+    --gf-text-muted: #94a3b8;
+    
+    --gf-primary: #34d399;
+    --gf-primary-hover: #10b981;
+    --gf-primary-dark: #34d399;
+    
+    --gf-shadow-sm: none;
+    --gf-shadow-md: none;
+    --gf-shadow-lg: none;
+}
+
+html[data-theme='dark'] .btn-secondary-gf {
+    background: #1e293b;
+    color: #cbd5e1;
+}
+
+html[data-theme='dark'] .btn-secondary-gf:hover:not(:disabled) {
+    background: #0f172a;
+}
+
+html[data-theme='dark'] .audit-table-gf tbody tr:hover {
+    background: rgba(255, 255, 255, 0.03);
 }

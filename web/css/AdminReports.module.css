@@ -499,8 +499,8 @@
 }
 
 .ar_data_table thead th {
-  padding: 12px 16px;
-  font-size: 0.72rem;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.75rem;
   font-weight: 700;
   color: var(--ar-primary);
   text-transform: uppercase;
@@ -513,7 +513,8 @@
 }
 
 .ar_data_table tbody td {
-  padding: 14px 16px;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.85rem;
   border-bottom: 1px solid var(--ar-border-light);
   color: var(--ar-text-main);
   vertical-align: middle;
@@ -710,4 +711,42 @@
   border-radius: 4px;
   cursor: pointer;
   accent-color: var(--ar-primary);
+}
+
+/* ---------------------------------------------------
+   Premium Dark Mode Overrides (Greenfield System)
+--------------------------------------------------- */
+html[data-theme='dark'] .admin-page {
+  --ar-bg: #0f172a;
+  --ar-surface: #1e293b;
+  --ar-border: #334155;
+  --ar-border-light: #1e293b;
+  
+  --ar-text-main: #f8fafc;
+  --ar-text-muted: #94a3b8;
+  
+  --ar-primary-soft: rgba(16, 185, 129, 0.15);
+  --ar-primary: #34d399;
+  --ar-primary-hover: #6ee7b7;
+  
+  --ar-shadow: none;
+  --ar-shadow-hover: none;
+}
+
+html[data-theme='dark'] .ar_data_table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+html[data-theme='dark'] .ar_search_box input {
+  color: #f8fafc;
+}
+
+html[data-theme='dark'] .ar_btn {
+  background-color: #1e293b;
+  color: #cbd5e1;
+}
+
+html[data-theme='dark'] .ar_btn_primary {
+  background-color: #34d399;
+  color: #0f172a;
 }

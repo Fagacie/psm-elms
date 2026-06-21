@@ -513,19 +513,6 @@ const ReactDOM = window.ReactDOM;
 
         return (
             <div className="ar_container">
-                {/* Breadcrumb */}
-                <div className="admin-breadcrumb" style={{ margin: 0 }}>
-                    <a href={ctxPath + '/dashboard'}>Dashboard</a>
-                    <span>&gt;</span>
-                    <span>Analytics Hub</span>
-                </div>
-
-                {/* Page Header */}
-                <div className="ar_header">
-                    <h1>Visual Analytics Hub</h1>
-                    <p>Explore enrollment trends, revenue performance, and platform health indicators with interactive charts and filterable data tables.</p>
-                </div>
-
                 {/* ═══ Command Bar ═══ */}
                 <div className="ar_controls">
                     <div className="ar_controls_top">

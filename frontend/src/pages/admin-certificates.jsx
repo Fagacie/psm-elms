@@ -252,43 +252,8 @@ const ReactDOM = window.ReactDOM;
 
         return (
             <div className="admin-container-gf">
-                {/* Dashboard Breadcrumbs */}
-                <div className="admin-breadcrumb" style={{ margin: 0 }}>
-                    <a href={window.__CONTEXT_PATH__ + "/dashboard"}>Dashboard</a>
-                    <span>&gt;</span>
-                    <span>Certificates Registry</span>
-                </div>
-
-                {/* Dashboard Headers */}
-                <div className="dashboard-header-gf">
-                    <h1>Credentials Verification Registry</h1>
-                    <p>Audit and manage institutional certificate templates, perform visual validation lookups, and cancel course completion credentials.</p>
-                </div>
-
-                {/* Registry Overview Summary Metrics */}
-                <section className="metrics-grid-gf">
-                    <div className="metric-card-gf">
-                        <span className="label">Total Issued</span>
-                        <span className="value">{totalCount}</span>
-                    </div>
-                    <div className="metric-card-gf">
-                        <span className="label">Active Verified</span>
-                        <span className="value" style={{ color: 'var(--gf-primary-dark)' }}>{activeCount}</span>
-                    </div>
-                    <div className="metric-card-gf">
-                        <span className="label">Revoked Credentials</span>
-                        <span className="value" style={{ color: 'var(--gf-red)' }}>{revokedCount}</span>
-                    </div>
-                    <div className="metric-card-gf">
-                        <span className="label">Registry Status</span>
-                        <span className="value" style={{ fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--gf-primary-dark)' }}>
-                            <i className="fas fa-shield-alt" style={{ width: '22px' }}></i> Operational
-                        </span>
-                    </div>
-                </section>
-
                 {/* Command Control Action Panel */}
-                <div className="section-card" style={{ padding: '1.5rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1.5rem', backgroundColor: '#ffffff', border: '1px solid var(--gf-border)', borderRadius: '12px', boxShadow: 'var(--gf-card-shadow)' }}>
+                <div className="section-card" style={{ padding: '1.5rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1.5rem', backgroundColor: 'var(--gf-card-bg)', border: '1px solid var(--gf-border)', borderRadius: '12px', boxShadow: 'var(--gf-card-shadow)', marginTop: '1rem' }}>
                     <div>
                         <strong style={{ display: 'block', fontSize: '1rem', color: 'var(--gf-text-primary)' }}>Registry Tooling Controls</strong>
                         <span style={{ fontSize: '0.85rem', color: 'var(--gf-text-secondary)' }}>Backfill new certificate eligibility criteria or preview templates.</span>
@@ -317,6 +282,7 @@ const ReactDOM = window.ReactDOM;
                 {/* Headless Table Shell */}
                 <section className="table-card-gf">
                     <div className="table-controls-gf">
+                        <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: '700', color: 'var(--gf-text-primary)' }}>Certificates</h2>
                         <div className="controls-left-gf">
                             {/* Global Monospace Code or Student Name Search */}
                             <div className="search-box-gf">

@@ -25,7 +25,8 @@ export default defineConfig({
         "certificates": resolve(__dirname, "src/pages/certificates.jsx"),
         "course-details": resolve(__dirname, "src/pages/course-details.jsx"),
         "my-enrollments": resolve(__dirname, "src/pages/my-enrollments.jsx"),
-        "payments": resolve(__dirname, "src/pages/payments.jsx")
+        "payments": resolve(__dirname, "src/pages/payments.jsx"),
+        "admin-payments": resolve(__dirname, "src/pages/admin-payments.jsx")
       },
       output: {
         entryFileNames: '[name].js',
