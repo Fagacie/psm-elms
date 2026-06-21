@@ -7,9 +7,11 @@
 # --- Stage 1: Frontend Builder ---
 FROM node:20-alpine AS frontend-builder
 WORKDIR /app
-COPY frontend ./frontend
 WORKDIR /app/frontend
-RUN npm install && npm run build
+COPY frontend/package.json frontend/package-lock.json* ./
+RUN npm ci || npm install
+COPY frontend ./
+RUN npm run build
 
 # --- Stage 2: Backend Builder ---
 FROM eclipse-temurin:17-jdk AS builder

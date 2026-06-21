@@ -2,7 +2,7 @@ const { useState, useEffect, useMemo, useCallback, useRef } = window.React || Re
 const ReactDOM = window.ReactDOM;
 
                         const PaymentHistoryApp = () => {
-                            const [payments, setPayments] = React.useState(window.paymentsData || []);
+                            const [payments, setPayments] = React.useState(window.__PAYMENTS__ || window.paymentsData || []);
                             const [searchTerm, setSearchTerm] = React.useState('');
                             const [activeStatus, setActiveStatus] = React.useState('all');
                             const [selectedPayment, setSelectedPayment] = React.useState(null);
@@ -357,7 +357,7 @@ const ReactDOM = window.ReactDOM;
                             );
                         };
 
-                        const container = document.getElementById('payment-history-react-root');
+                        const container = document.getElementById('admin-react-root');
                         const root = ReactDOM.createRoot(container);
                         root.render(<PaymentHistoryApp />);
                     

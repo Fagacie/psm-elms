@@ -13,15 +13,16 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin-dashboard.css?v=2.2">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/AdminNav.module.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin-payments-gf.css?v=1.0">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/PaymentHistory.module.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/ReceiptModal.module.css">
     <jsp:include page="/WEB-INF/views/common/head-external-assets.jsp"/>
     
     <!-- React & ReactDOM (UMD production versions) -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
     
-    <!-- Babel Standalone for JSX rendering -->
-    `n    
-    
+    <!-- Framer Motion UMD -->
+    <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
     <!-- Lucide Icons UMD -->
     <script src="https://unpkg.com/lucide@0.395.0/dist/umd/lucide.min.js"></script>
     
@@ -104,6 +105,6 @@
 
 <!-- Interactive React Command Center Application -->
 
-    <script type="module" src="${pageContext.request.contextPath}/js/dist/payments.js"></script>
+    <script type="module" src="${pageContext.request.contextPath}/js/dist/payments.js?v=<%= System.currentTimeMillis() %>"></script>
 </body>
 </html>
