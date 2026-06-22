@@ -215,7 +215,7 @@
     }
 
     function initChoiceBlocks(root) {
-        root.querySelectorAll('.choice_block').forEach(function (block) {
+        root.querySelectorAll('.choice_block, .focus_choice_block').forEach(function (block) {
             if (block.dataset.bound === 'true') {
                 return;
             }
@@ -228,9 +228,10 @@
                 var name = input.name;
                 var form = block.closest('form') || root;
                 form.querySelectorAll('input[name="' + name + '"]').forEach(function (peer) {
-                    var peerBlock = peer.closest('.choice_block');
+                    var peerBlock = peer.closest('.choice_block, .focus_choice_block');
                     if (peerBlock) {
                         peerBlock.classList.toggle('choice_block_selected', peer.checked);
+                        peerBlock.classList.toggle('is-selected', peer.checked);
                     }
                 });
             });
@@ -256,7 +257,7 @@
                 var originalHTML = button.innerHTML;
                 button.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>' + (button.getAttribute('data-loading-label') || 'Submitting...') + '</span>';
 
-                var formData = new FormData(form);
+                var finalUrl = '';
                 fetch(form.action, {
                     method: 'POST',
                     body: formData,
@@ -266,6 +267,7 @@
                 })
                 .then(function (response) {
                     if (!response.ok) throw new Error('Submission failed');
+                    finalUrl = response.url;
                     return response.text();
                 })
                 .then(function (html) {
@@ -278,8 +280,15 @@
                         stripDuplicateNav(stage);
                         init(stage);
                         syncHubProgress(doc);
+                        if (window.history && window.history.pushState && finalUrl) {
+                            window.history.pushState({ assessmentStage: 'result' }, '', finalUrl);
+                        }
                     } else {
-                        window.location.reload();
+                        if (finalUrl) {
+                            window.location.href = finalUrl;
+                        } else {
+                            window.location.reload();
+                        }
                     }
                 })
                 .catch(function (err) {
@@ -340,15 +349,15 @@
             var attemptShell = form.closest('[data-attempt-shell]') || root;
             var questions = Array.prototype.slice.call(form.querySelectorAll('[data-question-index]'));
             var stepperButtons = Array.prototype.slice.call(attemptShell.querySelectorAll('[data-step-index]'));
-            var currentIndexNode = attemptShell.querySelector('[data-current-question]');
-            var progressFill = attemptShell.querySelector('[data-progress-fill]');
+            var currentIndexNode = attemptShell.querySelector('[data-current-question]') || document.getElementById('currentQText');
+            var progressFill = attemptShell.querySelector('[data-progress-fill]') || document.getElementById('focusProgressFill');
             var submitButton = form.querySelector('[data-submit-button]');
             var previousButton = form.querySelector('[data-prev-question]');
             var nextButton = form.querySelector('[data-next-question]');
             var exitButton = form.querySelector('[data-exit-attempt]');
             var exitField = form.querySelector('[name="exitSubmission"]');
-            var timerNode = attemptShell.querySelector('[data-timer]');
-            var timerText = attemptShell.querySelector('[data-timer-text]');
+            var timerNode = document.querySelector('[data-timer]');
+            var timerText = document.querySelector('[data-timer-text]');
             var timerStart = Number(form.getAttribute('data-timer-start') || '0');
             var timerDuration = Number(form.getAttribute('data-timer-duration') || '0');
             var activeIndex = 0;
@@ -407,12 +416,24 @@
                 }
                 if (previousButton) {
                     previousButton.disabled = activeIndex === 0;
+                    previousButton.style.display = activeIndex === 0 ? 'none' : 'inline-flex';
                 }
                 if (nextButton) {
+                    var nextLabel = nextButton.querySelector('.focus_next_label') || nextButton.querySelector('span');
                     if (activeIndex === questions.length - 1) {
-                        nextButton.style.display = 'none';
+                        if (nextButton.classList.contains('focus_btn_next')) {
+                            if (nextLabel) nextLabel.textContent = 'Submit Assessment';
+                            nextButton.querySelector('i').className = 'fas fa-paper-plane';
+                        } else {
+                            nextButton.style.display = 'none';
+                        }
                     } else {
-                        nextButton.style.display = 'inline-flex';
+                        if (nextButton.classList.contains('focus_btn_next')) {
+                            if (nextLabel) nextLabel.textContent = 'Next Question';
+                            nextButton.querySelector('i').className = 'fas fa-arrow-right';
+                        } else {
+                            nextButton.style.display = 'inline-flex';
+                        }
                     }
                 }
             }
@@ -431,6 +452,7 @@
                 isSubmitting = true;
                 setBusyState('Grading submission...');
                 
+                var finalUrl = '';
                 var formData = new FormData(form);
                 fetch(form.action, {
                     method: 'POST',
@@ -441,6 +463,7 @@
                 })
                 .then(function (response) {
                     if (!response.ok) throw new Error('Submission failed');
+                    finalUrl = response.url;
                     return response.text();
                 })
                 .then(function (html) {
@@ -455,8 +478,15 @@
                         stripDuplicateNav(stage);
                         init(stage);
                         syncHubProgress(doc);
+                        if (window.history && window.history.pushState && finalUrl) {
+                            window.history.pushState({ assessmentStage: 'result' }, '', finalUrl);
+                        }
                     } else {
-                        window.location.reload();
+                        if (finalUrl) {
+                            window.location.href = finalUrl;
+                        } else {
+                            window.location.reload();
+                        }
                     }
                 })
                 .catch(function (err) {
@@ -517,7 +547,11 @@
 
             if (nextButton) {
                 nextButton.addEventListener('click', function () {
-                    showQuestion(activeIndex + 1);
+                    if (activeIndex === questions.length - 1) {
+                        form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+                    } else {
+                        showQuestion(activeIndex + 1);
+                    }
                 });
             }
 
@@ -550,14 +584,15 @@
             });
 
             // Synchronize selection changes to class highlights on choices
-            form.querySelectorAll('.choice_block input[type="radio"]').forEach(function (input) {
+            form.querySelectorAll('input[type="radio"]').forEach(function (input) {
                 input.addEventListener('change', function () {
                     updateProgress();
                 });
-                // Initial check
-                var block = input.closest('.choice_block');
+                // Initial check for legacy choice blocks and new focus choice blocks
+                var block = input.closest('.choice_block, .focus_choice_block');
                 if (block) {
                     block.classList.toggle('choice_block_selected', input.checked);
+                    block.classList.toggle('is-selected', input.checked);
                 }
             });
 

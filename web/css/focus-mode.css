@@ -1,0 +1,375 @@
+/* ==========================================================================
+   FOCUS MODE (STANDALONE ASSESSMENT)
+   ========================================================================== */
+
+.sv-focus-mode {
+  background-color: #ffffff !important;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  font-family: var(--lh-font-sans, "Inter", sans-serif);
+}
+
+.focus_topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40px;
+  height: 72px;
+  background-color: #ffffff;
+  border-bottom: 1px solid #f1f5f9;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.focus_topbar_left, .focus_topbar_right {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.focus_topbar_right {
+  justify-content: flex-end;
+}
+
+.focus_topbar_center {
+  flex: 2;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.focus_topbar_btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #334155;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: color 0.2s ease;
+}
+
+.focus_topbar_btn:hover {
+  color: #0f172a;
+}
+
+.focus_course_name {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+  color: #64748b;
+  margin-bottom: 4px;
+}
+
+.focus_question_count {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.focus_timer_box {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #f3f0ff;
+  color: #4338ca;
+  padding: 8px 16px;
+  border-radius: 9999px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+}
+
+.focus_timer_box.is_warning {
+  background-color: #fffbeb;
+  color: #d97706;
+}
+
+.focus_timer_box.is_critical {
+  background-color: #fef2f2;
+  color: #dc2626;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.focus_progress_bar_bg {
+  width: 100%;
+  height: 4px;
+  background-color: #eef2ff;
+  position: relative;
+  z-index: 49;
+}
+
+.focus_progress_bar_fill {
+  height: 100%;
+  background-color: #4338ca;
+  transition: width 0.3s ease;
+}
+
+.focus_main_container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 80px 24px;
+}
+
+.focus_assessment_container {
+  width: 100%;
+  max-width: 800px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.focus_question_badge {
+  display: inline-block;
+  background-color: #f3f0ff;
+  color: #4338ca;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 6px 16px;
+  border-radius: 9999px;
+  margin-bottom: 24px;
+  align-self: flex-start;
+}
+
+.focus_question_statement {
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.4;
+  margin: 0 0 40px 0;
+  text-align: left;
+  width: 100%;
+  font-family: var(--lh-font-display, "Inter", sans-serif);
+}
+
+.focus_choices_container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 56px;
+}
+
+.focus_choice_block {
+  display: flex;
+  align-items: center;
+  padding: 20px 24px;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  background-color: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.focus_choice_block:hover {
+  border-color: #94a3b8;
+  background-color: #f8fafc;
+}
+
+.focus_choice_badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid #cbd5e1;
+  background-color: #ffffff;
+  color: #475569;
+  font-weight: 600;
+  font-size: 1rem;
+  margin-right: 20px;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.focus_choice_text {
+  flex: 1;
+  font-size: 1.1rem;
+  color: #1e293b;
+  line-height: 1.5;
+  font-weight: 500;
+}
+
+.focus_choice_check {
+  color: #4338ca;
+  font-size: 1.25rem;
+  opacity: 0;
+  transform: scale(0.8);
+  transition: all 0.2s ease;
+  margin-left: 16px;
+}
+
+/* Checked State */
+.focus_choice_block:has(input:checked),
+.focus_choice_block.is-selected {
+  border-color: #4338ca;
+  background-color: #f5f3ff;
+  border-width: 2px;
+  padding: 19px 23px; /* Compensate for thicker border */
+  box-shadow: 0 4px 12px rgba(67, 56, 202, 0.08);
+}
+
+.focus_choice_block:has(input:checked) .focus_choice_badge,
+.focus_choice_block.is-selected .focus_choice_badge {
+  background-color: #ffffff;
+  border-color: #4338ca;
+  color: #4338ca;
+  border-width: 2px;
+}
+
+.focus_choice_block:has(input:checked) .focus_choice_text,
+.focus_choice_block.is-selected .focus_choice_text {
+  color: #0f172a;
+}
+
+.focus_choice_block:has(input:checked) .focus_choice_check,
+.focus_choice_block.is-selected .focus_choice_check {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Bottom Nav */
+.focus_bottom_nav {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 40px;
+  /* Removed border-top to keep it clean like mockup */
+}
+
+.focus_btn_prev {
+  display: inline-flex;
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #334155;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 14px 28px;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.focus_btn_prev:hover {
+  background-color: #f8fafc;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
+.focus_btn_next {
+  display: inline-flex;
+  align-items: center;
+  background-color: #3b28cc; /* Vibrant purple from mockup */
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 14px 32px;
+  border-radius: 9999px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(59, 40, 204, 0.2);
+  margin-left: auto; /* Forces button to the right if Previous is hidden */
+}
+
+.focus_btn_next:hover {
+  background-color: #2b1ca1;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(59, 40, 204, 0.25);
+}
+
+/* Assignment Styles */
+.focus_file_download {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 20px;
+  background-color: #f5f3ff;
+  border: 1px solid #c7d2fe;
+  border-radius: 12px;
+  color: #4338ca;
+  text-decoration: none;
+  font-weight: 600;
+  margin-bottom: 32px;
+  transition: all 0.2s ease;
+}
+
+.focus_file_download:hover {
+  background-color: #e0e7ff;
+  border-color: #a5b4fc;
+}
+
+.focus_file_download i {
+  font-size: 1.5rem;
+}
+
+.focus_prompts_container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.focus_prompt_box {
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  padding: 24px;
+  border-radius: 12px;
+}
+
+.focus_prompt_box strong {
+  display: block;
+  font-size: 0.85rem;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+}
+
+.focus_prompt_box p {
+  margin: 0;
+  color: #1e293b;
+  line-height: 1.6;
+}
+
+.focus_textarea_group {
+  width: 100%;
+  margin-top: 24px;
+  text-align: left;
+}
+
+.focus_textarea_group label {
+  display: block;
+  font-weight: 600;
+  color: #0f172a;
+  margin-bottom: 8px;
+}
+
+.focus_textarea_group span {
+  display: block;
+  font-size: 0.8rem;
+  color: #64748b;
+  margin-top: 6px;
+  text-align: right;
+}

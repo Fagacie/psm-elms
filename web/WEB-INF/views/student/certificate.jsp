@@ -32,139 +32,119 @@
                     <c:set var="activePage" value="certificates" />
                     <jsp:include page="/WEB-INF/views/common/student-sidebar.jsp" />
 
-                    <main class="sv-main cert-page trophy_pageWrapper"
-                        style="display: flex; flex-direction: column; align-items: center; justify-content: flex-start; min-height: calc(100vh - 68px); padding-top: 26px !important;">
+                    <main class="sv-main cert-page" style="display: flex; flex-direction: column; align-items: center; padding: 32px 24px; min-height: calc(100vh - 68px); background-color: var(--surface-bg);">
+                        
                         <!-- Navigation Breadcrumb -->
-                        <div class="sv-breadcrumb" style="width: 100%; max-width: 900px; margin-bottom: 24px;">
+                        <div class="sv-breadcrumb" style="width: 100%; max-width: 1000px; margin-bottom: 32px;">
                             <a href="${pageContext.request.contextPath}/dashboard">Dashboard</a>
                             <span>/</span>
                             <a href="${pageContext.request.contextPath}/student/certificates">Certificates</a>
                             <span>/</span>
-                            <span>View Certificate</span>
+                            <span style="color: var(--text-primary); font-weight: 600;">View Certificate</span>
                         </div>
 
-                        <div class="vc_viewport"
-                            style="background: transparent; min-height: auto; padding: 0; width: 100%; display: flex; flex-direction: column; align-items: center;">
+                        <div style="width: 100%; max-width: 1000px; display: flex; flex-direction: column; gap: 24px;">
 
                             <!-- Error & Info Alerts -->
-                            <div style="max-width: 900px; width: 100%; box-sizing: border-box; margin-bottom: 20px;">
-                                <c:if test="${param.error == 'noteligible'}">
-                                    <div class="alert alert-error" style="border-radius: 8px; margin: 0;">
-                                        <i class="fas fa-circle-exclamation"></i>
-                                        <span>Certificate cannot be generated yet. ${eligibilitySummary}</span>
-                                    </div>
-                                </c:if>
-                                <c:if test="${param.error == 'generatefail'}">
-                                    <div class="alert alert-error" style="border-radius: 8px; margin: 0;">
-                                        <i class="fas fa-triangle-exclamation"></i>
-                                        <span>Certificate generation did not complete. Please retry in a moment.</span>
-                                    </div>
-                                </c:if>
-                                <c:if test="${param.error == 'nocertificatefree'}">
-                                    <div class="alert alert-info" style="border-radius: 8px; margin: 0;">
-                                        <i class="fas fa-circle-info"></i>
-                                        <span>Free courses do not issue certificates. Continue learning directly from
-                                            your learning hub.</span>
-                                    </div>
-                                </c:if>
-                            </div>
+                            <c:if test="${param.error == 'noteligible'}">
+                                <div class="lh-alert lh-alert-error" style="background: var(--danger-soft); color: var(--danger); padding: 16px; border-radius: 8px; display: flex; align-items: center; gap: 12px;">
+                                    <i class="fas fa-circle-exclamation"></i>
+                                    <span>Certificate cannot be generated yet. ${eligibilitySummary}</span>
+                                </div>
+                            </c:if>
+                            <c:if test="${param.error == 'generatefail'}">
+                                <div class="lh-alert lh-alert-error" style="background: var(--danger-soft); color: var(--danger); padding: 16px; border-radius: 8px; display: flex; align-items: center; gap: 12px;">
+                                    <i class="fas fa-triangle-exclamation"></i>
+                                    <span>Certificate generation did not complete. Please retry in a moment.</span>
+                                </div>
+                            </c:if>
+                            <c:if test="${param.error == 'nocertificatefree'}">
+                                <div class="lh-alert lh-alert-info" style="background: var(--info-soft); color: var(--info); padding: 16px; border-radius: 8px; display: flex; align-items: center; gap: 12px;">
+                                    <i class="fas fa-circle-info"></i>
+                                    <span>Free courses do not issue certificates. Continue learning directly from your learning hub.</span>
+                                </div>
+                            </c:if>
 
                             <c:choose>
                                 <c:when test="${not eligible}">
-                                    <!-- Redesigned Minimal Sharp Diagnostics when not eligible -->
-                                    <section class="vc_diagCard">
-                                        <h3 class="vc_diagTitle">
-                                            <i class="fas fa-chart-bar" style="color: #2B5A8E;"></i> Eligibility
-                                            Diagnostics
-                                        </h3>
-                                        <div class="alert alert-error"
-                                            style="margin-bottom: 24px; border-radius: 8px; font-weight: 500;">
-                                            <i class="fas fa-circle-xmark"></i> Certificate is not available yet.
-                                            ${eligibilitySummary}
+                                    <!-- Elegantly designed Eligibility Diagnostics Card -->
+                                    <section class="lh-post-assessment-card" style="max-width: 100%; margin: 0 auto;">
+                                        <div class="lh-post-status-icon is-error" style="width: 4rem; height: 4rem; font-size: 2rem;">
+                                            <i class="fas fa-lock"></i>
                                         </div>
-                                        <div class="sc-diag-grid"
-                                            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 28px;">
-                                            <div class="vc_diagItem">
-                                                <span class="vc_diagLabel">Payment Status</span>
-                                                <strong class="${diagPaid ? 'success' : 'danger'}"
-                                                    style="display: block; margin-top: 6px; font-size: 1.05rem; font-weight: 700; color: ${diagPaid ? '#059669' : '#dc2626'} !important;">
+                                        <h2 class="lh-post-title" style="font-size: 1.5rem;">Certificate Locked</h2>
+                                        <p class="lh-post-desc" style="max-width: 600px;">
+                                            You must complete all syllabus milestones and achieve passing performance before your official credential can be issued.
+                                        </p>
+
+                                        <div class="lh-post-score-section" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; text-align: left; margin: 32px 0;">
+                                            <div class="lh-post-score-metric" style="background: var(--surface-primary); padding: 16px; border-radius: 8px; border: 1px solid var(--border-subtle);">
+                                                <span>Payment Status</span>
+                                                <strong style="color: ${diagPaid ? 'var(--success)' : 'var(--danger)'}; font-size: 1.25rem;">
                                                     ${diagPaid ? 'Paid' : 'Not Paid'}
                                                 </strong>
                                             </div>
-                                            <div class="vc_diagItem">
-                                                <span class="vc_diagLabel">Course Completion</span>
-                                                <strong class="${diagCompleted ? 'success' : 'danger'}"
-                                                    style="display: block; margin-top: 6px; font-size: 1.05rem; font-weight: 700; color: ${diagCompleted ? '#059669' : '#dc2626'} !important;">
-                                                    ${diagCompleted ? 'Completed' : 'Not Completed'} (${diagProgress}%)
+                                            <div class="lh-post-score-metric" style="background: var(--surface-primary); padding: 16px; border-radius: 8px; border: 1px solid var(--border-subtle);">
+                                                <span>Course Progress</span>
+                                                <strong style="color: ${diagCompleted ? 'var(--success)' : 'var(--danger)'}; font-size: 1.25rem;">
+                                                    ${diagCompleted ? 'Completed' : 'Incomplete'} (${diagProgress}%)
                                                 </strong>
                                             </div>
-                                            <div class="vc_diagItem">
-                                                <span class="vc_diagLabel">Required Assessments</span>
-                                                <strong class="${diagPassedRequiredAssessments ? 'success' : 'danger'}"
-                                                    style="display: block; margin-top: 6px; font-size: 1.05rem; font-weight: 700; color: ${diagPassedRequiredAssessments ? '#059669' : '#dc2626'} !important;">
-                                                    ${diagPassedRequiredAssessments ? 'Passed' : 'Pending/Failed'}
-                                                    (${diagPassedAssessments}/${diagTotalAssessments})
-                                                </strong>
-                                            </div>
-                                            <div class="vc_diagItem">
-                                                <span class="vc_diagLabel">Materials Viewed</span>
-                                                <strong class="${diagViewedAllMaterials ? 'success' : 'danger'}"
-                                                    style="display: block; margin-top: 6px; font-size: 1.05rem; font-weight: 700; color: ${diagViewedAllMaterials ? '#059669' : '#dc2626'} !important;">
-                                                    ${diagViewedMaterials}/${diagTotalMaterials} Viewed
+                                            <div class="lh-post-score-metric" style="background: var(--surface-primary); padding: 16px; border-radius: 8px; border: 1px solid var(--border-subtle);">
+                                                <span>Assessments</span>
+                                                <strong style="color: ${diagPassedRequiredAssessments ? 'var(--success)' : 'var(--danger)'}; font-size: 1.25rem;">
+                                                    ${diagPassedRequiredAssessments ? 'Passed' : 'Pending'} (${diagPassedAssessments}/${diagTotalAssessments})
                                                 </strong>
                                             </div>
                                         </div>
-                                        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-                                            <a class="vc_primaryBtn" style="width: auto;"
-                                                href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=learning">Open
-                                                Learning Checklist</a>
-                                            <a class="vc_primaryBtn vc_secondaryBtn" style="width: auto;"
-                                                href="${pageContext.request.contextPath}/student/certificates">Back to
-                                                Certificate Center</a>
+
+                                        <div class="lh-post-actions">
+                                            <a class="sv-btn primary" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=learning">
+                                                <i class="fas fa-book-open"></i> Resume Learning
+                                            </a>
+                                            <a class="sv-btn secondary" href="${pageContext.request.contextPath}/student/certificates">
+                                                Back to Certificates
+                                            </a>
                                         </div>
                                     </section>
                                 </c:when>
+                                
                                 <c:when test="${empty certificate}">
                                     <!-- Unissued State Certificate Unlock -->
-                                    <section class="vc_diagCard">
-                                        <h3 class="vc_diagTitle">
-                                            <i class="fas fa-award" style="color: #2B5A8E;"></i> Certificate Issuance
-                                        </h3>
+                                    <section class="lh-post-assessment-card" style="max-width: 100%; margin: 0 auto;">
+                                        <div class="lh-post-status-icon is-success" style="width: 4rem; height: 4rem; font-size: 2rem;">
+                                            <i class="fas fa-award"></i>
+                                        </div>
+                                        <h2 class="lh-post-title" style="font-size: 1.5rem;">Certificate Unlocked!</h2>
+                                        
                                         <c:choose>
                                             <c:when test="${canGenerate}">
-                                                <div class="alert alert-info"
-                                                    style="margin-bottom: 24px; border-radius: 8px;">
-                                                    <i class="fas fa-circle-info"></i> Your certificate is unlocked!
-                                                    Generate it now to create your official, verifiable digital
-                                                    credential.
+                                                <p class="lh-post-desc" style="max-width: 600px;">
+                                                    Congratulations! You have completed all course requirements. Generate your official, verifiable digital credential now.
+                                                </p>
+                                                <div class="lh-post-actions" style="margin-top: 24px;">
+                                                    <form method="post" action="${pageContext.request.contextPath}/student/certificate" style="margin: 0;">
+                                                        <input type="hidden" name="enrollmentId" value="${enrollment.enrollmentId}">
+                                                        <button class="sv-btn primary" type="submit">
+                                                            <i class="fas fa-file-signature"></i> Generate Certificate
+                                                        </button>
+                                                    </form>
                                                 </div>
-                                                <form method="post"
-                                                    action="${pageContext.request.contextPath}/student/certificate"
-                                                    style="margin: 0;">
-                                                    <input type="hidden" name="enrollmentId"
-                                                        value="${enrollment.enrollmentId}">
-                                                    <button class="vc_primaryBtn" style="width: auto;" type="submit">
-                                                        <i class="fas fa-file-signature"></i> Generate Certificate
-                                                    </button>
-                                                </form>
                                             </c:when>
                                             <c:otherwise>
-                                                <div class="alert alert-error" style="border-radius: 8px;">
-                                                    <i class="fas fa-circle-exclamation"></i> Certificate generation
-                                                    failed. Please refresh and try again.
-                                                </div>
+                                                <p class="lh-post-desc" style="max-width: 600px; color: var(--danger);">
+                                                    Certificate generation failed. Please refresh and try again.
+                                                </p>
                                             </c:otherwise>
                                         </c:choose>
                                     </section>
                                 </c:when>
+                                
                                 <c:otherwise>
                                     <c:if test="${certificate.status == 'Revoked'}">
-                                        <div
-                                            style="max-width: 900px; width: 100%; box-sizing: border-box; margin-bottom: 20px;">
-                                            <div class="alert alert-error" style="margin: 0; border-radius: 8px;">
-                                                <i class="fas fa-circle-xmark"></i> This certificate has been revoked.
-                                                Please contact support for clarification.
-                                            </div>
+                                        <div class="lh-alert lh-alert-error" style="background: var(--danger-soft); color: var(--danger); padding: 16px; border-radius: 8px; display: flex; align-items: center; gap: 12px; margin-bottom: 24px;">
+                                            <i class="fas fa-circle-xmark"></i>
+                                            <span>This certificate has been revoked. Please contact support for clarification.</span>
                                         </div>
                                     </c:if>
 
@@ -282,49 +262,46 @@
                                     </div>
 
                                     <!-- Sleek verification board below the certificate frame -->
-                                    <div class="vc_metaBoard">
-                                        <div class="vc_metaHeader">
-                                            <span class="vc_metaIcon">
-                                                <i class="fas fa-check-circle" style="font-size: 1.5rem;"></i>
-                                            </span>
-                                            <h4 class="vc_metaTitle">Verified Institutional Credential</h4>
+                                    <div class="lh-post-assessment-card" style="max-width: 900px; margin: 32px auto 0; text-align: left; align-items: flex-start;">
+                                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 24px;">
+                                            <div class="lh-post-status-icon is-success" style="width: 3rem; height: 3rem; font-size: 1.5rem; margin: 0;">
+                                                <i class="fas fa-check-circle"></i>
+                                            </div>
+                                            <h4 class="lh-post-title" style="font-size: 1.25rem; margin: 0;">Verified Institutional Credential</h4>
                                         </div>
 
-                                        <div class="vc_metaGrid">
-                                            <div class="vc_gridItem">
-                                                <span class="vc_itemLabel">Recipient Student</span>
-                                                <span class="vc_itemValue">${studentUser.fullName}</span>
+                                        <div class="lh-post-score-section" style="width: 100%; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin: 0; padding: 24px; background: var(--surface-bg);">
+                                            <div class="lh-post-score-metric" style="align-items: flex-start; text-align: left;">
+                                                <span>Recipient Student</span>
+                                                <strong style="font-size: 1.1rem; font-weight: 700;">${studentUser.fullName}</strong>
                                             </div>
-                                            <div class="vc_gridItem">
-                                                <span class="vc_itemLabel">Course Program</span>
-                                                <span class="vc_itemValue">${course.courseName}</span>
+                                            <div class="lh-post-score-metric" style="align-items: flex-start; text-align: left;">
+                                                <span>Course Program</span>
+                                                <strong style="font-size: 1.1rem; font-weight: 700;">${course.courseName}</strong>
                                             </div>
-                                            <div class="vc_gridItem">
-                                                <span class="vc_itemLabel">Issued Date</span>
-                                                <span class="vc_itemValue">
+                                            <div class="lh-post-score-metric" style="align-items: flex-start; text-align: left;">
+                                                <span>Issued Date</span>
+                                                <strong style="font-size: 1.1rem; font-weight: 700;">
                                                     <c:choose>
                                                         <c:when test="${not empty certificate.issueDate}">
                                                             ${certificate.issueDate.toLocalDate()}</c:when>
                                                         <c:otherwise>-</c:otherwise>
                                                     </c:choose>
-                                                </span>
+                                                </strong>
                                             </div>
-                                            <div class="vc_gridItem">
-                                                <span class="vc_itemLabel">Credential ID</span>
-                                                <span class="vc_itemValue">${certificate.certificateNo}</span>
+                                            <div class="lh-post-score-metric" style="align-items: flex-start; text-align: left;">
+                                                <span>Credential ID</span>
+                                                <strong style="font-size: 1.1rem; font-weight: 700; font-family: monospace;">${certificate.certificateNo}</strong>
                                             </div>
                                         </div>
 
                                         <c:if test="${certificate.status != 'Revoked'}">
                                             <!-- Action Buttons Side-by-Side -->
-                                            <div style="display: flex; gap: 12px; margin-top: 16px;">
-                                                <button id="studentCertDownloadPdfBtn" class="vc_primaryBtn"
-                                                    style="flex: 2;" type="button">
+                                            <div style="display: flex; gap: 16px; margin-top: 24px; width: 100%;">
+                                                <button id="studentCertDownloadPdfBtn" class="sv-btn primary" type="button" style="flex: 2; justify-content: center;">
                                                     <i class="fas fa-file-pdf"></i> Download Official High-Res PDF
                                                 </button>
-                                                <button id="studentCertShareBtn" class="vc_primaryBtn"
-                                                    style="flex: 1; background-color: #ffffff !important; color: #0f172a !important; border: 1px solid #cbd5e1 !important;"
-                                                    type="button">
+                                                <button id="studentCertShareBtn" class="sv-btn secondary" type="button" style="flex: 1; justify-content: center;">
                                                     <i class="fas fa-share-nodes"></i> Share Credential
                                                 </button>
                                             </div>

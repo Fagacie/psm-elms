@@ -987,6 +987,17 @@ public class EnrollmentDetailsServlet extends HttpServlet {
             }
             Integer selectedMaterialId = selectedMaterial != null ? selectedMaterial.getMaterialId() : null;
             Integer selectedAssessmentId = selectedAssessment != null ? selectedAssessment.getAssessmentId() : null;
+            
+            for (LearningItem item : learningItems) {
+                if ("material".equals(item.getItemKind()) && item.getItemId().equals(selectedMaterialId)) {
+                    item.setActive(true);
+                } else if ("assessment".equals(item.getItemKind()) && item.getItemId().equals(selectedAssessmentId)) {
+                    item.setActive(true);
+                } else {
+                    item.setActive(false);
+                }
+            }
+
             String selectedMaterialStatus = selectedMaterialId != null ? materialStatusById.getOrDefault(selectedMaterialId, "") : "";
             if (selectedMaterialId != null && activeCourseAccess 
                     && !"completed".equalsIgnoreCase(selectedMaterialStatus)

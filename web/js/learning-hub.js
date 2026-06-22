@@ -166,18 +166,24 @@
         });
     });
 
-    // ── MOBILE SIDEBAR TOGGLE ─────────────────────────────────
-    var sidebarToggle = document.getElementById('lhSidebarToggle');
+    // ── SIDEBAR TOGGLE (MOBILE & DESKTOP) ─────────────────────────────────
+    var sidebarToggle = document.getElementById('hubMobileToggle');
     if (sidebarToggle) {
         sidebarToggle.addEventListener('click', function () {
-            var isOpen = body.classList.toggle('lh-sidebar-open');
-            sidebarToggle.setAttribute('aria-expanded', String(isOpen));
+            if (window.innerWidth > 1100) {
+                var isClosed = body.classList.toggle('lh-sidebar-desktop-closed');
+                sidebarToggle.setAttribute('aria-expanded', String(!isClosed));
+            } else {
+                var isOpen = body.classList.toggle('lh-sidebar-open');
+                sidebarToggle.setAttribute('aria-expanded', String(isOpen));
+            }
         });
 
         body.addEventListener('click', function (e) {
-            if (body.classList.contains('lh-sidebar-open') &&
+            if (window.innerWidth <= 1100 &&
+                body.classList.contains('lh-sidebar-open') &&
                 !e.target.closest('#svSidebar') &&
-                !e.target.closest('#lhSidebarToggle')) {
+                !e.target.closest('#hubMobileToggle')) {
                 body.classList.remove('lh-sidebar-open');
                 sidebarToggle.setAttribute('aria-expanded', 'false');
             }

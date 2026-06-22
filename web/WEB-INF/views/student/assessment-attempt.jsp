@@ -9,68 +9,45 @@
     <title>${assessment.title} - Active Assessment</title>
     <jsp:include page="/WEB-INF/views/common/student-head-assets.jsp"/>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/AssessmentLayout.module.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/focus-mode.css">
 </head>
-<body class="sv-page">
-<c:set var="topbarTitle" value="Active Assessment"/>
-<c:set var="topbarSubtitle" value="Stay focused and submit when ready"/>
-<c:set var="topbarShowSearch" value="false"/>
-<c:set var="navContext" value="course"/>
-<c:set var="navContextPage" value="assessments"/>
-<c:set var="navCourseEnrollmentId" value="${enrollment.enrollmentId}"/>
-<c:set var="navCourseTitle" value="${enrollment.courseName}"/>
-<jsp:include page="/WEB-INF/views/common/student-topbar.jsp"/>
+<body class="sv-page sv-focus-mode" style="background-color: #fcfcfc;">
 
-<div class="sv-layout">
-    <c:set var="activePage" value="my-courses"/>
-    <jsp:include page="/WEB-INF/views/common/student-sidebar.jsp"/>
-
-    <main class="sv-main">
-        <div class="sv-breadcrumb">
-            <a href="${pageContext.request.contextPath}/dashboard"><i class="fas fa-house"></i> Dashboard</a>
-            <span>/</span>
-            <a href="${pageContext.request.contextPath}/student/my-enrollments">My Courses</a>
-            <span>/</span>
-            <a href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=assessments">Assessments</a>
-            <span>/</span>
-            <span>Active</span>
+    <%-- FOCUS TOPBAR --%>
+    <header class="focus_topbar">
+        <div class="focus_topbar_left">
+            <a href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=assessments" class="focus_topbar_btn" title="Save and Exit">
+                <i class="fas fa-xmark"></i> Save & Exit
+            </a>
         </div>
+        <div class="focus_topbar_center">
+            <div class="focus_course_name">${enrollment.courseName}</div>
+            <div class="focus_question_count">Question <span id="currentQText">1</span> of ${questions.size()}</div>
+        </div>
+        <div class="focus_topbar_right">
+            <div class="focus_timer_box" data-timer>
+                <i class="far fa-clock"></i>
+                <span data-timer-text>00:00</span>
+            </div>
+        </div>
+    </header>
+    <div class="focus_progress_bar_bg">
+        <div class="focus_progress_bar_fill" id="focusProgressFill" style="width: 0%;"></div>
+    </div>
 
-        <section class="container" data-attempt-shell>
+    <%-- MAIN CONTENT --%>
+    <main class="focus_main_container">
+        <section data-attempt-shell>
             <c:choose>
                 <c:when test="${objectiveAssessment}">
-                    <div class="active_assessment_container">
-                        
-                        <div class="active_question_header">
-                            <div>
-                                <span style="font-size: 0.875rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;"><i class="fas fa-shield-halved"></i> Active Assessment</span>
-                                <h1 class="title" style="margin-top: 4px; font-size: 1.75rem; text-align: left;">${assessment.title}</h1>
-                            </div>
-                            <div class="timer_box" data-timer>
-                                <i class="fas fa-clock"></i>
-                                <span data-timer-text>00:00</span>
-                            </div>
-                        </div>
-
-                        <div class="progress_row">
-                            <span class="progress_text">Question <strong data-current-question>1</strong> of ${questions.size()}</span>
-                            <span class="progress_text">Progress</span>
-                        </div>
-                        <div class="progress_bar_bg">
-                            <div class="progress_bar_fill" data-progress-fill></div>
-                        </div>
-
-                        <div class="stepper_row">
-                            <c:forEach var="q" items="${questions}" varStatus="loop">
-                                <button type="button" class="stepper_item ${loop.first ? 'stepper_item_active' : ''}" data-step-index="${loop.index}">${loop.index + 1}</button>
-                            </c:forEach>
-                        </div>
-
+                    <div class="focus_assessment_container">
                         <form method="post"
                               action="${pageContext.request.contextPath}/student/assessments"
                               data-attempt-form
                               data-timer-start="${timerStartTime}"
                               data-timer-duration="${timerDurationSeconds}"
-                              class="ax-attempt-form">
+                              class="ax-attempt-form"
+                              style="width: 100%;">
                             <input type="hidden" name="assessmentId" value="${assessment.assessmentId}">
                             <input type="hidden" name="enrollmentId" value="${enrollment.enrollmentId}">
                             <input type="hidden" name="timerStart" value="${timerStartTime}">
@@ -79,64 +56,55 @@
 
                             <c:forEach var="q" items="${questions}" varStatus="loop">
                                 <article class="ax-question ${loop.first ? 'is-active' : ''}" data-question-index="${loop.index}" style="display: ${loop.first ? 'block' : 'none'};">
-                                    <h2 class="question_statement">${loop.index + 1}. ${q.questionText}</h2>
+                                    <div class="focus_question_badge">${assessment.title}</div>
+                                    <div class="focus_question_statement">${q.questionText}</div>
                                     
-                                    <div class="choices_container">
-                                        <label class="choice_block">
+                                    <div class="focus_choices_container">
+                                        <label class="focus_choice_block">
                                             <input type="radio" name="q_${q.questionId}" value="A" style="display: none;" required>
-                                            <span class="choice_badge">A</span>
-                                            <span class="choice_text">${q.optionA}</span>
+                                            <span class="focus_choice_badge">A</span>
+                                            <span class="focus_choice_text">${q.optionA}</span>
+                                            <i class="fas fa-check-circle focus_choice_check"></i>
                                         </label>
-                                        <label class="choice_block">
+                                        <label class="focus_choice_block">
                                             <input type="radio" name="q_${q.questionId}" value="B" style="display: none;" required>
-                                            <span class="choice_badge">B</span>
-                                            <span class="choice_text">${q.optionB}</span>
+                                            <span class="focus_choice_badge">B</span>
+                                            <span class="focus_choice_text">${q.optionB}</span>
+                                            <i class="fas fa-check-circle focus_choice_check"></i>
                                         </label>
-                                        <label class="choice_block">
+                                        <label class="focus_choice_block">
                                             <input type="radio" name="q_${q.questionId}" value="C" style="display: none;" required>
-                                            <span class="choice_badge">C</span>
-                                            <span class="choice_text">${q.optionC}</span>
+                                            <span class="focus_choice_badge">C</span>
+                                            <span class="focus_choice_text">${q.optionC}</span>
+                                            <i class="fas fa-check-circle focus_choice_check"></i>
                                         </label>
-                                        <label class="choice_block">
+                                        <label class="focus_choice_block">
                                             <input type="radio" name="q_${q.questionId}" value="D" style="display: none;" required>
-                                            <span class="choice_badge">D</span>
-                                            <span class="choice_text">${q.optionD}</span>
+                                            <span class="focus_choice_badge">D</span>
+                                            <span class="focus_choice_text">${q.optionD}</span>
+                                            <i class="fas fa-check-circle focus_choice_check"></i>
                                         </label>
                                     </div>
                                 </article>
                             </c:forEach>
 
-                            <div class="submit_action_container" style="justify-content: space-between; border-top: 1px solid #e2e8f0; padding-top: 24px;">
-                                <div style="display: flex; gap: 8px;">
-                                    <button type="button" class="secondary_button" data-prev-question>
-                                        <i class="fas fa-arrow-left"></i>
-                                        <span>Previous</span>
-                                    </button>
-                                    <button type="button" class="secondary_button" data-next-question>
-                                        <span>Next</span>
-                                        <i class="fas fa-arrow-right"></i>
-                                    </button>
-                                </div>
-                                <div style="display: flex; gap: 8px;">
-                                    <button type="button" class="danger_button" data-exit-attempt>
-                                        <i class="fas fa-door-open"></i>
-                                        <span>Save & Exit</span>
-                                    </button>
-                                    <button type="submit" class="primary_button" data-submit-button>
-                                        <i class="fas fa-paper-plane"></i>
-                                        <span>Submit Assessment</span>
-                                    </button>
-                                </div>
+                            <div class="focus_bottom_nav">
+                                <button type="button" class="focus_btn_prev" data-prev-question style="display: none; gap: 8px;">
+                                    <i class="fas fa-arrow-left"></i> Previous
+                                </button>
+                                <button type="button" class="focus_btn_next" data-next-question style="gap: 8px;">
+                                    <span class="focus_next_label">Next Question</span> <i class="fas fa-arrow-right"></i>
+                                </button>
                             </div>
                         </form>
                     </div>
                 </c:when>
 
                 <c:otherwise>
-                    <div class="active_assessment_container">
-                        <h1 class="title">${assessment.title}</h1>
+                    <div class="focus_assessment_container">
+                        <div class="focus_question_badge">Assignment</div>
+                        <div class="focus_question_statement" style="text-align: center;">${assessment.title}</div>
                         
-                        <%-- Explicitly check for assessment attachment url or file url to render download anchor --%>
                         <c:set var="attachmentUrl" value="${assessment.attachmentUrl}"/>
                         <c:if test="${empty attachmentUrl}">
                             <c:set var="attachmentUrl" value="${assessment.fileUrl}"/>
@@ -146,18 +114,18 @@
                         </c:if>
                         
                         <c:if test="${not empty attachmentUrl}">
-                            <a class="file_download_anchor" href="${attachmentUrl}" target="_blank" rel="noopener noreferrer">
+                            <a class="focus_file_download" href="${attachmentUrl}" target="_blank" rel="noopener noreferrer">
                                 <i class="fas fa-file-pdf"></i>
                                 <span>Download Project Brief / Instructions PDF</span>
                             </a>
                         </c:if>
 
                         <c:if test="${not empty questions}">
-                            <div style="margin-top: 20px; margin-bottom: 24px; text-align: left;">
+                            <div class="focus_prompts_container">
                                 <c:forEach var="q" items="${questions}" varStatus="loop">
-                                    <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin-bottom: 12px;">
-                                        <strong style="color: #64748b; font-size: 0.875rem;">Prompt ${loop.index + 1}</strong>
-                                        <p style="margin: 4px 0 0 0; color: #0f172a; font-weight: 600;">${q.questionText}</p>
+                                    <div class="focus_prompt_box">
+                                        <strong>Prompt ${loop.index + 1}</strong>
+                                        <p>${q.questionText}</p>
                                     </div>
                                 </c:forEach>
                             </div>
@@ -167,7 +135,8 @@
                               action="${pageContext.request.contextPath}/student/assessments"
                               enctype="multipart/form-data"
                               data-loading-submit
-                              class="ax-composer">
+                              class="ax-composer"
+                              style="width: 100%;">
                             <input type="hidden" name="assessmentId" value="${assessment.assessmentId}">
                             <input type="hidden" name="enrollmentId" value="${enrollment.enrollmentId}">
 
@@ -180,22 +149,15 @@
                                 </div>
                             </div>
 
-                            <div style="margin-top: 24px; text-align: left;">
-                                <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #0f172a;">Written Answer (Optional)</label>
+                            <div class="focus_textarea_group">
+                                <label>Written Answer (Optional)</label>
                                 <textarea class="ax-textarea" name="answerText" maxlength="255" placeholder="Add a concise written answer if required."></textarea>
-                                <div style="display: flex; justify-content: space-between; font-size: 0.875rem; color: #64748b; margin-top: 4px;">
-                                    <span>Maximum 255 characters</span>
-                                </div>
+                                <span>Maximum 255 characters</span>
                             </div>
 
-                            <div class="submit_action_container" style="justify-content: space-between; border-top: 1px solid #e2e8f0; padding-top: 24px;">
-                                <a class="secondary_button" href="${pageContext.request.contextPath}/student/enrollment-details?id=${enrollment.enrollmentId}&tab=assessments">
-                                    <i class="fas fa-arrow-left"></i>
-                                    <span>Back to Course</span>
-                                </a>
-                                <button type="submit" class="primary_button" data-submit-button data-loading-label="Submitting your work...">
-                                    <i class="fas fa-paper-plane"></i>
-                                    <span>Submit Assessment</span>
+                            <div class="focus_bottom_nav" style="justify-content: flex-end;">
+                                <button type="submit" class="focus_btn_next" data-submit-button data-loading-label="Submitting your work...">
+                                    <span>Submit Assignment</span> <i class="fas fa-paper-plane" style="margin-left: 6px;"></i>
                                 </button>
                             </div>
                         </form>
@@ -204,9 +166,7 @@
             </c:choose>
         </section>
     </main>
-</div>
 
-<div class="sv-overlay" id="svOverlay"></div>
 <script src="${pageContext.request.contextPath}/js/student-v2.js"></script>
 <script defer src="${pageContext.request.contextPath}/js/student-assessment-flow.js"></script>
 </body>
