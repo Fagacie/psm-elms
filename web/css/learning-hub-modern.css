@@ -1835,7 +1835,7 @@ html[data-theme="dark"] .lh-action-bar__actions {
   }
 
   .lh-course-sidebar {
-    transform: translateX(-100%);
+    transform: translateX(-100%) !important;
     z-index: 50;
   }
 
@@ -3265,7 +3265,7 @@ body.theater-mode .lh-main {
     transition: margin-left var(--lh-motion-base);
   }
   body.lh-sidebar-desktop-closed .lh-course-sidebar {
-    transform: translateX(-100%);
+    transform: translateX(-100%) !important;
   }
   body.lh-sidebar-desktop-closed .lh-focus-topbar {
     inset: 0 0 auto 0;
@@ -3556,3 +3556,6 @@ body.theater-mode .lh-main {
     padding: 0 var(--lh-space-4);
   }
 }
+
+body.lh-sidebar-open .sv-overlay { display: block !important; opacity: 1 !important; z-index: 990; position: fixed; inset: 0; background: rgba(0,0,0,0.4); }
+

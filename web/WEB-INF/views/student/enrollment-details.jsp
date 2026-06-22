@@ -15,8 +15,8 @@
     <%@ include file="/WEB-INF/views/common/theme-bootstrap.jspf" %>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/AssessmentLayout.module.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/focus-mode.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/learning-hub-modern.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/focus-mode.css?v=<%= System.currentTimeMillis() %>">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/learning-hub-modern.css?v=<%= System.currentTimeMillis() %>">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/LearningHub.module.css">
     <script defer src="${pageContext.request.contextPath}/js/theme-toggle.js"></script>
 </head>
@@ -1392,41 +1392,13 @@ function toggleSidebarMaterial(event, materialId, enrollmentId, btn) {
 
 // Mobile sidebar toggle logic is handled by learning-hub.js
 
-document.addEventListener('DOMContentLoaded', function() {
-    // Universal Sidebar Toggle
-    var toggleBtn = document.getElementById('hubMobileToggle');
-    var overlay = document.getElementById('hubMobileOverlay');
-    
-    function toggleSidebar() {
-        if (window.innerWidth <= 1100) {
-            document.body.classList.toggle('lh-sidebar-open');
-            var isOpen = document.body.classList.contains('lh-sidebar-open');
-            if (overlay) {
-                overlay.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
-                overlay.style.display = isOpen ? 'block' : 'none';
-            }
-        } else {
-            document.body.classList.toggle('lh-sidebar-desktop-closed');
-        }
-    }
-    
-    if (toggleBtn) {
-        toggleBtn.addEventListener('click', toggleSidebar);
-    }
-    if (overlay) {
-        overlay.addEventListener('click', function() {
-            document.body.classList.remove('lh-sidebar-open');
-            overlay.setAttribute('aria-hidden', 'true');
-            overlay.style.display = 'none';
-        });
-    }
-
+(function() {
     // Scroll active item into view
     var activeItem = document.querySelector('.lh-chapter-item.is-active');
     if (activeItem) {
         setTimeout(function() { activeItem.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }, 200);
     }
-});
+})();
 </script>
 <script src="${pageContext.request.contextPath}/js/learning-hub.js"></script>
 <script defer src="${pageContext.request.contextPath}/js/student-assessment-flow.js"></script>
