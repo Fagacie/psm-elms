@@ -46,7 +46,7 @@ body.sv-page {
 .nav_mod_topbar {
   position: fixed;
   top: 0;
-  left: 0;
+  left: var(--nav_mod_sidebar_w);
   right: 0;
   height: var(--nav_mod_topbar_h);
   z-index: 120;
@@ -421,16 +421,16 @@ body.sv-page {
 
 .nav_mod_sidebar {
   position: fixed;
-  top: var(--nav_mod_topbar_h);
+  top: 0;
   left: 0;
   width: var(--nav_mod_sidebar_w);
-  height: calc(100vh - var(--nav_mod_topbar_h));
+  height: 100vh;
   padding: 20px 12px 20px;
   background: var(--nav_mod_white);
   border-right: 1px solid var(--nav_mod_border);
   overflow-y: auto;
   overflow-x: hidden;
-  z-index: 110;
+  z-index: 130;
   transition: width var(--nav_mod_transition), transform var(--nav_mod_transition),
               box-shadow var(--nav_mod_transition), padding var(--nav_mod_transition);
 }
@@ -582,6 +582,10 @@ body.sv-shell-collapsed .nav_mod_sidebar {
   padding-inline: 8px;
 }
 
+body.sv-shell-collapsed .nav_mod_topbar {
+  left: var(--nav_mod_sidebar_cw);
+}
+
 body.sv-shell-collapsed .nav_mod_label {
   max-width: 0;
   opacity: 0;
@@ -656,6 +660,10 @@ body.sv-shell-collapsed .nav_mod_link[title]:hover::after {
     width: var(--nav_mod_sidebar_w);
     transform: translateX(-100%);
     box-shadow: none;
+  }
+
+  .nav_mod_topbar {
+    left: 0;
   }
 
   body.sv-page .sv-layout {
