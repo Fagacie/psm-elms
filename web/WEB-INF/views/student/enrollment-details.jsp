@@ -1103,17 +1103,129 @@
                                     </c:choose>
                                 </c:when>
                                 <c:when test="${materialType == 'pdf' or fn:endsWith(fn:toLowerCase(materialPath), '.pdf')}">
-
-                                    <object class="lh-pdf-viewer" data="${materialViewUrl}" type="application/pdf">
-                                        <div class="lh-link-preview">
-                                            <h3>PDF preview is unavailable</h3>
-                                            <p>Open or download the material to continue reviewing it.</p>
-                                            <a class="sv-btn primary" href="${materialViewUrl}" target="_blank" rel="noopener">
-                                                <i class="fas fa-arrow-up-right-from-square"></i>
-                                                <span>Open PDF</span>
-                                            </a>
+                                    <div class="lh-pdf-wrapper" style="border: 1px solid var(--border-subtle); border-radius: var(--lh-radius-md); overflow: hidden; display: flex; flex-direction: column; height: 75vh; background: #cbd5e1;">
+                                        <!-- PDF Toolbar -->
+                                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #334155; color: white; flex-shrink: 0;">
+                                            <div style="display: flex; gap: 8px;">
+                                                <button id="pdf-prev" class="sv-btn" style="background: rgba(255,255,255,0.1); color: white; border: none; padding: 6px 12px;"><i class="fas fa-chevron-left"></i></button>
+                                                <button id="pdf-next" class="sv-btn" style="background: rgba(255,255,255,0.1); color: white; border: none; padding: 6px 12px;"><i class="fas fa-chevron-right"></i></button>
+                                            </div>
+                                            <div style="font-size: 0.9rem; font-weight: 500;">
+                                                Page <span id="pdf-page-num">0</span> of <span id="pdf-page-count">0</span>
+                                            </div>
+                                            <div style="display: flex; gap: 8px;">
+                                                <button id="pdf-zoomin" class="sv-btn" style="background: rgba(255,255,255,0.1); color: white; border: none; padding: 6px 12px;" title="Zoom In"><i class="fas fa-magnifying-glass-plus"></i></button>
+                                                <button id="pdf-zoomout" class="sv-btn" style="background: rgba(255,255,255,0.1); color: white; border: none; padding: 6px 12px;" title="Zoom Out"><i class="fas fa-magnifying-glass-minus"></i></button>
+                                                <a class="sv-btn" href="${materialViewUrl}" target="_blank" rel="noopener" style="background: var(--accent); color: white; border: none; padding: 6px 12px; margin-left: 8px;"><i class="fas fa-download"></i> <span class="hide-on-mobile">Download</span></a>
+                                            </div>
                                         </div>
-                                    </object>
+                                        
+                                        <!-- PDF Canvas Container -->
+                                        <div id="pdf-render-container" style="flex: 1; overflow: auto; display: flex; justify-content: center; align-items: flex-start; padding: 24px; position: relative;">
+                                            <div id="pdf-loading-spinner" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #475569; display: flex; flex-direction: column; align-items: center; gap: 12px;">
+                                                <i class="fas fa-spinner fa-spin fa-2x"></i>
+                                                <span>Loading Document...</span>
+                                            </div>
+                                            <canvas id="pdf-canvas" style="display: none; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); max-width: 100%; border-radius: 4px;"></canvas>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- PDF.js Integration Script -->
+                                    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+                                    <script>
+                                        document.addEventListener('DOMContentLoaded', function() {
+                                            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+                                            
+                                            const url = '${materialViewUrl}';
+                                            let pdfDoc = null,
+                                                pageNum = 1,
+                                                pageIsRendering = false,
+                                                pageNumIsPending = null,
+                                                scale = 1.2,
+                                                canvas = document.getElementById('pdf-canvas'),
+                                                ctx = canvas.getContext('2d'),
+                                                spinner = document.getElementById('pdf-loading-spinner');
+                                                
+                                            // Make responsive scale
+                                            if (window.innerWidth < 768) {
+                                                scale = window.innerWidth / 800; // fit width roughly
+                                                if(scale < 0.5) scale = 0.5;
+                                            }
+
+                                            function renderPage(num) {
+                                                pageIsRendering = true;
+                                                
+                                                pdfDoc.getPage(num).then(page => {
+                                                    const viewport = page.getViewport({ scale });
+                                                    canvas.height = viewport.height;
+                                                    canvas.width = viewport.width;
+
+                                                    const renderCtx = {
+                                                        canvasContext: ctx,
+                                                        viewport: viewport
+                                                    };
+
+                                                    page.render(renderCtx).promise.then(() => {
+                                                        pageIsRendering = false;
+                                                        spinner.style.display = 'none';
+                                                        canvas.style.display = 'block';
+
+                                                        if (pageNumIsPending !== null) {
+                                                            renderPage(pageNumIsPending);
+                                                            pageNumIsPending = null;
+                                                        }
+                                                    });
+                                                });
+
+                                                document.getElementById('pdf-page-num').textContent = num;
+                                            }
+
+                                            function queueRenderPage(num) {
+                                                if (pageIsRendering) {
+                                                    pageNumIsPending = num;
+                                                } else {
+                                                    renderPage(num);
+                                                }
+                                            }
+
+                                            function onPrevPage() {
+                                                if (pageNum <= 1) return;
+                                                pageNum--;
+                                                queueRenderPage(pageNum);
+                                            }
+
+                                            function onNextPage() {
+                                                if (pageNum >= pdfDoc.numPages) return;
+                                                pageNum++;
+                                                queueRenderPage(pageNum);
+                                            }
+                                            
+                                            function onZoomIn() {
+                                                scale += 0.2;
+                                                queueRenderPage(pageNum);
+                                            }
+                                            
+                                            function onZoomOut() {
+                                                if(scale <= 0.4) return;
+                                                scale -= 0.2;
+                                                queueRenderPage(pageNum);
+                                            }
+
+                                            document.getElementById('pdf-prev').addEventListener('click', onPrevPage);
+                                            document.getElementById('pdf-next').addEventListener('click', onNextPage);
+                                            document.getElementById('pdf-zoomin').addEventListener('click', onZoomIn);
+                                            document.getElementById('pdf-zoomout').addEventListener('click', onZoomOut);
+
+                                            pdfjsLib.getDocument(url).promise.then(pdfDoc_ => {
+                                                pdfDoc = pdfDoc_;
+                                                document.getElementById('pdf-page-count').textContent = pdfDoc.numPages;
+                                                renderPage(pageNum);
+                                            }).catch(err => {
+                                                spinner.innerHTML = '<i class="fas fa-exclamation-triangle" style="color:#ef4444; font-size:2rem; margin-bottom:12px;"></i><span style="color:#334155; text-align:center;">Failed to load PDF document.<br>It might be corrupted or missing.</span>';
+                                                console.error(err);
+                                            });
+                                        });
+                                    </script>
                                 </c:when>
                                 <c:when test="${materialType == 'video' or fn:endsWith(fn:toLowerCase(materialPath), '.mp4') or fn:endsWith(fn:toLowerCase(materialPath), '.webm') or fn:endsWith(fn:toLowerCase(materialPath), '.mov') or fn:endsWith(fn:toLowerCase(materialPath), '.m4v')}">
                                     <div class="lh-video-shell">
