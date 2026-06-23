@@ -20,8 +20,6 @@
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
     
     <!-- Babel Standalone for live JSX translation -->
-    `n    
-    
     <!-- React Hook Form UMD build -->
     <script src="https://unpkg.com/react-hook-form@7.51.5/dist/index.umd.js"></script>
 </head>

@@ -20,8 +20,6 @@
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
     
     <!-- Babel Standalone for JSX rendering -->
-    `n    
-    
     <!-- Lucide Icons UMD -->
     <script src="https://unpkg.com/lucide@0.395.0/dist/umd/lucide.min.js"></script>
     

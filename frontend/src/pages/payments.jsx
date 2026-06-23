@@ -357,7 +357,6 @@ const ReactDOM = window.ReactDOM;
                             );
                         };
 
-                        const container = document.getElementById('admin-react-root');
+                        const container = document.getElementById('payment-history-react-root');
                         const root = ReactDOM.createRoot(container);
                         root.render(<PaymentHistoryApp />);
-                    

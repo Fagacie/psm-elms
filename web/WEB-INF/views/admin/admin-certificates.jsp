@@ -20,8 +20,6 @@
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
     
     <!-- Babel Standalone for live JSX translation -->
-    `n    
-    
     <!-- TanStack Table UMD -->
     <script src="https://unpkg.com/@tanstack/react-table@8.17.3/build/umd/index.production.js"></script>
 </head>

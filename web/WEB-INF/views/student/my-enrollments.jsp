@@ -18,8 +18,6 @@
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
     
     <!-- Babel Standalone for browser JSX compilation -->
-    `n    
-    
     <!-- Framer Motion for premium staggered layout animations -->
     <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
 </head>

@@ -18,8 +18,6 @@
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
     
     <!-- Babel Standalone for browser JSX compilation -->
-    `n    
-
     <!-- Lucide Core for thin UI icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
