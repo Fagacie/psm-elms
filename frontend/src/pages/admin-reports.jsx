@@ -115,13 +115,168 @@ const ReactDOM = window.ReactDOM;
         };
 
         const exportPdf = () => {
-            window.location.href = ctxPath + '/reports?startDate=' + (startDate || '') + '&endDate=' + (endDate || '') + '&export=pdf' +
-                '&incSummary=' + incSummary +
-                '&incBreakdowns=' + incBreakdowns +
-                '&incAssessments=' + incAssessments +
-                '&incTopCourses=' + incTopCourses +
-                '&incRevenue=' + incRevenue +
-                '&incHistory=' + incHistory;
+            if (!window.html2canvas || !window.jspdf) {
+                window.location.href = ctxPath + '/reports?startDate=' + (startDate || '') + '&endDate=' + (endDate || '') + '&export=pdf' +
+                    '&incSummary=' + incSummary +
+                    '&incBreakdowns=' + incBreakdowns +
+                    '&incAssessments=' + incAssessments +
+                    '&incTopCourses=' + incTopCourses +
+                    '&incRevenue=' + incRevenue +
+                    '&incHistory=' + incHistory;
+                return;
+            }
+
+            // Capture chart canvas images if available
+            const getCanvasImg = (ref) => (ref && ref.current) ? ref.current.toDataURL('image/png') : null;
+            const revImg = getCanvasImg(revenueCanvasRef);
+            const enrollImg = getCanvasImg(enrollCanvasRef);
+
+            // Build clean printable document
+            const reportDoc = document.createElement('div');
+            reportDoc.id = 'printableReportDoc';
+            reportDoc.style.cssText = 'position: fixed; left: -9999px; top: 0; width: 794px; background: #ffffff; color: #0f172a; font-family: "Inter", sans-serif; padding: 40px; box-sizing: border-box; z-index: -9999;';
+
+            let html = `
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #166534; padding-bottom: 20px; margin-bottom: 28px;">
+                    <div>
+                        <h1 style="font-size: 26px; font-weight: 800; color: #0f172a; margin: 0; letter-spacing: -0.5px;">PSM E-Learning Academy</h1>
+                        <h2 style="font-size: 15px; font-weight: 600; color: #166534; margin: 6px 0 0 0; text-transform: uppercase; letter-spacing: 0.5px;">Executive Analytics & KPI Report</h2>
+                    </div>
+                    <div style="text-align: right; font-size: 12px; color: #475569; line-height: 1.5;">
+                        <div><strong>Report Period:</strong> ${startDate ? startDate : 'Full History'} → ${endDate ? endDate : 'Present'}</div>
+                        <div><strong>Generated Date:</strong> ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</div>
+                    </div>
+                </div>
+            `;
+
+            if (incSummary) {
+                html += `
+                    <div style="margin-bottom: 30px;">
+                        <h3 style="font-size: 16px; font-weight: 700; color: #0f172a; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; margin: 0 0 16px 0;">Key Performance Indicators</h3>
+                        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;">
+                            <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 16px; text-align: center;">
+                                <div style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase;">Total Revenue</div>
+                                <div style="font-size: 18px; font-weight: 800; color: #166534; margin-top: 6px;">NGN ${Number(totalRevenue).toLocaleString('en-NG')}</div>
+                            </div>
+                            <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 16px; text-align: center;">
+                                <div style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase;">Enrollments</div>
+                                <div style="font-size: 18px; font-weight: 800; color: #0f172a; margin-top: 6px;">${totalEnrollments}</div>
+                                <div style="font-size: 10px; color: #64748b; margin-top: 2px;">${completedEnrollments} Completed</div>
+                            </div>
+                            <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 16px; text-align: center;">
+                                <div style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase;">Completion Rate</div>
+                                <div style="font-size: 18px; font-weight: 800; color: #2563eb; margin-top: 6px;">${completionRate}%</div>
+                            </div>
+                            <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 16px; text-align: center;">
+                                <div style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase;">New Users</div>
+                                <div style="font-size: 18px; font-weight: 800; color: #9333ea; margin-top: 6px;">${newUsers}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            if (revImg || enrollImg) {
+                html += `
+                    <div style="margin-bottom: 30px;">
+                        <h3 style="font-size: 16px; font-weight: 700; color: #0f172a; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; margin: 0 0 16px 0;">Visual Analytics & Charts</h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                            ${revImg ? `<div><div style="font-size: 13px; font-weight: 600; color: #334155; margin-bottom: 8px;">Revenue by Course</div><div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; background: #ffffff;"><img src="${revImg}" style="width: 100%; height: auto; display: block;" /></div></div>` : ''}
+                            ${enrollImg ? `<div><div style="font-size: 13px; font-weight: 600; color: #334155; margin-bottom: 8px;">Enrollment Share</div><div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; background: #ffffff;"><img src="${enrollImg}" style="width: 100%; height: auto; display: block;" /></div></div>` : ''}
+                        </div>
+                    </div>
+                `;
+            }
+
+            if (incTopCourses && topCourses && topCourses.length > 0) {
+                html += `
+                    <div style="margin-bottom: 30px;">
+                        <h3 style="font-size: 16px; font-weight: 700; color: #0f172a; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; margin: 0 0 12px 0;">Top Courses by Enrollment</h3>
+                        <table style="width: 100%; border-collapse: collapse; font-size: 12px; text-align: left;">
+                            <thead>
+                                <tr style="background: #f1f5f9; color: #334155; font-weight: 600;">
+                                    <th style="padding: 8px 10px; border: 1px solid #cbd5e1;">Course Title</th>
+                                    <th style="padding: 8px 10px; border: 1px solid #cbd5e1; text-align: center;">Enrollments</th>
+                                    <th style="padding: 8px 10px; border: 1px solid #cbd5e1; text-align: center;">Completions</th>
+                                    <th style="padding: 8px 10px; border: 1px solid #cbd5e1; text-align: center;">Completion Rate</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${topCourses.slice(0, 10).map((c, i) => `
+                                    <tr style="background: ${i % 2 === 0 ? '#ffffff' : '#f8fafc'};">
+                                        <td style="padding: 8px 10px; border: 1px solid #e2e8f0; font-weight: 500;">${c.title}</td>
+                                        <td style="padding: 8px 10px; border: 1px solid #e2e8f0; text-align: center;">${c.enrollments}</td>
+                                        <td style="padding: 8px 10px; border: 1px solid #e2e8f0; text-align: center;">${c.completions}</td>
+                                        <td style="padding: 8px 10px; border: 1px solid #e2e8f0; text-align: center;">${c.completionRate}%</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            }
+
+            if (incRevenue && revenueRows && revenueRows.length > 0) {
+                html += `
+                    <div style="margin-bottom: 30px;">
+                        <h3 style="font-size: 16px; font-weight: 700; color: #0f172a; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; margin: 0 0 12px 0;">Revenue Breakdown by Course</h3>
+                        <table style="width: 100%; border-collapse: collapse; font-size: 12px; text-align: left;">
+                            <thead>
+                                <tr style="background: #f1f5f9; color: #334155; font-weight: 600;">
+                                    <th style="padding: 8px 10px; border: 1px solid #cbd5e1;">Course Title</th>
+                                    <th style="padding: 8px 10px; border: 1px solid #cbd5e1; text-align: center;">Enrollments</th>
+                                    <th style="padding: 8px 10px; border: 1px solid #cbd5e1; text-align: right;">Revenue (NGN)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${revenueRows.slice(0, 10).map((r, i) => `
+                                    <tr style="background: ${i % 2 === 0 ? '#ffffff' : '#f8fafc'};">
+                                        <td style="padding: 8px 10px; border: 1px solid #e2e8f0; font-weight: 500;">${r.title}</td>
+                                        <td style="padding: 8px 10px; border: 1px solid #e2e8f0; text-align: center;">${r.enrollments}</td>
+                                        <td style="padding: 8px 10px; border: 1px solid #e2e8f0; text-align: right; font-weight: 600; color: #166534;">NGN ${Number(r.revenue).toLocaleString('en-NG')}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            }
+
+            html += `
+                <div style="border-top: 1px solid #cbd5e1; padding-top: 16px; text-align: center; font-size: 11px; color: #64748b; margin-top: 40px;">
+                    Confidential Executive Report • PSM E-Learning Platform • Generated via Admin Portal
+                </div>
+            `;
+
+            reportDoc.innerHTML = html;
+            document.body.appendChild(reportDoc);
+
+            window.html2canvas(reportDoc, { scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff' }).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                const imgWidth = 210;
+                const pageHeight = 297;
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                let heightLeft = imgHeight;
+                let position = 0;
+                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+                while (heightLeft > 2) {
+                    position = heightLeft - imgHeight;
+                    pdf.addPage();
+                    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
+                }
+                pdf.save('PSME_Executive_Report_' + new Date().toISOString().slice(0,10) + '.pdf');
+            }).catch(err => {
+                console.error("PDF Report generation failed:", err);
+                alert("Could not generate PDF report. Please try again.");
+            }).finally(() => {
+                if (reportDoc.parentNode) {
+                    reportDoc.parentNode.removeChild(reportDoc);
+                }
+            });
         };
 
         // ── Chart.js: Revenue Bar Chart ──

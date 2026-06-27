@@ -7,18 +7,14 @@
 <c:set var="questionTotalCount" value="${empty questions ? 0 : questions.size()}" />
 
 <section class="ia-wizard" data-ia-wizard data-course-id="${selectedCourse.courseId}" data-assessment-id="${not empty selectedAssessment ? selectedAssessment.assessmentId : ''}" data-active-step="${wizardStep}">
-    <div class="ia-stepper" role="tablist" aria-label="Assessment workflow">
-        <button type="button" class="ia-step-chip ${wizardStep == 'details' ? 'active' : ''}" data-step-target="details">
-            <span>1</span>
-            <strong>Details</strong>
-            <small>Core settings</small>
+    <nav class="ins-flow-nav" role="tablist" aria-label="Assessment workflow" style="margin-bottom: 24px; border-bottom: 2px solid var(--iwm-border-soft); display: flex; gap: 12px;">
+        <button type="button" class="ins-flow-link ${wizardStep == 'details' ? 'active' : ''}" data-step-target="details" style="background: none; border: none; cursor: pointer; padding: 12px 20px; font-size: 1rem;">
+            <i class="fas fa-sliders"></i> <span>1. Details Settings</span>
         </button>
-        <button type="button" class="ia-step-chip ${wizardStep == 'questions' ? 'active' : ''} ${empty selectedAssessment ? 'is-disabled' : ''}" data-step-target="questions" ${empty selectedAssessment ? 'disabled' : ''}>
-            <span>2</span>
-            <strong>Questions</strong>
-            <small>Build content</small>
+        <button type="button" class="ins-flow-link ${wizardStep == 'questions' ? 'active' : ''} ${empty selectedAssessment ? 'is-disabled' : ''}" data-step-target="questions" ${empty selectedAssessment ? 'disabled' : ''} style="background: none; border: none; cursor: pointer; padding: 12px 20px; font-size: 1rem;">
+            <i class="fas fa-list-check"></i> <span>2. Questions Builder</span>
         </button>
-    </div>
+    </nav>
 
     <article class="ia-card ia-step-panel ${wizardStep == 'details' ? 'is-active' : ''}" data-step-panel="details">
         <div class="ia-card-head ia-wizard-head">

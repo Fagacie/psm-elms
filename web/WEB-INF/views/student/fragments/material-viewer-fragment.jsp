@@ -44,7 +44,7 @@
                        class="cp-inline-link"
                        target="_blank"
                        rel="noopener noreferrer"
-                       href="${pageContext.request.contextPath}/student/materials?action=view&id=${material.materialId}">
+                       href="${pageContext.request.contextPath}${(isInstructorPreview or not empty sessionScope.instructor or sessionScope.role eq 'Instructor' or sessionScope.role eq 'Admin') ? '/instructor/materials-preview' : '/student/materials'}?action=view&id=${material.materialId}">
                         Open Resource
                     </a>
                 </div>
@@ -66,128 +66,22 @@
                 </div>
             </c:when>
             <c:when test="${isPdfMaterial}">
-                <div class="mv-frame-wrap" style="background: #cbd5e1; display: flex; flex-direction: column;">
-                    <!-- PDF Toolbar -->
-                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #334155; color: white; flex-shrink: 0;">
-                        <div style="display: flex; gap: 8px;">
-                            <button id="pdf-prev" class="sv-btn" style="background: rgba(255,255,255,0.1); color: white; border: none; padding: 6px 12px;"><i class="fas fa-chevron-left"></i></button>
-                            <button id="pdf-next" class="sv-btn" style="background: rgba(255,255,255,0.1); color: white; border: none; padding: 6px 12px;"><i class="fas fa-chevron-right"></i></button>
-                        </div>
-                        <div style="font-size: 0.9rem; font-weight: 500;">
-                            Page <span id="pdf-page-num">0</span> of <span id="pdf-page-count">0</span>
-                        </div>
-                        <div style="display: flex; gap: 8px;">
-                            <button id="pdf-zoomin" class="sv-btn" style="background: rgba(255,255,255,0.1); color: white; border: none; padding: 6px 12px;" title="Zoom In"><i class="fas fa-magnifying-glass-plus"></i></button>
-                            <button id="pdf-zoomout" class="sv-btn" style="background: rgba(255,255,255,0.1); color: white; border: none; padding: 6px 12px;" title="Zoom Out"><i class="fas fa-magnifying-glass-minus"></i></button>
-                            <a class="sv-btn" href="${streamUrl}" target="_blank" rel="noopener" style="background: var(--accent); color: white; border: none; padding: 6px 12px; margin-left: 8px;"><i class="fas fa-download"></i> <span class="hide-on-mobile">Download</span></a>
+                <div class="mv-pdf-container" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; height: 820px; box-shadow: 0 4px 20px rgba(15,23,42,0.05);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; flex-shrink: 0; flex-wrap: wrap; gap: 10px;">
+                        <span style="font-weight: 600; color: #334155; font-size: 0.9rem; display: flex; align-items: center; gap: 8px;">
+                            <i class="fas fa-file-pdf" style="color: #ef4444; font-size: 1.15rem;"></i> Original Uploaded Document
+                        </span>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <a class="sv-btn" href="${streamUrl}" target="_blank" style="background: #ffffff; color: #475569; border: 1px solid #cbd5e1; padding: 7px 14px; border-radius: 6px; font-size: 0.825rem; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: all 0.15s ease;">
+                                <i class="fas fa-external-link-alt"></i> Open Full Page
+                            </a>
+                            <a class="sv-btn mv-pdf-download-btn" href="${not empty downloadUrl ? downloadUrl : streamUrl.concat('&action=download')}" target="_blank" style="background: #4f46e5; color: #ffffff; border: none; padding: 7px 16px; border-radius: 6px; font-size: 0.825rem; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(79,70,229,0.2); transition: all 0.15s ease;">
+                                <i class="fas fa-download"></i> Download PDF
+                            </a>
                         </div>
                     </div>
-                    
-                    <!-- PDF Canvas Container -->
-                    <div id="pdf-render-container" style="flex: 1; overflow: auto; display: flex; justify-content: center; align-items: flex-start; padding: 24px; position: relative; height: 100%; min-height: 60vh;">
-                        <div id="pdf-loading-spinner" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #475569; display: flex; flex-direction: column; align-items: center; gap: 12px;">
-                            <i class="fas fa-spinner fa-spin fa-2x"></i>
-                            <span>Loading Document...</span>
-                        </div>
-                        <canvas id="pdf-canvas" style="display: none; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); max-width: 100%; border-radius: 4px;"></canvas>
-                    </div>
+                    <iframe src="${streamUrl}" style="width: 100%; flex: 1; border: none; background: #525659; display: block;" allowfullscreen></iframe>
                 </div>
-                
-                <!-- PDF.js Integration Script -->
-                <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-                <script>
-                    document.addEventListener('DOMContentLoaded', function() {
-                        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-                        
-                        const url = '${streamUrl}';
-                        let pdfDoc = null,
-                            pageNum = 1,
-                            pageIsRendering = false,
-                            pageNumIsPending = null,
-                            scale = 1.2,
-                            canvas = document.getElementById('pdf-canvas'),
-                            ctx = canvas.getContext('2d'),
-                            spinner = document.getElementById('pdf-loading-spinner');
-                            
-                        if (window.innerWidth < 768) {
-                            scale = window.innerWidth / 800;
-                            if(scale < 0.5) scale = 0.5;
-                        }
-
-                        function renderPage(num) {
-                            pageIsRendering = true;
-                            
-                            pdfDoc.getPage(num).then(page => {
-                                const viewport = page.getViewport({ scale });
-                                canvas.height = viewport.height;
-                                canvas.width = viewport.width;
-
-                                const renderCtx = {
-                                    canvasContext: ctx,
-                                    viewport: viewport
-                                };
-
-                                page.render(renderCtx).promise.then(() => {
-                                    pageIsRendering = false;
-                                    spinner.style.display = 'none';
-                                    canvas.style.display = 'block';
-
-                                    if (pageNumIsPending !== null) {
-                                        renderPage(pageNumIsPending);
-                                        pageNumIsPending = null;
-                                    }
-                                });
-                            });
-
-                            document.getElementById('pdf-page-num').textContent = num;
-                        }
-
-                        function queueRenderPage(num) {
-                            if (pageIsRendering) {
-                                pageNumIsPending = num;
-                            } else {
-                                renderPage(num);
-                            }
-                        }
-
-                        function onPrevPage() {
-                            if (pageNum <= 1) return;
-                            pageNum--;
-                            queueRenderPage(pageNum);
-                        }
-
-                        function onNextPage() {
-                            if (pageNum >= pdfDoc.numPages) return;
-                            pageNum++;
-                            queueRenderPage(pageNum);
-                        }
-                        
-                        function onZoomIn() {
-                            scale += 0.2;
-                            queueRenderPage(pageNum);
-                        }
-                        
-                        function onZoomOut() {
-                            if(scale <= 0.4) return;
-                            scale -= 0.2;
-                            queueRenderPage(pageNum);
-                        }
-
-                        document.getElementById('pdf-prev').addEventListener('click', onPrevPage);
-                        document.getElementById('pdf-next').addEventListener('click', onNextPage);
-                        document.getElementById('pdf-zoomin').addEventListener('click', onZoomIn);
-                        document.getElementById('pdf-zoomout').addEventListener('click', onZoomOut);
-
-                        pdfjsLib.getDocument(url).promise.then(pdfDoc_ => {
-                            pdfDoc = pdfDoc_;
-                            document.getElementById('pdf-page-count').textContent = pdfDoc.numPages;
-                            renderPage(pageNum);
-                        }).catch(err => {
-                            spinner.innerHTML = '<i class="fas fa-exclamation-triangle" style="color:#ef4444; font-size:2rem; margin-bottom:12px;"></i><span style="color:#334155; text-align:center;">Failed to load PDF document.<br>It might be corrupted or missing.</span>';
-                            console.error(err);
-                        });
-                    });
-                </script>
             </c:when>
             <c:when test="${canInlinePreview}">
                 <div class="mv-frame-wrap">
@@ -199,7 +93,7 @@
                     <i class="fas fa-file-arrow-down"></i>
                     <h3>Preview Not Available</h3>
                     <p>This file cannot be embedded reliably in the browser.</p>
-                    <a class="cp-inline-link" href="${pageContext.request.contextPath}/student/materials?action=download&id=${material.materialId}">
+                    <a class="cp-inline-link" href="${pageContext.request.contextPath}${(isInstructorPreview or not empty sessionScope.instructor or sessionScope.role eq 'Instructor' or sessionScope.role eq 'Admin') ? '/instructor/materials-preview' : '/student/materials'}?action=download&id=${material.materialId}">
                         Download File
                     </a>
                 </div>
@@ -216,11 +110,8 @@
     var alreadyCompleted = '${isCompletedMaterial}' === 'true';
 
     function postToParent(type, note) {
-        if (!window.parent || window.parent === window) {
-            return;
-        }
-
-        window.parent.postMessage({
+        var targetWindow = (!window.parent || window.parent === window) ? window : window.parent;
+        targetWindow.postMessage({
             type: type,
             completionRule: completionRule,
             completed: alreadyCompleted,

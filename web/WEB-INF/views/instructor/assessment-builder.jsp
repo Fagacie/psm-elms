@@ -80,10 +80,21 @@
                 <div class="ia-step-label">Assessment Settings</div>
             </div>
             <div class="ia-step-line"></div>
-            <div class="ia-step ${not empty selectedAssessment ? '' : 'disabled'}">
-                <div class="ia-step-circle">2</div>
-                <div class="ia-step-label">Question Bank</div>
-            </div>
+            <c:choose>
+                <c:when test="${not empty selectedAssessment}">
+                    <a href="${pageContext.request.contextPath}/instructor/assessments?view=questions&courseId=${selectedCourse.courseId}&assessmentId=${selectedAssessment.assessmentId}"
+                        class="ia-step" style="text-decoration: none;">
+                        <div class="ia-step-circle">2</div>
+                        <div class="ia-step-label">Question Bank</div>
+                    </a>
+                </c:when>
+                <c:otherwise>
+                    <div class="ia-step disabled">
+                        <div class="ia-step-circle">2</div>
+                        <div class="ia-step-label">Question Bank</div>
+                    </div>
+                </c:otherwise>
+            </c:choose>
         </div>
 
         <div class="ia-flow-grid-single">

@@ -19,8 +19,8 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-shell.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-assessments.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-assessment-flow.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/InstructorAssessment.module.css?v=6">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-workspace-modern.css?v=1">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/InstructorAssessment.module.css?v=7">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/instructor-workspace-modern.css?v=2">
     <jsp:include page="/WEB-INF/views/common/head-external-assets.jsp"/>
     
     <!-- Styles moved to InstructorAssessment.module.css -->
@@ -73,6 +73,43 @@
         <c:if test="${param.error == 'rreview'}"><div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> Failed to submit retake request decision.</div></c:if>
         <c:if test="${param.error == 'graderange'}"><div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> Invalid score. Must be between 0 and ${selectedAssessment.totalMarks}.</div></c:if>
         <c:if test="${not empty errorMessage}"><div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> ${errorMessage}</div></c:if>
+
+        <!-- Redesigned KPI Strip -->
+        <c:set var="totalSubmissionsCount" value="0"/>
+        <c:set var="gradedCount" value="0"/>
+        <c:set var="pendingGradeCount" value="0"/>
+        <c:forEach var="row" items="${assessmentRosterRows}">
+            <c:if test="${not empty row.latestSubmission}">
+                <c:set var="totalSubmissionsCount" value="${totalSubmissionsCount + 1}"/>
+                <c:choose>
+                    <c:when test="${row.latestSubmission.status == 'Graded'}">
+                        <c:set var="gradedCount" value="${gradedCount + 1}"/>
+                    </c:when>
+                    <c:otherwise>
+                        <c:set var="pendingGradeCount" value="${pendingGradeCount + 1}"/>
+                    </c:otherwise>
+                </c:choose>
+            </c:if>
+        </c:forEach>
+
+        <div class="iax-kpi-grid" style="margin-bottom: 24px;">
+            <div class="iax-kpi-card" style="border-left: 4px solid #6366f1;">
+                <strong>${fn:length(assessmentRosterRows)}</strong>
+                <span>Roster Size</span>
+            </div>
+            <div class="iax-kpi-card" style="border-left: 4px solid #3b82f6;">
+                <strong>${totalSubmissionsCount}</strong>
+                <span>Turned In</span>
+            </div>
+            <div class="iax-kpi-card" style="border-left: 4px solid #10b981;">
+                <strong style="color: #10b981;">${gradedCount}</strong>
+                <span>Graded</span>
+            </div>
+            <div class="iax-kpi-card" style="border-left: 4px solid #f59e0b;">
+                <strong style="color: ${pendingGradeCount > 0 ? '#f59e0b' : 'inherit'};">${pendingGradeCount}</strong>
+                <span>Needs Review</span>
+            </div>
+        </div>
 
         <div class="ia-submissions-split-layout">
             <!-- Left Pane: Student Roster Queue -->
@@ -236,18 +273,26 @@
                     </div>
                     
                     <!-- Sleek compact horizontal toolbar banner for PDF download -->
-                    <div id="assignmentDownloadWrapper" style="display: none; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 16px; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; margin-top: 12px; width: 100%; box-sizing: border-box;">
-                        <div style="display: flex; align-items: center; gap: 8px; color: #1e293b; font-size: 0.875rem; font-weight: 500;">
-                            <i class="fas fa-file-pdf" style="color: #ef4444; font-size: 1.125rem;"></i>
-                            <span>Student Submitted Assignment PDF</span>
+                    <div id="assignmentDownloadWrapper" style="display: none; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; margin-top: 12px; width: 100%; box-sizing: border-box; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                        <div style="display: flex; align-items: center; gap: 12px; color: #1e293b; font-size: 0.95rem; font-weight: 600;">
+                            <i class="fas fa-file-pdf" style="color: #ef4444; font-size: 1.75rem;"></i>
+                            <div>
+                                <div>Student Submitted Assignment PDF</div>
+                                <div style="font-size: 0.8rem; font-weight: 400; color: #64748b; margin-top: 2px;">Click below to open the full PDF submission externally or download it directly.</div>
+                            </div>
                         </div>
-                        <a id="assignmentDownloadBtn" href="" download target="_blank" class="ws-btn ws-btn-primary ws-btn-xs" style="display: inline-flex; align-items: center; gap: 6px; margin: 0; padding: 6px 12px; font-size: 0.8125rem; font-weight: 500; text-decoration: none; border-radius: 4px; color: #ffffff; background-color: #3b82f6;">
-                            <i class="fas fa-download"></i> Download File
-                        </a>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <a id="assignmentPreviewBtn" href="" target="_blank" class="ws-btn ws-btn-secondary ws-btn-xs" style="display: inline-flex; align-items: center; gap: 6px; margin: 0; padding: 8px 14px; font-size: 0.8125rem; font-weight: 600; text-decoration: none; border-radius: 6px; color: #334155; background-color: #ffffff; border: 1px solid #cbd5e1;">
+                                <i class="fas fa-external-link-alt"></i> Open Full Preview
+                            </a>
+                            <a id="assignmentDownloadBtn" href="" download target="_blank" class="ws-btn ws-btn-primary ws-btn-xs" style="display: inline-flex; align-items: center; gap: 6px; margin: 0; padding: 8px 14px; font-size: 0.8125rem; font-weight: 600; text-decoration: none; border-radius: 6px; color: #ffffff; background-color: #3b82f6;">
+                                <i class="fas fa-download"></i> Download File
+                            </a>
+                        </div>
                     </div>
 
                     <!-- Frame for PDFs -->
-                    <iframe id="pdfViewerFrame" class="grading-iframe-viewer" src="" style="display: none;"></iframe>
+                    <iframe id="pdfViewerFrame" class="grading-iframe-viewer" src="" style="display: none; width: 100%; min-height: 580px; border: 1px solid #e2e8f0; border-radius: 8px; margin-top: 8px;"></iframe>
                     
                     <!-- Image viewer -->
                     <div id="imageViewerContainer" style="display: none; width: 100%; text-align: center; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; box-sizing: border-box;">
@@ -297,6 +342,10 @@
                         </div>
                     </div>
 
+                    <!-- Graded Status Banner -->
+                    <div id="sidebarGradedBanner" style="display: none; padding: 12px 14px; border-radius: 8px; margin-bottom: 16px; font-size: 0.85rem; align-items: flex-start; gap: 10px; line-height: 1.4;">
+                    </div>
+
                     <!-- AJAX Grading Form -->
                     <form id="gradingDashboardForm" method="post" action="${pageContext.request.contextPath}/instructor/assessments" class="grading-dashboard-form">
                         <input type="hidden" name="action" value="gradeSubmission" />
@@ -312,7 +361,7 @@
                         </div>
 
                         <div class="grading-score-wrapper">
-                            <label class="grading-score-label">Final Score *</label>
+                            <label class="grading-score-label" for="formScoreInput">Final Score *</label>
                             <div class="grading-score-input-group">
                                 <input 
                                     id="formScoreInput" 
@@ -328,7 +377,7 @@
                         </div>
 
                         <div class="grading-feedback-wrapper">
-                            <label class="grading-feedback-label">Constructive Feedback</label>
+                            <label class="grading-feedback-label" for="formFeedbackInput">Constructive Feedback</label>
                             <textarea 
                                 id="formFeedbackInput" 
                                 name="feedback" 
@@ -377,13 +426,13 @@
             <c:forEach var="q" items="${questions}">
                 <div class="question-data" 
                      data-question-id="${q.questionId}" 
-                     data-question-text="<c:out value='${q.questionText}'/>"
-                     data-option-a="<c:out value='${q.optionA}'/>"
-                     data-option-b="<c:out value='${q.optionB}'/>"
-                     data-option-c="<c:out value='${q.optionC}'/>"
-                     data-option-d="<c:out value='${q.optionD}'/>"
-                     data-correct-option="${q.correctOption}"
-                     data-marks="${q.marks}">
+                     data-question-text="${fn:escapeXml(q.questionText)}"
+                     data-option-a="${fn:escapeXml(q.optionA)}"
+                     data-option-b="${fn:escapeXml(q.optionB)}"
+                     data-option-c="${fn:escapeXml(q.optionC)}"
+                     data-option-d="${fn:escapeXml(q.optionD)}"
+                     data-correct-option="${fn:escapeXml(q.correctOption)}"
+                     data-marks="${q.marks != null ? q.marks : '1'}">
                 </div>
             </c:forEach>
         </div>
@@ -438,10 +487,31 @@
         document.getElementById("formScoreInput").value = score;
         document.getElementById("formFeedbackInput").value = feedback;
 
-        // Reset submit button state
+        // Populate graded status banner
+        const gradedBanner = document.getElementById("sidebarGradedBanner");
         const submitBtn = document.getElementById("gradingFormSubmitBtn");
         submitBtn.disabled = false;
-        submitBtn.innerHTML = '<i class="fas fa-check-double"></i> Submit Grade & Next Student';
+
+        const isAlreadyGraded = score !== null && score !== "" && score !== "null";
+        if (gradedBanner) {
+            if (isAlreadyGraded) {
+                gradedBanner.style.display = "flex";
+                gradedBanner.style.backgroundColor = "#f0fdf4";
+                gradedBanner.style.color = "#166534";
+                gradedBanner.style.border = "1px solid #bbf7d0";
+                gradedBanner.innerHTML = `<i class="fas fa-check-circle" style="color: #16a34a; font-size: 1.2rem; margin-top: 2px;"></i> <div><strong style="font-size: 0.9rem;">Already Graded: ${score} / ${selectedAssessment.totalMarks} Marks</strong><div style="font-size: 0.75rem; font-weight: 400; color: #15803d; margin-top: 2px;">Submitting again will update the existing grade and constructive feedback.</div></div>`;
+                submitBtn.innerHTML = '<i class="fas fa-edit"></i> Update Grade & Next Student';
+            } else {
+                gradedBanner.style.display = "flex";
+                gradedBanner.style.backgroundColor = "#fef9c3";
+                gradedBanner.style.color = "#854d0e";
+                gradedBanner.style.border = "1px solid #fde047";
+                gradedBanner.innerHTML = `<i class="fas fa-clock" style="color: #ca8a04; font-size: 1.2rem; margin-top: 2px;"></i> <div><strong style="font-size: 0.9rem;">Pending Grading</strong><div style="font-size: 0.75rem; font-weight: 400; color: #a16207; margin-top: 2px;">Please review the student's submission and enter a final score below.</div></div>`;
+                submitBtn.innerHTML = '<i class="fas fa-check-double"></i> Submit Grade & Next Student';
+            }
+        } else {
+            submitBtn.innerHTML = '<i class="fas fa-check-double"></i> Submit Grade & Next Student';
+        }
 
         // Load correct panes based on assessment type
         const docCardViewer = document.getElementById("docCardViewer");
@@ -449,7 +519,11 @@
         const quizSidebarScoreInfo = document.getElementById("quizSidebarScoreInfo");
 
         const typeStr = (type || "").trim().toLowerCase();
-        if (typeStr === "quiz" || typeStr === "exam") {
+        const hasQuestions = document.querySelectorAll("#hiddenQuestionsBlock .question-data").length > 0;
+        const isQuizPayload = payload && /^q_?\d+\s*:/i.test(payload.trim());
+        const isAssignmentType = typeStr === "assignment" || typeStr === "subjective" || (payload && (payload.toLowerCase().endsWith(".pdf") || payload.toLowerCase().endsWith(".docx") || payload.toLowerCase().endsWith(".zip") || payload.toLowerCase().endsWith(".png") || payload.toLowerCase().endsWith(".jpg")));
+        
+        if (!isAssignmentType && (typeStr === "quiz" || typeStr === "exam" || typeStr === "objective" || isQuizPayload || (hasQuestions && !payload))) {
             docCardViewer.style.display = "none";
             quizQuestionsReview.style.display = "flex";
             
@@ -477,6 +551,7 @@
             const genericBtn = document.getElementById("genericDownloadBtn");
             const extLink = document.getElementById("viewerExternalLink");
             const downloadWrap = document.getElementById("assignmentDownloadWrapper");
+            const previewBtn = document.getElementById("assignmentPreviewBtn");
             const downloadBtn = document.getElementById("assignmentDownloadBtn");
 
             // Reset displays
@@ -500,6 +575,7 @@
                     pdfFrame.style.display = "block";
                     pdfFrame.src = fileUrl;
                     downloadWrap.style.display = "flex";
+                    if (previewBtn) previewBtn.href = fileUrl;
                     downloadBtn.href = fileUrl;
                 } else if (isImage) {
                     imageContainer.style.display = "block";
@@ -527,46 +603,67 @@
         const quizReviewList = document.getElementById("quizReviewQuestionsList");
         quizReviewList.innerHTML = ""; // Clear old content
         
+        console.log("Populating Quiz Review. Payload:", payload, "Score:", score);
+
         // Populate quiz header score text
         const scoreText = document.getElementById("quizReviewScoreText");
         scoreText.textContent = "Auto-graded Score: " + ((score !== null && score !== "") ? score : "--") + " / " + "${selectedAssessment.totalMarks}";
 
-        // Parse student answers from payload: "Q1:A;Q2:B;"
+        function normOpt(val) {
+            if (!val) return "";
+            val = val.trim().toUpperCase();
+            if (val.startsWith("OPTION ")) val = val.substring(7).trim();
+            if (val.startsWith("OPT ")) val = val.substring(4).trim();
+            if (val.endsWith(".")) val = val.substring(0, val.length - 1).trim();
+            return val;
+        }
+
+        // Parse student answers from payload: "Q{id}:{answer};"
         const studentAnswers = {};
         if (payload) {
             const pairs = payload.split(';');
             pairs.forEach(pair => {
                 if (pair.trim()) {
-                    const parts = pair.split(':');
-                    if (parts.length === 2) {
-                        const qKey = parts[0].trim();
-                        const qId = qKey.startsWith('Q') ? qKey.substring(1) : qKey;
-                        studentAnswers[qId] = parts[1].trim().toUpperCase();
+                    const colonIdx = pair.indexOf(':');
+                    if (colonIdx > 0) {
+                        const qKey = pair.substring(0, colonIdx).trim();
+                        // Support both "Q45", "Q_45", and "q_45" formats
+                        const qId = qKey.replace(/^[qQ]_?/, '').trim();
+                        const answerVal = normOpt(pair.substring(colonIdx + 1));
+                        if (qId) studentAnswers[qId] = answerVal;
                     }
                 }
             });
         }
+        console.log("Parsed Student Answers:", studentAnswers);
 
         // Get all questions from the hidden questions block
         const questionDataNodes = document.querySelectorAll("#hiddenQuestionsBlock .question-data");
         
         if (questionDataNodes.length === 0) {
-            quizReviewList.innerHTML = `<div class="grading-no-submission">No questions found for this quiz.</div>`;
+            quizReviewList.innerHTML = `<div class="grading-no-submission" style="text-align:center; padding: 32px; color: #64748b;">
+                <i class="fas fa-question-circle" style="font-size:2rem; margin-bottom:12px; display:block; color: #94a3b8;"></i>
+                <strong>No questions found for this assessment.</strong>
+                <p style="margin-top:8px; font-size:0.875rem;">The assessment may not have any questions added yet, or the page needs to be refreshed.</p>
+            </div>`;
             return;
         }
 
         questionDataNodes.forEach((node, index) => {
-            const qId = node.getAttribute("data-question-id");
-            const qText = node.getAttribute("data-question-text");
-            const optA = node.getAttribute("data-option-a");
-            const optB = node.getAttribute("data-option-b");
-            const optC = node.getAttribute("data-option-c");
-            const optD = node.getAttribute("data-option-d");
-            const correctOpt = (node.getAttribute("data-correct-option") || "").trim().toUpperCase();
-            const marks = node.getAttribute("data-marks");
+            const qId = (node.getAttribute("data-question-id") || "").trim();
+            const qText = node.getAttribute("data-question-text") || "";
+            const optA = node.getAttribute("data-option-a") || "";
+            const optB = node.getAttribute("data-option-b") || "";
+            const optC = node.getAttribute("data-option-c") || "";
+            const optD = node.getAttribute("data-option-d") || "";
+            const correctOpt = normOpt(node.getAttribute("data-correct-option"));
+            const marks = node.getAttribute("data-marks") || "1";
 
-            const studentSelected = studentAnswers[qId] || "";
-            const isCorrect = (studentSelected === correctOpt && studentSelected !== "");
+            // Look up student answer by DB question ID, then by sequential index
+            const rawSelected = studentAnswers[qId] || studentAnswers[(index + 1).toString()] || "";
+            const studentSelected = normOpt(rawSelected);
+            const isCorrect = studentSelected !== "" && (studentSelected === correctOpt);
+            const isUnanswered = studentSelected === "";
 
             // Create question card
             const qCard = document.createElement("div");
@@ -577,7 +674,10 @@
             qTextDiv.className = "quiz-review-qtext";
             
             const icon = document.createElement("i");
-            if (isCorrect) {
+            if (isUnanswered) {
+                icon.className = "fas fa-minus-circle";
+                icon.style.color = "#94a3b8";
+            } else if (isCorrect) {
                 icon.className = "fas fa-check-circle";
             } else {
                 icon.className = "fas fa-times-circle";
@@ -585,8 +685,23 @@
             qTextDiv.appendChild(icon);
 
             const textSpan = document.createElement("span");
-            textSpan.innerHTML = `<strong>Q${index + 1}.</strong> ${qText} <span class="roster-date-meta" style="display: inline; margin-left: 8px;">(${marks} Marks)</span>`;
+            const displayMarks = marks ? marks : "1";
+            const displayQText = qText ? qText : "(Question text missing)";
+            textSpan.innerHTML = `<strong>Q${index + 1}.</strong> ${displayQText} <span class="roster-date-meta" style="display: inline; margin-left: 8px;">(${displayMarks} Marks)</span>`;
             qTextDiv.appendChild(textSpan);
+            
+            // Show student's answer vs correct answer if they got it wrong
+            if (!isUnanswered && !isCorrect) {
+                const answerSummary = document.createElement("div");
+                answerSummary.style.cssText = "font-size:0.78rem; color:#ef4444; margin-top:4px; display:flex; gap:12px;";
+                answerSummary.innerHTML = `<span>Student answered: <strong>${studentSelected || rawSelected}</strong></span><span style="color:#10b981;">Correct: <strong>${correctOpt || 'N/A'}</strong></span>`;
+                qTextDiv.appendChild(answerSummary);
+            } else if (isUnanswered) {
+                const unansweredTag = document.createElement("div");
+                unansweredTag.style.cssText = "font-size:0.78rem; color:#94a3b8; margin-top:4px;";
+                unansweredTag.textContent = "Not answered";
+                qTextDiv.appendChild(unansweredTag);
+            }
             
             qCard.appendChild(qTextDiv);
 
@@ -602,25 +717,26 @@
             ];
 
             options.forEach(opt => {
-                if (!opt.text) return; // Skip empty options if any
+                const displayText = (opt.text && opt.text.trim() !== "" && opt.text.trim() !== ".") ? opt.text : `Option ${opt.key}`;
 
                 const optCard = document.createElement("div");
                 let optClass = "quiz-review-option";
+                const normKey = normOpt(opt.key);
                 
                 // Add status styles
-                if (opt.key === correctOpt) {
+                if (normKey === correctOpt) {
                     optClass += " is-correct";
-                } else if (opt.key === studentSelected) {
+                } else if (normKey === studentSelected && !isUnanswered) {
                     optClass += " is-incorrect";
                 }
                 
                 optCard.className = optClass;
 
                 // Build option contents
-                let innerHTML = `<strong>${opt.key}.</strong> <span>${opt.text}</span>`;
-                if (opt.key === correctOpt) {
+                let innerHTML = `<strong>${opt.key}.</strong> <span>${displayText}</span>`;
+                if (normKey === correctOpt) {
                     innerHTML += ` <i class="fas fa-check quiz-review-correct-icon"></i>`;
-                } else if (opt.key === studentSelected) {
+                } else if (normKey === studentSelected && !isUnanswered) {
                     innerHTML += ` <i class="fas fa-times quiz-review-incorrect-icon"></i>`;
                 }
                 optCard.innerHTML = innerHTML;

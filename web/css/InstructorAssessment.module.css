@@ -1438,6 +1438,8 @@ html[data-theme="dark"] .iax-empty-state {
     display: flex;
     flex-direction: column;
     gap: 24px;
+    overflow-y: auto;
+    align-self: flex-start;
 }
 
 :root[data-theme="dark"] .grading-quiz-review {
@@ -1793,4 +1795,96 @@ html[data-theme="dark"] .grading-complete-title {
     color: #f87171;
 }
 
+/* ==========================================================================
+   Grading Layout – Responsive Overrides
+   ========================================================================== */
+
+/* KPI grid responsive */
+@media (max-width: 900px) {
+    .iax-kpi-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 520px) {
+    .iax-kpi-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Grading split layout – tablet */
+@media (max-width: 1280px) {
+    .ia-submissions-split-layout {
+        grid-template-columns: 280px 1fr 320px;
+        height: calc(100vh - 300px);
+    }
+}
+
+/* Grading split layout – collapse sidebar panel */
+@media (max-width: 1024px) {
+    .ia-submissions-split-layout {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto;
+        height: auto;
+        min-height: unset;
+        overflow: visible;
+        gap: 16px;
+    }
+
+    .grading-roster-sidebar,
+    .grading-document-viewer,
+    .grading-panel-sidebar {
+        height: auto;
+        min-height: 400px;
+        overflow-y: visible;
+        border-radius: 12px;
+    }
+
+    .grading-roster-sidebar {
+        min-height: 200px;
+        max-height: 320px;
+        overflow-y: auto;
+    }
+
+    .grading-document-viewer {
+        min-height: 500px;
+    }
+
+    .grading-panel-sidebar {
+        min-height: auto;
+    }
+}
+
+/* Grading split layout – mobile */
+@media (max-width: 600px) {
+    .ia-submissions-split-layout {
+        margin-top: 1rem;
+        gap: 12px;
+    }
+
+    .grading-roster-sidebar {
+        max-height: 260px;
+    }
+
+    .grading-document-viewer {
+        padding: 16px;
+    }
+
+    .grading-quiz-review {
+        padding: 16px;
+        gap: 16px;
+    }
+
+    .quiz-review-options {
+        grid-template-columns: 1fr;
+    }
+
+    .quiz-review-qcard {
+        padding: 14px;
+    }
+
+    .grading-panel-sidebar {
+        padding: 16px;
+    }
+}
 

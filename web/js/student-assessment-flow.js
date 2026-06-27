@@ -146,22 +146,32 @@
     }
 
     function initUploadZones(root) {
-        root.querySelectorAll('.dropzone').forEach(function (zone) {
+        root.querySelectorAll('.dropzone, [data-upload-zone], .lh-upload-zone').forEach(function (zone) {
             if (zone.dataset.bound === 'true') {
                 return;
             }
             zone.dataset.bound = 'true';
 
             var input = zone.querySelector('input[type="file"]');
-            var contentNode = zone.querySelector('.dropzone_content') || zone;
-            var list = zone.closest('form') ? zone.closest('form').querySelector('.file_list') : null;
             if (!input) {
                 return;
             }
 
+            var contentNode = zone.querySelector('.dropzone_content') || zone.querySelector('.lh-upload-zone__content');
+            if (!contentNode) {
+                contentNode = document.createElement('div');
+                contentNode.className = 'dropzone_content lh-upload-zone__content';
+                Array.from(zone.childNodes).forEach(function (child) {
+                    if (child !== input) {
+                        contentNode.appendChild(child);
+                    }
+                });
+                zone.appendChild(contentNode);
+            }
+
             // Clicking the zone triggers file input selection
             zone.addEventListener('click', function (e) {
-                if (e.target !== input) {
+                if (e.target !== input && !input.contains(e.target)) {
                     input.click();
                 }
             });
@@ -170,10 +180,10 @@
                 if (files && files.length > 0) {
                     var file = files[0];
                     zone.classList.add('dropzone_staged');
-                    contentNode.innerHTML = '<i class="fas fa-file-pdf dropzone_icon"></i><div class="dropzone_text">' + file.name + '</div><div class="dropzone_subtext">' + formatBytes(file.size) + ' - Click or drag to replace</div>';
+                    contentNode.innerHTML = '<i class="fas fa-file-pdf dropzone_icon lh-upload-zone__icon" style="color: var(--success, #10b981);"></i><div class="dropzone_text lh-upload-zone__text" style="font-weight: 600; color: var(--text-primary, #0f172a);">' + file.name + '</div><div class="dropzone_subtext lh-upload-zone__subtext">' + formatBytes(file.size) + ' - Click or drag to replace</div>';
                 } else {
                     zone.classList.remove('dropzone_staged');
-                    contentNode.innerHTML = '<i class="fas fa-cloud-arrow-up dropzone_icon"></i><div class="dropzone_text">Click to browse or drag your PDF answer file here</div><div class="dropzone_subtext">Supports PDF up to 50MB</div>';
+                    contentNode.innerHTML = '<i class="fas fa-cloud-arrow-up dropzone_icon lh-upload-zone__icon"></i><div class="dropzone_text lh-upload-zone__text">Click to browse or drag your PDF answer file here</div><div class="dropzone_subtext lh-upload-zone__subtext">Supports PDF up to 50MB</div>';
                 }
             }
 
@@ -258,45 +268,53 @@
                 button.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>' + (button.getAttribute('data-loading-label') || 'Submitting...') + '</span>';
 
                 var finalUrl = '';
-                fetch(form.action, {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-Requested-With': 'fetch'
-                    }
-                })
-                .then(function (response) {
-                    if (!response.ok) throw new Error('Submission failed');
-                    finalUrl = response.url;
-                    return response.text();
-                })
-                .then(function (html) {
-                    var parser = new DOMParser();
-                    var doc = parser.parseFromString(html, 'text/html');
-                    var newContent = doc.querySelector('.lh-content-stage') || doc.querySelector('.ax-shell') || doc.querySelector('.sa-shell');
-                    var stage = document.querySelector('.lh-content-stage');
-                    if (newContent && stage) {
-                        stage.innerHTML = newContent.innerHTML;
-                        stripDuplicateNav(stage);
-                        init(stage);
-                        syncHubProgress(doc);
-                        if (window.history && window.history.pushState && finalUrl) {
-                            window.history.pushState({ assessmentStage: 'result' }, '', finalUrl);
+                try {
+                    var formData = new FormData(form);
+                    fetch(form.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'fetch'
                         }
-                    } else {
-                        if (finalUrl) {
-                            window.location.href = finalUrl;
+                    })
+                    .then(function (response) {
+                        if (!response.ok) throw new Error('Submission failed');
+                        finalUrl = response.url;
+                        return response.text();
+                    })
+                    .then(function (html) {
+                        var parser = new DOMParser();
+                        var doc = parser.parseFromString(html, 'text/html');
+                        var newContent = doc.querySelector('.lh-content-stage') || doc.querySelector('.ax-shell') || doc.querySelector('.sa-shell');
+                        var stage = document.querySelector('.lh-content-stage');
+                        if (newContent && stage) {
+                            stage.innerHTML = newContent.innerHTML;
+                            stripDuplicateNav(stage);
+                            init(stage);
+                            syncHubProgress(doc);
+                            if (window.history && window.history.pushState && finalUrl) {
+                                window.history.pushState({ assessmentStage: 'result' }, '', finalUrl);
+                            }
                         } else {
-                            window.location.reload();
+                            if (finalUrl) {
+                                window.location.href = finalUrl;
+                            } else {
+                                window.location.reload();
+                            }
                         }
-                    }
-                })
-                .catch(function (err) {
+                    })
+                    .catch(function (err) {
+                        button.dataset.busy = 'false';
+                        button.disabled = false;
+                        button.innerHTML = originalHTML;
+                        notify('error', 'Submission failed: ' + err.message);
+                    });
+                } catch (syncErr) {
                     button.dataset.busy = 'false';
                     button.disabled = false;
                     button.innerHTML = originalHTML;
-                    notify('error', 'Submission failed: ' + err.message);
-                });
+                    notify('error', 'Submission failed: ' + syncErr.message);
+                }
             });
         });
     }

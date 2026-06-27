@@ -56,8 +56,7 @@
         </button>
 
         <a href="${pageContext.request.contextPath}/dashboard" class="nav_mod_brand" aria-label="PSM E-Learning home">
-            <span class="nav_mod_brand_main">PSM</span>
-            <span class="nav_mod_brand_sub">E-Learning</span>
+            <img src="${pageContext.request.contextPath}/img/psm-logo.svg" alt="PSM E-Learning" class="nav_mod_logo_img" style="height:34px;width:auto;display:block;">
         </a>
 
         <div class="nav_mod_page_title">

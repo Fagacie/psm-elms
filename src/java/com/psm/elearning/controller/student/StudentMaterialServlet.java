@@ -61,11 +61,11 @@ public class StudentMaterialServlet extends HttpServlet {
 
         // Ensure user is authorized for the current route path
         String servletPath = request.getServletPath();
-        if (servletPath.startsWith("/student/") && !"Student".equals(role)) {
+        if (servletPath.startsWith("/student/") && !"Student".equals(role) && !"Admin".equals(role)) {
             response.sendRedirect(request.getContextPath() + "/dashboard");
             return;
         }
-        if (servletPath.startsWith("/instructor/") && !"Instructor".equals(role)) {
+        if (servletPath.startsWith("/instructor/") && !"Instructor".equals(role) && !"Admin".equals(role)) {
             response.sendRedirect(request.getContextPath() + "/dashboard");
             return;
         }
@@ -110,126 +110,82 @@ public class StudentMaterialServlet extends HttpServlet {
             }
         }
 
-        if (selectedCourseId != null) {
-            final Integer requestedCourseId = selectedCourseId;
-            Enrollment selectedEnrollment = accessibleEnrollments.stream()
-                    .filter(e -> e.getCourseId() != null && e.getCourseId().equals(requestedCourseId))
-                    .findFirst()
-                    .orElse(null);
-
-            if (selectedEnrollment == null) {
-                request.setAttribute("errorMessage", "You do not have access to this course materials.");
-                selectedCourseId = null;
-            }
+        if (selectedCourseId == null && !accessibleEnrollments.isEmpty()) {
+            selectedCourseId = accessibleEnrollments.get(0).getCourseId();
         }
 
-        List<Enrollment> displayEnrollments = new ArrayList<>();
-        if (selectedCourseId == null) {
-            displayEnrollments.addAll(accessibleEnrollments);
-        } else {
-            for (Enrollment enrollment : accessibleEnrollments) {
-                if (enrollment.getCourseId() != null && enrollment.getCourseId().equals(selectedCourseId)) {
-                    displayEnrollments.add(enrollment);
+        List<Material> materials = new ArrayList<>();
+        Course selectedCourse = null;
+        if (selectedCourseId != null) {
+            boolean hasCourseEnrollment = false;
+            for (Enrollment en : accessibleEnrollments) {
+                if (en.getCourseId().equals(selectedCourseId)) {
+                    hasCourseEnrollment = true;
                     break;
                 }
             }
-        }
 
-        Map<Integer, List<Material>> materialsByCourse = new LinkedHashMap<>();
-        Map<Integer, Course> courseById = new LinkedHashMap<>();
-        Map<Integer, Set<Integer>> viewedMaterialIdsByCourse = new LinkedHashMap<>();
-        int totalMaterials = 0;
-        int totalViewedMaterials = 0;
-
-        List<Integer> courseIds = new ArrayList<>();
-        for (Enrollment enrollment : displayEnrollments) {
-            if (enrollment.getCourseId() != null) {
-                courseIds.add(enrollment.getCourseId());
+            if (hasCourseEnrollment) {
+                selectedCourse = courseDAO.findById(selectedCourseId);
+                materials = materialDAO.findByCourse(selectedCourseId);
+                if (materials == null) materials = new ArrayList<>();
             }
         }
 
-        List<Material> allMaterials = new ArrayList<>();
-        List<Course> allCourses = new ArrayList<>();
-        Map<Integer, Set<Integer>> viewedMaterialIdsByCourses = new HashMap<>();
+        List<Material> filteredMaterials = filterMaterials(materials, keyword, materialType);
+        List<Material> sortedMaterials = sortMaterials(filteredMaterials, sort);
 
-        if (!courseIds.isEmpty()) {
-            allMaterials = materialDAO.findByCourseIds(courseIds);
-            allCourses = courseDAO.findByCourseIds(courseIds);
-            viewedMaterialIdsByCourses = progressDAO.findViewedMaterialIdsByCourses(userId, courseIds);
+        Map<Integer, String> statusById = selectedCourseId != null
+                ? progressDAO.findMaterialStatusByCourse(userId, selectedCourseId)
+                : new java.util.HashMap<>();
+
+        List<Map<String, Object>> materialCards = new ArrayList<>();
+        int sequence = 1;
+        for (Material material : sortedMaterials) {
+            String status = statusById.get(material.getMaterialId());
+            if (status == null || status.trim().isEmpty()) {
+                status = "in_progress";
+            }
+            Map<String, Object> card = new java.util.HashMap<>();
+            card.put("material", material);
+            card.put("sequence", sequence++);
+            card.put("status", status);
+            card.put("statusLabel", "completed".equalsIgnoreCase(status) ? "Completed" : "In Progress");
+            card.put("statusClass", "completed".equalsIgnoreCase(status) ? "status-Approved" : "status-Pending");
+            card.put("isCompleted", "completed".equalsIgnoreCase(status));
+            card.put("isLink", "Link".equalsIgnoreCase(material.getMaterialType()));
+            String actionUrl = request.getContextPath() + "/student/materials?action="
+                    + ("Link".equalsIgnoreCase(material.getMaterialType()) ? "view" : "preview")
+                    + "&id=" + material.getMaterialId();
+            card.put("actionUrl", actionUrl);
+            materialCards.add(card);
         }
 
-        Map<Integer, List<Material>> preloadedMaterialsByCourse = new HashMap<>();
-        for (Material material : allMaterials) {
-            if (material != null && material.getCourseId() != null) {
-                preloadedMaterialsByCourse.computeIfAbsent(material.getCourseId(), k -> new ArrayList<>()).add(material);
+        int completedCount = 0;
+        for (String st : statusById.values()) {
+            if ("completed".equalsIgnoreCase(st)) {
+                completedCount++;
             }
         }
+        int totalCount = sortedMaterials.size();
+        int progressPercent = totalCount == 0 ? 0 : (int) Math.round((completedCount * 100.0) / totalCount);
 
-        Map<Integer, Course> preloadedCoursesById = new HashMap<>();
-        for (Course course : allCourses) {
-            if (course != null && course.getCourseId() != null) {
-                preloadedCoursesById.put(course.getCourseId(), course);
-            }
-        }
-
-        for (Enrollment enrollment : displayEnrollments) {
-            if (enrollment.getCourseId() == null) continue;
-            int courseId = enrollment.getCourseId();
-            List<Material> materials = preloadedMaterialsByCourse.getOrDefault(courseId, new ArrayList<>());
-            int rawCount = materials.size();
-            materials = filterMaterials(materials, keyword, materialType);
-            materials = sortMaterials(materials, sort);
-            LOGGER.info("StudentMaterialServlet: courseId=" + courseId
-                    + ", rawMaterials=" + rawCount
-                    + ", filteredMaterials=" + materials.size()
-                    + ", keyword='" + keyword + "', materialType='" + materialType + "'");
-            materialsByCourse.put(courseId, materials);
-            totalMaterials += materials.size();
-            Set<Integer> viewedIds = viewedMaterialIdsByCourses.getOrDefault(courseId, new java.util.LinkedHashSet<>());
-            viewedMaterialIdsByCourse.put(courseId, viewedIds);
-            int viewedInFilteredSet = 0;
-            for (Material material : materials) {
-                if (viewedIds.contains(material.getMaterialId())) {
-                    viewedInFilteredSet++;
-                }
-            }
-            totalViewedMaterials += viewedInFilteredSet;
-
-            Course course = preloadedCoursesById.get(courseId);
-            if (course != null) {
-                courseById.put(courseId, course);
-            }
-        }
-
+        request.setAttribute("selectedCourse", selectedCourse);
         request.setAttribute("selectedCourseId", selectedCourseId);
-        request.setAttribute("displayEnrollments", displayEnrollments);
-        request.setAttribute("materialsByCourse", materialsByCourse);
-        request.setAttribute("courseById", courseById);
-        request.setAttribute("visibleCourseCount", displayEnrollments.size());
-        request.setAttribute("totalMaterials", totalMaterials);
-        request.setAttribute("totalViewedMaterials", totalViewedMaterials);
-        request.setAttribute("viewedMaterialIdsByCourse", viewedMaterialIdsByCourse);
+        request.setAttribute("materialCards", materialCards);
+        request.setAttribute("completedCount", completedCount);
+        request.setAttribute("totalCount", totalCount);
+        request.setAttribute("progressPercent", progressPercent);
 
         request.getRequestDispatcher("/WEB-INF/views/student/materials.jsp").forward(request, response);
     }
 
-    private void serveMaterialFile(HttpServletRequest request,
-                                   HttpServletResponse response,
-                                   Integer userId,
-                                   boolean download,
-                                   boolean markViewed)
+    private void serveMaterialFile(HttpServletRequest request, HttpServletResponse response, Integer userId, boolean download, boolean markViewed)
             throws IOException {
 
-        String idStr = normalize(request.getParameter("id"));
-        if (idStr.isEmpty()) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Material ID is required.");
-            return;
-        }
-
-        int materialId;
-        try {
-            materialId = Integer.parseInt(idStr);
-        } catch (NumberFormatException e) {
+        String idStr = request.getParameter("id");
+        Integer materialId = parseInt(idStr);
+        if (materialId == null) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid material ID.");
             return;
         }
@@ -262,51 +218,64 @@ public class StudentMaterialServlet extends HttpServlet {
             return;
         }
 
-        if (isExternalHttpUrl(material.getFilePath())) {
-            response.sendRedirect(material.getFilePath());
-            return;
-        }
-
-        URL url;
+        String cleanPath = normalize(material.getFilePath());
+        InputStream inStream = null;
+        URLConnection connection = null;
         try {
-            url = new URL(material.getFilePath());
-        } catch (MalformedURLException ex) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Material URL is invalid.");
-            return;
-        }
-
-        URLConnection connection = url.openConnection();
-        connection.setConnectTimeout(15000);
-        connection.setReadTimeout(30000);
-        if (connection instanceof HttpURLConnection) {
-            HttpURLConnection httpConnection = (HttpURLConnection) connection;
-            httpConnection.setInstanceFollowRedirects(true);
-            int status = httpConnection.getResponseCode();
-            if (status >= 400) {
-                response.sendError(HttpServletResponse.SC_BAD_GATEWAY, "Unable to fetch material from storage.");
-                return;
+            if (cleanPath.startsWith("file://") || cleanPath.contains("://")) {
+                URL url = new URL(cleanPath);
+                connection = url.openConnection();
+                connection.setRequestProperty("User-Agent", "Mozilla/5.0");
+                connection.setConnectTimeout(15000);
+                connection.setReadTimeout(30000);
+                if (connection instanceof HttpURLConnection) {
+                    HttpURLConnection httpConnection = (HttpURLConnection) connection;
+                    httpConnection.setInstanceFollowRedirects(true);
+                    int status = httpConnection.getResponseCode();
+                    if (status >= 400) {
+                        response.sendError(HttpServletResponse.SC_BAD_GATEWAY, "Unable to fetch material from storage.");
+                        return;
+                    }
+                }
+                inStream = connection.getInputStream();
+            } else {
+                java.io.File file = new java.io.File(cleanPath);
+                if (!file.isAbsolute()) {
+                    String realPath = getServletContext().getRealPath("/");
+                    if (realPath != null) {
+                        java.io.File test = new java.io.File(realPath, cleanPath);
+                        if (test.exists()) file = test;
+                    }
+                }
+                if (!file.exists()) {
+                    response.sendError(HttpServletResponse.SC_NOT_FOUND, "Material file not found on server.");
+                    return;
+                }
+                inStream = new java.io.FileInputStream(file);
             }
-        }
 
-        String contentType = connection.getContentType();
-        if (contentType == null || contentType.trim().isEmpty()) {
-            contentType = inferContentType(material.getFilePath());
-        }
-        response.setContentType(contentType);
-        response.setHeader("X-Content-Type-Options", "nosniff");
-
-        String fileName = resolveFileName(material);
-        String dispositionType = download ? "attachment" : "inline";
-        response.setHeader("Content-Disposition", dispositionType + "; filename=\"" + fileName + "\"");
-
-        try (InputStream in = connection.getInputStream();
-             ServletOutputStream out = response.getOutputStream()) {
-            byte[] buffer = new byte[8192];
-            int bytesRead;
-            while ((bytesRead = in.read(buffer)) != -1) {
-                out.write(buffer, 0, bytesRead);
+            String contentType = connection != null ? connection.getContentType() : null;
+            if (contentType == null || contentType.trim().isEmpty()) {
+                contentType = inferContentType(cleanPath);
             }
-            out.flush();
+            response.setContentType(contentType);
+            response.setHeader("X-Content-Type-Options", "nosniff");
+
+            String fileName = resolveFileName(material);
+            String dispositionType = download ? "attachment" : "inline";
+            response.setHeader("Content-Disposition", dispositionType + "; filename=\"" + fileName + "\"");
+
+            try (InputStream in = inStream;
+                 ServletOutputStream out = response.getOutputStream()) {
+                byte[] buffer = new byte[8192];
+                int bytesRead;
+                while ((bytesRead = in.read(buffer)) != -1) {
+                    out.write(buffer, 0, bytesRead);
+                }
+                out.flush();
+            }
+        } catch (Exception ex) {
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error reading file.");
         } finally {
             if (connection instanceof HttpURLConnection) {
                 ((HttpURLConnection) connection).disconnect();
@@ -347,10 +316,9 @@ public class StudentMaterialServlet extends HttpServlet {
 
         String filePath = normalize(material.getFilePath());
         String extension = extractFileExtension(filePath);
-        String servletPath = "Instructor".equals(role) ? "/instructor/materials-preview" : "/student/materials";
-        String streamUrl = isExternalHttpUrl(filePath)
-            ? filePath
-            : request.getContextPath() + servletPath + "?action=view&id=" + materialId;
+        String servletPath = ("Instructor".equals(role) || "Admin".equals(role)) ? "/instructor/materials-preview" : "/student/materials";
+        String streamUrl = request.getContextPath() + servletPath + "?action=view&id=" + materialId;
+        String downloadUrl = request.getContextPath() + servletPath + "?action=download&id=" + materialId;
         List<Material> courseMaterials = materialDAO.findByCourse(material.getCourseId());
         if (courseMaterials == null) {
             courseMaterials = new ArrayList<>();
@@ -384,7 +352,7 @@ public class StudentMaterialServlet extends HttpServlet {
                 || filePath.contains("youtube.com")
                 || filePath.contains("youtu.be");
         boolean isLink = Material.TYPE_LINK.equalsIgnoreCase(material.getMaterialType()) && !isYouTube;
-        boolean isPdf = "pdf".equals(extension);
+        boolean isPdf = "pdf".equals(extension) || Material.TYPE_PDF.equalsIgnoreCase(material.getMaterialType()) || "Document".equalsIgnoreCase(material.getMaterialType());
         boolean isVideo = ("mp4".equals(extension)
                  || "webm".equals(extension)
                  || "mov".equals(extension)
@@ -413,8 +381,11 @@ public class StudentMaterialServlet extends HttpServlet {
                 : request.getContextPath() + "/instructor/courses?action=workspace&courseId=" + material.getCourseId() + "#materials";
         String backToHubLabel = "Student".equals(role) ? "Back to Learning Hub" : "Back to Course Workspace";
 
+        boolean isInstructorPreview = "Instructor".equals(role) || "Admin".equals(role);
+        request.setAttribute("isInstructorPreview", isInstructorPreview);
         request.setAttribute("material", material);
         request.setAttribute("streamUrl", streamUrl);
+        request.setAttribute("downloadUrl", downloadUrl);
         request.setAttribute("isLinkMaterial", isLink);
         request.setAttribute("isYouTubeMaterial", isYouTube);
         request.setAttribute("youtubeVideoId", youtubeVideoId);

@@ -22,7 +22,7 @@ function CourseWorkspaceApp() {
                         key={tab.id}
                         className={`ins_ws_nav_link ${activeTab === tab.id ? 'active' : ''}`}
                         onClick={() => setActiveTab(tab.id)}
-                        style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+                        style={{ background: 'none', borderTop: 'none', borderLeft: 'none', borderRight: 'none', cursor: 'pointer' }}
                     >
                         <i className={`fas ${tab.icon}`}></i> {tab.label}
                     </button>

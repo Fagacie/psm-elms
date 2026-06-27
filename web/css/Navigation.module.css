@@ -46,7 +46,7 @@ body.sv-page {
 .nav_mod_topbar {
   position: fixed;
   top: 0;
-  left: var(--nav_mod_sidebar_w);
+  left: 0;
   right: 0;
   height: var(--nav_mod_topbar_h);
   z-index: 120;
@@ -421,10 +421,10 @@ body.sv-page {
 
 .nav_mod_sidebar {
   position: fixed;
-  top: 0;
+  top: var(--nav_mod_topbar_h);
   left: 0;
   width: var(--nav_mod_sidebar_w);
-  height: 100vh;
+  height: calc(100vh - var(--nav_mod_topbar_h));
   padding: 20px 12px 20px;
   background: var(--nav_mod_white);
   border-right: 1px solid var(--nav_mod_border);
@@ -582,9 +582,7 @@ body.sv-shell-collapsed .nav_mod_sidebar {
   padding-inline: 8px;
 }
 
-body.sv-shell-collapsed .nav_mod_topbar {
-  left: var(--nav_mod_sidebar_cw);
-}
+/* topbar stays full width when collapsed */
 
 body.sv-shell-collapsed .nav_mod_label {
   max-width: 0;
@@ -662,9 +660,7 @@ body.sv-shell-collapsed .nav_mod_link[title]:hover::after {
     box-shadow: none;
   }
 
-  .nav_mod_topbar {
-    left: 0;
-  }
+/* topbar is left: 0 by default */
 
   body.sv-page .sv-layout {
     padding-left: 0;

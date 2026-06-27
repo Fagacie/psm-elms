@@ -3387,11 +3387,116 @@ html[data-theme="dark"] body.admin-page,
   font-style: italic;
 }
 
+/* ==========================================================================
+   STATE-OF-THE-ART ADMIN TABLE POLISH (GREENFIELD MASTER UPGRADE)
+   ========================================================================== */
+.table-card-gf, .ar_table_card, .section-card, .admin-hero {
+  border-top: 3px solid #10b981 !important;
+  box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.08) !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
 
+.users-table-gf th, .courses-table-gf th, .enrollments-table-gf th, .payments-table-gf th, .certificates-table-gf th, .ar_data_table thead th, .data-table th {
+  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%) !important;
+  color: #1e293b !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.08em !important;
+  padding: 1rem 1.5rem !important;
+  border-bottom: 2px solid #cbd5e1 !important;
+}
 
+.users-table-gf td, .courses-table-gf td, .enrollments-table-gf td, .payments-table-gf td, .certificates-table-gf td, .ar_data_table tbody td, .data-table td {
+  padding: 1.1rem 1.5rem !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  color: #0f172a;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
 
+.users-table-gf tbody tr:hover td, .courses-table-gf tbody tr:hover td, .enrollments-table-gf tbody tr:hover td, .payments-table-gf tbody tr:hover td, .certificates-table-gf tbody tr:hover td, .ar_data_table tbody tr:hover td, .data-table tbody tr:hover td {
+  background-color: #f0fdf4 !important;
+  color: #065f46 !important;
+}
 
+.search-box-gf input, .ar_search_box, .admin-search-input {
+  border: 1px solid #cbd5e1 !important;
+  background-color: #ffffff !important;
+  box-shadow: inset 0 2px 4px rgba(15, 23, 42, 0.02) !important;
+}
 
-/* User Request: Remove border radius to everything */
-* { border-radius: 0 !important; }
+.search-box-gf input:focus, .ar_search_box:focus-within {
+  border-color: #10b981 !important;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15) !important;
+}
+
+.status-badge-gf, .ar_table_badge, .badge {
+  font-weight: 800 !important;
+  letter-spacing: 0.04em !important;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.badge-success-gf, .ar_format_csv {
+  background-color: #d1fae5 !important;
+  color: #065f46 !important;
+  border: 1px solid #a7f3d0 !important;
+}
+
+.badge-pending-gf {
+  background-color: #fef3c7 !important;
+  color: #92400e !important;
+  border: 1px solid #fde68a !important;
+}
+
+.badge-failed-gf, .ar_format_pdf {
+  background-color: #fee2e2 !important;
+  color: #991b1b !important;
+  border: 1px solid #fca5a5 !important;
+}
+
+/* Greenfield Modern Admin Aesthetics */
+body.admin-page .section-card-gf,
+body.admin-page .ar_container,
+body.admin-page .table-card-gf,
+body.admin-page .ar_table_card,
+body.admin-page .ar_chart_card,
+body.admin-page .ar_kpi_card,
+body.admin-page .ar_health_section {
+  border-radius: 12px !important;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.06) !important;
+  border: 1px solid #e2e8f0 !important;
+}
+
+body.admin-page table {
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  width: 100% !important;
+}
+
+body.admin-page th {
+  background-color: #f8fafc !important;
+  color: #475569 !important;
+  font-weight: 600 !important;
+  font-size: 0.825rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.04em !important;
+  padding: 14px 18px !important;
+  border-bottom: 2px solid #e2e8f0 !important;
+}
+
+body.admin-page td {
+  padding: 16px 18px !important;
+  font-size: 0.925rem !important;
+  color: #1e293b !important;
+  border-bottom: 1px solid #f1f5f9 !important;
+}
+
+body.admin-page tr:hover td {
+  background-color: #f8fafc !important;
+}
+
+body.admin-page .btn-primary-gf,
+body.admin-page .ar_btn_primary,
+body.admin-page button.ar_btn,
+body.admin-page .ar_preset_btn {
+  border-radius: 8px !important;
+}
 

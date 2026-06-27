@@ -21,8 +21,10 @@
 <c:set var="navCourseEnrollmentId" value="${previewEnrollmentId}"/>
 <c:set var="navCourseTitle" value="${not empty previewEnrollment.courseName ? previewEnrollment.courseName : material.title}"/>
 <c:choose>
-    <c:when test="${not empty sessionScope.instructor}">
-        <jsp:include page="/WEB-INF/views/common/instructor-topbar.jsp"/>
+    <c:when test="${isInstructorPreview or not empty sessionScope.instructor or sessionScope.role eq 'Instructor' or sessionScope.role eq 'Admin'}">
+        <jsp:include page="/WEB-INF/views/common/instructor-header.jsp">
+            <jsp:param name="pageTitle" value="Material Preview"/>
+        </jsp:include>
     </c:when>
     <c:otherwise>
         <jsp:include page="/WEB-INF/views/common/student-topbar.jsp"/>
@@ -32,7 +34,8 @@
 <div class="sv-layout">
     <c:set var="activePage" value="my-courses"/>
     <c:choose>
-        <c:when test="${not empty sessionScope.instructor}">
+        <c:when test="${isInstructorPreview or not empty sessionScope.instructor or sessionScope.role eq 'Instructor' or sessionScope.role eq 'Admin'}">
+            <c:set var="activeInstructorPage" value="courses" scope="request"/>
             <jsp:include page="/WEB-INF/views/common/instructor-sidebar.jsp"/>
         </c:when>
         <c:otherwise>
@@ -55,10 +58,17 @@
                     </p>
                 </div>
                 <div class="lh-stage-head__status">
-                    <span class="status-badge ${materialStatusClass}" id="mvStatusBadge">${materialStatusLabel}</span>
+                    <c:choose>
+                        <c:when test="${isInstructorPreview or not empty sessionScope.instructor or sessionScope.role eq 'Instructor' or sessionScope.role eq 'Admin'}">
+                            <span class="status-badge status-published" style="background:#e0e7ff; color:#4f46e5;"><i class="fas fa-eye"></i> Instructor Preview Mode</span>
+                        </c:when>
+                        <c:otherwise>
+                            <span class="status-badge ${materialStatusClass}" id="mvStatusBadge">${materialStatusLabel}</span>
+                        </c:otherwise>
+                    </c:choose>
                     <span class="lh-stage-access is-ready">
                         <i class="fas fa-layer-group"></i>
-                        ${not empty previewEnrollmentId ? 'Course-linked viewer' : 'Standalone viewer'}
+                        ${(isInstructorPreview or not empty sessionScope.instructor or sessionScope.role eq 'Instructor' or sessionScope.role eq 'Admin') ? 'Instructor Curriculum View' : (not empty previewEnrollmentId ? 'Course-linked viewer' : 'Standalone viewer')}
                     </span>
                 </div>
             </header>
@@ -68,8 +78,10 @@
                 <c:if test="${materialPosition > 0}">
                     <span class="lh-stage-chip"><i class="fas fa-list-ol"></i> ${materialPosition} / ${totalMaterialsInCourse}</span>
                 </c:if>
-                <span class="lh-stage-chip"><i class="fas fa-chart-line"></i> <strong id="mvCourseProgressPercent">${courseProgressPercent}%</strong></span>
-                <span class="lh-stage-chip"><i class="fas fa-circle-check"></i> <span id="mvStatusChip">${materialStatusLabel}</span></span>
+                <c:if test="${not (isInstructorPreview or not empty sessionScope.instructor or sessionScope.role eq 'Instructor' or sessionScope.role eq 'Admin')}">
+                    <span class="lh-stage-chip"><i class="fas fa-chart-line"></i> <strong id="mvCourseProgressPercent">${courseProgressPercent}%</strong></span>
+                    <span class="lh-stage-chip"><i class="fas fa-circle-check"></i> <span id="mvStatusChip">${materialStatusLabel}</span></span>
+                </c:if>
             </div>
 
             <div class="lh-stage-body">
@@ -79,13 +91,25 @@
             <footer class="mv-footer">
                 <div class="mv-footer-left">
                     <c:if test="${not empty previousMaterial}">
-                        <a class="sv-btn" href="${pageContext.request.contextPath}/student/materials?action=preview&id=${previousMaterial.materialId}&enrollmentId=${previewEnrollmentId}">
+                        <a class="sv-btn" href="${pageContext.request.contextPath}${(isInstructorPreview or not empty sessionScope.instructor or sessionScope.role eq 'Instructor' or sessionScope.role eq 'Admin') ? '/instructor/materials-preview' : '/student/materials'}?action=preview&id=${previousMaterial.materialId}${not empty previewEnrollmentId ? '&enrollmentId='.concat(previewEnrollmentId) : ''}">
                             &larr; Previous Module
                         </a>
                     </c:if>
                 </div>
                 <div class="mv-footer-right">
                     <c:choose>
+                        <c:when test="${isInstructorPreview or not empty sessionScope.instructor or sessionScope.role eq 'Instructor' or sessionScope.role eq 'Admin'}">
+                            <a class="sv-btn primary" href="${backToHubUrl}" style="background:#4f46e5; color:white; font-weight:600;">
+                                <i class="fas fa-arrow-left"></i> Back to Course Workspace
+                            </a>
+                            <c:if test="${not empty nextMaterial}">
+                                <a class="sv-btn" href="${pageContext.request.contextPath}/instructor/materials-preview?action=preview&id=${nextMaterial.materialId}" style="margin-left: 8px;">
+                                    Next Material &rarr;
+                                </a>
+                            </c:if>
+                        </c:when>
+                        <c:otherwise>
+                            <c:choose>
                         <c:when test="${previewEnrollment.daysRemaining < 0 && previewEnrollment.courseDuration != null && previewEnrollment.courseDuration > 0}">
                             <button
                                 type="button"
@@ -118,6 +142,8 @@
                             </c:choose>
                         </c:otherwise>
                     </c:choose>
+                        </c:otherwise>
+                    </c:choose>
                 </div>
             </footer>
         </section>
@@ -128,6 +154,7 @@
 <script>
 (function () {
     var completeButton = document.getElementById('mvMarkCompleted');
+    if (!completeButton) return;
     var statusBadge = document.getElementById('mvStatusBadge');
     var statusChip = document.getElementById('mvStatusChip');
     var courseProgressBadge = document.getElementById('mvCourseProgressPercent');

@@ -179,10 +179,10 @@ body.lh-shell-page .sv-main {
 
 .lh-focus-topbar {
   position: fixed;
-  inset: 0 0 auto var(--lh-sidebar-width);
+  inset: 0 0 auto 0;
   z-index: 1000;
   display: grid;
-  grid-template-columns: auto auto minmax(0, 1fr) auto auto;
+  grid-template-columns: auto auto auto minmax(0, 1fr) auto auto;
   align-items: center;
   gap: var(--lh-space-4);
   height: 4.5rem;
@@ -301,7 +301,7 @@ html[data-theme="dark"] .lh-focus-topbar {
 
 .lh-course-sidebar {
   position: fixed;
-  top: 0;
+  top: 4.5rem;
   left: 0;
   bottom: 0;
   width: var(--lh-sidebar-width);
@@ -778,13 +778,16 @@ html[data-theme="dark"] .lh-focus-topbar {
    ========================================================================== */
 
 .lh-video-shell {
+  position: relative;
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  aspect-ratio: 16 / 9;
   overflow: hidden;
   border-radius: var(--lh-radius-xl);
   border: 1px solid var(--border-strong);
-  background: hsl(220 25% 6%);
-  box-shadow: var(--shadow-md);
-  aspect-ratio: 16 / 9;
-  max-height: 85vh;
+  background: #000000;
+  box-shadow: var(--shadow-lg);
 }
 
 .lh-video-shell--spaced {

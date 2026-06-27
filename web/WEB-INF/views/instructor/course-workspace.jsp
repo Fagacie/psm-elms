@@ -8,6 +8,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Course Workspace - PSM E-Learning</title>
+    <link rel="icon" type="image/svg+xml" href="${pageContext.request.contextPath}/img/psm-logo.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="${pageContext.request.contextPath}/img/psm-logo.png">
+    <link rel="shortcut icon" href="${pageContext.request.contextPath}/img/psm-logo.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -39,17 +42,59 @@
         padding: 0 !important;
         margin-top: 1rem;
         margin-bottom: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
     }
-    .ins_ws_page_head h2 {
-        font-size: 2.25rem !important;
+
+    /* Breadcrumb */
+    .ws-breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.82rem;
+        color: #64748b;
+        margin-bottom: 4px;
+    }
+    .ws-breadcrumb-link {
+        color: #6366f1;
+        text-decoration: none;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        transition: color 0.15s ease;
+    }
+    .ws-breadcrumb-link:hover { color: #4f46e5; }
+    .ws-breadcrumb-sep { color: #cbd5e1; }
+    .ws-breadcrumb-current { color: #64748b; font-weight: 500; }
+
+    /* Head row: title + status badge inline */
+    .ws-head-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+    .ws-head-row h2 {
+        font-size: 2rem !important;
         font-weight: 800 !important;
         color: #0f172a !important;
         margin: 0 !important;
-        letter-spacing: -0.03em !important;
+        letter-spacing: -0.02em !important;
+        line-height: 1.2;
     }
-    :root[data-theme="dark"] .ins_ws_page_head h2 {
-        color: #ffffff !important;
+    .ws-head-subtitle {
+        font-size: 0.9rem;
+        color: #64748b;
+        margin: 0;
+        max-width: 680px;
+        line-height: 1.5;
     }
+    :root[data-theme="dark"] .ws-head-row h2 { color: #ffffff !important; }
+    :root[data-theme="dark"] .ws-breadcrumb-link { color: #818cf8; }
+    :root[data-theme="dark"] .ws-breadcrumb-current { color: #94a3b8; }
+    :root[data-theme="dark"] .ws-head-subtitle { color: #9ca3af; }
 
     /* Tabs Navigation Bar */
     .ins_ws_nav_bar {
@@ -1394,9 +1439,28 @@
 <main class="app-main">
     <div class="content-wrapper course-workspace-page">
         
-        <%-- HEADER --%>
+        <%-- HEADER — Breadcrumb + Course Title + Status Badge --%>
         <section class="ins_ws_page_head">
-            <h2><c:out value="${selectedCourse.courseName}"/></h2>
+            <!-- Breadcrumb nav -->
+            <nav class="ws-breadcrumb" aria-label="Breadcrumb">
+                <a href="${pageContext.request.contextPath}/instructor/courses" class="ws-breadcrumb-link">
+                    <i class="fas fa-chevron-left" style="font-size:0.7rem;"></i> My Courses
+                </a>
+                <span class="ws-breadcrumb-sep">/</span>
+                <span class="ws-breadcrumb-current"><c:out value="${selectedCourse.courseName}"/></span>
+            </nav>
+            <!-- Course title + status badge inline -->
+            <div class="ws-head-row">
+                <h2><c:out value="${selectedCourse.courseName}"/></h2>
+                <c:if test="${not empty selectedCourse.status}">
+                    <span class="status-badge status-${fn:toLowerCase(selectedCourse.status)}">
+                        <c:out value="${selectedCourse.status}"/>
+                    </span>
+                </c:if>
+            </div>
+            <c:if test="${not empty selectedCourse.description}">
+                <p class="ws-head-subtitle"><c:out value="${selectedCourse.description}"/></p>
+            </c:if>
         </section>
 
         <c:if test="${not empty errorMessage}">

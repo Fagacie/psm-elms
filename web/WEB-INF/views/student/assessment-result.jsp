@@ -97,9 +97,11 @@
                         </c:when>
                         <c:otherwise>
                             <c:forEach var="q" items="${questions}" varStatus="loop">
-                                <c:set var="studAns" value="${empty studentAnswerByQuestionId[q.questionId] ? '' : studentAnswerByQuestionId[q.questionId]}" />
-                                <c:set var="corrAns" value="${empty correctAnswerByQuestionId[q.questionId] ? '' : correctAnswerByQuestionId[q.questionId]}" />
-                                <c:set var="isCorrect" value="${not empty studAns and studAns == corrAns}" />
+                                <c:set var="studAns" value="${empty studentAnswerByQuestionId[q.questionId] ? '' : fn:trim(studentAnswerByQuestionId[q.questionId])}" />
+                                <c:set var="corrAns" value="${empty correctAnswerByQuestionId[q.questionId] ? '' : fn:trim(correctAnswerByQuestionId[q.questionId])}" />
+                                <c:set var="isCorrect" value="${not empty studAns and fn:toUpperCase(studAns) == fn:toUpperCase(corrAns)}" />
+                                <c:set var="studAnsText" value="${fn:toUpperCase(studAns) == 'A' ? q.optionA : (fn:toUpperCase(studAns) == 'B' ? q.optionB : (fn:toUpperCase(studAns) == 'C' ? q.optionC : (fn:toUpperCase(studAns) == 'D' ? q.optionD : studAns)))}" />
+                                <c:set var="corrAnsText" value="${fn:toUpperCase(corrAns) == 'A' ? q.optionA : (fn:toUpperCase(corrAns) == 'B' ? q.optionB : (fn:toUpperCase(corrAns) == 'C' ? q.optionC : (fn:toUpperCase(corrAns) == 'D' ? q.optionD : corrAns)))}" />
                                 
                                 <div class="review_row ${isCorrect ? 'correct' : 'incorrect'}">
                                     <div class="review_question_text">${loop.index + 1}. ${q.questionText}</div>
@@ -107,17 +109,17 @@
                                         <c:choose>
                                             <c:when test="${isCorrect}">
                                                 <i class="fas fa-circle-check icon_correct"></i>
-                                                <span>Your Answer: <strong>${studAns}</strong></span>
+                                                <span>Your Answer: <strong>${studAns}</strong><c:if test="${not empty studAnsText and studAnsText != studAns}"> - ${fn:escapeXml(studAnsText)}</c:if></span>
                                             </c:when>
                                             <c:otherwise>
                                                 <i class="fas fa-circle-xmark icon_incorrect"></i>
-                                                <span>Your Answer: <strong>${empty studAns ? 'None' : studAns}</strong></span>
+                                                <span>Your Answer: <strong>${empty studAns ? 'None' : studAns}</strong><c:if test="${not empty studAns and not empty studAnsText and studAnsText != studAns}"> - ${fn:escapeXml(studAnsText)}</c:if></span>
                                             </c:otherwise>
                                         </c:choose>
                                     </div>
                                     <c:if test="${not isCorrect}">
                                         <div class="correct_answer_block">
-                                            <span>Correct Answer: <strong>${corrAns}</strong></span>
+                                            <span>Correct Answer: <strong>${corrAns}</strong><c:if test="${not empty corrAnsText and corrAnsText != corrAns}"> - ${fn:escapeXml(corrAnsText)}</c:if></span>
                                         </div>
                                     </c:if>
                                 </div>

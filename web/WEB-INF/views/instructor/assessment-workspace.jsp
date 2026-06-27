@@ -8,6 +8,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Course Assessments - Instructor</title>
+    <link rel="icon" type="image/svg+xml" href="${pageContext.request.contextPath}/img/psm-logo.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="${pageContext.request.contextPath}/img/psm-logo.png">
+    <link rel="shortcut icon" href="${pageContext.request.contextPath}/img/psm-logo.png">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/InstructorAssessment.module.css?v=6">
         <c:if test="${not empty errorMessage}">
             <div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> <c:out value="${errorMessage}"/></div>

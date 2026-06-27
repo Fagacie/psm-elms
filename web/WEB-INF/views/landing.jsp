@@ -20,8 +20,7 @@
 <header class="lp_header" id="siteHeader">
     <div class="lp_container lp_shell">
         <a class="lp_brand" href="#home" aria-label="PSM E-Learning home">
-            <span class="lp_brand_mark">PSM</span>
-            <span class="lp_brand_text">E-Learning</span>
+            <img src="${pageContext.request.contextPath}/img/psm-logo.svg" alt="PSM E-Learning" style="height:36px;width:auto;display:block;">
         </a>
 
         <button class="lp_hamburger" id="lpMobileToggle" aria-label="Toggle menu">
@@ -265,8 +264,7 @@
         <div class="lp_footer_grid">
             <div class="lp_footer_col_brand">
                 <a class="lp_brand" href="#home" style="margin-bottom: 24px;">
-                    <span class="lp_brand_mark">PSM</span>
-                    <span class="lp_brand_text">E-Learning</span>
+                    <img src="${pageContext.request.contextPath}/img/psm-logo.svg" alt="PSM E-Learning" style="height:36px;width:auto;display:block;margin-bottom:16px;">
                 </a>
                 <p>Empowering students and instructors with a state-of-the-art virtual campus.</p>
                 <div class="lp_footer_socials">

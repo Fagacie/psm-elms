@@ -148,114 +148,97 @@
                                         </div>
                                     </c:if>
 
-                                    <!-- A4 locked container with heavy dropshadow placed flat on a slate desk -->
+                                    <!-- Certificate: minimal, elegant A4 landscape design -->
                                     <div class="vc_certificateWrapper">
-                                        <section class="sc-sheet">
-                                            <!-- Border and Corners -->
-                                            <div class="sc-border-outer"></div>
-                                            <div class="sc-border-inner"></div>
-                                            <div class="sc-corner-tl"></div>
-                                            <div class="sc-corner-tr"></div>
-                                            <div class="sc-corner-bl"></div>
-                                            <div class="sc-corner-br"></div>
-                                            
-                                            <!-- Left Banner -->
-                                            <div class="sc-left-banner">
-                                                <div class="sc-banner-text">
-                                                    <span>P</span>
-                                                    <span class="sc-banner-dot">&bull;</span>
-                                                    <span>S</span>
-                                                    <span class="sc-banner-dot">&bull;</span>
-                                                    <span>M</span>
-                                                </div>
+                                        <section class="sc-sheet" id="certificateDocument">
+                                            <!-- Subtle watermark behind content -->
+                                            <div class="sc-watermark" aria-hidden="true">
+                                                <svg viewBox="0 0 100 120" width="380" height="380" xmlns="http://www.w3.org/2000/svg">
+                                                    <!-- Shield shape -->
+                                                    <path d="M50 8 L88 22 V58 C88 80 72 98 50 106 C28 98 12 80 12 58 V22 Z" fill="none" stroke="#1e3a5f" stroke-width="1.8"/>
+                                                    <!-- Book inside -->
+                                                    <line x1="50" y1="38" x2="50" y2="82" stroke="#1e3a5f" stroke-width="1.2"/>
+                                                    <path d="M26 45 C35 40 45 40 50 44 C55 40 65 40 74 45 L74 80 C65 75 55 75 50 78 C45 75 35 75 26 80 Z" fill="none" stroke="#1e3a5f" stroke-width="1.2"/>
+                                                    <path d="M50 30 L58 36 L50 42 L42 36 Z" fill="none" stroke="#1e3a5f" stroke-width="1.2"/>
+                                                </svg>
                                             </div>
 
-                                            <div class="sc-content-wrapper">
-                                                <!-- Watermark -->
-                                                <div class="sc-watermark">
-                                                    <svg viewBox="0 0 100 100" width="450" height="450">
-                                                        <path d="M50 15 L80 25 V55 C80 72 68 83 50 88 C32 83 20 72 20 55 V25 Z" fill="none" stroke="#0f172a" stroke-width="2.5"></path>
-                                                        <line x1="50" y1="15" x2="50" y2="88" stroke="#0f172a" stroke-width="1.5"></line>
-                                                        <line x1="20" y1="46" x2="80" y2="46" stroke="#0f172a" stroke-width="1.5"></line>
-                                                        <circle cx="35" cy="33" r="3.5" fill="#0f172a"></circle>
-                                                        <circle cx="65" cy="33" r="3.5" fill="#0f172a"></circle>
-                                                        <path d="M38 64 C42 60 48 60 50 63 C52 60 58 60 62 64 V52 C58 49 52 49 50 51 C48 49 42 49 38 52 Z" fill="none" stroke="#0f172a" stroke-width="1.5"></path>
+                                            <!-- Outer double-rule border frame -->
+                                            <div class="sc-frame-outer"></div>
+                                            <div class="sc-frame-inner"></div>
+
+                                            <!-- Main content, centered -->
+                                            <div class="sc-content-area">
+                                                <!-- Institution seal + name -->
+                                                <div class="sc-seal-row">
+                                                    <svg class="sc-seal-icon" viewBox="0 0 60 72" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                                        <path d="M30 4 L54 13 V36 C54 50 44 61 30 66 C16 61 6 50 6 36 V13 Z" fill="#1e3a5f"/>
+                                                        <line x1="30" y1="22" x2="30" y2="54" stroke="white" stroke-width="1.5"/>
+                                                        <path d="M14 29 C20 25 27 25 30 28 C33 25 40 25 46 29 L46 52 C40 48 33 48 30 50 C27 48 20 48 14 52 Z" fill="none" stroke="white" stroke-width="1.5"/>
+                                                        <path d="M30 16 L35 21 L30 26 L25 21 Z" fill="white"/>
                                                     </svg>
-                                                </div>
-                                                <!-- Top Crest -->
-                                                <div class="sc-crest">
-                                                    <svg class="sc-crest-svg" viewBox="0 0 100 100" width="44" height="44">
-                                                        <path d="M50 15 L80 25 V55 C80 72 68 83 50 88 C32 83 20 72 20 55 V25 Z" fill="none" stroke="#0f172a" stroke-width="2.5"></path>
-                                                        <line x1="50" y1="15" x2="50" y2="88" stroke="#0f172a" stroke-width="1.5"></line>
-                                                        <line x1="20" y1="46" x2="80" y2="46" stroke="#0f172a" stroke-width="1.5"></line>
-                                                        <circle cx="35" cy="33" r="3.5" fill="#0f172a"></circle>
-                                                        <circle cx="65" cy="33" r="3.5" fill="#0f172a"></circle>
-                                                        <path d="M38 64 C42 60 48 60 50 63 C52 60 58 60 62 64 V52 C58 49 52 49 50 51 C48 49 42 49 38 52 Z" fill="none" stroke="#0f172a" stroke-width="1.5"></path>
-                                                    </svg>
-                                                    <h4 class="sc-platform-name">PSM E-LEARNING ACADEMY</h4>
+                                                    <div class="sc-institution-block">
+                                                        <p class="sc-institution-name">PSM E-LEARNING ACADEMY</p>
+                                                        <p class="sc-institution-sub">Office of Academic Records &amp; Certification</p>
+                                                    </div>
                                                 </div>
 
-                                                <h1 class="sc-title">CERTIFICATE OF COMPLETION</h1>
-                                                
-                                                <div class="sc-divider-diamond"><span></span></div>
-
-                                                <!-- Centered Recipient & Program Description -->
-                                                <div class="sc-body-content">
-                                                    <p class="sc-recipient-lbl">PRESENTED TO</p>
-                                                    <h2 class="sc-recipient-name">${studentUser.fullName}</h2>
-                                                    <p class="sc-award-statement">FOR SUCCESSFULLY COMPLETING THE PROGRAM</p>
-                                                    <h3 class="sc-course-name">${course.courseName}</h3>
+                                                <!-- Certificate title with elegant rule -->
+                                                <div class="sc-title-block">
+                                                    <h1 class="sc-title">Certificate of Completion</h1>
+                                                    <div class="sc-title-rule"><span></span></div>
                                                 </div>
 
-                                                <!-- Structured Metadata & QR -->
+                                                <!-- Presentation copy -->
+                                                <p class="sc-presented-text">This is to certify that</p>
+
+                                                <!-- Recipient name — the visual centrepiece -->
+                                                <h2 class="sc-recipient-name">${studentUser.fullName}</h2>
+
+                                                <!-- Course statement -->
+                                                <p class="sc-completion-text">has successfully completed the course</p>
+                                                <h3 class="sc-course-name">${course.courseName}</h3>
+
+                                                <!-- Thin divider rule -->
+                                                <div class="sc-mid-rule"></div>
+
+                                                <!-- Footer metadata row -->
                                                 <div class="sc-footer-row">
-                                                    <div class="sc-footer-info">
-                                                        <div class="sc-info-col">
-                                                            <div class="sc-info-icon"><i class="fas fa-user-circle"></i></div>
-                                                            <span class="sc-info-label">STUDENT ID</span>
-                                                            <span class="sc-info-val"><c:out value="${studentProfile.regNumber}" default="N/A" /></span>
+                                                    <div class="sc-meta-items">
+                                                        <div class="sc-meta-item">
+                                                            <span class="sc-meta-label">Student ID</span>
+                                                            <span class="sc-meta-val"><c:out value="${studentProfile.regNumber}" default="N/A"/></span>
                                                         </div>
-                                                        <div class="sc-info-divider"></div>
-                                                        <div class="sc-info-col">
-                                                            <div class="sc-info-icon"><i class="fas fa-file-contract"></i></div>
-                                                            <span class="sc-info-label">CERTIFICATE NO.</span>
-                                                            <span class="sc-info-val">${certificate.certificateNo}</span>
+                                                        <div class="sc-meta-sep"></div>
+                                                        <div class="sc-meta-item">
+                                                            <span class="sc-meta-label">Certificate No.</span>
+                                                            <span class="sc-meta-val">${certificate.certificateNo}</span>
                                                         </div>
-                                                        <div class="sc-info-divider"></div>
-                                                        <div class="sc-info-col">
-                                                            <div class="sc-info-icon"><i class="fas fa-calendar-alt"></i></div>
-                                                            <span class="sc-info-label">ISSUED ON</span>
-                                                            <span class="sc-info-val">
+                                                        <div class="sc-meta-sep"></div>
+                                                        <div class="sc-meta-item">
+                                                            <span class="sc-meta-label">Issued On</span>
+                                                            <span class="sc-meta-val">
                                                                 <c:choose>
-                                                                    <c:when test="${not empty certificate.issueDate}">
-                                                                        ${certificate.issueDate.toLocalDate()}</c:when>
-                                                                    <c:otherwise>-</c:otherwise>
+                                                                    <c:when test="${not empty certificate.issueDate}">${certificate.issueDate.toLocalDate()}</c:when>
+                                                                    <c:otherwise>—</c:otherwise>
                                                                 </c:choose>
                                                             </span>
                                                         </div>
                                                     </div>
-                                                    
-                                                    <div class="sc-qr-section">
+                                                    <!-- QR Code -->
+                                                    <div class="sc-qr-block">
                                                         <c:if test="${not empty certificate.qrCodePath}">
                                                             <c:choose>
                                                                 <c:when test="${certificate.qrCodePath.startsWith('http')}">
-                                                                    <img class="sc-qr-image" src="${certificate.qrCodePath}" alt="Verification QR Code">
+                                                                    <img class="sc-qr-img" src="${certificate.qrCodePath}" alt="Verification QR">
                                                                 </c:when>
                                                                 <c:otherwise>
-                                                                    <img class="sc-qr-image" src="${pageContext.request.contextPath}/${certificate.qrCodePath}" alt="Verification QR Code">
+                                                                    <img class="sc-qr-img" src="${pageContext.request.contextPath}/${certificate.qrCodePath}" alt="Verification QR">
                                                                 </c:otherwise>
                                                             </c:choose>
                                                         </c:if>
-                                                        <div class="sc-qr-text">
-                                                            <strong>SCAN TO VERIFY</strong>THIS CERTIFICATE
-                                                        </div>
+                                                        <p class="sc-qr-caption">Scan to verify</p>
                                                     </div>
-                                                </div>
-
-                                                <!-- Verification Bottom Text -->
-                                                <div class="sc-footer-bottom">
-                                                    <div class="sc-divider-diamond-small"><span></span></div>
-                                                    <p class="sc-verification-text">THIS CERTIFICATE IS DIGITALLY GENERATED AND CAN BE VERIFIED USING THE QR CODE.</p>
                                                 </div>
                                             </div>
                                         </section>
@@ -317,29 +300,27 @@
                             <script>
                                 (function () {
                                     var downloadBtn = document.getElementById('studentCertDownloadPdfBtn');
-                                    var certificateNode = document.querySelector('.sc-sheet');
+                                    // Updated selector to match new redesigned certificate element
+                                    var certificateNode = document.getElementById('certificateDocument') || document.querySelector('.sc-sheet');
 
                                     if (downloadBtn && certificateNode) {
                                         downloadBtn.addEventListener('click', function () {
                                             var originalHTML = downloadBtn.innerHTML;
                                             downloadBtn.disabled = true;
-                                            downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Compiling PDF...</span>';
+                                            downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Generating PDF...</span>';
 
-                                            // Save original responsive styles
-                                            var originalStyle = certificateNode.getAttribute('style');
-
-                                            // Ensure Google fonts are fully drawn to the canvas before compiling PDF
+                                            // Wait for fonts to fully render before capturing
                                             document.fonts.ready.then(function () {
                                                 return html2canvas(certificateNode, {
-                                                    scale: 4, // Quad scaling for ultra high-resolution print quality
+                                                    scale: 4,
                                                     useCORS: true,
                                                     allowTaint: false,
-                                                    backgroundColor: '#ffffff'
+                                                    backgroundColor: '#ffffff',
+                                                    logging: false,
+                                                    imageTimeout: 0
                                                 });
                                             }).then(function (canvas) {
                                                 var imgData = canvas.toDataURL('image/png');
-
-                                                // PDF Dimensions corresponding perfectly to A4 Landscape bounds (297mm x 210mm)
                                                 var { jsPDF } = window.jspdf;
                                                 var pdf = new jsPDF({
                                                     orientation: 'landscape',
@@ -347,35 +328,29 @@
                                                     format: 'a4',
                                                     compress: true
                                                 });
-
+                                                // Fill the entire A4 page
                                                 pdf.addImage(imgData, 'PNG', 0, 0, 297, 210, undefined, 'FAST');
-
                                                 var certNo = '${certificate.certificateNo}' || 'PSM_Certificate';
                                                 var filename = certNo.replace(/[^a-z0-9_-]+/gi, '_') + '.pdf';
-
+                                                // Always use .save() — never output('datauristring') which opens new tab
                                                 pdf.save(filename);
                                             }).catch(function (err) {
-                                                console.error('High-fidelity PDF generation failed:', err);
-                                                alert('High-resolution PDF generation failed. Please use Chrome Print options.');
+                                                console.error('PDF generation failed:', err);
+                                                alert('PDF generation failed. Please try again or use your browser Print option (Ctrl+P).');
                                             }).finally(function () {
-                                                // Restore original styling properties
-                                                if (originalStyle) {
-                                                    certificateNode.setAttribute('style', originalStyle);
-                                                } else {
-                                                    certificateNode.removeAttribute('style');
-                                                }
                                                 downloadBtn.disabled = false;
                                                 downloadBtn.innerHTML = originalHTML;
                                             });
                                         });
                                     }
 
-                                    // Automatic PDF Trigger for direct list-view commands
+                                    // Auto-trigger download if ?download=pdf param is set
                                     if ('${param.download}' === 'pdf') {
                                         window.addEventListener('load', function () {
+                                            // Delay slightly to ensure all assets are ready
                                             window.setTimeout(function () {
                                                 if (downloadBtn) downloadBtn.click();
-                                            }, 400);
+                                            }, 800);
                                         }, { once: true });
                                     }
 
