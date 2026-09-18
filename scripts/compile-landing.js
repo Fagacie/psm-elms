@@ -27,12 +27,23 @@ landingContent = landingContent.replace(/\$\{pageContext\.request\.contextPath\}
 // Handle session scope success message (remove logic, keep it clean or remove entirely)
 landingContent = landingContent.replace(/<c:if test="\$\{not empty sessionScope\.success\}">([\s\S]*?)<\/c:if>/g, '');
 landingContent = landingContent.replace(/<c:remove var="success" scope="session"\/>/g, '');
+landingContent = landingContent.replace(/<c:if test="\$\{not empty sessionScope\.error\}">([\s\S]*?)<\/c:if>/g, '');
+landingContent = landingContent.replace(/<c:remove var="error" scope="session"\/>/g, '');
+
+// Remove theme scripts
+landingContent = landingContent.replace(/<link rel="stylesheet" href="\.\/css\/theme-toggle\.css">\n?/g, '');
+landingContent = landingContent.replace(/<script defer src="\.\/js\/theme-toggle\.js"><\/script>\n?/g, '');
+
+// Fix Quick Facts numbers
+landingContent = landingContent.replace(/\$\{empty studentCount \? 10500 : studentCount\}/g, '10500');
+landingContent = landingContent.replace(/\$\{empty instructorCount \? 320 : instructorCount\}/g, '320');
+landingContent = landingContent.replace(/\$\{empty courseCount \? 1200 : courseCount\}/g, '1200');
 
 // Replace course loop with static data
 const dummyCourses = `
-    <div class="course-data-item" data-id="1" data-name="Advanced Web Development" data-category="Programming" data-fee="Free" data-duration="8 Weeks" data-level="Advanced" data-banner="./img/courses/web-dev.jpg" data-context=".">Learn modern web development using React, Node.js, and MongoDB. Build real-world applications from scratch.</div>
-    <div class="course-data-item" data-id="2" data-name="Digital Marketing Masterclass" data-category="Marketing" data-fee="Free" data-duration="4 Weeks" data-level="Beginner" data-banner="./img/courses/digital-marketing.jpg" data-context=".">Master SEO, Social Media Marketing, and Google Analytics to drive massive traffic.</div>
-    <div class="course-data-item" data-id="3" data-name="Data Science Fundamentals" data-category="Data Science" data-fee="Free" data-duration="10 Weeks" data-level="Intermediate" data-banner="./img/courses/data-science.jpg" data-context=".">Dive into Python, Data Analysis, and Machine Learning algorithms with hands-on projects.</div>
+    <div class="course-data-item" data-id="1" data-name="Advanced Web Development" data-category="Programming" data-fee="Free" data-duration="8 Weeks" data-level="Advanced" data-banner="./img/landing/learning-hub.svg" data-context=".">Learn modern web development using React, Node.js, and MongoDB. Build real-world applications from scratch.</div>
+    <div class="course-data-item" data-id="2" data-name="Digital Marketing Masterclass" data-category="Marketing" data-fee="Free" data-duration="4 Weeks" data-level="Beginner" data-banner="./img/landing/analytics-panel.svg" data-context=".">Master SEO, Social Media Marketing, and Google Analytics to drive massive traffic.</div>
+    <div class="course-data-item" data-id="3" data-name="Data Science Fundamentals" data-category="Data Science" data-fee="Free" data-duration="10 Weeks" data-level="Intermediate" data-banner="./img/landing/classroom-stream.svg" data-context=".">Dive into Python, Data Analysis, and Machine Learning algorithms with hands-on projects.</div>
 `;
 
 // Replace <c:choose> block for courses
